@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<link rel="icon" href="images/favicon.ico">
+		<title>WITH</title>
+		<!-- build:css -->
+			<link rel="stylesheet" type="text/css" href="bower_modules/components-bootstrap/css/bootstrap.min.css">
+			<link rel="stylesheet" type="text/css" href="bower_modules/slick.js/slick/slick.css"/>
+			<link rel="stylesheet" type="text/css" href="css/style.css">
+		<!-- endbuild -->
+		<link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Orbitron'>
+		<link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Annie+Use+Your+Telescope'>
+		<!-- build:js -->
+			<script src="js/ie-emulation-modes-warning.js"></script>
+			<script src="js/app/require.config.js"></script>
+			<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
+		<!-- endbuild -->
+
+	    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+	    <!--[if lt IE 9]>
+	      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	    <![endif]-->
+	</head>
+	<body>
+		<nav-bar params="route: route"></nav-bar>
+
+		<div class="box" style="background-color:grey">
+			<side-bar params="route: route"></side-bar>
+
+			<div id="main" class="column col-sm-11 col-xs-11" data-bind="component: { name: route().page, params: route }">
+		</div>
+
+		<script src="js/ie10-viewport-bug-workaround.js"></script>
+	</body>
+</html>
