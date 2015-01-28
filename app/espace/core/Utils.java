@@ -65,6 +65,10 @@ public class Utils {
 		return readAttr(json, string, force, null);
 	}
 
+	public static int readIntAttr(JsonNode json, String string, boolean force) throws ParsingException {
+		return Integer.parseInt(readAttr(json, string, force, "0"));
+	}
+
 	public static String readAttr(JsonNode json, String string, boolean force, String def) throws ParsingException {
 		String res = json.findPath(string).asText();
 		if (res == null) {
@@ -74,6 +78,10 @@ public class Utils {
 				return null;
 		}
 		return res;
+	}
+
+	public static int readIntAttr(JsonNode json, String string, boolean force, int def) throws ParsingException {
+		return Integer.parseInt(readAttr(json, string, force, "" + def));
 	}
 
 }

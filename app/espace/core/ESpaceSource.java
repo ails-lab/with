@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import play.libs.Json;
-
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import espace.core.SourceResponse.ItemsResponse;
 
 public class ESpaceSource implements ISpaceSource {
 
@@ -33,7 +31,7 @@ public class ESpaceSource implements ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		return "http://europeana.eu/api/v2/search.json?wskey=" + europeanaKey + "&query="
 				+ Utils.spacesFormatQuery(q.query) + "&start=" + ((q.page - 1) * q.pageSize + 1) + "&rows="
-				+ q.pageSize + "&profile=standard";
+				+ q.pageSize + "&profile=rich+facets";
 	}
 
 	public String getSourceName() {
@@ -77,23 +75,25 @@ public class ESpaceSource implements ISpaceSource {
 
 	@Override
 	public Object getResults(CommonQuery q) {
-		ObjectNode res = Json.newObject();
-		res.put(JsonResponseKeys.source, getSourceName());
-		System.out.println(getSourceName());
+		SourceResponse res = new SourceResponse();
+		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);
-		res.put(JsonResponseKeys.query, httpQuery);
+		res.query = httpQuery;
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-			res.put(JsonResponseKeys.totalCount, Utils.readAttr(response, "totalResults", true));
-			res.put(JsonResponseKeys.count, Utils.readAttr(response, "itemsCount", true));
-			ArrayNode a = Json.newObject().arrayNode();
+			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
+			res.count = Utils.readIntAttr(response, "itemsCount", true);
+			ArrayList a = new ArrayList<Object>();
 			if (response.path("success").asBoolean()) {
 				for (JsonNode item : response.path("items")) {
-					ObjectNode ij = Json.newObject();
-					ij.put(JsonResponseKeys.id, Utils.readAttr(response, "itemsCount", true));
+					ItemsResponse it = new ItemsResponse();
+					it.id = Utils.readAttr(item, "id", true);
+					it.thumb = Utils.readAttr(item, "edmPreview", false);
+					a.add(it);
 				}
 			}
+			res.items = a;
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

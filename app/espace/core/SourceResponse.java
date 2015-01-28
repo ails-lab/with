@@ -16,5 +16,18 @@
 
 package espace.core;
 
+import java.util.List;
+
 public class SourceResponse {
+	public static class ItemsResponse {
+		public String id;
+		public String thumb;
+	}
+
+	public String query;
+	public int totalCount;
+	public int startIndex;
+	public int count;
+	public List<ItemsResponse> items;
+	public String source;
 }
