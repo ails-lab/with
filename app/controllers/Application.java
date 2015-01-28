@@ -16,15 +16,49 @@
 
 package controllers;
 
-import play.*;
-import play.mvc.*;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import sun.security.pkcs.ParsingException;
+import views.html.index;
 
-import views.html.*;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import espace.core.CommonQuery;
+import espace.core.ESpaceSources;
+import espace.core.Utils;
 
 public class Application extends Controller {
 
-    public static Result index() {
-        return ok(index.render("Your new application is ready."));
-    }
+	public static Result index() {
+		return ok(index.render("Your new application is ready."));
+	}
+
+	public static Result search() {
+		JsonNode json = request().body().asJson();
+		CommonQuery q = new CommonQuery();
+		if (json == null) {
+			return badRequest("Expecting Json query");
+		} else {
+			// Parse the query.
+			try {
+				Utils.parseJson(json, q);
+			} catch (ParsingException e) {
+				return badRequest(e.getMessage());
+			}
+		}
+		return search(q);
+	}
+
+	public static Result search(CommonQuery q) {
+		Object result = ESpaceSources.fillResults(q);
+		return ok(Json.toJson(result));
+	}
+
+	public static Result testsearch() {
+		CommonQuery q = new CommonQuery();
+		q.query = "Zeus";
+		return search(q);
+	}
 
 }
