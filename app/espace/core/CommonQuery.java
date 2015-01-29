@@ -16,29 +16,38 @@
 
 package espace.core;
 
+import java.util.List;
+
 public class CommonQuery {
 
 	public int page = 1;
 	public int pageSize = 20;
-	public String query;
-	public String source;
+	public String searchTerm;
+	public String termToExclude;
+	public List<String> source;
 
 	public CommonQuery(String generalQueryBody) {
 		super();
-		this.query = generalQueryBody;
+		this.searchTerm = generalQueryBody;
 	}
 
 	public CommonQuery() {
 		super();
-		query = "*";
+		searchTerm = "*";
 	}
 
 	public String getQuery() {
-		return query;
+		return searchTerm;
 	}
 
 	public void setQuery(String query) {
-		this.query = query;
+		this.searchTerm = query;
+	}
+
+	@Override
+	public String toString() {
+		return "CommonQuery [page=" + page + ", pageSize=" + pageSize + ", searchTerm=" + searchTerm + ", toExclude="
+				+ termToExclude + ", source=" + source + "]";
 	}
 
 }

@@ -35,14 +35,15 @@ public class Application extends Controller {
 	}
 
 	public static Result search() {
+		System.out.println(request().body());
 		JsonNode json = request().body().asJson();
-		CommonQuery q = new CommonQuery();
+		CommonQuery q = null;
 		if (json == null) {
 			return badRequest("Expecting Json query");
 		} else {
 			// Parse the query.
 			try {
-				Utils.parseJson(json, q);
+				q = Utils.parseJson(json);
 			} catch (ParsingException e) {
 				return badRequest(e.getMessage());
 			}
@@ -57,7 +58,7 @@ public class Application extends Controller {
 
 	public static Result testsearch() {
 		CommonQuery q = new CommonQuery();
-		q.query = "214";
+		q.searchTerm = "214";
 		return search(q);
 	}
 

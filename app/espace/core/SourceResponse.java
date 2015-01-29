@@ -21,6 +21,20 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class SourceResponse {
+	public static class Lang {
+		public Lang(String languageCode, String textValue) {
+			this.lang = languageCode;
+			this.value = textValue;
+		}
+
+		public Lang() {
+			super();
+		}
+
+		public String lang;
+		public String value;
+	}
+
 	public static class MyURL {
 		public List<String> original;
 		public String fromSourceAPI;
@@ -29,12 +43,13 @@ public class SourceResponse {
 	public static class ItemsResponse {
 		public String id;
 		public List<String> thumb;
-		public List<String> title;
-		public List<String> description;
-		public List<String> creator;
+		public List<Lang> title;
+		public List<Lang> description;
+		public List<Lang> creator;
 		public List<String> year;
-		public List<String> dataProvider;
+		public List<Lang> dataProvider;
 		public MyURL url;
+		public List<String> fullresolution;
 	}
 
 	public String query;

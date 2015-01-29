@@ -31,12 +31,13 @@ public class ESpaceSource implements ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		return "http://europeana.eu/api/v2/search.json?wskey=" + europeanaKey + "&query="
-				+ Utils.spacesFormatQuery(q.query) + "&start=" + ((q.page - 1) * q.pageSize + 1) + "&rows="
-				+ q.pageSize + "&profile=rich+facets";
+				+ Utils.spacesFormatQuery(q.searchTerm)
+				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
+				+ "&start=" + ((q.page - 1) * q.pageSize + 1) + "&rows=" + q.pageSize + "&profile=rich+facets";
 	}
 
 	public String getSourceName() {
-		return "europeana";
+		return "Europeana";
 	}
 
 	public String getEuropeanaKey() {
@@ -91,11 +92,12 @@ public class ESpaceSource implements ISpaceSource {
 					ItemsResponse it = new ItemsResponse();
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
-					it.title = Utils.readArrayAttr(item, "title", false);
-					it.description = Utils.readArrayAttr(item, "dcDescription", false);
-					it.creator = Utils.readArrayAttr(item, "dcCreator", false);
+					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
+					it.title = Utils.readLangAttr(item, "title", false);
+					it.description = Utils.readLangAttr(item, "dcDescription", false);
+					it.creator = Utils.readLangAttr(item, "dcCreator", false);
 					it.year = Utils.readArrayAttr(item, "year", false);
-					it.dataProvider = Utils.readArrayAttr(item, "dataProvider", false);
+					it.dataProvider = Utils.readLangAttr(item, "dataProvider", false);
 					it.url = new MyURL();
 					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);

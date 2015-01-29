@@ -22,18 +22,22 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.SourceResponse.ItemsResponse;
+import espace.core.SourceResponse.MyURL;
+
 public class DSpaceSource implements ISpaceSource {
 
 	private String DPLAKey = "2edebbb32b1f42f86aaa56fd2edc1a28";
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
-		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q=" + Utils.spacesFormatQuery(q.query) + "&page="
-				+ q.page + "&page_size=" + q.pageSize;
+		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q=" + Utils.spacesFormatQuery(q.searchTerm)
+				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
+				+ "&page=" + q.page + "&page_size=" + q.pageSize;
 	}
 
 	public String getSourceName() {
-		return "dpla";
+		return "DPLA";
 	}
 
 	public String getDPLAKey() {
@@ -73,8 +77,41 @@ public class DSpaceSource implements ISpaceSource {
 
 	@Override
 	public Object getResults(CommonQuery q) {
-		// TODO Auto-generated method stub
-		return null;
+		SourceResponse res = new SourceResponse();
+		res.source = getSourceName();
+		String httpQuery = getHttpQuery(q);
+		res.query = httpQuery;
+		JsonNode response;
+		try {
+			response = HttpConnector.getURLContent(httpQuery);
+			res.totalCount = Utils.readIntAttr(response, "limit", true);
+			res.count = Utils.readIntAttr(response, "count", true);
+			res.startIndex = Utils.readIntAttr(response, "start", true);
+			ArrayList a = new ArrayList<Object>();
+
+			for (JsonNode item : response.path("docs")) {
+				ItemsResponse it = new ItemsResponse();
+				it.id = Utils.readAttr(item, "id", true);
+				it.thumb = Utils.readArrayAttr(item, "object", false);
+				it.fullresolution = null;
+				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
+				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+				it.year = null;
+				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
+				it.url = new MyURL();
+				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
+				it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
+				a.add(it);
+			}
+			res.items = a;
+			res.facets = response.path("facets");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return res;
 	}
 
 }
