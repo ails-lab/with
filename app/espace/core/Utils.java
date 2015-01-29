@@ -16,6 +16,9 @@
 
 package espace.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import sun.security.pkcs.ParsingException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -77,7 +80,24 @@ public class Utils {
 			else
 				return null;
 		}
+		System.out.println(res);
 		return res;
+	}
+
+	public static List<String> readArrayAttr(JsonNode json, String string, boolean force) throws ParsingException {
+		JsonNode a = json.path(string);
+		if (a == null) {
+			if (force)
+				throw new ParsingException("Missing " + string);
+			else
+				return null;
+		} else {
+			List<String> res = new ArrayList<String>(a.size());
+			for (int i = 0; i < a.size(); i++) {
+				res.add(a.get(i).textValue());
+			}
+			return res;
+		}
 	}
 
 	public static int readIntAttr(JsonNode json, String string, boolean force, int def) throws ParsingException {

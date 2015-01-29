@@ -57,7 +57,7 @@ public class Application extends Controller {
 
 	public static Result testsearch() {
 		CommonQuery q = new CommonQuery();
-		q.query = "Zeus";
+		q.query = "214";
 		return search(q);
 	}
 

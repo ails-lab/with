@@ -18,10 +18,23 @@ package espace.core;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 public class SourceResponse {
+	public static class MyURL {
+		public List<String> original;
+		public String fromSourceAPI;
+	}
+
 	public static class ItemsResponse {
 		public String id;
-		public String thumb;
+		public List<String> thumb;
+		public List<String> title;
+		public List<String> description;
+		public List<String> creator;
+		public List<String> year;
+		public List<String> dataProvider;
+		public MyURL url;
 	}
 
 	public String query;
@@ -30,4 +43,5 @@ public class SourceResponse {
 	public int count;
 	public List<ItemsResponse> items;
 	public String source;
+	public JsonNode facets;
 }

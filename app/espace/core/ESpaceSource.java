@@ -23,6 +23,7 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.SourceResponse.ItemsResponse;
+import espace.core.SourceResponse.MyURL;
 
 public class ESpaceSource implements ISpaceSource {
 
@@ -89,12 +90,20 @@ public class ESpaceSource implements ISpaceSource {
 				for (JsonNode item : response.path("items")) {
 					ItemsResponse it = new ItemsResponse();
 					it.id = Utils.readAttr(item, "id", true);
-					it.thumb = Utils.readAttr(item, "edmPreview", false);
+					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
+					it.title = Utils.readArrayAttr(item, "title", false);
+					it.description = Utils.readArrayAttr(item, "dcDescription", false);
+					it.creator = Utils.readArrayAttr(item, "dcCreator", false);
+					it.year = Utils.readArrayAttr(item, "year", false);
+					it.dataProvider = Utils.readArrayAttr(item, "dataProvider", false);
+					it.url = new MyURL();
+					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
+					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
 					a.add(it);
 				}
 			}
 			res.items = a;
-
+			res.facets = response.path("facets");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
