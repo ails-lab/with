@@ -1,6 +1,6 @@
 define(['knockout', 'text!./side-bar.html'], function(ko, template) {
 
-  function NavBarViewModel(params) {
+  function SideBarViewModel(params) {
 
     // This viewmodel doesn't do anything except pass through the 'route' parameter to the view.
     // You could remove this viewmodel entirely, and define 'side-bar' as a template-only component.
@@ -9,5 +9,5 @@ define(['knockout', 'text!./side-bar.html'], function(ko, template) {
     this.route = params.route;
   }
 
-  return { viewModel: NavBarViewModel, template: template };
+  return { viewModel: SideBarViewModel, template: template };
 });
