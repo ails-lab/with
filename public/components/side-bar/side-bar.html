@@ -1,0 +1,28 @@
+<div id="sidebar" class="column col-sm-1 col-xs-1 sidebar-offcanvas">
+	<div class="logo">
+		<a href="#"><img src="images/withlogo.png" class="center-block img-responsive" /></a>
+	</div>
+	<ul class="nav">
+		<li><a class="visible-xs text-center" data-toggle="offcanvas" href="#"><i class="glyphicon glyphicon-chevron-right"></i></a></li>
+	</ul>
+
+	<ul id="lg-menu" class="nav hidden-xs">
+		<li data-bind="css: { active: route().page === 'search-page' }"><a href="#search"><i class="glyphicon glyphicon-search"></i> Search</a>
+		<li data-bind="css: { active: route().page === 'featured-page' }"><a href="#featured"><i class="glyphicon glyphicon-list-alt"></i> Featured</a></li>
+		<li data-bind="css: { active: route().page === 'stories-page' }"><a href="#stories"><i class="glyphicon glyphicon-list"></i> Stories</a></li>
+		<li><a href="#"><i class="glyphicon glyphicon-paperclip"></i> Saved</a></li>
+		<li><a href="#"><i class="glyphicon glyphicon-refresh"></i> Refresh</a></li>
+	</ul>
+
+	<ul id="sidebar-footer" class="list-unstyled hidden-xs">
+		<li></li>
+	</ul>
+
+	<!-- tiny only nav-->
+	<ul id="xs-menu" class="nav visible-xs">
+		<li><a class="text-center" href="#featured"><i class="glyphicon glyphicon-list-alt"></i></a></li>
+		<li><a class="text-center" href="#stories"><i class="glyphicon glyphicon-list"></i></a></li>
+		<li><a class="text-center" href="#"><i class="glyphicon glyphicon-paperclip"></i></a></li>
+		<li><a class="text-center" href="#"><i class="glyphicon glyphicon-refresh"></i></a></li>
+	</ul>
+</div>
