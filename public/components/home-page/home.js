@@ -35,6 +35,7 @@ define(["knockout", "text!./home.html", "slick"], function(ko, homeTemplate) {
 				}
 			]
 		});
+		this.route = params.route;
 	}
 
 	return { viewModel: HomeViewModel, template: homeTemplate };
