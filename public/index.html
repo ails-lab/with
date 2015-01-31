@@ -17,7 +17,6 @@
 		<link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Orbitron'>
 		<link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Annie+Use+Your+Telescope'>
 		<!-- build:js -->
-			<script src="js/ie-emulation-modes-warning.js"></script>
 			<script src="js/app/require.config.js"></script>
 			<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
 		<!-- endbuild -->
@@ -32,11 +31,17 @@
 		<nav-bar params="route: route"></nav-bar>
 
 		<div class="box" style="background-color:grey">
+		   <div class="row row-offcanvas row-offcanvas-left">
+ 
 			<side-bar params="route: route"></side-bar>
 
-			<div id="main" class="column col-sm-11 col-xs-11" data-bind="component: { name: route().page, params: route }">
-		</div>
-
+			<div id="main" class="column col-sm-11 col-xs-11">
+		         <home-page params="route: route"></home-page>
+		         <main-content params="route: route"></main-content>
+		         
+		     </div>
+		    </div>
+        </div>
 		<script src="js/ie10-viewport-bug-workaround.js"></script>
 	</body>
 </html>

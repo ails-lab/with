@@ -1,0 +1,157 @@
+results = [
+	 {
+		"_source":"One of Europeana, DPLA, Vimeo, Youtube, workspace #id, Collection #id",
+		source: "Europeana",
+		query: "query url",
+
+		totalCount:"",
+		startIndex:"",
+		count:"",
+		
+		facets:[
+			{
+				name : "UGC",
+				fields: [{
+					label : "true",
+					count : 4
+				}],
+			},
+			{
+				name : "LANGUAGE",
+				fields: [{
+					label : "en",
+					count : 4
+				}],
+			}
+		],
+		
+		items: [
+		{
+			id: "identifier",
+			"_thumb": "A url of the preview",
+			thumb : "www.animage.com",
+			fullresolution: "www.linkToTheFullResolutionImage.com",
+
+			url : {
+				"_original": "Europeana's isShownAt",
+				original:"",
+				"_fromSourceAPI": "Europeana's guid",
+				fromSourceAPi: "http://www.europeana.eu/portal/record/08501/E83B976C1E5BDFDB78F600B5206AD1FE300F141E.html?utm_source=api&utm_medium=api&utm_campaign=ANnuDzRpW"
+			},
+	
+			"_dcTitle":"Europeana's dcTitle",
+			title : [
+				{
+					value: "Title",
+					lang:"en" 
+				},
+				{
+					value:"Title2",
+					lang:"de"
+				}
+			],
+			"_dcDescription":"Europeana's dcDescription",
+			
+			description: [
+				{
+					value: "Description",
+					lang:"en"
+				},
+				{
+					value: "Description",
+					lang:"de"
+				}
+			],
+			"_dcCreator":"Europeana's dcCreator",
+			
+			creator :
+			 [
+			 	{
+					value: "creator",
+					lang:"en"
+				},
+				{
+					value: "creator",
+					lang:"de"
+				}
+			],
+			"_date": "Europeana's Year",
+			year :	"year",
+		
+			dataProvider: "Data Provider",
+			rights: "http://www.europeana.eu/rights/rr-f/",
+	
+			context : [],
+			tags : [],
+			collections: [],
+			xml : [{
+				value: "",
+				schema: "",
+			}]
+		},
+		{
+			id: "identifier",
+			"_thumb": "A url of the preview",
+			thumb : "www.animage.com",
+			fullresolution: "www.linkToTheFullResolutionImage.com",
+
+			url : {
+				"_original": "Europeana's isShownAt",
+				original:"",
+				"_fromSourceAPI": "Europeana's guid",
+				fromSourceAPi: "http://www.europeana.eu/portal/record/08501/E83B976C1E5BDFDB78F600B5206AD1FE300F141E.html?utm_source=api&utm_medium=api&utm_campaign=ANnuDzRpW"
+			},
+	
+			"_dcTitle":"Europeana's dcTitle",
+			title : [
+				{
+					value: "Title",
+					lang:"en" 
+				},
+				{
+					value:"Title2",
+					lang:"de"
+				}
+			],
+			"_dcDescription":"Europeana's dcDescription",
+			
+			description: [
+				{
+					value: "Description",
+					lang:"en"
+				},
+				{
+					value: "Description",
+					lang:"de"
+				}
+			],
+			"_dcCreator":"Europeana's dcCreator",
+			
+			creator :
+			 [
+			 	{
+					value: "creator",
+					lang:"en"
+				},
+				{
+					value: "creator",
+					lang:"de"
+				}
+			],
+			"_date": "Europeana's Year",
+			year :	"year",
+		
+			dataProvider: "Data Provider",
+			rights: "http://www.europeana.eu/rights/rr-f/",
+	
+			context : [],
+			tags : [],
+			collections: [],
+			xml : [{
+				value: "",
+				schema: "",
+			}]
+		}
+		]
+	}
+]

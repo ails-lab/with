@@ -16,9 +16,15 @@
 
 package espace.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import play.libs.Json;
 import sun.security.pkcs.ParsingException;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import espace.core.SourceResponse.Lang;
 
 public class Utils {
 
@@ -55,10 +61,9 @@ public class Utils {
 	// }
 	// }
 
-	public static void parseJson(JsonNode json, CommonQuery q) throws ParsingException {
-		q.query = readAttr(json, "searchTerm", true);
-		q.page = Integer.parseInt(readAttr(json, "page", false, "1"));
-		q.pageSize = Integer.parseInt(readAttr(json, "pageSize", false, "20"));
+	public static CommonQuery parseJson(JsonNode json) throws ParsingException {
+		CommonQuery q1 = Json.fromJson(json, CommonQuery.class);
+		return q1;
 	}
 
 	public static String readAttr(JsonNode json, String string, boolean force) throws ParsingException {
@@ -66,7 +71,7 @@ public class Utils {
 	}
 
 	public static int readIntAttr(JsonNode json, String string, boolean force) throws ParsingException {
-		return Integer.parseInt(readAttr(json, string, force, "0"));
+		return readIntAttr(json, string, force, 0);
 	}
 
 	public static String readAttr(JsonNode json, String string, boolean force, String def) throws ParsingException {
@@ -80,8 +85,52 @@ public class Utils {
 		return res;
 	}
 
+	public static List<String> readArrayAttr(JsonNode json, String string, boolean force) throws ParsingException {
+		JsonNode a = json.path(string);
+		if (a == null) {
+			if (force)
+				throw new ParsingException("Missing " + string);
+			else
+				return null;
+		} else {
+			List<String> res = new ArrayList<String>(a.size());
+			if (a.isArray()) {
+				for (int i = 0; i < a.size(); i++) {
+					res.add(a.get(i).textValue());
+				}
+			} else {
+				res.add(a.asText());
+			}
+			return res;
+		}
+	}
+
+	public static List<Lang> readLangAttr(JsonNode json, String string, boolean force) throws ParsingException {
+		JsonNode a = json.path(string);
+		if (a == null) {
+			if (force)
+				throw new ParsingException("Missing " + string);
+			else
+				return null;
+		} else {
+			List<Lang> res = new ArrayList<Lang>(a.size());
+			if (a.isArray()) {
+				for (int i = 0; i < a.size(); i++) {
+					res.add(new Lang(null, a.get(i).textValue()));
+				}
+			} else {
+				res.add(new Lang(null, a.asText()));
+			}
+			return res;
+		}
+	}
+
 	public static int readIntAttr(JsonNode json, String string, boolean force, int def) throws ParsingException {
-		return Integer.parseInt(readAttr(json, string, force, "" + def));
+		String readAttr = readAttr(json, string, force, "" + def);
+		if (readAttr == null || readAttr.equals(""))
+			return def;
+		// System.out.println("Int? " + readAttr);
+		return Integer.parseInt(readAttr);
 	}
 
 }

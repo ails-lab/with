@@ -26,7 +26,7 @@ public class ESpaceSources {
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
 		esources.add(new ESpaceSource());
-		// esources.add(new DSpaceSource());
+		esources.add(new DSpaceSource());
 		System.out.println("inittttttttttttttttttt");
 	}
 

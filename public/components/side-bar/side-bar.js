@@ -7,6 +7,14 @@ define(['knockout', 'text!./side-bar.html'], function(ko, template) {
     // But in most apps, you'll want some viewmodel logic to determine what navigation options appear.
 
     this.route = params.route;
+    $('[data-toggle=offcanvas]').click(function() {
+	  	$(this).toggleClass('visible-xs text-center');
+	    $(this).find('i').toggleClass('glyphicon-chevron-right glyphicon-chevron-left');
+	    $('.row-offcanvas').toggleClass('active');
+	    $('#lg-menu').toggleClass('hidden-xs').toggleClass('visible-xs');
+	    $('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
+	    $('#btnShow').toggle();
+	});
   }
 
   return { viewModel: SideBarViewModel, template: template };
