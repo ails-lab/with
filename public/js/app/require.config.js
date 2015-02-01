@@ -22,10 +22,11 @@ var require = {
 	    "matches-selector":     "bower-modules/matches-selector/matches-selector",
 	    "outlayer":             "bower-modules/outlayer/outlayer",
 		"imagesloaded":         "bower_modules/imagesloaded/imagesloaded.pkgd.min",
-		"masonry":              "bower_modules/masonry/dist/masonry.pkgd"
-		
+		"masonry":              "bower_modules/masonry/dist/masonry.pkgd",
+		"facebook":             "//connect.facebook.net/en_US/all"
 	},
 	shim: {
-		"bootstrap": { deps: ["jquery"] }
+		"bootstrap": { deps: ["jquery"] },
+		"facebook": { exports: "FB" }
 	}
 };

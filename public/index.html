@@ -21,27 +21,26 @@
 			<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
 		<!-- endbuild -->
 
-	    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-	    <!--[if lt IE 9]>
-	      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-	      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	    <![endif]-->
+		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+		  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+		  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
 	</head>
 	<body>
 		<nav-bar params="route: route"></nav-bar>
 
 		<div class="box" style="background-color:grey">
-		   <div class="row row-offcanvas row-offcanvas-left">
- 
-			<side-bar params="route: route"></side-bar>
+			<div class="row row-offcanvas row-offcanvas-left">
 
-			<div id="main" class="column col-sm-11 col-xs-11">
-		         <home-page params="route: route"></home-page>
-		         <main-content params="route: route"></main-content>
-		         
-		     </div>
-		    </div>
-        </div>
+				<side-bar params="route: route"></side-bar>
+
+				<div id="main" class="column col-sm-11 col-xs-11" data-bind="component: { name: route().page, params: route }">
+				</div>
+
+				<div id="fb-root"></div>
+			</div>
+		</div>
 		<script src="js/ie10-viewport-bug-workaround.js"></script>
 	</body>
 </html>
