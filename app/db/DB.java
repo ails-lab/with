@@ -48,6 +48,11 @@ public class DB {
 		return em;
 	}
 	
+	
+	public static void flush() {
+		getEm().flush();
+	}
+	
 	/**
 	 * A new EntityManager. Do whatever you will and clean up afterwards 
 	 * @return
@@ -56,7 +61,7 @@ public class DB {
 		return emf.createEntityManager();
 	}
 	
-	public UserDAO getUserDAO() {
+	public static UserDAO getUserDAO() {
 		return (UserDAO) getDAO(User.class);
 	}
 	
@@ -65,7 +70,7 @@ public class DB {
 	 * @param clazz
 	 * @return
 	 */
-	private DAO<?> getDAO( Class clazz ) {
+	private static DAO<?> getDAO( Class<?> clazz ) {
 		DAO<?> dao = daos.get( clazz.getSimpleName());
 		if( dao == null ) {
 			try {
@@ -78,5 +83,11 @@ public class DB {
 			}
 		}
 		return dao;
+	}
+	
+	public static void close() {
+		EntityManager em = managers.get();
+		if( em != null ) em.close();
+		managers.remove();
 	}
 }

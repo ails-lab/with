@@ -16,6 +16,8 @@
 
 package db;
 
+import java.util.List;
+
 import model.User;
 import play.Logger;
 import play.Logger.ALogger;
@@ -26,5 +28,9 @@ public class UserDAO extends DAO<User> {
 	public UserDAO() {
 		super( User.class );
 		log.debug( "Yuchuu made the DAO");
+	}
+	
+	public List<User> listByName( String name ) {
+		return list( "name = '" + name + "'");
 	}
 }

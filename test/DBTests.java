@@ -18,8 +18,9 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 
@@ -28,6 +29,7 @@ import model.User;
 import org.junit.Test;
 
 import play.twirl.api.Content;
+import db.DB;
 
 
 /**
@@ -42,20 +44,17 @@ public class DBTests {
     public void userStorage() {
     	User testUser= new User();
     	testUser.name = "Tester";
-    	
-    	EntityManagerFactory emf = Persistence.createEntityManagerFactory("with_persist");
-    	EntityManager em = emf.createEntityManager();
-    	em.persist(testUser);
-    	em.close();
+ 
+    	DB.getUserDAO().persist( testUser );
+    	DB.flush();
 
-    	em = emf.createEntityManager();
-    	Query q = em.createQuery("select u from User u where u.name='Tester'");
-    	com.impetus.kundera.query.Query kq = (com.impetus.kundera.query.Query) q;
-    	kq.iterate()
-    	List<?> userList = q.getResultList();
-    	assertThat( userList.size()).isEqualTo(1);
-    	em.close();
-    	emf.close();   	
+    	List<User> l = DB.getUserDAO().list( "obj.name = 'Tester' ");
+    	assertThat( l.size()).isGreaterThanOrEqualTo(1);
+    	
+//    	int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
+//    	assertThat( count )
+//    	.overridingErrorMessage("Not removed enough Testers")
+//    	.isGreaterThanOrEqualTo(1 );   	
     }
 
     @Test

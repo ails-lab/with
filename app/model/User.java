@@ -23,8 +23,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.impetus.kundera.index.Index;
+import com.impetus.kundera.index.IndexCollection;
+
 @Entity
-@Table( name="user")
+@Table( name="user" )
+@IndexCollection(columns = { @Index(name = "name",indexName="comp_1") })
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
