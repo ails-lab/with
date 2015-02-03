@@ -27,25 +27,62 @@ import espace.core.SourceResponse.MyURL;
 
 public class ESpaceSource implements ISpaceSource {
 
-	private String europeanaKey = "ANnuDzRpW";
-
 	public String getHttpQuery(CommonQuery q) {
-		return "http://europeana.eu/api/v2/search.json?wskey=" + europeanaKey + "&query="
-				+ Utils.spacesFormatQuery(q.searchTerm)
-				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
-				+ "&start=" + ((q.page - 1) * q.pageSize + 1) + "&rows=" + q.pageSize + "&profile=rich+facets";
+		EuropeanaQuery eq = new EuropeanaQuery();
+		eq.addSearch(Utils.spacesFormatQuery(q.searchTerm)
+				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : ""));
+		eq.addSearchParam("start", "" + ((q.page - 1) * q.pageSize + 1));
+		eq.addSearchParam("rows", "" + q.pageSize);
+		eq.addSearchParam("profile", "rich+facets");
+		euroAPI(q, eq);
+		return eq.getHttp();
+	}
+
+	private String euroAPI(CommonQuery q, EuropeanaQuery eq) {
+		if (q.europeanaAPI != null) {
+			String res = "";
+			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
+			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
+			if (q.europeanaAPI.facets != null) {
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
+			}
+			if (q.europeanaAPI.refinement != null) {
+				if (q.europeanaAPI.refinement.refinementTerms != null) {
+					for (String t : q.europeanaAPI.refinement.refinementTerms) {
+						eq.addSearch(t);
+					}
+				}
+				if (q.europeanaAPI.refinement.spatialParams != null) {
+
+					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
+						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
+								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
+								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
+					}
+					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
+						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
+								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
+								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
+					}
+				}
+			}
+
+			if (q.europeanaAPI.reusability != null) {
+				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
+			}
+			return res;
+		}
+		return "";
 	}
 
 	public String getSourceName() {
 		return "Europeana";
-	}
-
-	public String getEuropeanaKey() {
-		return europeanaKey;
-	}
-
-	public void setEuropeanaKey(String europeanaKey) {
-		this.europeanaKey = europeanaKey;
 	}
 
 	public List<CommonItem> getPreview(CommonQuery q) {

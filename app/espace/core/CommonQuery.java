@@ -20,11 +20,47 @@ import java.util.List;
 
 public class CommonQuery {
 
+	public static class CoordinateRange {
+		public String startPoint;
+		public String endPoint;
+	}
+
+	public static class SpatialParams {
+		public CoordinateRange latitude;
+		public CoordinateRange longitude;
+	}
+
+	public static class Refinement {
+		public List<String> refinementTerms;
+		public SpatialParams spatialParams;
+	}
+
+	public static class Facets {
+		public List<String> TYPE;
+		public List<String> LANGUAGE;
+		public List<String> YEAR;
+		public List<String> COUNTRY;
+		public List<String> RIGHTS;
+		public List<String> PROVIDER;
+		public List<String> UGC;
+
+	}
+
+	public static class EuropeanaAPI {
+		public String who;
+		public String where;
+		public Facets facets;
+		public Refinement refinement;
+		public List<String> reusability;
+
+	}
+
 	public int page = 1;
 	public int pageSize = 20;
 	public String searchTerm;
 	public String termToExclude;
 	public List<String> source;
+	public EuropeanaAPI europeanaAPI;
 
 	public CommonQuery(String generalQueryBody) {
 		super();

@@ -133,4 +133,51 @@ public class Utils {
 		return Integer.parseInt(readAttr);
 	}
 
+	public static Pair<String> getAttr(String value, String attrName) {
+		if (value != null)
+			return new Pair<String>(attrName, value);
+		return null;
+	}
+
+	public static Pair<String> getFacetsAttr(List<String> values, String NAME) {
+		if (values != null) {
+			return new Pair<String>(NAME, getORList(values));
+		}
+		return null;
+	}
+
+	public static String getORList(List<String> values) {
+		String res = "";
+		if (values.size() > 1) {
+			res += "(" + spacesFormatQuery(values.get(0));
+			for (int i = 1; i < values.size(); i++) {
+				res += "+OR+" + spacesFormatQuery(values.get(i));
+			}
+			res += ")";
+		} else {
+			res += spacesFormatQuery(values.get(0));
+		}
+		return res;
+	}
+
+	public static class Pair<T> {
+		public T first;
+		public T second;
+
+		public Pair() {
+			super();
+		}
+
+		public Pair(T first, T second) {
+			super();
+			this.first = first;
+			this.second = second;
+		}
+
+		public String getHttp() {
+			return first + "=" + spacesFormatQuery(second.toString());
+		}
+
+	}
+
 }
