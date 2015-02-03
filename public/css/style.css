@@ -1,6 +1,6 @@
 
 .logo{
-	
+
 padding-bottom:1.3em;
 }
 
@@ -38,7 +38,7 @@ h1 span{
 .col-centered{
     float: none;
     margin: 0 auto;
-    padding-top:10px;    
+    padding-top:10px;
 }
 
 .row {
@@ -52,19 +52,19 @@ margin-right: 0;
     height:270px;
     padding-top:1em;
   }
-  
+
   .thumbnail>img{
      height:210px;
      width:auto;
   }
-  
+
   .mythumbnail{
     background:none;
     border:none;
     text-align:center;
     cursor:pointer;
   }
-  
+
   .thumbnail>h3{
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     text-transform: uppercase;
@@ -133,11 +133,11 @@ z-index:100;}
 
 
 
-  .mythumbnail p {display:none}  
- 
- /*masonry*/ 
+  .mythumbnail p {display:none}
+
+ /*masonry*/
  .masonry {
-  
+
   max-width: 640px;
 }
 
@@ -145,7 +145,7 @@ z-index:100;}
   width:  60px;
   height: 60px;
   float: left;
- 
+
 }
 
 .item.w2 { width:  120px; }
@@ -155,7 +155,7 @@ z-index:100;}
 .item.h2 { height: 100px; }
 .item.h3 { height: 130px; }
 .item.h4 { height: 180px; }
-  
+
 /*masonry*/
 
 
@@ -189,14 +189,14 @@ padding-right: 0;
 #sidebar {
     padding:0px;
 	padding-top:15px;
-   
+
 }
 
 #sidebar, #sidebar a, #sidebar-footer a {
     color:#9d9d9d;
     background-color:#222;
 	text-shadow:0 0 2px #000000;
-   
+
 }
 #sidebar .nav li>a:hover {
    color:#ffffff;
@@ -249,3 +249,86 @@ padding-right: 0;
 
 
 /*sidebar*/
+
+.register-login {
+  padding: 10px 15px;
+}
+
+.register-login .btn {
+  margin-bottom: 10px;
+}
+
+.register-login .btn-default {
+  border: 2px solid #fff;
+  background-color: black;
+  color: #fff;
+}
+
+.register-login .btn-default:hover, .register-login .btn-primary:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.register-login .btn-primary:hover {
+  border: 2px solid #fff;
+}
+
+.register-login .btn-primary {
+  border: none;
+  background-color: #222;
+  color: #9d9d9d;
+}
+
+/* Facebook/Twitter Icons */
+i.huge, button.huge {
+  margin: 0 10px;
+  position: relative;
+  background-position: center center;
+  height: 170px;
+  width: 170px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-radius: 4px;
+}
+
+button.huge p {
+  position: absolute;
+  bottom: 10px;
+  visibility: hidden;
+  font-size: 14px;
+  font-weight: 400;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+}
+
+button.huge > i { transition: background-position 0.5s ease-out 0s; }
+button.huge:hover > i { background-position: center -15px; }
+button.huge:hover > p { visibility: visible; }
+
+button.facebook, button.twitter, button.email {
+  border: 0 none;
+  padding: 0;
+}
+
+i.facebook, button.facebook { background-color: #3b5997; }
+i.twiter, button.twitter { background-color: #1bb5e7; }
+i.email, button.email { background-color: #B5B5B5; }
+
+.facebook_huge,
+.twitter_huge,
+.email_huge,
+button:hover .facebook_huge,
+button:hover .twitter_huge,
+button:hover .email_huge {
+  display: inline-block;
+  width: 170px;
+  height: 170px;
+}
+
+.facebook_huge { background-image: url(../images/fb.png); }
+.twitter_huge { background-image: url(../images/twitter.png); }
+.email_huge { background-image: url(../images/email.png); }
+button:hover .facebook_huge { background-image: url(../images/fb_hover.png); }
+button:hover .twitter_huge { background-image: url(../images/twitter_hover.png); }
+button:hover .email_huge { background-image: url(../images/email_hover.png); }
