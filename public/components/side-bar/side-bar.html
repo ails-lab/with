@@ -6,26 +6,21 @@
 		<li><a class="visible-xs text-center" data-toggle="offcanvas" href="#"><i class="glyphicon glyphicon-chevron-right"></i></a></li>
 	</ul>
 
-
-    
 	<ul id="lg-menu" class="nav hidden-xs">
-		
-		
 		<li><a href="#search" id="searchlink" onClick="toggleSearch('focus'); return false;"><i class="glyphicon glyphicon-search"></i> Search</a>
-		 <li data-bind="css: { active: route().page === 'featured-page' }"><a href="#featured"><i class="glyphicon glyphicon-list-alt"></i> Featured</a></li>
+		<li data-bind="css: { active: route().page === 'featured-page' }"><a href="#featured"><i class="glyphicon glyphicon-list-alt"></i> Featured</a></li>
 		<li data-bind="css: { active: route().page === 'stories-page' }"><a href="#stories"><i class="glyphicon glyphicon-list"></i> Stories</a></li>
 		<li><a href="#"><i class="glyphicon glyphicon-paperclip"></i> Saved</a></li>
 		<li><a href="#"><i class="glyphicon glyphicon-refresh"></i> Refresh</a></li>
 		<br/>
-		<li><a href="#login"><i class="fa fa-sign-in"></i> Login</a></li>
-		<li><a href="#register"><i class="fa fa-user-plus"></i> Register</a></li>
-	
+		<li data-bind="{ visible: showLogin(); }"><a href="#login"><i class="fa fa-sign-in"></i> Login</a></li>
+		<li data-bind="{ visible: showLogin(); }"><a href="#register"><i class="fa fa-user-plus"></i> Register</a></li>
 	</ul>
 
 	<ul id="sidebar-footer" class="list-unstyled hidden-xs">
 		<li></li>
 	</ul>
-<!-- 
+<!--
 	<div class="register-login">
 		<button type="button" class="btn btn-default btn-responsive btn-block" onclick="location.href='#register'">Register</button>
 		<button type="button" class="btn btn-primary btn-responsive btn-block" onclick="location.href='#login'">Login</button>
