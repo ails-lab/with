@@ -19,7 +19,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 			}
 			else {
 				withsearch.addClass('open');
-				input.focus();
+				
 			}
 			isOpen = !isOpen;
 		};
@@ -44,6 +44,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 	);
 	// esc key closes search overlay
 	// keyboard navigation events
+	
 	$( document ).on( 'keydown', function( ev ) {
 		var keyCode = ev.keyCode || ev.which;
 		if( keyCode === 27 && isOpen ) {
