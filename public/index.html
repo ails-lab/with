@@ -11,6 +11,8 @@
 		<!-- build:css -->
 			<link rel="stylesheet" type="text/css" href="bower_modules/components-bootstrap/css/bootstrap.min.css">
 			<link rel="stylesheet" type="text/css" href="bower_modules/slick.js/slick/slick.css"/>
+			<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+			<link rel="stylesheet" type="text/css" href="css/search.css">
 			<link rel="stylesheet" type="text/css" href="css/style.css">
 		<!-- endbuild -->
 		<link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
@@ -30,7 +32,8 @@
 	<body>
 		<nav-bar params="route: route"></nav-bar>
 
-		<div class="box" style="background-color:grey">
+		<div class="box">
+		    <search-page params="route: route"></search-page>
 			<div class="row row-offcanvas row-offcanvas-left">
 
 				<side-bar params="route: route"></side-bar>

@@ -15,6 +15,9 @@ define(['knockout', 'text!./side-bar.html'], function(ko, template) {
 	    $('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
 	    $('#btnShow').toggle();
 	});
+    
+   
+    
   }
 
   return { viewModel: SideBarViewModel, template: template };
