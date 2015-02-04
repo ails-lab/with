@@ -27,12 +27,10 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 	// events
 		
 	input.focus(function(){toggleSearch('focus');});	
-	$( document ).on( 'keydown', function( ev ) {
+	$( document ).on( 'keypress', function( ev ) {
 	    var nodeName = ev.target.nodeName;
 
-	    if ( 'INPUT' == nodeName || 'TEXTAREA' == nodeName ) {
-	        return;
-	    }
+	    
 	    $('#searchlink').trigger( 'click' );
 	    input.focus();
 	    });
@@ -45,14 +43,12 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 	// esc key closes search overlay
 	// keyboard navigation events
 	
-	$( document ).on( 'keydown', function( ev ) {
-		var keyCode = ev.keyCode || ev.which;
-		if( keyCode === 27 && isOpen ) {
-			ctrlClose.click();
-		}
-	} );
+	$(document).keyup(function(e) {
 
-
+		  if (e.keyCode == 27 && isOpen ) { ctrlClose.click(); }   // esc
+		});
+	
+	
 	 
   }
  
