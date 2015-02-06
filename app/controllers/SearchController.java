@@ -58,6 +58,10 @@ public class SearchController extends Controller {
 
 	public static Result testsearch() {
 		CommonQuery q = userForm.bindFromRequest().get();
+		if (q == null || q.searchTerm == null) {
+			q = new CommonQuery();
+			q.searchTerm = "zeus";
+		}
 		List<SourceResponse> res = search(q);
 		return ok(views.html.testsearch.render(userForm, res));
 	}
