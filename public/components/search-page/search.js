@@ -26,14 +26,16 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 
 	// events
 		
-	input.focus(function(){toggleSearch('focus');});	
-	$( document ).on( 'keypress', function( ev ) {
+	input.focus(function(){toggleSearch('focus');});
+	keypressHandler = function(ev) {
 	    var nodeName = ev.target.nodeName;
 
 	    
 	    $('#searchlink').trigger( 'click' );
 	    input.focus();
-	    });
+	    };
+
+	   $( document ).on( 'keypress', keypressHandler);
 		
 	ctrlClose.on('click',function(){
 		input.val('');
