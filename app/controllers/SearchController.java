@@ -16,11 +16,12 @@
 
 package controllers;
 
+import java.util.List;
+
+import play.data.Form;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import sun.security.pkcs.ParsingException;
-import views.html.index;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -31,9 +32,7 @@ import espace.core.Utils;
 
 public class SearchController extends Controller {
 
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
-	}
+	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 
 	public static Result search() {
 		System.out.println(request().body());
@@ -45,33 +44,22 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				q = Utils.parseJson(json);
-			} catch (ParsingException e) {
+			} catch (Exception e) {
 				return badRequest(e.getMessage());
 			}
 		}
 		return ok(Json.toJson(search(q)));
 	}
 
-	public static Object search(CommonQuery q) {
-		Object result = ESpaceSources.fillResults(q);
+	public static List<SourceResponse> search(CommonQuery q) {
+		List<SourceResponse> result = ESpaceSources.fillResults(q);
 		return result;
 	}
 
 	public static Result testsearch() {
-		JsonNode json = request().body().asJson();
-		CommonQuery q = null;
-		if (json == null) {
-			return badRequest("Expecting Json query");
-		} else {
-			// Parse the query.
-			try {
-				q = Utils.parseJson(json);
-			} catch (ParsingException e) {
-				return badRequest(e.getMessage());
-			}
-		}
-		SourceResponse res = (SourceResponse) search(q);
-		return ok(testsearch.render(q, res));
+		CommonQuery q = userForm.bindFromRequest().get();
+		List<SourceResponse> res = search(q);
+		return ok(views.html.testsearch.render(userForm, res));
 	}
 
 }

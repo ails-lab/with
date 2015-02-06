@@ -5,7 +5,7 @@
 # Home page
 GET     /                           controllers.Application.index()
 
-POST     /api/search                controllers.Application.search()
+POST     /api/search                controllers.SearchController.search()
 GET      /api/testsearch            controllers.SearchController.testsearch()
 
 

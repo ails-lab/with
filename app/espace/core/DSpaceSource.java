@@ -77,7 +77,7 @@ public class DSpaceSource implements ISpaceSource {
 	}
 
 	@Override
-	public Object getResults(CommonQuery q) {
+	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);
@@ -107,7 +107,7 @@ public class DSpaceSource implements ISpaceSource {
 			}
 			res.items = a;
 			res.facets = response.path("facets");
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

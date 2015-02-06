@@ -38,8 +38,8 @@ public class ESpaceSources {
 
 	}
 
-	public static Object fillResults(CommonQuery q) {
-		ArrayList<Object> srcs = new ArrayList<Object>();
+	public static List<SourceResponse> fillResults(CommonQuery q) {
+		ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
 		for (ISpaceSource src : ESpaceSources.getESources()) {
 			srcs.add(src.getResults(q));
 		}

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import play.libs.Json;
-import sun.security.pkcs.ParsingException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -61,35 +60,35 @@ public class Utils {
 	// }
 	// }
 
-	public static CommonQuery parseJson(JsonNode json) throws ParsingException {
+	public static CommonQuery parseJson(JsonNode json) throws Exception {
 		CommonQuery q1 = Json.fromJson(json, CommonQuery.class);
 		return q1;
 	}
 
-	public static String readAttr(JsonNode json, String string, boolean force) throws ParsingException {
+	public static String readAttr(JsonNode json, String string, boolean force) throws Exception {
 		return readAttr(json, string, force, null);
 	}
 
-	public static int readIntAttr(JsonNode json, String string, boolean force) throws ParsingException {
+	public static int readIntAttr(JsonNode json, String string, boolean force) throws Exception {
 		return readIntAttr(json, string, force, 0);
 	}
 
-	public static String readAttr(JsonNode json, String string, boolean force, String def) throws ParsingException {
+	public static String readAttr(JsonNode json, String string, boolean force, String def) throws Exception {
 		String res = json.findPath(string).asText();
 		if (res == null) {
 			if (force)
-				throw new ParsingException("Missing " + string);
+				throw new Exception("Missing " + string);
 			else
 				return null;
 		}
 		return res;
 	}
 
-	public static List<String> readArrayAttr(JsonNode json, String string, boolean force) throws ParsingException {
+	public static List<String> readArrayAttr(JsonNode json, String string, boolean force) throws Exception {
 		JsonNode a = json.path(string);
 		if (a == null) {
 			if (force)
-				throw new ParsingException("Missing " + string);
+				throw new Exception("Missing " + string);
 			else
 				return null;
 		} else {
@@ -105,11 +104,11 @@ public class Utils {
 		}
 	}
 
-	public static List<Lang> readLangAttr(JsonNode json, String string, boolean force) throws ParsingException {
+	public static List<Lang> readLangAttr(JsonNode json, String string, boolean force) throws Exception {
 		JsonNode a = json.path(string);
 		if (a == null) {
 			if (force)
-				throw new ParsingException("Missing " + string);
+				throw new Exception("Missing " + string);
 			else
 				return null;
 		} else {
@@ -125,7 +124,7 @@ public class Utils {
 		}
 	}
 
-	public static int readIntAttr(JsonNode json, String string, boolean force, int def) throws ParsingException {
+	public static int readIntAttr(JsonNode json, String string, boolean force, int def) throws Exception {
 		String readAttr = readAttr(json, string, force, "" + def);
 		if (readAttr == null || readAttr.equals(""))
 			return def;
