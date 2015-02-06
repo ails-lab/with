@@ -1,4 +1,4 @@
-define(['knockout', 'text!./login-register.html',  'facebook'], function(ko, template) {
+define(['knockout', 'text!./login-register.html',  'facebook'], function(ko, template, FB) {
 
 	FB.init({
 		appId   : '1584816805087190',
@@ -6,17 +6,36 @@ define(['knockout', 'text!./login-register.html',  'facebook'], function(ko, tem
 		version : 'v2.2'
 	});
 
-	var template;
-
 	function LoginRegisterViewModel(params) {
+		var self = this;
 
-		this.route = params.route;
+		// Check if user is logged in in facebook
+		self.fblogin = function() { FBLogin(); }
+
+		self.route = params.route;
 	}
 
 	function FBLogin() {
-		FB.getLoginStatus(function(response) {
-			console.log(response);
-		});
+		FB.login(function(response) {
+			statusChangeCallback(response);
+		}, {scope: 'public_profile, email'});
+	}
+
+	function statusChangeCallback(response) {
+		console.log(response);
+		if (response.status === 'connected') {
+			console.log(response.authResponse.accessToken);
+
+			FB.api('/me', function(response) {
+				console.log(JSON.stringify(response));
+			});
+		}
+		else if (response.status === 'not_authorized') {
+			// User didn't authorize the application
+		}
+		else {
+			// User is not logged
+		}
 	}
 
 	return { viewModel: LoginRegisterViewModel, template: template };
