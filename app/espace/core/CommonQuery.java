@@ -69,7 +69,6 @@ public class CommonQuery {
 
 	public CommonQuery() {
 		super();
-		searchTerm = "*";
 	}
 
 	public String getQuery() {

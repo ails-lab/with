@@ -29,13 +29,19 @@ public class ESpaceSource implements ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
-		eq.addSearch(Utils.spacesFormatQuery(q.searchTerm)
-				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : ""));
+		eq.addSearch(getSearchTerm(q));
 		eq.addSearchParam("start", "" + ((q.page - 1) * q.pageSize + 1));
 		eq.addSearchParam("rows", "" + q.pageSize);
 		eq.addSearchParam("profile", "rich+facets");
 		euroAPI(q, eq);
 		return eq.getHttp();
+	}
+
+	private String getSearchTerm(CommonQuery q) {
+		if (q.searchTerm != null)
+			return Utils.spacesFormatQuery(q.searchTerm)
+					+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "");
+		return null;
 	}
 
 	private String euroAPI(CommonQuery q, EuropeanaQuery eq) {

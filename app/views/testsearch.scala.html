@@ -1,0 +1,44 @@
+@(q:espace.core.CommonQuery, content: espace.core.SourceResponse)
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Test Search</title>
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
+    </head>
+    <body>
+
+<form action="@routes.SearchController.testsearch()" method="POST">
+
+<table style="width:100%">
+<tr>
+	<td>query</td>
+    <td><input type="text" name="query" value="@q.searchTerm" /></td>
+   </tr>
+   
+   
+<tr>
+	<td>page</td>
+    <td><input type="text" name="page" value="@q.page" /></td>
+   </tr>
+<tr>
+	<td>page size</td>
+    <td><input type="text" name="pageSize" value="@q.pageSize"/></td>
+   </tr>
+<tr>
+<td></td><td></td>
+<td align="left">
+	<button>Search</button>
+	</td>
+</tr>
+</table>
+</form>
+
+        
+
+
+    </body>
+</html>
