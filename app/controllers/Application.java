@@ -19,7 +19,6 @@ package controllers;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import sun.security.pkcs.ParsingException;
 import views.html.index;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,34 +31,6 @@ public class Application extends Controller {
 
 	public static Result index() {
 		return ok(index.render("Your new application is ready."));
-	}
-
-	public static Result search() {
-		System.out.println(request().body());
-		JsonNode json = request().body().asJson();
-		CommonQuery q = null;
-		if (json == null) {
-			return badRequest("Expecting Json query");
-		} else {
-			// Parse the query.
-			try {
-				q = Utils.parseJson(json);
-			} catch (ParsingException e) {
-				return badRequest(e.getMessage());
-			}
-		}
-		return search(q);
-	}
-
-	public static Result search(CommonQuery q) {
-		Object result = ESpaceSources.fillResults(q);
-		return ok(Json.toJson(result));
-	}
-
-	public static Result testsearch() {
-		CommonQuery q = new CommonQuery();
-		q.searchTerm = "214";
-		return search(q);
 	}
 
 }

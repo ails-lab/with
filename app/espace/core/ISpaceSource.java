@@ -26,6 +26,6 @@ public interface ISpaceSource {
 
 	public List<CommonItem> getPreview(CommonQuery q);
 
-	public Object getResults(CommonQuery q);
+	public SourceResponse getResults(CommonQuery q);
 
 }

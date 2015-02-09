@@ -5,8 +5,8 @@
 # Home page
 GET     /                           controllers.Application.index()
 
-POST     /api/search                controllers.Application.search()
-GET      /api/testsearch            controllers.Application.testsearch()
+POST     /api/search                controllers.SearchController.search()
+GET      /api/testsearch            controllers.SearchController.testsearch()
 
 
 # Map static resources from the /public folder to the /assets URL path

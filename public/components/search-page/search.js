@@ -30,14 +30,14 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 			}
 			isOpen = !isOpen;
 		};
+
 		
-		
-	     $(document).keyup(function(e) {
+	    $(document).keyup(function(e) {
 
   		  if (e.keyCode == 27 && isOpen ) { 
   			withinput.val('');
   			toggleSearch(e,'');
-  			  //ctrlClose.click(); 
+  			  
   			  }   // esc
   		});
         ctrlClose.on('click',function(event){
