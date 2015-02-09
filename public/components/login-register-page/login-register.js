@@ -7,9 +7,9 @@ define(['knockout', 'text!./login-register.html',  'facebook'], function(ko, tem
 	});
 
 	function LoginRegisterViewModel(params) {
+		$(document).off("keypress");
 		var self = this;
-
-		// Check if user is logged in in facebook
+	// Check if user is logged in in facebook
 		self.fblogin = function() { FBLogin(); }
 
 		self.route = params.route;
@@ -37,6 +37,12 @@ define(['knockout', 'text!./login-register.html',  'facebook'], function(ko, tem
 			// User is not logged
 		}
 	}
+
+	/*
+	 * not needed
+	 * LoginRegisterViewModel.prototype.dispose = function() {
+		$(document).on("keypress", keypressHandler);
+	}*/
 
 	return { viewModel: LoginRegisterViewModel, template: template };
 });

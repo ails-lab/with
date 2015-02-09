@@ -1,53 +1,53 @@
 define(['knockout', 'text!./search.html'], function(ko, template) {
+	
 
   function SearchModel(params) {
 	  this.route = params.route;
 	  
-	  var withsearch = $( '#withsearchid' ),
-	  input =$("input.withsearch-input");
+	  var withsearch = $( '#withsearchid' );
+	  var withinput =$("input.withsearch-input");
 	  ctrlClose =$("span.withsearch-close");
 	  isOpen = false,
 		// show/hide search area
-		toggleSearch = function(evt) {
+		toggleSearch = function(evt,char) {
 			// return if open and the input gets focused
-			if( evt === 'focus' && isOpen ) return false;
+			if(  evt === 'focus' && isOpen ) return false;
 
 			if( isOpen ) {
 				withsearch.removeClass("open");
-				
-				input.blur();
+				withinput.blur();
 			}
 			else {
+				var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+			    // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+			    var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+
 				withsearch.addClass('open');
+				withinput.focus();
+				if(isOpera || isFirefox)
+				withinput.val(char);
 				
 			}
 			isOpen = !isOpen;
 		};
 
-	// events
 		
-	input.focus(function(){toggleSearch('focus');});	
-	$( document ).on( 'keypress', function( ev ) {
-	    var nodeName = ev.target.nodeName;
+	    $(document).keyup(function(e) {
 
-	    
-	    $('#searchlink').trigger( 'click' );
-	    input.focus();
-	    });
+  		  if (e.keyCode == 27 && isOpen ) { 
+  			withinput.val('');
+  			toggleSearch(e,'');
+  			  
+  			  }   // esc
+  		});
+        ctrlClose.on('click',function(event){
+    		withinput.val('');
+    		
+    		toggleSearch(event,'');
+    		}
+    	);
 		
-	ctrlClose.on('click',function(){
-		input.val('');
-		toggleSearch('click');
-		}
-	);
-	// esc key closes search overlay
-	// keyboard navigation events
-	
-	$(document).keyup(function(e) {
 
-		  if (e.keyCode == 27 && isOpen ) { ctrlClose.click(); }   // esc
-		});
-	
 	
 	 
   }

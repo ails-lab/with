@@ -6,7 +6,7 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
 	ko.components.register('home-page', { require: 'components/home-page/home' });
 	ko.components.register('main-content', { require: 'components/main-content/main-content' });
 	ko.components.register('search-page', { require: 'components/search-page/search' });
-	
+
 	ko.components.register('login-page', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/login.html'}

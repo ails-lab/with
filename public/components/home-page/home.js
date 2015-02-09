@@ -1,6 +1,22 @@
 define(["knockout", "text!./home.html", "slick"], function(ko, homeTemplate) {
 
 	function HomeViewModel(params) {
+		
+		$( document ).on( 'keypress', function( event ) {
+		     if (event.which == null) {
+		    	 var char=String.fromCharCode(event.which);
+		    	 toggleSearch("focus",char);
+		    	 
+		     } else if (event.which!=0 && event.charCode!=0) {
+		    	 var char=String.fromCharCode(event.which);
+		    	 toggleSearch("focus",char);
+		       } else {
+		    		    return;
+		     }
+		    
+		    
+		    
+		});
 
 		$('.mycarousel').slick({
 			dots: false,
