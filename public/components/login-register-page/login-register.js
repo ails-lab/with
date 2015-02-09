@@ -9,6 +9,10 @@ define(['knockout', 'text!./login-register.html',  'facebook'], function(ko, tem
 	function LoginRegisterViewModel(params) {
 		var self = this;
 
+	 	
+
+		$( document).unbind( "keypress" );
+
 		// Check if user is logged in in facebook
 		self.fblogin = function() { FBLogin(); }
 
