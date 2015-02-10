@@ -117,9 +117,6 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 					//self.page(self.page()+1);
 					self.previous(self.page()-1);
 					self.next(self.page()+1);
-
-                    var itemsbysource=[];
-					
 					for(var i in data) {
 						var source=data[i].source;
 						var items = [];
@@ -154,7 +151,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 							}
 							
 						  }
-						if(!found || self.results().length==0 ){
+						if(srcCat.items.length>0 && (!found || self.results().length==0)){
 							self.results.push(srcCat);
 						}
 					}
