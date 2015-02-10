@@ -1,45 +1,45 @@
-<div id="withsearchid" class="withsearch">
+<div id="withsearchid" class="withsearch"  data-bind="event: { scroll: scrolled }">
 				<form class="withsearch-form">
-					<input class="withsearch-input"  type="search" placeholder="Search..."/>
-					<button class="withsearch-submit" type="submit">Search</button>
+					<input class="withsearch-input"  type="search" data-bind="value: term" placeholder="Search..."/>
+					<button class="withsearch-submit" type="submit" data-bind="click: search">Search</button>
+					
 				</form>
 				<div class="withsearch-content">
+				
+					<!-- ko if: noResults -->
+						<p>No results</p>
+					<!-- /ko -->
+					<!-- ko if: results().length > 0 -->
+				
+				    <!-- ko foreach: results -->
+				 
 					<div class="dummy-column">
-						<h2>Europeana</h2>
-						<a class="dummy-media-object">
-							<img src="http://wellcomeimages.org/indexplus/obf_images/df/ac/0428ac88f6b3d5dda2c8b18498a4.jpg" alt="item title"/>
-							<h3>Snow fight</h3>
+					<h2>
+					 <!-- ko text: source --><!-- /ko --> 
+					</h2>
+					 <!-- ko foreach: items -->
+					 
+					 <!-- ko if: thumb -->
+					 	<a class="dummy-media-object">
+							<img data-bind="attr: { src:thumb, alt: title }"/>
+							<span>
+							 <!-- ko text: title --><!-- /ko --> 
+							</span>
 						</a>
-						<a class="dummy-media-object">
-							<img src="http://wellcomeimages.org/indexplus/obf_images/df/ac/0428ac88f6b3d5dda2c8b18498a4.jpg" alt="item title"/>
-							<h3>Snow fight</h3>
-						</a><a class="dummy-media-object">
-							<img src="http://wellcomeimages.org/indexplus/obf_images/df/ac/0428ac88f6b3d5dda2c8b18498a4.jpg" alt="item title"/>
-							<h3>Snow fight</h3>
-						</a><a class="dummy-media-object">
-							<img src="http://wellcomeimages.org/indexplus/obf_images/df/ac/0428ac88f6b3d5dda2c8b18498a4.jpg" alt="item title"/>
-							<h3>Snow fight</h3>
-						</a><a class="dummy-media-object">
-							<img src="http://wellcomeimages.org/indexplus/obf_images/df/ac/0428ac88f6b3d5dda2c8b18498a4.jpg" alt="item title"/>
-							<h3>Snow fight</h3>
-						</a>
+						<!-- /ko -->    
+						<!-- /ko -->    
 					</div>
-					<div class="dummy-column">
-						<h2>DPLA</h2>
-						<a class="dummy-media-object">
-							<img src="http://ids.si.edu/ids/deliveryService?max=500&id=http://npgportraits.si.edu/eMuseumNPG/media/CSC/8700416b.jpg" alt="item title"/>
-							<h3>Walt Disney</h3>
-						</a>
-						
-					</div>
-					<div class="dummy-column">
-						<h2>WITH<span>Collections<span></span></h2>
-						<a class="dummy-media-object">
-							<img class="round" src="" alt="TooltipStylesInspiration"/>
-							<h3>Sample collection one</h3>
-						</a>
-						
-					</div>
+					<!-- /ko -->
+					    	
+				 <!-- /ko --> 
+				 
+				
+				 <div id="more">
+				    
+				    <img src="http://rniemeyer.github.com/KnockMeOut/Images/loading.gif" data-bind="visible: searching" />
+				</div>
+					
+				
 				</div><!-- /withsearch-content -->
 				<span class="withsearch-close"></span>
 			</div><!-- /withsearch -->

@@ -8,6 +8,12 @@ body {
 	font-size: 12px;
 }
 
+a{text-decoration: none}
+a:focus, a:hover {
+
+text-decoration: none;
+}
+
 .withsearch {
 	display:none;
 	width: 200px;
@@ -17,6 +23,7 @@ body {
 	z-index: 10000;
 	top: 50px;
 	right: 50px;
+	overflow:scroll;
 	-webkit-transform-origin: 100% 0;
 	transform-origin: 100% 0;
 	-webkit-transition-property: min-height, width, top, right;
@@ -295,7 +302,7 @@ input[type="search"] { /* reset normalize */
 	vertical-align: middle;
 }
 
-.dummy-media-object h3 {
+.dummy-media-object span {
 	vertical-align: middle;
 	font-size: 0.85em;
 	display: inline-block;
@@ -305,9 +312,12 @@ input[type="search"] { /* reset normalize */
 	color: rgba(145,145,145,0.7);
 }
 
-.dummy-media-object:hover h3 {
+.dummy-media-object:hover span {
 	color: rgba(236,90,98,1);
+	text-decoration: none !important
 }
+
+
 
 /* Overlay */
 .overlay {
@@ -328,6 +338,17 @@ input[type="search"] { /* reset normalize */
 .withsearch.open ~ .overlay {
 	opacity: 1;
 }
+
+
+
+#more{
+	 left: 50%;
+     padding: 5px;
+     position: fixed;
+     top: 200px;
+     z-index:11000;
+	    }
+
 
 @media screen and (max-width: 53.125em) {
 	.withsearch-input {
