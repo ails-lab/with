@@ -101,6 +101,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 		}
 
 		self._search = function() {
+		 if(self.searching()==false){
 			self.searching(true);
 			$.ajax({
 				"url": "/api/search",
@@ -161,6 +162,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 				}
 			});
 			console.log(self.term());
+		 }
 		};
 
 		
@@ -168,6 +170,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 			self.results([]);
 			self.page(1);
 			self.currentTerm(self.term());
+			self.searching(false);
 			self._search();
 		};
 
