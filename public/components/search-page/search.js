@@ -1,4 +1,62 @@
-define(['knockout', 'text!./search.html'], function(ko, template) {
+define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko, template,Masonry,imagesloaded) {
+	
+	var msnry;
+
+    ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+		   /* var options = ko.unwrap(valueAccessor()),
+		    $el = $(element);
+		
+		    
+		
+		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+		        // This will be called when the element is removed by Knockout or
+		        // if some other part of your code calls ko.removeNode(element)
+		        $el.msnry("destroy");
+		    });*/
+
+    },
+    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+
+        var $el = $(element);
+        var value = ko.utils.unwrapObservable(valueAccessor());
+       
+      
+
+        var container = document.querySelector(value.container);
+        msnry = Masonry.data(container);
+
+
+        if (!msnry) {
+            msnry = new Masonry(container);
+            imagesloaded( container, function() {
+            	
+              msnry.layout();
+            });
+        }
+        
+        
+
+        
+     /*   imagesloaded( $el, function() {
+        	$el.animate({ opacity: 1 });
+        	msnry.appended( $el );
+      	    msnry.layout();
+      	});*/
+       //msnry.addItems($el);
+        imagesloaded( $el, function() {
+        	$el.animate({ opacity: 1 });
+        	 //$container.masonry( 'appended', $elems );
+        	msnry.appended( $el );
+        	msnry.layout();
+        	  
+        	});
+        
+        //msnry.bindResize();
+    },
+
+    };
+
+	
 	
 	function Record(data) {
 		var self = this;
@@ -8,7 +66,6 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 		self.thumb = ko.observable(false);
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
-		
 		self.load = function(data) {
 			self.title(data.title);
 			self.view_url(data.view_url);
@@ -31,6 +88,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 		var self = this;
 		self.source = ko.observable("");
 		self.items=ko.observableArray([]);
+		
 		
 		self.load=function(data){
 			self.source=data.source;
@@ -65,8 +123,9 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 
 		self.route = params.route;
 		self.term = ko.observable("");
+		self.sourceview=ko.observable(true);
 		self.sources= ko.observableArray([]);
-		
+		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
 		//self.results.extend({ rateLimit: 50 });
 		
@@ -87,6 +146,14 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
 
+		self.toggleSourceview = function () { self.sourceview(!self.sourceview()) 
+			if(self.sourceview()){
+				if (msnry) {
+	        	    msnry.destroy();
+	        	}
+			}else{msnry.layout();}
+		};
+		
 		self.reset = function() {
 			
 			self.term("");
@@ -95,7 +162,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 			self.pageSize(20);
 			self.previous(-1);
 			self.next(-1);
-			
+			self.mixresults([]);
 			self.results([]);
 			self.searching(false);
 		}
@@ -154,6 +221,14 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 						if(srcCat.items.length>0 && (!found || self.results().length==0)){
 							self.results.push(srcCat);
 						}
+						if(srcCat.items.length>0){
+							
+							for(g in srcCat.items){
+								self.mixresults.push(srcCat.items[g]);
+							}
+							//self.mixresults.push.apply(self.mixresults, srcCat.items);
+							
+						}
 					}
 						self.searching(false);
 				}
@@ -164,7 +239,12 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 
 		
 		self.search = function() {
+			
+	        if (msnry) {
+	        	msnry.destroy();
+	        	}
 			self.results([]);
+			self.mixresults([]);
 			self.page(1);
 			self.currentTerm(self.term());
 			self.searching(false);
@@ -181,6 +261,7 @@ define(['knockout', 'text!./search.html'], function(ko, template) {
 			self._search();
 		};
 
+      
 
 	  var withsearch = $( '#withsearchid' );
 	  var withinput =$("input.withsearch-input");
