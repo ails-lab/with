@@ -19,52 +19,58 @@ package db;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-
 import model.User;
+
+import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.Morphia;
+
 import play.Logger;
+
+import com.mongodb.MongoClient;
 
 // get the DAOs from here
 // the EntityManagerFactory is here
 public class DB {
-   	static EntityManagerFactory emf = Persistence.createEntityManagerFactory("with_persist");
-	static ThreadLocal<EntityManager> managers = new ThreadLocal<EntityManager>();
-	static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
-	
-	static private final Logger.ALogger log = Logger.of(DB.class); 
-	/**
-	 * A Thread specific EntityManager
-	 * System will use those during requests.
-	 * @return
+	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
+	private static MongoClient mongo;
+	private static Morphia morphia;
+	private static Datastore ds;
+
+	private String host;
+	private String dbName;
+	private int port;
+
+	static private final Logger.ALogger log = Logger.of(DB.class);
+
+	/* Init session method.
+	 * I can obtain host, port, dbName from the constructor
 	 */
-	public static EntityManager getEm() {
-		EntityManager em = managers.get();
-		if( em == null ) {
-			em = emf.createEntityManager();
-			managers.set( em );
+	public static void initialize() {
+		String host = "localhost";
+		int port = 27017;
+		try {
+			mongo = new MongoClient(host, port);
+			morphia = new Morphia();
+		} catch(Exception e) {
+			log.error("Database Conection aborted!", e);
 		}
-		return em;
 	}
-	
-	
-	public static void flush() {
-		getEm().flush();
+
+	public static Datastore getDs() {
+		String dbName = "morphia-test";
+		try {
+			ds = morphia.createDatastore(mongo, dbName);
+			morphia.mapPackage("com.city81.mongodb.morphia.entity");
+		} catch(Exception e) {
+			log.error("Database Conection aborted!", e);
+		}
+			return ds;
 	}
-	
-	/**
-	 * A new EntityManager. Do whatever you will and clean up afterwards 
-	 * @return
-	 */
-	public static EntityManager newEm() {
-		return emf.createEntityManager();
-	}
-	
+
 	public static UserDAO getUserDAO() {
 		return (UserDAO) getDAO(User.class);
 	}
-	
+
 	/**
 	 * Singleton DAO class for all the models
 	 * @param clazz
@@ -83,11 +89,5 @@ public class DB {
 			}
 		}
 		return dao;
-	}
-	
-	public static void close() {
-		EntityManager em = managers.get();
-		if( em != null ) em.close();
-		managers.remove();
 	}
 }

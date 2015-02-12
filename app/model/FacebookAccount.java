@@ -14,23 +14,23 @@
  */
 
 
-package db;
+package model;
 
-import java.util.List;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
 
-import model.User;
-import play.Logger;
-import play.Logger.ALogger;
+@Entity
+public class FacebookAccount {
 
-public class UserDAO extends DAO<User> {
-	public static final ALogger log = Logger.of( UserDAO.class);
-
-	public UserDAO() {
-		super( User.class );
-		log.debug( "Yuchuu made the DAO");
+	@Id
+	private String fbId;
+	
+	public String getFbID() {
+		return fbId;
 	}
-
-	public List<User> listByName( String name ) {
-		return list("name", name);
+	
+	public void setFbId(String fbId) {
+		this.fbId = fbId;
 	}
+	
 }

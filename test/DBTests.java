@@ -18,12 +18,11 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
-import javax.persistence.Query;
-
+import model.Search;
 import model.User;
 
 import org.junit.Test;
@@ -43,18 +42,31 @@ public class DBTests {
     @Test
     public void userStorage() {
     	User testUser= new User();
-    	testUser.name = "Tester";
- 
-    	DB.getUserDAO().persist( testUser );
-    	DB.flush();
+    	testUser.setName("test_user_2");
+    	List<Search> searchHistory = new ArrayList<Search>();
+    	Search s1 = new Search();
+    	s1.setSearchDate(new Date());
+    	searchHistory.add(s1);
+    	Search s2 = new Search();
+    	s2.setSearchDate(new Date());
+    	searchHistory.add(s2);
+    	testUser.setSearcHistory(searchHistory);
 
-    	List<User> l = DB.getUserDAO().list( "obj.name = 'Tester' ");
+    	DB.initialize();
+    	DB.getDs().ensureIndexes(User.class);
+    	//DB.getDs().ensureIndexes(User.class, false);
+    	DB.getDs().save(testUser);
+
+    	List<User> l = DB.getUserDAO().listByName("test_user");
     	assertThat( l.size()).isGreaterThanOrEqualTo(1);
-    	
+    	for(User u : l) {
+    		System.out.println("Nickname = " + u.getName());
+    	}
+
 //    	int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
 //    	assertThat( count )
 //    	.overridingErrorMessage("Not removed enough Testers")
-//    	.isGreaterThanOrEqualTo(1 );   	
+//    	.isGreaterThanOrEqualTo(1 );
     }
 
     @Test

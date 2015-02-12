@@ -14,23 +14,33 @@
  */
 
 
-package db;
+package model;
 
-import java.util.List;
+import java.util.Date;
 
-import model.User;
-import play.Logger;
-import play.Logger.ALogger;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
 
-public class UserDAO extends DAO<User> {
-	public static final ALogger log = Logger.of( UserDAO.class);
+@Entity
+public class Search {
 
-	public UserDAO() {
-		super( User.class );
-		log.debug( "Yuchuu made the DAO");
+	@Id
+	private String userId;
+	@Indexed(name="date", unique=true)
+	private Date searchDate;
+
+	public String getUserId() {
+		return userId;
+	}
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	public Date getSearchDate() {
+		return searchDate;
+	}
+	public void setSearchDate(Date searchDate) {
+		this.searchDate = searchDate;
 	}
 
-	public List<User> listByName( String name ) {
-		return list("name", name);
-	}
 }
