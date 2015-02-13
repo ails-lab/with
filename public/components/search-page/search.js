@@ -5,6 +5,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
+    	console.log("exists:"+$element.data('masonry'));
 		    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 		
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
@@ -19,8 +20,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
     	masonry = ko.utils.unwrapObservable(valueAccessor())
     	
-    	if ($element.data('masonry'))
-			//$element.masonry('destroy')
+    	
+			
 		if (!list.length){
 			
 			return;
@@ -28,6 +29,12 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     	
       
     	imagesLoaded( $element, function() {
+    		if (!($element.data('masonry'))){
+        		
+        		console.log("masonry init");
+        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
+        			
+        	}
     		$('#columns > figure').each(function () {
  				
  	 		    $(this).animate({ opacity: 1 });
