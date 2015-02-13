@@ -27,7 +27,6 @@ public class UserDAO extends DAO<User> {
 
 	public UserDAO() {
 		super( User.class );
-		log.debug( "Yuchuu made the DAO");
 	}
 
 	public List<User> listByName( String name ) {

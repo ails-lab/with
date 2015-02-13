@@ -11,7 +11,5 @@ libraryDependencies ++= Seq(
 //  javaEbean,
 //  cache,
 //  javaWs
-  "com.impetus.kundera.core" % "kundera-core" % "2.15",
- "com.impetus.kundera.client" % "kundera-mongo" % "2.15",
  "org.mongodb.morphia" % "morphia" % "0.110"
 )

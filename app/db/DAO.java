@@ -23,6 +23,8 @@ import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 
+import com.mongodb.WriteConcern;
+
 import play.Logger;
 import play.libs.F.Callback;
 
@@ -65,7 +67,7 @@ public class DAO<E> extends BasicDAO<E, String> {
     			E obj = i.next();
     			callback.invoke(obj);
     			if( withWriteback ) {
-    				this.delete(obj);
+    				save(obj, WriteConcern.JOURNALED);
     			}
     		} catch( Throwable thr) {
     			log.error( "Iterate over " + entityClass.getSimpleName() + " with condition " +

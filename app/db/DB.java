@@ -25,8 +25,11 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
+import play.Play;
 
 import com.mongodb.MongoClient;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 
 // get the DAOs from here
 // the EntityManagerFactory is here
@@ -46,8 +49,11 @@ public class DB {
 	 * I can obtain host, port, dbName from the constructor
 	 */
 	public static void initialize() {
-		String host = "localhost";
-		int port = 27017;
+		Config conf = ConfigFactory.load();
+		
+		String host = conf.getString("mongo.host");
+		int port = conf.getInt("mongo.port");
+
 		try {
 			mongo = new MongoClient(host, port);
 			morphia = new Morphia();
@@ -57,10 +63,10 @@ public class DB {
 	}
 
 	public static Datastore getDs() {
-		String dbName = "morphia-test";
+		String dbName = "with-db";
 		try {
 			ds = morphia.createDatastore(mongo, dbName);
-			morphia.mapPackage("com.city81.mongodb.morphia.entity");
+			morphia.mapPackage("db.model");
 		} catch(Exception e) {
 			log.error("Database Conection aborted!", e);
 		}

@@ -42,7 +42,7 @@ public class DBTests {
     @Test
     public void userStorage() {
     	User testUser= new User();
-    	testUser.setName("test_user_2");
+    	testUser.setName("test_user");
     	List<Search> searchHistory = new ArrayList<Search>();
     	Search s1 = new Search();
     	s1.setSearchDate(new Date());
@@ -59,10 +59,8 @@ public class DBTests {
 
     	List<User> l = DB.getUserDAO().listByName("test_user");
     	assertThat( l.size()).isGreaterThanOrEqualTo(1);
-    	for(User u : l) {
-    		System.out.println("Nickname = " + u.getName());
-    	}
-
+    	assertThat( l.size()).isEqualTo(0);
+    	
 //    	int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
 //    	assertThat( count )
 //    	.overridingErrorMessage("Not removed enough Testers")
