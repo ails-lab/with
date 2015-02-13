@@ -124,7 +124,7 @@ input[type="search"] { /* reset normalize */
 	width: 80px;
 	height: 80px;
 	text-indent: 100px;
-	overflow:auto;
+	overflow: hidden;
 	right: 0;
 	top: 50%;
 	background: transparent url(../images/magnifier.svg) no-repeat center center;
