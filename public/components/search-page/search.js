@@ -1,62 +1,45 @@
-define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko, template,Masonry,imagesloaded) {
+define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], function(bridget,ko, template,masonry,imagesLoaded) {
 	
-	var msnry;
-
+	 $.bridget( 'masonry', masonry );
+	
+	
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-		   /* var options = ko.unwrap(valueAccessor()),
-		    $el = $(element);
-		
-		    
+    	var $element = $(element);
+		    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 		
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-		        // This will be called when the element is removed by Knockout or
-		        // if some other part of your code calls ko.removeNode(element)
-		        $el.msnry("destroy");
-		    });*/
+		       
+		        $element.masonry("destroy");
+		    });
 
     },
     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-
-        var $el = $(element);
-        var value = ko.utils.unwrapObservable(valueAccessor());
-       
+    	
+    	var $element = $(element),
+    	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
+    	masonry = ko.utils.unwrapObservable(valueAccessor())
+    	
+    	if ($element.data('masonry'))
+			//$element.masonry('destroy')
+		if (!list.length){
+			
+			return;
+		}
+    	
       
-
-        var container = document.querySelector(value.container);
-        msnry = Masonry.data(container);
-
-
-        if (!msnry) {
-            msnry = new Masonry(container);
-            imagesloaded( container, function() {
-            	
-              msnry.layout();
-            });
-        }
-        
-        
-
-        
-     /*   imagesloaded( $el, function() {
-        	$el.animate({ opacity: 1 });
-        	msnry.appended( $el );
-      	    msnry.layout();
-      	});*/
-       //msnry.addItems($el);
-        imagesloaded( $el, function() {
-        	$el.animate({ opacity: 1 });
-        	 //$container.masonry( 'appended', $elems );
-        	msnry.appended( $el );
-        	msnry.layout();
-        	  
-        	});
-        
-        //msnry.bindResize();
-    },
-
+    	imagesLoaded( $element, function() {
+    		$('#columns > figure').each(function () {
+ 				
+ 	 		    $(this).animate({ opacity: 1 });
+ 			});
+ 			$element.masonry( 'reloadItems' );
+ 			$element.masonry( 'layout' );
+ 			
+ 		 });
+		 
+      }
     };
-
-	
+    
 	
 	function Record(data) {
 		var self = this;
@@ -67,7 +50,10 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
 		self.load = function(data) {
-			self.title(data.title);
+			if(data.title==undefined){
+				self.title("No title");
+			}else{self.title(data.title);}
+			
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 			self.fullres(data.fullres);
@@ -94,15 +80,8 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 			self.source=data.source;
 			
 			self.items=data.items;
-		}
-		self.addNewData = function(newData) {
-		    var newItems = ko.utils.arrayMap(newData, function(item) {
-		       return new Record(item);
-		    });
-		    //take advantage of push accepting variable arguments
-		    self.items.push.apply(self.items, newItems);
 		};
-
+		
 		
 		self.addItem = function(c) {            
 	           self.items.push(new Record(c));
@@ -123,7 +102,7 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 
 		self.route = params.route;
 		self.term = ko.observable("");
-		self.sourceview=ko.observable(true);
+		self.sourceview=ko.observable(false);
 		self.sources= ko.observableArray([]);
 		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
@@ -145,14 +124,8 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
-
-		self.toggleSourceview = function () { self.sourceview(!self.sourceview()) 
-			if(self.sourceview()){
-				if (msnry) {
-	        	    msnry.destroy();
-	        	}
-			}else{msnry.layout();}
-		};
+		
+		self.toggleSourceview = function () { self.sourceview(!self.sourceview())};
 		
 		self.reset = function() {
 			
@@ -168,7 +141,7 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 		}
 
 		self._search = function() {
-		 if(self.searching()==false){
+		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
 			$.ajax({
 				"url": "/api/search",
@@ -181,7 +154,7 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 				    source:self.sources()
 				}),
 				"success": function(data) {
-					//self.page(self.page()+1);
+					
 					self.previous(self.page()-1);
 					self.next(self.page()+1);
 					for(var i in data) {
@@ -198,7 +171,11 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 						  });
 						 items.push(record);
 						}
-						
+						if(items.length>0){
+							
+							self.mixresults.push.apply(self.mixresults, items);
+							
+						}
 						var srcCat=new SourceCategory({
 							source:source,
 							items:items
@@ -221,14 +198,7 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 						if(srcCat.items.length>0 && (!found || self.results().length==0)){
 							self.results.push(srcCat);
 						}
-						if(srcCat.items.length>0){
-							
-							for(g in srcCat.items){
-								self.mixresults.push(srcCat.items[g]);
-							}
-							//self.mixresults.push.apply(self.mixresults, srcCat.items);
-							
-						}
+						
 					}
 						self.searching(false);
 				}
@@ -240,9 +210,7 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
 		
 		self.search = function() {
 			
-	        if (msnry) {
-	        	msnry.destroy();
-	        	}
+	      
 			self.results([]);
 			self.mixresults([]);
 			self.page(1);
@@ -304,10 +272,8 @@ define(['knockout', 'text!./search.html','masonry','imagesloaded'], function(ko,
     		toggleSearch(event,'');
     		}
     	);
-		
-
-	
-	 
+        
+       	 
   }
  
   return { viewModel: SearchModel, template: template };

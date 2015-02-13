@@ -5,7 +5,7 @@ html, body {
 body {
 	/*overflow-x: hidden;
 	overflow-y: scroll;*/
-	font-size: 12px;
+	font-size: 1.2em;
 }
 
 a{text-decoration: none}
@@ -15,21 +15,18 @@ text-decoration: none;
 }
 
 .withsearch {
-	display:none;
-	width: 200px;
-	min-height: 40px;
+	width:1px;
+	height:0px;
 	background: #f1f1f1;
 	position: absolute;
+	overflow:auto;
 	z-index: 10000;
-	top: 50px;
-	right: 50px;
-	overflow:scroll;
 	-webkit-transform-origin: 100% 0;
 	transform-origin: 100% 0;
 	-webkit-transition-property: min-height, width, top, right;
 	transition-property: min-height, width, top, right;
 	-webkit-transition-duration: 0.5s;
-	transition-duration: 0.5s;
+	transition-duration: 0.3s;
 	-webkit-transition-timing-function: cubic-bezier(0.7,0,0.3,1);
 	transition-timing-function: cubic-bezier(0.7,0,0.3,1);
 }
@@ -162,18 +159,19 @@ input[type="search"] { /* reset normalize */
 	cursor: pointer;
 	pointer-events: none;
 	opacity: 0;
-	-webkit-transform: scale3d(0,0,1);
-	transform: scale3d(0,0,1);
+	/*-webkit-transform: scale3d(0,0,1);
+	transform: scale3d(0,0,1);*/
 }
 
 .withsearch-view {
-	
-	width: 20px;
+	font-size: 30px;
 	height: 40px;
 	position: absolute;
-	right: 1em;
-	top: 5em;
 	cursor: pointer;
+	display: inline-block;
+	overflow: auto;
+	top: 80%;
+	right: 5%;
 	
 	
 }
@@ -181,12 +179,12 @@ input[type="search"] { /* reset normalize */
 .withsearch.open .withsearch-close {
 	opacity: 1;
 	pointer-events: auto;
-	-webkit-transform: scale3d(1,1,1);
+/*	-webkit-transform: scale3d(1,1,1);
 	transform: scale3d(1,1,1);
 	-webkit-transition: opacity 0.3s, -webkit-transform 0.3s;
 	transition: opacity 0.3s, transform 0.3s;
 	-webkit-transition-delay: 0.5s;
-	transition-delay: 0.5s;
+	transition-delay: 0.5s;*/
 }
 
 .withsearch-close::before,
@@ -219,13 +217,12 @@ input[type="search"] { /* reset normalize */
 
 .withsearch-content {
 	color: #333;
-	margin-top: 5px;
+	margin-top: 2.5em;
 	width: 100%;
 	height: 0;
-	overflow: hidden;
+	/*overflow: scroll;*/
 	background: #f1f1f1;
-	position: absolute;
-	pointer-events: none;
+	/*position: absolute;*/
 	opacity: 0;
 }
 
@@ -244,7 +241,6 @@ input[type="search"] { /* reset normalize */
 
 .dummy-column {
 	margin-left:3em;
-	margin-top:1em;
 	width: 30%;
 	padding: 0 0 6em;
 	float: left;
@@ -281,10 +277,10 @@ input[type="search"] { /* reset normalize */
 }
 
 .dummy-column h2 {
-	font-size: 1em;
+	font-size: 1.2em;
 	letter-spacing: 1px;
 	text-transform: uppercase;
-	font-weight: 800;
+	font-weight: 500;
 	color: #c2c2c2;
 	padding: 0.5em 0;
 }
@@ -321,12 +317,12 @@ input[type="search"] { /* reset normalize */
 
 .dummy-media-object span {
 	vertical-align: middle;
-	font-size: 0.85em;
+	font-size: 1.0em;
 	display: inline-block;
-	font-weight: 700;
+	font-weight: 200;
 	margin: 0 0 0 0;
 	width: calc(100% - 70px);
-	color: rgba(145,145,145,0.7);
+	color: rgba(0, 0, 0, 0.52);
 }
 
 .dummy-media-object:hover span {
@@ -339,10 +335,12 @@ input[type="search"] { /* reset normalize */
 /* Overlay */
 .overlay {
 	position: fixed;
+	
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
+	overflow: scroll;
 	background: rgba(0,0,0,0.5);
 	opacity: 0;
 	pointer-events: none;
@@ -371,15 +369,18 @@ margin: 50px auto;
 }
 
 div#columns figure {
+opacity:0;
 background: #fefefe;
 border: 2px solid #fcfcfc;
 box-shadow: 0 1px 2px rgba(34, 25, 25, 0.4);
-margin: 0 2px 5px;
+margin: 0 2px 10px;
+
 padding: 15px; 
 padding-bottom: 10px;
-transition: opacity .4s ease-in-out;
+/*transition: opacity .4s ease-in-out;*/
 column-break-inside: avoid;
-display: inline-block;
+
+
 }
 div#columns figure img {
 width: 100%; height: auto;
@@ -388,12 +389,15 @@ padding-bottom: 15px;
 margin-bottom: 5px;
 }
 
+.fa-th-large{
+	color:rgba(0, 0, 0, 0.16);
+}
+
 
 #more{
-	 bottom:20px;
+	 bottom:40px;
 	 right:40px;
-	 
-     padding: 5px;
+	 padding: 5px;
      position: fixed;
      z-index:11000;
 	    }
@@ -402,6 +406,8 @@ margin-bottom: 5px;
 #withsearch-content-masonry {
     width: 100%;
     margin: 0 auto;
+    font-weight:200;
+    color:rgba(0, 0, 0, 0.52);
 }
  
 /*Media Queries*/
@@ -442,6 +448,8 @@ only screen and (max-device-width : 399px){
 }
 
 
+
+
 @media screen and (max-width: 53.125em) {
 	.withsearch-input {
 		padding: 0 25% 0 10px;
@@ -452,7 +460,7 @@ only screen and (max-device-width : 399px){
 	.dummy-column {
 		float: none;
 		width: auto;
-		padding: 0 0 2em;
+		padding: 2em;
 	}
 	.dummy-column:nth-child(2) {
 		margin: 0;
