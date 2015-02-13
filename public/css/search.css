@@ -169,7 +169,7 @@ input[type="search"] { /* reset normalize */
 	position: absolute;
 	cursor: pointer;
 	display: inline-block;
-	overflow: auto;
+	overflow: hidden;
 	top: 80%;
 	right: 5%;
 	
