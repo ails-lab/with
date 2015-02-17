@@ -19,6 +19,9 @@ package db;
 import java.util.List;
 
 import model.User;
+
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -27,6 +30,23 @@ public class UserDAO extends DAO<User> {
 
 	public UserDAO() {
 		super( User.class );
+	}
+
+	public User getByEmail(String email) {
+		return this.getDs().find(User.class, "email", email).get();
+	}
+
+	public User getByLogin(String name) {
+		return this.getDs().find(User.class, "name", name).get();
+	}
+
+	public User getByLoginPassword(String name, String pass) {
+		Query<User> q = DB.getDs().createQuery(User.class);
+		q.and(
+			q.criteria("name").equal(name),
+			q.criteria("password").equal(pass)
+		);
+		return find(q).get();
 	}
 
 	public List<User> listByName( String name ) {

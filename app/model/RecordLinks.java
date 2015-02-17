@@ -17,10 +17,13 @@
 package model;
 
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
 
 @Entity
 public class RecordLinks {
 
+	@Id
+	private String dbID;
 	private String source;
 	private String title;
 	private String description;

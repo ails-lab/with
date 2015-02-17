@@ -23,10 +23,11 @@ import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 
-import com.mongodb.WriteConcern;
-
 import play.Logger;
 import play.libs.F.Callback;
+
+import com.mongodb.MongoException;
+import com.mongodb.WriteConcern;
 
 public class DAO<E> extends BasicDAO<E, String> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
@@ -49,6 +50,26 @@ public class DAO<E> extends BasicDAO<E, String> {
 
 	}
 
+	/**
+	 * Return collection stats
+	 */
+	public String getCollectionStatistics() {
+		String stats = this.getCollection().getStats().toString();
+		if(stats != null)
+			return stats;
+		else {
+			log.debug("No statistics returned for the " + entityClass.getSimpleName() + "collection");
+			return null;
+		}
+
+	}
+
+	/**
+	 * Return index info for a collection
+	 */
+	public String getIndexindexInfo() {
+		return null;
+	}
 
 	/**
 	 * Execute on all matching entities and optionally write changes back to db.
@@ -74,6 +95,39 @@ public class DAO<E> extends BasicDAO<E, String> {
     					condition, thr  );
     		}
     	}
+	}
+
+	/**
+	 * Drop a collection and all it's documents
+	 */
+	public void dropCollection() {
+		try {
+			DB.getDs().getCollection(entityClass).drop();
+		} catch(MongoException me) {
+			log.error("Cannot drop collection " + entityClass.getSimpleName(), me);
+		}
+	}
+
+	/**
+	 * Drop an index from a collection
+	 */
+	public void dropIndexFromCollection(String index) {
+		try {
+			DB.getDs().getCollection(entityClass).dropIndex(index);
+		} catch(MongoException me) {
+			log.error("Cannot drop index from collection " + entityClass.getSimpleName(), me);
+		}
+	}
+
+	/**
+	 * Drop all indexes from collection
+	 */
+	public void dropAllIndexesFromCollection() {
+		try {
+			DB.getDs().getCollection(entityClass).dropIndexes();
+		} catch(MongoException me) {
+			log.error("Cannot drop indexes from collection", me);
+		}
 	}
 
 	/**
