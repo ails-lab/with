@@ -16,8 +16,7 @@
 
 package model;
 
-import java.util.List;
-
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
@@ -25,27 +24,15 @@ import org.mongodb.morphia.annotations.Id;
 public class Collection {
 
 	@Id
-	private String dbId;
-	private String owner;
+	private ObjectId dbId;
+	private ObjectId owner;
+	
 	private String title;
 	private String description;
+	
 	private boolean isPublic;
 
-	private List<String> aclID;
-	private List<String> categories;
 
-	public String getDbId() {
-		return dbId;
-	}
-	public void setDbId(String dbId) {
-		this.dbId = dbId;
-	}
-	public String getOwner() {
-		return owner;
-	}
-	public void setOwner(String owner) {
-		this.owner = owner;
-	}
 	public String getTitle() {
 		return title;
 	}
@@ -64,12 +51,5 @@ public class Collection {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
-	public List<String> getCategories() {
-		return categories;
-	}
-	public void setCategories(List<String> categories) {
-		this.categories = categories;
-	}
-
 
 }
