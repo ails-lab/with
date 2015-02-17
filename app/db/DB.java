@@ -39,16 +39,13 @@ public class DB {
 	private static Morphia morphia;
 	private static Datastore ds;
 
-	private String host;
-	private String dbName;
-	private int port;
-
 	static private final Logger.ALogger log = Logger.of(DB.class);
 
 	/* Init session method.
 	 * I can obtain host, port, dbName from the constructor
 	 */
 	public static void initialize() {
+		// ConfigFactory.invalidateCaches();
 		Config conf = ConfigFactory.load();
 		
 		String host = conf.getString("mongo.host");
@@ -66,7 +63,7 @@ public class DB {
 		String dbName = "with-db";
 		try {
 			ds = morphia.createDatastore(mongo, dbName);
-			morphia.mapPackage("db.model");
+			morphia.mapPackage("model");
 		} catch(Exception e) {
 			log.error("Database Conection aborted!", e);
 		}
