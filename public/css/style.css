@@ -164,7 +164,7 @@ z-index:100;}
 
 .column {
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     *zoom:1;
 }
 
@@ -283,9 +283,9 @@ padding-right: 0;
   color: #9d9d9d;
 }
 
-/* Facebook/Twitter Icons */
-i.huge, button.huge {
-  margin: 0 10px;
+/* Facebook/google Icons */
+i.huge, button.huge, div.huge {
+  margin: 0 20px 0 0;
   position: relative;
   background-position: center center;
   height: 170px;
@@ -310,20 +310,21 @@ button.huge > i { transition: background-position 0.5s ease-out 0s; }
 button.huge:hover > i { background-position: center -15px; }
 button.huge:hover > p { visibility: visible; }
 
-button.facebook, button.twitter, button.email {
+button.facebook, button.google, button.email, button.google,
+div.facebook, div.google, div.email, div.google {
   border: 0 none;
   padding: 0;
 }
 
-i.facebook, button.facebook { background-color: #3b5997; }
-i.twiter, button.twitter { background-color: #1bb5e7; }
-i.email, button.email { background-color: #B5B5B5; }
+i.facebook, button.facebook, .facebook { background-color: #3b5997; }
+i.twiter, button.google, .google { background-color: #cc3333; }
+i.email, button.email, .email { background-color: #B5B5B5; }
 
 .facebook_huge,
-.twitter_huge,
+.google_huge,
 .email_huge,
 button:hover .facebook_huge,
-button:hover .twitter_huge,
+button:hover .google_huge,
 button:hover .email_huge {
   display: inline-block;
   width: 170px;
@@ -331,8 +332,13 @@ button:hover .email_huge {
 }
 
 .facebook_huge { background-image: url(../images/fb.png); }
-.twitter_huge { background-image: url(../images/twitter.png); }
+.google_huge { background-image: url(../images/google.png); }
 .email_huge { background-image: url(../images/email.png); }
 button:hover .facebook_huge { background-image: url(../images/fb_hover.png); }
-button:hover .twitter_huge { background-image: url(../images/twitter_hover.png); }
+button:hover .google_huge { background-image: url(../images/google_hover.png); }
 button:hover .email_huge { background-image: url(../images/email_hover.png); }
+
+.vcenter {
+  display: flex;
+  align-items: center;
+}

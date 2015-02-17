@@ -1,4 +1,9 @@
-define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], function($, ko, router) {
+define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], function($, ko, router) {
+
+	// Knockout AMD Helpers Initialization
+	ko.amdTemplateEngine.defaultPath                  = 'templates';
+	ko.amdTemplateEngine.defaultSuffix                = '.tpl.html';
+	ko.amdTemplateEngine.defaultRequireTextPluginName = 'text';
 
 	// Components can be packaged as AMD modules, such as the following:
 	ko.components.register('nav-bar', { require: 'components/nav-bar/nav-bar' });
@@ -6,19 +11,10 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections'], 
 	ko.components.register('home-page', { require: 'components/home-page/home' });
 	ko.components.register('main-content', { require: 'components/main-content/main-content' });
 	ko.components.register('search-page', { require: 'components/search-page/search' });
-
-	ko.components.register('login-page', {
-		viewModel: { require: 'components/login-register-page/login-register' },
-		template: { require: 'text!components/login-register-page/login.html'}
-	});
-	ko.components.register('register-page', {
-		viewModel: { require: 'components/login-register-page/login-register' },
-		template: { require: 'text!components/login-register-page/register.html'}
-	});
+	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
+	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
 
 	// ... or for template-only components, you can just point to a .html file directly:
-//	ko.components.register('search-page', { template: { require: 'text!components/search-page/search.html' } });
-
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 
