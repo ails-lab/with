@@ -18,47 +18,33 @@ package model;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
 
 @Entity
-@Indexes( @Index("name, -searchHistory.searchDate"))
 public class User {
 
 	@Id
-	private String dbID;
-	@Indexed(name="name", unique=true)
-	private String name;
+	private ObjectId dbID;
+
 	private String email;
 	private String firstName;
 	private String lastName;
-	private String md5Password;
 
-	@Embedded
-	private FacebookAccount fbAccount;
+	private String md5Password;
+	private String facebookId;
+	
+	
+	// we should experiment here with a capped collection
+	// We keep a complete search history, but have the first
+	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory;
 
-
-	public String getDbID() {
-		return dbID;
-	}
-
-	public void setDbID(String dbID) {
-		this.dbID = dbID;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 
 	public String getEmail() {
 		return email;
@@ -92,13 +78,6 @@ public class User {
 		this.md5Password = md5Password;
 	}
 
-	public FacebookAccount getFbAccount() {
-		return fbAccount;
-	}
-
-	public void setFbAccount(FacebookAccount fbAccount) {
-		this.fbAccount = fbAccount;
-	}
 
 	public List<Search> getSearcHistory() {
 		return searchHistory;
