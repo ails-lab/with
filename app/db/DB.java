@@ -16,18 +16,23 @@
 
 package db;
 
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.print.attribute.standard.Media;
+
+import model.Collection;
 import model.User;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
-import play.Play;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
+import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
@@ -38,6 +43,8 @@ public class DB {
 	private static MongoClient mongo;
 	private static Morphia morphia;
 	private static Datastore ds;
+	private static GridFS gridfs;
+	private static String dbName = "with-db";
 
 	static private final Logger.ALogger log = Logger.of(DB.class);
 
@@ -47,31 +54,58 @@ public class DB {
 	public static void initialize() {
 		// ConfigFactory.invalidateCaches();
 		Config conf = ConfigFactory.load();
-		
+
 		String host = conf.getString("mongo.host");
 		int port = conf.getInt("mongo.port");
 
 		try {
 			mongo = new MongoClient(host, port);
 			morphia = new Morphia();
-		} catch(Exception e) {
-			log.error("Database Conection aborted!", e);
+			ds = morphia.createDatastore(mongo, dbName);
+			morphia.mapPackage("model");
+			gridfs = new GridFS(mongo.getDB(dbName));
+		} catch(UnknownHostException | MongoException e) {
+			log.error("Database Connection aborted!", e);
 		}
 	}
 
-	public static Datastore getDs() {
-		String dbName = "with-db";
-		try {
-			ds = morphia.createDatastore(mongo, dbName);
-			morphia.mapPackage("model");
-		} catch(Exception e) {
-			log.error("Database Conection aborted!", e);
+	public static GridFS getGridFs() {
+		if(gridfs != null)
+			return gridfs;
+		else {
+			try {
+				gridfs = new GridFS(mongo.getDB(dbName));
+			} catch(Exception e) {
+				log.error("Cannot create GridFS!", e);
+			}
+			return gridfs;
 		}
+
+	}
+
+	public static Datastore getDs() {
+		if(ds != null)
 			return ds;
+		else {
+			try {
+				ds = morphia.createDatastore(mongo, dbName);
+			} catch(Exception e) {
+				log.error("Cannot create Datastore!", e);
+			}
+			return ds;
+		}
 	}
 
 	public static UserDAO getUserDAO() {
 		return (UserDAO) getDAO(User.class);
+	}
+
+	public static CollectionDAO getCollectionDAO() {
+		return (CollectionDAO) getDAO(Collection.class);
+	}
+
+	public static MediaDAO getMediaDAO() {
+		return (MediaDAO) getDAO(Media.class);
 	}
 
 	/**

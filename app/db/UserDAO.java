@@ -18,6 +18,8 @@ package db;
 
 import java.util.List;
 
+import model.Collection;
+import model.Search;
 import model.User;
 
 import org.mongodb.morphia.query.Query;
@@ -44,9 +46,21 @@ public class UserDAO extends DAO<User> {
 		Query<User> q = DB.getDs().createQuery(User.class);
 		q.and(
 			q.criteria("name").equal(name),
-			q.criteria("password").equal(pass)
+			q.criteria("md5Password").equal(pass)
 		);
 		return find(q).get();
+	}
+
+	public List<Collection> getUserCollections(String name) {
+		return null;
+	}
+
+	public List<Search> getSearchResults(String name) {
+		Query<User> q = DB.getDs().find(User.class)
+				.field(name).equal(name)
+				.retrievedFields(true, "searchHistory");
+		return q.asList().get(0).getSearcHistory();
+
 	}
 
 	public List<User> listByName( String name ) {

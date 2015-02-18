@@ -30,9 +30,9 @@ public class SearchResult {
 	private int offset;
 	private int count;
 	private String source;
-	
+
 	@Embedded
-	private List<RecordLinks> recordLinks;
+	private List<RecordLink> recordLinks;
 
 	public String getSearchId() {
 		return searchId;
@@ -66,14 +66,14 @@ public class SearchResult {
 		this.source = source;
 	}
 
-	public List<RecordLinks> getRecordLinks() {
+	public List<RecordLink> getRecordLinks() {
 		return recordLinks;
 	}
 
-	public void setRecordLinks(List<RecordLinks> recordLinks) {
+	public void setRecordLinks(List<RecordLink> recordLinks) {
 		this.recordLinks = recordLinks;
 	}
-	
-	
-	
+
+
+
 }

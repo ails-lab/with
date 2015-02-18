@@ -16,15 +16,40 @@
 
 package model;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
 
 /**
  * A fully materialized Record from the backend ... indexed and all.
  * @author stabenau
  *
  */
+@Entity
 public class Record {
-	@Embedded 
+
+	@Id
+	private ObjectId recordIdl;
+
+	@Embedded
 	private RecordLink baseLinkData;
-	
+
+	public ObjectId getRecordIdl() {
+		return recordIdl;
+	}
+
+	public void setRecordIdl(ObjectId recordIdl) {
+		this.recordIdl = recordIdl;
+	}
+
+	public RecordLink getBaseLinkData() {
+		return baseLinkData;
+	}
+
+	public void setBaseLinkData(RecordLink baseLinkData) {
+		this.baseLinkData = baseLinkData;
+	}
+
+
 }
