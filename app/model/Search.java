@@ -18,6 +18,7 @@ package model;
 
 import java.util.Date;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
@@ -26,10 +27,16 @@ import org.mongodb.morphia.annotations.Indexed;
 public class Search {
 
 	@Id
-	private String userId;
-	@Indexed(name="date", unique=true)
+	private ObjectId dbID;
+	// a ref to the user
+	private User user;
+	
+	// when the search was done
 	private Date searchDate;
 
+	private String query;
+	
+	
 	public String getUserId() {
 		return userId;
 	}
