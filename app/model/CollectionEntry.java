@@ -22,7 +22,11 @@ import org.mongodb.morphia.annotations.Id;
 public class CollectionEntry {
 	@Id
 	private ObjectId dbID;
+	
+	//reference
 	private Collection collection;
+	
+	// embedded
 	private RecordLink recordLink;
 	
 	// the place in the collection of this record,
