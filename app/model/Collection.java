@@ -16,6 +16,8 @@
 
 package model;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -32,7 +34,10 @@ public class Collection {
 	
 	private boolean isPublic;
 
-
+	// capped list of entries
+	// those will be as well in the CollectionEntry table
+	private List<RecordLink> firstEntries;
+	
 	public String getTitle() {
 		return title;
 	}
