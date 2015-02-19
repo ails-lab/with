@@ -16,31 +16,18 @@
 
 package model;
 
-import java.util.List;
-
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 
-@Entity
-public class Collection {
-
-	@Id
-	private ObjectId dbId;
-	@Reference
-	private User owner;
+@Embedded
+public class CollectionMetadata {
 
 	private String title;
 	private String description;
-
-	private boolean isPublic;
-
-	// fixed-size list of entries
-	// those will be as well in the CollectionEntry table
-	@Embedded
-	private List<RecordLink> firstEntries;
+	@Reference
+	private Collection colletion;
+	@Reference
+	private Media thumbnail;
 
 	public String getTitle() {
 		return title;
@@ -54,11 +41,18 @@ public class Collection {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public boolean isPublic() {
-		return isPublic;
+	public Collection getColletion() {
+		return colletion;
 	}
-	public void setPublic(boolean isPublic) {
-		this.isPublic = isPublic;
+	public void setColletion(Collection colletion) {
+		this.colletion = colletion;
 	}
+	public Media getThumbnail() {
+		return thumbnail;
+	}
+	public void setThumbnail(Media thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
 
 }

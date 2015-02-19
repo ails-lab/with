@@ -13,6 +13,9 @@ dist
 /.project
 /RUNNING_PID
 /.settings
+npm-debug.log
+conf/local.conf
+test/persistent.xml
 
 #### joe made this: https://goel.io/joe
 

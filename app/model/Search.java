@@ -19,23 +19,24 @@ package model;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Reference;
 
-@Entity
+@Embedded //or entity
 public class Search {
 
 	@Id
 	private ObjectId dbID;
 	// a ref to the user
+	@Reference
 	private User user;
-	
+
 	// when the search was done
 	private Date searchDate;
 
 	private String query;
-	
-	
+
 
 	public Date getSearchDate() {
 		return searchDate;

@@ -16,7 +16,12 @@
 
 package db;
 
+import java.util.List;
+
 import model.Collection;
+
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -25,6 +30,12 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public CollectionDAO() {
 		super( Collection.class );
+	}
+
+	public List<Collection> getCollectionsByIds(List<String> ids) {
+		Query<Collection> collectionQ = this.createQuery()
+				.field("dbId").hasAnyOf(ids);
+		return find(collectionQ).asList();
 	}
 
 	public Collection getByTitle(String title) {

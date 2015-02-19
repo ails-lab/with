@@ -17,13 +17,14 @@
 package model;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
 /**
  * In this class we store search results that were retrieved by a search and we want to
  * be able to share them with others or store them to compare with re-executed searches in the future.
- * 
+ *
  * @author stabenau
  *
  */
@@ -32,19 +33,19 @@ public class SearchResult {
 
 	@Id
 	private ObjectId dbID;
-	
+
 	// where in the Search was this result
 	private int offset;
-	
-	// embed the search in here
-	private Search search;
-	
-	// embedd the recordLink in here
-	private RecordLink recordLink;
-	
 
-	
-	
+	// embed the search in here or reference
+	@Embedded
+	private Search search;
+
+	// embedd the recordLink in here
+	@Embedded
+	private RecordLink recordLink;
+
+
 	public int getOffset() {
 		return offset;
 	}

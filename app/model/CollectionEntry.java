@@ -17,19 +17,56 @@
 package model;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Reference;
 
+@Entity
 public class CollectionEntry {
 	@Id
 	private ObjectId dbID;
-	
-	//reference
+
+	@Reference
 	private Collection collection;
-	
-	// embedded
+	@Embedded
 	private RecordLink recordLink;
-	
+
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
+
+	public ObjectId getDbID() {
+		return dbID;
+	}
+
+	public void setDbID(ObjectId dbID) {
+		this.dbID = dbID;
+	}
+
+	public Collection getCollection() {
+		return collection;
+	}
+
+	public void setCollection(Collection collection) {
+		this.collection = collection;
+	}
+
+	public RecordLink getRecordLink() {
+		return recordLink;
+	}
+
+	public void setRecordLink(RecordLink recordLink) {
+		this.recordLink = recordLink;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+
 }

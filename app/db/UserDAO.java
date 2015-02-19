@@ -16,13 +16,16 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
+import model.CollectionMetadata;
 import model.Search;
 import model.User;
 
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -38,8 +41,19 @@ public class UserDAO extends DAO<User> {
 		return this.getDs().find(User.class, "email", email).get();
 	}
 
+	/**
+	 * This method is updating one specific User.
+	 * By default update method is invoked to all documents of a collection.
+	 **/
+	public void setSpecificUserField(String dbId, String fieldName, String value) {
+		Query<User> q = this.createQuery().field("dbID").equal(dbId);
+		UpdateOperations<User> updateOps = this.createUpdateOperations();
+		updateOps.set(fieldName, value);
+		this.update(q, updateOps);
+	}
+
 	public User getByEmailPassword(String email, String pass) {
-		Query<User> q = DB.getDs().createQuery(User.class);
+		Query<User> q = this.createQuery();
 		q.and(
 			q.criteria("email").equal(email),
 			q.criteria("md5Password").equal(pass)
@@ -47,15 +61,22 @@ public class UserDAO extends DAO<User> {
 		return find(q).get();
 	}
 
-	public List<Collection> getUserCollections(String name) {
-		return null;
+	public List<Collection> getUserCollectionsByEmail(String email) {
+		Query<User> q = this.createQuery()
+				.field("email").equal(email)
+				.retrievedFields(true, "userCollections.collection");
+		List<Collection> collections = new ArrayList<Collection>();
+		for(CollectionMetadata colMeta: find(q).get().getCollectionMetadata()) {
+			collections.add(colMeta.getColletion());
+		}
+		return collections;
 	}
 
-	public List<Search> getSearchResults(String name) {
-		Query<User> q = DB.getDs().find(User.class)
-				.field(name).equal(name)
+	public List<Search> getSearchResults(String email) {
+		Query<User> q = this.createQuery()
+				.field("email").equal(email)
 				.retrievedFields(true, "searchHistory");
-		return q.asList().get(0).getSearcHistory();
+		return find(q).get().getSearcHistory();
 
 	}
 

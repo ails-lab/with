@@ -34,23 +34,23 @@ import org.mongodb.morphia.annotations.Id;
 public class Record {
 	@Id
 	private ObjectId dbID;
-	
-	@Embedded 
+
+	@Embedded
 	private RecordLink baseLinkData;
-	
+
 	// there will be different serializations of the record available in here
 	// like "EDM" -> xml for the EDM
 	// "json EDM" -> json format of the EDM?
 	// "json UI" -> ...
 	// "source format" -> ...
 	private Map<String, String> content;
-	
-	// capped, denormalization of Tags on this record
-	// When somebody adds a tag to a record, and the cap is not reached, it will go here 
+
+	// fixed-size, denormalization of Tags on this record
+	// When somebody adds a tag to a record, and the cap is not reached, it will go here
 	// This might get out of sync on tag deletes, since a deleted tag from one user doesn't necessarily delete
 	// the tag from here. Tag cleaning has to be performed regularly.
 	private Set<String> tags;
-	
 
-	
+
+
 }

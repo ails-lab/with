@@ -22,8 +22,6 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.Indexes;
 
 @Entity
 public class User {
@@ -35,16 +33,17 @@ public class User {
 	private String firstName;
 	private String lastName;
 
-	private String nickName;
 	private String md5Password;
 	private String facebookId;
-	
-	
-	// we should experiment here with a capped collection
+
+
+	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory;
+	@Embedded
+	private List<CollectionMetadata> userCollections;
 
 
 	public String getEmail() {
@@ -88,5 +87,11 @@ public class User {
 		this.searchHistory = searcHistory;
 	}
 
-	
+	public List<CollectionMetadata> getCollectionMetadata() {
+		return userCollections;
+	}
+
+	public void setCollectionMetadata(List<CollectionMetadata> userCollections) {
+		this.userCollections = userCollections;
+	}
 }
