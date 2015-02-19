@@ -18,7 +18,7 @@ package model;
 
 
 // This is just for embedding, won't have its own id
-// there is an option Record link if the link is already materialized
+// there is an optional Record link if the link is already materialized
 public class RecordLink {
 	
 	// optional link to the materialized Record
