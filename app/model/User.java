@@ -35,6 +35,7 @@ public class User {
 	private String firstName;
 	private String lastName;
 
+	private String nickName;
 	private String md5Password;
 	private String facebookId;
 	
@@ -87,4 +88,5 @@ public class User {
 		this.searchHistory = searcHistory;
 	}
 
+	
 }

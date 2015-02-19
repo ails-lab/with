@@ -16,10 +16,7 @@
 
 package model;
 
-import java.util.List;
-
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
@@ -34,7 +31,7 @@ import org.mongodb.morphia.annotations.Id;
 public class SearchResult {
 
 	@Id
-	private ObjectId searchResultId;
+	private ObjectId dbID;
 	
 	// where in the Search was this result
 	private int offset;
@@ -46,6 +43,8 @@ public class SearchResult {
 	private RecordLink recordLink;
 	
 
+	
+	
 	public int getOffset() {
 		return offset;
 	}
@@ -53,4 +52,29 @@ public class SearchResult {
 	public void setOffset(int offset) {
 		this.offset = offset;
 	}
+
+	public ObjectId getDbID() {
+		return dbID;
+	}
+
+	public void setDbID(ObjectId dbID) {
+		this.dbID = dbID;
+	}
+
+	public Search getSearch() {
+		return search;
+	}
+
+	public void setSearch(Search search) {
+		this.search = search;
+	}
+
+	public RecordLink getRecordLink() {
+		return recordLink;
+	}
+
+	public void setRecordLink(RecordLink recordLink) {
+		this.recordLink = recordLink;
+	}
+
 }

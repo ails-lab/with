@@ -21,13 +21,16 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+
 
 /**
  * A fully materialized Record from the backend ... indexed and all.
  * @author stabenau
  *
  */
+@Entity
 public class Record {
 	@Id
 	private ObjectId dbID;
@@ -47,5 +50,7 @@ public class Record {
 	// This might get out of sync on tag deletes, since a deleted tag from one user doesn't necessarily delete
 	// the tag from here. Tag cleaning has to be performed regularly.
 	private Set<String> tags;
+	
+
 	
 }

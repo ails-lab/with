@@ -21,7 +21,6 @@ import java.util.Date;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Indexed;
 
 @Entity
 public class Search {
@@ -37,17 +36,30 @@ public class Search {
 	private String query;
 	
 	
-	public String getUserId() {
-		return userId;
-	}
-	public void setUserId(String userId) {
-		this.userId = userId;
-	}
+
 	public Date getSearchDate() {
 		return searchDate;
 	}
 	public void setSearchDate(Date searchDate) {
 		this.searchDate = searchDate;
+	}
+	public ObjectId getDbID() {
+		return dbID;
+	}
+	public void setDbID(ObjectId dbID) {
+		this.dbID = dbID;
+	}
+	public User getUser() {
+		return user;
+	}
+	public void setUser(User user) {
+		this.user = user;
+	}
+	public String getQuery() {
+		return query;
+	}
+	public void setQuery(String query) {
+		this.query = query;
 	}
 
 }
