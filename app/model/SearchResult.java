@@ -18,29 +18,33 @@ package model;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+/**
+ * In this class we store search results that were retrieved by a search and we want to
+ * be able to share them with others or store them to compare with re-executed searches in the future.
+ * 
+ * @author stabenau
+ *
+ */
 @Entity
 public class SearchResult {
 
 	@Id
-	private String searchId;
-	private int offset;
-	private int count;
-	private String source;
+	private ObjectId searchResultId;
 	
-	@Embedded
-	private List<RecordLinks> recordLinks;
-
-	public String getSearchId() {
-		return searchId;
-	}
-
-	public void setSearchId(String searchId) {
-		this.searchId = searchId;
-	}
+	// where in the Search was this result
+	private int offset;
+	
+	// embed the search in here
+	private Search search;
+	
+	// embedd the recordLink in here
+	private RecordLink recordLink;
+	
 
 	public int getOffset() {
 		return offset;
@@ -49,31 +53,4 @@ public class SearchResult {
 	public void setOffset(int offset) {
 		this.offset = offset;
 	}
-
-	public int getCount() {
-		return count;
-	}
-
-	public void setCount(int count) {
-		this.count = count;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		this.source = source;
-	}
-
-	public List<RecordLinks> getRecordLinks() {
-		return recordLinks;
-	}
-
-	public void setRecordLinks(List<RecordLinks> recordLinks) {
-		this.recordLinks = recordLinks;
-	}
-	
-	
-	
 }
