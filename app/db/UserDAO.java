@@ -38,7 +38,7 @@ public class UserDAO extends DAO<User> {
 	}
 
 	public User getByEmail(String email) {
-		return this.getDs().find(User.class, "email", email).get();
+		return this.findOne("email", email);
 	}
 
 	/**
@@ -52,6 +52,12 @@ public class UserDAO extends DAO<User> {
 		this.update(q, updateOps);
 	}
 
+	/**
+	 * Retrieve a user from his credentials
+	 * @param email
+	 * @param pass
+	 * @return
+	 */
 	public User getByEmailPassword(String email, String pass) {
 		Query<User> q = this.createQuery();
 		q.and(
@@ -61,6 +67,11 @@ public class UserDAO extends DAO<User> {
 		return find(q).get();
 	}
 
+	/**
+	 * Return user collections 
+	 * @param email
+	 * @return
+	 */
 	public List<Collection> getUserCollectionsByEmail(String email) {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
@@ -72,6 +83,11 @@ public class UserDAO extends DAO<User> {
 		return collections;
 	}
 
+	/**
+	 * Return search results from a user
+	 * @param email
+	 * @return
+	 */
 	public List<Search> getSearchResults(String email) {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)

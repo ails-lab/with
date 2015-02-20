@@ -27,7 +27,8 @@ import org.mongodb.morphia.annotations.Id;
 
 /**
  * A fully materialized Record from the backend ... indexed and all.
- * @author stabenau
+ * E.g.: When you retrieve a record from backend and you want to annotate
+ * it for example then we have to create a Record.
  *
  */
 @Entity
@@ -51,6 +52,38 @@ public class Record {
 	// the tag from here. Tag cleaning has to be performed regularly.
 	private Set<String> tags;
 
+	public ObjectId getDbID() {
+		return dbID;
+	}
 
+	public void setDbID(ObjectId dbID) {
+		this.dbID = dbID;
+	}
+
+	public RecordLink getBaseLinkData() {
+		return baseLinkData;
+	}
+
+	public void setBaseLinkData(RecordLink baseLinkData) {
+		this.baseLinkData = baseLinkData;
+	}
+
+	public Map<String, String> getContent() {
+		return content;
+	}
+
+	public void setContent(Map<String, String> content) {
+		this.content = content;
+	}
+
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<String> tags) {
+		this.tags = tags;
+	}
+
+	
 
 }

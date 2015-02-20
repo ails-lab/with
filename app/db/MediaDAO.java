@@ -16,19 +16,36 @@
 
 package db;
 
+import com.mongodb.DBObject;
+import com.mongodb.gridfs.GridFS;
+import com.mongodb.gridfs.GridFSInputFile;
+
 import model.Media;
 import play.Logger;
 import play.Logger.ALogger;
 
 public class MediaDAO extends DAO<Media> {
-	public static final ALogger log = Logger.of( MediaDAO.class);
+	public static final ALogger log = Logger.of(MediaDAO.class);
 
 	public MediaDAO() {
-		super( Media.class );
+		super(Media.class);
 	}
 
-public void saveImage() {
+	public void saveImage(Media media) {
+		GridFS gridfs = DB.getGridFs();
+		GridFSInputFile mediaGridfsFile = gridfs.createFile(media.getData());
 
+		// set metadata
+		mediaGridfsFile.setContentType(media.getMimeType());
+		DBObject metadata = mediaGridfsFile.getMetaData();
+		metadata.put("width", media.getWidth());
+		metadata.put("height", media.getHeight());
+		metadata.put("duration", media.getDuration());
+		metadata.put("mimeType", media.getMimeType());
+		metadata.put("type", media.getType());
+
+		// save the file
+		mediaGridfsFile.save();
 	}
 
 }

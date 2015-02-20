@@ -16,6 +16,7 @@ dist
 npm-debug.log
 conf/local.conf
 test/persistent.xml
+public/bower_modules/
 
 #### joe made this: https://goel.io/joe
 

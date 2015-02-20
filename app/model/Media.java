@@ -28,8 +28,8 @@ import org.mongodb.morphia.annotations.Transient;
  *
  */
 public class Media {
-	@Id
-	private ObjectId dbID;
+	//@Id
+	//private ObjectId dbID;
 	// examples, but there might be more
 	private int width, height;
 

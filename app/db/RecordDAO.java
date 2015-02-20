@@ -16,12 +16,41 @@
 
 package db;
 
+import org.mongodb.morphia.query.Query;
+
+import play.Logger;
 import model.Record;
+import model.RecordLink;
 
 public class RecordDAO extends DAO<Record> {
-
+	static private final Logger.ALogger log = Logger.of(Record.class);
+	
 	public RecordDAO() {
 		super( Record.class );
 	}
 
+	/**
+	 * Get the embedded RecordLink from a Record 
+	 * @param dbId
+	 * @return
+	 */
+	public RecordLink getRecordLink(String dbId) {
+		Query<Record> q = this.createQuery()
+				.field("dbId").equal(dbId)
+				.retrievedFields(true, "baseLinkData");
+		return this.find(q).get().getBaseLinkData();
+	}
+	
+	/**
+	 * Retrieve the source from an embedded RecordLink
+	 * @param dbId
+	 * @return
+	 */
+	public String getRecordSource(String dbId) {
+		Query<Record> q = this.createQuery()
+				.field("dbId").equal(dbId)
+				.retrievedFields(true, "baseLinkData.source");
+		return this.find(q).get()
+				.getBaseLinkData().getSource();	
+	}
 }

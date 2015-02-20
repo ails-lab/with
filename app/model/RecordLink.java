@@ -18,13 +18,14 @@ package model;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 
 
 // This is just for embedding, won't have its own id
 // there is an option Record link if the link is already materialized
-@Embedded
+@Entity
 public class RecordLink {
 
 	@Id
