@@ -131,6 +131,29 @@ public class DAO<E> extends BasicDAO<E, String> {
 	}
 
 	/**
+	 * Use this method to save and Object to the database
+	 * @param record
+	 */
+	public void makePermanent(Object obj) {
+		try {
+			this.save(getEntityClass().cast(obj));
+		} catch(Exception e) {
+			log.error("Cannot save " + getEntityClass().getSimpleName(), e);
+		}
+	}
+	/**
+	 * Use this method to delete and Object to the database
+	 * @param record
+	 */
+	public void makeTransient(Object obj) {
+		try {
+			this.delete(getEntityClass().cast(obj));
+		} catch (Exception e) {
+			log.error("Cannot delete " + getEntityClass().getSimpleName(), e);
+		}
+	}
+
+	/**
 	 * Condition on the object needs to include the prefix 'obj.'!
 	 * There is a separate entity manager doing the work here.
 	 * @param condition

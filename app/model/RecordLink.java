@@ -17,7 +17,6 @@
 package model;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
@@ -41,7 +40,7 @@ public class RecordLink {
 	// an optional URL for the thumbnail
 	private String thumbnailUrl;
 
-	// an optional cached version of a thumbnail for this record
+	// an optional cached version of a thumbnail for this record'
 	@Reference
 	private Media thumbnail;
 
@@ -54,10 +53,9 @@ public class RecordLink {
 	private String sourceUrl;
 
 	private String type;
-	
+
 	private String rights;
-	
-	
+
 
 	public ObjectId getDbId() {
 		return dbId;

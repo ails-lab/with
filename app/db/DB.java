@@ -23,6 +23,11 @@ import java.util.Map;
 import javax.print.attribute.standard.Media;
 
 import model.Collection;
+import model.CollectionEntry;
+import model.Record;
+import model.RecordLink;
+import model.Search;
+import model.SearchResult;
 import model.User;
 
 import org.mongodb.morphia.Datastore;
@@ -58,14 +63,17 @@ public class DB {
 		String host = conf.getString("mongo.host");
 		int port = conf.getInt("mongo.port");
 
-		try {
-			mongo = new MongoClient(host, port);
-			morphia = new Morphia();
-			ds = morphia.createDatastore(mongo, dbName);
-			morphia.mapPackage("model");
-			gridfs = new GridFS(mongo.getDB(dbName));
-		} catch(UnknownHostException | MongoException e) {
-			log.error("Database Connection aborted!", e);
+		if((mongo == null) || (morphia == null)
+				|| (ds == null) || (gridfs == null) ) {
+			try {
+				mongo = new MongoClient(host, port);
+				morphia = new Morphia();
+				ds = morphia.createDatastore(mongo, dbName);
+				morphia.mapPackage("model");
+				gridfs = new GridFS(mongo.getDB(dbName));
+			} catch(UnknownHostException | MongoException e) {
+				log.error("Database Connection aborted!", e);
+			}
 		}
 	}
 
@@ -106,6 +114,26 @@ public class DB {
 
 	public static MediaDAO getMediaDAO() {
 		return (MediaDAO) getDAO(Media.class);
+	}
+
+	public static RecordDAO getRecordDAO() {
+		return (RecordDAO) getDAO(Record.class);
+	}
+
+	public static RecordLinkDAO getRecordLinkDAO() {
+		return (RecordLinkDAO) getDAO(RecordLink.class);
+	}
+
+	public static SearchDAO getSearchDAO() {
+		return (SearchDAO) getDAO(Search.class);
+	}
+
+	public static SearchResultDAO getSearchResultDAO() {
+		return (SearchResultDAO) getDAO(SearchResult.class);
+	}
+
+	public static CollectionEntryDAO getCollectionEntryDAO() {
+		return (CollectionEntryDAO) getDAO(CollectionEntry.class);
 	}
 
 	/**

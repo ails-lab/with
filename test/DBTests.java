@@ -18,6 +18,11 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.awt.image.WritableRaster;
+import java.io.File;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
@@ -27,6 +32,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
+
+import model.Media;
+import model.Record;
+import model.RecordLink;
 import model.Search;
 import model.User;
 
@@ -36,7 +46,6 @@ import org.junit.Test;
 import play.twirl.api.Content;
 
 import com.mongodb.MongoException;
-import com.mongodb.WriteConcern;
 
 import db.DB;
 
@@ -60,6 +69,9 @@ public class DBTests {
 
 	@Before
 	public void setUp() {
+		DB.initialize();
+		DB.getDs().ensureIndexes(User.class);
+
 		beginTime = Timestamp.valueOf("2013-01-01 00:00:00").getTime();
 		endTime = Timestamp.valueOf("2013-12-31 00:58:00").getTime();
 
@@ -100,8 +112,6 @@ public class DBTests {
 	/* *********************************************** */
 	@Test
 	public void userStorage() {
-		DB.initialize();
-		DB.getDs().ensureIndexes(User.class);
 		/* Add 1000 random users */
 		for (int i = 0; i < 1000; i++) {
 			User testUser = new User();
@@ -130,7 +140,7 @@ public class DBTests {
 			}
 			if (testUser != null)
 				try {
-					DB.getDs().save(testUser, WriteConcern.SAFE);
+					DB.getUserDAO().makePermanent(testUser);
 				} catch (MongoException e) {
 					System.out.println("mongo exception");
 				}
@@ -143,6 +153,37 @@ public class DBTests {
 		// assertThat( count )
 		// .overridingErrorMessage("Not removed enough Testers")
 		// .isGreaterThanOrEqualTo(1 );
+	}
+
+	@Test
+	public void mediaStorage() throws IOException {
+		Media image = new Media();
+
+		File imgPath = new File("/home/yiorgos/Pictures/tmnt.jpg");
+		BufferedImage bufImg = ImageIO.read(imgPath);
+		WritableRaster raster = bufImg.getRaster();
+
+		image.setData(((DataBufferByte)raster.getDataBuffer()).getData());
+		image.setType("image/jpg");
+		image.setMimeType("jpg");
+		image.setDuration(0);
+		image.setHeight(bufImg.getHeight());
+		image.setWidth(bufImg.getWidth());
+
+		DB.getMediaDAO().makePermanent(image);
+
+		//Test Record Storage
+		Record record = new Record();
+		DB.getRecordDAO().save(record);
+
+		//Test RecordLink Reference
+		Media imageRetrieved = DB.getMediaDAO().find("54ec926de4b05c5762747493");
+		Record recordRetrieved = DB.getRecordDAO().find().get();
+		RecordLink rlink = new RecordLink();
+		rlink.setThumbnail(imageRetrieved);
+		rlink.setRecordReference(recordRetrieved);
+		DB.getRecordLinkDAO().save(rlink);
+
 	}
 
 	@Test

@@ -16,42 +16,46 @@
 
 package db;
 
-import play.Logger;
+import model.Media;
 import model.RecordLink;
+import play.Logger;
 
 public class RecordLinkDAO extends DAO<RecordLink> {
 	static private final Logger.ALogger log = Logger.of(RecordLink.class);
-	
+
 	public RecordLinkDAO() {
 		super( RecordLink.class );
 	}
-	
+
 	public RecordLink getByDbId(String dbId) {
 		return this.get(dbId);
 	}
-	
+
 	public String getTitle(String dbId) {
 		return this.get(dbId).getTitle();
 	}
-	
+
 	public String getDescription(String dbId) {
 		return this.get(dbId).getDescription();
 	}
-	
+
 	public String getSource(String dbId) {
 		return this.get(dbId).getSource();
 	}
-	
+
 	public String getSourceId(String dbId) {
 		return this.get(dbId).getSourceId();
 	}
-	
+
 	public String getSourceUrl(String dbId) {
 		return this.get(dbId).getSourceUrl();
 	}
-	
+
 	public String getThumbnailUrl(String dbId) {
 		return this.get(dbId).getThumbnailUrl();
 	}
-	
+
+	public void blabla(Media media) {
+
+	}
 }

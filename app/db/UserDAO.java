@@ -68,7 +68,7 @@ public class UserDAO extends DAO<User> {
 	}
 
 	/**
-	 * Return user collections 
+	 * Return user collections
 	 * @param email
 	 * @return
 	 */
@@ -99,4 +99,6 @@ public class UserDAO extends DAO<User> {
 	public List<User> listByName( String name ) {
 		return list("name", name);
 	}
+
+
 }

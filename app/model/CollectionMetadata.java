@@ -26,6 +26,7 @@ public class CollectionMetadata {
 	private String description;
 	@Reference
 	private Collection colletion;
+
 	@Reference
 	private Media thumbnail;
 
