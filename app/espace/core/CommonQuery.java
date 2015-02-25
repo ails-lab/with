@@ -55,8 +55,8 @@ public class CommonQuery {
 
 	}
 
-	public int page = 1;
-	public int pageSize = 20;
+	public String page = "1";
+	public String pageSize = "20";
 	public String searchTerm;
 	public String termToExclude;
 	public List<String> source;
@@ -81,8 +81,8 @@ public class CommonQuery {
 
 	@Override
 	public String toString() {
-		return "CommonQuery [page=" + page + ", pageSize=" + pageSize + ", searchTerm=" + searchTerm + ", toExclude="
-				+ termToExclude + ", source=" + source + "]";
+		return "CommonQuery [page=" + page + ", pageSize=" + pageSize + ", searchTerm=" + searchTerm
+				+ ", termToExclude=" + termToExclude + ", source=" + source + ", europeanaAPI=" + europeanaAPI + "]";
 	}
 
 }
