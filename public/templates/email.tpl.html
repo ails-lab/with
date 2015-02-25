@@ -1,0 +1,55 @@
+			<div class="col-lg-10 col-lg-offset-1">
+				<h1 data-bind="text: title"></h1>
+
+				<p class="lead" data-bind="text: description"></p>
+
+				<form>
+					<div class="row text-left">
+						<div class="col-sm-6">
+							<div class="form-group" data-bind="validationElement: firstName">
+								<label for="firstName">First Name</label>
+								<input type="text" class="form-control" id="firstName" data-bind="value: firstName, valueUpdate: 'afterkeypress', hasFocus: true;">
+							</div>
+							<div class="form-group" data-bind="validationElement: lastName">
+								<label for="lastName">Last Name</label>
+								<input type="text" class="form-control" id="lastName" data-bind="value: lastName, valueUpdate: 'afterkeypress'">
+							</div>
+							<div class="form-group" data-bind="validationElement: username">
+								<label for="username">Username</label>
+								<input type="text" class="form-control" id="username" data-bind="value: username, valueUpdate: 'afterkeypress'">
+							</div>
+						</div>
+						<div class="col-sm-6">
+							<div class="form-group">
+								<label for="gender">Select Gender</label>
+								<select class="form-control" id="gender" data-bind="options: genders, optionsCaption: 'Please select', value: gender"></select>
+							</div>
+							<div class="form-group" data-bind="validationElement: email">
+								<label for="useremail">Email</label>
+								<input type="email" class="form-control" id="useremail" data-bind="value: email, valueUpdate: 'afterkeypress'">
+							</div>
+							<div class="form-group" data-bind="validationElement: password">
+								<label for="userpassword">Password</label>
+								<input type="password" class="form-control" id="userpassword" data-bind="value: password, valueUpdate: 'afterkeypress'">
+							</div>
+						</div>
+					</div>
+
+					<br />
+
+					<div class="row text-left">
+						<div class="col-lg-12">
+							<div class="well well-sm">
+								<div class="row vcenter">
+									<div class="col-md-10">
+										<input type="checkbox" data-bind="checked: acceptTerms"> &nbsp;I acknowledge that I have read and accept the <a>Terms of Use Agreement</a>.
+									</div>
+									<div class="col-md-2 text-right">
+										<button class="btn btn-primary" type="submit" data-bind="enable: acceptTerms, click: submitRegistration">Create Account</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>

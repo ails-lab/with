@@ -1,0 +1,58 @@
+define(["knockout", "text!./home.html", "slick"], function(ko, homeTemplate) {
+
+	function HomeViewModel(params) {
+		
+		$( document ).on( 'keypress', function( event ) {
+		     if (event.which == null) {
+		    	 var char=String.fromCharCode(event.which);
+		    	 toggleSearch("focus",char);
+		    	 
+		     } else if (event.which!=0 && event.charCode!=0) {
+		    	 var char=String.fromCharCode(event.which);
+		    	 toggleSearch("focus",char);
+		       } else {
+		    		    return;
+		     }
+		    
+		    
+		    
+		});
+
+		$('.mycarousel').slick({
+			dots: false,
+			infinite: false,
+			speed: 300,
+			slidesToShow: 4,
+			slidesToScroll: 4,
+			cssEase: 'linear',
+			responsive: [
+				{
+					breakpoint: 1024,
+					settings: {
+						slidesToShow: 3,
+						slidesToScroll: 3,
+						infinite: true,
+						dots: true
+					}
+				},
+				{
+					breakpoint: 600,
+					settings: {
+						slidesToShow: 2,
+						slidesToScroll: 2
+					}
+				},
+				{
+					breakpoint: 480,
+					settings: {
+						slidesToShow: 1,
+						slidesToScroll: 1
+					}
+				}
+			]
+		});
+		this.route = params.route;
+	}
+
+	return { viewModel: HomeViewModel, template: homeTemplate };
+});

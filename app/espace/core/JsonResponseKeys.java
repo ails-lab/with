@@ -14,23 +14,14 @@
  */
 
 
-package controllers;
+package espace.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import views.html.index;
+public class JsonResponseKeys {
 
-import com.fasterxml.jackson.databind.JsonNode;
-
-import espace.core.CommonQuery;
-import espace.core.ESpaceSources;
-import espace.core.Utils;
-
-public class Application extends Controller {
-
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
-	}
+	public static final String source = "source";
+	public static final String query = "query";
+	public static final String totalCount = "totalCount";
+	public static final String count = "count";
+	public static final String id = "id";
 
 }

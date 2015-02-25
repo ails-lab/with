@@ -14,23 +14,18 @@
  */
 
 
-package controllers;
+package espace.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import views.html.index;
+import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
+public interface ISpaceSource {
 
-import espace.core.CommonQuery;
-import espace.core.ESpaceSources;
-import espace.core.Utils;
+	public String getSourceName();
 
-public class Application extends Controller {
+	public String getHttpQuery(CommonQuery q);
 
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
-	}
+	public List<CommonItem> getPreview(CommonQuery q);
+
+	public SourceResponse getResults(CommonQuery q);
 
 }

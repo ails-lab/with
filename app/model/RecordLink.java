@@ -35,6 +35,7 @@ public class RecordLink {
 	private Record recordReference;
 
 	// which backend provided this entry
+	// Europeana, DPLA ....
 	private String source;
 
 	// an optional URL for the thumbnail
@@ -52,6 +53,11 @@ public class RecordLink {
 	// a link to the record on its source
 	private String sourceUrl;
 
+	private String type;
+	
+	private String rights;
+	
+	
 
 	public ObjectId getDbId() {
 		return dbId;

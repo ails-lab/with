@@ -1,0 +1,51 @@
+@(qform:Form[espace.core.CommonQuery], content: List[espace.core.SourceResponse])
+@import helper._
+@import helper.twitterBootstrap._
+
+@testsearchmain("Test search") {
+	@helper.form( action= routes.SearchController.testsearch() ){
+			@helper.inputText(qform("searchTerm"))
+			@helper.inputText(qform("termToExclude"))		
+			<input type="submit" class="button" value="Search" />
+	}
+	
+	
+	
+<div id="tabs">
+<ul class="basictab">
+
+@for(p <- content) {
+<li onClick="change('@p.source')" >@p.source</li>
+}
+</ul>
+<div id="Display_content" onload="change('@content.get(0).source')">
+  </div>
+@for(p <- content) {
+<div id="@p.source" class="content_tab">
+  <b>Source: </b> @p.source <br/>
+  <b>Count: </b>@p.count <br/>
+  <b>Query: </b>@p.query <br/>
+  
+  @for(it <- p.items) {
+  <div id="thumbframe">
+  
+  <div id="thumb"   >
+  <img alt="" src="@it.thumb.get(0)" />  
+    
+    </div>
+    <div  id="thinfo">
+  <b>Title: </b> <a href="@it.url.original.get(0)"> @it.title.get(0).value </a><br/>
+  <b>Descr: </b>@it.description.get(0).value <br/>
+  
+  </div>
+  
+  </div>
+  }
+  
+  
+</div>
+}
+</div>
+	
+	
+}

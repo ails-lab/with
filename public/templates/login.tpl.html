@@ -1,0 +1,50 @@
+				<h1>login</h1>
+
+				<p class="lead">Use Facebook, Google or your email to login. <br />
+				Don't have a WITH account yet? No worries, <a href="#register">joining</a> is easy.</p>
+
+				<br />
+
+				<div class="container text-left">
+					<div class="row">
+						<div class="col-lg-5 col-lg-offset-1">
+							<button class="facebook huge" type="button">
+								<i class="facebook_huge"></i>
+								<p>Facebook</p>
+							</button>
+
+							<button class="google huge" type="button">
+								<i class="google_huge"></i>
+								<p>Google</p>
+							</button>
+						</div>
+						<div class="col-lg-4 text-left">
+							<form>
+								<div class="form-group" data-bind="validationElement: emailUser">
+									<label for="useremail">Email or Username</label>
+									<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser; hasFocus: true;">
+								</div>
+								<div class="form-group" data-bind="validationElement: emailPass">
+									<label for="userpassword">Password</label>
+									<input type="password" class="form-control" id="userpassword" placeholder="Password" data-bind="value: emailPass;">
+								</div>
+								<div class="row vcenter">
+									<div class="col-sm-6">
+										<a href="#">Forgot password?</a>
+									</div>
+									<div class="checkbox col-sm-6 text-right">
+										<label><input type="checkbox" data-bind="checked: stayLogged">Keep me signed in</label>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+
+					<div class="row text-right" style="margin-top: 20px;">
+						<div class="col-lg-9 col-lg-offset-1">
+							<div class="well well-sm">
+								<a class="btn btn-primary" data-bind="click: function() { emailLogin(); }">Login</a>
+							</div>
+						</div>
+					</div>
+				</div>

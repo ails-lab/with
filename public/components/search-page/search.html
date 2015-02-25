@@ -1,0 +1,58 @@
+<div id="withsearchid" class="withsearch"  data-bind="event: { scroll: scrolled }">
+				<form class="withsearch-form">
+					<input class="withsearch-input"  type="search" data-bind="value: term" placeholder="Search..."/>
+					<button class="withsearch-submit" type="submit" data-bind="click: search">Search</button>
+					<span class="withsearch-view"><a data-bind="click: toggleSourceview" title="alter view"><i class="fa fa-th-large"></i></a></span>
+				</form>
+				<div class="withsearch-content">
+				
+					<!-- ko if: noResults -->
+						<p>Your search did not return results. Please try again.</p>
+					<!-- /ko -->
+					<!-- ko if: results().length > 0 && sourceview -->
+					
+					
+				    <!-- ko foreach: results -->
+				 
+					<div class="dummy-column">
+					<h2>
+					 <!-- ko text: source --><!-- /ko --> 
+					</h2>
+					 <!-- ko foreach: items -->
+					 
+					 <!-- ko if: thumb -->
+					 	<a class="dummy-media-object">
+							<img data-bind="attr: { src:thumb, alt: title }"/>
+							<span>
+							 <!-- ko text: title --><!-- /ko --> 
+							</span>
+						</a>
+						<!-- /ko -->    
+					   <!-- /ko -->    
+					</div>
+					<!-- /ko -->
+					<!-- /ko --> 
+					
+					
+					<!-- ko ifnot: sourceview -->
+					<!-- ko if: mixresults().length > 0 -->
+					 <div id="withsearch-content-masonry">
+					  <div id="columns" data-bind="foreach: mixresults, masonry"><figure class="masonryitem"><img data-bind="attr: { src:thumb, alt: title }"/><figcaption data-bind="text: title"></figcaption></figure></div>
+	            	</div>
+					<!-- /ko -->
+					<!-- /ko -->
+			    
+			   	
+				 <div id="more" data-bind='visible: searching' >
+				    
+				    <img src="http://rniemeyer.github.com/KnockMeOut/Images/loading.gif"/>
+				</div>
+				
+				
+				</div>
+				
+				<span class="withsearch-close"></span>
+				
+			</div>
+			
+			<div class="overlay"></div>
