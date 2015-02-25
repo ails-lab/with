@@ -10,6 +10,6 @@ libraryDependencies ++= Seq(
 //  javaJdbc,
 //  javaEbean,
 //  cache,
-//  javaWs
+  javaWs,
  "org.mongodb.morphia" % "morphia" % "0.110"
 )
