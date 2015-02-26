@@ -26,7 +26,6 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 
-import com.mongodb.gridfs.GridFS;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 
@@ -44,45 +43,74 @@ public class MediaDAO extends DAO<Media> {
 	 * @param gridfsDbFile
 	 * @return
 	 */
-	private Media gridFsDbFileToMediaObj(GridFSDBFile gridfsDbFile){
+	private Media gridFsDbFileToMediaObj(GridFSDBFile gridfsDbFile) {
 		Media media = new Media();
-		media.setType((String)gridfsDbFile.get("type"));
-		media.setMimeType(gridfsDbFile.getContentType());
-		//media.setDuration((float)gridfsDbFile.get("duration"));
-		media.setHeight((int)gridfsDbFile.get("height"));
-		media.setWidth((int)gridfsDbFile.get("width"));
-		media.setDbId((ObjectId)gridfsDbFile.getId());
+
 		try {
+			// set metadata to media object
+			media.setType((String)gridfsDbFile.get("type"));
+			media.setMimeType(gridfsDbFile.getContentType());
+			media.setDuration(new Double((double) gridfsDbFile.get("duration")).floatValue());
+			media.setHeight((int)gridfsDbFile.get("height"));
+			media.setWidth((int)gridfsDbFile.get("width"));
+			media.setDbId((ObjectId)gridfsDbFile.getId());
 			media.setData(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.error("Error transforming media file's InputStream to raw bytes", e);
+		} catch (Exception e) {
+			log.error("Error setting properties to Media object", e);
 		}
+
 		return media;
 	}
 
 	public Media find(String dbId) {
 		ObjectId objectId = new ObjectId(dbId);
-		Media media = gridFsDbFileToMediaObj(DB.getGridFs().find(objectId));
+		GridFSDBFile media = null;
+		try {
+			media = DB.getGridFs().find(objectId) ;
+		} catch (Exception e) {
+			log.error("Problem in find file from GridFS " + dbId);
+		}
+		if (media == null)
+			log.debug("Cannot find Media document with ID: " + dbId);
+		else
+			log.debug("Succesfully found Media GridFS document");
 
-		return media;
+		return gridFsDbFileToMediaObj(media);
 	}
 
 	@Override
-	public void makePermanent(Object obj) {
-		Media media = (Media)obj;
-		GridFS gridfs = DB.getGridFs();
-		GridFSInputFile mediaGridfsFile = gridfs.createFile(media.getData());
+	public void makePermanent(Media media) {
+		GridFSInputFile mediaGridFsFile;
+		try {
+			mediaGridFsFile = DB.getGridFs().createFile(media.getData());
 
-		// set metadata
-		mediaGridfsFile.setContentType(media.getMimeType());
-		mediaGridfsFile.put("width", media.getWidth());
-		mediaGridfsFile.put("height", media.getHeight());
-		mediaGridfsFile.put("duration", media.getDuration());
-		mediaGridfsFile.put("mimeType", media.getMimeType());
-		mediaGridfsFile.put("type", media.getType());
+			if(mediaGridFsFile == null)
+				throw new Exception("Got a NULL mediaGridFsFile");
 
-		// save the file
-		mediaGridfsFile.save();
+			// set metadata
+			mediaGridFsFile.setContentType(media.getMimeType());
+			mediaGridFsFile.put("width", media.getWidth());
+			mediaGridFsFile.put("height", media.getHeight());
+			mediaGridFsFile.put("duration", media.getDuration());
+			mediaGridFsFile.put("mimeType", media.getMimeType());
+			mediaGridFsFile.put("type", media.getType());
+
+			// save the file
+			mediaGridFsFile.save();
+		} catch (Exception e) {
+			log.error("Cannot save Media document to GridFS", e);
+		}
+	}
+
+	@Override
+	public void makeTransient(Media media) {
+		try {
+			DB.getGridFs().remove(media.getDbId());
+		} catch (Exception e) {
+			log.error("Cannot delete Media document from GridFS", e);
+		}
 	}
 
 }

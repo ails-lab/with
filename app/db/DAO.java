@@ -134,22 +134,22 @@ public class DAO<E> extends BasicDAO<E, String> {
 	 * Use this method to save and Object to the database
 	 * @param record
 	 */
-	public void makePermanent(Object obj) {
+	public void makePermanent(E doc) {
 		try {
-			this.save(getEntityClass().cast(obj));
+			this.save(doc);
 		} catch(Exception e) {
-			log.error("Cannot save " + getEntityClass().getSimpleName(), e);
+			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}
 	}
 	/**
 	 * Use this method to delete and Object to the database
 	 * @param record
 	 */
-	public void makeTransient(Object obj) {
+	public void makeTransient(E doc) {
 		try {
-			this.delete(getEntityClass().cast(obj));
+			this.delete(doc);
 		} catch (Exception e) {
-			log.error("Cannot delete " + getEntityClass().getSimpleName(), e);
+			log.error("Cannot delete " + doc.getClass().getSimpleName(), e);
 		}
 	}
 

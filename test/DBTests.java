@@ -18,11 +18,11 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
@@ -32,14 +32,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import javax.imageio.ImageIO;
-
 import model.Media;
 import model.Record;
 import model.RecordLink;
 import model.Search;
 import model.User;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,6 +57,113 @@ import db.DB;
  */
 //@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class DBTests {
+
+
+	@Test
+	public void userStorage() {
+		/* Add 1000 random users */
+		for (int i = 0; i < 1000; i++) {
+			User testUser = new User();
+			if (i == 42) {
+				// email
+				testUser.setEmail("heres42@mongo.gr");
+			} else {
+				// email
+				testUser.setEmail(randomString() + "@mongo.gr");
+			}
+			// set an MD5 password
+			if (i == 42) {
+				digest.update("helloworld".getBytes());
+				testUser.setMd5Password(digest.digest().toString());
+			} else {
+				digest.update(randomString().getBytes());
+				testUser.setMd5Password(digest.digest().toString());
+			}
+			// search history
+			List<Search> searchHistory = new ArrayList<Search>();
+			for (int j = 0; j < 1000; j++) {
+				Search s1 = new Search();
+				s1.setSearchDate(generate_random_date_java());
+				searchHistory.add(s1);
+				testUser.setSearcHistory(searchHistory);
+			}
+			if (testUser != null)
+				try {
+					DB.getUserDAO().makePermanent(testUser);
+				} catch (MongoException e) {
+					System.out.println("mongo exception");
+				}
+		}
+
+		List<User> l = DB.getUserDAO().find().asList();
+		assertThat(l.size()).isGreaterThanOrEqualTo(1);
+
+		// int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
+		// assertThat( count )
+		// .overridingErrorMessage("Not removed enough Testers")
+		// .isGreaterThanOrEqualTo(1 );
+	}
+
+	@Test
+	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
+
+		//Create a Media Object
+		Media image = new Media();
+
+		URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
+		File file = new File("test_java.txt");
+		FileUtils.copyURLToFile(url, file);
+		FileInputStream fileStream = new FileInputStream(
+				file);
+
+		byte[] rawbytes = IOUtils.toByteArray(fileStream);
+
+		image.setData(rawbytes);
+		image.setType("video/mp4");
+		image.setMimeType("mp4");
+		image.setDuration(0.0f);
+		image.setHeight(1024);
+		image.setWidth(1080);
+
+		DB.getMediaDAO().makePermanent(image);
+
+		//Create Record Object
+		Record record = new Record();
+		DB.getRecordDAO().save(record);
+
+		//Create a RecordLink Object
+		//and references to Media and Record
+
+		//Get Media object
+		Media imageRetrieved = DB.getMediaDAO().find("54ef0a09e4b0af9ca4dc8fbc");
+		//Get Record object
+		Record recordRetrieved = DB.getRecordDAO().find().get();
+
+		RecordLink rlink = new RecordLink();
+		rlink.setThumbnail(imageRetrieved);
+		rlink.setRecordReference(recordRetrieved);
+
+		DB.getRecordLinkDAO().save(rlink);
+
+	}
+
+	@Test
+	public void testUserDAO() {
+		DB.initialize();
+		User user1 = DB.getUserDAO().getByEmail("heres42@mongo.gr");
+		User user3 = DB.getUserDAO().getByEmailPassword("heres42@mongo.gr", "helloworld");
+		// List<Search> searchList = DB.getUserDAO().getSearchResults("man42");
+		System.out.println(user1.toString());
+	}
+
+	@Test
+	public void renderTemplate() {
+		Content html = views.html.index
+				.render("Your new application is ready.");
+		assertThat(contentType(html)).isEqualTo("text/html");
+		assertThat(contentAsString(html)).contains(
+				"Your new application is ready.");
+	}
 
 	/*
 	 * test set up stuff... don't give a sh#t
@@ -110,98 +217,6 @@ public class DBTests {
 	}
 
 	/* *********************************************** */
-	@Test
-	public void userStorage() {
-		/* Add 1000 random users */
-		for (int i = 0; i < 1000; i++) {
-			User testUser = new User();
-			if (i == 42) {
-				// email
-				testUser.setEmail("heres42@mongo.gr");
-			} else {
-				// email
-				testUser.setEmail(randomString() + "@mongo.gr");
-			}
-			// set an MD5 password
-			if (i == 42) {
-				digest.update("helloworld".getBytes());
-				testUser.setMd5Password(digest.digest().toString());
-			} else {
-				digest.update(randomString().getBytes());
-				testUser.setMd5Password(digest.digest().toString());
-			}
-			// search history
-			List<Search> searchHistory = new ArrayList<Search>();
-			for (int j = 0; j < 1000; j++) {
-				Search s1 = new Search();
-				s1.setSearchDate(generate_random_date_java());
-				searchHistory.add(s1);
-				testUser.setSearcHistory(searchHistory);
-			}
-			if (testUser != null)
-				try {
-					DB.getUserDAO().makePermanent(testUser);
-				} catch (MongoException e) {
-					System.out.println("mongo exception");
-				}
-		}
 
-		List<User> l = DB.getUserDAO().find().asList();
-		assertThat(l.size()).isGreaterThanOrEqualTo(1);
-
-		// int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
-		// assertThat( count )
-		// .overridingErrorMessage("Not removed enough Testers")
-		// .isGreaterThanOrEqualTo(1 );
-	}
-
-	@Test
-	public void mediaStorage() throws IOException {
-		Media image = new Media();
-
-		File imgPath = new File("/home/yiorgos/Pictures/tmnt.jpg");
-		BufferedImage bufImg = ImageIO.read(imgPath);
-		WritableRaster raster = bufImg.getRaster();
-
-		image.setData(((DataBufferByte)raster.getDataBuffer()).getData());
-		image.setType("image/jpg");
-		image.setMimeType("jpg");
-		image.setDuration(0);
-		image.setHeight(bufImg.getHeight());
-		image.setWidth(bufImg.getWidth());
-
-		DB.getMediaDAO().makePermanent(image);
-
-		//Test Record Storage
-		Record record = new Record();
-		DB.getRecordDAO().save(record);
-
-		//Test RecordLink Reference
-		Media imageRetrieved = DB.getMediaDAO().find("54ec926de4b05c5762747493");
-		Record recordRetrieved = DB.getRecordDAO().find().get();
-		RecordLink rlink = new RecordLink();
-		rlink.setThumbnail(imageRetrieved);
-		rlink.setRecordReference(recordRetrieved);
-		DB.getRecordLinkDAO().save(rlink);
-
-	}
-
-	@Test
-	public void testUserDAO() {
-		DB.initialize();
-		User user1 = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		User user3 = DB.getUserDAO().getByEmailPassword("heres42@mongo.gr", "helloworld");
-		// List<Search> searchList = DB.getUserDAO().getSearchResults("man42");
-		System.out.println(user1.toString());
-	}
-
-	@Test
-	public void renderTemplate() {
-		Content html = views.html.index
-				.render("Your new application is ready.");
-		assertThat(contentType(html)).isEqualTo("text/html");
-		assertThat(contentAsString(html)).contains(
-				"Your new application is ready.");
-	}
 
 }
