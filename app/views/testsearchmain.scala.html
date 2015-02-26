@@ -105,6 +105,7 @@ color: black;
  
 var namee;
 function change(namee){
+	//alert(namee);
 document.getElementById("Display_content").innerHTML=document.getElementById(namee).innerHTML;
  
 //optional Javascript code below - To change color of clicked tab
@@ -126,6 +127,11 @@ for(i=1;i<=3;i++){
 document.getElementById(livetab).style.backgroundColor="silver";
 //optional code ends here
  
+}
+ 
+function shorttext(text, size){
+	document.write("hola");
+	return text.substring(0,size)+"(...)";
 }
  
 </script>        

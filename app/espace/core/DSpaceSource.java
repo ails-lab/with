@@ -33,7 +33,7 @@ public class DSpaceSource implements ISpaceSource {
 		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
 		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
 				+ Utils.spacesFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
 				+ "&page=" + q.page + "&page_size=" + q.pageSize;
 	}
 
@@ -85,8 +85,8 @@ public class DSpaceSource implements ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-			res.totalCount = Utils.readIntAttr(response, "limit", true);
-			res.count = Utils.readIntAttr(response, "count", true);
+			res.totalCount = Utils.readIntAttr(response, "count", true);
+			res.count = Utils.readIntAttr(response, "limit", true);
 			res.startIndex = Utils.readIntAttr(response, "start", true);
 			ArrayList a = new ArrayList<Object>();
 

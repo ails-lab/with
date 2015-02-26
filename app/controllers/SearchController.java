@@ -67,6 +67,7 @@ public class SearchController extends Controller {
 			q = new CommonQuery();
 			q.searchTerm = "zeus";
 		}
+		q.validate();
 		List<SourceResponse> res = search(q);
 		return ok(views.html.testsearch.render(userForm, res));
 	}

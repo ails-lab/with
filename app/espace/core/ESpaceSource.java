@@ -38,9 +38,9 @@ public class ESpaceSource implements ISpaceSource {
 	}
 
 	private String getSearchTerm(CommonQuery q) {
-		if (q.searchTerm != null)
+		if (Utils.hasAny(q.searchTerm))
 			return Utils.spacesFormatQuery(q.searchTerm)
-					+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "");
+					+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "");
 		return null;
 	}
 

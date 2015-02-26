@@ -208,4 +208,8 @@ public class Utils {
 		return null;
 	}
 
+	public static boolean hasAny(String term) {
+		return term != null && !term.equals("");
+	}
+
 }

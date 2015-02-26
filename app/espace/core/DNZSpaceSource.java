@@ -27,26 +27,20 @@ import espace.core.SourceResponse.Lang;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils.Pair;
 
-public class NLASpaceSource implements ISpaceSource {
+public class DNZSpaceSource implements ISpaceSource {
 
-	private String Key = "SECRET_KEY";
+	/**
+	 * user: espace password: with2015 email: gardero@gmail.com
+	 */
+	private String Key = "Qcv9eq67Ep32HDbYXmsx";
 
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
-		return "http://api.trove.nla.gov.au/result?key=" + Key + "&zone=picture,book,music,article" + "&q="
-				+ q.searchTerm
-				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")+" : "")
-				+ "&n=" + q.pageSize + "&s=" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize))
-				+ "&encoding=json&reclevel=full";
-		// return "http://api.dp.la/v2/items?api_key=" + Key + "&q="
-		// + Utils.spacesFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-		// + ((q.termToExclude != null) ? "+NOT+(" +
-		// Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
-		// + "&page=" + q.page + "&page_size=" + q.pageSize;
+		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text=" + q.searchTerm + "&per_page="
+				+ q.pageSize + "&page=" + q.page;
 	}
 
 	public String getSourceName() {
-		return "NLA";
+		return "DigitalNZ";
 	}
 
 	public String getDPLAKey() {
@@ -103,47 +97,38 @@ public class NLASpaceSource implements ISpaceSource {
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 
-			JsonNode pa = response.path("response").path("zone");
 			ArrayList a = new ArrayList<Object>();
 
-			for (int i = 0; i < pa.size(); i++) {
-				JsonNode o = pa.get(i);
-				if (!o.path("name").asText().equals("people")) {
-					System.out.print(o.path("name").asText() + " ");
-					res.totalCount += Utils.readIntAttr(o.path("records"), "totalCount", true);
-					res.count += Utils.readIntAttr(o.path("records"), "n", true);
-					res.startIndex = Utils.readIntAttr(o.path("records"), "s", true);
+			JsonNode o = response.path("search");
+			// System.out.print(o.path("name").asText() + " ");
 
-					JsonNode aa = o.path("records").path("work");
+			res.totalCount = Utils.readIntAttr(o, "result_count", true);
+			res.count += Utils.readIntAttr(o, "per_page", true);
+			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1) * res.count;
 
-					System.out.println(aa.size());
+			JsonNode aa = o.path("results");
 
-					for (JsonNode item : aa) {
-						// System.out.println(item.toString());
-						ItemsResponse it = new ItemsResponse();
-						it.id = Utils.readAttr(item, "id", true);
-						it.thumb = Utils.readArrayAttr(Utils.findNode(item.path("identifier"), new Pair<String>("type",
-								"url"), new Pair<String>("linktype", "thumbnail")), "value", false);
-						// TODO not present
-						it.fullresolution = null;
-						it.title = Utils.readLangAttr(item, "title", false);
-						it.description = Utils.readLangAttr(item, "abstract", false);
-						it.year = Utils.readArrayAttr(item, "issued", true);
+			for (JsonNode item : aa) {
+				// System.out.println(item.toString());
+				ItemsResponse it = new ItemsResponse();
+				it.id = Utils.readAttr(item, "id", true);
+				it.title = Utils.readLangAttr(item, "title", false);
+				it.creator = Utils.readLangAttr(item, "creator", false);
+				it.description = Utils.readLangAttr(item, "description", false);
 
-						// TODO are they the same?
-						it.creator = Utils.readLangAttr(item, "contributor", false);
-						it.dataProvider = Utils.readLangAttr(item, "contributor", false);
+				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
+				// TODO not present
+				it.fullresolution = null;
+				// TODO read date and take year?
+				it.year = null; // Utils.readArrayAttr(item, "issued", true);
+				// TODO use author?
+				it.dataProvider = null;// Utils.readLangAttr(item,
+										// "contributor", false);
+				it.url = new MyURL();
+				it.url.original = Utils.readArrayAttr(item, "landing_url", false);
+				it.url.fromSourceAPI = Utils.readAttr(item, "source_url", false);
+				a.add(it);
 
-						it.url = new MyURL();
-						it.url.original = Utils.readArrayAttr(item, "troveUrl", false);
-
-						// TODO What to use?
-						// it.url.fromSourceAPI = Utils.readAttr(item, "guid",
-						// false);
-						a.add(it);
-
-					}
-				}
 			}
 
 			res.items = a;

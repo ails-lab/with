@@ -28,6 +28,7 @@ public class ESpaceSources {
 		esources.add(new ESpaceSource());
 		esources.add(new DSpaceSource());
 		esources.add(new NLASpaceSource());
+		esources.add(new DNZSpaceSource());
 		System.out.println("inittttttttttttttttttt");
 	}
 

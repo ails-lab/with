@@ -4,8 +4,7 @@
 
 @testsearchmain("Test search") {
 	@helper.form( action= routes.SearchController.posttestsearch() ){
-		
-
+	    
 
 <div id="hsection">
 	<div id="vsection">
@@ -33,14 +32,13 @@
 <li onClick="change('@p.source')" >@p.source</li>
 }
 </ul>
-<div id="Display_content" onload="change('@content.get(0).source')">
-  </div>
+
 @for(p <- content) {
 <div id="@p.source" class="content_tab">
   <b>Source: </b> @p.source <br/>
   <b>Count: </b>@p.count <br/>
   <b>Query: </b>@p.query <br/>
-  
+  @if(p.items!=null){ 
   @for(it <- p.items) {
   <div id="thumbframe">
   
@@ -49,12 +47,15 @@
     
     </div>
     <div  id="thinfo">
-  <b>Title: </b> <a href="@if(it.url!=null) {@it.url.original.get(0)} else {NA}"> @it.title.get(0).value </a><br/>
-  <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@it.description.get(0).value} else {NA} <br/>
+  <b>Title: </b> <a href="@if(it.url!=null) {@it.url.original.get(0)} else {NA}"> 
+ @shorttext(it.title.get(0).value,40)
+ </a><br/>
+  <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
   
   </div>
   
   </div>
+  }
   }
   
   
@@ -66,3 +67,6 @@
   Nothing here	
 }	
 }
+
+<div id="Display_content" onload="change('@content.get(0).source')">
+  </div>
