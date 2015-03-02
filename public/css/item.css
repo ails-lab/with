@@ -64,6 +64,7 @@
 }
 
 .itemim{
+	float:right;
 	text-align:right;
 	max-width:270px;
 	min-width: 120px;

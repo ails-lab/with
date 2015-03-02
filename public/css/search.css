@@ -228,7 +228,7 @@ input[type="search"] { /* reset normalize */
 
 .scrollable{
 	
-	width: 1600px;
+	width: 1400px;
     display:table;
    overflow-y: auto;   overflow-x: visible;
     margin: 0 auto;
@@ -468,8 +468,8 @@ only screen and (max-device-width : 399px){
 		font-size: 2em;
 	}
 	.dummy-column {
-		float: none;
-		width: auto;
+		float: left;
+		width: 300px;
 		padding: 2em;
 	}
 	.dummy-column:nth-child(2) {
