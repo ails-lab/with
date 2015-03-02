@@ -5,8 +5,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	console.log("exists:"+$element.data('masonry'));
-		    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
+    	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 		
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 		       
@@ -19,10 +18,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     	var $element = $(element),
     	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
     	masonry = ko.utils.unwrapObservable(valueAccessor())
-    	
-    	
-			
-		if (!list.length){
+    	if (!list.length){
 			
 			return;
 		}
@@ -31,7 +27,6 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     	imagesLoaded( $element, function() {
     		if (!($element.data('masonry'))){
         		
-        		console.log("masonry init");
         		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
         			
         	}
@@ -56,6 +51,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.thumb = ko.observable(false);
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
+		self.source=ko.observable(false);
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
@@ -65,6 +61,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.thumb(data.thumb);
 			self.fullres(data.fullres);
 			self.description(data.description);
+			self.source(data.source);
 			
 		};
 
@@ -113,6 +110,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.sources= ko.observableArray([]);
 		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
+		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
 		
 		self.searching = ko.observable(false);
@@ -165,18 +163,21 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 					self.previous(self.page()-1);
 					self.next(self.page()+1);
 					for(var i in data) {
-						var source=data[i].source;
+						source=data[i].source;
 						var items = [];
 						for(var j in data[i].items){
 						 var result = data[i].items[j];
+						 console.log("source:"+source);
+						 if(result !=null && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null"){
 						 var record = new Record({
 							id: result.id,
 							thumb: result.thumb[0],
 							fullres: result.fullresolution,
 							title: result.title[0].value,
-							view_url: result.url.fromSourceAPI
+							view_url: result.url.fromSourceAPI,
+							source: source
 						  });
-						 items.push(record);
+						 items.push(record);}
 						}
 						if(items.length>0){
 							
@@ -226,6 +227,12 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self._search();
 		};
 
+		self.recordSelect= function (e){
+			console.log(e);
+			itemShow(e);
+			
+		}
+		
 		self.searchNext = function() {
 			self.page(self.next());
 			self._search();

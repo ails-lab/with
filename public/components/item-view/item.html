@@ -1,0 +1,48 @@
+<div class="md-modal md-effect-1" id="modal-1">
+			<div class="md-content">
+			 
+				<h3><!-- ko text: title --><!-- /ko --> </h3>
+				
+				
+			 
+				   <div class="row">
+					  <div class="col-md-6">
+					    <div class="spec">
+					      <div class="itemlabel">Description
+					      </div>
+					      <div class="value" data-bind="text:description"> 
+					      </div>
+					      </div>
+					      
+					      <div class="spec">
+					      <div class="itemlabel">Record source
+					      </div>
+					      <div class="value"><!-- ko text: apisource --><!-- /ko --> 
+					      </div>
+					    </div>
+					  
+					   <div class="spec">
+					      <div class="itemlabel">More details
+					      </div>
+					      <div class="value">
+					      <a data-bind="attr: { href:view_url}"><!-- ko text: view_url --><!-- /ko --> </a>
+					      
+					      </div>
+					    </div>
+					  
+					  
+					  
+					  
+					  </div>
+					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:fullres, alt: title }" class="itemim"/></div>
+					</div>
+				 
+			
+				
+				
+			</div>
+</div>
+		
+		
+		
+<div class="md-overlay" data-bind="event: {click: close}"></div><!-- the overlay element -->
