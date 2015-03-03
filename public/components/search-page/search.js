@@ -132,16 +132,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
-			$('.withsearch-content').css({
-			    
-			    'overflow-x': 'hidden'
-			});
+			$('.withsearch-content').css({'overflow-x': 'hidden'});
 		  }
 		else{
-			$('.withsearch-content').css({
-			    
-			    'overflow-x': 'scroll'
-			});
+			$('.withsearch-content').css({'overflow-x': 'scroll'});
 		  }
 		
 		};
@@ -187,7 +181,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						for(var j in data[i].items){
 						 var result = data[i].items[j];
 						 
-						 if(result !=null && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null"){
+						 if(result !=null && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
 						 var record = new Record({
 							id: result.id,
 							thumb: result.thumb[0],
