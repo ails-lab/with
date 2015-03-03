@@ -35,8 +35,8 @@ public class DNZSpaceSource implements ISpaceSource {
 	private String Key = "Qcv9eq67Ep32HDbYXmsx";
 
 	public String getHttpQuery(CommonQuery q) {
-		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text=" + q.searchTerm + "&per_page="
-				+ q.pageSize + "&page=" + q.page;
+		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
+				+ Utils.spacesFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
 	}
 
 	public String getSourceName() {

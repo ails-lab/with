@@ -34,7 +34,7 @@ public class NLASpaceSource implements ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
 		return "http://api.trove.nla.gov.au/result?key=" + Key + "&zone=picture,book,music,article" + "&q="
-				+ q.searchTerm
+				+ Utils.spacesFormatQuery(q.searchTerm)
 				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")+" : "")
 				+ "&n=" + q.pageSize + "&s=" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize))
 				+ "&encoding=json&reclevel=full";
