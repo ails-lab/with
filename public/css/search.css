@@ -20,7 +20,7 @@ text-decoration: none;
 	background: #f1f1f1;
 	position: absolute;
 	overflow:auto;
-	z-index: 10000;
+	z-index: 1031; /*more than nav bar*/
 	-webkit-transform-origin: 100% 0;
 	transform-origin: 100% 0;
 	-webkit-transition-property: min-height, width, top, right;
@@ -226,6 +226,15 @@ input[type="search"] { /* reset normalize */
 	opacity: 0;
 }
 
+.scrollable{
+	
+	width: 1400px;
+    display:table;
+   overflow-y: auto;   overflow-x: scroll;
+    margin: 0 auto;
+            
+}
+
 .withsearch-content p{
 	padding:3em;
 }
@@ -233,7 +242,7 @@ input[type="search"] { /* reset normalize */
 .withsearch.open .withsearch-content {
 	opacity: 1;
 	height: auto;
-	overflow: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
+	overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
 	pointer-events: auto;
 	-webkit-transition: opacity 0.3s 0.5s;
 	transition: opacity 0.3s 0.5s;
@@ -241,7 +250,7 @@ input[type="search"] { /* reset normalize */
 
 .dummy-column {
 	margin-left:3em;
-	width: 30%;
+	width: 300px;
 	padding: 0 0 6em;
 	float: left;
 	opacity: 0;
@@ -272,8 +281,8 @@ input[type="search"] { /* reset normalize */
 	transform: translate3d(0,0,0);
 }
 
-.dummy-column:nth-child(2) {
-	margin: 0 5%;
+.dummy-column:nth-child(n) {
+	margin: 0 1em;
 }
 
 .dummy-column h2 {
@@ -323,6 +332,7 @@ input[type="search"] { /* reset normalize */
 	margin: 0 0 0 0;
 	width: calc(100% - 70px);
 	color: rgba(0, 0, 0, 0.52);
+	word-wrap:break-word;
 }
 
 .dummy-media-object:hover span {
@@ -399,7 +409,7 @@ margin-bottom: 5px;
 	 right:40px;
 	 padding: 5px;
      position: fixed;
-     z-index:11000;
+     z-index:1032;
 	    }
 
 
@@ -414,7 +424,7 @@ margin-bottom: 5px;
 @media only screen and (max-width : 1199px),
 only screen and (max-device-width : 1199px){
     #withsearch-content-masonry {
-        width: 1000px;
+        width: 1199px;
     }
 }
  
@@ -458,8 +468,8 @@ only screen and (max-device-width : 399px){
 		font-size: 2em;
 	}
 	.dummy-column {
-		float: none;
-		width: auto;
+		float: left;
+		width: 300px;
 		padding: 2em;
 	}
 	.dummy-column:nth-child(2) {
