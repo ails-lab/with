@@ -130,7 +130,21 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
 		
-		self.toggleSourceview = function () { self.sourceview(!self.sourceview())};
+		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
+		if(self.sourceview()==false){
+			$('.withsearch-content').css({
+			    
+			    'overflow-x': 'hidden'
+			});
+		  }
+		else{
+			$('.withsearch-content').css({
+			    
+			    'overflow-x': 'scroll'
+			});
+		  }
+		
+		};
 		
 		self.reset = function() {
 			
@@ -161,13 +175,18 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				"success": function(data) {
 					
 					self.previous(self.page()-1);
-					self.next(self.page()+1);
+					var moreitems=false;
+					
 					for(var i in data) {
 						source=data[i].source;
+						//count should be working in api but it's not, use item length until fixed
+						if(data[i].items!=null && data[i].items.length==self.pageSize() && moreitems==false){
+							moreitems=true;
+						}
 						var items = [];
 						for(var j in data[i].items){
 						 var result = data[i].items[j];
-						 console.log("source:"+source);
+						 
 						 if(result !=null && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null"){
 						 var record = new Record({
 							id: result.id,
@@ -209,6 +228,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						
 					}
 						self.searching(false);
+						if(moreitems){
+							self.next(self.page()+1);
+						}else{
+							self.next(-1);
+						}
 				}
 			});
 			console.log(self.term());
@@ -222,6 +246,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.results([]);
 			self.mixresults([]);
 			self.page(1);
+			self.next(1);
+			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
 			self._search();
@@ -234,8 +260,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		}
 		
 		self.searchNext = function() {
+		if(self.next()>0){	
 			self.page(self.next());
-			self._search();
+			self._search();}
 		};
 
 		self.searchPrevious = function() {

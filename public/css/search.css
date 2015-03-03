@@ -230,7 +230,7 @@ input[type="search"] { /* reset normalize */
 	
 	width: 1400px;
     display:table;
-   overflow-y: auto;   overflow-x: visible;
+   overflow-y: auto;   overflow-x: scroll;
     margin: 0 auto;
             
 }
@@ -242,7 +242,7 @@ input[type="search"] { /* reset normalize */
 .withsearch.open .withsearch-content {
 	opacity: 1;
 	height: auto;
-	overflow: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
+	overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
 	pointer-events: auto;
 	-webkit-transition: opacity 0.3s 0.5s;
 	transition: opacity 0.3s 0.5s;
