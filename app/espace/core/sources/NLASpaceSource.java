@@ -101,13 +101,11 @@ public class NLASpaceSource implements ISpaceSource {
 						it.dataProvider = Utils.readLangAttr(item, "contributor", false);
 
 						it.url = new MyURL();
-						// it.url.original = Utils.readArrayAttr(item,
-						// "troveUrl", false);
-
-						// TODO What to use?
-						it.url.fromSourceAPI = Utils.readAttr(Utils.findNode(item.path("identifier"), new Pair<String>(
+						it.url.original = Utils.readArrayAttr(Utils.findNode(item.path("identifier"), new Pair<String>(
 								"type", "url"), new Pair<String>("linktype", "fulltext, restricted, unknown")),
 								"value", false);
+						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl", false);
+
 						a.add(it);
 
 					}
