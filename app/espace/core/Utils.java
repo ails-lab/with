@@ -51,7 +51,7 @@ public class Utils {
 	public static String readAttr(JsonNode json, String string, boolean force, String def) throws Exception {
 		if (json == null)
 			return null;
-		String res = json.findPath(string).asText();
+		String res = json.path(string).asText();
 		if (res == null) {
 			if (force)
 				throw new Exception("Missing " + string);

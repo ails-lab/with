@@ -63,6 +63,7 @@ public class DSpaceSource implements ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
+			// System.out.println(response.toString());
 			JsonNode docs = response.path("docs");
 			res.totalCount = Utils.readIntAttr(response, "count", true);
 			res.count = docs.size();
