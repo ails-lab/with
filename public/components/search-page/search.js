@@ -23,7 +23,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			return;
 		}
     	
-      
+        
     	imagesLoaded( $element, function() {
     		if (!($element.data('masonry'))){
         		
@@ -34,8 +34,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
  				
  	 		    $(this).animate({ opacity: 1 });
  			});
- 			$element.masonry( 'reloadItems' );
+    		
+    		$element.masonry( 'reloadItems' );
  			$element.masonry( 'layout' );
+ 			
+    		
  			
  		 });
 		 
@@ -264,7 +267,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self._search();
 		};
 
-      
+		self.defaultSource=function(item){
+			console.log(item);
+			item.thumb('images/no_image.jpg');
+			
+	    }
 
 	  var withsearch = $( '#withsearchid' );
 	  var withinput =$("input.withsearch-input");

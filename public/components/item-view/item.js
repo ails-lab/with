@@ -12,6 +12,7 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 	  self.fullres=ko.observable(false);
 	  self.view_url=ko.observable("");
 	  self.apisource=ko.observable(true);
+	  self.thumbshow=ko.observable(false);
      
     itemShow = function(record) {
     	self.itemload(record);
@@ -33,9 +34,10 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		thumb=data.thumb;
 		if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0)
 		self.fullres(data.fullres[0]);
-		else
+		else{
 			self.fullres(data.thumb);
-		
+			self.thumbshow(true);
+		  }
 		
 		if(data.description==undefined){
 			self.description(data.title);
@@ -56,8 +58,13 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     }
     
     self.changeSource=function(){
-    	console.log("error found");
-    	$("#fullresim").attr('src',thumb);
+    	if(self.thumbshow()==false){
+    	  $("#fullresim").attr('src',thumb);
+    	  self.thumbshow(true);
+    	}
+    	else{
+    		$("#fullresim").attr('src','images/no_image.jpg');
+    	}
     }
    
     
