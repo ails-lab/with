@@ -19,6 +19,11 @@ package espace.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import espace.core.sources.DNZSpaceSource;
+import espace.core.sources.DSpaceSource;
+import espace.core.sources.ESpaceSource;
+import espace.core.sources.NLASpaceSource;
+
 public class ESpaceSources {
 
 	public static List<ISpaceSource> esources;

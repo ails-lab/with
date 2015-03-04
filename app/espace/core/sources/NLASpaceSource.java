@@ -14,7 +14,7 @@
  */
 
 
-package espace.core;
+package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +22,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonQuery;
+import espace.core.HttpConnector;
+import espace.core.ISpaceSource;
+import espace.core.SourceResponse;
+import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.Lang;
 import espace.core.SourceResponse.MyURL;
@@ -32,17 +37,14 @@ public class NLASpaceSource implements ISpaceSource {
 	private String Key = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
-		return "http://api.trove.nla.gov.au/result?key=" + Key + "&zone=picture,book,music,article" + "&q="
-				+ Utils.spacesFormatQuery(q.searchTerm)
-				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")+" : "")
-				+ "&n=" + q.pageSize + "&s=" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize))
-				+ "&encoding=json&reclevel=full";
-		// return "http://api.dp.la/v2/items?api_key=" + Key + "&q="
-		// + Utils.spacesFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-		// + ((q.termToExclude != null) ? "+NOT+(" +
-		// Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
-		// + "&page=" + q.page + "&page_size=" + q.pageSize;
+		return "http://api.trove.nla.gov.au/result?key="
+				+ Key
+				+ "&zone=picture,book,music,article"
+				+ "&q="
+				+ Utils.spacesFormatQuery(q.searchTerm, "%20")
+				+ (Utils.hasAny(q.termToExclude) ? "%20NOT%20" + Utils.spacesFormatQuery(q.termToExclude, "%20")
+						+ "%20" : "") + "&n=" + q.pageSize + "&s="
+				+ ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + "&encoding=json&reclevel=full";
 	}
 
 	public String getSourceName() {
@@ -57,42 +59,6 @@ public class NLASpaceSource implements ISpaceSource {
 		Key = dPLAKey;
 	}
 
-	public List<CommonItem> getPreview(CommonQuery q) {
-		ArrayList<CommonItem> res = new ArrayList<CommonItem>();
-		try {
-			String httpQuery = getHttpQuery(q);
-			// System.out.println(httpQuery);
-			JsonNode node = HttpConnector.getURLContent(httpQuery);
-			JsonNode a = node.path("response").path("zone");
-			for (int i = 0; i < a.size(); i++) {
-				JsonNode o = a.get(i);
-				if (!o.path("name").asText().equals("people")) {
-					JsonNode aa = node.path("records").path("zone");
-
-					for (int k = 0; k < aa.size(); k++) {
-
-						JsonNode oo = aa.get(k);
-						CommonItem item = new CommonItem();
-						JsonNode path = oo.path("sourceResource").path("title");
-						// System.out.println(path);
-						item.setTitle(path.asText());
-						item.seteSource(this.getSourceName());
-						String description;
-						JsonNode path2 = oo.path("object");
-						// System.out.println(path2);
-						if (path2 != null)
-							item.setPreview(path2.asText());
-						res.add(item);
-					}
-
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return res;
-	}
-
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
@@ -102,9 +68,9 @@ public class NLASpaceSource implements ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-
+			// System.out.println(response.toString());
 			JsonNode pa = response.path("response").path("zone");
-			ArrayList a = new ArrayList<Object>();
+			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
 			for (int i = 0; i < pa.size(); i++) {
 				JsonNode o = pa.get(i);
@@ -135,11 +101,13 @@ public class NLASpaceSource implements ISpaceSource {
 						it.dataProvider = Utils.readLangAttr(item, "contributor", false);
 
 						it.url = new MyURL();
-						it.url.original = Utils.readArrayAttr(item, "troveUrl", false);
+						// it.url.original = Utils.readArrayAttr(item,
+						// "troveUrl", false);
 
 						// TODO What to use?
-						// it.url.fromSourceAPI = Utils.readAttr(item, "guid",
-						// false);
+						it.url.fromSourceAPI = Utils.readAttr(Utils.findNode(item.path("identifier"), new Pair<String>(
+								"type", "url"), new Pair<String>("linktype", "fulltext, restricted, unknown")),
+								"value", false);
 						a.add(it);
 
 					}

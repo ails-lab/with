@@ -27,38 +27,13 @@ import espace.core.SourceResponse.Lang;
 
 public class Utils {
 
-	public static String spacesFormatQuery(String text) {
-		return text.replaceAll("(\\s)+", "+");
+	public static String spacesFormatQuery(String text, String space) {
+		return text.replaceAll("(\\s)+", space);
 	}
 
-	// public static <T> T gsonLoad(String filepath, Class<T> className) {
-	// try (Reader reader = new InputStreamReader(new
-	// FileInputStream(filepath))) {
-	// Gson gson = new GsonBuilder().create();
-	// return gson.fromJson(reader, className);
-	// } catch (FileNotFoundException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// return null;
-	// }
-	//
-	// public void gsonWrite(String filepath, Object object) {
-	// try (Writer writer = new OutputStreamWriter(new
-	// FileOutputStream(filepath))) {
-	// Gson gson = new GsonBuilder().create();
-	// gson.toJson(object, writer);
-	// } catch (UnsupportedEncodingException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// } catch (IOException e) {
-	// // TODO Auto-generated catch block
-	// e.printStackTrace();
-	// }
-	// }
+	public static String spacesPlusFormatQuery(String text) {
+		return text.replaceAll("(\\s)+", "+");
+	}
 
 	public static CommonQuery parseJson(JsonNode json) throws Exception {
 		CommonQuery q1 = Json.fromJson(json, CommonQuery.class);
@@ -156,13 +131,13 @@ public class Utils {
 	public static String getORList(List<String> values) {
 		String res = "";
 		if (values.size() > 1) {
-			res += "(" + spacesFormatQuery(values.get(0));
+			res += "(" + spacesPlusFormatQuery(values.get(0));
 			for (int i = 1; i < values.size(); i++) {
-				res += "+OR+" + spacesFormatQuery(values.get(i));
+				res += "+OR+" + spacesPlusFormatQuery(values.get(i));
 			}
 			res += ")";
 		} else {
-			res += spacesFormatQuery(values.get(0));
+			res += spacesPlusFormatQuery(values.get(0));
 		}
 		return res;
 	}
@@ -182,7 +157,7 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=" + spacesFormatQuery(second.toString());
+			return first + "=" + spacesPlusFormatQuery(second.toString());
 		}
 
 	}
@@ -195,7 +170,7 @@ public class Utils {
 			for (Pair<String> p : pair) {
 				String value = node.path(p.first).asText();
 				// System.out.println(value + "?=" + p.second);
-				if (!p.second.equals(value)) {
+				if (!p.second.contains(value)) {
 					found = false;
 					break;
 				}

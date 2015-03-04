@@ -14,7 +14,7 @@
  */
 
 
-package espace.core;
+package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +22,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonQuery;
+import espace.core.HttpConnector;
+import espace.core.ISpaceSource;
+import espace.core.SourceResponse;
+import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.Lang;
 import espace.core.SourceResponse.MyURL;
@@ -36,7 +41,7 @@ public class DNZSpaceSource implements ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
-				+ Utils.spacesFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
+				+ Utils.spacesPlusFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
 	}
 
 	public String getSourceName() {
@@ -51,42 +56,6 @@ public class DNZSpaceSource implements ISpaceSource {
 		Key = dPLAKey;
 	}
 
-	public List<CommonItem> getPreview(CommonQuery q) {
-		ArrayList<CommonItem> res = new ArrayList<CommonItem>();
-		try {
-			String httpQuery = getHttpQuery(q);
-			// System.out.println(httpQuery);
-			JsonNode node = HttpConnector.getURLContent(httpQuery);
-			JsonNode a = node.path("response").path("zone");
-			for (int i = 0; i < a.size(); i++) {
-				JsonNode o = a.get(i);
-				if (!o.path("name").asText().equals("people")) {
-					JsonNode aa = node.path("records").path("zone");
-
-					for (int k = 0; k < aa.size(); k++) {
-
-						JsonNode oo = aa.get(k);
-						CommonItem item = new CommonItem();
-						JsonNode path = oo.path("sourceResource").path("title");
-						// System.out.println(path);
-						item.setTitle(path.asText());
-						item.seteSource(this.getSourceName());
-						String description;
-						JsonNode path2 = oo.path("object");
-						// System.out.println(path2);
-						if (path2 != null)
-							item.setPreview(path2.asText());
-						res.add(item);
-					}
-
-				}
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return res;
-	}
-
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
@@ -97,7 +66,7 @@ public class DNZSpaceSource implements ISpaceSource {
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 
-			ArrayList a = new ArrayList<Object>();
+			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
 			JsonNode o = response.path("search");
 			// System.out.print(o.path("name").asText() + " ");
