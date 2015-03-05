@@ -87,7 +87,7 @@ public class DNZSpaceSource implements ISpaceSource {
 
 				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
 				// TODO not present
-				it.fullresolution = null;
+				it.fullresolution = Utils.readArrayAttr(item, "large_thumbnail_url", false);
 				// TODO read date and take year?
 				it.year = null; // Utils.readArrayAttr(item, "issued", true);
 				// TODO use author?
@@ -95,7 +95,7 @@ public class DNZSpaceSource implements ISpaceSource {
 										// "contributor", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "landing_url", false);
-				it.url.fromSourceAPI = Utils.readAttr(item, "source_url", false);
+				it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
 				a.add(it);
 
 			}
