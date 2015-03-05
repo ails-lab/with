@@ -26,13 +26,14 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     
     self.itemload = function(e) {
     	data=ko.toJS(e);
+    	console.log(data);
     	if(data.title==undefined){
 			self.title("No title");
 		}else{self.title(data.title);}
 		
 		self.thumb(data.thumb);
 		thumb=data.thumb;
-		if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0)
+		if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0 && data.fullres!="null")
 		self.fullres(data.fullres[0]);
 		else{
 			self.fullres(data.thumb);
