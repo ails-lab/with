@@ -15,6 +15,8 @@
 
 
 import org.junit.*;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 import play.mvc.*;
 import play.test.*;

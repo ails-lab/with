@@ -60,5 +60,17 @@ public class Collection {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
+	public User getOwner() {
+		return owner;
+	}
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
+	public List<RecordLink> getFirstEntries() {
+		return firstEntries;
+	}
+	public void setFirstEntries(List<RecordLink> firstEntries) {
+		this.firstEntries = firstEntries;
+	}
 
 }

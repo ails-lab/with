@@ -19,6 +19,7 @@ package db;
 import model.Record;
 import model.RecordLink;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
 import play.Logger;
@@ -37,7 +38,7 @@ public class RecordDAO extends DAO<Record> {
 	 */
 	public RecordLink getRecordLink(String dbId) {
 		Query<Record> q = this.createQuery()
-				.field("dbId").equal(dbId)
+				.field("dbId").equal(new ObjectId(dbId))
 				.retrievedFields(true, "baseLinkData");
 		return this.find(q).get().getBaseLinkData();
 	}
@@ -49,7 +50,7 @@ public class RecordDAO extends DAO<Record> {
 	 */
 	public String getRecordSource(String dbId) {
 		Query<Record> q = this.createQuery()
-				.field("dbId").equal(dbId)
+				.field("_id").equal(new ObjectId(dbId))
 				.retrievedFields(true, "baseLinkData.source");
 		return this.find(q).get()
 				.getBaseLinkData().getSource();

@@ -22,7 +22,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 
 
-// This is just for embedding, won't have its own id
 // there is an option Record link if the link is already materialized
 @Entity
 public class RecordLink {
@@ -30,7 +29,7 @@ public class RecordLink {
 	@Id
 	private ObjectId dbId;
 	// optional link to the materialized Record
-	@Reference
+	@Reference(lazy = true)
 	private Record recordReference;
 
 	// which backend provided this entry
@@ -41,7 +40,7 @@ public class RecordLink {
 	private String thumbnailUrl;
 
 	// an optional cached version of a thumbnail for this record'
-	@Reference
+	@Reference(lazy = true)
 	private Media thumbnail;
 
 	private String title;
@@ -126,6 +125,22 @@ public class RecordLink {
 
 	public void setSourceUrl(String sourceUrl) {
 		this.sourceUrl = sourceUrl;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getRights() {
+		return rights;
+	}
+
+	public void setRights(String rights) {
+		this.rights = rights;
 	}
 
 

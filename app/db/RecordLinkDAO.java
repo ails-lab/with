@@ -18,6 +18,10 @@ package db;
 
 import model.Media;
 import model.RecordLink;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 
 public class RecordLinkDAO extends DAO<RecordLink> {
@@ -28,7 +32,9 @@ public class RecordLinkDAO extends DAO<RecordLink> {
 	}
 
 	public RecordLink getByDbId(String dbId) {
-		return this.get(dbId);
+		Query<RecordLink> q = this.createQuery()
+				.field("_id").equal(new ObjectId(dbId));
+		return this.findOne(q);
 	}
 
 	public String getTitle(String dbId) {

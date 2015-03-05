@@ -24,10 +24,10 @@ public class CollectionMetadata {
 
 	private String title;
 	private String description;
-	@Reference
+	@Reference(lazy = true)
 	private Collection colletion;
 
-	@Reference
+	@Reference(lazy = true)
 	private Media thumbnail;
 
 	public String getTitle() {

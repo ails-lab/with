@@ -64,7 +64,8 @@ public class MediaDAO extends DAO<Media> {
 		return media;
 	}
 
-	public Media find(String dbId) {
+
+	public Media findById(String dbId) {
 		ObjectId objectId = new ObjectId(dbId);
 		GridFSDBFile media = null;
 		try {

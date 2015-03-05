@@ -18,11 +18,8 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
@@ -32,19 +29,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import model.Collection;
 import model.Media;
 import model.Record;
 import model.RecordLink;
 import model.Search;
 import model.User;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
 import play.twirl.api.Content;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mongodb.MongoException;
 
 import db.DB;
@@ -62,14 +62,20 @@ public class DBTests {
 	@Test
 	public void userStorage() {
 		/* Add 1000 random users */
+		//int i = 42;
 		for (int i = 0; i < 1000; i++) {
 			User testUser = new User();
+			String email;
 			if (i == 42) {
 				// email
-				testUser.setEmail("heres42@mongo.gr");
+				email = "heres42_@mongo.gr";
+				testUser.setEmail(email);
+				testUser.setFirstName(randomString());
 			} else {
 				// email
-				testUser.setEmail(randomString() + "@mongo.gr");
+				email = randomString() + "@mongo.gr";
+				testUser.setEmail(email);
+				testUser.setFirstName(randomString());
 			}
 			// set an MD5 password
 			if (i == 42) {
@@ -79,17 +85,25 @@ public class DBTests {
 				digest.update(randomString().getBytes());
 				testUser.setMd5Password(digest.digest().toString());
 			}
-			// search history
-			List<Search> searchHistory = new ArrayList<Search>();
-			for (int j = 0; j < 1000; j++) {
-				Search s1 = new Search();
-				s1.setSearchDate(generate_random_date_java());
-				searchHistory.add(s1);
-				testUser.setSearcHistory(searchHistory);
-			}
 			if (testUser != null)
 				try {
 					DB.getUserDAO().makePermanent(testUser);
+				} catch (MongoException e) {
+					System.out.println("mongo exception");
+				}
+			// search history
+			List<Search> searchHistory = new ArrayList<Search>();
+			User userWithDates = DB.getUserDAO().getByEmail(email);
+			for (int j = 0; j < 1000; j++) {
+				Search s1 = new Search();
+				s1.setSearchDate(generate_random_date_java());
+				s1.setUser(userWithDates);
+				searchHistory.add(s1);
+				userWithDates.setSearcHistory(searchHistory);
+			}
+			if (userWithDates != null)
+				try {
+					DB.getUserDAO().makePermanent(userWithDates);
 				} catch (MongoException e) {
 					System.out.println("mongo exception");
 				}
@@ -108,43 +122,71 @@ public class DBTests {
 	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
 
 		//Create a Media Object
-		Media image = new Media();
+		/*for(int i = 0; i < 50; i++) {
+			Media image = new Media();
 
-		URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
-		File file = new File("test_java.txt");
-		FileUtils.copyURLToFile(url, file);
-		FileInputStream fileStream = new FileInputStream(
-				file);
+			URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
+			File file = new File("test_java.txt");
+			FileUtils.copyURLToFile(url, file);
+			FileInputStream fileStream = new FileInputStream(
+					file);
 
-		byte[] rawbytes = IOUtils.toByteArray(fileStream);
+			byte[] rawbytes = IOUtils.toByteArray(fileStream);
 
-		image.setData(rawbytes);
-		image.setType("video/mp4");
-		image.setMimeType("mp4");
-		image.setDuration(0.0f);
-		image.setHeight(1024);
-		image.setWidth(1080);
+			image.setData(rawbytes);
+			image.setType("video/mp4");
+			image.setMimeType("mp4");
+			image.setDuration(0.0f);
+			image.setHeight(1024);
+			image.setWidth(1080);
 
-		DB.getMediaDAO().makePermanent(image);
+			DB.getMediaDAO().makePermanent(image);
 
-		//Create Record Object
-		Record record = new Record();
-		DB.getRecordDAO().save(record);
+			//Create Record Object
+			Record record = new Record();
+			DB.getRecordDAO().save(record);
 
-		//Create a RecordLink Object
-		//and references to Media and Record
+			//Create a RecordLink Object
+			//and references to Media and Record
+*/
+			//Get Media object
+			Media imageRetrieved = DB.getMediaDAO().findById("54ef0a09e4b0af9ca4dc8fbc");
+			//Media imageRetrieved = DB.getMediaDAO().
+			//Get Record object
+			Record recordRetrieved = DB.getRecordDAO().find().get();
 
-		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().find("54ef0a09e4b0af9ca4dc8fbc");
-		//Get Record object
-		Record recordRetrieved = DB.getRecordDAO().find().get();
+			RecordLink rlink = new RecordLink();
+			rlink.setThumbnail(imageRetrieved);
+			rlink.setRecordReference(recordRetrieved);
 
-		RecordLink rlink = new RecordLink();
-		rlink.setThumbnail(imageRetrieved);
-		rlink.setRecordReference(recordRetrieved);
+			//embed recordlink in collection - 10th
+			Collection col = DB.getCollectionDAO().getById("54f6eb79e4b0aaf7d551abe1");
+			ArrayList<RecordLink> firstEntries = new ArrayList<RecordLink>();
+			firstEntries.add(rlink);
+			col.setFirstEntries(firstEntries);
+			DB.getCollectionDAO().save(col);
 
-		DB.getRecordLinkDAO().save(rlink);
+			DB.getRecordLinkDAO().save(rlink);
 
+
+		//}
+
+	}
+
+	@Test
+	public void testDAOsFuntionality() {
+
+		//Get a user by email
+		User user1 = DB.getUserDAO().getByEmail("heres42_@mongo.gr");
+		jsonPrettyPrint(user1.toString());
+
+		//Get user Searches
+		List<Search> userSearches = DB.getUserDAO().getSearchResults("heres42_@mongo.gr");
+		for(Search s: userSearches) {
+			jsonPrettyPrint(s.toString());
+		}
+
+		List<Collection> cols = DB.getUserDAO().getUserCollectionsByEmail("heres42_@mongo.gr");
 	}
 
 	@Test
@@ -187,6 +229,17 @@ public class DBTests {
 		} catch (NoSuchAlgorithmException e1) {
 			e1.printStackTrace();
 		}
+	}
+
+	/*
+	 * Pretty print json
+	 */
+	private void jsonPrettyPrint(String json) {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		JsonParser jp = new JsonParser();
+		JsonElement je = jp.parse(json);
+		String pretty = gson.toJson(je);
+		System.out.println(pretty);
 	}
 
 	/**

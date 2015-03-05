@@ -77,7 +77,7 @@ public class UserDAO extends DAO<User> {
 				.field("email").equal(email)
 				.retrievedFields(true, "userCollections.collection");
 		List<Collection> collections = new ArrayList<Collection>();
-		for(CollectionMetadata colMeta: find(q).get().getCollectionMetadata()) {
+		for(CollectionMetadata colMeta: findOne(q).getCollectionMetadata()) {
 			collections.add(colMeta.getColletion());
 		}
 		return collections;
@@ -96,8 +96,11 @@ public class UserDAO extends DAO<User> {
 
 	}
 
-	public List<User> listByName( String name ) {
-		return list("name", name);
+	public User getByName( String firstName, String lastName ) {
+		Query<User> q = this.createQuery()
+				.field("firstName").equal(firstName)
+				.field("lastName").equal(lastName);
+		return this.findOne(q);
 	}
 
 
