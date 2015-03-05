@@ -82,7 +82,7 @@ public class DSpaceSource implements ISpaceSource {
 				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = Utils.readAttr(item, "@id", false);
+				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
 				a.add(it);
 			}
 			res.items = a;
