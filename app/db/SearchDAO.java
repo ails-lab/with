@@ -17,6 +17,10 @@
 package db;
 
 import model.Search;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -25,6 +29,12 @@ public class SearchDAO extends DAO<Search> {
 
 	public SearchDAO() {
 		super(Search.class);
+	}
+
+	public Search getById(ObjectId id) {
+		Query<Search> q = this.createQuery()
+				.field("_id").equal(id);
+		return findOne(q);
 	}
 
 }

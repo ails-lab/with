@@ -27,7 +27,7 @@ import org.mongodb.morphia.annotations.Id;
 public class User {
 
 	@Id
-	private ObjectId dbID;
+	private ObjectId dbId;
 
 	private String email;
 	private String firstName;
@@ -45,6 +45,14 @@ public class User {
 	@Embedded
 	private List<CollectionMetadata> userCollections;
 
+
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
 
 	public String getEmail() {
 		return email;

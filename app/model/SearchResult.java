@@ -20,7 +20,8 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 /**
  * In this class we store search results that were retrieved by a search and we want to
@@ -39,8 +40,7 @@ public class SearchResult {
 	private int offset;
 
 	// embed the search in here or reference
-	@Reference
-	private Search search;
+	private ObjectId search;
 
 	// embedd the recordLink in here
 	@Embedded
@@ -64,11 +64,13 @@ public class SearchResult {
 	}
 
 	public Search getSearch() {
+		Search search =
+				DB.getSearchDAO().getById(this.search);
 		return search;
 	}
 
 	public void setSearch(Search search) {
-		this.search = search;
+		this.search = search.getDbID();
 	}
 
 	public RecordLink getRecordLink() {

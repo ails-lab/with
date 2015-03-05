@@ -44,9 +44,9 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.findOne("title", title);
 	}
 
-	public Collection getById(String id) {
+	public Collection getById(ObjectId id) {
 		Query<Collection> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
+				.field("_id").equal(id);
 		return findOne(q);
 	}
 

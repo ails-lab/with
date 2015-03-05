@@ -38,27 +38,27 @@ public class RecordLinkDAO extends DAO<RecordLink> {
 	}
 
 	public String getTitle(String dbId) {
-		return this.get(dbId).getTitle();
+		return getByDbId(dbId).getTitle();
 	}
 
 	public String getDescription(String dbId) {
-		return this.get(dbId).getDescription();
+		return getByDbId(dbId).getDescription();
 	}
 
 	public String getSource(String dbId) {
-		return this.get(dbId).getSource();
+		return getByDbId(dbId).getSource();
 	}
 
 	public String getSourceId(String dbId) {
-		return this.get(dbId).getSourceId();
+		return getByDbId(dbId).getSourceId();
 	}
 
 	public String getSourceUrl(String dbId) {
-		return this.get(dbId).getSourceUrl();
+		return getByDbId(dbId).getSourceUrl();
 	}
 
 	public String getThumbnailUrl(String dbId) {
-		return this.get(dbId).getThumbnailUrl();
+		return getByDbId(dbId).getThumbnailUrl();
 	}
 
 	public void blabla(Media media) {

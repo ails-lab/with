@@ -11,3 +11,8 @@ GET      /api/testsearch            controllers.SearchController.testsearch()
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# Collection Controller
+POST     /collection/delete/      controllers.CollectionController.deleteCollection()
+POST     /collection/add/         controllers.CollectionController.saveCollection()
+

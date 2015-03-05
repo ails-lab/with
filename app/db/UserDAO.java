@@ -24,6 +24,7 @@ import model.CollectionMetadata;
 import model.Search;
 import model.User;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -37,6 +38,13 @@ public class UserDAO extends DAO<User> {
 		super( User.class );
 	}
 
+	public User getById(ObjectId id) {
+		Query<User> q = this.createQuery()
+				.field("_id").equal(id);
+		return this.findOne(q);
+
+	}
+
 	public User getByEmail(String email) {
 		return this.findOne("email", email);
 	}
@@ -46,7 +54,7 @@ public class UserDAO extends DAO<User> {
 	 * By default update method is invoked to all documents of a collection.
 	 **/
 	public void setSpecificUserField(String dbId, String fieldName, String value) {
-		Query<User> q = this.createQuery().field("dbID").equal(dbId);
+		Query<User> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<User> updateOps = this.createUpdateOperations();
 		updateOps.set(fieldName, value);
 		this.update(q, updateOps);
@@ -78,7 +86,7 @@ public class UserDAO extends DAO<User> {
 				.retrievedFields(true, "userCollections.collection");
 		List<Collection> collections = new ArrayList<Collection>();
 		for(CollectionMetadata colMeta: findOne(q).getCollectionMetadata()) {
-			collections.add(colMeta.getColletion());
+			collections.add(colMeta.getCollection());
 		}
 		return collections;
 	}

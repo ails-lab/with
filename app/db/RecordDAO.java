@@ -36,9 +36,9 @@ public class RecordDAO extends DAO<Record> {
 	 * @param dbId
 	 * @return
 	 */
-	public RecordLink getRecordLink(String dbId) {
+	public RecordLink getRecordLink(ObjectId dbId) {
 		Query<Record> q = this.createQuery()
-				.field("dbId").equal(new ObjectId(dbId))
+				.field("_id").equal(dbId)
 				.retrievedFields(true, "baseLinkData");
 		return this.find(q).get().getBaseLinkData();
 	}
@@ -54,6 +54,12 @@ public class RecordDAO extends DAO<Record> {
 				.retrievedFields(true, "baseLinkData.source");
 		return this.find(q).get()
 				.getBaseLinkData().getSource();
+	}
+
+	public Record getById(ObjectId id) {
+		Query<Record> q = this.createQuery()
+				.field("_id").equal(id);
+		return this.findOne(q);
 	}
 
 }

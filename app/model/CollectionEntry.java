@@ -20,15 +20,16 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 @Entity
 public class CollectionEntry {
+
 	@Id
 	private ObjectId dbID;
 
-	@Reference
-	private Collection collection;
+	private ObjectId collection;
 	@Embedded
 	private RecordLink recordLink;
 
@@ -45,11 +46,13 @@ public class CollectionEntry {
 	}
 
 	public Collection getCollection() {
+		Collection collection =
+				DB.getCollectionDAO().getById(this.collection);
 		return collection;
 	}
 
 	public void setCollection(Collection collection) {
-		this.collection = collection;
+		this.collection = collection.getDbId();
 	}
 
 	public RecordLink getRecordLink() {

@@ -22,15 +22,16 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 @Entity
 public class Collection {
 
 	@Id
 	private ObjectId dbId;
-	@Reference
-	private User owner;
+
+	private ObjectId owner;
 
 	private String title;
 	private String description;
@@ -41,6 +42,14 @@ public class Collection {
 	// those will be as well in the CollectionEntry table
 	@Embedded
 	private List<RecordLink> firstEntries;
+
+	public ObjectId getDbId() {
+		return this.dbId;
+	}
+
+	public void setDbId(ObjectId id) {
+		this.dbId = id;
+	}
 
 	public String getTitle() {
 		return title;
@@ -61,10 +70,12 @@ public class Collection {
 		this.isPublic = isPublic;
 	}
 	public User getOwner() {
-		return owner;
+		User user =
+				DB.getUserDAO().getById(this.owner);
+		return user;
 	}
 	public void setOwner(User owner) {
-		this.owner = owner;
+		this.owner = owner.getDbId();
 	}
 	public List<RecordLink> getFirstEntries() {
 		return firstEntries;
