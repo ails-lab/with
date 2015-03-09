@@ -16,9 +16,11 @@
 
 package model;
 
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -89,6 +91,33 @@ public class User {
 		
 	}
 	
+	/**
+	 * md5 the password and set it in the right field
+	 * @param password
+	 */
+	public void setPassword( String password ) {
+		String pass = computeMD5( this.getEmail(), password );
+		this.setMd5Password(pass);
+	}
+	
+	/**
+	 * Computes the MD5 with email for this password.
+	 * Use when authenticating a user via password.
+	 * 
+	 * @param password
+	 * @return
+	 */
+	public static String computeMD5( String email, String password ) {
+		String salted = email + " - " + password;
+		try {
+			MessageDigest d = MessageDigest.getInstance("MD5");
+			String res = Hex.encodeHexString( d.digest( salted.getBytes("UTF8")));
+			return res;
+		} catch( Exception e ) {
+			log.error( "MD5 problem.", e );
+		}
+		return "";
+	}
 	
 	// getter setter
 	
