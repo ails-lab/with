@@ -19,6 +19,7 @@ package db;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
@@ -29,7 +30,7 @@ import play.libs.F.Callback;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 
-public class DAO<E> extends BasicDAO<E, String> {
+public class DAO<E> extends BasicDAO<E, ObjectId> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
 
 	private final Class<?> entityClass;
@@ -39,16 +40,6 @@ public class DAO<E> extends BasicDAO<E, String> {
 	}
 
 
-	/**
-	 * use attributes on the condition with the obj. prefix
-	 * @param condition
-	 * @return
-	 */
-	public List<E> list( String property, String value)  {
-		List<E> res = (List<E>) this.getDs().find(entityClass, property, value).asList();
-		return res;
-
-	}
 
 	/**
 	 * Return collection stats
@@ -64,16 +55,9 @@ public class DAO<E> extends BasicDAO<E, String> {
 
 	}
 
-	/**
-	 * Return index info for a collection
-	 */
-	public String getIndexindexInfo() {
-		return null;
-	}
 
 	/**
 	 * Execute on all matching entities and optionally write changes back to db.
-	 * Use the "obj." prefix on parameters of the query.
 	 * @param callback
 	 * @param withWriteback
 	 * @throws Exception
@@ -159,11 +143,13 @@ public class DAO<E> extends BasicDAO<E, String> {
 	 * @param condition
 	 * @return Number of entries deleted
 	 */
-	public boolean removeAll( String condition ) {
+	public int removeAll( String condition ) {
 		Query<E> q = this.createQuery();
 		q.criteria(condition);
-		boolean res = this.deleteByQuery(q).getLastError().ok();
-
-		return res;
+		int n = this
+				.deleteByQuery(q)
+				.getN();
+		
+		return n;
 	}
 }
