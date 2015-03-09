@@ -45,7 +45,7 @@ public class UserDAO extends DAO<User> {
 	 * This method is updating one specific User.
 	 * By default update method is invoked to all documents of a collection.
 	 **/
-	public void setSpecificUserField(String dbId, String fieldName, String value) {
+	private void setSpecificUserField(String dbId, String fieldName, String value) {
 		Query<User> q = this.createQuery().field("dbID").equal(dbId);
 		UpdateOperations<User> updateOps = this.createUpdateOperations();
 		updateOps.set(fieldName, value);
@@ -58,11 +58,12 @@ public class UserDAO extends DAO<User> {
 	 * @param pass
 	 * @return
 	 */
-	public User getByEmailPassword(String email, String pass) {
+	public User getByEmailPassword(String email, String pass) {		
 		Query<User> q = this.createQuery();
+		String md5Pass = User.computeMD5(email, pass);
 		q.and(
 			q.criteria("email").equal(email),
-			q.criteria("md5Password").equal(pass)
+			q.criteria("md5Password").equal(md5Pass)
 		);
 		return find(q).get();
 	}
@@ -82,23 +83,4 @@ public class UserDAO extends DAO<User> {
 		}
 		return collections;
 	}
-
-	/**
-	 * Return search results from a user
-	 * @param email
-	 * @return
-	 */
-	public List<Search> getSearchResults(String email) {
-		Query<User> q = this.createQuery()
-				.field("email").equal(email)
-				.retrievedFields(true, "searchHistory");
-		return find(q).get().getSearchHistory();
-
-	}
-
-	public List<User> listByName( String name ) {
-		return list("name", name);
-	}
-
-
 }
