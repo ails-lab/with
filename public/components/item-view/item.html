@@ -1,8 +1,14 @@
 <div class="md-modal md-effect-1" id="modal-1">
 			<div class="md-content">
-			 
-				<h3><!-- ko text: title --><!-- /ko --> </h3>
+			   
+			    <h3 class="truncate">
+				 <span class="withcollect"><i class="fa fa-connectdevelop"></i><span class="content"> collect it</span></span>
+				<!-- ko text: title --><!-- /ko --> 
+				<span class="overlay-close" data-bind="event: {click: close}"></span>
 				
+				</h3>
+				
+				<hr class="faded">
 				
 			 
 				   <div class="row">
@@ -14,18 +20,38 @@
 					      </div>
 					      </div>
 					      
-					      <div class="spec">
-					      <div class="itemlabel">Record source
+					     
+					    
+					     <div class="spec" data-bind="if: creator">
+					      <div class="itemlabel">Creator
 					      </div>
-					      <div class="value"><!-- ko text: apisource --><!-- /ko --> 
+					      <div class="value" data-bind="text:creator">
+					      
+					      </div>
+					    </div>
+					  
+					   <div class="spec" data-bind="if: provider">
+					      <div class="itemlabel">Provider
+					      </div>
+					      <div class="value" data-bind="text:provider">
+					      
 					      </div>
 					    </div>
 					  
 					   <div class="spec">
-					      <div class="itemlabel">More details
+					      <div class="itemlabel">Record source
 					      </div>
 					      <div class="value">
-					      <a data-bind="attr: { href:view_url}" target="_blank"><!-- ko text: view_url --><!-- /ko --> </a>
+					      
+					      <div><img  class="logo" data-bind="attr:{src:sourceImage}"/>
+					      </div>
+					      </div>
+					    </div>
+					  
+					   <div class="spec">
+					     
+					      <div class="value">
+					      <a data-bind="attr: { href:view_url}" target="_blank">More details </a>
 					      
 					      </div>
 					    </div>

@@ -11,9 +11,10 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 	  self.thumb = ko.observable(false);
 	  self.fullres=ko.observable(false);
 	  self.view_url=ko.observable("");
+	  self.creator=ko.observable("");
+	  self.provider=ko.observable("");
 	  self.apisource=ko.observable(true);
-	  self.thumbshow=ko.observable(false);
-     
+	 
     itemShow = function(record) {
     	self.itemload(record);
     	$('#modal-1').css('display', 'block');
@@ -33,11 +34,11 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		
 		self.thumb(data.thumb);
 		thumb=data.thumb;
-		if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0 && data.fullres!="null")
-		self.fullres(data.fullres[0]);
+		if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0 && data.fullres!="null"){
+		  self.fullres(data.fullres[0]);}
 		else{
 			self.fullres(data.thumb);
-			self.thumbshow(true);
+			
 		  }
 		
 		if(data.description==undefined){
@@ -45,9 +46,18 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		}
 		else{
 		self.description(data.description);}
+		if(data.creator!==undefined){
+			self.creator(data.creator);
+		}
+		if(data.provider!==undefined){
+			self.provider(data.provider);
+		}
 		
 		self.apisource(data.source);
+		
 		self.view_url(data.view_url);
+		
+	   
 		
 	};
    
@@ -58,16 +68,24 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     	$('.withsearch').css('overflow','scroll');
     }
     
-    self.changeSource=function(){
-    	if(self.thumbshow()==false){
-    	  $("#fullresim").attr('src',thumb);
-    	  self.thumbshow(true);
+    self.changeSource=function(item){
+    	if(item.fullres!=item.thumb){
+    		 $("#fullresim").attr('src',thumb);
     	}
     	else{
-    		$("#fullresim").attr('src','images/no_image.jpg');
+    		 $("#fullresim").attr('src',thumb);
     	}
+    	
     }
-   
+    
+    self.sourceImage = ko.pureComputed(function() {
+		if(self.apisource() =="DPLA") return "images/logos/dpla.png";
+		else if(self.apisource() == "Europeana") return "images/logos/europeana.jpeg";
+		else if(self.apisource() == "NLA") return "images/logos/nla_logo.png";
+		else if(self.apisource() == "DigitalNZ") return "images/logos/digitalnz.png";
+		else return "";
+	});
+    
     
   }
 

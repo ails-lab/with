@@ -53,14 +53,12 @@
 }
 
 .md-content h3 {
+	color: #333;
+	clear: both;
+	font-size: 20px;
+	font-weight: bold;
 	margin: 0;
-	padding: 0.4em;
-	text-align: left;
-	font-size: 1.3em;
-	font-weight: 300;
-	opacity: 0.8;
-	background: rgba(0,0,0,0.1);
-	border-radius: 3px 3px 0 0;
+	padding: 45px 15px 1px;
 }
 
 .itemim{
@@ -117,3 +115,97 @@
 	opacity: 1;
 }
 
+.overlay-close {
+	width: 16px;
+	height: 16px;
+	position: absolute;
+	right: 0.5em;
+	top: 0.5em;
+	overflow: hidden;
+	text-indent: 100%;
+	cursor: pointer;
+	pointer-events: auto;
+	opacity: 0.6;
+	
+}
+
+.overlay-close::before,
+.overlay-close::after {
+	content: '';
+	position: absolute;
+	width: 2px;
+	height: 100%;
+	top: 0;
+	left: 50%;
+	border-radius: 3px;
+	opacity: 0.6;
+	background: #000;
+}
+
+.overlay-close:hover.overlay-close::before,
+.overlay-close:hover.overlay-close::after {
+	opacity: 1;
+}
+
+.overlay-close::before {
+	-webkit-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+.overlay-close::after {
+	-webkit-transform: rotate(-45deg);
+	transform: rotate(-45deg);
+}
+
+
+.withcollect{
+	font-size:20px;
+	position:absolute;
+	top:0.5em;
+	left:0.5em;
+	opacity:0.5;
+	cursor:pointer;
+}
+
+.withcollect:hover{
+	opacity:1;
+}
+
+.withcollect .content{
+	font-size: 12px;
+	font-weight: 200;
+    
+	
+}
+
+
+hr.faded {
+  clear: both; 
+  float: none; 
+  width: 100%; 
+  height: 1px;
+  margin: 1.4em 0;
+  border: none; 
+  background: #ddd;
+  background-image: -webkit-gradient(
+      linear,
+      left bottom,
+      right bottom,
+      color-stop(0, rgb(255,255,255)),
+      color-stop(0.1, rgb(221,221,221)),
+      color-stop(0.9, rgb(221,221,221)),
+      color-stop(1, rgb(255,255,255))
+  );
+  background-image: -moz-linear-gradient(
+      left center,
+      rgb(255,255,255) 0%,
+      rgb(221,221,221) 10%,
+      rgb(221,221,221) 90%,
+      rgb(255,255,255) 100%
+  );
+}
+
+.logo{
+	max-width:100px;
+	
+}
