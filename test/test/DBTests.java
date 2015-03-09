@@ -14,6 +14,7 @@
  */
 
 
+package test;
 import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
@@ -59,50 +60,6 @@ import db.DB;
 public class DBTests {
 
 
-	@Test
-	public void userStorage() {
-		/* Add 1000 random users */
-		for (int i = 0; i < 1000; i++) {
-			User testUser = new User();
-			if (i == 42) {
-				// email
-				testUser.setEmail("heres42@mongo.gr");
-			} else {
-				// email
-				testUser.setEmail(randomString() + "@mongo.gr");
-			}
-			// set an MD5 password
-			if (i == 42) {
-				digest.update("helloworld".getBytes());
-				testUser.setMd5Password(digest.digest().toString());
-			} else {
-				digest.update(randomString().getBytes());
-				testUser.setMd5Password(digest.digest().toString());
-			}
-			// search history
-			List<Search> searchHistory = new ArrayList<Search>();
-			for (int j = 0; j < 1000; j++) {
-				Search s1 = new Search();
-				s1.setSearchDate(generate_random_date_java());
-				searchHistory.add(s1);
-				testUser.setSearcHistory(searchHistory);
-			}
-			if (testUser != null)
-				try {
-					DB.getUserDAO().makePermanent(testUser);
-				} catch (MongoException e) {
-					System.out.println("mongo exception");
-				}
-		}
-
-		List<User> l = DB.getUserDAO().find().asList();
-		assertThat(l.size()).isGreaterThanOrEqualTo(1);
-
-		// int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
-		// assertThat( count )
-		// .overridingErrorMessage("Not removed enough Testers")
-		// .isGreaterThanOrEqualTo(1 );
-	}
 
 	@Test
 	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
@@ -147,14 +104,6 @@ public class DBTests {
 
 	}
 
-	@Test
-	public void testUserDAO() {
-		DB.initialize();
-		User user1 = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		User user3 = DB.getUserDAO().getByEmailPassword("heres42@mongo.gr", "helloworld");
-		// List<Search> searchList = DB.getUserDAO().getSearchResults("man42");
-		System.out.println(user1.toString());
-	}
 
 	@Test
 	public void renderTemplate() {
@@ -164,59 +113,5 @@ public class DBTests {
 		assertThat(contentAsString(html)).contains(
 				"Your new application is ready.");
 	}
-
-	/*
-	 * test set up stuff... don't give a sh#t
-	 */
-	/* ************************************* */
-	private long beginTime;
-	private long endTime;
-	// create an MD5 password
-	private MessageDigest digest = null;
-
-	@Before
-	public void setUp() {
-		DB.initialize();
-		DB.getDs().ensureIndexes(User.class);
-
-		beginTime = Timestamp.valueOf("2013-01-01 00:00:00").getTime();
-		endTime = Timestamp.valueOf("2013-12-31 00:58:00").getTime();
-
-		try {
-			digest = MessageDigest.getInstance("MD5");
-		} catch (NoSuchAlgorithmException e1) {
-			e1.printStackTrace();
-		}
-	}
-
-	/**
-	 * Method should generate random number that represents a time between two
-	 * dates.
-	 *
-	 * @return
-	 */
-	private long getRandomTimeBetweenTwoDates() {
-		long diff = (endTime - beginTime) + 1;
-		return beginTime + (long) (Math.random() * diff);
-	}
-
-	public Date generate_random_date_java() {
-
-		SimpleDateFormat dateFormat = new SimpleDateFormat(
-				"yyyy-MM-dd hh:mm:ss");
-
-		return new Date(getRandomTimeBetweenTwoDates());
-	}
-
-	public String randomString() {
-		char[] text = new char[50];
-		for (int i = 0; i < 50; i++)
-			text[i] = "abcdefghijklmnopqrstuvwxyz".charAt(new Random()
-					.nextInt(25));
-		return text.toString();
-	}
-
-	/* *********************************************** */
-
 
 }
