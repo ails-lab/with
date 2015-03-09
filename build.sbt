@@ -11,5 +11,6 @@ libraryDependencies ++= Seq(
 //  javaEbean,
 //  cache,
   javaWs,
- "org.mongodb.morphia" % "morphia" % "0.110"
+ "org.mongodb.morphia" % "morphia" % "0.110",
+ "org.apache.jena" % "apache-jena-libs" % "2.10.1"
 )
