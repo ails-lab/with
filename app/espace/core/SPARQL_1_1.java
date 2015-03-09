@@ -38,7 +38,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 public class SPARQL_1_1 {
 	
-	protected final static Logger log = Logger.getLogger(Repository.class);
+	protected final static Logger log = Logger.getLogger(SPARQL_1_1.class);
 	private String sparqlEndpoint;
 	
 	
@@ -194,7 +194,7 @@ public class SPARQL_1_1 {
 	 * @return a ResultSet with the results
 	 */
 	public ResultSet query(String query) {
-		return Repository.query(this.sparqlEndpoint, query);
+		return SPARQL_1_1.query(this.sparqlEndpoint, query);
 	}
 
 	/**
@@ -203,7 +203,7 @@ public class SPARQL_1_1 {
 	 * @return a String with the first result's first bound variable 
 	 */
 	public String queryFirst(String query) {
-		return Repository.queryFirst(this.sparqlEndpoint, query);
+		return SPARQL_1_1.queryFirst(this.sparqlEndpoint, query);
 	}
 
 	/**
@@ -212,7 +212,7 @@ public class SPARQL_1_1 {
 	 * @return a list containing the results for the first variable set in the SPAQRL query
 	 */
 	public List<String> queryList(String query) {
-		return Repository.queryList(this.sparqlEndpoint, query);
+		return SPARQL_1_1.queryList(this.sparqlEndpoint, query);
 	}
 
 	/**
@@ -222,7 +222,7 @@ public class SPARQL_1_1 {
 	 * @return a Map with bound variables as keys
 	 */
 	public Map<String, String> queryMap(String query) {
-		return Repository.queryMap(this.sparqlEndpoint, query);
+		return SPARQL_1_1.queryMap(this.sparqlEndpoint, query);
 	}
 	
 	/**
@@ -232,7 +232,7 @@ public class SPARQL_1_1 {
 	 * @return a List of Maps with bound variables as keys
 	 */
 	public List<Map<String, String>> queryMapList(String query) {
-		return Repository.queryMapList(this.sparqlEndpoint, query);
+		return SPARQL_1_1.queryMapList(this.sparqlEndpoint, query);
 	}
 	
 		
