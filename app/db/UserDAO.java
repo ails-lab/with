@@ -92,7 +92,7 @@ public class UserDAO extends DAO<User> {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
 				.retrievedFields(true, "searchHistory");
-		return find(q).get().getSearcHistory();
+		return find(q).get().getSearchHistory();
 
 	}
 
