@@ -74,6 +74,9 @@ public class DB {
 				String host = getConf().getString("mongo.host");
 				int port = getConf().getInt("mongo.port");
 				mongo = new MongoClient(host, port);
+				if( getConf().getBoolean("mongo.erase")) {
+					mongo.dropDatabase(getConf().getString( "mongo.dbname"));
+				}
 			} catch( Exception e ) {
 				log.error( "Cannot create Mongo client", e );
 			}
