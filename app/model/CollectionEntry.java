@@ -16,6 +16,8 @@
 
 package model;
 
+import java.util.Date;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -32,10 +34,15 @@ public class CollectionEntry {
 	@Embedded
 	private RecordLink recordLink;
 
+	private Date created;
+	
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
 
+	
+	// getter setter section
+	
 	public ObjectId getDbID() {
 		return dbID;
 	}
@@ -66,6 +73,14 @@ public class CollectionEntry {
 
 	public void setPosition(int position) {
 		this.position = position;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
 	}
 
 
