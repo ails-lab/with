@@ -16,6 +16,8 @@
 
 package model;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -26,6 +28,8 @@ import org.mongodb.morphia.annotations.Reference;
 
 @Entity
 public class Collection {
+	private static final int EMBEDDED_CAP = 20;
+	
 
 	@Id
 	private ObjectId dbId;
@@ -34,14 +38,38 @@ public class Collection {
 
 	private String title;
 	private String description;
-
+	private Media thumbnail;
+	
+	private Record exampleRecord;
 	private boolean isPublic;
-
+	private Date created;
+	private Date lastModified;
+	
+	
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
-	private List<RecordLink> firstEntries;
+	private List<RecordLink> firstEntries = new ArrayList<RecordLink>();
 
+	
+	public void addEntry( CollectionEntry ce ) {
+		
+	}
+	/**
+	 * Get the embeddable Metadata part
+	 * @return
+	 */
+	public CollectionMetadata getMetadata() {
+		CollectionMetadata cm = new CollectionMetadata();
+		cm.setColletion(this);
+		cm.setDescription(description);
+		cm.setThumbnail(thumbnail);
+		cm.setTitle(title);
+		
+		return cm;
+	}
+	
+	// Getter setters
 	public String getTitle() {
 		return title;
 	}
@@ -61,4 +89,55 @@ public class Collection {
 		this.isPublic = isPublic;
 	}
 
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+
+	public User getOwner() {
+		return owner;
+	}
+
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
+
+	public Media getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(Media thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
+	public Record getExampleRecord() {
+		return exampleRecord;
+	}
+
+	public void setExampleRecord(Record exampleRecord) {
+		this.exampleRecord = exampleRecord;
+	}
+
+	public List<RecordLink> getFirstEntries() {
+		return firstEntries;
+	}
+
+	public void setFirstEntries(List<RecordLink> firstEntries) {
+		this.firstEntries = firstEntries;
+	}
+	public Date getCreated() {
+		return created;
+	}
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+	public Date getLastModified() {
+		return lastModified;
+	}
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
+	}
 }
