@@ -13,6 +13,6 @@ GET      /api/testsearch            controllers.SearchController.testsearch()
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Collection Controller
-POST     /collection/delete/      controllers.CollectionController.deleteCollection()
-POST     /collection/add/         controllers.CollectionController.saveCollection()
+POST     /collection/delete      controllers.CollectionController.deleteCollection()
+POST     /collection/add         controllers.CollectionController.saveCollection()
 

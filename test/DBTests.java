@@ -36,6 +36,7 @@ import model.RecordLink;
 import model.Search;
 import model.User;
 
+import org.bson.types.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -99,7 +100,7 @@ public class DBTests {
 				s1.setSearchDate(generate_random_date_java());
 				s1.setUser(userWithDates);
 				searchHistory.add(s1);
-				userWithDates.setSearcHistory(searchHistory);
+				userWithDates.setSearchHistory(searchHistory);
 			}
 			if (userWithDates != null)
 				try {
@@ -150,7 +151,7 @@ public class DBTests {
 			//and references to Media and Record
 */
 			//Get Media object
-			Media imageRetrieved = DB.getMediaDAO().findById("54ef0a09e4b0af9ca4dc8fbc");
+			Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
 			//Media imageRetrieved = DB.getMediaDAO().
 			//Get Record object
 			Record recordRetrieved = DB.getRecordDAO().find().get();
@@ -160,7 +161,7 @@ public class DBTests {
 			rlink.setRecordReference(recordRetrieved);
 
 			//embed recordlink in collection - 10th
-			Collection col = DB.getCollectionDAO().getById("54f6eb79e4b0aaf7d551abe1");
+			Collection col = DB.getCollectionDAO().getById(new ObjectId("54f6eb79e4b0aaf7d551abe1"));
 			ArrayList<RecordLink> firstEntries = new ArrayList<RecordLink>();
 			firstEntries.add(rlink);
 			col.setFirstEntries(firstEntries);
@@ -191,7 +192,6 @@ public class DBTests {
 
 	@Test
 	public void testUserDAO() {
-		DB.initialize();
 		User user1 = DB.getUserDAO().getByEmail("heres42@mongo.gr");
 		User user3 = DB.getUserDAO().getByEmailPassword("heres42@mongo.gr", "helloworld");
 		// List<Search> searchList = DB.getUserDAO().getSearchResults("man42");
@@ -218,7 +218,6 @@ public class DBTests {
 
 	@Before
 	public void setUp() {
-		DB.initialize();
 		DB.getDs().ensureIndexes(User.class);
 
 		beginTime = Timestamp.valueOf("2013-01-01 00:00:00").getTime();

@@ -16,8 +16,6 @@
 
 package utils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 import model.Collection;
@@ -34,56 +32,38 @@ import db.DB;
 public class Serializer {
 	public static final ALogger log = Logger.of( Serializer.class);
 
-	private final JsonNode json;
-	private final Class clazz;
 
-	public Serializer(JsonNode json, Class clazz) {
-		this.json = json;
-		this.clazz = clazz;
-	}
-
-	public Object jsonToObject() {
-		return this.jsonToObject(clazz);
-	}
-
-	private Object jsonToObject(Class clazz)  {
-		try {
-			String methodName = "jsonTo" + clazz.getSimpleName() + "Object";
-			Method serializer = getClass().getDeclaredMethod(methodName);
-			return serializer.invoke(this, new Object());
-		} catch(IllegalAccessException | InvocationTargetException e) {
-			log.error("Illegal access to method!");
-		} catch(IllegalArgumentException e) {
-			log.error("Wrong arguments specified to method invocation!");
-		} catch(Exception e) {
-			log.error("Cannot invoke serialization method!");
-		}
-		return null;
-	}
-
-	private Collection jsonToCollectionObject() {
+	public static Collection jsonToCollectionObject(JsonNode json) {
 		Collection collection = new Collection();
 
-		collection.setDescription(json.get("description").toString());
-		collection.setTitle(json.get("title").toString());
-		String isPublic = json.get("public").toString();
-		if(isPublic.equals("true"))
-			collection.setPublic(true);
-		else
-			collection.setPublic(false);
-
-		String ownerMail = json.get("ownerMail").toString();
-		User owner = DB.getUserDAO().getByEmail(ownerMail);
-		collection.setOwner(owner);
-
-		ArrayNode firstEntriesIds = (ArrayNode)json.get("firstEntries");
-		ArrayList<RecordLink> firstEntries = new ArrayList<RecordLink>();
-		for(JsonNode idNode: firstEntriesIds) {
-			String id = idNode.get("id").toString();
-			RecordLink rlink = DB.getRecordLinkDAO().getByDbId(id);
-			firstEntries.add(rlink);
+		if(json.has("description"))
+			collection.setDescription(json.get("description").toString());
+		if(json.has("title"))
+			collection.setTitle(json.get("title").toString());
+		if(json.has("public")) {
+			String isPublic = json.get("public").toString();
+			if(isPublic.equals("true"))
+				collection.setPublic(true);
+			else
+				collection.setPublic(false);
 		}
-		collection.setFirstEntries(firstEntries);
+
+		if(json.has("ownerMail")) {
+			String ownerMail = json.get("ownerMail").toString();
+			User owner = DB.getUserDAO().getByEmail(ownerMail);
+			collection.setOwner(owner);
+		}
+
+		if(json.has("firstEntries")) {
+			ArrayNode firstEntriesIds = (ArrayNode)json.get("firstEntries");
+			ArrayList<RecordLink> firstEntries = new ArrayList<RecordLink>();
+			for(JsonNode idNode: firstEntriesIds) {
+				String id = idNode.get("id").toString();
+				RecordLink rlink = DB.getRecordLinkDAO().getByDbId(id);
+				firstEntries.add(rlink);
+			}
+			collection.setFirstEntries(firstEntries);
+		}
 
 		if(collection == null)
 			log.debug("Null collection! No database storage!");

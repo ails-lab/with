@@ -27,8 +27,9 @@ public class CollectionMetadata {
 	private String title;
 	private String description;
 
+	//ref to collection
 	private ObjectId collection;
-
+	//ref to thumbnail
 	private ObjectId thumbnail;
 
 	public String getTitle() {
@@ -67,5 +68,7 @@ public class CollectionMetadata {
 		this.thumbnail = thumbnail.getDbId();
 	}
 
-
+	public void setThumbnail(ObjectId thumbnail) {
+		this.thumbnail = thumbnail;
+	}
 }

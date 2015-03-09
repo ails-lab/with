@@ -26,7 +26,6 @@ import org.mongodb.morphia.annotations.Id;
 
 import play.Logger;
 import play.Logger.ALogger;
-import db.MediaDAO;
 
 @Entity
 public class User {
@@ -35,7 +34,7 @@ public class User {
 
 
 	private static final int EMBEDDED_CAP = 20;
-	
+
 	@Id
 	private ObjectId dbId;
 
@@ -67,7 +66,7 @@ public class User {
 	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
 
 	// convenience methods
-	
+
 	/**
 	 * The search should already be stored in the database separately
 	 * @param search
@@ -77,15 +76,15 @@ public class User {
 			log.error( "Search is  not saved!" );
 			return;
 		}
-		
+
 		searchHistory.add( search );
 		if( searchHistory.size() > EMBEDDED_CAP ) {
 			searchHistory.remove(0);
 		}
 	}
-	
+
 	/**
-	 * The Collection should already be stored in the database separately 
+	 * The Collection should already be stored in the database separately
 	 * @param col
 	 */
 	public void addToCollections( Collection col ) {
@@ -97,12 +96,12 @@ public class User {
 		if( collections.size() > EMBEDDED_CAP) {
 			collections.remove(0);
 		}
-		
+
 	}
-	
-	
+
+
 	// getter setter
-	
+
 	public String getEmail() {
 		return email;
 	}
@@ -152,14 +151,6 @@ public class User {
 		this.collections = collections;
 	}
 
-	public ObjectId getDbID() {
-		return dbID;
-	}
-
-	public void setDbID(ObjectId dbID) {
-		this.dbID = dbID;
-	}
-
 	public String getFacebookId() {
 		return facebookId;
 	}
@@ -167,5 +158,5 @@ public class User {
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
 	}
-	
+
 }

@@ -46,14 +46,14 @@ public class DB {
 	private static Datastore ds;
 	private static GridFS gridfs;
 	private static Config conf;
-	
+
 	static private final Logger.ALogger log = Logger.of(DB.class);
 
 	public static GridFS getGridFs() {
 		if(gridfs == null) {
 			try {
 				String dbname = getConf().getString( "mongo.dbname");
-				gridfs = new GridFS(mongo.getDB(dbname));
+				gridfs = new GridFS(getMongo().getDB(dbname));
 			} catch(Exception e) {
 				log.error("Cannot create GridFS!", e);
 			}
@@ -67,14 +67,14 @@ public class DB {
 		}
 		return conf;
 	}
-	
+
 	public static MongoClient getMongo() {
 		if( mongo == null ) {
 			try {
 				String host = getConf().getString("mongo.host");
 				int port = getConf().getInt("mongo.port");
 				mongo = new MongoClient(host, port);
-				if( getConf().getBoolean("mongo.erase")) {
+				if( getConf().hasPath("mongo.erase") && getConf().getBoolean("mongo.erase")) {
 					mongo.dropDatabase(getConf().getString( "mongo.dbname"));
 				}
 			} catch( Exception e ) {
@@ -88,10 +88,11 @@ public class DB {
 		if(ds == null) {
 			try {
 				Morphia morphia = new Morphia();
-				morphia.mapPackage("model");
-				ds = new Morphia().createDatastore(getMongo(), getConf().getString("mongo.dbname"));
+				//this method is not working, have to find why!!
+				//morphia.mapPackage("model");
+				ds = morphia.createDatastore(getMongo(), getConf().getString("mongo.dbname"));
 				ds.ensureIndexes();
-				
+
 			} catch(Exception e) {
 				log.error("Cannot create Datastore!", e);
 			}

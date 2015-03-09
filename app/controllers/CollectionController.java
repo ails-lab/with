@@ -17,6 +17,9 @@
 package controllers;
 
 import model.Collection;
+
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.mvc.BodyParser;
@@ -51,11 +54,10 @@ public class CollectionController extends Controller {
 		JsonNode json = request().body().asJson();
 
 		if(json == null)
-			return badRequest("Empty json!");
+			return badRequest("Empty json!\n");
 
 		jsonPrettyPrint(json.toString());
-		Serializer serilaze = new Serializer(json, Collection.class);
-		Collection newCollection = (Collection)serilaze.jsonToObject();
+		Collection newCollection = Serializer.jsonToCollectionObject(json);
 
 		try {
 			DB.getCollectionDAO().save(newCollection);
@@ -63,7 +65,7 @@ public class CollectionController extends Controller {
 			log.error("Collection was not saved!", e);
 			return status(INTERNAL_SERVER_ERROR);
 		}
-		return ok("Got json from request!");
+		return ok("Got json from request!\n");
 	}
 
 	@BodyParser.Of(BodyParser.Json.class)
@@ -73,8 +75,12 @@ public class CollectionController extends Controller {
 		if(json == null)
 			return badRequest("Empty json!");
 
-		String id = json.get("dbId").asText();
-		DB.getCollectionDAO().deleteById(id);
-		return ok("Collection deleted succesfully!");
+		if(json.has("dbId")) {
+			ObjectId id = new ObjectId(json.get("dbId").asText());
+			DB.getCollectionDAO().deleteById(id);
+			return ok("Collection deleted succesfully!\n");
+		} else {
+			return ok("No collection id specified!\n");
+		}
 	}
 }

@@ -17,7 +17,6 @@
 import model.Collection;
 import model.User;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import db.DB;
@@ -25,10 +24,6 @@ import db.DB;
 
 public class storeCollections  {
 
-	@Before
-	public void setUp() {
-		DB.initialize();
-	}
 
 	@Test
 	public void storeCollection() {
@@ -48,7 +43,7 @@ public class storeCollections  {
 				user = DB.getUserDAO().find().asList().get(i);
 				collection.setOwner(user);
 			}
-			DB.getCollectionDAO().save(collection);
+			DB.getCollectionDAO().makePermanent(collection);;
 		}
 
 	}

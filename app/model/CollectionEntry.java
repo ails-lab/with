@@ -36,14 +36,14 @@ public class CollectionEntry {
 	private RecordLink recordLink;
 
 	private Date created;
-	
+
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
 
-	
+
 	// getter setter section
-	
+
 	public ObjectId getDbID() {
 		return dbID;
 	}
@@ -60,6 +60,10 @@ public class CollectionEntry {
 
 	public void setCollection(Collection collection) {
 		this.collection = collection.getDbId();
+	}
+
+	public void setCollection(ObjectId collectionId) {
+		this.collection = collectionId;
 	}
 
 	public RecordLink getRecordLink() {
