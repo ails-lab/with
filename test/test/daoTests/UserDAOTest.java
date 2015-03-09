@@ -25,7 +25,9 @@ import java.util.List;
 import model.Search;
 import model.User;
 
+import org.bson.types.ObjectId;
 import org.junit.Test;
+import org.mongodb.morphia.query.Query;
 
 import test.TestUtils;
 
@@ -34,16 +36,55 @@ import com.mongodb.MongoException;
 import db.DB;
  
 public class UserDAOTest {
-	@Test
-	public void testUserDAO() {
-		User user1 = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		User user3 = DB.getUserDAO().getByEmailPassword("heres42@mongo.gr", "helloworld");
-		// List<Search> searchList = DB.getUserDAO().getSearchResults("man42");
-		System.out.println(user1.toString());
-	}
 
 	@Test
-	public void userStorage() {
+	public void testCRUD() {
+		// create
+		User testUser = new User();
+		testUser.setEmail( "test@ntua.gr");
+		testUser.setPassword("secret");
+		DB.getUserDAO().makePermanent(testUser);
+		
+		ObjectId id = testUser.getDbID();
+
+		// find by Email
+		User a = DB.getUserDAO().findOne( "email", "test@ntua.gr");
+		assertThat(a).isNotNull()
+			.overridingErrorMessage("Test user not found after store.");
+		
+		// find with email and password
+		User b = DB.getUserDAO().getByEmailPassword("test@ntua.gr", "wrong");
+		assertThat( b )
+			.overridingErrorMessage("User falsly retrieved with wrong password")
+			.isNull();
+		b = DB.getUserDAO().getByEmailPassword("test@ntua.gr", "secret");
+		assertThat(b)
+			.overridingErrorMessage("User with password not retreived.")
+			.isNotNull();
+		
+		// update a user
+		b.setFirstName("Bert");
+		b.setLastName("Testuser");
+		DB.getUserDAO().makePermanent(b);
+		
+		// check its correct in db
+		User c = DB.getUserDAO().get(id);
+		assertThat( c.getLastName())
+			.isEqualTo("Testuser" );
+		
+		// remove from db
+		DB.getUserDAO().makeTransient(c);
+		
+		// check its gone
+		User d = DB.getUserDAO().get( id );
+		assertThat( d )
+			.overridingErrorMessage("User not deleted!")
+			.isNull();
+		
+	}
+	
+	@Test
+	public void massStorage() {
 		/* Add 1000 random users */
 		for (int i = 0; i < 1000; i++) {
 			User testUser = new User();
@@ -54,38 +95,43 @@ public class UserDAOTest {
 				// email
 				testUser.setEmail(TestUtils.randomString() + "@mongo.gr");
 			}
+
 			// set an MD5 password
-			MessageDigest digest = TestUtils.getMD5Digest();
 			if (i == 42) {
-				digest.update("helloworld".getBytes());
-				testUser.setMd5Password(digest.digest().toString());
+				testUser.setPassword("helloworld");
 			} else {
-				digest.update(TestUtils.randomString().getBytes());
-				testUser.setMd5Password(digest.digest().toString());
+				testUser.setPassword(TestUtils.randomString());
 			}
+
 			// search history
-			List<Search> searchHistory = new ArrayList<Search>();
-			for (int j = 0; j < 1000; j++) {
-				Search s1 = new Search();
-				s1.setSearchDate(TestUtils.randomDate());
-				searchHistory.add(s1);
-				testUser.setSearchHistory(searchHistory);
-			}
-			if (testUser != null)
-				try {
-					DB.getUserDAO().makePermanent(testUser);
-				} catch (MongoException e) {
-					System.out.println("mongo exception");
+			if( i==42 ) {
+				List<Search> searchHistory = new ArrayList<Search>();
+				for (int j = 0; j < 1000; j++) {
+					Search s1 = new Search();
+					s1.setSearchDate(TestUtils.randomDate());
+					testUser.addToHistory(s1);
+					searchHistory.add(s1);
 				}
+				// testUser.setSearchHistory(searchHistory);
+			}
+			testUser.setLastName("Testuser");
+			DB.getUserDAO().makePermanent(testUser);
 		}
 
-		List<User> l = DB.getUserDAO().find().asList();
-		assertThat(l.size()).isGreaterThanOrEqualTo(1);
 
-		// int count = DB.getUserDAO().removeAll("obj.name='Tester'" );
-		// assertThat( count )
-		// .overridingErrorMessage("Not removed enough Testers")
-		// .isGreaterThanOrEqualTo(1 );
+		List<User> l = DB.getUserDAO().find().asList();
+		assertThat(l.size()).isGreaterThanOrEqualTo(1000);
+
+		// get User 42
+		User x = DB.getUserDAO().getByEmail("heres42@mongo.gr");
+		assertThat(x)
+			.isNotNull();
+		
+		// mass delete
+		int res = DB.getUserDAO().removeAll("lastName='Testuser'");
+		assertThat( res )
+			.overridingErrorMessage("Not enough Testusers deleted.")
+			.isGreaterThanOrEqualTo(1000);
 	}
 
 }
