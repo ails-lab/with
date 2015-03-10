@@ -55,6 +55,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
 		self.source=ko.observable(false);
+		self.creator=ko.observable("");
+		self.provider=ko.observable("");
+		
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
@@ -65,7 +68,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.fullres(data.fullres);
 			self.description(data.description);
 			self.source(data.source);
-			
+			self.creator(data.creator);
+			self.provider(data.provider);
 		};
 
 		self.displayTitle = ko.computed(function() {
@@ -191,6 +195,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							fullres: result.fullresolution,
 							title: result.title[0].value,
 							view_url: result.url.fromSourceAPI,
+							creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
+							provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
 							source: source
 						  });
 						 items.push(record);}

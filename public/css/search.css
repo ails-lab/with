@@ -137,6 +137,11 @@ input[type="search"] { /* reset normalize */
 	transform: translate3d(-30px,-50%,0) scale3d(0,0,1);
 }
 
+.withsearch-submit:hover{
+	background: transparent url(../images/magnifierblack.png) no-repeat center center;
+    background-size: 100%;
+	}
+
 .withsearch.open .withsearch-submit {
 	pointer-events: auto;
 	opacity: 1;
@@ -403,6 +408,9 @@ margin-bottom: 5px;
 	color:rgba(0, 0, 0, 0.16);
 }
 
+.fa-th-large:hover{
+	color:black;
+}
 
 #more{
 	 bottom:40px;

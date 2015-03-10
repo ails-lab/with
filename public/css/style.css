@@ -5,6 +5,13 @@ padding-bottom:1.3em;
 }
 
 
+.truncate {
+    width: 450px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 #searchwith {
 display: block;
 padding: 0 0 10px 0;

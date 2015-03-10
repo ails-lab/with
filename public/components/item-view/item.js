@@ -86,6 +86,13 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		else return "";
 	});
     
+    self.collect=function(item){
+    	
+			console.log(item);
+			collectionShow(item);
+			
+		
+    }
     
   }
 

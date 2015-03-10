@@ -1,10 +1,10 @@
 <div class="md-modal md-effect-1" id="modal-1">
 			<div class="md-content">
-			   
+			    <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
+				
 			    <h3 class="truncate">
-				 <span class="withcollect"><i class="fa fa-connectdevelop"></i><span class="content"> collect it</span></span>
+				 <span class="withcollect" data-bind="event: {click: collect}"><i class="fa fa-connectdevelop"></i><span class="content"> collect it</span></span>
 				<!-- ko text: title --><!-- /ko --> 
-				<span class="overlay-close" data-bind="event: {click: close}"></span>
 				
 				</h3>
 				
@@ -72,3 +72,6 @@
 		
 		
 <div class="md-overlay" data-bind="event: {click: close}"></div><!-- the overlay element -->
+
+
+<collection params="route: route"></collection>	
