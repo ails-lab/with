@@ -64,8 +64,8 @@
 }
 
 .itemim{
-	float:right;
-	text-align:right;
+	text-align:center;
+	width:100%;
 	max-width:270px;
 	min-width: 120px;
 }
@@ -88,7 +88,6 @@
 
 .md-content > div {
 	padding: 15px 0px 30px;
-	margin: 0;
 	font-weight: 300;
 	font-size: 1.15em;
 }

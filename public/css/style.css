@@ -6,7 +6,7 @@ padding-bottom:1.3em;
 
 
 .truncate {
-    width: 450px;
+    width: 95%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

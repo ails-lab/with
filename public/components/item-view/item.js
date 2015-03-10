@@ -14,6 +14,7 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 	  self.creator=ko.observable("");
 	  self.provider=ko.observable("");
 	  self.apisource=ko.observable(true);
+	  $("#fullresim").attr('src','');
 	 
     itemShow = function(record) {
     	self.itemload(record);
@@ -62,6 +63,7 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 	};
    
     self.close= function(){
+    	
     	$('#modal-1').removeClass('md-show');
     	$('#modal-1').css('display', 'none');
     	$('.withsearch').css('position','absolute');
