@@ -48,12 +48,13 @@ public class Collection {
 	private Date created;
 	private Date lastModified;
 
-
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
 	private List<RecordLink> firstEntries = new ArrayList<RecordLink>();
 
+	
+	
 	public ObjectId getDbId() {
 		return this.dbId;
 	}

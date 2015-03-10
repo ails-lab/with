@@ -14,6 +14,7 @@
  */
 
 
+package test.daoTests;
 import model.Collection;
 import model.User;
 

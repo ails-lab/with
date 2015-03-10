@@ -25,6 +25,7 @@ import java.util.List;
 import model.Search;
 import model.User;
 
+import org.junit.*;
 import org.junit.Test;
 
 import test.TestUtils;

@@ -198,6 +198,7 @@ public class DBTests {
 		System.out.println(user1.toString());
 	}
 
+	
 	@Test
 	public void renderTemplate() {
 		Content html = views.html.index
@@ -214,7 +215,7 @@ public class DBTests {
 	private long beginTime;
 	private long endTime;
 	// create an MD5 password
-	private MessageDigest digest = null;
+	protected MessageDigest digest = null;
 
 	@Before
 	public void setUp() {
