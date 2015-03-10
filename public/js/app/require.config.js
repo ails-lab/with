@@ -23,6 +23,7 @@ var require = {
 		"imagesloaded":         "bower_modules/imagesloaded/imagesloaded.pkgd.min",
 		"masonry":              "bower_modules/masonry/dist/masonry.pkgd",
 		"facebook":             "//connect.facebook.net/en_US/all",
+		"google":               "https://apis.google.com/js/client:platform",
 		"knockout-validation":  "bower_modules/knockout-validation/dist/knockout.validation.min",
 		"knockout-amd-helpers": "bower_modules/knockout-amd-helpers/build/knockout-amd-helpers.min"
 	},
