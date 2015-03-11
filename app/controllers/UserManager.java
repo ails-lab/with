@@ -1,0 +1,98 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+
+package controllers;
+
+import model.User;
+
+import org.apache.commons.lang3.StringUtils;
+import org.specs2.execute.Results;
+
+import db.DB;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import views.html.index;
+
+public class UserManager extends Controller {
+	public static final ALogger log = Logger.of(UserManager.class);
+
+	public static Result findByEmail( String email ) {
+		return ok();
+	}
+	
+	public static Result findByDisplayName( String displayName ) {
+		return ok();		
+	}
+
+	/**
+	 * Not quite sure what I need here
+	 * @return
+	 */
+	public static Result register() {
+		return ok();
+		
+	}
+	
+	/**
+	 * Should not be needed, is the same as login by email?
+	 * Maybe need to store if its a facebook or google or password log inner
+	 * @return
+	 */
+	public static Result findByFacebookId() {
+		return ok();
+	}
+	
+	public static Result login( String email, String password, String displayName ) {
+		User u = null;
+		String result ="";
+		
+		if( StringUtils.isNotEmpty(  email )) {
+			u = DB.getUserDAO().getByEmail(email);
+			if( u == null ) {
+				result = "{error:\"Invalid email\"}";
+			}
+		} else if( StringUtils.isNotEmpty(displayName )) {
+			u = DB.getUserDAO().getByDisplayName( displayName );
+			if( u== null)  {
+				result = "{error:\"Invalid displayName\"}";
+			}
+		}
+
+		if( u != null ) {
+			// check password
+			if( u.checkPassword( password )) {
+				session().put( "user", u.getDbId().toHexString());
+				result = "{success:1}";
+				return ok(Json.parse( result));
+			} else {
+				result = "{error:\"Invalid Password\"}";				
+			}
+		}
+		return badRequest( Json.parse( result ));
+	}
+	
+	/**
+	 * This action clears the session, the user is logged out.
+	 * @return
+	 */
+	public static Result logout() {
+		session().clear();
+		return ok();
+	}	
+}
