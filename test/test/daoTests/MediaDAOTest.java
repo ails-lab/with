@@ -41,7 +41,7 @@ public class MediaDAOTest {
 		//Create a Media Object
 		Media image = new Media();
 
-		URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
+		URL url = new URL("http://www.ntua.gr/ntua-01.jpg");
 		File file = new File("test_java.txt");
 		FileUtils.copyURLToFile(url, file);
 		FileInputStream fileStream = new FileInputStream(
@@ -50,11 +50,10 @@ public class MediaDAOTest {
 		byte[] rawbytes = IOUtils.toByteArray(fileStream);
 
 		image.setData(rawbytes);
-		image.setType("video/mp4");
-		image.setMimeType("mp4");
-		image.setDuration(0.0f);
-		image.setHeight(1024);
-		image.setWidth(1080);
+		image.setType("IMAGE");
+		image.setMimeType("image/jpeg");
+		image.setHeight(599);
+		image.setWidth(755);
 
 		DB.getMediaDAO().makePermanent(image);
 
@@ -64,19 +63,17 @@ public class MediaDAOTest {
 		Record record = new Record();
 		DB.getRecordDAO().save(record);
 
+		assertThat( record.getDbID()).isNotNull();
+
 		//Create a RecordLink Object
 		//and references to Media and Record
 
-		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
-		//Get Record object
-		Record recordRetrieved = DB.getRecordDAO().find().get();
 
 		RecordLink rlink = new RecordLink();
-		rlink.setThumbnail(imageRetrieved);
-		rlink.setRecordReference(recordRetrieved);
+		// rlink.setThumbnail(imageRetrieved);
+		// rlink.setRecordReference(recordRetrieved);
 
-		DB.getRecordLinkDAO().save(rlink);
+		// DB.getRecordLinkDAO().save(rlink);
 
 	}
 
