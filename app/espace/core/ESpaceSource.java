@@ -30,7 +30,7 @@ public class ESpaceSource implements ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
 		eq.addSearch(getSearchTerm(q));
-		eq.addSearchParam("start", "" + ((q.page - 1) * q.pageSize + 1));
+		eq.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 		eq.addSearchParam("rows", "" + q.pageSize);
 		eq.addSearchParam("profile", "rich+facets");
 		euroAPI(q, eq);

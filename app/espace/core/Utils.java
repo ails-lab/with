@@ -74,6 +74,8 @@ public class Utils {
 	}
 
 	public static String readAttr(JsonNode json, String string, boolean force, String def) throws Exception {
+		if (json == null)
+			return null;
 		String res = json.findPath(string).asText();
 		if (res == null) {
 			if (force)
@@ -85,6 +87,8 @@ public class Utils {
 	}
 
 	public static List<String> readArrayAttr(JsonNode json, String string, boolean force) throws Exception {
+		if (json == null)
+			return null;
 		JsonNode a = json.path(string);
 		if (a == null) {
 			if (force)
@@ -105,6 +109,8 @@ public class Utils {
 	}
 
 	public static List<Lang> readLangAttr(JsonNode json, String string, boolean force) throws Exception {
+		if (json == null)
+			return null;
 		JsonNode a = json.path(string);
 		if (a == null) {
 			if (force)
@@ -125,6 +131,8 @@ public class Utils {
 	}
 
 	public static int readIntAttr(JsonNode json, String string, boolean force, int def) throws Exception {
+		if (json == null)
+			return def;
 		String readAttr = readAttr(json, string, force, "" + def);
 		if (readAttr == null || readAttr.equals(""))
 			return def;
@@ -177,6 +185,27 @@ public class Utils {
 			return first + "=" + spacesFormatQuery(second.toString());
 		}
 
+	}
+
+	public static JsonNode findNode(JsonNode path, Pair<String>... pair) {
+		boolean found;
+		// System.out.println(path);
+		for (JsonNode node : path) {
+			found = true;
+			for (Pair<String> p : pair) {
+				String value = node.path(p.first).asText();
+				// System.out.println(value + "?=" + p.second);
+				if (!p.second.equals(value)) {
+					found = false;
+					break;
+				}
+			}
+			if (found) {
+				// System.out.println("got it");
+				return node;
+			}
+		}
+		return null;
 	}
 
 }

@@ -3,14 +3,29 @@
 @import helper.twitterBootstrap._
 
 @testsearchmain("Test search") {
-	@helper.form( action= routes.SearchController.testsearch() ){
-			@helper.inputText(qform("searchTerm"))
-			@helper.inputText(qform("termToExclude"))		
+	@helper.form( action= routes.SearchController.posttestsearch() ){
+		
+
+
+<div id="hsection">
+	<div id="vsection">
+	@helper.inputText(qform("searchTerm"))
+	@helper.inputText(qform("termToExclude"))		
+	</div>
+	<div id="vsection">
+	
+	@inputNumber(qform("page"), '_default -> "2" )
+	</div>
+	</div>
+	<div id="hsection">
+	
 			<input type="submit" class="button" value="Search" />
+			</div>
 	}
 	
 	
-	
+@if(content!=null) {
+ 	
 <div id="tabs">
 <ul class="basictab">
 
@@ -30,12 +45,12 @@
   <div id="thumbframe">
   
   <div id="thumb"   >
-  <img alt="" src="@it.thumb.get(0)" />  
+  <img alt="" src="@if(it.thumb!=null) {@it.thumb.get(0)} else {NA}" />  
     
     </div>
     <div  id="thinfo">
-  <b>Title: </b> <a href="@it.url.original.get(0)"> @it.title.get(0).value </a><br/>
-  <b>Descr: </b>@it.description.get(0).value <br/>
+  <b>Title: </b> <a href="@if(it.url!=null) {@it.url.original.get(0)} else {NA}"> @it.title.get(0).value </a><br/>
+  <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@it.description.get(0).value} else {NA} <br/>
   
   </div>
   
@@ -46,6 +61,8 @@
 </div>
 }
 </div>
-	
-	
+ 
+} else {
+  Nothing here	
+}	
 }

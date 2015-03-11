@@ -7,6 +7,7 @@ GET     /                           controllers.Application.index()
 
 POST     /api/search                controllers.SearchController.search()
 GET      /api/testsearch            controllers.SearchController.testsearch()
+POST     /api/testsearch            controllers.SearchController.posttestsearch()
 
 
 # Map static resources from the /public folder to the /assets URL path
