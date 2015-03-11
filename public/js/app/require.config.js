@@ -3,7 +3,7 @@ var require = {
 	baseUrl: ".",
 	paths: {
 		"jquery":               "bower_modules/jquery/dist/jquery.min",
-		 "bridget":				"bower_modules/jquery-bridget/jquery.bridget",
+		"bridget":				"bower_modules/jquery-bridget/jquery.bridget",
 		"bootstrap":            "bower_modules/components-bootstrap/js/bootstrap.min",
 		"crossroads":           "bower_modules/crossroads/dist/crossroads.min",
 		"hasher":               "bower_modules/hasher/dist/js/hasher.min",
@@ -25,7 +25,8 @@ var require = {
 		"facebook":             "//connect.facebook.net/en_US/all",
 		"google":               "https://apis.google.com/js/client:platform",
 		"knockout-validation":  "bower_modules/knockout-validation/dist/knockout.validation.min",
-		"knockout-amd-helpers": "bower_modules/knockout-amd-helpers/build/knockout-amd-helpers.min"
+		"knockout-amd-helpers": "bower_modules/knockout-amd-helpers/build/knockout-amd-helpers.min",
+		"app":                  "js/app/app"
 	},
 	shim: {
 		"bootstrap": { deps: ["jquery"] },
