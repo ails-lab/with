@@ -17,3 +17,11 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 POST     /collection/delete      controllers.CollectionController.deleteCollection()
 POST     /collection/add         controllers.CollectionController.saveCollection()
 
+# User Manager Controller
+GET 	/user/byEmail/				controllers.UserManager.findByEmail()
+GET		/user/byDisplayName/		controllers.UserManager.findByDisplayName()
+POST	/user/register				controllers.UserManager.register()
+GET		/user/byFacebookId/			controllers.UserManager.findByFacebookId()
+GET		/api/login					controllers.UserManager.login(email:java.lang.String?="", password:java.lang.String, displayName:java.lang.String?="" )
+GET		/api/logout					controllers.UserManager.logout()
+

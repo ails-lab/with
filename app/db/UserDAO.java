@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
-import model.Search;
 import model.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+
+import com.mongodb.BasicDBObjectBuilder;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -47,6 +47,10 @@ public class UserDAO extends DAO<User> {
 
 	public User getByEmail(String email) {
 		return this.findOne("email", email);
+	}
+
+	public User getByDisplayName(String displayName) {
+		return this.findOne("displayName", displayName);
 	}
 
 	/**
@@ -88,4 +92,12 @@ public class UserDAO extends DAO<User> {
 		
 		return this.findOne(q).getUserCollections();
 	}
+	
+	public List<String> getAllDisplayNames() {
+		ArrayList<String> res = new ArrayList<String>();
+		withCollection( res, "", "displayName");
+		return res;
+	}
+	
+	
 }
