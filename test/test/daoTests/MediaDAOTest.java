@@ -30,14 +30,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
+import static org.fest.assertions.Assertions.assertThat;
 
 import db.DB;
 
-
-public class TestRecordMediaRecordLink  {
-
+public class MediaDAOTest {
 	@Test
-	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
+	public void testMediaStorage() throws IOException, URISyntaxException {
 
 		//Create a Media Object
 		Media image = new Media();
@@ -59,6 +58,8 @@ public class TestRecordMediaRecordLink  {
 
 		DB.getMediaDAO().makePermanent(image);
 
+		assertThat( image.getDbId()).isNotNull();
+		
 		//Create Record Object
 		Record record = new Record();
 		DB.getRecordDAO().save(record);
