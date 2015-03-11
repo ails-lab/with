@@ -64,11 +64,11 @@ public class MediaDAO extends DAO<Media> {
 		return media;
 	}
 
-	public Media find(String dbId) {
-		ObjectId objectId = new ObjectId(dbId);
+
+	public Media findById(ObjectId dbId) {
 		GridFSDBFile media = null;
 		try {
-			media = DB.getGridFs().find(objectId) ;
+			media = DB.getGridFs().find(dbId) ;
 		} catch (Exception e) {
 			log.error("Problem in find file from GridFS " + dbId);
 		}

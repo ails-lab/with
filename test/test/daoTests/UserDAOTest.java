@@ -45,7 +45,7 @@ public class UserDAOTest {
 		testUser.setPassword("secret");
 		DB.getUserDAO().makePermanent(testUser);
 		
-		ObjectId id = testUser.getDbID();
+		ObjectId id = testUser.getDbId();
 
 		// find by Email
 		User a = DB.getUserDAO().findOne( "email", "test@ntua.gr");

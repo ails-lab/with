@@ -19,7 +19,9 @@ package db;
 import java.util.List;
 
 import model.Collection;
+import model.RecordLink;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
 import play.Logger;
@@ -33,16 +35,25 @@ public class CollectionDAO extends DAO<Collection> {
 	}
 
 	public List<Collection> getCollectionsByIds(List<String> ids) {
-		Query<Collection> collectionQ = this.createQuery()
-				.field("dbId").hasAnyOf(ids);
-		return find(collectionQ).asList();
+		Query<Collection> colQuery = this.createQuery()
+				.field("_id").hasAnyOf(ids);
+		return find(colQuery).asList();
 	}
 
 	public Collection getByTitle(String title) {
 		return this.findOne("title", title);
 	}
 
-	public Collection getById(String id) {
-		return this.findOne("dbId", id);
+	public Collection getById(ObjectId id) {
+		Query<Collection> q = this.createQuery()
+				.field("_id").equal(id);
+		return findOne(q);
+	}
+
+	public List<RecordLink> getCollectionRecordLinks(String id) {
+		Query<Collection> colQuery = this.createQuery()
+				.field("_id").equal(id)
+				.retrievedFields(true, "firstEntries");
+		return find(colQuery).get().getFirstEntries();
 	}
 }

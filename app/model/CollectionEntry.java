@@ -22,27 +22,28 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 @Entity
 public class CollectionEntry {
+
 	@Id
 	private ObjectId dbID;
 
-	@Reference
-	private Collection collection;
+	private ObjectId collection;
 	@Embedded
 	private RecordLink recordLink;
 
 	private Date created;
-	
+
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
 
-	
+
 	// getter setter section
-	
+
 	public ObjectId getDbID() {
 		return dbID;
 	}
@@ -52,11 +53,17 @@ public class CollectionEntry {
 	}
 
 	public Collection getCollection() {
+		Collection collection =
+				DB.getCollectionDAO().getById(this.collection);
 		return collection;
 	}
 
 	public void setCollection(Collection collection) {
-		this.collection = collection;
+		this.collection = collection.getDbId();
+	}
+
+	public void setCollection(ObjectId collectionId) {
+		this.collection = collectionId;
 	}
 
 	public RecordLink getRecordLink() {

@@ -28,7 +28,6 @@ import org.mongodb.morphia.annotations.Id;
 
 import play.Logger;
 import play.Logger.ALogger;
-import db.MediaDAO;
 
 @Entity
 public class User {
@@ -37,9 +36,9 @@ public class User {
 
 
 	private static final int EMBEDDED_CAP = 20;
-	
+
 	@Id
-	private ObjectId dbID;
+	private ObjectId dbId;
 
 	private String email;
 	private String firstName;
@@ -55,10 +54,21 @@ public class User {
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
 	@Embedded
+	private List<CollectionMetadata> userCollections;
+
+
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+
 	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
 
 	// convenience methods
-	
+
 	/**
 	 * The search should already be stored in the database separately
 	 * @param search
@@ -68,15 +78,15 @@ public class User {
 			log.error( "Search is  not saved!" );
 			return;
 		}
-		
+
 		searchHistory.add( search );
 		if( searchHistory.size() > EMBEDDED_CAP ) {
 			searchHistory.remove(0);
 		}
 	}
-	
+
 	/**
-	 * The Collection should already be stored in the database separately 
+	 * The Collection should already be stored in the database separately
 	 * @param col
 	 */
 	public void addToCollections( Collection col ) {
@@ -88,9 +98,8 @@ public class User {
 		if( collections.size() > EMBEDDED_CAP) {
 			collections.remove(0);
 		}
-		
+
 	}
-	
 	/**
 	 * md5 the password and set it in the right field
 	 * @param password
@@ -118,9 +127,8 @@ public class User {
 		}
 		return "";
 	}
-	
 	// getter setter
-	
+
 	public String getEmail() {
 		return email;
 	}
@@ -170,14 +178,6 @@ public class User {
 		this.collections = collections;
 	}
 
-	public ObjectId getDbID() {
-		return dbID;
-	}
-
-	public void setDbID(ObjectId dbID) {
-		this.dbID = dbID;
-	}
-
 	public String getFacebookId() {
 		return facebookId;
 	}
@@ -185,5 +185,5 @@ public class User {
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
 	}
-	
+
 }

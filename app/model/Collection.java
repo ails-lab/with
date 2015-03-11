@@ -24,36 +24,47 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 @Entity
 public class Collection {
 	private static final int EMBEDDED_CAP = 20;
-	
+
 
 	@Id
 	private ObjectId dbId;
-	@Reference
-	private User owner;
+
+	private ObjectId owner;
 
 	private String title;
 	private String description;
-	private Media thumbnail;
-	
+
+	private ObjectId thumbnail;
+
+	@Embedded
 	private Record exampleRecord;
 	private boolean isPublic;
 	private Date created;
 	private Date lastModified;
-	
-	
+
+
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
 	private List<RecordLink> firstEntries = new ArrayList<RecordLink>();
 
-	
+	public ObjectId getDbId() {
+		return this.dbId;
+	}
+
+	public void setDbId(ObjectId id) {
+		this.dbId = id;
+	}
+
+
 	public void addEntry( CollectionEntry ce ) {
-		
+
 	}
 	/**
 	 * Get the embeddable Metadata part
@@ -61,14 +72,14 @@ public class Collection {
 	 */
 	public CollectionMetadata getMetadata() {
 		CollectionMetadata cm = new CollectionMetadata();
-		cm.setColletion(this);
+		cm.setCollection(this);
 		cm.setDescription(description);
 		cm.setThumbnail(thumbnail);
 		cm.setTitle(title);
-		
+
 		return cm;
 	}
-	
+
 	// Getter setters
 	public String getTitle() {
 		return title;
@@ -88,29 +99,31 @@ public class Collection {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
-
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
-
 	public User getOwner() {
-		return owner;
+		User user =
+				DB.getUserDAO().getById(this.owner);
+		return user;
+	}
+	public void setOwner(User owner) {
+		this.owner = owner.getDbId();
 	}
 
-	public void setOwner(User owner) {
-		this.owner = owner;
+	public List<RecordLink> getFirstEntries() {
+		return firstEntries;
+	}
+
+	public void setFirstEntries(List<RecordLink> firstEntries) {
+		this.firstEntries = firstEntries;
 	}
 
 	public Media getThumbnail() {
-		return thumbnail;
+		Media media =
+				DB.getMediaDAO().findById(this.thumbnail);
+		return media;
 	}
 
 	public void setThumbnail(Media thumbnail) {
-		this.thumbnail = thumbnail;
+		this.thumbnail = thumbnail.getDbId();
 	}
 
 	public Record getExampleRecord() {
@@ -121,23 +134,21 @@ public class Collection {
 		this.exampleRecord = exampleRecord;
 	}
 
-	public List<RecordLink> getFirstEntries() {
-		return firstEntries;
-	}
 
-	public void setFirstEntries(List<RecordLink> firstEntries) {
-		this.firstEntries = firstEntries;
-	}
 	public Date getCreated() {
 		return created;
 	}
+
 	public void setCreated(Date created) {
 		this.created = created;
 	}
+
 	public Date getLastModified() {
 		return lastModified;
 	}
+
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
 	}
+
 }

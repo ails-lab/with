@@ -21,7 +21,8 @@ import java.util.Date;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 @Entity
 public class Search {
@@ -30,8 +31,7 @@ public class Search {
 	private ObjectId dbID;
 
 	// a ref to the user
-	@Reference
-	private User user;
+	private ObjectId user;
 
 	// when the search was done
 	private Date searchDate;
@@ -56,11 +56,13 @@ public class Search {
 	}
 
 	public User getUser() {
+		User user =
+				DB.getUserDAO().getById(this.user);
 		return user;
 	}
 
 	public void setUser(User user) {
-		this.user = user;
+		this.user = user.getDbId();
 	}
 	public String getQuery() {
 		return query;

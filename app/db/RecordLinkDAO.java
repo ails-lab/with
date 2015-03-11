@@ -16,7 +16,6 @@
 
 package db;
 
-import model.Media;
 import model.RecordLink;
 import play.Logger;
 
@@ -25,6 +24,11 @@ public class RecordLinkDAO extends DAO<RecordLink> {
 
 	public RecordLinkDAO() {
 		super( RecordLink.class );
+	}
+
+	public RecordLink getByDbId(String id) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

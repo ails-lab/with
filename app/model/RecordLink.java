@@ -19,10 +19,10 @@ package model;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 
-// This is just for embedding, won't have its own id
 // there is an option Record link if the link is already materialized
 @Entity
 public class RecordLink {
@@ -30,8 +30,7 @@ public class RecordLink {
 	@Id
 	private ObjectId dbId;
 	// optional link to the materialized Record
-	@Reference
-	private Record recordReference;
+	private ObjectId recordReference;
 
 	// which backend provided this entry
 	// Europeana, DPLA ....
@@ -41,8 +40,7 @@ public class RecordLink {
 	private String thumbnailUrl;
 
 	// an optional cached version of a thumbnail for this record'
-	@Reference
-	private Media thumbnail;
+	private ObjectId thumbnail;
 
 	private String title;
 	private String description;
@@ -66,12 +64,15 @@ public class RecordLink {
 	}
 
 	public Record getRecordReference() {
-		return recordReference;
+		Record record =
+				DB.getRecordDAO().getById(this.recordReference);
+		return record;
 	}
 
 	public void setRecordReference(Record recordReference) {
-		this.recordReference = recordReference;
+		this.recordReference = recordReference.getDbID();
 	}
+
 	public String getSource() {
 		return source;
 	}
@@ -80,20 +81,14 @@ public class RecordLink {
 		this.source = source;
 	}
 
-	public String getThumbnailUrl() {
-		return thumbnailUrl;
-	}
-
-	public void setThumbnailUrl(String thumbnailUrl) {
-		this.thumbnailUrl = thumbnailUrl;
-	}
-
 	public Media getThumbnail() {
+		Media thumbnail =
+				DB.getMediaDAO().findById(this.thumbnail);
 		return thumbnail;
 	}
 
 	public void setThumbnail(Media thumbnail) {
-		this.thumbnail = thumbnail;
+		this.thumbnail = thumbnail.getDbId();
 	}
 
 	public String getTitle() {
@@ -126,6 +121,30 @@ public class RecordLink {
 
 	public void setSourceUrl(String sourceUrl) {
 		this.sourceUrl = sourceUrl;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getRights() {
+		return rights;
+	}
+
+	public void setRights(String rights) {
+		this.rights = rights;
+	}
+
+	public String getThumbnailUrl() {
+		return thumbnailUrl;
+	}
+
+	public void setThumbnailUrl(String thumbnailUrl) {
+		this.thumbnailUrl = thumbnailUrl;
 	}
 
 

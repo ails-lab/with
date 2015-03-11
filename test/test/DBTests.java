@@ -24,30 +24,17 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
 
 import model.Media;
 import model.Record;
 import model.RecordLink;
-import model.Search;
-import model.User;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import play.twirl.api.Content;
-
-import com.mongodb.MongoException;
-
 import db.DB;
 
 /**
@@ -92,7 +79,7 @@ public class DBTests {
 		//and references to Media and Record
 
 		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().find("54ef0a09e4b0af9ca4dc8fbc");
+		Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
 		//Get Record object
 		Record recordRetrieved = DB.getRecordDAO().find().get();
 
