@@ -83,6 +83,10 @@ public class MediaDAO  {
 		try {
 			mediaGridFsFile = DB.getGridFs().createFile(media.getData());
 
+			if( media.getDbId() != null ) {
+				mediaGridFsFile.setId(media.getDbId());
+			}
+			
 			if(mediaGridFsFile == null)
 				throw new Exception("Got a NULL mediaGridFsFile");
 
@@ -96,6 +100,7 @@ public class MediaDAO  {
 
 			// save the file
 			mediaGridFsFile.save();
+			media.setDbId((ObjectId) mediaGridFsFile.getId()); 
 		} catch (Exception e) {
 			log.error("Cannot save Media document to GridFS", e);
 		}
