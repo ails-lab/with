@@ -42,6 +42,8 @@ import com.typesafe.config.ConfigFactory;
 // the EntityManagerFactory is here
 public class DB {
 	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
+	private static MediaDAO mediaDAO;
+	
 	private static MongoClient mongo;
 	private static Datastore ds;
 	private static GridFS gridfs;
@@ -109,7 +111,9 @@ public class DB {
 	}
 
 	public static MediaDAO getMediaDAO() {
-		return (MediaDAO) getDAO(Media.class);
+		if( mediaDAO == null ) 
+			mediaDAO = new MediaDAO();
+		return mediaDAO;
 	}
 
 	public static RecordDAO getRecordDAO() {
