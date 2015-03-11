@@ -46,7 +46,7 @@ public class User {
 
 	private String md5Password;
 	private String facebookId;
-
+	private String displayName;
 
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
@@ -108,7 +108,17 @@ public class User {
 		String pass = computeMD5( this.getEmail(), password );
 		this.setMd5Password(pass);
 	}
-	
+
+	/**
+	 * Is this the right password for the user?
+	 * @param password
+	 * @return
+	 */
+	public boolean checkPassword(String password) {
+		String md5 = computeMD5( this.getEmail(), password );
+		return md5.equals( getMd5Password());
+	}
+
 	/**
 	 * Computes the MD5 with email for this password.
 	 * Use when authenticating a user via password.
@@ -193,4 +203,14 @@ public class User {
 		}
 		return collections;
 	}
+
+	public String getDisplayName() {
+		return displayName;
+	}
+
+	public void setDisplayName(String displayName) {
+		this.displayName = displayName;
+	}
+
+	
 }
