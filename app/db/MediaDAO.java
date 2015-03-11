@@ -29,12 +29,9 @@ import play.Logger.ALogger;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 
-public class MediaDAO extends DAO<Media> {
+public class MediaDAO  {
 	public static final ALogger log = Logger.of(MediaDAO.class);
 
-	public MediaDAO() {
-		super(Media.class);
-	}
 
 	/**Converts GridFSDBFile to Media object.
 	 * We use this method for convertion because we cannot cast directly to Media.
@@ -80,7 +77,7 @@ public class MediaDAO extends DAO<Media> {
 		return gridFsDbFileToMediaObj(media);
 	}
 
-	@Override
+
 	public void makePermanent(Media media) {
 		GridFSInputFile mediaGridFsFile;
 		try {
@@ -104,7 +101,7 @@ public class MediaDAO extends DAO<Media> {
 		}
 	}
 
-	@Override
+
 	public void makeTransient(Media media) {
 		try {
 			DB.getGridFs().remove(media.getDbId());
