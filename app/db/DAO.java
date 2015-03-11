@@ -16,8 +16,8 @@
 
 package db;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.dao.BasicDAO;
@@ -27,8 +27,12 @@ import org.mongodb.morphia.query.QueryResults;
 import play.Logger;
 import play.libs.F.Callback;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.util.JSON;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
@@ -39,8 +43,30 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		this.entityClass = entityClass;
 	}
 
+	public static DBObject asDBObject( String json ) {
+		DBObject res = (DBObject) JSON.parse(json);
+		return res;
+	}
 
-
+	/**
+	 * Convenience method for retrieving all values for this query on certain field.
+	 * Use if you don't want the morphia treatment (you want values, not objects)
+	 * @param res
+	 * @param query
+	 * @param field
+	 */
+	public void withCollection( Collection<String> res, String query, String field ) {
+		DBCursor cursor = null;
+		try {
+			BasicDBObject fieldProjector = new BasicDBObject();
+			fieldProjector.put( field, 1 );
+			cursor = getCollection().find( asDBObject(query), fieldProjector);
+			while( cursor.hasNext()) res.add( cursor.next().get(field).toString());
+		} finally {
+			cursor.close();
+		}
+	}
+	
 	/**
 	 * Return collection stats
 	 */
