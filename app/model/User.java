@@ -186,4 +186,11 @@ public class User {
 		this.facebookId = facebookId;
 	}
 
+	public List<Collection> getUserCollections() {
+		List<Collection> collections = new ArrayList<>();
+		for(CollectionMetadata colMetaData: getCollectionMetadata()) {
+			collections.add(colMetaData.getCollection());
+		}
+		return collections;
+	}
 }

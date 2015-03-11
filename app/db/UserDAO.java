@@ -85,10 +85,7 @@ public class UserDAO extends DAO<User> {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
 				.retrievedFields(true, "userCollections.collection");
-		List<Collection> collections = new ArrayList<Collection>();
-		for(CollectionMetadata colMeta: findOne(q).getCollectionMetadata()) {
-			collections.add(colMeta.getCollection());
-		}
-		return collections;
+		
+		return this.findOne(q).getUserCollections();
 	}
 }

@@ -62,8 +62,8 @@ public class CollectionEntry {
 		this.collection = collection.getDbId();
 	}
 
-	public void setCollection(ObjectId collectionId) {
-		this.collection = collectionId;
+	public void setCollection(String collectionId) {
+		this.collection = new ObjectId(collectionId);
 	}
 
 	public RecordLink getRecordLink() {
@@ -89,6 +89,5 @@ public class CollectionEntry {
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-
 
 }
