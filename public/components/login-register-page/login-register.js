@@ -1,4 +1,4 @@
-define(['knockout', 'text!./login-register.html',  'facebook', 'knockout-validation', 'google'], function(ko, template, FB) {
+define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-validation', 'google'], function(ko, template, FB, app) {
 
 	FB.init({
 		appId   : '1584816805087190',
@@ -117,6 +117,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'knockout-validat
 				console.log(json);
 				// TODO: Try to login. If OK, then redirect to the appropriate page (post-registration if missing, landing otherwise)
 				// TODO: Before redirecting, if stayLogged is pressed, make sure user stays online (use a cookie?)
+				// TODO: Add the user to the global app: app.currentUser('finik');
 			}
 			else {
 				self.loginValidation.errors.showAllMessages();
@@ -139,6 +140,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'knockout-validat
 								var json = ko.toJSON(self.loginValidation);
 								console.log(json);
 								// TODO: Send to server to sign in
+								// TODO: Add the user to the global app: app.currentUser('finik');
 							});
 						});
 					}
@@ -155,6 +157,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'knockout-validat
 						var json = ko.toJSON(self.loginValidation);
 						console.log(json);
 						// TODO: Send to server to sign in
+						// TODO: Add the user to the global app: app.currentUser('finik');
 					});
 				}
 			}, {scope: 'email'});

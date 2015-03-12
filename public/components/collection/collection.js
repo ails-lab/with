@@ -133,7 +133,7 @@ define(['knockout', 'text!./collection.html','selectize'], function(ko, template
 	  
 	  
 	  
-	  var nocollection=true; /*picked up from browser session storage : should be stored upon login*/
+	  var nocollection=false; /*picked up from browser session storage : should be stored upon login*/
 	  
 	  /*load these from db and put on session storage upon login . For now use static array*/
 	  self.collectionitems = ko.observableArray([

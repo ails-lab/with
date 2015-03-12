@@ -1,4 +1,4 @@
-define(['knockout', 'text!./side-bar.html'], function(ko, template) {
+define(['knockout', 'text!./side-bar.html', 'app'], function(ko, template, app) {
 
   function SideBarViewModel(params) {
 
@@ -17,8 +17,7 @@ define(['knockout', 'text!./side-bar.html'], function(ko, template) {
 		});
 
 		var self = this;
-		self.currentUser = ko.observable();
-		self.showLogin = ko.computed(function() { return self.currentUser() === undefined; });
+		self.isLogged    = ko.computed(function() { return app.currentUser() !== undefined });
 	}
 
 	return { viewModel: SideBarViewModel, template: template };
