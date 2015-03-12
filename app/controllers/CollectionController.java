@@ -99,10 +99,10 @@ public class CollectionController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		
-		if(json.has("userMail")) {
-			String owner = json.get("userMail").asText();
+		if(json.has("userId")) {
+			String userId = json.get("userId").asText();
 			List<Collection> userCollections = 
-					DB.getUserDAO().getUserCollectionsByEmail(owner);
+					DB.getUserDAO().getById(userId).getUserCollections();
 			ObjectNode collections = Json.newObject();
 			for(Collection col: userCollections) {
 				collections.arrayNode().add(Serializer.collectionToJson(col));
