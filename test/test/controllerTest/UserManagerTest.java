@@ -79,8 +79,11 @@ public class UserManagerTest {
 				
 				result = route(fakeRequest(GET, "/api/login?password=secret&email=my@you.me"), HOUR );
 				assertThat( status( result )).isEqualTo( Status.OK );
+				assertThat( session( result ).isEmpty()).isFalse();
+				assertThat( session( result ).get("user")).isNotEmpty();
+				
 				j = Json.parse( contentAsString( result ));
-				// here maybe we need the whole user record to come back
+				assertThat(j.get("displayName").asText()).isEqualTo("cool_url");
 			}
 		});
 		} finally {

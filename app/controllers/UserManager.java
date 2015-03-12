@@ -46,6 +46,7 @@ public class UserManager extends Controller {
 	 * @return
 	 */
 	public static Result register() {
+		
 		return ok();
 		
 	}
@@ -79,7 +80,8 @@ public class UserManager extends Controller {
 			// check password
 			if( u.checkPassword( password )) {
 				session().put( "user", u.getDbId().toHexString());
-				result.put("success", 1);
+				// now return the whole user stuff, just for good measure
+				result = (ObjectNode) Json.parse( DB.getJson( u ));
 				return ok(result);
 			} else {
 				result.put( "error", "Invalid Password");				
