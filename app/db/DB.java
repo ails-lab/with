@@ -46,6 +46,7 @@ public class DB {
 	
 	private static MongoClient mongo;
 	private static Datastore ds;
+	private static Morphia morphia;
 	private static GridFS gridfs;
 	private static Config conf;
 
@@ -86,13 +87,19 @@ public class DB {
 		return mongo;
 	}
 
+	public static Morphia getMorphia() {
+		if( morphia == null ) {
+			 morphia = new Morphia();
+			//this method is not working, have to find why!!
+			morphia.mapPackage("model");
+		}
+		return morphia;
+	}
+	
 	public static Datastore getDs() {
 		if(ds == null) {
 			try {
-				Morphia morphia = new Morphia();
-				//this method is not working, have to find why!!
-				//morphia.mapPackage("model");
-				ds = morphia.createDatastore(getMongo(), getConf().getString("mongo.dbname"));
+				ds = getMorphia().createDatastore(getMongo(), getConf().getString("mongo.dbname"));
 				ds.ensureIndexes();
 
 			} catch(Exception e) {
@@ -102,6 +109,10 @@ public class DB {
 		return ds;
 	}
 
+	public static String getJson( Object o ) {
+		return getMorphia().getMapper().toDBObject(o).toString();
+	}
+	
 	public static UserDAO getUserDAO() {
 		return (UserDAO) getDAO(User.class);
 	}
