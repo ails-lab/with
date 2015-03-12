@@ -19,15 +19,16 @@ package controllers;
 import model.User;
 
 import org.apache.commons.lang3.StringUtils;
-import org.specs2.execute.Results;
 
-import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
 
 public class UserManager extends Controller {
 	public static final ALogger log = Logger.of(UserManager.class);
@@ -60,17 +61,17 @@ public class UserManager extends Controller {
 	
 	public static Result login( String email, String password, String displayName ) {
 		User u = null;
-		String result ="";
+		ObjectNode result = Json.newObject();
 		
 		if( StringUtils.isNotEmpty(  email )) {
 			u = DB.getUserDAO().getByEmail(email);
 			if( u == null ) {
-				result = "{error:\"Invalid email\"}";
+				result.put( "error", "Invalid email");
 			}
 		} else if( StringUtils.isNotEmpty(displayName )) {
 			u = DB.getUserDAO().getByDisplayName( displayName );
 			if( u== null)  {
-				result = "{error:\"Invalid displayName\"}";
+				result.put("error","Invalid displayName");
 			}
 		}
 
@@ -78,13 +79,15 @@ public class UserManager extends Controller {
 			// check password
 			if( u.checkPassword( password )) {
 				session().put( "user", u.getDbId().toHexString());
-				result = "{success:1}";
-				return ok(Json.parse( result));
+				result.put("success", 1);
+				return ok(result);
 			} else {
-				result = "{error:\"Invalid Password\"}";				
+				result.put( "error", "Invalid Password");				
 			}
+		} else {
+			result.put( "error", "Need 'displayName' or 'email' parameter" );
 		}
-		return badRequest( Json.parse( result ));
+		return badRequest( result );
 	}
 	
 	/**
