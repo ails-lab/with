@@ -35,26 +35,10 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
 import db.DB;
 
 public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of( CollectionController.class);
-
-	/*
-	 * Pretty print json
-	 */
-	private static void jsonPrettyPrint(String json) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		JsonParser jp = new JsonParser();
-		JsonElement je = jp.parse(json);
-		String pretty = gson.toJson(je);
-		System.out.println(pretty);
-	}
 
 	/**
 	 * Action to store a Collection to the database.
@@ -66,12 +50,6 @@ public class CollectionController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		
-		if(json == null) {
-			result.put("message", "Empty json sent to server!\n");
-			return badRequest(result);
-		}
-
-		jsonPrettyPrint(json.toString());
 		
 		Key<Collection> colKey = null;
 		try {
@@ -98,10 +76,6 @@ public class CollectionController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		
-		if(json == null) {
-			result.put("message", "Empty json sent to server!\n");
-			return badRequest(result);
-		}
 
 		if(json.has("dbId")) {
 			ObjectId id = new ObjectId(json.get("dbId").asText());

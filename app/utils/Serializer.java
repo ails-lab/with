@@ -72,8 +72,6 @@ public class Serializer {
 			throw new Exception("Cannot convert json to collection object!");
 		}
 		
-		if(collection == null)
-			log.debug("Null collection! No database storage!");
 		return collection;
 	}
 

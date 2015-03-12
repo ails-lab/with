@@ -27,6 +27,8 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObjectBuilder;
+import com.mongodb.CommandResult;
+import com.mongodb.WriteResult;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -38,9 +40,9 @@ public class UserDAO extends DAO<User> {
 		super( User.class );
 	}
 
-	public User getById(ObjectId id) {
+	public User getById(String id) {
 		Query<User> q = this.createQuery()
-				.field("_id").equal(id);
+				.field("_id").equal(new ObjectId(id));
 		return this.findOne(q);
 
 	}
@@ -99,5 +101,9 @@ public class UserDAO extends DAO<User> {
 		return res;
 	}
 	
-	
+	public int deleteById(String id) {
+		Query<User> q = this.createQuery()
+				.field("_id").equal(new ObjectId(id));
+		return this.deleteByQuery(q).getN();
+	}
 }
