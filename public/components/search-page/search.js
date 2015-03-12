@@ -57,12 +57,12 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.source=ko.observable(false);
 		self.creator=ko.observable("");
 		self.provider=ko.observable("");
-		
+		self.url=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
 			}else{self.title(data.title);}
-			
+			self.url("#item/"+data.id);
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 			self.fullres(data.fullres);

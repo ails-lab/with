@@ -89,9 +89,7 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 	});
     
     self.collect=function(item){
-    	
-			console.log(item);
-			collectionShow(item);
+    		collectionShow(item);
 			
 		
     }

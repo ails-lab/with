@@ -4,10 +4,12 @@
 				
 			    <h3 class="truncate">
 				 <span class="withcollect" data-bind="event: {click: collect}"><i class="fa fa-connectdevelop"></i><span class="content"> collect it</span></span>
+				 
+				
 				<!-- ko text: title --><!-- /ko --> 
 				
 				</h3>
-				
+				<collection params="route: route"></collection>	
 				<hr class="faded">
 				
 			  <div class="container-fluid">
@@ -73,5 +75,3 @@
 		
 <div class="md-overlay" data-bind="event: {click: close}"></div><!-- the overlay element -->
 
-
-<collection params="route: route"></collection>	

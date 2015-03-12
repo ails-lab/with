@@ -2,12 +2,11 @@
 
 .md-modal-coll {
 	position: absolute;
-	top:10%;
+	top:0;
 	left: 50%;
 	width: 50%;
 	max-width: 330px;
 	min-width: 320px;
-	overflow-y: scroll;
 	z-index: 1037;
 	visibility: hidden;
 	display:none;
@@ -23,8 +22,30 @@
 	background: white;
 }
 
+.md-modal-addto {
+	position: relative;
+	  top: 0;
+	  left: 50%;
+	  width: 100%;
+	  overflow-y: scroll;
+	  z-index: 1037;
+	  background-color:white;
+	  visibility: hidden;
+	  border-radius: 6px;
+	  display: block;
+	  -webkit-backface-visibility: hidden;
+	  -moz-backface-visibility: hidden;
+	  backface-visibility: hidden;
+	  -webkit-transform: translateX(-50%) translateY(0%);
+	  -moz-transform: translateX(-50%) translateY(0%);
+	  -ms-transform: translateX(-50%) translateY(0%);
+	  transform: translateX(-50%) translateY(0%);
+	
+}
+
 .md-show {
 	visibility: visible;
+	
 }
 
 .md-overlay-coll {
@@ -42,9 +63,33 @@
 	transition: all 0.3s;
 }
 
+.md-overlay-addto {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	visibility: hidden;
+	top: 0;
+	left: 0;
+	z-index: 1036;
+	opacity: 0;
+	background: rgba(227, 224, 226, 0.85);
+	-webkit-transition: all 0.3s;
+	-moz-transition: all 0.3s;
+	transition: all 0.3s;
+}
+
+
 .md-show ~ .md-overlay-coll {
 	opacity: 1;
 	visibility: visible;
+	
+}
+
+
+.md-show ~ .md-overlay-addto {
+	opacity: 1;
+	visibility: visible;
+	
 }
 
 
@@ -55,6 +100,8 @@
 	position: relative;
 	margin: 0 auto;
 	padding:5px;
+	border-radius: 6px;
+	overflow: hidden;
 }
 
 .md-content-coll h3 {
