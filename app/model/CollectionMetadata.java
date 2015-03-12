@@ -48,6 +48,10 @@ public class CollectionMetadata {
 		this.description = description;
 	}
 
+	public String getCollectionId() {
+		return this.collection.toString();
+	}
+	
 	public Collection getCollection() {
 		Collection collection =
 				DB.getCollectionDAO().getById(this.collection);

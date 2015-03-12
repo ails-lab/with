@@ -54,9 +54,10 @@ public class User {
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
 	@Embedded
-	private List<CollectionMetadata> userCollections;
-
-
+	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
+	
+	
+	
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -64,11 +65,7 @@ public class User {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-
-	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
-
-	// convenience methods
-
+	
 	/**
 	 * The search should already be stored in the database separately
 	 * @param search

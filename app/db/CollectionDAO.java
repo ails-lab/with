@@ -19,7 +19,9 @@ package db;
 import java.util.List;
 
 import model.Collection;
+import model.CollectionMetadata;
 import model.RecordLink;
+import model.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -55,5 +57,24 @@ public class CollectionDAO extends DAO<Collection> {
 				.field("_id").equal(id)
 				.retrievedFields(true, "firstEntries");
 		return find(colQuery).get().getFirstEntries();
+	}
+	
+	public User getCollectionOwner(String id) {
+		Query<Collection> q =  this.createQuery()
+				.field("_id").equal(new ObjectId(id))
+				.retrievedFields(true, "owner");
+		return findOne(q).getOwner();
+	}
+	
+	public int deleteById(String id) {
+		User owner = getCollectionOwner(id);
+		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
+			if(colMeta.getCollectionId().equals(id))
+				owner.getCollectionMetadata().remove(colMeta);
+		}
+		
+		Query<Collection> q = this.createQuery()
+				.field("_id").equal(new ObjectId(id));
+		return deleteByQuery(q).getN();
 	}
 }
