@@ -150,12 +150,13 @@ define(['knockout', 'text!./collection.html','selectize'], function(ko, template
 	  self.open=function(){
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
+	   
 	  }
 	  
 	  self.close= function(){
 	    	$('#modal-'+self.modal()).removeClass('md-show');
 	    	$('#modal-'+self.modal()).css('display', 'none');
-	    	
+	
 	    }
 	  
 	  self.privateToggle=function(e,arg){

@@ -8,20 +8,20 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		
 	  self.title = ko.observable(false);
 	  self.description=ko.observable(false);
-	  self.thumb = ko.observable(false);
-	  self.fullres=ko.observable(false);
+	  self.thumb = ko.observable("");
+	  self.fullres=ko.observable("");
 	  self.view_url=ko.observable("");
 	  self.creator=ko.observable("");
 	  self.provider=ko.observable("");
 	  self.apisource=ko.observable(true);
-	  $("#fullresim").attr('src','');
+	  
 	 
     itemShow = function(record) {
     	self.itemload(record);
+    	
     	$('#modal-1').css('display', 'block');
+    	
     	$('#modal-1').addClass('md-show');
-    	
-    	
     	$('.withsearch').css('position','fixed');
     	$('.withsearch').css('overflow','hidden');
     }
@@ -63,11 +63,16 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 	};
    
     self.close= function(){
-    	
+    	self.fullres('');
+    	$("#modal-1").find("div[id^='modal-']").removeClass('md-show').css('display', 'none');
     	$('#modal-1').removeClass('md-show');
     	$('#modal-1').css('display', 'none');
+    	
+    	
+    	
     	$('.withsearch').css('position','absolute');
     	$('.withsearch').css('overflow','scroll');
+    	
     }
     
     self.changeSource=function(item){

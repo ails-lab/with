@@ -5,11 +5,13 @@
 	width: 50%;
 	max-width: 730px;
 	min-width: 320px;
+	min-height:600px;
 	overflow-y: scroll;
 	z-index: 1035;
 	visibility: hidden;
 	border-radius: 6px;
 	display:none;
+	padding-bottom:2em;
 	-webkit-backface-visibility: hidden;
 	-moz-backface-visibility: hidden;
 	backface-visibility: hidden;
