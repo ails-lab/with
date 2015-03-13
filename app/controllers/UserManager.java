@@ -33,16 +33,36 @@ import db.DB;
 public class UserManager extends Controller {
 	public static final ALogger log = Logger.of(UserManager.class);
 
+	/**
+	 * Free to call by anybody, so we don't give lots of info.
+	 * @param email
+	 * @return
+	 */
 	public static Result findByEmail( String email ) {
-		return ok();
+		User u = DB.getUserDAO().getByEmail(email);
+		if( u != null ) {
+			ObjectNode res = Json.newObject();
+			res.put( "displayName", u.getDisplayName());
+			res.put( "email", u.getEmail());
+			return ok( res );
+		} else {
+			return badRequest();
+		}
 	}
 	
 	public static Result findByDisplayName( String displayName ) {
-		return ok();		
+		User u = DB.getUserDAO().getByDisplayName(displayName);
+		if( u != null ) {
+			ObjectNode res = Json.newObject();
+			res.put( "displayName", u.getDisplayName());
+			return ok( res );
+		} else {
+			return badRequest();
+		}
 	}
 
 	/**
-	 * Not quite sure what I need here
+	 * 
 	 * @return
 	 */
 	public static Result register() {
