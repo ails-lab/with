@@ -129,11 +129,7 @@ define(['knockout', 'text!./collection.html','selectize'], function(ko, template
 	  self.route = params.route;
 	  self.templateName=ko.observable('collection_new');
 	  self.modal=ko.observable("3");
-	  
-	  
-	  
-	  
-	  var nocollection=false; /*picked up from browser session storage : should be stored upon login*/
+	  var nocollection=true; /*picked up from browser session storage : should be stored upon login*/
 	  
 	  /*load these from db and put on session storage upon login . For now use static array*/
 	  self.collectionitems = ko.observableArray([
@@ -161,19 +157,19 @@ define(['knockout', 'text!./collection.html','selectize'], function(ko, template
 	    	$('#modal-'+self.modal()).css('display', 'none');
 	    	
 	    }
-	
-	  $('.btn-toggle').click(function() {
-		    $(this).find('.btn').toggleClass('active');  
+	  
+	  self.privateToggle=function(e,arg){
+		  $(arg.currentTarget).parent().find('.btn').toggleClass('active');  
 		    
-		    if ($(this).find('.btn-primary').size()>0) {
-		    	$(this).find('.btn').toggleClass('btn-primary');
+		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
+		    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
 		    }
 		   
 		    
-		    $(this).find('.btn').toggleClass('btn-default');
-		       
-		});
-
+		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
+	  }
+	
+	
     
   }
 
