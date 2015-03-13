@@ -16,43 +16,63 @@
 
 package model;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Reference;
+
+import db.DB;
 
 @Embedded
 public class CollectionMetadata {
 
 	private String title;
 	private String description;
-	@Reference
-	private Collection colletion;
-	@Reference
-	private Media thumbnail;
+
+	//ref to collection
+	private ObjectId collection;
+	//ref to thumbnail
+	private ObjectId thumbnail;
 
 	public String getTitle() {
 		return title;
 	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public Collection getColletion() {
-		return colletion;
+
+	public String getCollectionId() {
+		return this.collection.toString();
 	}
-	public void setColletion(Collection colletion) {
-		this.colletion = colletion;
+	
+	public Collection getCollection() {
+		Collection collection =
+				DB.getCollectionDAO().getById(this.collection);
+		return collection;
 	}
+
+	public void setCollection(Collection collection) {
+		this.collection = collection.getDbId();
+	}
+
 	public Media getThumbnail() {
+		Media thumbnail =
+				DB.getMediaDAO().findById(this.thumbnail);
 		return thumbnail;
 	}
+
 	public void setThumbnail(Media thumbnail) {
-		this.thumbnail = thumbnail;
+		this.thumbnail = thumbnail.getDbId();
 	}
 
-
+	public void setThumbnail(ObjectId thumbnail) {
+		this.thumbnail = thumbnail;
+	}
 }

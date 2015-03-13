@@ -16,9 +16,10 @@
 
 package db;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
@@ -26,10 +27,14 @@ import org.mongodb.morphia.query.QueryResults;
 import play.Logger;
 import play.libs.F.Callback;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.util.JSON;
 
-public class DAO<E> extends BasicDAO<E, String> {
+public class DAO<E> extends BasicDAO<E, ObjectId> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
 
 	private final Class<?> entityClass;
@@ -38,18 +43,30 @@ public class DAO<E> extends BasicDAO<E, String> {
 		this.entityClass = entityClass;
 	}
 
-
-	/**
-	 * use attributes on the condition with the obj. prefix
-	 * @param condition
-	 * @return
-	 */
-	public List<E> list( String property, String value)  {
-		List<E> res = (List<E>) this.getDs().find(entityClass, property, value).asList();
+	public static DBObject asDBObject( String json ) {
+		DBObject res = (DBObject) JSON.parse(json);
 		return res;
-
 	}
 
+	/**
+	 * Convenience method for retrieving all values for this query on certain field.
+	 * Use if you don't want the morphia treatment (you want values, not objects)
+	 * @param res
+	 * @param query
+	 * @param field
+	 */
+	public void withCollection( Collection<String> res, String query, String field ) {
+		DBCursor cursor = null;
+		try {
+			BasicDBObject fieldProjector = new BasicDBObject();
+			fieldProjector.put( field, 1 );
+			cursor = getCollection().find( asDBObject(query), fieldProjector);
+			while( cursor.hasNext()) res.add( cursor.next().get(field).toString());
+		} finally {
+			cursor.close();
+		}
+	}
+	
 	/**
 	 * Return collection stats
 	 */
@@ -64,16 +81,9 @@ public class DAO<E> extends BasicDAO<E, String> {
 
 	}
 
-	/**
-	 * Return index info for a collection
-	 */
-	public String getIndexindexInfo() {
-		return null;
-	}
 
 	/**
 	 * Execute on all matching entities and optionally write changes back to db.
-	 * Use the "obj." prefix on parameters of the query.
 	 * @param callback
 	 * @param withWriteback
 	 * @throws Exception
@@ -131,16 +141,41 @@ public class DAO<E> extends BasicDAO<E, String> {
 	}
 
 	/**
+	 * Use this method to save and Object to the database
+	 * @param record
+	 */
+	public void makePermanent(E doc) {
+		try {
+			this.save(doc);
+		} catch(Exception e) {
+			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
+		}
+	}
+	/**
+	 * Use this method to delete and Object to the database
+	 * @param record
+	 */
+	public void makeTransient(E doc) {
+		try {
+			this.delete(doc);
+		} catch (Exception e) {
+			log.error("Cannot delete " + doc.getClass().getSimpleName(), e);
+		}
+	}
+
+	/**
 	 * Condition on the object needs to include the prefix 'obj.'!
 	 * There is a separate entity manager doing the work here.
 	 * @param condition
 	 * @return Number of entries deleted
 	 */
-	public boolean removeAll( String condition ) {
+	public int removeAll( String condition ) {
 		Query<E> q = this.createQuery();
 		q.criteria(condition);
-		boolean res = this.deleteByQuery(q).getLastError().ok();
-
-		return res;
+		int n = this
+				.deleteByQuery(q)
+				.getN();
+		
+		return n;
 	}
 }

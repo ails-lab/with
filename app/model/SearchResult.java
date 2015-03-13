@@ -21,6 +21,8 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import db.DB;
+
 /**
  * In this class we store search results that were retrieved by a search and we want to
  * be able to share them with others or store them to compare with re-executed searches in the future.
@@ -38,8 +40,7 @@ public class SearchResult {
 	private int offset;
 
 	// embed the search in here or reference
-	@Embedded
-	private Search search;
+	private ObjectId search;
 
 	// embedd the recordLink in here
 	@Embedded
@@ -63,11 +64,13 @@ public class SearchResult {
 	}
 
 	public Search getSearch() {
+		Search search =
+				DB.getSearchDAO().getById(this.search);
 		return search;
 	}
 
 	public void setSearch(Search search) {
-		this.search = search;
+		this.search = search.getDbID();
 	}
 
 	public RecordLink getRecordLink() {

@@ -16,13 +16,16 @@
 
 package db;
 
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.print.attribute.standard.Media;
-
 import model.Collection;
+import model.CollectionEntry;
+import model.Media;
+import model.Record;
+import model.RecordLink;
+import model.Search;
+import model.SearchResult;
 import model.User;
 
 import org.mongodb.morphia.Datastore;
@@ -31,7 +34,6 @@ import org.mongodb.morphia.Morphia;
 import play.Logger;
 
 import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
 import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -40,62 +42,77 @@ import com.typesafe.config.ConfigFactory;
 // the EntityManagerFactory is here
 public class DB {
 	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
+	private static MediaDAO mediaDAO;
+	
 	private static MongoClient mongo;
-	private static Morphia morphia;
 	private static Datastore ds;
+	private static Morphia morphia;
 	private static GridFS gridfs;
-	private static String dbName = "with-db";
+	private static Config conf;
 
 	static private final Logger.ALogger log = Logger.of(DB.class);
 
-	/* Init session method.
-	 * I can obtain host, port, dbName from the constructor
-	 */
-	public static void initialize() {
-		// ConfigFactory.invalidateCaches();
-		Config conf = ConfigFactory.load();
-
-		String host = conf.getString("mongo.host");
-		int port = conf.getInt("mongo.port");
-
-		try {
-			mongo = new MongoClient(host, port);
-			morphia = new Morphia();
-			ds = morphia.createDatastore(mongo, dbName);
-			morphia.mapPackage("model");
-			gridfs = new GridFS(mongo.getDB(dbName));
-		} catch(UnknownHostException | MongoException e) {
-			log.error("Database Connection aborted!", e);
-		}
-	}
-
 	public static GridFS getGridFs() {
-		if(gridfs != null)
-			return gridfs;
-		else {
+		if(gridfs == null) {
 			try {
-				gridfs = new GridFS(mongo.getDB(dbName));
+				String dbname = getConf().getString( "mongo.dbname");
+				gridfs = new GridFS(getMongo().getDB(dbname));
 			} catch(Exception e) {
 				log.error("Cannot create GridFS!", e);
 			}
-			return gridfs;
 		}
-
+		return gridfs;
 	}
 
-	public static Datastore getDs() {
-		if(ds != null)
-			return ds;
-		else {
+	public static Config getConf() {
+		if( conf == null ) {
+			conf = ConfigFactory.load();
+		}
+		return conf;
+	}
+
+	public static MongoClient getMongo() {
+		if( mongo == null ) {
 			try {
-				ds = morphia.createDatastore(mongo, dbName);
+				String host = getConf().getString("mongo.host");
+				int port = getConf().getInt("mongo.port");
+				mongo = new MongoClient(host, port);
+				if( getConf().hasPath("mongo.erase") && getConf().getBoolean("mongo.erase")) {
+					mongo.dropDatabase(getConf().getString( "mongo.dbname"));
+				}
+			} catch( Exception e ) {
+				log.error( "Cannot create Mongo client", e );
+			}
+		}
+		return mongo;
+	}
+
+	public static Morphia getMorphia() {
+		if( morphia == null ) {
+			 morphia = new Morphia();
+			//this method is not working, have to find why!!
+			morphia.mapPackage("model");
+		}
+		return morphia;
+	}
+	
+	public static Datastore getDs() {
+		if(ds == null) {
+			try {
+				ds = getMorphia().createDatastore(getMongo(), getConf().getString("mongo.dbname"));
+				ds.ensureIndexes();
+
 			} catch(Exception e) {
 				log.error("Cannot create Datastore!", e);
 			}
-			return ds;
 		}
+		return ds;
 	}
 
+	public static String getJson( Object o ) {
+		return getMorphia().getMapper().toDBObject(o).toString();
+	}
+	
 	public static UserDAO getUserDAO() {
 		return (UserDAO) getDAO(User.class);
 	}
@@ -105,7 +122,29 @@ public class DB {
 	}
 
 	public static MediaDAO getMediaDAO() {
-		return (MediaDAO) getDAO(Media.class);
+		if( mediaDAO == null ) 
+			mediaDAO = new MediaDAO();
+		return mediaDAO;
+	}
+
+	public static RecordDAO getRecordDAO() {
+		return (RecordDAO) getDAO(Record.class);
+	}
+
+	public static RecordLinkDAO getRecordLinkDAO() {
+		return (RecordLinkDAO) getDAO(RecordLink.class);
+	}
+
+	public static SearchDAO getSearchDAO() {
+		return (SearchDAO) getDAO(Search.class);
+	}
+
+	public static SearchResultDAO getSearchResultDAO() {
+		return (SearchResultDAO) getDAO(SearchResult.class);
+	}
+
+	public static CollectionEntryDAO getCollectionEntryDAO() {
+		return (CollectionEntryDAO) getDAO(CollectionEntry.class);
 	}
 
 	/**
