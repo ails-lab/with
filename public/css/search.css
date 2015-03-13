@@ -61,7 +61,7 @@ text-decoration: none;
 }
 
 .withsearch-input {
-	width: 100%;
+	width: 95%;
 	height: 100%;
 	padding: 0 10% 0 10px;
 	font-weight: 500;
@@ -379,7 +379,8 @@ input[type="search"] { /* reset normalize */
 
 column-gap: 15px;
 width: 90%;
-max-width: 1100px;
+/*
+max-width: 1500px;*/
 margin: 50px auto;
 }
 
