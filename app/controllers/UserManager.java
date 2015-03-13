@@ -53,9 +53,7 @@ public class UserManager extends Controller {
 	public static Result findByDisplayName( String displayName ) {
 		User u = DB.getUserDAO().getByDisplayName(displayName);
 		if( u != null ) {
-			ObjectNode res = Json.newObject();
-			res.put( "displayName", u.getDisplayName());
-			return ok( res );
+			return ok();
 		} else {
 			return badRequest();
 		}

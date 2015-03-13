@@ -55,7 +55,7 @@ public class UserManagerTest {
 		});
 	}
 
-	@Test
+	// @Test
 	public void testLogin() {
 		
 		// make a user with password
@@ -90,4 +90,36 @@ public class UserManagerTest {
 			DB.getUserDAO().makeTransient(u);
 		}
 	}
+	
+	@Test
+	public void testGetByDisplayName() {
+		
+		// make a user with password
+		User u = new User();
+		u.setEmail("my@you.me");
+		u.setDisplayName("cool_url");
+		// set password after email, email salts the password!
+		u.setPassword("secret");
+		DB.getUserDAO().makePermanent(u);
+		
+		try {
+		running( fakeApplication(), new Runnable() {
+			public void run() {
+				Result result = route(fakeRequest(GET, "/user/byEmail"),HOUR );
+				System.out.println( contentAsString( result ));
+				
+				assertThat( status( result )).isEqualTo( Status.BAD_REQUEST );
+				
+				result = route(fakeRequest(GET, "/user/byDisplayName?displayName=uncool"), HOUR );
+				assertThat( status( result )).isEqualTo( Status.BAD_REQUEST );
+				
+				result = route(fakeRequest(GET, "/user/byDisplayName?displayName=cool_url"), HOUR );
+				assertThat( status( result )).isEqualTo( Status.OK );
+			}
+		});
+		} finally {
+			DB.getUserDAO().makeTransient(u);
+		}
+	}
+
 }
