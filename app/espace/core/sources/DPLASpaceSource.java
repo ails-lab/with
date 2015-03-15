@@ -30,12 +30,12 @@ import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 
-public class DSpaceSource implements ISpaceSource {
+public class DPLASpaceSource implements ISpaceSource {
 
-	private String DPLAKey = "2edebbb32b1f42f86aaa56fd2edc1a28";
+	private String DPLAKey = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
+		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
 				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
 				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
