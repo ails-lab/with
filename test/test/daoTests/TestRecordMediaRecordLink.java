@@ -23,12 +23,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import model.Media;
-import model.Record;
 import model.RecordLink;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import db.DB;
@@ -39,44 +37,55 @@ public class TestRecordMediaRecordLink  {
 	@Test
 	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
 
-		//Create a Media Object
-		Media image = new Media();
+		for(int i = 0; i < 100; i++) {
+			//Create a Media Object
+			Media image = new Media();
 
-		URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
-		File file = new File("test_java.txt");
-		FileUtils.copyURLToFile(url, file);
-		FileInputStream fileStream = new FileInputStream(
-				file);
+			URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
+			File file = new File("test_java.txt");
+			FileUtils.copyURLToFile(url, file);
+			FileInputStream fileStream = new FileInputStream(
+					file);
 
-		byte[] rawbytes = IOUtils.toByteArray(fileStream);
+			byte[] rawbytes = IOUtils.toByteArray(fileStream);
 
-		image.setData(rawbytes);
-		image.setType("video/mp4");
-		image.setMimeType("mp4");
-		image.setDuration(0.0f);
-		image.setHeight(1024);
-		image.setWidth(1080);
+			image.setData(rawbytes);
+			image.setType("video/mp4");
+			image.setMimeType("mp4");
+			image.setDuration(0.0f);
+			image.setHeight(1024);
+			image.setWidth(1080);
 
-		DB.getMediaDAO().makePermanent(image);
+			DB.getMediaDAO().makePermanent(image);
+		}
 
 		//Create Record Object
-		Record record = new Record();
-		DB.getRecordDAO().save(record);
+		//Record record = new Record();
+		//DB.getRecordDAO().save(record);
 
 		//Create a RecordLink Object
 		//and references to Media and Record
 
 		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
+		Media imageRetrieved = DB.getMediaDAO().findById("55003261e4b0dadbf3dbbd10");
 		//Get Record object
-		Record recordRetrieved = DB.getRecordDAO().find().get();
+		//Record recordRetrieved = DB.getRecordDAO().find().get();
 
-		RecordLink rlink = new RecordLink();
-		rlink.setThumbnail(imageRetrieved);
-		rlink.setRecordReference(recordRetrieved);
 
-		DB.getRecordLinkDAO().save(rlink);
+		for(int i = 0; i < 1000; i++) {
+			RecordLink rlink = new RecordLink();
+			rlink.setDescription("test RecordLink");
+			rlink.setRights("CC");
+			rlink.setSource("blabla");
+			rlink.setSourceId("sourceId");
+			rlink.setSourceUrl("http://blabgla.gr");
+			rlink.setType("image");
+			rlink.setTitle("The test title");
+			rlink.setThumbnail(imageRetrieved);
+			//rlink.setRecordReference(recordRetrieved);
 
+			DB.getRecordLinkDAO().save(rlink);
+		}
 	}
 
 }

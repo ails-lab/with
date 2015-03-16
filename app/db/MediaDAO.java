@@ -29,11 +29,10 @@ import play.Logger.ALogger;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSInputFile;
 
-public class MediaDAO extends DAO<Media> {
+public class MediaDAO  {
 	public static final ALogger log = Logger.of(MediaDAO.class);
 
 	public MediaDAO() {
-		super(Media.class);
 	}
 
 	/**Converts GridFSDBFile to Media object.
@@ -65,10 +64,10 @@ public class MediaDAO extends DAO<Media> {
 	}
 
 
-	public Media findById(ObjectId dbId) {
+	public Media findById(String dbId) {
 		GridFSDBFile media = null;
 		try {
-			media = DB.getGridFs().find(dbId) ;
+			media = DB.getGridFs().find(new ObjectId(dbId));
 		} catch (Exception e) {
 			log.error("Problem in find file from GridFS " + dbId);
 		}
@@ -80,7 +79,7 @@ public class MediaDAO extends DAO<Media> {
 		return gridFsDbFileToMediaObj(media);
 	}
 
-	@Override
+
 	public void makePermanent(Media media) {
 		GridFSInputFile mediaGridFsFile;
 		try {
@@ -104,7 +103,7 @@ public class MediaDAO extends DAO<Media> {
 		}
 	}
 
-	@Override
+
 	public void makeTransient(Media media) {
 		try {
 			DB.getGridFs().remove(media.getDbId());

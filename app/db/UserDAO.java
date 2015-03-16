@@ -16,11 +16,9 @@
 
 package db;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.Search;
 import model.User;
 
@@ -83,8 +81,8 @@ public class UserDAO extends DAO<User> {
 	public List<Collection> getUserCollectionsByEmail(String email) {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
-				.retrievedFields(true, "userCollections.collection");
-		
+				.retrievedFields(true, "collections.collection");
+
 		return this.findOne(q).getUserCollections();
 	}
 

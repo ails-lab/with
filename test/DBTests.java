@@ -151,7 +151,7 @@ public class DBTests {
 			//and references to Media and Record
 */
 			//Get Media object
-			Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
+			Media imageRetrieved = DB.getMediaDAO().findById("54ef0a09e4b0af9ca4dc8fbc");
 			//Media imageRetrieved = DB.getMediaDAO().
 			//Get Record object
 			Record recordRetrieved = DB.getRecordDAO().find().get();
@@ -198,7 +198,7 @@ public class DBTests {
 		System.out.println(user1.toString());
 	}
 
-	
+
 	@Test
 	public void renderTemplate() {
 		Content html = views.html.index

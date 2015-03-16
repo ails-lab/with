@@ -50,9 +50,10 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
-	public void deleteById(ObjectId id) {
+
+	public void deleteByID(String id) {
 		Query<Collection> q = this.createQuery()
-				.field("_id").equal(id);
+				.field("_id").equal(new ObjectId(id));
 		this.deleteByQuery(q);
 	}
 

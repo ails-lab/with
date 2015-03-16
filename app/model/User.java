@@ -51,9 +51,6 @@ public class User {
 	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
-	@Embedded
-	private List<CollectionMetadata> userCollections;
-
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -63,6 +60,7 @@ public class User {
 		this.dbId = dbId;
 	}
 
+	@Embedded
 	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
 
 	// convenience methods

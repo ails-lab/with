@@ -19,6 +19,7 @@ package db;
 import java.util.Iterator;
 import java.util.List;
 
+import org.mongodb.morphia.Key;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
@@ -28,6 +29,7 @@ import play.libs.F.Callback;
 
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
 
 public class DAO<E> extends BasicDAO<E, String> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
@@ -134,23 +136,25 @@ public class DAO<E> extends BasicDAO<E, String> {
 	 * Use this method to save and Object to the database
 	 * @param record
 	 */
-	public void makePermanent(E doc) {
+	public Key<E> makePermanent(E doc) {
 		try {
-			this.save(doc);
+			return this.save(doc);
 		} catch(Exception e) {
 			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}
+		return null;
 	}
 	/**
 	 * Use this method to delete and Object to the database
 	 * @param record
 	 */
-	public void makeTransient(E doc) {
+	public WriteResult makeTransient(E doc) {
 		try {
-			this.delete(doc);
+			return this.delete(doc);
 		} catch (Exception e) {
 			log.error("Cannot delete " + doc.getClass().getSimpleName(), e);
 		}
+		return null;
 	}
 
 	/**

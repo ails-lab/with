@@ -53,8 +53,8 @@ public class Collection {
 	@Embedded
 	private List<RecordLink> firstEntries = new ArrayList<RecordLink>();
 
-	
-	
+
+
 	public ObjectId getDbId() {
 		return this.dbId;
 	}
@@ -73,7 +73,7 @@ public class Collection {
 	 */
 	public CollectionMetadata getMetadata() {
 		CollectionMetadata cm = new CollectionMetadata();
-		cm.setCollection(this);
+		cm.setCollection(this.dbId);
 		cm.setDescription(description);
 		cm.setThumbnail(thumbnail);
 		cm.setTitle(title);
@@ -119,7 +119,7 @@ public class Collection {
 
 	public Media getThumbnail() {
 		Media media =
-				DB.getMediaDAO().findById(this.thumbnail);
+				DB.getMediaDAO().findById(this.thumbnail.toString());
 		return media;
 	}
 
