@@ -14,21 +14,15 @@
  */
 
 
-package db;
-
-import model.RecordLink;
+import play.Application;
+import play.GlobalSettings;
 import play.Logger;
 
-public class RecordLinkDAO extends DAO<RecordLink> {
-	static private final Logger.ALogger log = Logger.of(RecordLink.class);
 
-	public RecordLinkDAO() {
-		super( RecordLink.class );
+public class Global extends GlobalSettings {
+	static private final Logger.ALogger log = Logger.of(Global.class);
+	
+	@Override
+	public void onStart( Application app ) {
 	}
-
-	public RecordLink getByDbId(String id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

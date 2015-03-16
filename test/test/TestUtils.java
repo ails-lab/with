@@ -20,6 +20,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -73,5 +78,18 @@ public class TestUtils {
 		}
 		return res;
 	}
+	
+	/*
+	 * Pretty print json
+	 */
+	public static void jsonPrettyPrint(String json) {
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		JsonParser jp = new JsonParser();
+		JsonElement je = jp.parse(json);
+		String pretty = gson.toJson(je);
+		System.out.println(pretty);
+	}
+
+
 
 }

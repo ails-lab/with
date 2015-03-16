@@ -28,64 +28,56 @@ import model.RecordLink;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
+import static org.fest.assertions.Assertions.assertThat;
 
 import db.DB;
 
-
-public class TestRecordMediaRecordLink  {
-
+public class MediaDAOTest {
 	@Test
-	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
+	public void testMediaStorage() throws IOException, URISyntaxException {
 
 		for(int i = 0; i < 100; i++) {
 			//Create a Media Object
 			Media image = new Media();
 
-			URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
-			File file = new File("test_java.txt");
-			FileUtils.copyURLToFile(url, file);
-			FileInputStream fileStream = new FileInputStream(
-					file);
+
+		URL url = new URL("http://www.ntua.gr/ntua-01.jpg");
+		File file = new File("test_java.txt");
+		FileUtils.copyURLToFile(url, file);
+		FileInputStream fileStream = new FileInputStream(
+				file);
 
 			byte[] rawbytes = IOUtils.toByteArray(fileStream);
 
-			image.setData(rawbytes);
-			image.setType("video/mp4");
-			image.setMimeType("mp4");
-			image.setDuration(0.0f);
-			image.setHeight(1024);
-			image.setWidth(1080);
+
+		image.setData(rawbytes);
+		image.setType("IMAGE");
+		image.setMimeType("image/jpeg");
+		image.setHeight(599);
+		image.setWidth(755);
 
 			DB.getMediaDAO().makePermanent(image);
 		}
 
+		assertThat( image.getDbId()).isNotNull();
+		
 		//Create Record Object
 		//Record record = new Record();
 		//DB.getRecordDAO().save(record);
 
+		assertThat( record.getDbID()).isNotNull();
+
 		//Create a RecordLink Object
 		//and references to Media and Record
 
-		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().findById("55003261e4b0dadbf3dbbd10");
-		//Get Record object
-		//Record recordRetrieved = DB.getRecordDAO().find().get();
 
 
-		for(int i = 0; i < 1000; i++) {
-			RecordLink rlink = new RecordLink();
-			rlink.setDescription("test RecordLink");
-			rlink.setRights("CC");
-			rlink.setSource("blabla");
-			rlink.setSourceId("sourceId");
-			rlink.setSourceUrl("http://blabgla.gr");
-			rlink.setType("image");
-			rlink.setTitle("The test title");
-			rlink.setThumbnail(imageRetrieved);
-			//rlink.setRecordReference(recordRetrieved);
+		RecordLink rlink = new RecordLink();
+		// rlink.setThumbnail(imageRetrieved);
+		// rlink.setRecordReference(recordRetrieved);
 
-			DB.getRecordLinkDAO().save(rlink);
-		}
+		// DB.getRecordLinkDAO().save(rlink);
+
 	}
 
 }

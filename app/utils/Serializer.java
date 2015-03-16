@@ -72,7 +72,6 @@ public class Serializer {
 			throw new Exception("Cannot convert json to collection object!");
 		}
 
-
 		return collection;
 	}
 

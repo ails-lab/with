@@ -33,28 +33,12 @@ import play.mvc.Result;
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 import db.DB;
 
 public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of( CollectionController.class);
-
-	/*
-	 * Pretty print json
-	 */
-	private static void jsonPrettyPrint(String json) {
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		JsonParser jp = new JsonParser();
-		JsonElement je = jp.parse(json);
-		String pretty = gson.toJson(je);
-		System.out.println(pretty);
-	}
 
 	/**
 	 * Action to store a Collection to the database.
@@ -65,13 +49,6 @@ public class CollectionController extends Controller {
 	public static Result saveCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-
-		if(json == null) {
-			result.put("message", "Empty json sent to server!\n");
-			return badRequest(result);
-		}
-
-		jsonPrettyPrint(json.toString());
 
 		Key<Collection> colKey = null;
 		try {
@@ -98,11 +75,6 @@ public class CollectionController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		if(json == null) {
-			result.put("message", "Empty json sent to server!\n");
-			return badRequest(result);
-		}
-
 		if(json.has("dbId")) {
 			String id = json.get("dbId").asText();
 			try {
@@ -125,21 +97,13 @@ public class CollectionController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		if(json.has("userMail")) {
-			String owner = json.get("userMail").asText();
-			try {
-				List<Collection> userCollections =
-						DB.getUserDAO().getUserCollectionsByEmail(owner);
-				ArrayNode collections = Json.newObject().arrayNode();
-				for(Collection col: userCollections) {
-					collections.add(Serializer.collectionToJson(col));
-				}
-				result.put("user_collections", collections);
-				result.put("message", "Succesfully got user collections!");
-			} catch(Exception e) {
-				log.error("Cannot fetch user collections!", e);
-				result.put("message", "Cannot fetch user collections!");
-				return internalServerError(result);
+		if(json.has("userId")) {
+			String userId = json.get("userId").asText();
+			List<Collection> userCollections =
+					DB.getUserDAO().getById(userId).getUserCollections();
+			ObjectNode collections = Json.newObject();
+			for(Collection col: userCollections) {
+				collections.arrayNode().add(Serializer.collectionToJson(col));
 			}
 			return ok(result);
 		} else {

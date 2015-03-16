@@ -7,6 +7,7 @@ GET     /                           controllers.Application.index()
 
 POST     /api/search                controllers.SearchController.search()
 GET      /api/testsearch            controllers.SearchController.testsearch()
+POST     /api/testsearch            controllers.SearchController.posttestsearch()
 
 
 # Map static resources from the /public folder to the /assets URL path
@@ -17,4 +18,12 @@ POST     /collection/delete                      controllers.CollectionControlle
 POST     /collection/add                         controllers.CollectionController.saveCollection()
 POST     /collection/listUserCollections         controllers.CollectionController.listUserCollections()
 POST     /collection/addRecordToCollection       controllers.CollectionController.addRecordToCollection()
+
+# User Manager Controller
+GET 	/user/byEmail				controllers.UserManager.findByEmail(email:java.lang.String)
+GET		/user/byDisplayName			controllers.UserManager.findByDisplayName(displayName:java.lang.String)
+POST	/user/register				controllers.UserManager.register()
+GET		/user/byFacebookId/			controllers.UserManager.findByFacebookId()
+GET		/api/login					controllers.UserManager.login(email:java.lang.String?="", password:java.lang.String, displayName:java.lang.String?="" )
+GET		/api/logout					controllers.UserManager.logout()
 

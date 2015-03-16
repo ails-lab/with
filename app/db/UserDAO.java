@@ -16,10 +16,10 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
-import model.Search;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -36,9 +36,9 @@ public class UserDAO extends DAO<User> {
 		super( User.class );
 	}
 
-	public User getById(ObjectId id) {
+	public User getById(String id) {
 		Query<User> q = this.createQuery()
-				.field("_id").equal(id);
+				.field("_id").equal(new ObjectId(id));
 		return this.findOne(q);
 
 	}
@@ -47,11 +47,15 @@ public class UserDAO extends DAO<User> {
 		return this.findOne("email", email);
 	}
 
+	public User getByDisplayName(String displayName) {
+		return this.findOne("displayName", displayName);
+	}
+
 	/**
 	 * This method is updating one specific User.
 	 * By default update method is invoked to all documents of a collection.
 	 **/
-	public void setSpecificUserField(String dbId, String fieldName, String value) {
+	private void setSpecificUserField(String dbId, String fieldName, String value) {
 		Query<User> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<User> updateOps = this.createUpdateOperations();
 		updateOps.set(fieldName, value);
@@ -66,9 +70,10 @@ public class UserDAO extends DAO<User> {
 	 */
 	public User getByEmailPassword(String email, String pass) {
 		Query<User> q = this.createQuery();
+		String md5Pass = User.computeMD5(email, pass);
 		q.and(
 			q.criteria("email").equal(email),
-			q.criteria("md5Password").equal(pass)
+			q.criteria("md5Password").equal(md5Pass)
 		);
 		return find(q).get();
 	}
@@ -86,25 +91,15 @@ public class UserDAO extends DAO<User> {
 		return this.findOne(q).getUserCollections();
 	}
 
-	/**
-	 * Return search results from a user
-	 * @param email
-	 * @return
-	 */
-	public List<Search> getSearchResults(String email) {
-		Query<User> q = this.createQuery()
-				.field("email").equal(email)
-				.retrievedFields(true, "searchHistory");
-		return find(q).get().getSearchHistory();
-
+	public List<String> getAllDisplayNames() {
+		ArrayList<String> res = new ArrayList<String>();
+		withCollection( res, "", "displayName");
+		return res;
 	}
 
-	public User getByName( String firstName, String lastName ) {
+	public int deleteById(String id) {
 		Query<User> q = this.createQuery()
-				.field("firstName").equal(firstName)
-				.field("lastName").equal(lastName);
-		return this.findOne(q);
+				.field("_id").equal(new ObjectId(id));
+		return this.deleteByQuery(q).getN();
 	}
-
-
 }

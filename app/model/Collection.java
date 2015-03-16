@@ -102,7 +102,7 @@ public class Collection {
 	}
 	public User getOwner() {
 		User user =
-				DB.getUserDAO().getById(this.owner);
+				DB.getUserDAO().getById(this.owner.toString());
 		return user;
 	}
 	public void setOwner(User owner) {
