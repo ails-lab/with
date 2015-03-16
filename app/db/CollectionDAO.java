@@ -16,7 +16,9 @@
 
 package db;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import model.Collection;
 import model.CollectionMetadata;
@@ -52,12 +54,23 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
-
-	public List<RecordLink> getCollectionRecordLinks(String id) {
+	public List<Collection> getByOwner(String owner) {
+		Query<Collection> q = this.createQuery()
+				.field("owner").equal(new ObjectId(owner));
+		return this.find(q).asList();
+	}
+	
+	public Map<String, List<RecordLink>> getCollectionRecordLinksByOwner(String owner) {
 		Query<Collection> colQuery = this.createQuery()
-				.field("_id").equal(id)
+				.field("owner").equal(new ObjectId(owner))
 				.retrievedFields(true, "firstEntries");
-		return find(colQuery).get().getFirstEntries();
+		
+		Map<String, List<RecordLink>> firstEntries = 
+				new HashMap<String, List<RecordLink>>();
+		for(Collection c: find(colQuery).asList()) {
+			firstEntries.put(c.getTitle(), c.getFirstEntries());
+		}
+		return firstEntries;
 	}
 	
 	public User getCollectionOwner(String id) {

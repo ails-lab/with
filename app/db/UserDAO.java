@@ -19,10 +19,9 @@ package db;
 import java.util.List;
 
 import model.Collection;
-<<<<<<< HEAD
-=======
 import model.Search;
->>>>>>> enrich more tests, add more routes
+import model.CollectionMetadata;
+import model.Search;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -31,6 +30,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.CommandResult;
+import com.mongodb.DBCollection;
 import com.mongodb.WriteResult;
 
 import play.Logger;
@@ -105,8 +105,20 @@ public class UserDAO extends DAO<User> {
 	}
 	
 	public int deleteById(String id) {
-		Query<User> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
-		return this.deleteByQuery(q).getN();
+		User user = getById(id);
+		
+		//delete user realted searches
+		List<Search> userSearches = user.getSearchHistory();
+		for(Search s: userSearches) {
+			DB.getSearchDAO().makeTransient(s);
+		}
+		
+		//delete user related collections
+		List<CollectionMetadata> collectionMD = user.getCollectionMetadata();
+		for(CollectionMetadata cmd: collectionMD) {
+			DB.getCollectionDAO().deleteById(cmd.getCollectionId());
+		}
+		
+		return this.makeTransient(user);
 	}
 }

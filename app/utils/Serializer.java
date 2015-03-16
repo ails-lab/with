@@ -74,6 +74,17 @@ public class Serializer {
 		return collection;
 	}
 
+	public static JsonNode recordLinkToJson(RecordLink recLink) {
+		ObjectNode json = Json.newObject();
+		json.put("title", recLink.getTitle());
+		json.put("type", recLink.getType());
+		json.put("source", recLink.getSource());
+		json.put("sourceId", recLink.getSourceId());
+		json.put("sourceUrl", recLink.getSourceUrl());
+		json.put("rights", recLink.getRights());
+		
+		return json;
+	}
 
 	public static JsonNode collectionToJson(Collection collection) {
 		ObjectNode json = Json.newObject();
@@ -96,7 +107,6 @@ public class Serializer {
 			recordLinksArray.add(jsonRecLink);
 		}
 		json.put("first_entries", recordLinksArray);
-
 		return json;
 	}
 }

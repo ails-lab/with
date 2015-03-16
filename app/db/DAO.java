@@ -158,13 +158,13 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 * Use this method to delete and Object to the database
 	 * @param record
 	 */
-	public WriteResult makeTransient(E doc) {
+	public int makeTransient(E doc) {
 		try {
-			return this.delete(doc);
+			return this.delete(doc).getN();
 		} catch (Exception e) {
 			log.error("Cannot delete " + doc.getClass().getSimpleName(), e);
 		}
-		return null;
+		return -1;
 	}
 
 	/**
