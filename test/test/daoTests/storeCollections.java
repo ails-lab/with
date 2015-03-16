@@ -15,37 +15,57 @@
 
 
 package test.daoTests;
+
+import java.util.ArrayList;
+
 import model.Collection;
+import model.CollectionMetadata;
+import model.RecordLink;
 import model.User;
 
+import org.bson.types.ObjectId;
 import org.junit.Test;
+import org.mongodb.morphia.Key;
 
 import db.DB;
 
-
-public class storeCollections  {
-
+public class storeCollections {
 
 	@Test
 	public void storeCollection() {
 
 		// store Collection
 		User user;
-		for(int i = 0;i < 1000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			Collection collection = new Collection();
+			CollectionMetadata colMeta = new CollectionMetadata();
+
+
 			collection.setDescription("This is a test collection");
+			colMeta.setDescription(collection.getDescription());
 			collection.setPublic(true);
 			collection.setTitle("The TEST collection");
+			colMeta.setTitle(collection.getTitle());
 
-			if(i == 42) {
-				user = DB.getUserDAO().getByEmail("heres42_@mongo.gr");
+			if (i == 42) {
+				user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
 				collection.setOwner(user);
 			} else {
 				user = DB.getUserDAO().find().asList().get(i);
 				collection.setOwner(user);
 			}
-			DB.getCollectionDAO().makePermanent(collection);;
-		}
 
+			ArrayList<RecordLink> firstEntries = new ArrayList<RecordLink>();
+			for (int j = 0; j < 20; j++) {
+				RecordLink rlink = DB.getRecordLinkDAO().find().asList().get(j);
+				firstEntries.add(rlink);
+			}
+			collection.setFirstEntries(firstEntries);
+			Key<Collection> colKey = DB.getCollectionDAO().makePermanent(collection);
+			colMeta.setCollection(new ObjectId(colKey.getId().toString()));
+
+			user.getCollectionMetadata().add(colMeta);
+			DB.getUserDAO().makePermanent(user);
+		}
 	}
 }

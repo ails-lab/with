@@ -58,18 +58,14 @@ public class CollectionMetadata {
 		return collection;
 	}
 
-	public void setCollection(Collection collection) {
-		this.collection = collection.getDbId();
+	public void setCollection(ObjectId collection) {
+		this.collection = collection;
 	}
 
 	public Media getThumbnail() {
 		Media thumbnail =
-				DB.getMediaDAO().findById(this.thumbnail);
+				DB.getMediaDAO().findById(this.thumbnail.toString());
 		return thumbnail;
-	}
-
-	public void setThumbnail(Media thumbnail) {
-		this.thumbnail = thumbnail.getDbId();
 	}
 
 	public void setThumbnail(ObjectId thumbnail) {

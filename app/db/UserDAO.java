@@ -16,10 +16,13 @@
 
 package db;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
+<<<<<<< HEAD
+=======
+import model.Search;
+>>>>>>> enrich more tests, add more routes
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -90,8 +93,8 @@ public class UserDAO extends DAO<User> {
 	public List<Collection> getUserCollectionsByEmail(String email) {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
-				.retrievedFields(true, "userCollections.collection");
-		
+				.retrievedFields(true, "collections.collection");
+
 		return this.findOne(q).getUserCollections();
 	}
 	

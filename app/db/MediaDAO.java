@@ -32,6 +32,11 @@ import com.mongodb.gridfs.GridFSInputFile;
 public class MediaDAO  {
 	public static final ALogger log = Logger.of(MediaDAO.class);
 
+<<<<<<< HEAD
+=======
+	public MediaDAO() {
+	}
+>>>>>>> enrich more tests, add more routes
 
 	/**Converts GridFSDBFile to Media object.
 	 * We use this method for convertion because we cannot cast directly to Media.
@@ -62,10 +67,10 @@ public class MediaDAO  {
 	}
 
 
-	public Media findById(ObjectId dbId) {
+	public Media findById(String dbId) {
 		GridFSDBFile media = null;
 		try {
-			media = DB.getGridFs().find(dbId) ;
+			media = DB.getGridFs().find(new ObjectId(dbId));
 		} catch (Exception e) {
 			log.error("Problem in find file from GridFS " + dbId);
 		}

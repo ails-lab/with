@@ -23,12 +23,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import model.Media;
-import model.Record;
 import model.RecordLink;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.bson.types.ObjectId;
 import org.junit.Test;
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -38,8 +36,9 @@ public class MediaDAOTest {
 	@Test
 	public void testMediaStorage() throws IOException, URISyntaxException {
 
-		//Create a Media Object
-		Media image = new Media();
+		for(int i = 0; i < 100; i++) {
+			//Create a Media Object
+			Media image = new Media();
 
 		URL url = new URL("http://www.ntua.gr/ntua-01.jpg");
 		File file = new File("test_java.txt");
@@ -47,21 +46,20 @@ public class MediaDAOTest {
 		FileInputStream fileStream = new FileInputStream(
 				file);
 
-		byte[] rawbytes = IOUtils.toByteArray(fileStream);
-
 		image.setData(rawbytes);
 		image.setType("IMAGE");
 		image.setMimeType("image/jpeg");
 		image.setHeight(599);
 		image.setWidth(755);
 
-		DB.getMediaDAO().makePermanent(image);
+			DB.getMediaDAO().makePermanent(image);
+		}
 
 		assertThat( image.getDbId()).isNotNull();
 		
 		//Create Record Object
-		Record record = new Record();
-		DB.getRecordDAO().save(record);
+		//Record record = new Record();
+		//DB.getRecordDAO().save(record);
 
 		assertThat( record.getDbID()).isNotNull();
 
@@ -75,6 +73,26 @@ public class MediaDAOTest {
 
 		// DB.getRecordLinkDAO().save(rlink);
 
+		//Get Media object
+		Media imageRetrieved = DB.getMediaDAO().findById("55003261e4b0dadbf3dbbd10");
+		//Get Record object
+		//Record recordRetrieved = DB.getRecordDAO().find().get();
+
+
+		for(int i = 0; i < 1000; i++) {
+			RecordLink rlink = new RecordLink();
+			rlink.setDescription("test RecordLink");
+			rlink.setRights("CC");
+			rlink.setSource("blabla");
+			rlink.setSourceId("sourceId");
+			rlink.setSourceUrl("http://blabgla.gr");
+			rlink.setType("image");
+			rlink.setTitle("The test title");
+			rlink.setThumbnail(imageRetrieved);
+			//rlink.setRecordReference(recordRetrieved);
+
+			DB.getRecordLinkDAO().save(rlink);
+		}
 	}
 
 }

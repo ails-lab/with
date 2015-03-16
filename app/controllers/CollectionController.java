@@ -22,7 +22,6 @@ import model.Collection;
 import model.CollectionEntry;
 import model.RecordLink;
 
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.Key;
 
 import play.Logger;
@@ -34,6 +33,7 @@ import play.mvc.Result;
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
@@ -49,8 +49,6 @@ public class CollectionController extends Controller {
 	public static Result saveCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		
-		
 		Key<Collection> colKey = null;
 		try {
 			Collection newCollection = Serializer.jsonToCollectionObject(json);
@@ -65,7 +63,7 @@ public class CollectionController extends Controller {
 		return ok(result);
 	}
 
-	
+
 	/**
 	 * Action to delete a Collection from database.
 	 * Json input, the collection dbId
@@ -75,12 +73,11 @@ public class CollectionController extends Controller {
 	public static Result deleteCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		
 
 		if(json.has("dbId")) {
-			ObjectId id = new ObjectId(json.get("dbId").asText());
+			String id = json.get("dbId").asText();
 			try {
-				DB.getCollectionDAO().deleteById(id);
+				DB.getCollectionDAO().deleteByID(id);
 			} catch(Exception e) {
 				log.error("Collection not deleted!", e);
 				result.put("message", "Could not delete collection from database!");
@@ -107,20 +104,18 @@ public class CollectionController extends Controller {
 			for(Collection col: userCollections) {
 				collections.arrayNode().add(Serializer.collectionToJson(col));
 			}
-			result.put("user_collections", collections);
-			result.put("message", "Succesfully got user collections!");
 			return ok(result);
 		} else {
 			result.put("message", "Did not specify the user!");
 			return badRequest(result);
 		}
 	}
-	
+
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result addRecordToCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		
+
 		RecordLink rLink = null;
 		String colId = null;
 		String recordLinkId = null;
@@ -129,15 +124,15 @@ public class CollectionController extends Controller {
 			colId = json.get("collection_id").asText();
 			rLink = DB.getRecordLinkDAO().getByDbId(recordLinkId);
 		} else {
-			result.put("message", 
+			result.put("message",
 					"Cannot retrieve recordLink or collection from db, id is missing!");
 			return badRequest(result);
 		}
-		
+
 		CollectionEntry colEntry = new CollectionEntry();
 		colEntry.setRecordLink(rLink);
 		colEntry.setCollection(colId);
-		
+
 		try {
 			DB.getCollectionEntryDAO().save(colEntry);
 			result.put("message", "CollectionEntry saved succesfully to database!");

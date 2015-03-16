@@ -21,7 +21,6 @@ import java.util.Map;
 
 import model.Collection;
 import model.CollectionEntry;
-import model.Media;
 import model.Record;
 import model.RecordLink;
 import model.Search;
@@ -43,7 +42,6 @@ import com.typesafe.config.ConfigFactory;
 public class DB {
 	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
 	private static MediaDAO mediaDAO;
-
 	private static MongoClient mongo;
 	private static Datastore ds;
 	private static Morphia morphia;
@@ -123,7 +121,7 @@ public class DB {
 
 	public static MediaDAO getMediaDAO() {
 		if( mediaDAO == null )
-			mediaDAO = new MediaDAO();
+			 mediaDAO = new MediaDAO();
 		return mediaDAO;
 	}
 

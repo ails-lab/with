@@ -22,6 +22,7 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.CollectionMetadata;
 import model.Search;
 import model.User;
 
@@ -34,7 +35,7 @@ import test.TestUtils;
 import com.mongodb.MongoException;
 
 import db.DB;
- 
+
 public class UserDAOTest {
 
 	@Test
@@ -84,7 +85,7 @@ public class UserDAOTest {
 	}
 	
 	@Test
-	public void massStorage() {
+	public void userStorage(CollectionMetadata md) {
 		/* Add 1000 random users */
 		for (int i = 0; i < 1000; i++) {
 			User testUser = new User();

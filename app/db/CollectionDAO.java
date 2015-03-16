@@ -52,6 +52,7 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
+
 	public List<RecordLink> getCollectionRecordLinks(String id) {
 		Query<Collection> colQuery = this.createQuery()
 				.field("_id").equal(id)

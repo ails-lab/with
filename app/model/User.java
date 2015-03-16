@@ -65,7 +65,6 @@ public class User {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-	
 	/**
 	 * The search should already be stored in the database separately
 	 * @param search
