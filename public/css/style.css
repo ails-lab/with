@@ -379,7 +379,7 @@ button:hover .email_huge { background-image: url(../images/email_hover.png); }
   z-index: 1040;
 }
 
-.dialog > .footer {
+.externalLogin .footer {
   font-weight: 500;
   padding: 15px;
 }
@@ -427,12 +427,16 @@ button.email:hover {
   text-align: center;
 }
 
-#loginPopup .externalLogin {
+#loginPopup .externalLogin, #loginPopup .emailLogin {
   float: left;
   margin-right: 15px;
   text-align: center;
   width: 550px;
   padding: 30px 0;
+}
+
+.emailLogin {
+  vertical-align: top;
 }
 
 #loginPopup .externalLogin > button {
@@ -445,8 +449,8 @@ button.email:hover {
   width: 130px;
 }
 
-#loginPopup .emailLogin {
-  overflow-x: hidden;
+#loginPopup {
+  overflow: hidden;
 }
 
 button.close {
