@@ -16,9 +16,15 @@
 
 package controllers;
 
+import java.io.InputStream;
+
 import model.User;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -26,6 +32,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -76,6 +83,32 @@ public class UserManager extends Controller {
 	 */
 	public static Result findByFacebookId() {
 		return ok();
+	}
+	public static  Result googleLogin( String accessToken ) {
+		// WTF HttpClientBuilder available in eclipse, not in activator??
+		
+		log.info( accessToken );
+		User u = null;
+		try {
+			HttpGet hg = new HttpGet( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpResponse response = client.execute(hg);
+			InputStream is = response.getEntity().getContent();
+			JsonNode res = Json.parse( is );
+			String email = res.get("email").asText();
+			u = DB.getUserDAO().getByEmail(email);
+			if( u == null ) {
+				// create a User for google login, send empty Json and ask 
+				// UI to fill the void
+				u = new User();
+				u.setEmail(email);
+				DB.getUserDAO().makePermanent(u);
+			}
+			return ok( Json.parse( DB.getJson(u)));
+		} catch( Exception e ) {
+			log.error( "Couldn't validate user!", e );
+			return badRequest();
+		}
 	}
 	
 	public static Result login( String email, String password, String displayName ) {
