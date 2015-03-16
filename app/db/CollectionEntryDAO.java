@@ -16,6 +16,9 @@
 
 package db;
 
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
 import model.CollectionEntry;
 import play.Logger;
 import play.Logger.ALogger;
@@ -25,5 +28,17 @@ public class CollectionEntryDAO extends DAO<CollectionEntry> {
 
 	public CollectionEntryDAO() {
 		super(CollectionEntry.class);
+	}
+
+	public CollectionEntry getByRecLinkId(String recLinkId) {
+		Query<CollectionEntry> q = this.createQuery()
+				.field("recordLink").equal(new ObjectId(recLinkId));
+		return this.findOne(q);
+	}
+	
+	public int deleteByRecLinkId(String recLinkId) {
+		Query<CollectionEntry> q = this.createQuery()
+				.field("recordLink").equal(new ObjectId(recLinkId));
+		return this.deleteByQuery(q).getN();
 	}
 }

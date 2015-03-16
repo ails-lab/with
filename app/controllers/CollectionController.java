@@ -17,6 +17,8 @@
 package controllers;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import model.Collection;
 import model.CollectionEntry;
@@ -33,6 +35,7 @@ import play.mvc.Result;
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -92,18 +95,28 @@ public class CollectionController extends Controller {
 		}
 	}
 
+	/**
+	 * Retrieve all fields from the first 20 items
+	 * of all collections?
+	 */
 	@BodyParser.Of(BodyParser.Json.class)
-	public static Result listUserCollections() {
+	public static Result listFirstRecordsOfUserCollections() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
 		if(json.has("userId")) {
 			String userId = json.get("userId").asText();
-			List<Collection> userCollections =
-					DB.getUserDAO().getById(userId).getUserCollections();
+			Map<String, List<RecordLink>> firstEntries =
+					DB.getCollectionDAO().getCollectionRecordLinksByOwner(userId);
+
 			ObjectNode collections = Json.newObject();
-			for(Collection col: userCollections) {
-				collections.arrayNode().add(Serializer.collectionToJson(col));
+			for(Entry<String, ?> col: firstEntries.entrySet()) {
+				ArrayNode firstRecords = Json.newObject().arrayNode();
+				for(RecordLink recLink: (List<RecordLink>)col.getValue()) {
+					firstRecords.add(Json.toJson(recLink));
+					//firstRecords.add(Serializer.recordLinkToJson(recLink));
+				}
+				collections.put(col.getKey(), firstRecords);
 			}
 			return ok(result);
 		} else {
@@ -111,29 +124,30 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 	}
-
+	
+	/**
+	 * Adds a Record to a Collection
+	 */
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result addRecordToCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
 		RecordLink rLink = null;
-		String colId = null;
-		String recordLinkId = null;
+		CollectionEntry colEntry = null;
 		if(json.has("recordLink_id") && json.has("collection_id")) {
-			recordLinkId = json.get("recordLink_id").asText();
-			colId = json.get("collection_id").asText();
+			String recordLinkId = json.get("recordLink_id").asText();
+			String colId = json.get("collection_id").asText();
+			
 			rLink = DB.getRecordLinkDAO().getByDbId(recordLinkId);
+			colEntry = new CollectionEntry();
+			colEntry.setRecordLink(rLink);
+			colEntry.setCollection(colId);
 		} else {
 			result.put("message",
 					"Cannot retrieve recordLink or collection from db, id is missing!");
 			return badRequest(result);
 		}
-
-		CollectionEntry colEntry = new CollectionEntry();
-		colEntry.setRecordLink(rLink);
-		colEntry.setCollection(colId);
-
 		try {
 			DB.getCollectionEntryDAO().save(colEntry);
 			result.put("message", "CollectionEntry saved succesfully to database!");
@@ -143,5 +157,46 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot save CollectionEntry to database!");
 			return internalServerError(result);
 		}
+	}
+	
+	/**
+	 * Remove a Record from a Collection
+	 */
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result removeRecordFromCollection() {
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		
+		if(json.has("recordlink_id")) {
+			String recLinkId = json.get("recordlink_id").asText();
+			try {
+				RecordLink recLink = 
+						DB.getRecordLinkDAO().getByDbId(recLinkId);
+				 if(DB.getCollectionEntryDAO().deleteByRecLinkId(recLinkId) == 0 ) {
+					 result.put("message", "Cannot delete CollectionEntry!");
+					 return internalServerError(result);
+				 }
+				 
+					 
+				
+			} catch(Exception e) {
+				
+			}
+		} else {
+			result.put("message", 
+					"Cannot retrieve recordLink or collection from db, id is missing!");
+			return badRequest(result);
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * List all Records from a Collection 
+	 * using a start item and a page size
+	 */
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result listCollectionRecords() {
+		return null;
 	}
 }

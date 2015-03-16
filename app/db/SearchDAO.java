@@ -37,4 +37,9 @@ public class SearchDAO extends DAO<Search> {
 		return findOne(q);
 	}
 
+	public int deleteById(String id) {
+		Query<Search> q = this.createQuery()
+				.field("_id").equal(new ObjectId(id));
+		return this.deleteByQuery(q).getN();
+	}
 }
