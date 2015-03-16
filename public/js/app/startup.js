@@ -15,6 +15,10 @@ define(['jquery', 'knockout', './router', 'bootstrap', 'knockout-projections', '
 	ko.components.register('collection', { require: 'components/collection/collection' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
+	ko.components.register('popup-login', {
+		viewModel: { require: 'components/login-register-page/login-register' },
+		template: { require: 'text!components/login-register-page/popup-login.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
 
