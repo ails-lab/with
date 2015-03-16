@@ -16,9 +16,7 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -26,9 +24,9 @@ import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.SourceResponse;
-import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
+import espace.core.Utils;
 
 public class DSpaceSource implements ISpaceSource {
 
