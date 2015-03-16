@@ -24,6 +24,7 @@ import model.Collection;
 import model.CollectionEntry;
 import model.RecordLink;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.Key;
 
 import play.Logger;
@@ -79,7 +80,7 @@ public class CollectionController extends Controller {
 		if(json.has("dbId")) {
 			String id = json.get("dbId").asText();
 			try {
-				DB.getCollectionDAO().deleteByID(id);
+				DB.getCollectionDAO().deleteById(new ObjectId(id));
 			} catch(Exception e) {
 				log.error("Collection not deleted!", e);
 				result.put("message", "Could not delete collection from database!");
