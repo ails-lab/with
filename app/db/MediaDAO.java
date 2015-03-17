@@ -63,10 +63,10 @@ public class MediaDAO  {
 	}
 
 
-	public Media findById(String dbId) {
+	public Media findById(ObjectId dbId) {
 		GridFSDBFile media = null;
 		try {
-			media = DB.getGridFs().find(new ObjectId(dbId));
+			media = DB.getGridFs().find(dbId);
 		} catch (Exception e) {
 			log.error("Problem in find file from GridFS " + dbId);
 		}

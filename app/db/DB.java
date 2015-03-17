@@ -89,7 +89,7 @@ public class DB {
 		if( morphia == null ) {
 			 morphia = new Morphia();
 			//this method is not working, have to find why!!
-			morphia.mapPackage("model");
+			//morphia.mapPackage("model");
 		}
 		return morphia;
 	}

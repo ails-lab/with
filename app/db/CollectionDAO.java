@@ -54,33 +54,20 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
-	public List<Collection> getByOwner(String owner) {
+	public List<Collection> getByOwner(ObjectId ownerId) {
 		Query<Collection> q = this.createQuery()
-				.field("owner").equal(new ObjectId(owner));
+				.field("owner").equal(ownerId);
 		return this.find(q).asList();
 	}
-	
-	public Map<String, List<RecordLink>> getCollectionRecordLinksByOwner(String owner) {
-		Query<Collection> colQuery = this.createQuery()
-				.field("owner").equal(new ObjectId(owner))
-				.retrievedFields(true, "firstEntries");
-		
-		Map<String, List<RecordLink>> firstEntries = 
-				new HashMap<String, List<RecordLink>>();
-		for(Collection c: find(colQuery).asList()) {
-			firstEntries.put(c.getTitle(), c.getFirstEntries());
-		}
-		return firstEntries;
-	}
 
-	public User getCollectionOwner(String id) {
+	public User getCollectionOwner(ObjectId id) {
 		Query<Collection> q =  this.createQuery()
-				.field("_id").equal(new ObjectId(id))
+				.field("_id").equal(id)
 				.retrievedFields(true, "owner");
 		return findOne(q).getOwner();
 	}
 
-	public int deleteById(String id) {
+	public int removeById(ObjectId id) {
 		User owner = getCollectionOwner(id);
 		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
 			if(colMeta.getCollectionId().equals(id))
@@ -88,7 +75,7 @@ public class CollectionDAO extends DAO<Collection> {
 		}
 
 		Query<Collection> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
+				.field("_id").equal(id);
 		return deleteByQuery(q).getN();
 	}
 }
