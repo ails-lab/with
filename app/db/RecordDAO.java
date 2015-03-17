@@ -48,9 +48,9 @@ public class RecordDAO extends DAO<Record> {
 	 * @param dbId
 	 * @return
 	 */
-	public String getRecordSource(String dbId) {
+	public String getRecordSource(ObjectId dbId) {
 		Query<Record> q = this.createQuery()
-				.field("_id").equal(new ObjectId(dbId))
+				.field("_id").equal(dbId)
 				.retrievedFields(true, "baseLinkData.source");
 		return this.find(q).get()
 				.getBaseLinkData().getSource();

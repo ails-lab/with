@@ -30,15 +30,15 @@ public class CollectionEntryDAO extends DAO<CollectionEntry> {
 		super(CollectionEntry.class);
 	}
 
-	public CollectionEntry getByRecLinkId(String recLinkId) {
+	public CollectionEntry getByRecLinkId(ObjectId recLinkId) {
 		Query<CollectionEntry> q = this.createQuery()
-				.field("recordLink").equal(new ObjectId(recLinkId));
+				.field("recordLink").equal(recLinkId);
 		return this.findOne(q);
 	}
 	
-	public int deleteByRecLinkId(String recLinkId) {
+	public int deleteByRecLinkId(ObjectId recLinkId) {
 		Query<CollectionEntry> q = this.createQuery()
-				.field("recordLink").equal(new ObjectId(recLinkId));
+				.field("recordLink._id").equal(recLinkId);
 		return this.deleteByQuery(q).getN();
 	}
 }

@@ -43,9 +43,9 @@ public class UserDAO extends DAO<User> {
 		super( User.class );
 	}
 
-	public User getById(String id) {
+	public User getById(ObjectId id) {
 		Query<User> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
+				.field("_id").equal(id);
 		return this.findOne(q);
 
 	}
@@ -90,7 +90,7 @@ public class UserDAO extends DAO<User> {
 	 * @param email
 	 * @return
 	 */
-	public List<Collection> getUserCollectionsByEmail(String email) {
+	public List<Collection> getUserTopCollectionsByEmail(String email) {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
 				.retrievedFields(true, "collections.collection");
@@ -103,21 +103,20 @@ public class UserDAO extends DAO<User> {
 		withCollection( res, "", "displayName");
 		return res;
 	}
-	
-	public int deleteById(String id) {
+
+	public int removeById(ObjectId id) {
 		User user = getById(id);
 		
 		//delete user realted searches
 		List<Search> userSearches = user.getSearchHistory();
-		for(Search s: userSearches) {
+		for(Search s: userSearches) 
 			DB.getSearchDAO().makeTransient(s);
-		}
 		
 		//delete user related collections
 		List<CollectionMetadata> collectionMD = user.getCollectionMetadata();
-		for(CollectionMetadata cmd: collectionMD) {
-			DB.getCollectionDAO().deleteById(cmd.getCollectionId());
-		}
+		for(CollectionMetadata cmd: collectionMD)
+			DB.getCollectionDAO().removeById(cmd.getCollectionId());
+		
 		
 		return this.makeTransient(user);
 	}
