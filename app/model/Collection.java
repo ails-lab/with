@@ -35,7 +35,7 @@ public class Collection {
 	@Id
 	private ObjectId dbId;
 
-	private ObjectId owner;
+	private ObjectId ownerId;
 
 	private String title;
 	private String description;
@@ -101,12 +101,18 @@ public class Collection {
 		this.isPublic = isPublic;
 	}
 	public User getOwner() {
-		User user =
-				DB.getUserDAO().getById(this.owner.toString());
-		return user;
+		return	DB.getUserDAO().getById(this.ownerId);
 	}
+	
 	public void setOwner(User owner) {
-		this.owner = owner.getDbId();
+		//set owner to collection
+		this.ownerId = owner.getDbId();
+		
+		//create a new collection metadata for owner
+		owner.getCollectionMetadata().add(getMetadata());
+		
+		//save the new owner
+		DB.getUserDAO().makePermanent(owner);
 	}
 
 	public List<RecordLink> getFirstEntries() {
@@ -119,7 +125,7 @@ public class Collection {
 
 	public Media getThumbnail() {
 		Media media =
-				DB.getMediaDAO().findById(this.thumbnail.toString());
+				DB.getMediaDAO().findById(this.thumbnail);
 		return media;
 	}
 

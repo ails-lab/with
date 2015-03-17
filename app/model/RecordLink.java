@@ -83,7 +83,7 @@ public class RecordLink {
 
 	public Media getThumbnail() {
 		Media thumbnail =
-				DB.getMediaDAO().findById(this.thumbnail.toString());
+				DB.getMediaDAO().findById(this.thumbnail);
 		return thumbnail;
 	}
 
