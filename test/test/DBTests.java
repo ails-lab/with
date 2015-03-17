@@ -31,6 +31,7 @@ import model.RecordLink;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import play.twirl.api.Content;
@@ -78,7 +79,7 @@ public class DBTests {
 		//and references to Media and Record
 
 		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().findById("54ef0a09e4b0af9ca4dc8fbc");
+		Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
 		//Get Record object
 		Record recordRetrieved = DB.getRecordDAO().find().get();
 

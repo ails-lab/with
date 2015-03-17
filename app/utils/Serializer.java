@@ -18,6 +18,8 @@ package utils;
 
 import java.util.ArrayList;
 
+import org.bson.types.ObjectId;
+
 import model.Collection;
 import model.RecordLink;
 import model.User;
@@ -61,7 +63,7 @@ public class Serializer {
 				ArrayNode firstEntriesIds = (ArrayNode)json.get("firstEntries");
 				ArrayList<RecordLink> firstEntries = new ArrayList<RecordLink>();
 				for(JsonNode idNode: firstEntriesIds) {
-					String id = idNode.get("id").asText();
+					ObjectId id = new ObjectId(idNode.get("id").asText());
 					RecordLink rlink = DB.getRecordLinkDAO().getByDbId(id);
 					firstEntries.add(rlink);
 				}
@@ -107,6 +109,7 @@ public class Serializer {
 			recordLinksArray.add(jsonRecLink);
 		}
 		json.put("first_entries", recordLinksArray);
+
 		return json;
 	}
 }

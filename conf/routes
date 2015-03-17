@@ -16,8 +16,10 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 # Collection Controller
 POST     /collection/delete                      controllers.CollectionController.deleteCollection()
 POST     /collection/add                         controllers.CollectionController.saveCollection()
-POST     /collection/listUserCollections         controllers.CollectionController.listUserCollections()
-POST     /collection/addRecordToCollection       controllers.CollectionController.addRecordToCollection()
+POST     /collection/listUserCollections         controllers.CollectionController.listFirstRecordsOfUserCollections()
+POST     /collection/removeRecord                controllers.CollectionController.removeRecordFromCollection
+POST     /collection/addRecord                   controllers.CollectionController.addRecordToCollection()
+POST     /collection/listColRecords              controllers.CollectionController.listCollectionRecords()
 
 # User Manager Controller
 GET 	/user/byEmail				controllers.UserManager.findByEmail(email:java.lang.String)

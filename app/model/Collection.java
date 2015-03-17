@@ -35,7 +35,7 @@ public class Collection {
 	@Id
 	private ObjectId dbId;
 
-	private ObjectId ownerId;
+	private ObjectId owner;
 
 	private String title;
 	private String description;
@@ -101,12 +101,12 @@ public class Collection {
 		this.isPublic = isPublic;
 	}
 	public User getOwner() {
-		return	DB.getUserDAO().getById(this.ownerId);
+		return	DB.getUserDAO().getById(this.owner);
 	}
 	
 	public void setOwner(User owner) {
 		//set owner to collection
-		this.ownerId = owner.getDbId();
+		this.owner = owner.getDbId();
 		
 		//create a new collection metadata for owner
 		owner.getCollectionMetadata().add(getMetadata());

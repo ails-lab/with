@@ -16,6 +16,8 @@
 
 package db;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
@@ -40,5 +42,19 @@ public class CollectionEntryDAO extends DAO<CollectionEntry> {
 		Query<CollectionEntry> q = this.createQuery()
 				.field("recordLink._id").equal(recLinkId);
 		return this.deleteByQuery(q).getN();
+	}
+	
+	public List<CollectionEntry> getByCollection(ObjectId colId) {
+		Query<CollectionEntry> q = this.createQuery()
+				.field("collection").equal(colId);
+		return this.find(q).asList();
+	} 
+	
+	public List<CollectionEntry> getByCollectionOffsetCount(ObjectId colId, int offset, int count) {
+		Query<CollectionEntry> q = this.createQuery()
+				.field("collection").equal(colId)
+				.offset(offset)
+				.limit(count);
+		return this.find(q).asList();
 	}
 }

@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,6 +34,7 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.With;
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,6 +50,7 @@ public class CollectionController extends Controller {
 	 * Json input with collection fields
 	 * @return
 	 */
+	@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result saveCollection() {
 		JsonNode json = request().body().asJson();
@@ -72,6 +75,7 @@ public class CollectionController extends Controller {
 	 * Json input, the collection dbId
 	 * @return
 	 */
+	@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result deleteCollection() {
 		JsonNode json = request().body().asJson();
@@ -105,18 +109,23 @@ public class CollectionController extends Controller {
 		
 		if(json.has("userId")) {
 			String userId = json.get("userId").asText();
-			Map<String, List<RecordLink>> firstEntries =
-					DB.getCollectionDAO().getCollectionRecordLinksByOwner(userId);
+			
+			//create a Map <collectionTitle, firstEntries>
+			Map<String, List<RecordLink>> firstEntries = 
+					new HashMap<String, List<RecordLink>>();
+			for(Collection c: DB.getCollectionDAO().getByOwner(new ObjectId(userId))) 
+				firstEntries.put(c.getTitle(), c.getFirstEntries());
 
 			ObjectNode collections = Json.newObject();
 			for(Entry<String, ?> col: firstEntries.entrySet()) {
 				ArrayNode firstRecords = Json.newObject().arrayNode();
 				for(RecordLink recLink: (List<RecordLink>)col.getValue()) {
-					firstRecords.add(Json.toJson(recLink));
-					//firstRecords.add(Serializer.recordLinkToJson(recLink));
+					//firstRecords.add(Json.toJson(recLink));
+					firstRecords.add(Serializer.recordLinkToJson(recLink));
 				}
 				collections.put(col.getKey(), firstRecords);
 			}
+			result.put("userCollections", collections);
 			return ok(result);
 		} else {
 			result.put("message", "Did not specify the user!");
@@ -127,6 +136,7 @@ public class CollectionController extends Controller {
 	/**
 	 * Adds a Record to a Collection
 	 */
+	@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result addRecordToCollection() {
 		JsonNode json = request().body().asJson();
@@ -138,46 +148,45 @@ public class CollectionController extends Controller {
 			String recordLinkId = json.get("recordLink_id").asText();
 			String colId = json.get("collection_id").asText();
 			
-			rLink = DB.getRecordLinkDAO().getByDbId(recordLinkId);
+			rLink = DB.getRecordLinkDAO().getByDbId(new ObjectId(recordLinkId));
 			colEntry = new CollectionEntry();
 			colEntry.setRecordLink(rLink);
 			colEntry.setCollection(colId);
+			
+			try {
+				DB.getCollectionEntryDAO().save(colEntry);
+				result.put("collection_id", colId);
+				result.put("message", "CollectionEntry saved succesfully to database!");
+				return ok(result);
+			} catch(Exception e) {
+				log.error("Cannot save CollectionEntry to database!", e);
+				result.put("message", "Cannot save CollectionEntry to database!");
+				return internalServerError(result);
+			}
 		} else {
 			result.put("message",
 					"Cannot retrieve recordLink or collection from db, id is missing!");
 			return badRequest(result);
 		}
-		try {
-			DB.getCollectionEntryDAO().save(colEntry);
-			result.put("message", "CollectionEntry saved succesfully to database!");
-			return ok(result);
-		} catch(Exception e) {
-			log.error("Cannot save CollectionEntry to database!", e);
-			result.put("message", "Cannot save CollectionEntry to database!");
-			return internalServerError(result);
-		}
+
 	}
 	
 	/**
 	 * Remove a Record from a Collection
 	 */
+	@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result removeRecordFromCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		
 		if(json.has("recordlink_id")) {
-			String recLinkId = json.get("recordlink_id").asText();
+			ObjectId recLinkId = new ObjectId(json.get("recordlink_id").asText());
 			try {
-				RecordLink recLink = 
-						DB.getRecordLinkDAO().getByDbId(recLinkId);
 				 if(DB.getCollectionEntryDAO().deleteByRecLinkId(recLinkId) == 0 ) {
 					 result.put("message", "Cannot delete CollectionEntry!");
 					 return internalServerError(result);
-				 }
-				 
-					 
-				
+				 }		 
 			} catch(Exception e) {
 				
 			}
@@ -196,6 +205,30 @@ public class CollectionController extends Controller {
 	 */
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result listCollectionRecords() {
-		return null;
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		
+		if(json.has("collection_id")) {
+			ObjectId colId = new ObjectId(json.get("collection_id").asText());
+			int start = 
+					(json.has("start"))?json.get("start").asInt():1;
+			int count = 
+					(json.has("count"))?json.get("count").asInt():20;
+					
+			List<CollectionEntry> entries =	 
+				DB.getCollectionEntryDAO()
+				.getByCollectionOffsetCount(colId, start, count);
+			ArrayNode records = Json.newObject().arrayNode();
+			for(CollectionEntry e: entries) {
+				records.add(Serializer.recordLinkToJson(e.getRecordLink()));
+			}
+			result.put("records", records);
+			return ok(result);
+		} else {
+			result.put("message", "Cannot list records, collection id is missing!");
+			return badRequest(result);
+		}
 	}
+
 }
+
