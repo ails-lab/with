@@ -111,19 +111,25 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			}
 		}
 
-		self.emailLogin           = function() {
+		self.emailLogin           = function(popup) {
 			if (self.loginValidation.isValid()) {
 				var json = ko.toJSON(self.loginValidation);
 				console.log(json);
 				// TODO: Try to login. If OK, then redirect to the appropriate page (post-registration if missing, landing otherwise)
 				// TODO: Before redirecting, if stayLogged is pressed, make sure user stays online (use a cookie?)
 				// TODO: Add the user to the global app: app.currentUser('finik');
+
+				self.emailUser(null);
+				self.emailPass(null);
+				if (typeof popup !== 'undefined') {
+					if (popup) { self.closeLoginPopup(); }
+				}
 			}
 			else {
 				self.loginValidation.errors.showAllMessages();
 			}
 		}
-		self.googleLogin          = function() {
+		self.googleLogin          = function(popup) {
 			gapi.auth.signIn({
 				'clientid'     : '712515719334-u6ofvnotfug9ktv0e9kou7ms2cq9lb85.apps.googleusercontent.com',
 				'cookiepolicy' : 'single_host_origin',
@@ -141,13 +147,16 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								console.log(json);
 								// TODO: Send to server to sign in
 								// TODO: Add the user to the global app: app.currentUser('finik');
+								if (typeof popup !== 'undefined') {
+									if (popup) { self.closeLoginPopup(); }
+								}
 							});
 						});
 					}
 				}
 			});
 		}
-		self.fbLogin              = function() {
+		self.fbLogin              = function(popup) {
 			FB.login(function(response) {
 				if (response.status === 'connected') {
 					FB.api('/me', function(response) {
@@ -158,9 +167,25 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						console.log(json);
 						// TODO: Send to server to sign in
 						// TODO: Add the user to the global app: app.currentUser('finik');
+						if (typeof popup !== 'undefined') {
+							if (popup) { self.closeLoginPopup(); }
+						}
 					});
 				}
 			}, {scope: 'email'});
+		}
+
+		showLoginPopup            = function() {
+			$('#loginPopup').addClass('open');
+		}
+
+		self.scrollEmail          = function() {
+			$('.externalLogin').slideUp();
+		}
+
+		self.closeLoginPopup      = function() {
+			$('#loginPopup').removeClass('open');
+			$('.externalLogin').slideDown();	// Reset dialog state
 		}
 
 		self.completeRegistration = function() {

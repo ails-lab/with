@@ -16,19 +16,25 @@
 
 package db;
 
-import model.RecordLink;
+import model.Search;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
+import play.Logger.ALogger;
 
-public class RecordLinkDAO extends DAO<RecordLink> {
-	static private final Logger.ALogger log = Logger.of(RecordLink.class);
+public class SearchDAO extends DAO<Search> {
+	public static final ALogger log = Logger.of( SearchDAO.class);
 
-	public RecordLinkDAO() {
-		super( RecordLink.class );
+	public SearchDAO() {
+		super(Search.class);
 	}
 
-	public RecordLink getByDbId(String id) {
-		// TODO Auto-generated method stub
-		return null;
+	public Search getById(ObjectId id) {
+		Query<Search> q = this.createQuery()
+				.field("_id").equal(id);
+		return findOne(q);
 	}
 
 }

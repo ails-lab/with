@@ -12,3 +12,17 @@ POST     /api/testsearch            controllers.SearchController.posttestsearch(
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+# Collection Controller
+POST     /collection/delete      controllers.CollectionController.deleteCollection()
+POST     /collection/add         controllers.CollectionController.saveCollection()
+
+# User Manager Controller
+GET 	/user/byEmail				controllers.UserManager.findByEmail(email:java.lang.String)
+GET		/user/byDisplayName			controllers.UserManager.findByDisplayName(displayName:java.lang.String)
+POST	/user/register				controllers.UserManager.register()
+GET		/user/byFacebookId/			controllers.UserManager.findByFacebookId()
+GET		/api/login					controllers.UserManager.login(email:java.lang.String?="", password:java.lang.String, displayName:java.lang.String?="" )
+GET		/api/googleLogin			controllers.UserManager.googleLogin( accessToken:java.lang.String )
+GET		/api/logout					controllers.UserManager.logout()
+

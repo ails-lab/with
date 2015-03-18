@@ -17,8 +17,8 @@
 package model;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Transient;
 
 
 /**
@@ -27,9 +27,11 @@ import org.mongodb.morphia.annotations.Transient;
  * @author stabenau
  *
  */
+@Entity
 public class Media {
-	//@Id
-	//private ObjectId dbID;
+
+	@Id
+	private ObjectId dbId;
 	// examples, but there might be more
 	private int width, height;
 
@@ -43,8 +45,16 @@ public class Media {
 	private float duration;
 
 	// the actual data .. GridFS
-	@Transient
 	private byte[] data;
+
+
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
 
 	public int getWidth() {
 		return width;

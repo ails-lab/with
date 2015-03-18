@@ -16,19 +16,14 @@
 
 package db;
 
-import model.RecordLink;
+import model.SearchResult;
 import play.Logger;
+import play.Logger.ALogger;
 
-public class RecordLinkDAO extends DAO<RecordLink> {
-	static private final Logger.ALogger log = Logger.of(RecordLink.class);
+public class SearchResultDAO extends DAO<SearchResult> {
+	public static final ALogger log = Logger.of( SearchResultDAO.class);
 
-	public RecordLinkDAO() {
-		super( RecordLink.class );
+	public SearchResultDAO() {
+		super(SearchResult.class);
 	}
-
-	public RecordLink getByDbId(String id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }

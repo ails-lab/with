@@ -19,18 +19,19 @@ package model;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Reference;
 
-@Embedded //or entity
+import db.DB;
+
+@Entity
 public class Search {
 
 	@Id
 	private ObjectId dbID;
+
 	// a ref to the user
-	@Reference
-	private User user;
+	private ObjectId user;
 
 	// when the search was done
 	private Date searchDate;
@@ -38,27 +39,35 @@ public class Search {
 	private String query;
 
 
-	public Date getSearchDate() {
-		return searchDate;
-	}
-	public void setSearchDate(Date searchDate) {
-		this.searchDate = searchDate;
-	}
 	public ObjectId getDbID() {
 		return dbID;
 	}
+
 	public void setDbID(ObjectId dbID) {
 		this.dbID = dbID;
 	}
+
+	public Date getSearchDate() {
+		return searchDate;
+	}
+
+	public void setSearchDate(Date searchDate) {
+		this.searchDate = searchDate;
+	}
+
 	public User getUser() {
+		User user =
+				DB.getUserDAO().getById(this.user.toString());
 		return user;
 	}
+
 	public void setUser(User user) {
-		this.user = user;
+		this.user = user.getDbId();
 	}
 	public String getQuery() {
 		return query;
 	}
+
 	public void setQuery(String query) {
 		this.query = query;
 	}

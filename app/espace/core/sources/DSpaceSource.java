@@ -28,28 +28,28 @@ import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class DNZSpaceSource implements ISpaceSource {
+public class DSpaceSource implements ISpaceSource {
 
-	/**
-	 * user: espace password: with2015 email: gardero@gmail.com
-	 */
-	private String Key = "Qcv9eq67Ep32HDbYXmsx";
+	private String DPLAKey = "2edebbb32b1f42f86aaa56fd2edc1a28";
 
 	public String getHttpQuery(CommonQuery q) {
-		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
+		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
+		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
+				+ "&page=" + q.page + "&page_size=" + q.pageSize;
 	}
 
 	public String getSourceName() {
-		return "DigitalNZ";
+		return "DPLA";
 	}
 
 	public String getDPLAKey() {
-		return Key;
+		return DPLAKey;
 	}
 
 	public void setDPLAKey(String dPLAKey) {
-		Key = dPLAKey;
+		DPLAKey = dPLAKey;
 	}
 
 	@Override
@@ -61,43 +61,30 @@ public class DNZSpaceSource implements ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-
+			// System.out.println(response.toString());
+			JsonNode docs = response.path("docs");
+			res.totalCount = Utils.readIntAttr(response, "count", true);
+			res.count = docs.size();
+			res.startIndex = Utils.readIntAttr(response, "start", true);
 			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
-			JsonNode o = response.path("search");
-			// System.out.print(o.path("name").asText() + " ");
-
-			res.totalCount = Utils.readIntAttr(o, "result_count", true);
-			res.count += Utils.readIntAttr(o, "per_page", true);
-			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1) * res.count;
-
-			JsonNode aa = o.path("results");
-
-			for (JsonNode item : aa) {
-				// System.out.println(item.toString());
+			for (JsonNode item : docs) {
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
-				it.title = Utils.readLangAttr(item, "title", false);
-				it.creator = Utils.readLangAttr(item, "creator", false);
-				it.description = Utils.readLangAttr(item, "description", false);
-
-				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
-				// TODO not present
-				it.fullresolution = Utils.readArrayAttr(item, "large_thumbnail_url", false);
-				// TODO read date and take year?
-				it.year = null; // Utils.readArrayAttr(item, "issued", true);
-				// TODO use author?
-				it.dataProvider = null;// Utils.readLangAttr(item,
-										// "contributor", false);
+				it.thumb = Utils.readArrayAttr(item, "object", false);
+				it.fullresolution = null;
+				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
+				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+				it.year = null;
+				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
 				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "landing_url", false);
-				it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
+				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
+				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
 				a.add(it);
-
 			}
-
 			res.items = a;
-
+			res.facets = response.path("facets");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
