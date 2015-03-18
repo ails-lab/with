@@ -32,7 +32,7 @@ import play.Logger.ALogger;
 public class TestUtils {
 	public static final ALogger log = Logger.of(TestUtils.class);
 
-	private static Random r = new Random();
+	public static Random r = new Random();
 	
 	public static String randomString() {
 		char[] text = new char[50];
