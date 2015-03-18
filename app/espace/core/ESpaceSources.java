@@ -50,7 +50,8 @@ public class ESpaceSources {
 	public static List<SourceResponse> fillResults(CommonQuery q) {
 		ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
 		for (ISpaceSource src : ESpaceSources.getESources()) {
-			srcs.add(src.getResults(q));
+			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName()))
+				srcs.add(src.getResults(q));
 		}
 		return srcs;
 	}
