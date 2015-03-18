@@ -30,8 +30,8 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 public class FashionSparqlEndpoint {
 	
-//	String sparqlEndpoint = "http://localhost:3030/thesauri/sparql";
-	String sparqlEndpoint = "http://panic.image.ntua.gr:3030/fashionSem/sparql";
+	String sparqlEndpoint = "http://localhost:3030/thesauri/sparql";
+//	String sparqlEndpoint = "http://panic.image.ntua.gr:3030/fashionSem/sparql";
 	String prefixes = "PREFIX edm:<http://www.europeana.eu/schemas/edm/> \n"+
 					  "PREFIX ore:<http://www.openarchives.org/ore/terms/> \n"+
 					  "PREFIX skos:<http://www.w3.org/2004/02/skos/core#> \n"+
