@@ -111,7 +111,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			}
 		}
 
-		self.emailLogin           = function(popup) {
+		self.emailLogin           = function(popup, callback) {
 			if (self.loginValidation.isValid()) {
 				var json = ko.toJSON(self.loginValidation);
 				console.log(json);
@@ -123,13 +123,17 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				self.emailPass(null);
 				if (typeof popup !== 'undefined') {
 					if (popup) { self.closeLoginPopup(); }
+
+					if (typeof callback !== 'undefined') {
+						callback();
+					}
 				}
 			}
 			else {
 				self.loginValidation.errors.showAllMessages();
 			}
 		}
-		self.googleLogin          = function(popup) {
+		self.googleLogin          = function(popup, callback) {
 			gapi.auth.signIn({
 				'clientid'     : '712515719334-u6ofvnotfug9ktv0e9kou7ms2cq9lb85.apps.googleusercontent.com',
 				'cookiepolicy' : 'single_host_origin',
@@ -149,6 +153,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								// TODO: Add the user to the global app: app.currentUser('finik');
 								if (typeof popup !== 'undefined') {
 									if (popup) { self.closeLoginPopup(); }
+
+									if (typeof callback !== 'undefined') {
+										callback();
+									}
 								}
 							});
 						});
@@ -156,7 +164,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				}
 			});
 		}
-		self.fbLogin              = function(popup) {
+		self.fbLogin              = function(popup, callback) {
 			FB.login(function(response) {
 				if (response.status === 'connected') {
 					FB.api('/me', function(response) {
@@ -169,13 +177,17 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						// TODO: Add the user to the global app: app.currentUser('finik');
 						if (typeof popup !== 'undefined') {
 							if (popup) { self.closeLoginPopup(); }
+
+							if (typeof callback !== 'undefined') {
+								callback();
+							}
 						}
 					});
 				}
 			}, {scope: 'email'});
 		}
 
-		showLoginPopup            = function() {
+		showLoginPopup            = function(record) {
 			$('#loginPopup').addClass('open');
 		}
 
