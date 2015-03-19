@@ -67,9 +67,9 @@ public class YouTubeSpaceSource implements ISpaceSource {
 			for (JsonNode item : docs) {
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item.path("id"), "videoId", true);
-				it.thumb = Utils.readArrayAttr(item.path("snippet").path("thumbnails"), "default", false);
-				it.fullresolution = Utils.readArrayAttr(item.path("snippet").path("thumbnails"), "high", false);
-
+				it.thumb = Utils.readArrayAttr(item.path("snippet").path("thumbnails").path("default"), "url", false);
+				it.fullresolution = Utils.readArrayAttr(item.path("snippet").path("thumbnails").path("high"), "url",
+						false);
 				it.title = Utils.readLangAttr(item.path("snippet"), "title", false);
 				it.description = Utils.readLangAttr(item.path("snippet"), "description", false);
 				it.creator = null;// Utils.readLangAttr(item.path("sourceResource"),
