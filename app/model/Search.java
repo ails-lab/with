@@ -61,8 +61,8 @@ public class Search {
 		return user;
 	}
 
-	public void setUser(User user) {
-		this.user = user.getDbId();
+	public void setUser(ObjectId user) {
+		this.user = user;
 	}
 	public String getQuery() {
 		return query;

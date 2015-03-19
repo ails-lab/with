@@ -69,8 +69,8 @@ public class SearchResult {
 		return search;
 	}
 
-	public void setSearch(Search search) {
-		this.search = search.getDbID();
+	public void setSearch(ObjectId search) {
+		this.search = search;
 	}
 
 	public RecordLink getRecordLink() {
