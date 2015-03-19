@@ -72,14 +72,14 @@ public class NLASpaceSource implements ISpaceSource {
 			for (int i = 0; i < pa.size(); i++) {
 				JsonNode o = pa.get(i);
 				if (!o.path("name").asText().equals("people")) {
-					System.out.print(o.path("name").asText() + " ");
+					// System.out.print(o.path("name").asText() + " ");
 					res.totalCount += Utils.readIntAttr(o.path("records"), "totalCount", true);
 					res.count += Utils.readIntAttr(o.path("records"), "n", true);
 					res.startIndex = Utils.readIntAttr(o.path("records"), "s", true);
 
 					JsonNode aa = o.path("records").path("work");
 
-					System.out.println(aa.size());
+					// System.out.println(aa.size());
 
 					for (JsonNode item : aa) {
 						// System.out.println(item.toString());

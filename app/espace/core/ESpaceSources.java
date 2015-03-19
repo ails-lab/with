@@ -24,6 +24,7 @@ import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.ESpaceSource;
 import espace.core.sources.NLASpaceSource;
+import espace.core.sources.YouTubeSpaceSource;
 
 public class ESpaceSources {
 
@@ -36,6 +37,7 @@ public class ESpaceSources {
 		esources.add(new NLASpaceSource());
 		esources.add(new DNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
+		esources.add(new YouTubeSpaceSource());
 		System.out.println("inittttttttttttttttttt");
 	}
 
@@ -49,9 +51,32 @@ public class ESpaceSources {
 
 	public static List<SourceResponse> fillResults(CommonQuery q) {
 		ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
+		ArrayList<Thread> t = new ArrayList<Thread>();
 		for (ISpaceSource src : ESpaceSources.getESources()) {
-			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName()))
-				srcs.add(src.getResults(q));
+			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
+				Thread tit = new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						SourceResponse results = src.getResults(q);
+						synchronized (srcs) {
+							srcs.add(results);
+							System.out.println(results.source + " found " + results.count);
+						}
+					}
+				});
+				t.add(tit);
+				tit.start();
+			}
+		}
+		for (Thread thread : t) {
+			try {
+				thread.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return srcs;
 	}
