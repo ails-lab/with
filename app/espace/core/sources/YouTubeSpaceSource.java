@@ -30,6 +30,8 @@ import espace.core.Utils;
 
 public class YouTubeSpaceSource implements ISpaceSource {
 
+	// TODO keep track of the pages links and go to the requested page.
+
 	public String getHttpQuery(CommonQuery q) {
 		return getBaseURL() + "search?part=snippet&q="
 				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm) + "&maxResults=" + q.pageSize
@@ -77,8 +79,9 @@ public class YouTubeSpaceSource implements ISpaceSource {
 				it.year = null;
 				it.dataProvider = Utils.readLangAttr(item.path("snippet"), "channelTitle", false);
 				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
 				it.url.fromSourceAPI = "https://www.youtube.com/watch?v=" + it.id;
+				it.url.original = new ArrayList<String>();
+				it.url.original.add(it.url.fromSourceAPI);
 				a.add(it);
 			}
 			res.items = a;
