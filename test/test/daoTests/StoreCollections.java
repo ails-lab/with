@@ -29,7 +29,7 @@ import org.mongodb.morphia.Key;
 
 import db.DB;
 
-public class storeCollections {
+public class StoreCollections {
 
 	@Test
 	public void storeCollection() {
