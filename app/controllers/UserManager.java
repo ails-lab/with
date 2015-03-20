@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +35,7 @@ import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import db.DB;
 
@@ -75,15 +78,14 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		boolean error = false;
+		ArrayNode error = Json.newObject().arrayNode();
 
 		String email = null;
 		if (json.has("email")) {
 			email = json.get("email").asText();
 			// Check if email is already used by another user
 			if (DB.getUserDAO().getByEmail(email) != null) {
-				result.put("error", "Email Address Already in Use");
-				error = true;
+				error.add("Email Address Already in Use");
 			}
 			// Validate email address with regular expression
 			final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
@@ -91,49 +93,43 @@ public class UserManager extends Controller {
 			Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 			Matcher matcher = pattern.matcher(email);
 			if (!matcher.matches()) {
-				result.put("error", "Invalid Email Address");
-				error = true;
+				error.add("Invalid Email Address");
 			}
 		} else {
-			result.put("error", "Email Address is Empty");
-			error = true;
+			error.add("Email Address is Empty");
 		}
 		String firstName = null;
 		if (!json.has("firstName")) {
-			result.put("error", "First Name is Empty");
-			error = true;
+			error.add("First Name is Empty");
 		} else {
 			firstName = json.get("firstName").asText();
 		}
 		String lastName = null;
 		if (!json.has("lastName")) {
-			result.put("error", "Last Name is Empty");
-			error = true;
+			error.add("Last Name is Empty");
 		} else {
 			lastName = json.get("lastName").asText();
 		}
 		String password = null;
 		// TODO: ask for password validation
 		if (!json.has("password")) {
-			result.put("error", "Password is Empty");
-			error = true;
+			error.add("Password is Empty");
 		} else {
 			password = json.get("password").asText();
 		}
 		String displayName = null;
 		// displayName unique
 		if (!json.has("displayName")) {
-			result.put("error", "Display Name is Empty");
-			error = true;
+			error.add("Display Name is Empty");
 		} else {
 			displayName = json.get("displayName").asText();
 			if (DB.getUserDAO().getByDisplayName(displayName) != null) {
-				result.put("error", "Display Name Already in Use");
-				error = true;
+				error.add("Display Name Already in Use");
 			}
 		}
 		// If everything is ok store the user at the database
-		if (error == true) {
+		if (error.size() != 0) {
+			result.put("error", error);
 			return badRequest(result);
 		}
 		User user = new User();
