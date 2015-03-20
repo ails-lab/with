@@ -22,8 +22,9 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     	$('#modal-1').css('display', 'block');
     	
     	$('#modal-1').addClass('md-show');
-    	$('.withsearch').css('position','fixed');
-    	$('.withsearch').css('overflow','hidden');
+    	//$('.withsearch').css('position','fixed');
+    	//$('.withsearch').css('overflow','hidden');
+    	$('html, body').css('overflow', 'hidden');
     }
     
     self.itemload = function(e) {
@@ -70,9 +71,9 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     	
     	
     	
-    	$('.withsearch').css('position','absolute');
-    	$('.withsearch').css('overflow','scroll');
-    	
+    	//$('.withsearch').css('position','');
+    	//$('.withsearch').css('overflow','scroll');
+    	$('html, body').css('overflow', 'auto');
     }
     
     self.changeSource=function(item){

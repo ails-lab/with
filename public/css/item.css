@@ -1,8 +1,9 @@
 .md-modal {
-	position: absolute;
+	position: fixed;
 	top:10%;
 	left: 50%;
 	width: 50%;
+	height:80%;
 	max-width: 730px;
 	min-width: 320px;
 	min-height:600px;
