@@ -41,8 +41,10 @@ define(["knockout", "text!./home2.html","flip"], function(ko, homeTemplate,flip)
                  image.remove();
                  image.css('width','100%').css('opacity','0.3').addClass('img-responsive');
                  
-                 imholder.css('background','url('+image.attr('src')+')'); 
+                 imholder.css('background-image','url('+image.attr('src')+')'); 
                  imholder.css('display','block');
+                 if(image.attr('src').indexOf('create')==-1){imholder.css('height',175);}
+                 else{imholder.css('height',350);}
 			     elem.flip(true);
 			    
 			    fig.css('display','none');
@@ -52,6 +54,7 @@ define(["knockout", "text!./home2.html","flip"], function(ko, homeTemplate,flip)
 				 var img = $('<img>'); 
 				 var url= imholder.css('background-image');
 				 url = url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+				
 				 img.attr('src', url);
 				 
 				 imholder.css('display','none');

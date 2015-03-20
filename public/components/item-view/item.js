@@ -22,9 +22,7 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     	$('#modal-1').css('display', 'block');
     	
     	$('#modal-1').addClass('md-show');
-    	//$('.withsearch').css('position','fixed');
-    	//$('.withsearch').css('overflow','hidden');
-    	$('html, body').css('overflow', 'hidden');
+    	$('body').css('overflow', 'hidden');
     }
     
     self.itemload = function(e) {
@@ -71,9 +69,7 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
     	
     	
     	
-    	//$('.withsearch').css('position','');
-    	//$('.withsearch').css('overflow','scroll');
-    	$('html, body').css('overflow', 'auto');
+    	$('body').css('overflow', 'auto');
     }
     
     self.changeSource=function(item){
@@ -91,6 +87,9 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		else if(self.apisource() == "Europeana") return "images/logos/europeana.jpeg";
 		else if(self.apisource() == "NLA") return "images/logos/nla_logo.png";
 		else if(self.apisource() == "DigitalNZ") return "images/logos/digitalnz.png";
+		else if(self.apisource() == "DigitalNZ") return "images/logos/digitalnz.png";
+		else if(self.apisource() == "EFashion") return "images/logos/eufashion.png";
+		
 		else return "";
 	});
     
