@@ -58,13 +58,13 @@ public class SearchController extends Controller {
 		final CommonQuery q;
 
 		if (json == null) {
-			return Promise.pure(badRequest("Expecting Json query"));
+			return Promise.pure((Result) badRequest("Expecting Json query"));
 		} else {
 			// Parse the query.
 			try {
 				q = Utils.parseJson(json);
 			} catch (Exception e) {
-				return Promise.pure(badRequest(e.getMessage()));
+				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
 
