@@ -415,6 +415,26 @@ margin-bottom: 5px;
 	color:black;
 }
 
+.fa-external-link:hover {
+  color: black;
+}
+
+.fa-external-link {
+  color:rgba(0, 0, 0, 0.16);
+}
+
+
+.withsearch-console{
+font-size: 15px;
+  height: 20px;
+  position: absolute;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+  top: 50;
+  right: 5%;
+  padding: 0 10px;}
+
 #more{
 	 bottom:40px;
 	 right:40px;
