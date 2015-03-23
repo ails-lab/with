@@ -193,6 +193,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								console.log(json);
 								// TODO: Send to server to sign in
 								// TODO: Add the user to the global app: app.currentUser('finik');
+								app.currentUser('finik'); // TODO: REMOVE
 								if (typeof popup !== 'undefined') {
 									if (popup) { self.closeLoginPopup(); }
 

@@ -7,10 +7,7 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 		// But in most apps, you'll want some viewmodel logic to determine what navigation options appear.
 
 		this.route = params.route;
-	
 
-		var self = this;
-		self.isLogged    = ko.computed(function() { return app.currentUser() !== undefined });
 	}
 
 	return { viewModel: TopBarViewModel, template: template };
