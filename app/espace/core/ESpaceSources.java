@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import espace.core.sources.DNZSpaceSource;
+import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.ESpaceSource;
 import espace.core.sources.NLASpaceSource;
@@ -31,7 +32,7 @@ public class ESpaceSources {
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
 		esources.add(new ESpaceSource());
-		esources.add(new EuropeanaFashionSpaceSource());
+		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
 		esources.add(new DNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());

@@ -84,12 +84,13 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	function SourceCategory(data) {
 		var self = this;
 		self.source = ko.observable("");
+		self.consoleurl=ko.observable("");
 		self.items=ko.observableArray([]);
 		
 		
 		self.load=function(data){
 			self.source=data.source;
-			
+			self.consoleurl=data.consoleurl;
 			self.items=data.items;
 		};
 		
@@ -206,9 +207,24 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							self.mixresults.push.apply(self.mixresults, items);
 							
 						}
+						api_console="";
+						if(source=="Europeana"){
+							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
+							}
+						else if(source=="DPLA"){
+							api_console="http://api.dp.la/";
+						}
+						else if(source=="NLA"){
+							api_console="http://api.trove.nla.gov.au/";
+						}
+						else if(source=="DigitalNZ"){
+							api_console="http://api.digitalnz.org/"
+						}
+						else{api_console="http://www.europeanafashion.eu/api/search/"+self.term();}
 						var srcCat=new SourceCategory({
 							source:source,
-							items:items
+							items:items,
+							consoleurl:api_console
 						});
 						var found=false;
 						if(self.results().length>0)
@@ -219,7 +235,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 								inCat.append(srcCat.items);
 								self.results.replace(self.results()[k],new SourceCategory({
 									source:inCat.source,
-									items:inCat.items
+									items:inCat.items,
+									consoleurl:inCat.consoleurl
 								}));
 								break;
 							}

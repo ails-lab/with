@@ -17,14 +17,14 @@
 package controllers;
 
 import java.util.List;
-
-import play.data.Form;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
+import java.util.concurrent.Callable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import play.data.Form;
+import play.libs.Json;
+import play.libs.F.*;
+import play.mvc.*;
 import espace.core.CommonQuery;
 import espace.core.ESpaceSources;
 import espace.core.SourceResponse;
@@ -34,7 +34,7 @@ public class SearchController extends Controller {
 
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 
-	public static Result search() {
+	public static Result searchslow() {
 		System.out.println(request().body());
 		JsonNode json = request().body().asJson();
 		CommonQuery q = null;
@@ -48,7 +48,37 @@ public class SearchController extends Controller {
 				return badRequest(e.getMessage());
 			}
 		}
+
 		return ok(Json.toJson(search(q)));
+	}
+
+	public static Promise<Result> search() {
+		System.out.println(request().body());
+		JsonNode json = request().body().asJson();
+		final CommonQuery q;
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				q = Utils.parseJson(json);
+			} catch (Exception e) {
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+
+		return Promise.promise(new Function0<JsonNode>() {
+			public JsonNode apply() {
+				return Json.toJson(search(q));
+			}
+		}).map(new Function<JsonNode, Result>() {
+			public Result apply(JsonNode i) {
+				return ok(i);
+			}
+		});
+
+		// return ok(Json.toJson(search(q)));
 	}
 
 	public static List<SourceResponse> search(CommonQuery q) {
