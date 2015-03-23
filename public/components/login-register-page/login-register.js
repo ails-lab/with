@@ -12,6 +12,48 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		decorateInputElement: true
 	});
 
+	function Record(data) {
+		var self         = this;
+		self.id          = ko.observable(false);
+		self.title       = ko.observable(false);
+		self.description = ko.observable(false);
+		self.thumb       = ko.observable(false);
+		self.fullres     = ko.observable(false);
+		self.view_url    = ko.observable(false);
+		self.source      = ko.observable(false);
+		self.creator     = ko.observable("");
+		self.provider    = ko.observable("");
+		self.url         = ko.observable("");
+
+		self.load        = function(data) {
+			if (data.title == undefined) {
+				self.title("No title");
+			}
+			else {
+				self.title(data.title);
+			}
+			self.url("#item/"+data.id);
+			self.view_url(data.view_url);
+			self.thumb(data.thumb);
+			self.fullres(data.fullres);
+			self.description(data.description);
+			self.source(data.source);
+			self.creator(data.creator);
+			self.provider(data.provider);
+		};
+
+		self.displayTitle = ko.computed(function() {
+			if (self.title != undefined)
+				return self.title;
+			else if (self.description != undefined)
+				return self.description;
+			else return "- No title -";
+		});
+
+		if (data != undefined)
+			self.load(data);
+	}
+
 	function LoginRegisterViewModel(params) {
 		var self = this;
 
@@ -133,13 +175,13 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				self.loginValidation.errors.showAllMessages();
 			}
 		}
-		self.googleLogin          = function(popup, callback) {
+		self.googleLogin          = function(popup, callback, record) {
 			gapi.auth.signIn({
 				'clientid'     : '712515719334-u6ofvnotfug9ktv0e9kou7ms2cq9lb85.apps.googleusercontent.com',
 				'cookiepolicy' : 'single_host_origin',
 				'scope'        : 'profile email',
 				'callback'     : function(authResult) {
-					console.log(authResult);
+					// console.log(authResult);
 					if (authResult['status']['signed_in']) {
 						gapi.client.load('plus','v1', function() {
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
@@ -155,7 +197,9 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									if (popup) { self.closeLoginPopup(); }
 
 									if (typeof callback !== 'undefined') {
-										callback();
+										data = ko.toJS(new Record(record));
+										callback(data);
+										// callback(record);
 									}
 								}
 							});
