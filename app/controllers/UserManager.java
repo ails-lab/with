@@ -73,6 +73,32 @@ public class UserManager extends Controller {
 	 * 
 	 * @return
 	 */
+	private static ArrayNode proposeDisplayName(String initial,
+			String firstName, String lastName) {
+		ArrayNode names = Json.newObject().arrayNode();
+		String proposedName;
+		int i = 0;
+		User u;
+		do {
+			proposedName = initial + i++;
+			u = DB.getUserDAO().getByDisplayName(proposedName);
+		} while (u != null);
+		names.add(proposedName);
+		if (firstName == null || lastName == null)
+			return names;
+		proposedName = firstName + "_" + lastName;
+		i = 0;
+		while (DB.getUserDAO().getByDisplayName(proposedName) != null) {
+			proposedName = proposedName + i++;
+		}
+		names.add(proposedName);
+		return names;
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result register() {
 
@@ -125,6 +151,10 @@ public class UserManager extends Controller {
 			displayName = json.get("displayName").asText();
 			if (DB.getUserDAO().getByDisplayName(displayName) != null) {
 				error.add("Display Name Already in Use");
+				ArrayNode names = proposeDisplayName(displayName, firstName,
+						lastName);
+				result.put("proposal", names);
+
 			}
 		}
 		// If everything is ok store the user at the database

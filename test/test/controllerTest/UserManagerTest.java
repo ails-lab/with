@@ -165,8 +165,8 @@ public class UserManagerTest {
 						// Test when everything is ok
 						json = (ObjectNode) mapper.readTree("{"
 								+ "\"email\": \"test@test.eu\","
-								+ "\"firstName\" : \"testFirstName\","
-								+ "\"lastName\" : \"testLastName\","
+								+ "\"firstName\" : \"first\","
+								+ "\"lastName\" : \"last\","
 								+ "\"password\" : \"pwd\","
 								+ "\"displayName\" : \"user\"" + "}");
 						Result result = callAction(
@@ -234,6 +234,12 @@ public class UserManagerTest {
 								"Email Address Already in Use");
 						assertThat(contentAsString(result)).contains(
 								"Display Name Already in Use");
+
+						// Test displayName proposal
+						assertThat(contentAsString(result).contains("proposal"));
+						assertThat(contentAsString(result).contains("user0"));
+						assertThat(contentAsString(result).contains(
+								"first_last"));
 						u = DB.getUserDAO().getByDisplayName("user");
 						DB.getUserDAO().makeTransient(u);
 
@@ -243,7 +249,7 @@ public class UserManagerTest {
 								.register(), new FakeRequest("POST",
 								"/user/register").withJsonBody(json));
 						assertThat(status(result))
-						.isEqualTo(Status.BAD_REQUEST);
+								.isEqualTo(Status.BAD_REQUEST);
 						assertThat(contentAsString(result)).contains(
 								"Email Address is Empty");
 						assertThat(contentAsString(result)).contains(
