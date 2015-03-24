@@ -18,7 +18,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		// Template variables
 		self.title        = ko.observable('Join with your email address');
 		self.description  = ko.observable('');
-		self.templateName = ko.observable(params.title);
+		self.templateName = ko.observable(params.title.toLowerCase());
 
 		// Registration Parameters
 		self.acceptTerms  = ko.observable(false);
