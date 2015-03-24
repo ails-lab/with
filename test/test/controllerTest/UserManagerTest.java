@@ -168,7 +168,7 @@ public class UserManagerTest {
 								+ "\"firstName\" : \"first\","
 								+ "\"lastName\" : \"last\","
 								+ "\"password\" : \"pwd\","
-								+ "\"displayName\" : \"user\"" + "}");
+								+ "\"username\" : \"user\"" + "}");
 						Result result = callAction(
 								controllers.routes.ref.UserManager.register(),
 								new FakeRequest("POST", "/user/register")
@@ -233,7 +233,7 @@ public class UserManagerTest {
 						assertThat(contentAsString(result)).contains(
 								"Email Address Already in Use");
 						assertThat(contentAsString(result)).contains(
-								"Display Name Already in Use");
+								"Username Already in Use");
 
 						// Test displayName proposal
 						assertThat(contentAsString(result).contains("proposal"));
@@ -259,7 +259,7 @@ public class UserManagerTest {
 						assertThat(contentAsString(result)).contains(
 								"Email Address is Empty");
 						assertThat(contentAsString(result)).contains(
-								"Display Name is Empty");
+								"Username is Empty");
 
 					} catch (JsonProcessingException e) {
 						e.printStackTrace();

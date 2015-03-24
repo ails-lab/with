@@ -147,12 +147,12 @@ public class UserManager extends Controller {
 		}
 		String displayName = null;
 		// displayName unique
-		if (!json.has("displayName")) {
-			error.add("Display Name is Empty");
+		if (!json.has("username")) {
+			error.add("Username is Empty");
 		} else {
-			displayName = json.get("displayName").asText();
+			displayName = json.get("username").asText();
 			if (DB.getUserDAO().getByDisplayName(displayName) != null) {
-				error.add("Display Name Already in Use");
+				error.add("Username Already in Use");
 				ArrayNode names = proposeDisplayName(displayName, firstName,
 						lastName);
 				result.put("proposal", names);
