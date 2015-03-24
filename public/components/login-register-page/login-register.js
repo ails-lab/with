@@ -60,7 +60,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		// Template variables
 		self.title        = ko.observable('Join with your email address');
 		self.description  = ko.observable('');
-		self.templateName = ko.observable(params.title);
+		self.templateName = ko.observable(params.title.toLowerCase());
 
 		// Registration Parameters
 		self.acceptTerms  = ko.observable(false);
@@ -145,6 +145,22 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				// TODO: Encrypt the password
 				var json = ko.toJSON(self.validationModel);
 				// TODO: Submit the user information to the server
+				$.ajax({
+					type    : "post",
+					url     : "/user/register",
+					data    : json,
+					success : function(data, text) {
+						console.log("Success!");
+						console.log(data);
+						console.log(text);
+					},
+					error   : function(request, status, error) {
+						console.log("Error!");
+						console.log(request);
+						console.log(error);
+					}
+				});
+
 				console.log(json);
 				self.templateName('postregister');
 			}
@@ -156,14 +172,32 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.emailLogin           = function(popup, callback) {
 			if (self.loginValidation.isValid()) {
 				var json = ko.toJSON(self.loginValidation);
-				console.log(json);
-				// TODO: Try to login. If OK, then redirect to the appropriate page (post-registration if missing, landing otherwise)
-				// TODO: Before redirecting, if stayLogged is pressed, make sure user stays online (use a cookie?)
-				// TODO: Add the user to the global app: app.currentUser('finik');
+				// console.log(json);
 
-				self.emailUser(null);
-				self.emailPass(null);
+				$.ajax({
+					type    : "get",
+					url     : "/api/login",
+					data    : { email: self.emailUser(), password: self.emailPass() },
+					success : function (data, text) {
+
+					},
+					error   : function (request, status, error) {
+						console.log(request);
+						console.log(error);
+					}
+				});
+
+				// $.post("/api/login", json, function(data, status) {
+				// 	// TODO: Before redirecting, if stayLogged is pressed, make sure user stays online (use a cookie?)
+				// 	// TODO: Add the user to the global app: app.currentUser('finik');
+				// 	console.log("Success");
+				// 	app.currentUser(data['username']);
+				// 	// TODO: Redirect to the appropriate page
+				// });
+
 				if (typeof popup !== 'undefined') {
+					self.emailUser(null);
+					self.emailPass(null);
 					if (popup) { self.closeLoginPopup(); }
 
 					if (typeof callback !== 'undefined') {

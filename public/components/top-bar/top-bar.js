@@ -8,6 +8,13 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 
 		this.route = params.route;
 
+		var self = this;
+		self.logout = function() {
+			$.get('api/logout', function() {
+				app.currentUser();
+			});
+		}
+
 	}
 
 	return { viewModel: TopBarViewModel, template: template };

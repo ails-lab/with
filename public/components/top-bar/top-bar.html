@@ -17,13 +17,13 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-       
-        
+
+
       </ul>
-     
+
       <ul class="nav navbar-nav navbar-right">
         <li><a href="#search" id="searchlink" onClick="toggleSearch('focus'); return false;"><i class="glyphicon glyphicon-search"></i> Click or type to Search   </a></li>
-      
+
       <li data-bind="visible: !isLogged()"><a href="#login"><i class="fa fa-sign-in"></i> Login</a></li>
 		<li data-bind="visible: !isLogged()"><a href="#register"><i class="fa fa-user-plus"></i> Register</a></li>
         <li data-bind="visible: isLogged()"><a href="#">My collections</a></li>
@@ -34,7 +34,7 @@
             <li><a href="#"></a></li>
             <li><a href="#">Edit Profile</a></li>
             <li class="divider"></li>
-            <li><a href="#">Sign out</a></li>
+            <li><a href="#" onclick="logout(); return false;">Sign out</a></li>
           </ul>
         </li>
       </ul>
