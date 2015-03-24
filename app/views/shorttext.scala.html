@@ -1,0 +1,7 @@
+@(text: String, size: Integer)
+
+@if(text.size>size){
+@text.substring(0,size-3) ...
+} else {
+@text
+}

@@ -1,3 +1,4 @@
+
 <div id="withsearchid" class="withsearch"  data-bind="event: { scroll: scrolled }">
 				<form class="withsearch-form">
 					<input class="withsearch-input"  type="search" data-bind="value: term" placeholder="Search..."/>
@@ -11,18 +12,20 @@
 					<!-- /ko -->
 					<!-- ko if: results().length > 0 && sourceview -->
 					
-					
+					 <div class="scrollable">
 				    <!-- ko foreach: results -->
 				 
+				  
 					<div class="dummy-column">
 					<h2>
 					 <!-- ko text: source --><!-- /ko --> 
+					 <span class="withsearch-console"><a data-bind="attr: { href:consoleurl}" target="_blank"><i class="fa fa-external-link fa-1" title="API console"></i></a></span>
 					</h2>
 					 <!-- ko foreach: items -->
 					 
 					 <!-- ko if: thumb -->
-					 	<a class="dummy-media-object">
-							<img data-bind="attr: { src:thumb, alt: title }"/>
+					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].recordSelect}">
+							<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
 							<span>
 							 <!-- ko text: title --><!-- /ko --> 
 							</span>
@@ -30,29 +33,34 @@
 						<!-- /ko -->    
 					   <!-- /ko -->    
 					</div>
+					
 					<!-- /ko -->
+					</div>
 					<!-- /ko --> 
 					
 					
 					<!-- ko ifnot: sourceview -->
 					<!-- ko if: mixresults().length > 0 -->
 					 <div id="withsearch-content-masonry">
-					  <div id="columns" data-bind="foreach: mixresults, masonry"><figure class="masonryitem"><img data-bind="attr: { src:thumb, alt: title }"/><figcaption data-bind="text: title"></figcaption></figure></div>
+					  <div id="columns" data-bind="foreach: mixresults, masonry"><figure class="masonryitem"><a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="text: title"></figcaption></figure></div>
 	            	</div>
+	    
 					<!-- /ko -->
 					<!-- /ko -->
 			    
-			   	
+			   	 
+		
 				 <div id="more" data-bind='visible: searching' >
 				    
-				    <img src="http://rniemeyer.github.com/KnockMeOut/Images/loading.gif"/>
+				    <img src="images/loading.gif"/>
 				</div>
 				
 				
 				</div>
 				
 				<span class="withsearch-close"></span>
-				
+			
 			</div>
 			
 			<div class="overlay"></div>
+			<item-view params="route: route"></item-view>	

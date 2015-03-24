@@ -14,7 +14,7 @@
  */
 
 
-package espace.core;
+package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,18 +22,23 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonQuery;
+import espace.core.HttpConnector;
+import espace.core.ISpaceSource;
+import espace.core.SourceResponse;
+import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 
-public class DSpaceSource implements ISpaceSource {
+public class DPLASpaceSource implements ISpaceSource {
 
-	private String DPLAKey = "2edebbb32b1f42f86aaa56fd2edc1a28";
+	private String DPLAKey = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
+		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
-				+ Utils.spacesFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-				+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "")
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
 				+ "&page=" + q.page + "&page_size=" + q.pageSize;
 	}
 
@@ -49,33 +54,6 @@ public class DSpaceSource implements ISpaceSource {
 		DPLAKey = dPLAKey;
 	}
 
-	public List<CommonItem> getPreview(CommonQuery q) {
-		ArrayList<CommonItem> res = new ArrayList<CommonItem>();
-		try {
-			String httpQuery = getHttpQuery(q);
-			// System.out.println(httpQuery);
-			JsonNode node = HttpConnector.getURLContent(httpQuery);
-			JsonNode a = node.path("docs");
-			for (int i = 0; i < a.size(); i++) {
-				JsonNode o = a.get(i);
-				CommonItem item = new CommonItem();
-				JsonNode path = o.path("sourceResource").path("title");
-				// System.out.println(path);
-				item.setTitle(path.asText());
-				item.seteSource(this.getSourceName());
-				String description;
-				JsonNode path2 = o.path("object");
-				// System.out.println(path2);
-				if (path2 != null)
-					item.setPreview(path2.asText());
-				res.add(item);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return res;
-	}
-
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
@@ -85,12 +63,14 @@ public class DSpaceSource implements ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-			res.totalCount = Utils.readIntAttr(response, "limit", true);
-			res.count = Utils.readIntAttr(response, "count", true);
+			// System.out.println(response.toString());
+			JsonNode docs = response.path("docs");
+			res.totalCount = Utils.readIntAttr(response, "count", true);
+			res.count = docs.size();
 			res.startIndex = Utils.readIntAttr(response, "start", true);
-			ArrayList a = new ArrayList<Object>();
+			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
-			for (JsonNode item : response.path("docs")) {
+			for (JsonNode item : docs) {
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
@@ -102,7 +82,7 @@ public class DSpaceSource implements ISpaceSource {
 				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
+				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
 				a.add(it);
 			}
 			res.items = a;

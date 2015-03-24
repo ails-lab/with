@@ -85,4 +85,13 @@ public class CommonQuery {
 				+ ", termToExclude=" + termToExclude + ", source=" + source + ", europeanaAPI=" + europeanaAPI + "]";
 	}
 
+	public void validate() {
+		if (!Utils.hasAny(page)) {
+			page = "1";
+		}
+		if (!Utils.hasAny(pageSize)) {
+			pageSize = "20";
+		}
+	}
+
 }

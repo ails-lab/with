@@ -14,16 +14,20 @@
  */
 
 
-package espace.core;
+package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonQuery;
+import espace.core.EuropeanaQuery;
+import espace.core.HttpConnector;
+import espace.core.ISpaceSource;
+import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
+import espace.core.Utils;
 
 public class ESpaceSource implements ISpaceSource {
 
@@ -38,9 +42,10 @@ public class ESpaceSource implements ISpaceSource {
 	}
 
 	private String getSearchTerm(CommonQuery q) {
-		if (q.searchTerm != null)
-			return Utils.spacesFormatQuery(q.searchTerm)
-					+ ((q.termToExclude != null) ? "+NOT+(" + Utils.spacesFormatQuery(q.termToExclude) + ")" : "");
+		if (Utils.hasAny(q.searchTerm))
+			return Utils.spacesPlusFormatQuery(q.searchTerm)
+					+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
+							: "");
 		return null;
 	}
 
@@ -91,33 +96,6 @@ public class ESpaceSource implements ISpaceSource {
 		return "Europeana";
 	}
 
-	public List<CommonItem> getPreview(CommonQuery q) {
-		ArrayList<CommonItem> res = new ArrayList<CommonItem>();
-		try {
-			String httpQuery = getHttpQuery(q);
-			// System.out.println(httpQuery);
-			JsonNode node = HttpConnector.getURLContent(httpQuery);
-			JsonNode a = node.path("items");
-			for (int i = 0; i < a.size(); i++) {
-				JsonNode o = a.get(i);
-				// System.out.println(o);
-				CommonItem item = new CommonItem();
-				JsonNode path = o.path("title");
-				// System.out.println(path);
-				item.setTitle(path.get(0).asText());
-				item.seteSource(this.getSourceName());
-				JsonNode path2 = o.path("edmPreview");
-				// System.out.println(path2);
-				if (path2 != null && path2.get(0) != null)
-					item.setPreview(path2.get(0).asText());
-				res.add(item);
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return res;
-	}
-
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
@@ -129,7 +107,7 @@ public class ESpaceSource implements ISpaceSource {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 			res.count = Utils.readIntAttr(response, "itemsCount", true);
-			ArrayList a = new ArrayList<Object>();
+			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 			if (response.path("success").asBoolean()) {
 				for (JsonNode item : response.path("items")) {
 					ItemsResponse it = new ItemsResponse();

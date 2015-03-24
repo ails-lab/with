@@ -1,0 +1,14 @@
+
+.profileheader{
+-webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.22);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.22);
+  background: #fff;
+  -webkit-box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.22);
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 54px;
+  z-index: 103;
+}
+

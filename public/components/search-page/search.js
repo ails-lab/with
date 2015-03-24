@@ -5,8 +5,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	console.log("exists:"+$element.data('masonry'));
-		    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
+    	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 		
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 		       
@@ -19,19 +18,15 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     	var $element = $(element),
     	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
     	masonry = ko.utils.unwrapObservable(valueAccessor())
-    	
-    	
-			
-		if (!list.length){
+    	if (!list.length){
 			
 			return;
 		}
     	
-      
+        
     	imagesLoaded( $element, function() {
     		if (!($element.data('masonry'))){
         		
-        		console.log("masonry init");
         		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
         			
         	}
@@ -39,8 +34,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
  				
  	 		    $(this).animate({ opacity: 1 });
  			});
- 			$element.masonry( 'reloadItems' );
+    		
+    		$element.masonry( 'reloadItems' );
  			$element.masonry( 'layout' );
+ 			
+    		
  			
  		 });
 		 
@@ -56,16 +54,22 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.thumb = ko.observable(false);
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
+		self.source=ko.observable(false);
+		self.creator=ko.observable("");
+		self.provider=ko.observable("");
+		self.url=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
 			}else{self.title(data.title);}
-			
+			self.url("#item/"+data.id);
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 			self.fullres(data.fullres);
 			self.description(data.description);
-			
+			self.source(data.source);
+			self.creator(data.creator);
+			self.provider(data.provider);
 		};
 
 		self.displayTitle = ko.computed(function() {
@@ -80,12 +84,13 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	function SourceCategory(data) {
 		var self = this;
 		self.source = ko.observable("");
+		self.consoleurl=ko.observable("");
 		self.items=ko.observableArray([]);
 		
 		
 		self.load=function(data){
 			self.source=data.source;
-			
+			self.consoleurl=data.consoleurl;
 			self.items=data.items;
 		};
 		
@@ -113,6 +118,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.sources= ko.observableArray([]);
 		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
+		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
 		
 		self.searching = ko.observable(false);
@@ -132,7 +138,15 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
 		
-		self.toggleSourceview = function () { self.sourceview(!self.sourceview())};
+		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
+		if(self.sourceview()==false){
+			$('.withsearch-content').css({'overflow-x': 'hidden'});
+		  }
+		else{
+			$('.withsearch-content').css({'overflow-x': 'scroll'});
+		  }
+		
+		};
 		
 		self.reset = function() {
 			
@@ -163,29 +177,54 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				"success": function(data) {
 					
 					self.previous(self.page()-1);
-					self.next(self.page()+1);
+					var moreitems=false;
+					
 					for(var i in data) {
-						var source=data[i].source;
+						source=data[i].source;
+						//count should be working in api but it's not, use item length until fixed
+						if(data[i].items!=null && data[i].items.length==self.pageSize() && moreitems==false){
+							moreitems=true;
+						}
 						var items = [];
 						for(var j in data[i].items){
 						 var result = data[i].items[j];
+						 
+						 if(result !=null && result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
 						 var record = new Record({
 							id: result.id,
 							thumb: result.thumb[0],
 							fullres: result.fullresolution,
 							title: result.title[0].value,
-							view_url: result.url.fromSourceAPI
+							view_url: result.url.fromSourceAPI,
+							creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
+							provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
+							source: source
 						  });
-						 items.push(record);
+						 items.push(record);}
 						}
 						if(items.length>0){
 							
 							self.mixresults.push.apply(self.mixresults, items);
 							
 						}
+						api_console="";
+						if(source=="Europeana"){
+							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
+							}
+						else if(source=="DPLA"){
+							api_console="http://api.dp.la/";
+						}
+						else if(source=="NLA"){
+							api_console="http://api.trove.nla.gov.au/";
+						}
+						else if(source=="DigitalNZ"){
+							api_console="http://api.digitalnz.org/"
+						}
+						else{api_console="http://www.europeanafashion.eu/api/search/"+self.term();}
 						var srcCat=new SourceCategory({
 							source:source,
-							items:items
+							items:items,
+							consoleurl:api_console
 						});
 						var found=false;
 						if(self.results().length>0)
@@ -196,7 +235,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 								inCat.append(srcCat.items);
 								self.results.replace(self.results()[k],new SourceCategory({
 									source:inCat.source,
-									items:inCat.items
+									items:inCat.items,
+									consoleurl:inCat.consoleurl
 								}));
 								break;
 							}
@@ -208,6 +248,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						
 					}
 						self.searching(false);
+						if(moreitems){
+							self.next(self.page()+1);
+						}else{
+							self.next(-1);
+						}
 				}
 			});
 			console.log(self.term());
@@ -221,14 +266,23 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.results([]);
 			self.mixresults([]);
 			self.page(1);
+			self.next(1);
+			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
 			self._search();
 		};
 
+		self.recordSelect= function (e){
+			console.log(e);
+			itemShow(e);
+			
+		}
+		
 		self.searchNext = function() {
+		if(self.next()>0){	
 			self.page(self.next());
-			self._search();
+			self._search();}
 		};
 
 		self.searchPrevious = function() {
@@ -236,7 +290,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self._search();
 		};
 
-      
+		self.defaultSource=function(item){
+			item.thumb('images/no_image.jpg');
+			
+	    }
 
 	  var withsearch = $( '#withsearchid' );
 	  var withinput =$("input.withsearch-input");
