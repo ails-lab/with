@@ -16,13 +16,10 @@
 
 package db;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import model.Collection;
 import model.CollectionMetadata;
-import model.RecordLink;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -38,7 +35,7 @@ public class CollectionDAO extends DAO<Collection> {
 		super( Collection.class );
 	}
 
-	public List<Collection> getCollectionsByIds(List<String> ids) {
+	public List<Collection> getCollectionsByIds(List<ObjectId> ids) {
 		Query<Collection> colQuery = this.createQuery()
 				.field("_id").hasAnyOf(ids);
 		return find(colQuery).asList();

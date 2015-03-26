@@ -15,11 +15,14 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # Collection Controller
 POST     /collection/delete                      controllers.CollectionController.deleteCollection()
-POST     /collection/add                         controllers.CollectionController.saveCollection()
-POST     /collection/listUserCollections         controllers.CollectionController.listFirstRecordsOfUserCollections()
+POST     /collection/add                         controllers.CollectionController.createCollection()
+POST     /collection/listByUser			         controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/removeRecord                controllers.CollectionController.removeRecordFromCollection
 POST     /collection/addRecord                   controllers.CollectionController.addRecordToCollection()
-POST     /collection/listColRecords              controllers.CollectionController.listCollectionRecords()
+POST     /collection/listRecords   	             controllers.CollectionController.listCollectionRecords()
+POST     /collection/metadata          			 controllers.CollectionController.getCollectionMetadata()
+GET		 /collection/:id/thumbnail				 controllers.CollectionController.getCollectionThumbnail(id)
+GET		 /recordlink/:id/thumbnail				 controllers.CollectionController.getRecordLinkThumbnail(id)
 
 # User Manager Controller
 GET 	/user/byEmail				controllers.UserManager.findByEmail(email:java.lang.String)

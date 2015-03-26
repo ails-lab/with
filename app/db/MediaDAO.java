@@ -42,6 +42,10 @@ public class MediaDAO  {
 	 * @return
 	 */
 	private Media gridFsDbFileToMediaObj(GridFSDBFile gridfsDbFile) {
+
+		if(gridfsDbFile == null)
+			return null;
+
 		Media media = new Media();
 
 		try {
@@ -70,6 +74,7 @@ public class MediaDAO  {
 		} catch (Exception e) {
 			log.error("Problem in find file from GridFS " + dbId);
 		}
+
 		if (media == null)
 			log.debug("Cannot find Media document with ID: " + dbId);
 		else

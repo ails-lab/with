@@ -18,11 +18,13 @@ package utils;
 
 import java.util.ArrayList;
 
-import org.bson.types.ObjectId;
-
 import model.Collection;
 import model.RecordLink;
 import model.User;
+
+import org.apache.commons.codec.binary.Base64;
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -85,17 +87,20 @@ public class Serializer {
 		json.put("sourceId", recLink.getSourceId());
 		json.put("sourceUrl", recLink.getSourceUrl());
 		json.put("rights", recLink.getRights());
-		
+
 		return json;
 	}
 
 	public static JsonNode collectionToJson(Collection collection) {
 		ObjectNode json = Json.newObject();
+
+		// put title, description
 		json.put("title", collection.getTitle());
 		json.put("description", collection.getDescription());
 		//json.put("date_created", collection.getCreated());
 		//json.put("last_modified", collection.getLastModified());
 
+		// put the capped array of first entries
 		ArrayNode recordLinksArray = Json.newObject().arrayNode();
 		for(RecordLink rlink: collection.getFirstEntries()) {
 			ObjectNode jsonRecLink = Json.newObject();
@@ -110,6 +115,17 @@ public class Serializer {
 			recordLinksArray.add(jsonRecLink);
 		}
 		json.put("first_entries", recordLinksArray);
+
+		// put thumbnail metadata
+		ObjectNode thumbnailMetadata = Json.newObject();
+		thumbnailMetadata.put("data", Base64.encodeBase64(collection.getThumbnail().getData()));
+		thumbnailMetadata.put("type", collection.getThumbnail().getType());
+		thumbnailMetadata.put("mimeType", collection.getThumbnail().getMimeType());
+		thumbnailMetadata.put("duration", collection.getThumbnail().getDuration());
+		thumbnailMetadata.put("height", collection.getThumbnail().getHeight());
+		thumbnailMetadata.put("width", collection.getThumbnail().getWidth());
+
+		json.put("thumbnail", thumbnailMetadata);
 
 		return json;
 	}
