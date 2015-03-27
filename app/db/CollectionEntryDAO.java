@@ -18,10 +18,11 @@ package db;
 
 import java.util.List;
 
+import model.CollectionEntry;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
-import model.CollectionEntry;
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -37,19 +38,20 @@ public class CollectionEntryDAO extends DAO<CollectionEntry> {
 				.field("recordLink").equal(recLinkId);
 		return this.findOne(q);
 	}
-	
-	public int deleteByRecLinkId(ObjectId recLinkId) {
+
+	public int deleteByCollectionRecLinkId(ObjectId recLinkId, ObjectId colId) {
 		Query<CollectionEntry> q = this.createQuery()
-				.field("recordLink._id").equal(recLinkId);
+				.field("recordLink._id").equal(recLinkId)
+				.field("collection").equal(colId);
 		return this.deleteByQuery(q).getN();
 	}
-	
+
 	public List<CollectionEntry> getByCollection(ObjectId colId) {
 		Query<CollectionEntry> q = this.createQuery()
 				.field("collection").equal(colId);
 		return this.find(q).asList();
-	} 
-	
+	}
+
 	public List<CollectionEntry> getByCollectionOffsetCount(ObjectId colId, int offset, int count) {
 		Query<CollectionEntry> q = this.createQuery()
 				.field("collection").equal(colId)

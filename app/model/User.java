@@ -91,7 +91,7 @@ public class User {
 			log.error( "Collection is not saved!");
 			return;
 		}
-		collections.add( col.getMetadata() );
+		collections.add( col.collectMetadata() );
 		if( collections.size() > EMBEDDED_CAP) {
 			collections.remove(0);
 		}

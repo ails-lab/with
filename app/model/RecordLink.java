@@ -16,42 +16,71 @@
 
 package model;
 
+import javax.validation.constraints.NotNull;
+
 import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+
+import utils.Serializer;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
 
 // there is an option Record link if the link is already materialized
 @Entity
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
 public class RecordLink {
 
 	@Id
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
+
 	// optional link to the materialized Record
+	@NotNull
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId recordReference;
 
 	// which backend provided this entry
 	// Europeana, DPLA ....
+	@NotNull
+	@NotBlank
 	private String source;
 
 	// an optional URL for the thumbnail
 	private String thumbnailUrl;
 
 	// an optional cached version of a thumbnail for this record'
+	@NotNull
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
+	@NotNull
+	@NotBlank
 	private String title;
 	private String description;
 
 	// the id in the source system
+	@NotNull
+	@NotBlank
 	private String sourceId;
 	// a link to the record on its source
+	@NotNull
+	@NotBlank
 	private String sourceUrl;
 
+	@NotNull
+	@NotBlank
 	private String type;
 
+	@NotNull
+	@NotBlank
 	private String rights;
 
 
@@ -63,10 +92,14 @@ public class RecordLink {
 		this.dbId = dbId;
 	}
 
-	public Record getRecordReference() {
+	public Record retrieveRecordReference() {
 		Record record =
 				DB.getRecordDAO().getById(this.recordReference);
 		return record;
+	}
+
+	public ObjectId getRecordReference() {
+		return this.recordReference;
 	}
 
 	public void setRecordReference(Record recordReference) {
@@ -81,10 +114,14 @@ public class RecordLink {
 		this.source = source;
 	}
 
-	public Media getThumbnail() {
+	public Media retrieveThumbnail() {
 		Media thumbnail =
 				DB.getMediaDAO().findById(this.thumbnail);
 		return thumbnail;
+	}
+
+	public ObjectId getThumbnail() {
+		return this.thumbnail;
 	}
 
 	public void setThumbnail(Media thumbnail) {
@@ -140,7 +177,9 @@ public class RecordLink {
 	}
 
 	public String getThumbnailUrl() {
-		return thumbnailUrl;
+		return "/recordlink/" +
+				this.getDbId().toString() +
+				"/thumbnail";
 	}
 
 	public void setThumbnailUrl(String thumbnailUrl) {

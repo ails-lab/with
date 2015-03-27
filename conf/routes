@@ -20,7 +20,7 @@ POST     /collection/listByUser			         controllers.CollectionController.list
 POST     /collection/removeRecord                controllers.CollectionController.removeRecordFromCollection
 POST     /collection/addRecord                   controllers.CollectionController.addRecordToCollection()
 POST     /collection/listRecords   	             controllers.CollectionController.listCollectionRecords()
-POST     /collection/metadata          			 controllers.CollectionController.getCollectionMetadata()
+POST     /collection/get 	        			 controllers.CollectionController.getCollection()
 GET		 /collection/:id/thumbnail				 controllers.CollectionController.getCollectionThumbnail(id)
 GET		 /recordlink/:id/thumbnail				 controllers.CollectionController.getRecordLinkThumbnail(id)
 
