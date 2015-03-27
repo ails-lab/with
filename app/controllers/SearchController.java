@@ -69,14 +69,16 @@ public class SearchController extends Controller {
 				Iterable<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 				final long initTime = System.currentTimeMillis();
 				for (final ISpaceSource src : ESpaceSources.getESources()) {
-					((ArrayList<Promise<SourceResponse>>) promises).add(
-						 Promise.promise(new Function0<SourceResponse>() {
-							public SourceResponse apply() {
-								//Logger.info("Async call to " + src.getSourceName());
-								return src.getResults(q);
-							}
-						 })
-					);
+					if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
+						((ArrayList<Promise<SourceResponse>>) promises).add(
+							 Promise.promise(new Function0<SourceResponse>() {
+								public SourceResponse apply() {
+									//Logger.info("Async call to " + src.getSourceName());
+									return src.getResults(q);
+								}
+							 })
+						);
+					}
 				}	
 				 // compose all futures
 		        Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);		 
@@ -85,11 +87,11 @@ public class SearchController extends Controller {
 		        		new Function<Iterable<SourceResponse>, Result>() {
 		        			List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
 		        			public Result apply(Iterable<SourceResponse> responses) {
-		        				Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()-initTime));
 		        				for (SourceResponse r: responses) {
 		        					Logger.info(r.source + " found " + r.count);
 		        					finalResponses.add(r);
 		        				}	
+		        				Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()-initTime));
 		        				return ok(Json.toJson(finalResponses));
 		        			}
 		        		}
