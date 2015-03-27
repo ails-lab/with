@@ -75,7 +75,7 @@ public class CollectionDAO extends DAO<Collection> {
 		Query<Collection> q =  this.createQuery()
 				.field("_id").equal(id)
 				.retrievedFields(true, "owner");
-		return findOne(q).getOwner();
+		return findOne(q).retrieveOwner();
 	}
 	
 

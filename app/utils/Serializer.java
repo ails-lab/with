@@ -16,6 +16,7 @@
 
 package utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import model.Collection;
@@ -29,7 +30,11 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -37,6 +42,7 @@ import db.DB;
 
 public class Serializer {
 	public static final ALogger log = Logger.of( Serializer.class);
+
 
 
 	public static Collection jsonToCollectionObject(JsonNode json) throws Exception {
@@ -117,15 +123,24 @@ public class Serializer {
 
 		// put thumbnail metadata
 		ObjectNode thumbnailMetadata = Json.newObject();
-		thumbnailMetadata.put("data", Base64.encodeBase64(collection.getThumbnail().getData()));
-		thumbnailMetadata.put("type", collection.getThumbnail().getType());
-		thumbnailMetadata.put("mimeType", collection.getThumbnail().getMimeType());
-		thumbnailMetadata.put("duration", collection.getThumbnail().getDuration());
-		thumbnailMetadata.put("height", collection.getThumbnail().getHeight());
-		thumbnailMetadata.put("width", collection.getThumbnail().getWidth());
+		thumbnailMetadata.put("data", Base64.encodeBase64(collection.retrieveThumbnail().getData()));
+		thumbnailMetadata.put("type", collection.retrieveThumbnail().getType());
+		thumbnailMetadata.put("mimeType", collection.retrieveThumbnail().getMimeType());
+		thumbnailMetadata.put("duration", collection.retrieveThumbnail().getDuration());
+		thumbnailMetadata.put("height", collection.retrieveThumbnail().getHeight());
+		thumbnailMetadata.put("width", collection.retrieveThumbnail().getWidth());
 
 		json.put("thumbnail", thumbnailMetadata);
 
 		return json;
+	}
+
+	public static class ObjectIdSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object oid, JsonGenerator jsonGen, SerializerProvider provider)
+				throws IOException,	JsonProcessingException {
+					jsonGen.writeString(oid.toString());
+		}
+
 	}
 }

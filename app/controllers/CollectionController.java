@@ -16,7 +16,6 @@
 
 package controllers;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +36,6 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
-import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -46,6 +44,23 @@ import db.DB;
 
 public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of( CollectionController.class);
+
+
+	/**
+	 * get recordLink thumbnail
+	 */
+	public static Result getRecordLinkThumbnail(String rlinkId) {
+		RecordLink r = null;
+		Media thumbnail = null;
+		try {
+			r = DB.getRecordLinkDAO().getByDbId(new ObjectId(rlinkId));
+			thumbnail = r.retrieveThumbnail();
+		} catch(Exception e) {
+			log.error("Cannot retrieve record link or media document from database", e);
+			return internalServerError("Cannot retrieve record link or media document from database");
+		}
+		return ok(thumbnail.getData()).as(thumbnail.getMimeType());
+	}
 
 	/**
 	 * Return the thumbnail (in raw bytes) of a collection
@@ -58,7 +73,7 @@ public class CollectionController extends Controller {
 		Media thumbnail = null;
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(colId));
-			thumbnail = c.getThumbnail();
+			thumbnail = c.retrieveThumbnail();
 		} catch(Exception e) {
 			log.error("Cannot retrieve collection or media document from database", e);
 			return internalServerError("Cannot retrieve collection or media document from database");
@@ -70,33 +85,22 @@ public class CollectionController extends Controller {
 	 * Get collection metadata (title, descr, thumbnail)
 	 */
 	@BodyParser.Of(BodyParser.Json.class)
-	public static Result getCollectionMetadata() {
+	public static Result getCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result  = Json.newObject();
 
 		if(json.has("collection_id")) {
 			ObjectId colId = new ObjectId(json.get("collection_id").asText());
 			Collection c = null;
-			Media thumbnail = null;
 			try {
 				c = DB.getCollectionDAO().getById(colId);
-				thumbnail = c.getThumbnail();
 			} catch(Exception e) {
 				log.error("Cannot retrieve metadata for the specified collection!", e);
 				result.put("message", "Cannot retrieve metadata for the specified collection!");
 				return internalServerError(result);
 			}
-			result.put("title", c.getTitle());
-			result.put("description", c.getDescription());
-			Date d = c.getLastModified();
-			result.put("last_modified", (d!=null)?d.toString():"");
-
-			ObjectNode thumbMetadata = Json.newObject();
-			thumbMetadata.put("type", thumbnail.getType());
-			thumbMetadata.put("width", thumbnail.getWidth());
-			thumbMetadata.put("height", thumbnail.getHeight());
-			result.put("thumbnail", thumbMetadata);
-
+			result.put("collection", Json.toJson(c));
+			result.put("message", "Collection retrieved succesfully!");
 			return ok(result);
 		} else {
 			log.error("Collection id was not specified!");
@@ -110,14 +114,16 @@ public class CollectionController extends Controller {
 	 * Json input with collection fields
 	 * @return
 	 */
-	@With(UserLoggedIn.class)
+	//@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result createCollection() {
 		JsonNode json = request().body().asJson();
+		//DBObject jsonObj = DB.getMorphia().toDBObject(json);
 		ObjectNode result = Json.newObject();
 		Key<Collection> colKey = null;
 		try {
-			Collection newCollection = Serializer.jsonToCollectionObject(json);
+			//Collection newCollection = Serializer.jsonToCollectionObject(json);
+			Collection newCollection = Json.fromJson(json, Collection.class);
 			colKey = DB.getCollectionDAO().save(newCollection);
 		} catch (Exception e) {
 			log.error("Cannot save Collection to database", e);
@@ -177,13 +183,13 @@ public class CollectionController extends Controller {
 				firstEntries.put(c.getTitle(), c.getFirstEntries());
 
 			ObjectNode collections = Json.newObject();
-			for(Entry<String, ?> col: firstEntries.entrySet()) {
+			for(Entry<String, ?> entry: firstEntries.entrySet()) {
 				ArrayNode firstRecords = Json.newObject().arrayNode();
-				for(RecordLink recLink: (List<RecordLink>)col.getValue()) {
-					firstRecords.add(Json.parse(DB.getJson(recLink)));
+				for(RecordLink recLink: (List<RecordLink>)entry.getValue()) {
+					firstRecords.add(Json.toJson(recLink));
 					//firstRecords.add(Serializer.recordLinkToJson(recLink));
 				}
-				collections.put(col.getKey(), firstRecords);
+				collections.put(entry.getKey(), firstRecords);
 			}
 			result.put("userCollections", collections);
 			return ok(result);
@@ -194,25 +200,9 @@ public class CollectionController extends Controller {
 	}
 
 	/**
-	 * get recordLink thumbnail
-	 */
-	public static Result getRecordLinkThumbnail(String rlinkId) {
-		RecordLink r = null;
-		Media thumbnail = null;
-		try {
-			r = DB.getRecordLinkDAO().getByDbId(new ObjectId(rlinkId));
-			thumbnail = r.getThumbnail();
-		} catch(Exception e) {
-			log.error("Cannot retrieve record link or media document from database", e);
-			return internalServerError("Cannot retrieve record link or media document from database");
-		}
-		return ok(thumbnail.getData()).as(thumbnail.getMimeType());
-	}
-
-	/**
 	 * Adds a Record to a Collection
 	 */
-	@With(UserLoggedIn.class)
+	//@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result addRecordToCollection() {
 		JsonNode json = request().body().asJson();
@@ -220,8 +210,8 @@ public class CollectionController extends Controller {
 
 		RecordLink rLink = null;
 		CollectionEntry colEntry = null;
-		if(json.has("recordLink_id") && json.has("collection_id")) {
-			String recordLinkId = json.get("recordLink_id").asText();
+		if(json.has("recordlink_id") && json.has("collection_id")) {
+			String recordLinkId = json.get("recordlink_id").asText();
 			String colId = json.get("collection_id").asText();
 
 			rLink = DB.getRecordLinkDAO().getByDbId(new ObjectId(recordLinkId));
@@ -250,29 +240,30 @@ public class CollectionController extends Controller {
 	/**
 	 * Remove a Record from a Collection
 	 */
-	@With(UserLoggedIn.class)
+	//@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result removeRecordFromCollection() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		if(json.has("recordlink_id")) {
+		if(json.has("recordlink_id") && json.has("collection_id")) {
 			ObjectId recLinkId = new ObjectId(json.get("recordlink_id").asText());
+			ObjectId colId = new ObjectId(json.get("collection_id").asText());
 			try {
-				 if(DB.getCollectionEntryDAO().deleteByRecLinkId(recLinkId) == 0 ) {
+				 if(DB.getCollectionEntryDAO().deleteByCollectionRecLinkId(recLinkId, colId) == 0 ) {
 					 result.put("message", "Cannot delete CollectionEntry!");
 					 return internalServerError(result);
 				 }
 			} catch(Exception e) {
 
 			}
+			result.put("message", "RecordLink succesfully removed from Collection with id: " + colId.toString());
+			return ok(result);
 		} else {
 			result.put("message",
 					"Cannot retrieve recordLink or collection from db, id is missing!");
 			return badRequest(result);
 		}
-
-		return null;
 	}
 
 	/**
@@ -296,7 +287,7 @@ public class CollectionController extends Controller {
 				.getByCollectionOffsetCount(colId, start, count);
 			ArrayNode records = Json.newObject().arrayNode();
 			for(CollectionEntry e: entries) {
-				records.add(DB.getJson(e.getRecordLink()));
+				records.add(Json.toJson(e.getRecordLink()));
 				//records.add(Serializer.recordLinkToJson(e.getRecordLink()));
 			}
 			result.put("records", records);
