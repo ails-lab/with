@@ -49,9 +49,8 @@ public class ESpaceSource implements ISpaceSource {
 		return null;
 	}
 
-	private String euroAPI(CommonQuery q, EuropeanaQuery eq) {
+	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
 		if (q.europeanaAPI != null) {
-			String res = "";
 			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
 			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
 			if (q.europeanaAPI.facets != null) {
@@ -87,9 +86,7 @@ public class ESpaceSource implements ISpaceSource {
 			if (q.europeanaAPI.reusability != null) {
 				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
 			}
-			return res;
 		}
-		return "";
 	}
 
 	public String getSourceName() {

@@ -235,7 +235,7 @@ input[type="search"] { /* reset normalize */
 
 .scrollable{
 	
-	width: 1800px;
+	width: 2200px;
     display:table;
    overflow-y: auto;   overflow-x: scroll;
     margin: 0 auto;
