@@ -2,6 +2,6 @@
 					<div data-bind="template: { name: templateName, afterRender: open}"></div>
 
 					<!-- ko ifnot: isLogged -->
-					<div data-bind="component: { name: 'popup-login', params: {} }"></div>
+					<div data-bind="component: { name: 'popup-login', params: { item: $parent } }"></div>
 					<!-- /ko -->
 				</div>

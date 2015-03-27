@@ -1,4 +1,4 @@
-define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, template,selectize, app) {
+define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, template, selectize, app) {
 
 
 	var inject_binding = function (allBindings, key, value) {
@@ -141,12 +141,12 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 	  self.selected_items2 = ko.observableArray();
 
 	  collectionShowPopup = function(record) {
-	    	if (!app.isLogged) {
-	    		showLoginPopup(record);
-	    	}
-	    	else {
-	    		collectionShow(record);
-	    	}
+			if (app.currentUser() === undefined) {
+				showLoginPopup(record);
+			}
+			else {
+				collectionShow(record);
+			}
 	  }
 
 	  collectionShow = function(record) {

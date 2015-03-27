@@ -12,55 +12,15 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		decorateInputElement: true
 	});
 
-	function Record(data) {
-		var self         = this;
-		self.id          = ko.observable(false);
-		self.title       = ko.observable(false);
-		self.description = ko.observable(false);
-		self.thumb       = ko.observable(false);
-		self.fullres     = ko.observable(false);
-		self.view_url    = ko.observable(false);
-		self.source      = ko.observable(false);
-		self.creator     = ko.observable("");
-		self.provider    = ko.observable("");
-		self.url         = ko.observable("");
-
-		self.load        = function(data) {
-			if (data.title == undefined) {
-				self.title("No title");
-			}
-			else {
-				self.title(data.title);
-			}
-			self.url("#item/"+data.id);
-			self.view_url(data.view_url);
-			self.thumb(data.thumb);
-			self.fullres(data.fullres);
-			self.description(data.description);
-			self.source(data.source);
-			self.creator(data.creator);
-			self.provider(data.provider);
-		};
-
-		self.displayTitle = ko.computed(function() {
-			if (self.title != undefined)
-				return self.title;
-			else if (self.description != undefined)
-				return self.description;
-			else return "- No title -";
-		});
-
-		if (data != undefined)
-			self.load(data);
-	}
-
 	function LoginRegisterViewModel(params) {
 		var self = this;
 
 		// Template variables
 		self.title        = ko.observable('Join with your email address');
 		self.description  = ko.observable('');
-		self.templateName = ko.observable(params.title.toLowerCase());
+		if (typeof params.title !== 'undefined') {	// To avoid problems with template-less components
+			self.templateName = ko.observable(params.title.toLowerCase());
+		}
 
 		// Registration Parameters
 		self.acceptTerms  = ko.observable(false);
@@ -146,23 +106,26 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				var json = ko.toJSON(self.validationModel);
 				// TODO: Submit the user information to the server
 				$.ajax({
-					type    : "post",
-					url     : "/user/register",
-					data    : json,
-					success : function(data, text) {
+					type        : "post",
+					contentType : 'application/json',
+					dataType    : 'json',
+					processData : false,
+					url         : "/user/register",
+					data        : json,
+					success     : function(data, text) {
 						console.log("Success!");
 						console.log(data);
 						console.log(text);
+						self.templateName('postregister');
 					},
-					error   : function(request, status, error) {
+					error       : function(request, status, error) {
 						console.log("Error!");
 						console.log(request);
 						console.log(error);
+						// TODO: Load errors to the form
+						self.validationModel.errors.showAllMessages();
 					}
 				});
-
-				console.log(json);
-				self.templateName('postregister');
 			}
 			else {
 				self.validationModel.errors.showAllMessages();
@@ -172,18 +135,19 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.emailLogin           = function(popup, callback) {
 			if (self.loginValidation.isValid()) {
 				var json = ko.toJSON(self.loginValidation);
-				// console.log(json);
+				console.log(json);
 
 				$.ajax({
 					type    : "get",
-					url     : "/api/login",
+					url     : "/api/login", //?email=" + "finikm@gmail.com&password=123456",
 					data    : { email: self.emailUser(), password: self.emailPass() },
 					success : function (data, text) {
-
+						// TODO: Redirect to the appropriate page
 					},
 					error   : function (request, status, error) {
 						console.log(request);
 						console.log(error);
+						// TODO: Show error messages
 					}
 				});
 
@@ -209,14 +173,13 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				self.loginValidation.errors.showAllMessages();
 			}
 		}
-		self.googleLogin          = function(popup, callback, record) {
+		self.googleLogin          = function(popup, callback) {
 			gapi.auth.signIn({
 				'clientid'     : '712515719334-u6ofvnotfug9ktv0e9kou7ms2cq9lb85.apps.googleusercontent.com',
 				'cookiepolicy' : 'single_host_origin',
 				'scope'        : 'profile email',
 				'callback'     : function(authResult) {
-					// console.log(authResult);
-					if (authResult['status']['signed_in']) {
+					if (authResult['status']['signed_in'] && authResult['status']['method'] === 'PROMPT') {
 						gapi.client.load('plus','v1', function() {
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
 							request.execute(function(response) {
@@ -232,9 +195,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									if (popup) { self.closeLoginPopup(); }
 
 									if (typeof callback !== 'undefined') {
-										data = ko.toJS(new Record(record));
-										callback(data);
-										// callback(record);
+										callback(params.item);
 									}
 								}
 							});
