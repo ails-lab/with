@@ -43,7 +43,7 @@ import com.typesafe.config.ConfigFactory;
 public class DB {
 	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
 	private static MediaDAO mediaDAO;
-	
+
 	private static MongoClient mongo;
 	private static Datastore ds;
 	private static Morphia morphia;
@@ -91,11 +91,11 @@ public class DB {
 		if( morphia == null ) {
 			 morphia = new Morphia();
 			//this method is not working, have to find why!!
-			morphia.mapPackage("model");
+			//morphia.mapPackage("model");
 		}
 		return morphia;
 	}
-	
+
 	public static Datastore getDs() {
 		if(ds == null) {
 			try {
@@ -112,7 +112,7 @@ public class DB {
 	public static String getJson( Object o ) {
 		return getMorphia().getMapper().toDBObject(o).toString();
 	}
-	
+
 	public static UserDAO getUserDAO() {
 		return (UserDAO) getDAO(User.class);
 	}
@@ -122,7 +122,7 @@ public class DB {
 	}
 
 	public static MediaDAO getMediaDAO() {
-		if( mediaDAO == null ) 
+		if( mediaDAO == null )
 			mediaDAO = new MediaDAO();
 		return mediaDAO;
 	}
