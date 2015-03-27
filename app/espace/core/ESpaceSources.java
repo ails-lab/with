@@ -19,6 +19,7 @@ package espace.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import play.Logger;
 import espace.core.sources.DNZSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
@@ -38,7 +39,7 @@ public class ESpaceSources {
 		esources.add(new DNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
-		System.out.println("inittttttttttttttttttt");
+		Logger.info("Initialization of sources list");
 	}
 
 	public static List<ISpaceSource> getESources() {
