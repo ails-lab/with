@@ -65,7 +65,6 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				q = Utils.parseJson(json);
-				ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
 				Iterable<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 				final long initTime = System.currentTimeMillis();
 				for (final ISpaceSource src : ESpaceSources.getESources()) {
