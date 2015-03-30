@@ -14,26 +14,8 @@
  */
 
 
-package db;
+package test.daoTests;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
-
-import model.RecordLink;
-import play.Logger;
-
-public class RecordLinkDAO extends DAO<RecordLink> {
-	static private final Logger.ALogger log = Logger.of(RecordLink.class);
-
-	public RecordLinkDAO() {
-		super( RecordLink.class );
-	}
-
-	public RecordLink getByDbId(ObjectId id) {
-		Query<RecordLink> q =
-				this.createQuery()
-				.field("_id").equal(id);
-		return this.findOne(q);
-	}
+public class CollectionMetadataDAOTests {
 
 }

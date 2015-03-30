@@ -20,26 +20,43 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
-import db.DB;
+import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import db.DB;
 @Entity
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
 public class Collection {
 	private static final int EMBEDDED_CAP = 20;
 
 
 	@Id
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
+	@NotNull
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId owner;
 
+	@NotNull
+	@NotBlank
 	private String title;
 	private String description;
 
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
 	@Embedded
@@ -47,18 +64,19 @@ public class Collection {
 	private boolean isPublic;
 	private Date created;
 	private Date lastModified;
+	private String category;
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
 	private List<RecordLink> firstEntries = new ArrayList<RecordLink>();
 
-	
-	
+
 	public ObjectId getDbId() {
 		return this.dbId;
 	}
 
+	@JsonProperty
 	public void setDbId(ObjectId id) {
 		this.dbId = id;
 	}
@@ -71,9 +89,9 @@ public class Collection {
 	 * Get the embeddable Metadata part
 	 * @return
 	 */
-	public CollectionMetadata getMetadata() {
+	public CollectionMetadata collectMetadata() {
 		CollectionMetadata cm = new CollectionMetadata();
-		cm.setCollection(this);
+		cm.setCollection(this.dbId);
 		cm.setDescription(description);
 		cm.setThumbnail(thumbnail);
 		cm.setTitle(title);
@@ -100,13 +118,28 @@ public class Collection {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
-	public User getOwner() {
-		User user =
-				DB.getUserDAO().getById(this.owner.toString());
-		return user;
+	public User retrieveOwner() {
+		return	DB.getUserDAO().getById(this.owner);
 	}
+
+	public ObjectId getOwner() {
+		return this.owner;
+	}
+
+	@JsonProperty
+	public void setOwner(ObjectId ownerId) {
+		this.owner = ownerId;
+	}
+
 	public void setOwner(User owner) {
+		//set owner to collection
 		this.owner = owner.getDbId();
+
+		//create a new collection metadata for owner
+		owner.getCollectionMetadata().add(collectMetadata());
+
+		//save the new owner
+		DB.getUserDAO().makePermanent(owner);
 	}
 
 	public List<RecordLink> getFirstEntries() {
@@ -117,10 +150,24 @@ public class Collection {
 		this.firstEntries = firstEntries;
 	}
 
-	public Media getThumbnail() {
+	public String getThumbnailUrl() {
+		return 	firstEntries.get(0).getThumbnailUrl();
+
+	}
+
+	public Media retrieveThumbnail() {
 		Media media =
 				DB.getMediaDAO().findById(this.thumbnail);
 		return media;
+	}
+
+	public ObjectId getThumbnail() {
+		return this.thumbnail;
+	}
+
+	@JsonProperty
+	public void setThumbnail(ObjectId thumbId) {
+		this.thumbnail = thumbId;
 	}
 
 	public void setThumbnail(Media thumbnail) {
@@ -150,6 +197,14 @@ public class Collection {
 
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
 	}
 
 }

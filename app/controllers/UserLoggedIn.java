@@ -14,26 +14,22 @@
  */
 
 
-package db;
+package controllers;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
+import play.libs.F.Promise;
+import play.mvc.Action;
+import play.mvc.Http.Context;
+import play.mvc.Result;
 
-import model.RecordLink;
-import play.Logger;
+public class UserLoggedIn extends Action.Simple {
 
-public class RecordLinkDAO extends DAO<RecordLink> {
-	static private final Logger.ALogger log = Logger.of(RecordLink.class);
-
-	public RecordLinkDAO() {
-		super( RecordLink.class );
-	}
-
-	public RecordLink getByDbId(ObjectId id) {
-		Query<RecordLink> q =
-				this.createQuery()
-				.field("_id").equal(id);
-		return this.findOne(q);
+	@Override
+	public Promise<Result> call(Context ctx) throws Throwable {
+		if(ctx.session().containsKey("user")) {
+			return delegate.call(ctx);
+		}
+		
+		return Promise.pure((Result)badRequest());
 	}
 
 }
