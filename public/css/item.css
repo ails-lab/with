@@ -3,10 +3,9 @@
 	top:10%;
 	left: 50%;
 	width: 50%;
-	height:80%;
 	max-width: 730px;
 	min-width: 320px;
-	min-height:600px;
+	max-height:80%;
 	overflow-y: scroll;
 	z-index: 1035;
 	visibility: hidden;
@@ -135,7 +134,7 @@
 	opacity:1;
 }
 
-.withcollect .content{
+.withcollect .collectit{
 	font-size: 12px;
 	font-weight: 200;
     

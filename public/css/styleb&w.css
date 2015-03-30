@@ -1,4 +1,5 @@
 
+
 .withlogo{
 /*padding-bottom:1.3em;*/
   margin-top:-2em;
@@ -13,14 +14,18 @@
 	color:#fff;
 }
 
+
+
 .withmain h2 {
   font-size: 1em;
-  font-weight: 500;
+  font-weight: 600;
   font-size:15px;
   font-family: 'Raleway', Arial, sans-serif;
-  color:grey;
+  color:black;
   text-transform:uppercase;
   margin-bottom:20px;
+  text-align: left;
+  padding-top:10px
 }
 
 .logo{
@@ -75,6 +80,12 @@ h1 span{
 height: 100%;
 margin-left: 0;
 margin-right: 0;
+}
+
+
+.maincontent{
+	padding-bottom:100px;
+	
 }
 
   .mycarousel{
@@ -768,19 +779,26 @@ figure.effect-with:hover p {
   	padding: 15px;
   	padding-bottom: 10px;
 	/*width:500px;*/
-	background-color:white;
+	background-color:whitesmoke;
 	float:left;
 	display: inline-block;
 	position:relative;
 	
-	border: 1px solid #efefef;
-  	box-shadow: 0 10px 7px -5px rgba(0, 0, 0, 0.1);
+	border: 1px solid rgb(215,215,215);
+	min-width: 350px;
+	min-height:100px;
+	text-align:left;
+  	/*box-shadow: 0 10px 7px -5px rgba(0, 0, 0, 0.1);*/
   
 }
+
+
+
 
 .exhibit{max-width: 340px;
   height: 260px;
   overflow: hidden;
+  border:2px solid rgb(82, 82, 82);
   display: inline-block;}
 
 .exhibit img{max-height:100%}
@@ -798,6 +816,18 @@ figure.effect-with:hover p {
   top: 80px;
   max-width: 500px;
   z-index: 2;
+}
+
+.outlay h3{
+
+  font-size: 1.2em;
+  color: black;
+  font-weight: 600;
+  border: 0;
+  margin: 5px 0 10px 0;
+  text-align: left;
+  
+
 }
 
 .outlay p{

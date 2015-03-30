@@ -16,6 +16,7 @@
 			<link rel="stylesheet" type="text/css" href="css/item.css">
 			<link rel="stylesheet" type="text/css" href="css/collection.css">
 			<link rel="stylesheet" type="text/css" href="css/styleb&w.css">
+			<link rel="stylesheet" type="text/css" href="css/profile.css">
 			<link rel="stylesheet" type="text/css" href="css/selectize.bootstrap3.css">
 		<!-- endbuild -->
 		<link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
@@ -34,19 +35,16 @@
 	</head>
 	<body>
 	   <top-bar params="route: route"></top-bar>
-		<nav-bar params="route: route"></nav-bar>
-
+		
 
 		    <search-page params="route: route"></search-page>
-
-			<div class="row" data-bind="component: { name: route().page, params: route }">
-
-
-
+            <div class="row">
+			<div class="maincontent" data-bind="component: { name: route().page, params: route }">
 				<div id="fb-root"></div>
 			</div>
-
+            </div>
 		<div id="fb-root"></div>
+<nav-bar params="route: route"></nav-bar>
 
 		<script src="js/ie10-viewport-bug-workaround.js"></script>
 	</body>
