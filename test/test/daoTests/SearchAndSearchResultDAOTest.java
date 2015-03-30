@@ -16,9 +16,10 @@
 
 package test.daoTests;
 
+import static org.fest.assertions.Assertions.assertThat;
+
 import java.util.List;
 
-import model.RecordLink;
 import model.Search;
 import model.SearchResult;
 import model.User;
@@ -36,24 +37,32 @@ public class SearchAndSearchResultDAOTest {
 	@Test
 	public void storeSearchesWithSearchResults() {
 
-		for(int i=0;i<10000;i++) {
+		for(int i=0;i<1000000;i++) {
 			Search search = new Search();
 			search.setQuery("SELECT * FROM europeana;");
 			search.setSearchDate(TestUtils.randomDate("2014", "2015"));
 
 			List<Key<User>> userKeys = DB.getUserDAO().find().asKeyList();
-			search.setUser(DB.getUserDAO().getById(new ObjectId(userKeys.get(i%999).getId().toString())).getDbId());
+			assertThat(userKeys.size()).isEqualTo(1000);
+			// change to i%(TestUtils.r.nextInt(999)) for a not normalized distribution of Searches to the Users
+			ObjectId userId = new ObjectId(userKeys.get(i%999).getId().toString());
+			search.setUser(DB.getUserDAO().getById(userId).getDbId());
 
 			Key<Search> searchId = DB.getSearchDAO().makePermanent(search);
+			assertThat(searchId).isNotNull();
+
+			User user = DB.getUserDAO().getById(userId);
+			if(user.getSearchHistory().size() < 20)
+				user.getSearchHistory().add(search);
+			DB.getUserDAO().makePermanent(user);
+
 
 			SearchResult result = new SearchResult();
 			result.setSearch(new ObjectId(searchId.getId().toString()));
 			result.setOffset(i);
 
-			List<Key<RecordLink>> rlinkKeys = DB.getRecordLinkDAO().find().asKeyList();
-			result.setRecordLink(DB.getRecordLinkDAO().getByDbId(new ObjectId(rlinkKeys.get(i%1000).getId().toString())));
-
-			DB.getSearchResultDAO().makePermanent(result);
+			Key<SearchResult> sresultId = DB.getSearchResultDAO().makePermanent(result);
+			assertThat(sresultId).isNotNull();
 		}
 	}
 

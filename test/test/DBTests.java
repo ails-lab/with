@@ -19,23 +19,12 @@ import static org.fest.assertions.Assertions.assertThat;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.contentType;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-
-import model.Media;
-import model.Record;
-import model.RecordLink;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import play.twirl.api.Content;
-import db.DB;
+import test.daoTests.SearchAndSearchResultDAOTest;
+import test.daoTests.CollectionDAOTest;
+import test.daoTests.UserDAOTest;
 
 /**
  *
@@ -47,50 +36,21 @@ import db.DB;
 public class DBTests {
 
 
-
 	@Test
-	public void test_Record_and_Media_storage() throws IOException, URISyntaxException {
+	public void createMockupDB() {
+		UserDAOTest
+			userDAO =     new UserDAOTest();
+		SearchAndSearchResultDAOTest
+			searchesDAO = new SearchAndSearchResultDAOTest();
+		CollectionDAOTest
+			colDAO =      new CollectionDAOTest();
 
-		//Create a Media Object
-		Media image = new Media();
 
-		URL url = new URL("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4");
-		File file = new File("test_java.txt");
-		FileUtils.copyURLToFile(url, file);
-		FileInputStream fileStream = new FileInputStream(
-				file);
-
-		byte[] rawbytes = IOUtils.toByteArray(fileStream);
-
-		image.setData(rawbytes);
-		image.setType("video/mp4");
-		image.setMimeType("mp4");
-		image.setDuration(0.0f);
-		image.setHeight(1024);
-		image.setWidth(1080);
-
-		DB.getMediaDAO().makePermanent(image);
-
-		//Create Record Object
-		Record record = new Record();
-		DB.getRecordDAO().save(record);
-
-		//Create a RecordLink Object
-		//and references to Media and Record
-
-		//Get Media object
-		Media imageRetrieved = DB.getMediaDAO().findById(new ObjectId("54ef0a09e4b0af9ca4dc8fbc"));
-		//Get Record object
-		Record recordRetrieved = DB.getRecordDAO().find().get();
-
-		RecordLink rlink = new RecordLink();
-		rlink.setThumbnail(imageRetrieved);
-		rlink.setRecordReference(recordRetrieved);
-
-		DB.getRecordLinkDAO().save(rlink);
-
+		// create a whole dummy database
+		userDAO.massStorage();
+		searchesDAO.storeSearchesWithSearchResults();
+		colDAO.storeCollection();
 	}
-
 
 	@Test
 	public void renderTemplate() {

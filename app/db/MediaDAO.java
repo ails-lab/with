@@ -32,11 +32,6 @@ import com.mongodb.gridfs.GridFSInputFile;
 public class MediaDAO  {
 	public static final ALogger log = Logger.of(MediaDAO.class);
 
-<<<<<<< HEAD
-=======
-	public MediaDAO() {
-	}
->>>>>>> enrich more tests, add more routes
 
 	/**Converts GridFSDBFile to Media object.
 	 * We use this method for convertion because we cannot cast directly to Media.
@@ -96,7 +91,7 @@ public class MediaDAO  {
 			if( media.getDbId() != null ) {
 				mediaGridFsFile.setId(media.getDbId());
 			}
-			
+
 			if(mediaGridFsFile == null)
 				throw new Exception("Got a NULL mediaGridFsFile");
 
@@ -110,7 +105,7 @@ public class MediaDAO  {
 
 			// save the file
 			mediaGridFsFile.save();
-			media.setDbId((ObjectId) mediaGridFsFile.getId()); 
+			media.setDbId((ObjectId) mediaGridFsFile.getId());
 		} catch (Exception e) {
 			log.error("Cannot save Media document to GridFS", e);
 		}

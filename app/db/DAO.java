@@ -34,7 +34,6 @@ import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
-import com.mongodb.WriteResult;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
@@ -68,7 +67,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			cursor.close();
 		}
 	}
-	
+
 	/**
 	 * Return collection stats
 	 */
@@ -179,7 +178,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		int n = this
 				.deleteByQuery(q)
 				.getN();
-		
+
 		return n;
 	}
 }

@@ -16,10 +16,10 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
-import model.Search;
 import model.CollectionMetadata;
 import model.Search;
 import model.User;
@@ -27,11 +27,6 @@ import model.User;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
-
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.CommandResult;
-import com.mongodb.DBCollection;
-import com.mongodb.WriteResult;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -75,7 +70,7 @@ public class UserDAO extends DAO<User> {
 	 * @param pass
 	 * @return
 	 */
-	public User getByEmailPassword(String email, String pass) {		
+	public User getByEmailPassword(String email, String pass) {
 		Query<User> q = this.createQuery();
 		String md5Pass = User.computeMD5(email, pass);
 		q.and(
@@ -97,7 +92,7 @@ public class UserDAO extends DAO<User> {
 
 		return this.findOne(q).getUserCollections();
 	}
-	
+
 	public List<String> getAllDisplayNames() {
 		ArrayList<String> res = new ArrayList<String>();
 		withCollection( res, "", "displayName");
@@ -106,18 +101,18 @@ public class UserDAO extends DAO<User> {
 
 	public int removeById(ObjectId id) {
 		User user = getById(id);
-		
+
 		//delete user realted searches
 		List<Search> userSearches = user.getSearchHistory();
-		for(Search s: userSearches) 
+		for(Search s: userSearches)
 			DB.getSearchDAO().makeTransient(s);
-		
+
 		//delete user related collections
 		List<CollectionMetadata> collectionMD = user.getCollectionMetadata();
 		for(CollectionMetadata cmd: collectionMD)
 			DB.getCollectionDAO().removeById(cmd.getCollectionId());
-		
-		
+
+
 		return this.makeTransient(user);
 	}
 }
