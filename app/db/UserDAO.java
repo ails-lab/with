@@ -34,15 +34,14 @@ import play.Logger;
 import play.Logger.ALogger;
 
 public class UserDAO extends DAO<User> {
-	public static final ALogger log = Logger.of( UserDAO.class);
+	public static final ALogger log = Logger.of(UserDAO.class);
 
 	public UserDAO() {
-		super( User.class );
+		super(User.class);
 	}
 
 	public User getById(String id) {
-		Query<User> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
+		Query<User> q = this.createQuery().field("_id").equal(new ObjectId(id));
 		return this.findOne(q);
 
 	}
@@ -51,15 +50,16 @@ public class UserDAO extends DAO<User> {
 		return this.findOne("email", email);
 	}
 
-	public User getByDisplayName(String displayName) {
-		return this.findOne("displayName", displayName);
+	public User getByUsername(String username) {
+		return this.findOne("username", username);
 	}
 
 	/**
-	 * This method is updating one specific User.
-	 * By default update method is invoked to all documents of a collection.
+	 * This method is updating one specific User. By default update method is
+	 * invoked to all documents of a collection.
 	 **/
-	private void setSpecificUserField(String dbId, String fieldName, String value) {
+	private void setSpecificUserField(String dbId, String fieldName,
+			String value) {
 		Query<User> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<User> updateOps = this.createUpdateOperations();
 		updateOps.set(fieldName, value);
@@ -68,42 +68,40 @@ public class UserDAO extends DAO<User> {
 
 	/**
 	 * Retrieve a user from his credentials
+	 * 
 	 * @param email
 	 * @param pass
 	 * @return
 	 */
-	public User getByEmailPassword(String email, String pass) {		
+	public User getByEmailPassword(String email, String pass) {
 		Query<User> q = this.createQuery();
 		String md5Pass = User.computeMD5(email, pass);
-		q.and(
-			q.criteria("email").equal(email),
-			q.criteria("md5Password").equal(md5Pass)
-		);
+		q.and(q.criteria("email").equal(email), q.criteria("md5Password")
+				.equal(md5Pass));
 		return find(q).get();
 	}
 
 	/**
 	 * Return user collections
+	 * 
 	 * @param email
 	 * @return
 	 */
 	public List<Collection> getUserCollectionsByEmail(String email) {
-		Query<User> q = this.createQuery()
-				.field("email").equal(email)
+		Query<User> q = this.createQuery().field("email").equal(email)
 				.retrievedFields(true, "userCollections.collection");
-		
+
 		return this.findOne(q).getUserCollections();
 	}
-	
-	public List<String> getAllDisplayNames() {
+
+	public List<String> getAllUsernames() {
 		ArrayList<String> res = new ArrayList<String>();
-		withCollection( res, "", "displayName");
+		withCollection(res, "", "username");
 		return res;
 	}
-	
+
 	public int deleteById(String id) {
-		Query<User> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
+		Query<User> q = this.createQuery().field("_id").equal(new ObjectId(id));
 		return this.deleteByQuery(q).getN();
 	}
 }

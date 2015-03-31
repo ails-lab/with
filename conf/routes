@@ -19,7 +19,7 @@ POST     /collection/add         controllers.CollectionController.saveCollection
 
 # User Manager Controller
 GET 	/user/byEmail				controllers.UserManager.findByEmail(email:java.lang.String)
-GET		/user/byDisplayName			controllers.UserManager.findByDisplayName(displayName:java.lang.String)
+GET		/user/byUsername			controllers.UserManager.findByUsername(username:java.lang.String)
 POST	/user/register				controllers.UserManager.register()
 GET		/user/byFacebookId/			controllers.UserManager.findByFacebookId()
 GET		/api/login					controllers.UserManager.login(email:java.lang.String?="", password:java.lang.String, displayName:java.lang.String?="" )

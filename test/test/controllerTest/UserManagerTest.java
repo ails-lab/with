@@ -29,29 +29,19 @@ import static play.test.Helpers.session;
 import static play.test.Helpers.status;
 
 import java.io.IOException;
-import java.util.List;
 
 import model.User;
 
 import org.junit.Test;
 
-import play.libs.F.Promise;
 import play.libs.Json;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 import play.mvc.Http.Status;
 import play.mvc.Result;
 import play.test.FakeRequest;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -60,7 +50,7 @@ public class UserManagerTest {
 
 	public static long HOUR = 3600000;
 
-	// @Test
+	@Test
 	public void testLogout() {
 		running(fakeApplication(), new Runnable() {
 			public void run() {
@@ -73,13 +63,13 @@ public class UserManagerTest {
 		});
 	}
 
-	// @Test
+	@Test
 	public void testLogin() {
 
 		// make a user with password
 		User u = new User();
 		u.setEmail("my@you.me");
-		u.setDisplayName("cool_url");
+		u.setUsername("cool_url");
 		// set password after email, email salts the password!
 		u.setPassword("secret");
 		DB.getUserDAO().makePermanent(u);
@@ -106,7 +96,7 @@ public class UserManagerTest {
 					assertThat(session(result).get("user")).isNotEmpty();
 
 					j = Json.parse(contentAsString(result));
-					assertThat(j.get("displayName").asText()).isEqualTo(
+					assertThat(j.get("username").asText()).isEqualTo(
 							"cool_url");
 				}
 			});
@@ -115,13 +105,13 @@ public class UserManagerTest {
 		}
 	}
 
-	// @Test
-	public void testGetByDisplayName() {
+	@Test
+	public void testGetByUsername() {
 
 		// make a user with password
 		User u = new User();
 		u.setEmail("my@you.me");
-		u.setDisplayName("cool_url");
+		u.setUsername("cool_url");
 		// set password after email, email salts the password!
 		u.setPassword("secret");
 		DB.getUserDAO().makePermanent(u);
@@ -137,13 +127,13 @@ public class UserManagerTest {
 
 					result = route(
 							fakeRequest(GET,
-									"/user/byDisplayName?displayName=uncool"),
+									"/user/byUsername?username=uncool"),
 							HOUR);
 					assertThat(status(result)).isEqualTo(Status.BAD_REQUEST);
 
 					result = route(
 							fakeRequest(GET,
-									"/user/byDisplayName?displayName=cool_url"),
+									"/user/byUsername?username=cool_url"),
 							HOUR);
 					assertThat(status(result)).isEqualTo(Status.OK);
 				}
@@ -175,7 +165,7 @@ public class UserManagerTest {
 										.withJsonBody(json));
 						System.out.println(contentAsString(result));
 						assertThat(status(result)).isEqualTo(Status.OK);
-						User u = DB.getUserDAO().getByDisplayName("user");
+						User u = DB.getUserDAO().getByUsername("user");
 						assertThat(u.getEmail().equals("test@test.eu"));
 						DB.getUserDAO().makeTransient(u);
 
@@ -188,7 +178,7 @@ public class UserManagerTest {
 								"/user/register").withJsonBody(json));
 						System.out.println(contentAsString(result));
 						assertThat(status(result)).isEqualTo(Status.OK);
-						u = DB.getUserDAO().getByDisplayName("user");
+						u = DB.getUserDAO().getByUsername("user");
 						DB.getUserDAO().makeTransient(u);
 
 						// Invalid Email Addresses
@@ -217,7 +207,7 @@ public class UserManagerTest {
 						assertThat(contentAsString(result)).contains(
 								"Invalid Email Address");
 
-						// Test for already used email and displayName
+						// Test for already used email and username
 						json.put("email", "test@test.eu");
 						result = callAction(controllers.routes.ref.UserManager
 								.register(), new FakeRequest("POST",
@@ -240,7 +230,7 @@ public class UserManagerTest {
 						assertThat(contentAsString(result).contains("user0"));
 						assertThat(contentAsString(result).contains(
 								"first_last"));
-						u = DB.getUserDAO().getByDisplayName("user");
+						u = DB.getUserDAO().getByUsername("user");
 						DB.getUserDAO().makeTransient(u);
 
 						// Test for empty fields
@@ -269,7 +259,7 @@ public class UserManagerTest {
 				}
 			});
 		} finally {
-			User u = DB.getUserDAO().getByDisplayName("user");
+			User u = DB.getUserDAO().getByUsername("user");
 			if (u != null) {
 				DB.getUserDAO().makeTransient(u);
 			}

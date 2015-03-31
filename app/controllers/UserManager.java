@@ -54,7 +54,7 @@ public class UserManager extends Controller {
 		User u = DB.getUserDAO().getByEmail(email);
 		if (u != null) {
 			ObjectNode res = Json.newObject();
-			res.put("displayName", u.getDisplayName());
+			res.put("username", u.getUsername());
 			res.put("email", u.getEmail());
 			return ok(res);
 		} else {
@@ -62,8 +62,8 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result findByDisplayName(String displayName) {
-		User u = DB.getUserDAO().getByDisplayName(displayName);
+	public static Result findByUsername(String username) {
+		User u = DB.getUserDAO().getByUsername(username);
 		if (u != null) {
 			return ok();
 		} else {
@@ -75,7 +75,7 @@ public class UserManager extends Controller {
 	 * 
 	 * @return
 	 */
-	private static ArrayNode proposeDisplayName(String initial,
+	private static ArrayNode proposeUsername(String initial,
 			String firstName, String lastName) {
 		ArrayNode names = Json.newObject().arrayNode();
 		String proposedName;
@@ -83,14 +83,14 @@ public class UserManager extends Controller {
 		User u;
 		do {
 			proposedName = initial + i++;
-			u = DB.getUserDAO().getByDisplayName(proposedName);
+			u = DB.getUserDAO().getByUsername(proposedName);
 		} while (u != null);
 		names.add(proposedName);
 		if (firstName == null || lastName == null)
 			return names;
 		proposedName = firstName + "_" + lastName;
 		i = 0;
-		while (DB.getUserDAO().getByDisplayName(proposedName) != null) {
+		while (DB.getUserDAO().getByUsername(proposedName) != null) {
 			proposedName = proposedName + i++;
 		}
 		names.add(proposedName);
@@ -139,21 +139,20 @@ public class UserManager extends Controller {
 			lastName = json.get("lastName").asText();
 		}
 		String password = null;
-		// TODO: ask for password validation
 		if (!json.has("password")) {
 			error.add("Password is Empty");
 		} else {
 			password = json.get("password").asText();
 		}
-		String displayName = null;
-		// displayName unique
+		String username = null;
+		// username unique
 		if (!json.has("username")) {
 			error.add("Username is Empty");
 		} else {
-			displayName = json.get("username").asText();
-			if (DB.getUserDAO().getByDisplayName(displayName) != null) {
+			username = json.get("username").asText();
+			if (DB.getUserDAO().getByUsername(username) != null) {
 				error.add("Username Already in Use");
-				ArrayNode names = proposeDisplayName(displayName, firstName,
+				ArrayNode names = proposeUsername(username, firstName,
 						lastName);
 				result.put("proposal", names);
 
@@ -168,7 +167,7 @@ public class UserManager extends Controller {
 		user.setEmail(email);
 		user.setFirstName(firstName);
 		user.setLastName(lastName);
-		user.setDisplayName(displayName);
+		user.setUsername(username);
 		user.setPassword(password);
 		DB.getUserDAO().makePermanent(user);
 		session().put("user", user.getDbId().toHexString());
@@ -214,7 +213,7 @@ public class UserManager extends Controller {
 		}
 	}
 	
-	public static Result login( String email, String password, String displayName ) {
+	public static Result login( String email, String password, String username ) {
 
 		User u = null;
 		ObjectNode result = Json.newObject();
@@ -224,10 +223,10 @@ public class UserManager extends Controller {
 			if (u == null) {
 				result.put("error", "Invalid email");
 			}
-		} else if (StringUtils.isNotEmpty(displayName)) {
-			u = DB.getUserDAO().getByDisplayName(displayName);
+		} else if (StringUtils.isNotEmpty(username)) {
+			u = DB.getUserDAO().getByUsername(username);
 			if (u == null) {
-				result.put("error", "Invalid displayName");
+				result.put("error", "Invalid username");
 			}
 		}
 
@@ -242,7 +241,7 @@ public class UserManager extends Controller {
 				result.put("error", "Invalid Password");
 			}
 		} else {
-			result.put("error", "Need 'displayName' or 'email' parameter");
+			result.put("error", "Need 'username' or 'email' parameter");
 		}
 		return badRequest(result);
 	}

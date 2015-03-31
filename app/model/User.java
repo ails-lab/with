@@ -46,7 +46,7 @@ public class User {
 
 	private String md5Password;
 	private String facebookId;
-	private String displayName;
+	private String username;
 
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
@@ -201,12 +201,12 @@ public class User {
 		return collections;
 	}
 
-	public String getDisplayName() {
-		return displayName;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setDisplayName(String displayName) {
-		this.displayName = displayName;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 
 	
