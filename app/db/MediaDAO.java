@@ -27,7 +27,7 @@ import play.Logger;
 import play.Logger.ALogger;
 
 import com.mongodb.gridfs.GridFSDBFile;
-import com.mongodb.gridfs.GridFSInputFile;
+import com.mongodb.gridfs.GridFSFile;
 
 public class MediaDAO  {
 	public static final ALogger log = Logger.of(MediaDAO.class);
@@ -83,32 +83,48 @@ public class MediaDAO  {
 		return gridFsDbFileToMediaObj(media);
 	}
 
-
-	public void makePermanent(Media media) {
-		GridFSInputFile mediaGridFsFile;
+	public void deleteById(ObjectId dbId) {
 		try {
-			mediaGridFsFile = DB.getGridFs().createFile(media.getData());
+			DB.getGridFs().remove(dbId);
+		} catch (Exception e) {
+			log.error("Cannot delete Media document from GridFS", e);
+			throw e;
+		}
+	}
+
+	public void makePermanent(Media media) throws Exception {
+		GridFSFile mediaGridFsFile;
+
+		try {
 
 			if( media.getDbId() != null ) {
-				mediaGridFsFile.setId(media.getDbId());
+				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
+			} else {
+				mediaGridFsFile = DB.getGridFs().createFile(media.getData());
 			}
 
 			if(mediaGridFsFile == null)
 				throw new Exception("Got a NULL mediaGridFsFile");
 
 			// set metadata
-			mediaGridFsFile.setContentType(media.getMimeType());
-			mediaGridFsFile.put("width", media.getWidth());
-			mediaGridFsFile.put("height", media.getHeight());
-			mediaGridFsFile.put("duration", media.getDuration());
-			mediaGridFsFile.put("mimeType", media.getMimeType());
-			mediaGridFsFile.put("type", media.getType());
+
+			if(media.hasWidth())
+				mediaGridFsFile.put("width", media.getWidth());
+			if(media.hasHeight())
+				mediaGridFsFile.put("height", media.getHeight());
+			if(media.hasDuration())
+				mediaGridFsFile.put("duration", media.getDuration());
+			if(media.hasMimeType())
+				mediaGridFsFile.put("mimeType", media.getMimeType());
+			if(media.hasType())
+				mediaGridFsFile.put("type", media.getType());
 
 			// save the file
 			mediaGridFsFile.save();
 			media.setDbId((ObjectId) mediaGridFsFile.getId());
 		} catch (Exception e) {
 			log.error("Cannot save Media document to GridFS", e);
+			throw e;
 		}
 	}
 
@@ -118,6 +134,7 @@ public class MediaDAO  {
 			DB.getGridFs().remove(media.getDbId());
 		} catch (Exception e) {
 			log.error("Cannot delete Media document from GridFS", e);
+			throw e;
 		}
 	}
 

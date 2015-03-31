@@ -20,6 +20,10 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 
 /**
  * A class to represent media, merge of all the interesting attributes
@@ -28,9 +32,12 @@ import org.mongodb.morphia.annotations.Id;
  *
  */
 @Entity
+@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonInclude(value=JsonInclude.Include.NON_NULL)
 public class Media {
 
 	@Id
+	@JsonIgnore
 	private ObjectId dbId;
 	// examples, but there might be more
 	private int width, height;
@@ -45,6 +52,7 @@ public class Media {
 	private float duration;
 
 	// the actual data .. GridFS
+	@JsonIgnore
 	private byte[] data;
 
 
@@ -64,12 +72,20 @@ public class Media {
 		this.width = width;
 	}
 
+	public boolean hasWidth() {
+		return getWidth() != 0;
+	}
+
 	public int getHeight() {
 		return height;
 	}
 
 	public void setHeight(int height) {
 		this.height = height;
+	}
+
+	public boolean hasHeight() {
+		return getHeight() != 0;
 	}
 
 	public String getType() {
@@ -80,12 +96,20 @@ public class Media {
 		this.type = type;
 	}
 
+	public boolean hasType() {
+		return getType() != null;
+	}
+
 	public String getMimeType() {
 		return mimeType;
 	}
 
 	public void setMimeType(String mimeType) {
 		this.mimeType = mimeType;
+	}
+
+	public boolean hasMimeType() {
+		return getMimeType() != null;
 	}
 
 	public float getDuration() {
@@ -96,12 +120,20 @@ public class Media {
 		this.duration = duration;
 	}
 
+	public boolean hasDuration() {
+		return getDuration() != 0;
+	}
+
 	public byte[] getData() {
 		return data;
 	}
 
 	public void setData(byte[] data) {
 		this.data = data;
+	}
+
+	public boolean hasData() {
+		return getData() != null;
 	}
 
 }
