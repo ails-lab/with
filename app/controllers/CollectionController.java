@@ -23,8 +23,8 @@ import java.util.Map.Entry;
 
 import model.Collection;
 import model.CollectionEntry;
-import model.Media;
 import model.RecordLink;
+import model.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Key;
@@ -47,51 +47,15 @@ public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of( CollectionController.class);
 
 
-	/**
-	 * get recordLink thumbnail
-	 */
-	public static Result getRecordLinkThumbnail(String rlinkId) {
-		RecordLink r = null;
-		Media thumbnail = null;
-		try {
-			r = DB.getRecordLinkDAO().getByDbId(new ObjectId(rlinkId));
-			thumbnail = r.retrieveThumbnail();
-		} catch(Exception e) {
-			log.error("Cannot retrieve record link or media document from database", e);
-			return internalServerError("Cannot retrieve record link or media document from database");
-		}
-		return ok(thumbnail.getData()).as(thumbnail.getMimeType());
-	}
 
-	/**
-	 * Return the thumbnail (in raw bytes) of a collection
-	 * @param colId
-	 * @return
-	 */
-	public static Result getCollectionThumbnail(String colId) {
-
-		Collection c = null;
-		Media thumbnail = null;
-		try {
-			c = DB.getCollectionDAO().getById(new ObjectId(colId));
-			thumbnail = c.retrieveThumbnail();
-		} catch(Exception e) {
-			log.error("Cannot retrieve collection or media document from database", e);
-			return internalServerError("Cannot retrieve collection or media document from database");
-		}
-		return ok(thumbnail.getData()).as(thumbnail.getMimeType());
-	}
 
 	/**
 	 * Get collection metadata (title, descr, thumbnail)
 	 */
-	@BodyParser.Of(BodyParser.Json.class)
-	public static Result getCollection() {
-		JsonNode json = request().body().asJson();
+	public static Result getCollection(String id) {
 		ObjectNode result  = Json.newObject();
 
-		if(json.has("collection_id")) {
-			ObjectId colId = new ObjectId(json.get("collection_id").asText());
+			ObjectId colId = new ObjectId(id);
 			Collection c = null;
 			try {
 				c = DB.getCollectionDAO().getById(colId);
@@ -100,14 +64,42 @@ public class CollectionController extends Controller {
 				result.put("message", "Cannot retrieve metadata for the specified collection!");
 				return internalServerError(result);
 			}
-			result.put("collection", Json.toJson(c));
-			result.put("message", "Collection retrieved succesfully!");
+
+			return ok(Json.toJson(c));
+
+	}
+
+	/**
+	 * Action to delete a Collection from database.
+	 * Json input, the collection dbId
+	 * @return
+	 */
+	@With(UserLoggedIn.class)
+	public static Result deleteCollection(String id) {
+		ObjectNode result = Json.newObject();
+
+			try {
+				DB.getCollectionDAO().deleteById(new ObjectId(id));
+			} catch(Exception e) {
+				log.error("Collection not deleted!", e);
+				result.put("message", "Could not delete collection from database!");
+				return internalServerError(result);
+			}
+			result.put("message", "Collection deleted succesfully from database");
 			return ok(result);
-		} else {
-			log.error("Collection id was not specified!");
-			result.put("message", "Collection id was not specified!");
-			return badRequest(result);
+	}
+
+	public static Result editCollection(String id) {
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+
+		Collection collection = Json.fromJson(json, Collection.class);
+		if(DB.getCollectionDAO().makePermanent(collection) == null) {
+			result.put("message", "Cannot save collection to database!");
+			return internalServerError(result);
 		}
+
+		return ok(Json.toJson(collection));
 	}
 
 	/**
@@ -119,51 +111,33 @@ public class CollectionController extends Controller {
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result createCollection() {
 		JsonNode json = request().body().asJson();
-		//DBObject jsonObj = DB.getMorphia().toDBObject(json);
 		ObjectNode result = Json.newObject();
 
-		Key<Collection> colKey = null;
-		try {
-			//Collection newCollection = Serializer.jsonToCollectionObject(json);
-			Collection newCollection = Json.fromJson(json, Collection.class);
-			colKey = DB.getCollectionDAO().save(newCollection);
-		} catch (Exception e) {
-			log.error("Cannot save Collection to database", e);
-			result.put("message", "Cannot save Collection to database");
-			return internalServerError(result);
-		}
-		result.put("message", "Collection succesfully stored!");
-		result.put("id", colKey.getId().toString());
-		return ok(result);
+		Key<Collection> colKey;
+		Collection newCollection = Json.fromJson(json, Collection.class);
+			if( (colKey = DB.getCollectionDAO().makePermanent(newCollection)) == null) {
+				result.put("message", "Cannot save Collection to database");
+				return internalServerError(result);
+			}
+		newCollection.setDbId(new ObjectId(colKey.getId().toString()));
+		//result.put("message", "Collection succesfully stored!");
+		//result.put("id", colKey.getId().toString());
+		return ok(Json.toJson(newCollection));
 	}
 
 
 	/**
-	 * Action to delete a Collection from database.
-	 * Json input, the collection dbId
-	 * @return
+	 * list accessible collections
 	 */
-	@With(UserLoggedIn.class)
-	@BodyParser.Of(BodyParser.Json.class)
-	public static Result deleteCollection() {
-		JsonNode json = request().body().asJson();
-		ObjectNode result = Json.newObject();
+	public static Result list(	String displayName, String userId, String email,
+								String access,
+								int offset, int count) {
 
-		if(json.has("dbId")) {
-			String id = json.get("dbId").asText();
-			try {
-				DB.getCollectionDAO().deleteById(new ObjectId(id));
-			} catch(Exception e) {
-				log.error("Collection not deleted!", e);
-				result.put("message", "Could not delete collection from database!");
-				return internalServerError(result);
-			}
-			result.put("message", "Collection deleted succesfully from database");
-			return ok(result);
-		} else {
-			result.put("message", "Did not specify collection dbId field!");
-			return badRequest(result);
-		}
+		User u = DB.getUserDAO().getByEmail(email);
+		List<Collection> userCollections =
+				DB.getCollectionDAO().getByOwner(u.getDbId(), offset, count);
+
+		return ok(Json.toJson(userCollections));
 	}
 
 	/**

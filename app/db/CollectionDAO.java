@@ -51,9 +51,15 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
-	public List<Collection> getByOwner(ObjectId ownerId) {
+	public List<Collection> getByOwner(ObjectId id) {
+		return getByOwner(id, 0, 0);
+	}
+
+	public List<Collection> getByOwner(ObjectId ownerId, int offset, int count) {
 		Query<Collection> q = this.createQuery()
-				.field("owner").equal(ownerId);
+				.field("owner").equal(ownerId)
+				.offset(offset)
+				.limit(count);
 		return this.find(q).asList();
 	}
 
