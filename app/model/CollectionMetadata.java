@@ -28,7 +28,7 @@ public class CollectionMetadata {
 	private String description;
 
 	//ref to collection
-	private ObjectId collection;
+	private ObjectId collectionId;
 	//ref to thumbnail
 	private ObjectId thumbnail;
 
@@ -48,28 +48,24 @@ public class CollectionMetadata {
 		this.description = description;
 	}
 
-	public String getCollectionId() {
-		return this.collection.toString();
+	public ObjectId getCollectionId() {
+		return this.collectionId;
 	}
 	
 	public Collection getCollection() {
 		Collection collection =
-				DB.getCollectionDAO().getById(this.collection);
+				DB.getCollectionDAO().getById(this.collectionId);
 		return collection;
 	}
 
-	public void setCollection(Collection collection) {
-		this.collection = collection.getDbId();
+	public void setCollection(ObjectId collection) {
+		this.collectionId = collection;
 	}
 
 	public Media getThumbnail() {
 		Media thumbnail =
 				DB.getMediaDAO().findById(this.thumbnail);
 		return thumbnail;
-	}
-
-	public void setThumbnail(Media thumbnail) {
-		this.thumbnail = thumbnail.getDbId();
 	}
 
 	public void setThumbnail(ObjectId thumbnail) {

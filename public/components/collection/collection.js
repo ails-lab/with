@@ -1,6 +1,6 @@
-define(['knockout', 'text!./collection.html','selectize'], function(ko, template,selectize) {
-	
-	
+define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, template, selectize, app) {
+
+
 	var inject_binding = function (allBindings, key, value) {
 	    return {
 	        has: function (bindingKey) {
@@ -120,8 +120,8 @@ define(['knockout', 'text!./collection.html','selectize'], function(ko, template
 	            }
 	        }
 	    }
-	}	
-	
+	}
+
 
   function CollectionViewModel(params) {
 	  var self = this;
@@ -130,51 +130,60 @@ define(['knockout', 'text!./collection.html','selectize'], function(ko, template
 	  self.templateName=ko.observable('collection_new');
 	  self.modal=ko.observable("3");
 	  var nocollection=true; /*picked up from browser session storage : should be stored upon login*/
-	  
+
 	  /*load these from db and put on session storage upon login . For now use static array*/
 	  self.collectionitems = ko.observableArray([
 	                           		{'id': 1, 'name': ' Collection One'},
 	                           		{'id': 2, 'name': ' Collection Two'}
 	                           		]);
-	                            
-	 
+
+
 	  self.selected_items2 = ko.observableArray();
-	  
+
+	  collectionShowPopup = function(record) {
+			if (app.currentUser() === undefined) {
+				showLoginPopup(record);
+			}
+			else {
+				collectionShow(record);
+			}
+	  }
+
 	  collectionShow = function(record) {
-	    	console.log(record);
+	    	
 	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();
 	    }
-	  
+
 	  self.open=function(){
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
-	   
+
 	  }
-	  
+
 	  self.close= function(){
 	    	$('#modal-'+self.modal()).removeClass('md-show');
 	    	$('#modal-'+self.modal()).css('display', 'none');
-	
+
 	    }
-	  
+
 	  self.privateToggle=function(e,arg){
-		  $(arg.currentTarget).parent().find('.btn').toggleClass('active');  
-		    
+		  $(arg.currentTarget).parent().find('.btn').toggleClass('active');
+
 		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
 		    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
 		    }
-		   
-		    
+
+
 		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 	  }
-	
-	
-    
+
+
+
   }
 
- 
-  
+
+
   return { viewModel: CollectionViewModel, template: template };
 });

@@ -65,7 +65,6 @@ public class User {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-	
 	/**
 	 * The search should already be stored in the database separately
 	 * @param search
@@ -91,7 +90,7 @@ public class User {
 			log.error( "Collection is not saved!");
 			return;
 		}
-		collections.add( col.getMetadata() );
+		collections.add( col.collectMetadata() );
 		if( collections.size() > EMBEDDED_CAP) {
 			collections.remove(0);
 		}

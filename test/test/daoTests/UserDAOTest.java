@@ -18,23 +18,16 @@ package test.daoTests;
 
 import static org.fest.assertions.Assertions.assertThat;
 
-import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.List;
 
-import model.Search;
 import model.User;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
-import org.mongodb.morphia.query.Query;
 
 import test.TestUtils;
-
-import com.mongodb.MongoException;
-
 import db.DB;
- 
+
 public class UserDAOTest {
 
 	//@Test
@@ -44,14 +37,14 @@ public class UserDAOTest {
 		testUser.setEmail( "test@ntua.gr");
 		testUser.setPassword("secret");
 		DB.getUserDAO().makePermanent(testUser);
-		
+
 		ObjectId id = testUser.getDbId();
 
 		// find by Email
 		User a = DB.getUserDAO().findOne( "email", "test@ntua.gr");
 		assertThat(a).isNotNull()
 			.overridingErrorMessage("Test user not found after store.");
-		
+
 		// find with email and password
 		User b = DB.getUserDAO().getByEmailPassword("test@ntua.gr", "wrong");
 		assertThat( b )
@@ -61,28 +54,28 @@ public class UserDAOTest {
 		assertThat(b)
 			.overridingErrorMessage("User with password not retreived.")
 			.isNotNull();
-		
+
 		// update a user
 		b.setFirstName("Bert");
 		b.setLastName("Testuser");
 		DB.getUserDAO().makePermanent(b);
-		
+
 		// check its correct in db
 		User c = DB.getUserDAO().get(id);
 		assertThat( c.getLastName())
 			.isEqualTo("Testuser" );
-		
+
 		// remove from db
 		DB.getUserDAO().makeTransient(c);
-		
+
 		// check its gone
 		User d = DB.getUserDAO().get( id );
 		assertThat( d )
 			.overridingErrorMessage("User not deleted!")
 			.isNull();
-		
+
 	}
-	
+
 	@Test
 	public void massStorage() {
 		/* Add 1000 random users */
@@ -104,7 +97,7 @@ public class UserDAOTest {
 			}
 
 			// search history
-			if( i==42 ) {
+			/*if( i==42 ) {
 				List<Search> searchHistory = new ArrayList<Search>();
 				for (int j = 0; j < 1000; j++) {
 					Search s1 = new Search();
@@ -114,7 +107,7 @@ public class UserDAOTest {
 					searchHistory.add(s1);
 				}
 				// testUser.setSearchHistory(searchHistory);
-			}
+			}*/
 			testUser.setLastName("Testuser");
 			DB.getUserDAO().makePermanent(testUser);
 		}
@@ -127,12 +120,14 @@ public class UserDAOTest {
 		User x = DB.getUserDAO().getByEmail("heres42@mongo.gr");
 		assertThat(x)
 			.isNotNull();
-		
+
 		// mass delete
+		/*
 		int res = DB.getUserDAO().removeAll("lastName='Testuser'");
 		assertThat( res )
 			.overridingErrorMessage("Not enough Testusers deleted.")
 			.isGreaterThanOrEqualTo(1000);
+		*/
 	}
 
 }

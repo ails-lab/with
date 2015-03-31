@@ -57,12 +57,12 @@ public class Search {
 
 	public User getUser() {
 		User user =
-				DB.getUserDAO().getById(this.user.toString());
+				DB.getUserDAO().getById(this.user);
 		return user;
 	}
 
-	public void setUser(User user) {
-		this.user = user.getDbId();
+	public void setUser(ObjectId user) {
+		this.user = user;
 	}
 	public String getQuery() {
 		return query;

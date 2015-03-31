@@ -15,9 +15,6 @@ define(['knockout', 'text!./side-bar.html', 'app'], function(ko, template, app) 
 			$('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
 			$('#btnShow').toggle();
 		});
-
-		var self = this;
-		self.isLogged    = ko.computed(function() { return app.currentUser() !== undefined });
 	}
 
 	return { viewModel: SideBarViewModel, template: template };

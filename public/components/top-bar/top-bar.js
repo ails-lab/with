@@ -2,15 +2,35 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 
   function TopBarViewModel(params) {
 
-		// This viewmodel doesn't do anything except pass through the 'route' parameter to the view.
-		// You could remove this viewmodel entirely, and define 'side-bar' as a template-only component.
-		// But in most apps, you'll want some viewmodel logic to determine what navigation options appear.
+
+		$( document ).on( 'keypress', function( event ) {
+			
+			if(event.target.nodeName != 'INPUT') {
+				
+			 if (event.which == null) {
+		    	 var char=String.fromCharCode(event.which);
+		    	 toggleSearch("focus",char);
+		    	 
+		     } else if (event.which!=0 && event.charCode!=0) {
+		    	 var char=String.fromCharCode(event.which);
+		    	 toggleSearch("focus",char);
+		       } else {
+		    		    return;
+		     }
+			}else{return;}
+		    
+		    
+		});
 
 		this.route = params.route;
-	
 
 		var self = this;
-		self.isLogged    = ko.computed(function() { return app.currentUser() !== undefined });
+		self.logout = function() {
+			$.get('api/logout', function() {
+				app.currentUser();
+			});
+		}
+
 	}
 
 	return { viewModel: TopBarViewModel, template: template };

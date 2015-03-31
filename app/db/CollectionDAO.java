@@ -20,7 +20,6 @@ import java.util.List;
 
 import model.Collection;
 import model.CollectionMetadata;
-import model.RecordLink;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -36,7 +35,7 @@ public class CollectionDAO extends DAO<Collection> {
 		super( Collection.class );
 	}
 
-	public List<Collection> getCollectionsByIds(List<String> ids) {
+	public List<Collection> getCollectionsByIds(List<ObjectId> ids) {
 		Query<Collection> colQuery = this.createQuery()
 				.field("_id").hasAnyOf(ids);
 		return find(colQuery).asList();
@@ -52,29 +51,30 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
-	public List<RecordLink> getCollectionRecordLinks(String id) {
-		Query<Collection> colQuery = this.createQuery()
-				.field("_id").equal(id)
-				.retrievedFields(true, "firstEntries");
-		return find(colQuery).get().getFirstEntries();
+	public List<Collection> getByOwner(ObjectId ownerId) {
+		Query<Collection> q = this.createQuery()
+				.field("owner").equal(ownerId);
+		return this.find(q).asList();
 	}
-	
-	public User getCollectionOwner(String id) {
+
+
+	public User getCollectionOwner(ObjectId id) {
 		Query<Collection> q =  this.createQuery()
-				.field("_id").equal(new ObjectId(id))
+				.field("_id").equal(id)
 				.retrievedFields(true, "owner");
-		return findOne(q).getOwner();
+		return findOne(q).retrieveOwner();
 	}
-	
-	public int deleteById(String id) {
+
+
+	public int removeById(ObjectId id) {
 		User owner = getCollectionOwner(id);
 		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
 			if(colMeta.getCollectionId().equals(id))
 				owner.getCollectionMetadata().remove(colMeta);
 		}
-		
+
 		Query<Collection> q = this.createQuery()
-				.field("_id").equal(new ObjectId(id));
+				.field("_id").equal(id);
 		return deleteByQuery(q).getN();
 	}
 }
