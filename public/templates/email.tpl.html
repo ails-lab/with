@@ -28,9 +28,17 @@
 								<label for="useremail">Email</label>
 								<input type="email" class="form-control" id="useremail" data-bind="value: email, valueUpdate: 'afterkeypress'">
 							</div>
-							<div class="form-group" data-bind="validationElement: password">
-								<label for="userpassword">Password</label>
-								<input type="password" class="form-control" id="userpassword" data-bind="value: password, valueUpdate: 'afterkeypress'">
+							<div class="col-sm-6" style="padding-left: 0;" data-bind="visible: usingEmail">
+								<div class="form-group" data-bind="validationElement: password">
+									<label for="userpassword">Password</label>
+									<input type="password" class="form-control" id="userpassword" data-bind="value: password, valueUpdate: 'afterkeypress'">
+								</div>
+							</div>
+							<div class="col-sm-6" style="padding-right: 0;" data-bind="visible: usingEmail">
+								<div class="form-group" data-bind="validationElement: password2">
+									<label for="userpassword2">Password (confirm)</label>
+									<input type="password" class="form-control" id="userpassword2" data-bind="value: password2, valueUpdate: 'afterkeypress'">
+								</div>
 							</div>
 						</div>
 					</div>

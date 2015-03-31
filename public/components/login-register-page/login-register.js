@@ -25,28 +25,35 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		// Registration Parameters
 		self.acceptTerms  = ko.observable(false);
 		self.genders      = ko.observableArray(['Female', 'Male', 'Unspecified']);
-		self.id           = ko.observable('').extend({ required: false });
+		self.facebookid   = ko.observable('');
+		self.googleid     = ko.observable('');
 		self.firstName    = ko.observable('').extend({ required: true });
 		self.lastName     = ko.observable('').extend({ required: true });
 		self.email        = ko.observable('').extend({ required: true, email: true });
 		self.username     = ko.observable('').extend({ required: true, minLength: 4, maxLength: 32 });
-		self.password     = ko.observable('').extend({ required: true, minLength: 6, maxLength: 16 });
+		self.password     = ko.observable('').extend({
+			required  : { onlyIf : function() { return (self.facebookid() == "" && self.googleid() == "") } }
+		});
+		self.password2    = ko.observable('').extend({ equal: self.password });
 		self.gender       = ko.observable();
 
 		self.validationModel = ko.validatedObservable({
-			id        : self.id,
 			firstName : self.firstName,
 			lastName  : self.lastName,
 			email     : self.email,
 			username  : self.username,
-			password  : self.password
+			password  : self.password,
+			password2 : self.password2
 		});
 
 		// Email Login
 		self.emailUser       = ko.observable('').extend({ required: true });
 		self.emailPass       = ko.observable('').extend({ required: true });
 		self.stayLogged      = ko.observable(false);
-		self.loginValidation = ko.validatedObservable({ username: self.emailUser, password: self.emailPass, id: self.id });
+		self.loginValidation = ko.validatedObservable({ username: self.emailUser, password: self.emailPass });
+
+		// Control variables
+		self.usingEmail  = ko.observable(true);
 
 		// Functionality
 		self.fbRegistration       = function() {
@@ -56,12 +63,13 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						self.title('You are almost ready...');
 						self.description('We loaded your account with your Facebook details. Help us with just a few more questions.' +
 							' You can always edit this or any other info in settings after joining.');
-						self.id('FB' + response.id);
+						self.facebookid(response.id);
 						self.email(response.email);
 						self.firstName(response.first_name);
 						self.lastName(response.last_name);
 						self.username(response.first_name.toLowerCase() + '.' + response.last_name.toLowerCase());
 						self.gender(response.gender === 'male' ? 'Male' : (response.gender === 'female' ? 'Female' : 'Unspecified'));
+						self.usingEmail(false);
 						self.templateName('email');
 					});
 				}
@@ -86,12 +94,13 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								self.title('You are almost ready...');
 								self.description('We loaded your account with your Google details. Help us with just a few more questions.' +
 									' You can always edit this or any other info in settings after joining.');
-								self.id('GG' + response['id']);
+								self.googleid(response['id']);
 								self.email(response['emails'][0]['value']);
 								self.firstName(response['name']['givenName']);
 								self.lastName(response['name']['familyName']);
 								self.username(response['name']['givenName'].toLowerCase() + '.' + response['name']['familyName'].toLowerCase());
 								self.gender(response['gender'] === 'male' ? 'Male' : (response['gender'] === 'female' ? 'Female' : 'Unspecified'));
+								self.usingEmail(false);
 								self.templateName('email');
 							});
 						});
@@ -99,11 +108,25 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				}
 			});
 		}
-		self.emailRegistration    = function() { self.templateName('email'); }
+		self.emailRegistration    = function() {
+			self.usingEmail(true);
+			self.templateName('email');
+		}
+
 		self.submitRegistration   = function() {
 			if (self.validationModel.isValid()) {
-				// TODO: Encrypt the password
-				var json = ko.toJSON(self.validationModel);
+				var data = {
+					firstName  : self.firstName,
+					lastName   : self.lastName,
+					email      : self.email,
+					password   : self.password,
+					gender     : self.gender,
+					googleid   : self.googleid,
+					facebookid : self.facebookid
+				};
+
+				var json = ko.toJSON(data);
+				console.log(json);
 				// TODO: Submit the user information to the server
 				$.ajax({
 					type        : "post",
