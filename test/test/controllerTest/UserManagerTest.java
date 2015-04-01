@@ -148,7 +148,7 @@ public class UserManagerTest {
 		try {
 			running(fakeApplication(), new Runnable() {
 				public void run() {
-
+										
 					ObjectMapper mapper = new ObjectMapper();
 					ObjectNode json;
 					try {
@@ -157,13 +157,12 @@ public class UserManagerTest {
 								+ "\"email\": \"test@test.eu\","
 								+ "\"firstName\" : \"first\","
 								+ "\"lastName\" : \"last\","
-								+ "\"password\" : \"pwd\","
+								+ "\"password\" : \"pwd123\","
 								+ "\"username\" : \"user\"" + "}");
 						Result result = callAction(
 								controllers.routes.ref.UserManager.register(),
 								new FakeRequest("POST", "/user/register")
 										.withJsonBody(json));
-						System.out.println(contentAsString(result));
 						assertThat(status(result)).isEqualTo(Status.OK);
 						User u = DB.getUserDAO().getByUsername("user");
 						assertThat(u.getEmail().equals("test@test.eu"));
@@ -232,6 +231,15 @@ public class UserManagerTest {
 								"first_last"));
 						u = DB.getUserDAO().getByUsername("user");
 						DB.getUserDAO().makeTransient(u);
+						
+						json.put("password", "pwd");
+						result = callAction(controllers.routes.ref.UserManager
+								.register(), new FakeRequest("POST",
+								"/user/register").withJsonBody(json));
+						assertThat(status(result))
+								.isEqualTo(Status.BAD_REQUEST);
+						assertThat(contentAsString(result)).contains(
+								"Password must contain more than 6 characters");
 
 						// Test for empty fields
 						json.removeAll();

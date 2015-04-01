@@ -75,8 +75,8 @@ public class UserManager extends Controller {
 	 * 
 	 * @return
 	 */
-	private static ArrayNode proposeUsername(String initial,
-			String firstName, String lastName) {
+	private static ArrayNode proposeUsername(String initial, String firstName,
+			String lastName) {
 		ArrayNode names = Json.newObject().arrayNode();
 		String proposedName;
 		int i = 0;
@@ -106,14 +106,14 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ArrayNode error = Json.newObject().arrayNode();
+		ObjectNode error = (ObjectNode) Json.newObject();
 
 		String email = null;
 		if (json.has("email")) {
 			email = json.get("email").asText();
 			// Check if email is already used by another user
 			if (DB.getUserDAO().getByEmail(email) != null) {
-				error.add("Email Address Already in Use");
+				error.put("email", "Email Address Already in Use");
 			}
 			// Validate email address with regular expression
 			final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
@@ -121,39 +121,41 @@ public class UserManager extends Controller {
 			Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 			Matcher matcher = pattern.matcher(email);
 			if (!matcher.matches()) {
-				error.add("Invalid Email Address");
+				error.put("email", "Invalid Email Address");
 			}
 		} else {
-			error.add("Email Address is Empty");
+			error.put("email", "Email Address is Empty");
 		}
 		String firstName = null;
 		if (!json.has("firstName")) {
-			error.add("First Name is Empty");
+			error.put("firstName", "First Name is Empty");
 		} else {
 			firstName = json.get("firstName").asText();
 		}
 		String lastName = null;
 		if (!json.has("lastName")) {
-			error.add("Last Name is Empty");
+			error.put("lastName", "Last Name is Empty");
 		} else {
 			lastName = json.get("lastName").asText();
 		}
 		String password = null;
 		if (!json.has("password")) {
-			error.add("Password is Empty");
+			error.put("password", "Password is Empty");
 		} else {
 			password = json.get("password").asText();
+			if(password.length() < 6 ) {
+				error.put("password", "Password must contain more than 6 characters");
+			}
 		}
 		String username = null;
 		// username unique
 		if (!json.has("username")) {
-			error.add("Username is Empty");
+			error.put("username", "Username is Empty");
 		} else {
 			username = json.get("username").asText();
 			if (DB.getUserDAO().getByUsername(username) != null) {
-				error.add("Username Already in Use");
-				ArrayNode names = proposeUsername(username, firstName,
-						lastName);
+				error.put("username", "Username Already in Use");
+				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);
 
 			}
@@ -161,14 +163,10 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		if (error.size() != 0) {
 			result.put("error", error);
+			System.out.println(result.toString());
 			return badRequest(result);
 		}
-		User user = new User();
-		user.setEmail(email);
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
-		user.setUsername(username);
-		user.setPassword(password);
+		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
 		session().put("user", user.getDbId().toHexString());
 		return ok();
@@ -185,35 +183,36 @@ public class UserManager extends Controller {
 		return ok();
 	}
 
-
-	public static  Result googleLogin( String accessToken ) {
+	public static Result googleLogin(String accessToken) {
 		// WTF HttpClientBuilder available in eclipse, not in activator??
-		
-		log.info( accessToken );
+
+		log.info(accessToken);
 		User u = null;
 		try {
-			HttpGet hg = new HttpGet( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
+			HttpGet hg = new HttpGet(
+					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
+							+ accessToken);
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpResponse response = client.execute(hg);
 			InputStream is = response.getEntity().getContent();
-			JsonNode res = Json.parse( is );
+			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
-			if( u == null ) {
-				// create a User for google login, send empty Json and ask 
+			if (u == null) {
+				// create a User for google login, send empty Json and ask
 				// UI to fill the void
 				u = new User();
 				u.setEmail(email);
 				DB.getUserDAO().makePermanent(u);
 			}
-			return ok( Json.parse( DB.getJson(u)));
-		} catch( Exception e ) {
-			log.error( "Couldn't validate user!", e );
+			return ok(Json.parse(DB.getJson(u)));
+		} catch (Exception e) {
+			log.error("Couldn't validate user!", e);
 			return badRequest();
 		}
 	}
-	
-	public static Result login( String email, String password, String username ) {
+
+	public static Result login(String email, String password, String username) {
 
 		User u = null;
 		ObjectNode result = Json.newObject();
