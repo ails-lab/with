@@ -163,13 +163,13 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		if (error.size() != 0) {
 			result.put("error", error);
-			System.out.println(result.toString());
 			return badRequest(result);
 		}
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
 		session().put("user", user.getDbId().toHexString());
-		return ok();
+		result = (ObjectNode) Json.parse(DB.getJson(user));
+		return ok(result);
 
 	}
 
