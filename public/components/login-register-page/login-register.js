@@ -118,11 +118,12 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				var data = {
 					firstName  : self.firstName,
 					lastName   : self.lastName,
+					username   : self.username,
 					email      : self.email,
 					password   : self.password,
 					gender     : self.gender,
-					googleid   : self.googleid,
-					facebookid : self.facebookid
+					googleId   : self.googleid,
+					facebookId : self.facebookid
 				};
 
 				var json = ko.toJSON(data);
@@ -142,10 +143,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						self.templateName('postregister');
 					},
 					error       : function(request, status, error) {
-						console.log("Error!");
-						console.log(request);
-						console.log(error);
-						// TODO: Load errors to the form
+						console.log(request.responseText);
+						var err = JSON.parse(request.responseText);
+						if (err.error.email !== undefined) {
+							self.email.setError(err.error.email);
+							self.email.isModified(true);
+						}
+						if (err.error.username !== undefined) {
+							self.username.setError(err.error.username + " (Suggestions: " + err.proposal[0] + ", " + err.proposal[1] +")");
+							self.username.isModified(true);
+						}
+						if (err.error.password !== undefined) {
+							self.password.setError(err.error.password);
+							self.password.isModified(true);
+						}
 						self.validationModel.errors.showAllMessages();
 					}
 				});
