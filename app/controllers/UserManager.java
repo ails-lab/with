@@ -143,8 +143,9 @@ public class UserManager extends Controller {
 			error.put("password", "Password is Empty");
 		} else {
 			password = json.get("password").asText();
-			if(password.length() < 6 ) {
-				error.put("password", "Password must contain more than 6 characters");
+			if (password.length() < 6) {
+				error.put("password",
+						"Password must contain more than 6 characters");
 			}
 		}
 		String username = null;
@@ -199,23 +200,23 @@ public class UserManager extends Controller {
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
-				// create a User for google login, send empty Json and ask
-				// UI to fill the void
-				u = new User();
-				u.setEmail(email);
-				DB.getUserDAO().makePermanent(u);
+				return badRequest(Json
+						.parse("{\"error\":\"User not registered\""));
 			}
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
-			log.error("Couldn't validate user!", e);
-			return badRequest();
+			return badRequest(Json
+					.parse("{\"error\":\"Couldn't validate user\""));
 		}
 	}
 
 	public static Result login(String email, String password, String username) {
 
-		User u = null;
+		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+
+		User u = null;
 
 		if (StringUtils.isNotEmpty(email)) {
 			u = DB.getUserDAO().getByEmail(email);
