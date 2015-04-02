@@ -34,19 +34,25 @@ public class User {
 
 	public static final ALogger log = Logger.of(User.class);
 
-
 	private static final int EMBEDDED_CAP = 20;
+
+	private enum Gender {
+		MALE, FEMALE
+	}
 
 	@Id
 	private ObjectId dbId;
 
 	private String email;
+	private String username;
 	private String firstName;
 	private String lastName;
 
-	private String md5Password;
+	private Gender gender;
 	private String facebookId;
-	private String username;
+	private String googleId;
+
+	private String md5Password;
 
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
@@ -55,9 +61,10 @@ public class User {
 	private List<Search> searchHistory = new ArrayList<Search>();
 	@Embedded
 	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
-	
-	
-	
+	private int recordLimit;
+	private int collectedRecords;
+	private double storageLimit;
+
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -65,74 +72,81 @@ public class User {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
+
 	/**
 	 * The search should already be stored in the database separately
+	 * 
 	 * @param search
 	 */
-	public void addToHistory( Search search ) {
-		if( search.getDbID() == null ) {
-			log.error( "Search is  not saved!" );
+	public void addToHistory(Search search) {
+		if (search.getDbID() == null) {
+			log.error("Search is  not saved!");
 			return;
 		}
 
-		searchHistory.add( search );
-		if( searchHistory.size() > EMBEDDED_CAP ) {
+		searchHistory.add(search);
+		if (searchHistory.size() > EMBEDDED_CAP) {
 			searchHistory.remove(0);
 		}
 	}
 
 	/**
 	 * The Collection should already be stored in the database separately
+	 * 
 	 * @param col
 	 */
-	public void addToCollections( Collection col ) {
-		if( col.getDbId() == null ) {
-			log.error( "Collection is not saved!");
+	public void addToCollections(Collection col) {
+		if (col.getDbId() == null) {
+			log.error("Collection is not saved!");
 			return;
 		}
-		collections.add( col.collectMetadata() );
-		if( collections.size() > EMBEDDED_CAP) {
+		collections.add(col.collectMetadata());
+		if (collections.size() > EMBEDDED_CAP) {
 			collections.remove(0);
 		}
 
 	}
+
 	/**
 	 * md5 the password and set it in the right field
+	 * 
 	 * @param password
 	 */
-	public void setPassword( String password ) {
-		String pass = computeMD5( this.getEmail(), password );
+	public void setPassword(String password) {
+		String pass = computeMD5(this.getEmail(), password);
 		this.setMd5Password(pass);
 	}
 
 	/**
 	 * Is this the right password for the user?
-	 * @param password
-	 * @return
-	 */
-	public boolean checkPassword(String password) {
-		String md5 = computeMD5( this.getEmail(), password );
-		return md5.equals( getMd5Password());
-	}
-
-	/**
-	 * Computes the MD5 with email for this password.
-	 * Use when authenticating a user via password.
 	 * 
 	 * @param password
 	 * @return
 	 */
-	public static String computeMD5( String email, String password ) {
+	public boolean checkPassword(String password) {
+		String md5 = computeMD5(this.getEmail(), password);
+		return md5.equals(getMd5Password());
+	}
+
+	/**
+	 * Computes the MD5 with email for this password. Use when authenticating a
+	 * user via password.
+	 * 
+	 * @param password
+	 * @return
+	 */
+	public static String computeMD5(String email, String password) {
 		String salted = email + " - " + password;
 		try {
 			MessageDigest d = MessageDigest.getInstance("MD5");
-			String res = Hex.encodeHexString( d.digest( salted.getBytes("UTF8")));
+			String res = Hex.encodeHexString(d.digest(salted.getBytes("UTF8")));
 			return res;
-		} catch( Exception e ) {
-			log.error( "MD5 problem.", e );
+		} catch (Exception e) {
+			log.error("MD5 problem.", e);
 		}
 		return "";
 	}
+
 	// getter setter
 
 	public String getEmail() {
@@ -167,7 +181,6 @@ public class User {
 		this.md5Password = md5Password;
 	}
 
-
 	public List<Search> getSearchHistory() {
 		return searchHistory;
 	}
@@ -194,7 +207,7 @@ public class User {
 
 	public List<Collection> getUserCollections() {
 		List<Collection> collections = new ArrayList<>();
-		for(CollectionMetadata colMetaData: getCollectionMetadata()) {
+		for (CollectionMetadata colMetaData : getCollectionMetadata()) {
 			collections.add(colMetaData.getCollection());
 		}
 		return collections;
@@ -208,5 +221,44 @@ public class User {
 		this.username = username;
 	}
 
-	
+	public Gender getGender() {
+		return gender;
+	}
+
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
+
+	public String getGoogleId() {
+		return googleId;
+	}
+
+	public void setGoogleId(String googleId) {
+		this.googleId = googleId;
+	}
+
+	public int getRecordLimit() {
+		return recordLimit;
+	}
+
+	public void setRecordLimit(int recordLimit) {
+		this.recordLimit = recordLimit;
+	}
+
+	public int getCollectedRecords() {
+		return collectedRecords;
+	}
+
+	public void setCollectedRecords(int collectedRecords) {
+		this.collectedRecords = collectedRecords;
+	}
+
+	public double getStorageLimit() {
+		return storageLimit;
+	}
+
+	public void setStorageLimit(double storageLimit) {
+		this.storageLimit = storageLimit;
+	}
+
 }
