@@ -1,5 +1,7 @@
 html, body {
+	padding-top: 20px;
 	height: 100%;
+	
 }
 
 body {
@@ -20,7 +22,7 @@ text-decoration: none;
 	background: #f1f1f1;
 	position: absolute;
 	overflow:auto;
-	z-index: 10000;
+	z-index: 1031; /*more than nav bar*/
 	-webkit-transform-origin: 100% 0;
 	transform-origin: 100% 0;
 	-webkit-transition-property: min-height, width, top, right;
@@ -37,6 +39,7 @@ text-decoration: none;
 	min-height: 100%;
 	top: 0px;
 	right: 0px;
+	position:fixed;
 }
 
 .withsearch-form {
@@ -61,7 +64,7 @@ text-decoration: none;
 }
 
 .withsearch-input {
-	width: 100%;
+	width: 95%;
 	height: 100%;
 	padding: 0 10% 0 10px;
 	font-weight: 500;
@@ -137,6 +140,11 @@ input[type="search"] { /* reset normalize */
 	transform: translate3d(-30px,-50%,0) scale3d(0,0,1);
 }
 
+.withsearch-submit:hover{
+	background: transparent url(../images/magnifierblack.png) no-repeat center center;
+    background-size: 100%;
+	}
+
 .withsearch.open .withsearch-submit {
 	pointer-events: auto;
 	opacity: 1;
@@ -172,7 +180,7 @@ input[type="search"] { /* reset normalize */
 	overflow: hidden;
 	top: 80%;
 	right: 5%;
-	
+	padding:0 10px;
 	
 }
 
@@ -226,6 +234,15 @@ input[type="search"] { /* reset normalize */
 	opacity: 0;
 }
 
+.scrollable{
+	
+	width: 2200px;
+    display:table;
+   overflow-y: auto;   overflow-x: scroll;
+    margin: 0 auto;
+            
+}
+
 .withsearch-content p{
 	padding:3em;
 }
@@ -233,7 +250,7 @@ input[type="search"] { /* reset normalize */
 .withsearch.open .withsearch-content {
 	opacity: 1;
 	height: auto;
-	overflow: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
+	overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
 	pointer-events: auto;
 	-webkit-transition: opacity 0.3s 0.5s;
 	transition: opacity 0.3s 0.5s;
@@ -241,7 +258,7 @@ input[type="search"] { /* reset normalize */
 
 .dummy-column {
 	margin-left:3em;
-	width: 30%;
+	width: 300px;
 	padding: 0 0 6em;
 	float: left;
 	opacity: 0;
@@ -272,8 +289,8 @@ input[type="search"] { /* reset normalize */
 	transform: translate3d(0,0,0);
 }
 
-.dummy-column:nth-child(2) {
-	margin: 0 5%;
+.dummy-column:nth-child(n) {
+	margin: 0 1em;
 }
 
 .dummy-column h2 {
@@ -323,6 +340,7 @@ input[type="search"] { /* reset normalize */
 	margin: 0 0 0 0;
 	width: calc(100% - 70px);
 	color: rgba(0, 0, 0, 0.52);
+	word-wrap:break-word;
 }
 
 .dummy-media-object:hover span {
@@ -364,7 +382,8 @@ input[type="search"] { /* reset normalize */
 
 column-gap: 15px;
 width: 90%;
-max-width: 1100px;
+/*
+max-width: 1500px;*/
 margin: 50px auto;
 }
 
@@ -393,13 +412,36 @@ margin-bottom: 5px;
 	color:rgba(0, 0, 0, 0.16);
 }
 
+.fa-th-large:hover{
+	color:black;
+}
+
+.fa-external-link:hover {
+  color: black;
+}
+
+.fa-external-link {
+  color:rgba(0, 0, 0, 0.16);
+}
+
+
+.withsearch-console{
+font-size: 15px;
+  height: 20px;
+  position: absolute;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+  top: 50;
+  right: 5%;
+  padding: 0 10px;}
 
 #more{
 	 bottom:40px;
 	 right:40px;
 	 padding: 5px;
      position: fixed;
-     z-index:11000;
+     z-index:1032;
 	    }
 
 
@@ -414,7 +456,7 @@ margin-bottom: 5px;
 @media only screen and (max-width : 1199px),
 only screen and (max-device-width : 1199px){
     #withsearch-content-masonry {
-        width: 1000px;
+        width: 1199px;
     }
 }
  
@@ -458,8 +500,8 @@ only screen and (max-device-width : 399px){
 		font-size: 2em;
 	}
 	.dummy-column {
-		float: none;
-		width: auto;
+		float: left;
+		width: 300px;
 		padding: 2em;
 	}
 	.dummy-column:nth-child(2) {

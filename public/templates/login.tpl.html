@@ -8,12 +8,12 @@
 				<div class="container text-left">
 					<div class="row">
 						<div class="col-lg-5 col-lg-offset-1">
-							<button class="facebook huge" type="button">
+							<button class="facebook huge" type="button" data-bind="click: function() { fbLogin(); }">
 								<i class="facebook_huge"></i>
 								<p>Facebook</p>
 							</button>
 
-							<button class="google huge" type="button">
+							<button class="google huge" type="button" data-bind="click: function() { googleLogin(); }">
 								<i class="google_huge"></i>
 								<p>Google</p>
 							</button>
@@ -22,7 +22,7 @@
 							<form>
 								<div class="form-group" data-bind="validationElement: emailUser">
 									<label for="useremail">Email or Username</label>
-									<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser; hasFocus: true;">
+									<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser;" autofocus>
 								</div>
 								<div class="form-group" data-bind="validationElement: emailPass">
 									<label for="userpassword">Password</label>

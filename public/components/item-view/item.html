@@ -1,0 +1,81 @@
+<div class="md-modal md-effect-1" id="modal-1">
+			<div class="md-content">
+			    <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
+				<h3 class="truncate">
+				 <span class="withcollect" data-bind="event: {click: collect}">
+				 
+				 
+ 						 <img src="images/logos/wsmall.png" width="20">
+				
+				<span class="collectit"> collect it</span></span>
+				 
+				
+				<!-- ko text: title --><!-- /ko --> 
+				
+				</h3>
+				<collection params="route: route"></collection>	
+				<hr class="faded">
+				
+			  <div class="container-fluid">
+				   <div class="row">
+					  <div class="col-md-6">
+					    <div class="spec">
+					      <div class="itemlabel">Description
+					      </div>
+					      <div class="value" data-bind="text:description"> 
+					      </div>
+					      </div>
+					      
+					     
+					    
+					     <div class="spec" data-bind="if: creator">
+					      <div class="itemlabel">Creator
+					      </div>
+					      <div class="value" data-bind="text:creator">
+					      
+					      </div>
+					    </div>
+					  
+					   <div class="spec" data-bind="if: provider">
+					      <div class="itemlabel">Provider
+					      </div>
+					      <div class="value" data-bind="text:provider">
+					      
+					      </div>
+					    </div>
+					  
+					   <div class="spec">
+					      <div class="itemlabel">Record source
+					      </div>
+					      <div class="value">
+					      
+					      <div><img  class="logo" data-bind="attr:{src:sourceImage}"/>
+					      </div>
+					      </div>
+					    </div>
+					  
+					   <div class="spec">
+					     
+					      <div class="value">
+					      <a data-bind="attr: { href:view_url}" target="_blank">More details </a>
+					      
+					      </div>
+					    </div>
+					  
+					  
+					  
+					  
+					  </div>
+					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:fullres, alt: title }" class="itemim"/></div>
+					</div>
+				 </div>
+			
+				
+				
+			</div>
+</div>
+		
+		
+		
+<div class="md-overlay" data-bind="event: {click: close}"></div><!-- the overlay element -->
+

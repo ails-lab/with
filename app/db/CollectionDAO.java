@@ -63,12 +63,14 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.find(q).asList();
 	}
 
+
 	public User getCollectionOwner(ObjectId id) {
 		Query<Collection> q =  this.createQuery()
 				.field("_id").equal(id)
 				.retrievedFields(true, "owner");
 		return findOne(q).retrieveOwner();
 	}
+
 
 	public int removeById(ObjectId id) {
 		User owner = getCollectionOwner(id);

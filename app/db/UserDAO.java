@@ -28,19 +28,14 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.CommandResult;
-import com.mongodb.DBCollection;
-import com.mongodb.WriteResult;
-
 import play.Logger;
 import play.Logger.ALogger;
 
 public class UserDAO extends DAO<User> {
-	public static final ALogger log = Logger.of( UserDAO.class);
+	public static final ALogger log = Logger.of(UserDAO.class);
 
 	public UserDAO() {
-		super( User.class );
+		super(User.class);
 	}
 
 	public User getById(ObjectId id) {
@@ -54,15 +49,16 @@ public class UserDAO extends DAO<User> {
 		return this.findOne("email", email);
 	}
 
-	public User getByDisplayName(String displayName) {
-		return this.findOne("displayName", displayName);
+	public User getByUsername(String username) {
+		return this.findOne("username", username);
 	}
 
 	/**
-	 * This method is updating one specific User.
-	 * By default update method is invoked to all documents of a collection.
+	 * This method is updating one specific User. By default update method is
+	 * invoked to all documents of a collection.
 	 **/
-	private void setSpecificUserField(String dbId, String fieldName, String value) {
+	private void setSpecificUserField(String dbId, String fieldName,
+			String value) {
 		Query<User> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<User> updateOps = this.createUpdateOperations();
 		updateOps.set(fieldName, value);
@@ -71,6 +67,7 @@ public class UserDAO extends DAO<User> {
 
 	/**
 	 * Retrieve a user from his credentials
+	 *
 	 * @param email
 	 * @param pass
 	 * @return
@@ -78,15 +75,14 @@ public class UserDAO extends DAO<User> {
 	public User getByEmailPassword(String email, String pass) {
 		Query<User> q = this.createQuery();
 		String md5Pass = User.computeMD5(email, pass);
-		q.and(
-			q.criteria("email").equal(email),
-			q.criteria("md5Password").equal(md5Pass)
-		);
+		q.and(q.criteria("email").equal(email), q.criteria("md5Password")
+				.equal(md5Pass));
 		return find(q).get();
 	}
 
 	/**
 	 * Return user collections
+	 *
 	 * @param email
 	 * @return
 	 */
@@ -100,24 +96,23 @@ public class UserDAO extends DAO<User> {
 
 	public List<String> getAllDisplayNames() {
 		ArrayList<String> res = new ArrayList<String>();
-		withCollection( res, "", "displayName");
+		withCollection(res, "", "username");
 		return res;
 	}
 
 	public int removeById(ObjectId id) {
 		User user = getById(id);
-		
+
 		//delete user realted searches
 		List<Search> userSearches = user.getSearchHistory();
-		for(Search s: userSearches) 
+		for(Search s: userSearches)
 			DB.getSearchDAO().makeTransient(s);
-		
+
 		//delete user related collections
 		List<CollectionMetadata> collectionMD = user.getCollectionMetadata();
 		for(CollectionMetadata cmd: collectionMD)
 			DB.getCollectionDAO().removeById(cmd.getCollectionId());
-		
-		
+
 		return this.makeTransient(user);
 	}
 }

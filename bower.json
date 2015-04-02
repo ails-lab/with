@@ -16,7 +16,9 @@
     "imagesloaded":"~3.1.7",
     "jquery-bridget": "latest",
     "knockout-validation": "~2.0.2",
-    "knockout-amd-helpers": "~0.7.3"
+    "knockout-amd-helpers": "~0.7.3",
+    "selectize": "latest",
+    "flip": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"

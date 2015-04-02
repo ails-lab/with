@@ -13,14 +13,18 @@
 			<link rel="stylesheet" type="text/css" href="bower_modules/slick.js/slick/slick.css"/>
 			<link rel="stylesheet" type="text/css" href="css/normalize.css" />
 			<link rel="stylesheet" type="text/css" href="css/search.css">
-			<link rel="stylesheet" type="text/css" href="css/style.css">
+			<link rel="stylesheet" type="text/css" href="css/item.css">
+			<link rel="stylesheet" type="text/css" href="css/collection.css">
+			<link rel="stylesheet" type="text/css" href="css/styleb&w.css">
+			<link rel="stylesheet" type="text/css" href="css/profile.css">
+			<link rel="stylesheet" type="text/css" href="css/selectize.bootstrap3.css">
 		<!-- endbuild -->
 		<link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Orbitron'>
-		<link rel="stylesheet" type="text/css" href='http://fonts.googleapis.com/css?family=Annie+Use+Your+Telescope'>
+		<link href="http://fonts.googleapis.com/css?family=Raleway:400,800,300" rel="stylesheet" type="text/css">
 		<!-- build:js -->
 			<script src="js/app/require.config.js"></script>
 			<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
+
 		<!-- endbuild -->
 
 		<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -30,20 +34,18 @@
 		<![endif]-->
 	</head>
 	<body>
-		<nav-bar params="route: route"></nav-bar>
+	   <top-bar params="route: route"></top-bar>
+		
 
-		<div class="box">
-		    <search-page params="route: route"></search-page>
-			<div class="row row-offcanvas row-offcanvas-left">
-
-				<side-bar params="route: route"></side-bar>
-
-				<div id="main" class="column col-sm-11 col-xs-11" data-bind="component: { name: route().page, params: route }">
-				</div>
-
+		    
+            <div class="row">
+			<div class="maincontent" data-bind="component: { name: route().page, params: route }">
 				<div id="fb-root"></div>
 			</div>
-		</div>
+            </div>
+		<div id="fb-root"></div>
+<nav-bar params="route: route"></nav-bar>
+
 		<script src="js/ie10-viewport-bug-workaround.js"></script>
 	</body>
 </html>

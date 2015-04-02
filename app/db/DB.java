@@ -120,9 +120,8 @@ public class DB {
 	}
 
 	public static MediaDAO getMediaDAO() {
-
 		if( mediaDAO == null )
-			mediaDAO = new MediaDAO();
+			 mediaDAO = new MediaDAO();
 		return mediaDAO;
 	}
 

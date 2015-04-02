@@ -20,7 +20,11 @@ libraryDependencies ++= Seq(
 //  cache,
   javaWs,
  "org.mongodb.morphia" % "morphia" % "0.110",
+ "org.apache.jena" % "apache-jena-libs" % "2.10.1",
  "commons-io" % "commons-io" % "2.3",
- "com.google.code.gson" % "gson" % "2.2.4"
+ "com.google.code.gson" % "gson" % "2.2.4",
+  "org.apache.httpcomponents" % "httpclient" % "4.4"
+ // validate the token from the login on web browser
+ // "com.google.api-client" % "google-api-client" % "1.19.1"
 )
 

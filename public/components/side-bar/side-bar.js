@@ -1,4 +1,4 @@
-define(['knockout', 'text!./side-bar.html'], function(ko, template) {
+define(['knockout', 'text!./side-bar.html', 'app'], function(ko, template, app) {
 
   function SideBarViewModel(params) {
 
@@ -15,10 +15,6 @@ define(['knockout', 'text!./side-bar.html'], function(ko, template) {
 			$('#xs-menu').toggleClass('visible-xs').toggleClass('hidden-xs');
 			$('#btnShow').toggle();
 		});
-
-		var self = this;
-		self.currentUser = ko.observable();
-		self.showLogin = ko.computed(function() { return self.currentUser() === undefined; });
 	}
 
 	return { viewModel: SideBarViewModel, template: template };

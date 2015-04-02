@@ -30,7 +30,7 @@ import db.DB;
 
 public class UserDAOTest {
 
-	@Test
+	//@Test
 	public void testCRUD() {
 		// create
 		User testUser = new User();
@@ -102,12 +102,13 @@ public class UserDAOTest {
 				for (int j = 0; j < 1000; j++) {
 					Search s1 = new Search();
 					s1.setSearchDate(TestUtils.randomDate());
+					DB.getSearchDAO().makePermanent(s1);
 					testUser.addToHistory(s1);
 					searchHistory.add(s1);
 				}
 				// testUser.setSearchHistory(searchHistory);
 			}*/
-			testUser.setDisplayName("Testuser");
+			testUser.setUsername("Testuser");
 			DB.getUserDAO().makePermanent(testUser);
 		}
 

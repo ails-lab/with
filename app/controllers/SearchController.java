@@ -16,17 +16,19 @@
 
 package controllers;
 
+import java.util.ArrayList;
 import java.util.List;
-
-import play.data.Form;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import play.Logger;
+import play.data.Form;
+import play.libs.Json;
+import play.libs.F.*;
+import play.mvc.*;
 import espace.core.CommonQuery;
 import espace.core.ESpaceSources;
+import espace.core.ISpaceSource;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 
@@ -34,7 +36,7 @@ public class SearchController extends Controller {
 
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 
-	public static Result search() {
+	public static Result searchslow() {
 		System.out.println(request().body());
 		JsonNode json = request().body().asJson();
 		CommonQuery q = null;
@@ -48,7 +50,87 @@ public class SearchController extends Controller {
 				return badRequest(e.getMessage());
 			}
 		}
+
 		return ok(Json.toJson(search(q)));
+	}
+	
+	public static Promise<Result> search() {
+		System.out.println(request().body());
+		JsonNode json = request().body().asJson();
+		final CommonQuery q;
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				q = Utils.parseJson(json);
+				ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
+				Iterable<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
+				final long initTime = System.currentTimeMillis();
+				for (final ISpaceSource src : ESpaceSources.getESources()) {
+					if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
+						((ArrayList<Promise<SourceResponse>>) promises).add(
+							 Promise.promise(new Function0<SourceResponse>() {
+								public SourceResponse apply() {
+									//Logger.info("Async call to " + src.getSourceName());
+									return src.getResults(q);
+								}
+							 })
+						);
+					}
+				}	
+				 // compose all futures
+		        Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);		 
+		        // block until all futures finish
+		        Promise<Result> promiseResult = promisesSequence.map(
+		        		new Function<Iterable<SourceResponse>, Result>() {
+		        			List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
+		        			public Result apply(Iterable<SourceResponse> responses) {
+		        				for (SourceResponse r: responses) {
+		        					Logger.info(r.source + " found " + r.count);
+		        					finalResponses.add(r);
+		        				}	
+		        				Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()-initTime));
+		        				return ok(Json.toJson(finalResponses));
+		        			}
+		        		}
+		        );
+		        return promiseResult;		
+			} catch (Exception e) {
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+	}
+
+	public static Promise<Result> searchWithThreads() {
+		System.out.println(request().body());
+		JsonNode json = request().body().asJson();
+		final CommonQuery q;
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				q = Utils.parseJson(json);
+			} catch (Exception e) {
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+		final long initTime = System.currentTimeMillis();
+		return Promise.promise(new Function0<JsonNode>() {
+			public JsonNode apply() {
+				return Json.toJson(search(q));
+			}
+		}).map(new Function<JsonNode, Result>() {
+			public Result apply(JsonNode i) {
+				Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()-initTime));
+				return ok(i);
+			}
+		});
+
+		// return ok(Json.toJson(search(q)));
 	}
 
 	public static List<SourceResponse> search(CommonQuery q) {
@@ -67,6 +149,7 @@ public class SearchController extends Controller {
 			q = new CommonQuery();
 			q.searchTerm = "zeus";
 		}
+		q.validate();
 		List<SourceResponse> res = search(q);
 		return ok(views.html.testsearch.render(userForm, res));
 	}

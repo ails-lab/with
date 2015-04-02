@@ -1,0 +1,37 @@
+<div class="dialog" id="loginPopup">
+	<button type="button" class="close" data-dismiss="modal" aria-label="Close" data-bind="click: function() { closeLoginPopup(); }"><span aria-hidden="true">&times;</span></button>
+
+	<h2>Sign in to save this to a collection</h2>
+
+	<div>
+		<div class="externalLogin">
+			<button class="facebook" type="button" data-bind="click: function() { fbLogin(true, collectionShow); }">
+				<i class="facebook_small"></i>
+				<span>Facebook</span>
+			</button>
+			<button class="google" type="button" data-bind="click: function() { googleLogin(true, collectionShow, $parents[1]); }">
+				<i class="google_small"></i>
+				<span>Google</span>
+			</button>
+			<button class="email" type="button" data-bind="click: function() { scrollEmail(); }">
+				<i class="email_small"></i>
+				<span>Email</span>
+			</button>
+
+			<div class="footer">Don't have an account? <a href="#">Joining is quick and easy</a>.</div>
+		</div>
+		<div class="emailLogin">
+			<form class="form form-inline">
+				<div class="form-group" data-bind="validationElement: emailUser">
+					<label class="sr-only" for="useremail">Email address</label>
+					<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser; hasFocus: true;">
+				</div>
+				<div class="form-group" data-bind="validationElement: emailPass">
+					<label class="sr-only" for="userpass">Email address</label>
+					<input type="password" class="form-control" id="userpass" placeholder="Password" data-bind="value: emailPass;">
+				</div>
+				<button type="submit" class="btn btn-primary" data-bind="click: function() { emailLogin(true, collectionShow); }">Login</button>
+		</div>
+	</div>
+
+</div>

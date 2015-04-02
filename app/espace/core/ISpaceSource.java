@@ -16,15 +16,11 @@
 
 package espace.core;
 
-import java.util.List;
-
 public interface ISpaceSource {
 
 	public String getSourceName();
 
 	public String getHttpQuery(CommonQuery q);
-
-	public List<CommonItem> getPreview(CommonQuery q);
 
 	public SourceResponse getResults(CommonQuery q);
 

@@ -69,6 +69,7 @@ public class CollectionController extends Controller {
 
 	}
 
+
 	/**
 	 * Action to delete a Collection from database.
 	 * Json input, the collection dbId
@@ -110,6 +111,7 @@ public class CollectionController extends Controller {
 	//@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result createCollection() {
+
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
@@ -129,7 +131,7 @@ public class CollectionController extends Controller {
 	/**
 	 * list accessible collections
 	 */
-	public static Result list(	String displayName, String ownerId, String email,
+	public static Result list(	String username, String ownerId, String email,
 								String access,
 								int offset, int count) {
 
@@ -142,8 +144,8 @@ public class CollectionController extends Controller {
 			User u = null;
 			if(email != null)
 				u = DB.getUserDAO().getByEmail(email);
-			if(displayName != null)
-				u = DB.getUserDAO().getByDisplayName(displayName);
+			if(username != null)
+				u = DB.getUserDAO().getByUsername(username);
 
 			if( u == null)
 				return badRequest("User did not specified!");
@@ -267,6 +269,5 @@ public class CollectionController extends Controller {
 
 			return ok(records);
 	}
-
 }
 

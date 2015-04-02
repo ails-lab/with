@@ -1,0 +1,111 @@
+
+.profileheader{
+-webkit-box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.22);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.22);
+  background: #fff;
+  -webkit-box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.22);
+  box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.22);
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 154px;
+  z-index: 103;
+}
+
+.profile{
+
+    background: white;
+    padding: 10px 0 10px 0;
+}
+
+.profile:hover{
+	
+    background: whitesmoke;
+    cursor:pointer;
+  
+	
+}
+
+div.closesign {
+    display: none;
+}
+
+.profile:hover div.closesign {
+    display: block;
+}
+
+.profile:hover div.content {
+    background:white;
+}
+
+.row-fluid{
+     white-space: nowrap;
+}
+.row-fluid .col-md-1{
+     display: inline-block;
+     height:100px;
+}
+
+
+.content{
+	border: 1px solid rgb(215,215,215);
+	padding:5px 5px 25px 5px;
+	background-color:whitesmoke;
+	min-height:130px;
+}
+
+.content .h3,h3{
+	margin-top:0;
+	font-size:18px;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profilecoll{
+	float:left;
+	display: inline-block;
+	position:relative;
+	text-align:left;
+    width:100%;
+}
+
+.profilecoll > div.container-fluid{
+	padding-left:0;
+}
+
+.profilecoll .content div{
+	margin-bottom:8px;
+	white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+	
+}
+
+
+.profilecoll div.imcontainer{
+    height:100%;
+    position:relative;
+    display:inline-block;
+    overflow:scroll;
+	
+	width:100%;
+}
+
+.profilecoll div.imcontainer div.coll_figure {
+  position: relative;
+  height: 140px;
+  
+  display: inline-block;
+  text-align:center;
+  vertical-align:middle;
+  
+}
+
+
+.profilecoll div.imcontainer div.coll_figure > img {
+  
+  max-height: 100%;
+   padding: 10px;
+    
+}

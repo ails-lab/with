@@ -39,3 +39,4 @@ GET		/user/byFacebookId/						controllers.UserManager.findByFacebookId()
 GET		/api/login								controllers.UserManager.login(email:java.lang.String?="", password:java.lang.String, displayName:java.lang.String?="" )
 GET		/api/logout								controllers.UserManager.logout()
 
+

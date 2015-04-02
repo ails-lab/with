@@ -59,6 +59,7 @@ public class EuropeanaQuery {
 	public void addSearch(String q) {
 		if (q != null)
 			search.add(q);
+		System.out.println("query " + q);
 	}
 
 	public void addSearchParam(String name, String value) {
