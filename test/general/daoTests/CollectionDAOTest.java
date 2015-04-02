@@ -14,9 +14,10 @@
  */
 
 
-package test.daoTests;
+package general.daoTests;
 
 import static org.fest.assertions.Assertions.assertThat;
+import general.TestUtils;
 
 import java.util.List;
 
@@ -31,7 +32,6 @@ import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.Key;
 
-import test.TestUtils;
 import db.DB;
 
 public class CollectionDAOTest {
@@ -64,6 +64,7 @@ public class CollectionDAOTest {
 
 		//save the new created collection
 		Key<Collection> colKey = DB.getCollectionDAO().makePermanent(collection);
+		System.out.println(colKey.getId());
 		assertThat(colKey).isNotNull();
 
 		//get by id
@@ -85,10 +86,18 @@ public class CollectionDAOTest {
 		List<Collection> c = DB.getCollectionDAO().getByOwner(new ObjectId("54fd8ee6e4b0f8b923eb66cb"));
 		assertThat(c).isNotNull()
 		.overridingErrorMessage("Test collections not found using owner id.");
-		assertThat(c.size()).isGreaterThan(0);
+		//assertThat(c.size()).isGreaterThan(0);
+
+		//get, modify, save again
+		Collection e = DB.getCollectionDAO().getById(new ObjectId(colKey.getId().toString()));
+		e.setTitle("DbId test");
+		colKey = DB.getCollectionDAO().makePermanent(e);
+		System.out.println(colKey.getId());
+
+
 
 		// remove from db
-		//DB.getCollectionDAO().makeTransient(b);
+		DB.getCollectionDAO().makeTransient(b);
 		DB.getCollectionDAO().deleteById(new ObjectId(colKey.getId().toString()));
 
 		// check its gone

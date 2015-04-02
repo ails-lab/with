@@ -59,11 +59,13 @@ public class User {
 	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
+
 	@Embedded
 	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
 	private int recordLimit;
 	private int collectedRecords;
 	private double storageLimit;
+
 
 	public ObjectId getDbId() {
 		return dbId;

@@ -14,14 +14,12 @@
  */
 
 
-package test.daoTests;
+package general.daoTests;
 
 import static org.fest.assertions.Assertions.assertThat;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 import model.Media;
@@ -35,7 +33,7 @@ import db.DB;
 public class MediaDAOTest {
 
 	@Test
-	public void testCRUD() {
+	public void testCRUD() throws Exception {
 		//create
 		Media thumb = new Media();
 		byte[] rawbytes = null;
@@ -78,7 +76,7 @@ public class MediaDAOTest {
 	}
 
 
-	public Media testMediaStorage() throws IOException, URISyntaxException {
+	public Media testMediaStorage() throws Exception {
 
 		Media image = null;
 			//Create a Media Object
@@ -91,7 +89,7 @@ public class MediaDAOTest {
 			FileInputStream fileStream = new FileInputStream(
 					file);
 
-				byte[] rawbytes = IOUtils.toByteArray(fileStream);
+			byte[] rawbytes = IOUtils.toByteArray(fileStream);
 
 
 			image.setData(rawbytes);
@@ -104,7 +102,6 @@ public class MediaDAOTest {
 
 		assertThat( image.getDbId()).isNotNull();
 		return image;
-
 
 	}
 

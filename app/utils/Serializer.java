@@ -81,6 +81,7 @@ public class Serializer {
 			log.error("Cannot convert json to collection object!",e);
 			throw new Exception("Cannot convert json to collection object!");
 		}
+
 		return collection;
 	}
 

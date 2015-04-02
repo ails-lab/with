@@ -14,7 +14,7 @@
  */
 
 
-package test.controllerTest;
+package general.controllerTest;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.BAD_REQUEST;

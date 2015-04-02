@@ -14,17 +14,12 @@
  */
 
 
-package test;
-import static org.fest.assertions.Assertions.assertThat;
-import static play.test.Helpers.contentAsString;
-import static play.test.Helpers.contentType;
+package general;
+import general.daoTests.CollectionDAOTest;
+import general.daoTests.SearchAndSearchResultDAOTest;
+import general.daoTests.UserDAOTest;
 
 import org.junit.Test;
-
-import play.twirl.api.Content;
-import test.daoTests.SearchAndSearchResultDAOTest;
-import test.daoTests.CollectionDAOTest;
-import test.daoTests.UserDAOTest;
 
 /**
  *
@@ -50,15 +45,6 @@ public class DBTests {
 		userDAO.massStorage();
 		searchesDAO.storeSearchesWithSearchResults();
 		colDAO.storeCollection();
-	}
-
-	@Test
-	public void renderTemplate() {
-		Content html = views.html.index
-				.render("Your new application is ready.");
-		assertThat(contentType(html)).isEqualTo("text/html");
-		assertThat(contentAsString(html)).contains(
-				"Your new application is ready.");
 	}
 
 }

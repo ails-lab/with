@@ -67,7 +67,7 @@ public class UserDAO extends DAO<User> {
 
 	/**
 	 * Retrieve a user from his credentials
-	 * 
+	 *
 	 * @param email
 	 * @param pass
 	 * @return
@@ -82,7 +82,7 @@ public class UserDAO extends DAO<User> {
 
 	/**
 	 * Return user collections
-	 * 
+	 *
 	 * @param email
 	 * @return
 	 */
@@ -90,10 +90,11 @@ public class UserDAO extends DAO<User> {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
 				.retrievedFields(true, "collections.collection");
+
 		return this.findOne(q).getUserCollections();
 	}
 
-	public List<String> getAllUsernames() {
+	public List<String> getAllDisplayNames() {
 		ArrayList<String> res = new ArrayList<String>();
 		withCollection(res, "", "username");
 		return res;
@@ -111,6 +112,7 @@ public class UserDAO extends DAO<User> {
 		List<CollectionMetadata> collectionMD = user.getCollectionMetadata();
 		for(CollectionMetadata cmd: collectionMD)
 			DB.getCollectionDAO().removeById(cmd.getCollectionId());
+
 		return this.makeTransient(user);
 	}
 }

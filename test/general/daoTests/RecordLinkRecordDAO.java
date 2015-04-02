@@ -14,7 +14,7 @@
  */
 
 
-package test.daoTests;
+package general.daoTests;
 
 import static org.fest.assertions.Assertions.assertThat;
 import model.Media;

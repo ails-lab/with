@@ -14,9 +14,10 @@
  */
 
 
-package test.daoTests;
+package general.daoTests;
 
 import static org.fest.assertions.Assertions.assertThat;
+import general.TestUtils;
 
 import java.util.List;
 
@@ -25,7 +26,6 @@ import model.User;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import test.TestUtils;
 import db.DB;
 
 public class UserDAOTest {
@@ -108,7 +108,7 @@ public class UserDAOTest {
 				}
 				// testUser.setSearchHistory(searchHistory);
 			}*/
-			testUser.setLastName("Testuser");
+			testUser.setUsername("Testuser");
 			DB.getUserDAO().makePermanent(testUser);
 		}
 

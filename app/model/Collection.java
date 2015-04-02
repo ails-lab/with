@@ -151,7 +151,10 @@ public class Collection {
 	}
 
 	public String getThumbnailUrl() {
-		return 	firstEntries.get(0).getThumbnailUrl();
+
+		if(firstEntries.size() > 0)
+			return 	firstEntries.get(0).getThumbnailUrl();
+		return null;
 
 	}
 

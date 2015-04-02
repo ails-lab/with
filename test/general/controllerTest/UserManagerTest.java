@@ -14,7 +14,7 @@
  */
 
 
-package test.controllerTest;
+package general.controllerTest;
 
 // all test should use those
 import static org.fest.assertions.Assertions.assertThat;
@@ -148,7 +148,7 @@ public class UserManagerTest {
 		try {
 			running(fakeApplication(), new Runnable() {
 				public void run() {
-										
+
 					ObjectMapper mapper = new ObjectMapper();
 					ObjectNode json;
 					try {
@@ -231,7 +231,7 @@ public class UserManagerTest {
 								"first_last"));
 						u = DB.getUserDAO().getByUsername("user");
 						DB.getUserDAO().makeTransient(u);
-						
+
 						json.put("password", "pwd");
 						result = callAction(controllers.routes.ref.UserManager
 								.register(), new FakeRequest("POST",
