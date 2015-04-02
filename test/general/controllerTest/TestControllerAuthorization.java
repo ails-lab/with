@@ -14,29 +14,29 @@
  */
 
 
-package test.controllerTest;
+package general.controllerTest;
+
+import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.BAD_REQUEST;
+import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.callAction;
+import static play.test.Helpers.fakeApplication;
+import static play.test.Helpers.running;
+import static play.test.Helpers.status;
 
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import static org.fest.assertions.Assertions.assertThat;
-import static play.mvc.Http.Status.OK;
-import static play.mvc.Http.Status.BAD_REQUEST;
-import static play.test.Helpers.status;
-import static play.test.Helpers.fakeApplication;
-import static play.test.Helpers.running;
-import static play.test.Helpers.callAction;
 import play.libs.Json;
 import play.mvc.Result;
 import play.test.FakeRequest;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 public class TestControllerAuthorization {
-	
+
 	@Test
 	public void testAuthorization() {
-		
+
 		final ObjectNode json = Json.newObject();
 		json.put("description", "TEst controller");
 		json.put("title", "The test title");
@@ -47,15 +47,15 @@ public class TestControllerAuthorization {
 			public void run() {
 				Result result = callAction(
 						controllers.routes.ref
-						.CollectionController.saveCollection()
+						.CollectionController.createCollection()
 						, new FakeRequest("POST", "/collection/add")
 						.withJsonBody(json)
 						.withSession("user", "blabla"));
-				
-			    assertThat(status(result)).isEqualTo(OK);					
+
+			    assertThat(status(result)).isEqualTo(OK);
 			}
 		});
-		
+
 	    }
 	@Test
 	public void testNoAuthorization() {
@@ -64,9 +64,9 @@ public class TestControllerAuthorization {
 			public void run() {
 				Result result = callAction(
 						controllers.routes.ref
-						.CollectionController.saveCollection()
+						.CollectionController.createCollection()
 						, new FakeRequest("POST", "/collection/add"));
-		
+
 				System.out.println();
 				assertThat(status(result)).isEqualTo(BAD_REQUEST);
 			}

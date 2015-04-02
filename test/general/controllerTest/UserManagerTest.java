@@ -14,7 +14,7 @@
  */
 
 
-package test.controllerTest;
+package general.controllerTest;
 
 // all test should use those
 import static org.fest.assertions.Assertions.assertThat;

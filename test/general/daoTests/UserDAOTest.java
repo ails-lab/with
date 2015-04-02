@@ -14,20 +14,18 @@
  */
 
 
-package test.daoTests;
+package general.daoTests;
 
 import static org.fest.assertions.Assertions.assertThat;
+import general.TestUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import model.Search;
 import model.User;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import test.TestUtils;
 import db.DB;
 
 public class UserDAOTest {
@@ -99,7 +97,7 @@ public class UserDAOTest {
 			}
 
 			// search history
-			if( i==42 ) {
+			/*if( i==42 ) {
 				List<Search> searchHistory = new ArrayList<Search>();
 				for (int j = 0; j < 1000; j++) {
 					Search s1 = new Search();
@@ -108,8 +106,8 @@ public class UserDAOTest {
 					searchHistory.add(s1);
 				}
 				// testUser.setSearchHistory(searchHistory);
-			}
-			testUser.setLastName("Testuser");
+			}*/
+			testUser.setDisplayName("Testuser");
 			DB.getUserDAO().makePermanent(testUser);
 		}
 
@@ -123,10 +121,12 @@ public class UserDAOTest {
 			.isNotNull();
 
 		// mass delete
+		/*
 		int res = DB.getUserDAO().removeAll("lastName='Testuser'");
 		assertThat( res )
 			.overridingErrorMessage("Not enough Testusers deleted.")
 			.isGreaterThanOrEqualTo(1000);
+		*/
 	}
 
 }

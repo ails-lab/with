@@ -14,7 +14,7 @@
  */
 
 
-package test;
+package general;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Date;
