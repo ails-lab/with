@@ -150,7 +150,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 	  }
 
 	  collectionShow = function(record) {
-	    	console.log(record);
+	    	
 	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();

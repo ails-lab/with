@@ -17,6 +17,8 @@
 package controllers;
 
 import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import model.User;
 
@@ -29,10 +31,12 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -42,24 +46,25 @@ public class UserManager extends Controller {
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
+	 * 
 	 * @param email
 	 * @return
 	 */
-	public static Result findByEmail( String email ) {
+	public static Result findByEmail(String email) {
 		User u = DB.getUserDAO().getByEmail(email);
-		if( u != null ) {
+		if (u != null) {
 			ObjectNode res = Json.newObject();
-			res.put( "displayName", u.getDisplayName());
-			res.put( "email", u.getEmail());
-			return ok( res );
+			res.put("username", u.getUsername());
+			res.put("email", u.getEmail());
+			return ok(res);
 		} else {
 			return badRequest();
 		}
 	}
-	
-	public static Result findByDisplayName( String displayName ) {
-		User u = DB.getUserDAO().getByDisplayName(displayName);
-		if( u != null ) {
+
+	public static Result findByUsername(String username) {
+		User u = DB.getUserDAO().getByUsername(username);
+		if (u != null) {
 			return ok();
 		} else {
 			return badRequest();
@@ -70,85 +75,183 @@ public class UserManager extends Controller {
 	 * 
 	 * @return
 	 */
-	public static Result register() {
-		
-		return ok();
-		
+	private static ArrayNode proposeUsername(String initial, String firstName,
+			String lastName) {
+		ArrayNode names = Json.newObject().arrayNode();
+		String proposedName;
+		int i = 0;
+		User u;
+		do {
+			proposedName = initial + i++;
+			u = DB.getUserDAO().getByUsername(proposedName);
+		} while (u != null);
+		names.add(proposedName);
+		if (firstName == null || lastName == null)
+			return names;
+		proposedName = firstName + "_" + lastName;
+		i = 0;
+		while (DB.getUserDAO().getByUsername(proposedName) != null) {
+			proposedName = proposedName + i++;
+		}
+		names.add(proposedName);
+		return names;
 	}
-	
+
 	/**
-	 * Should not be needed, is the same as login by email?
-	 * Maybe need to store if its a facebook or google or password log inner
+	 * 
+	 * @return
+	 */
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result register() {
+
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+
+		String email = null;
+		if (json.has("email")) {
+			email = json.get("email").asText();
+			// Check if email is already used by another user
+			if (DB.getUserDAO().getByEmail(email) != null) {
+				error.put("email", "Email Address Already in Use");
+			}
+			// Validate email address with regular expression
+			final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
+					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+			Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+			Matcher matcher = pattern.matcher(email);
+			if (!matcher.matches()) {
+				error.put("email", "Invalid Email Address");
+			}
+		} else {
+			error.put("email", "Email Address is Empty");
+		}
+		String firstName = null;
+		if (!json.has("firstName")) {
+			error.put("firstName", "First Name is Empty");
+		} else {
+			firstName = json.get("firstName").asText();
+		}
+		String lastName = null;
+		if (!json.has("lastName")) {
+			error.put("lastName", "Last Name is Empty");
+		} else {
+			lastName = json.get("lastName").asText();
+		}
+		String password = null;
+		if (!json.has("password")) {
+			error.put("password", "Password is Empty");
+		} else {
+			password = json.get("password").asText();
+			if(password.length() < 6 ) {
+				error.put("password", "Password must contain more than 6 characters");
+			}
+		}
+		String username = null;
+		// username unique
+		if (!json.has("username")) {
+			error.put("username", "Username is Empty");
+		} else {
+			username = json.get("username").asText();
+			if (DB.getUserDAO().getByUsername(username) != null) {
+				error.put("username", "Username Already in Use");
+				ArrayNode names = proposeUsername(username, firstName, lastName);
+				result.put("proposal", names);
+
+			}
+		}
+		// If everything is ok store the user at the database
+		if (error.size() != 0) {
+			result.put("error", error);
+			return badRequest(result);
+		}
+		User user = Json.fromJson(json, User.class);
+		DB.getUserDAO().makePermanent(user);
+		session().put("user", user.getDbId().toHexString());
+		result = (ObjectNode) Json.parse(DB.getJson(user));
+		return ok(result);
+
+	}
+
+	/**
+	 * Should not be needed, is the same as login by email? Maybe need to store
+	 * if its a facebook or google or password log inner
+	 * 
 	 * @return
 	 */
 	public static Result findByFacebookId() {
 		return ok();
 	}
-	public static  Result googleLogin( String accessToken ) {
+
+	public static Result googleLogin(String accessToken) {
 		// WTF HttpClientBuilder available in eclipse, not in activator??
-		
-		log.info( accessToken );
+
+		log.info(accessToken);
 		User u = null;
 		try {
-			HttpGet hg = new HttpGet( "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=" + accessToken );
+			HttpGet hg = new HttpGet(
+					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
+							+ accessToken);
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpResponse response = client.execute(hg);
 			InputStream is = response.getEntity().getContent();
-			JsonNode res = Json.parse( is );
+			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
-			if( u == null ) {
-				// create a User for google login, send empty Json and ask 
+			if (u == null) {
+				// create a User for google login, send empty Json and ask
 				// UI to fill the void
 				u = new User();
 				u.setEmail(email);
 				DB.getUserDAO().makePermanent(u);
 			}
-			return ok( Json.parse( DB.getJson(u)));
-		} catch( Exception e ) {
-			log.error( "Couldn't validate user!", e );
+			return ok(Json.parse(DB.getJson(u)));
+		} catch (Exception e) {
+			log.error("Couldn't validate user!", e);
 			return badRequest();
 		}
 	}
-	
-	public static Result login( String email, String password, String displayName ) {
+
+	public static Result login(String email, String password, String username) {
+
 		User u = null;
 		ObjectNode result = Json.newObject();
-		
-		if( StringUtils.isNotEmpty(  email )) {
+
+		if (StringUtils.isNotEmpty(email)) {
 			u = DB.getUserDAO().getByEmail(email);
-			if( u == null ) {
-				result.put( "error", "Invalid email");
+			if (u == null) {
+				result.put("error", "Invalid email");
 			}
-		} else if( StringUtils.isNotEmpty(displayName )) {
-			u = DB.getUserDAO().getByDisplayName( displayName );
-			if( u== null)  {
-				result.put("error","Invalid displayName");
+		} else if (StringUtils.isNotEmpty(username)) {
+			u = DB.getUserDAO().getByUsername(username);
+			if (u == null) {
+				result.put("error", "Invalid username");
 			}
 		}
 
-		if( u != null ) {
+		if (u != null) {
 			// check password
-			if( u.checkPassword( password )) {
-				session().put( "user", u.getDbId().toHexString());
+			if (u.checkPassword(password)) {
+				session().put("user", u.getDbId().toHexString());
 				// now return the whole user stuff, just for good measure
-				result = (ObjectNode) Json.parse( DB.getJson( u ));
+				result = (ObjectNode) Json.parse(DB.getJson(u));
 				return ok(result);
 			} else {
-				result.put( "error", "Invalid Password");				
+				result.put("error", "Invalid Password");
 			}
 		} else {
-			result.put( "error", "Need 'displayName' or 'email' parameter" );
+			result.put("error", "Need 'username' or 'email' parameter");
 		}
-		return badRequest( result );
+		return badRequest(result);
 	}
-	
+
 	/**
 	 * This action clears the session, the user is logged out.
+	 * 
 	 * @return
 	 */
 	public static Result logout() {
 		session().clear();
 		return ok();
-	}	
+	}
 }
