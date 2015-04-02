@@ -17,14 +17,14 @@ GET     /assets/*file               			controllers.Assets.at(path="/public", fil
 GET 	 /collection/list						controllers.CollectionController.list(displayName, ownerId, email, 	access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
-POST     /collection/removeRecord               controllers.CollectionController.removeRecordFromCollection
-POST     /collection/addRecord                  controllers.CollectionController.addRecordToCollection()
-POST     /collection/listRecords   	            controllers.CollectionController.listCollectionRecords()
+POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
+DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, pos: Integer ?=0, version: Integer ?=-1)
+GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, start: Integer ?=0, count: Integer ?=10)
+#Not Implemented
+GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)
-DELETE   /collection/:id	                    controllers.CollectionController.deleteCollection(id)
 POST	 /collection/:id 						controllers.CollectionController.editCollection(id)
-#GET		 /collection/:id/thumbnail				controllers.CollectionController.getCollectionThumbnail(id)
-#GET		 /recordlink/:id/thumbnail				controllers.CollectionController.getRecordLinkThumbnail(id)
+DELETE   /collection/:id	                    controllers.CollectionController.deleteCollection(id)
 
 # Media Controller
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=false) 
