@@ -37,7 +37,7 @@ public class User {
 	private static final int EMBEDDED_CAP = 20;
 
 	private enum Gender {
-		MALE, FEMALE
+		MALE, FEMALE, UNSPECIFIED
 	}
 
 	@Id
@@ -221,12 +221,27 @@ public class User {
 		this.username = username;
 	}
 
-	public Gender getGender() {
-		return gender;
+	public String getGender() {
+		switch (gender) {
+		case FEMALE:
+			return "Female";
+		case MALE:
+			return "Male";
+		default:
+			return "Unspecified";
+
+		}
+
 	}
 
-	public void setGender(Gender gender) {
-		this.gender = gender;
+	public void setGender(String gender) {
+		if (gender.equalsIgnoreCase("female")) {
+			this.gender = Gender.FEMALE;
+		} else if (gender.equalsIgnoreCase("male")) {
+			this.gender = Gender.MALE;
+		} else {
+			this.gender = Gender.UNSPECIFIED;
+		}
 	}
 
 	public String getGoogleId() {

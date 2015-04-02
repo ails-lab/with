@@ -139,7 +139,8 @@ public class UserManager extends Controller {
 			lastName = json.get("lastName").asText();
 		}
 		String password = null;
-		if (!json.has("password")) {
+		if (!json.has("password") && !json.has("facebookId")
+				&& !json.has("googleId")) {
 			error.put("password", "Password is Empty");
 		} else {
 			password = json.get("password").asText();
@@ -170,6 +171,7 @@ public class UserManager extends Controller {
 		DB.getUserDAO().makePermanent(user);
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
+		result.remove("md5Password");
 		return ok(result);
 
 	}
