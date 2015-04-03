@@ -234,7 +234,7 @@ public class CollectionController extends Controller {
 	//@With(UserLoggedIn.class)
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result removeRecordFromCollection(String collectionId, String rLinkId,
-													int position, String version) {
+													int position, int version) {
 		ObjectNode result = Json.newObject();
 
 		ObjectId colId     = new ObjectId(collectionId);
@@ -268,6 +268,10 @@ public class CollectionController extends Controller {
 			}
 
 			return ok(records);
+	}
+
+	public static Result download(String id) {
+		return null;
 	}
 }
 
