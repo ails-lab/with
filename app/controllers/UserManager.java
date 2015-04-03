@@ -212,40 +212,49 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result login(String email, String password, String username) {
+	public static Result login() {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectNode error = (ObjectNode) Json.newObject();
 
 		User u = null;
-
-		if (StringUtils.isNotEmpty(email)) {
-			u = DB.getUserDAO().getByEmail(email);
+		String emailOrUserName = null;
+		if (json.has("email")) {
+			emailOrUserName = json.get("email").asText();
+			u = DB.getUserDAO().getByEmail(emailOrUserName);
 			if (u == null) {
-				result.put("error", "Invalid email");
+				u = DB.getUserDAO().getByUsername(emailOrUserName);
+				if (u == null) {
+					error.put("email", "Invalid Email Address or Username");
+					result.put("error", error);
+					return badRequest(result);
+				}
 			}
-		} else if (StringUtils.isNotEmpty(username)) {
-			u = DB.getUserDAO().getByUsername(username);
-			if (u == null) {
-				result.put("error", "Invalid username");
-			}
+		} else {
+			error.put("email", "Need Email or Username");
+			result.put("error", error);
+			return badRequest(result);
 		}
-
-		if (u != null) {
-			// check password
-			if (u.checkPassword(password)) {
-				session().put("user", u.getDbId().toHexString());
+		// check password
+		String password = null;
+		if (json.has("password")) {
+			password = json.get("password").asText();
+		} else {
+			error.put("password", "Password is Empty");
+			result.put("error", error);
+			return badRequest(result);
+		}
+		if (u.checkPassword(password)) {
+			session().put("user", u.getDbId().toHexString());
 				// now return the whole user stuff, just for good measure
 				result = (ObjectNode) Json.parse(DB.getJson(u));
 				return ok(result);
 			} else {
-				result.put("error", "Invalid Password");
+				error.put("password", "Invalid Password");
+				result.put("error", error);
+				return badRequest(result);
 			}
-		} else {
-			result.put("error", "Need 'username' or 'email' parameter");
-		}
-		return badRequest(result);
 	}
 
 	/**
