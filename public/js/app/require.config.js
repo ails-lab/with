@@ -28,8 +28,9 @@ var require = {
 		"knockout-amd-helpers": "bower_modules/knockout-amd-helpers/build/knockout-amd-helpers.min",
 		"komapping":            "bower_modules/bower-knockout-mapping/build/output/knockout.mapping-latest",
 		"selectize" :           "bower_modules/selectize/dist/js/standalone/selectize.min",
-		"flip":					"bower_modules/flip/dist/jquery.flip.min",
-		"app":                  "js/app/app"
+		"flip":					"bower_modules/flip/dist/jquery.flip.min",	
+		"app":                  "js/app/app",
+		"autocomplete":			"bower_modules/devbridge-autocomplete/dist/jquery.autocomplete.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

@@ -46,6 +46,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     };
     
 	
+    
 	function Record(data) {
 		var self = this;
 		self.id = ko.observable(false);
@@ -258,11 +259,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			console.log(self.term());
 		 }
 		};
-
+		
 		
 		self.search = function() {
-			
-	      
 			self.results([]);
 			self.mixresults([]);
 			self.page(1);
@@ -296,11 +295,52 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	    }
 
 	  var withsearch = $( '#withsearchid' );
+	  var selectedSources = ["YouTube", "Europeana"];
 	  var withinput =$("input.withsearch-input");
+	  $(".withsearch-input").devbridgeAutocomplete({
+	   		 minChars: 3,
+	   		 //lookupLimit: 10,
+	   		 //default type GET
+	   		 //type: "POST",
+	   		 serviceUrl: "/api/autocompleteExt",
+	   		 //paramName: default is "query"
+	   		 paramName: "term",
+	   		 params: {
+	   			 source: selectedSources//[{sourceName: "Youtube"}, {sourceName:"Europeana"}]}
+	   		 },
+	   		 ajaxSettings: {
+	   			 traditional: true,
+	   			dataType: "json"
+	   		 },
+	   		 //the following works in case of POST
+//	   		 ajaxSettings: {
+//	   			 "data": JSON.stringify({
+//	   				 sources: [{sourceName: "Youtube"}, {sourceName:"Europeana"}],
+//	   				 term: $('.withsearch-input').val()
+//	   			 }),
+//	   			 //"method": "post",
+//	   			 "contentType": "application/json"
+//	   		 },
+	   		 transformResult: function(response) {
+	   			var result = [];
+	   			for (var i in response) {
+	   				var suggestions  = response[i].suggestions;
+	   				$.merge(result, suggestions);
+	   			}
+	   			return {"suggestions": result};
+	   		 },
+	   		 groupBy: "category",
+	   		 orientation: "auto",
+		     onSearchComplete: function(query, suggestions) {	
+		    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
+		    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+		     }
+	 });
+	  
 	  ctrlClose =$("span.withsearch-close");
 	  isOpen = false;
 		// show/hide search area
-     toggleSearch = function(evt,char) {
+      toggleSearch = function(evt,char) {
 			// return if open and the input gets focused
 			if(  evt === 'focus' && isOpen ) return false;
 
@@ -322,14 +362,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			isOpen = !isOpen;
 		};
 
-		
 	    $(document).keyup(function(e) {
-
   		  if (e.keyCode == 27 && isOpen ) { 
   			self.reset();
   			toggleSearch(e,'');
-  			  
-  			  }   // esc
+  		  }   // esc
   		});
         ctrlClose.on('click',function(event){
     		self.reset();

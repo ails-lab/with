@@ -28,7 +28,7 @@ import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class DSpaceSource implements ISpaceSource {
+public class DSpaceSource extends ISpaceSource {
 
 	private String DPLAKey = "2edebbb32b1f42f86aaa56fd2edc1a28";
 

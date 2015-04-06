@@ -19,17 +19,24 @@ package espace.core.sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.AutocompleteResponse;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.SourceResponse;
+import espace.core.AutocompleteResponse.DataJSON;
+import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class YouTubeSpaceSource implements ISpaceSource {
+public class YouTubeSpaceSource extends ISpaceSource {
 
 	// TODO keep track of the pages links and go to the requested page.
 
@@ -53,7 +60,7 @@ public class YouTubeSpaceSource implements ISpaceSource {
 		return string;
 	}
 
-	private String getKey() {
+	private static String getKey() {
 		return "SECRET_KEY";
 	}
 
@@ -124,4 +131,36 @@ public class YouTubeSpaceSource implements ISpaceSource {
 		return q + "/" + pageSize;
 	}
 
+	
+	public String autocompleteQuery(String term) {
+		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t" + 
+				"&key=" + getKey()+ "&q=" + term;
+	}
+	
+	public AutocompleteResponse autocompleteResponse(String response) {
+		try {
+			JSONArray jsonResp = new JSONArray(response);
+			JSONArray suggestionsArray = jsonResp.getJSONArray(1);
+			if (suggestionsArray.length()==0)
+				return new AutocompleteResponse();
+			else {
+				AutocompleteResponse ar = new AutocompleteResponse();
+				ar.suggestions = new ArrayList<Suggestion>();
+				int suggestionsLength = 4;
+				for (int i=0; i < suggestionsLength; i++) {
+					String suggestion = (String) suggestionsArray.get(i);
+					Suggestion s = new Suggestion();
+					s.value = suggestion;
+					DataJSON data = new DataJSON();
+					data.category = "YouTube";
+					s.data = data;
+					ar.suggestions.add(s);
+				}
+				return ar;
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return new AutocompleteResponse();
+		}
+	}
 }

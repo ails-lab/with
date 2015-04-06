@@ -29,7 +29,7 @@ import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
 
-public class NLASpaceSource implements ISpaceSource {
+public class NLASpaceSource extends ISpaceSource {
 
 	private String Key = "SECRET_KEY";
 

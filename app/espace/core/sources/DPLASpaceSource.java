@@ -30,7 +30,7 @@ import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 
-public class DPLASpaceSource implements ISpaceSource {
+public class DPLASpaceSource extends ISpaceSource {
 
 	private String DPLAKey = "SECRET_KEY";
 

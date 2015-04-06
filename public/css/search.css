@@ -43,7 +43,6 @@ text-decoration: none;
 }
 
 .withsearch-form {
-	
 	width: 100%;
 	height: 40px;
 	margin: 0 auto;
@@ -78,6 +77,18 @@ text-decoration: none;
 
 .withsearch-input::-ms-clear { /* remove cross in IE */
     display: none;
+}
+
+.autocomplete-suggestions-extra {
+	font-size: 12pt;
+}
+.autocomplete-suggestion-extra {
+	background: #eeeeee;
+	cursor: default;
+}
+
+.autocomplete-suggestion-extra:hover {
+	background: #bbbbbb;
 }
 
 .withsearch.hideInput .withsearch-input {
@@ -224,6 +235,7 @@ input[type="search"] { /* reset normalize */
 }
 
 .withsearch-content {
+	padding-top: 10em;
 	color: #333;
 	margin-top: 2.5em;
 	width: 100%;

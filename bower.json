@@ -19,7 +19,8 @@
     "knockout-amd-helpers": "~0.7.3",
     "bower-knockout-mapping": "~2.4.1",
     "selectize": "latest",
-    "flip": "latest"
+    "flip": "latest",
+    "devbridge-autocomplete": "~1.2.18"
   },
   "resolutions": {
     "knockout": "~3.2.0"

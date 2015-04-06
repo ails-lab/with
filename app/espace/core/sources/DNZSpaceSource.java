@@ -28,7 +28,7 @@ import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class DNZSpaceSource implements ISpaceSource {
+public class DNZSpaceSource extends ISpaceSource {
 
 	/**
 	 * user: espace password: with2015 email: gardero@gmail.com

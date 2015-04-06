@@ -17,7 +17,9 @@
 package espace.core;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import play.Logger;
 import espace.core.sources.DNZSpaceSource;
@@ -40,6 +42,23 @@ public class ESpaceSources {
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
 		Logger.info("Initialization of sources list");
+	}
+	
+	public static Map<String, ISpaceSource> initSourceByNameMap() {
+		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
+		ISpaceSource s = new ESpaceSource();
+		sourcesMap.put(s.getSourceName(), s);
+		s = new DPLASpaceSource();
+		sourcesMap.put(s.getSourceName(), s);
+		s = new NLASpaceSource();
+		sourcesMap.put(s.getSourceName(), s);
+		s = new DNZSpaceSource();
+		sourcesMap.put(s.getSourceName(), s);
+		s = new EuropeanaFashionSpaceSource();
+		sourcesMap.put(s.getSourceName(), s);
+		s = new YouTubeSpaceSource();
+		sourcesMap.put(s.getSourceName(), s);
+		return sourcesMap;
 	}
 
 	public static List<ISpaceSource> getESources() {
