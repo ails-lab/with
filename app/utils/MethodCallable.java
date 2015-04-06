@@ -14,28 +14,9 @@
  */
 
 
-package espace.core;
+package utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-public abstract class ISpaceSource {
-
-	public abstract String getSourceName();
-
-	public abstract String getHttpQuery(CommonQuery q);
-
-	public abstract SourceResponse getResults(CommonQuery q);
-
-	public String autocompleteQuery(String term) {
-		return "";
-	}
-	
-	public AutocompleteResponse autocompleteResponse(String response) {
-		return new AutocompleteResponse();
-	};
+public interface MethodCallable<I, R> {
+	public R call(I input);
 }
+

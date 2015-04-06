@@ -30,7 +30,7 @@ import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 
-public class EuropeanaFashionSpaceSource implements ISpaceSource {
+public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus

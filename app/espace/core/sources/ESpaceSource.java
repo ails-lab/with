@@ -18,8 +18,15 @@ package espace.core.sources;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.AutocompleteResponse;
+import espace.core.AutocompleteResponse.DataJSON;
+import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
 import espace.core.HttpConnector;
@@ -29,7 +36,7 @@ import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class ESpaceSource implements ISpaceSource {
+public class ESpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
@@ -131,5 +138,39 @@ public class ESpaceSource implements ISpaceSource {
 
 		return res;
 	}
+	
+	public String autocompleteQuery(String term) {
+		return "http://www.europeana.eu/api/v2/suggestions.json?rows=4&phrases=false&query=" + term;
+	}
+	
 
+	public AutocompleteResponse autocompleteResponse(String response) {
+		try {
+			JSONObject jsonResp = new JSONObject(response);
+			if (!jsonResp.getBoolean("success"))
+				return new AutocompleteResponse();
+			else {
+				JSONArray items = jsonResp.getJSONArray("items");
+				AutocompleteResponse ar = new AutocompleteResponse();
+				ar.suggestions = new ArrayList<Suggestion>();
+				for (int i=0; i < items.length(); i++) {
+					JSONObject item = items.getJSONObject(i);
+					Suggestion s = new Suggestion();
+					s.value = item.getString("term");
+					DataJSON data = new DataJSON();
+					data.category = "Europeana";
+					data.frequencey = item.getInt("frequency");
+					data.field = item.getString("field");
+					s.data = data;
+					ar.suggestions.add(s);
+				}
+				return ar;
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return new AutocompleteResponse();
+		}
+	}
+	
+	
 }

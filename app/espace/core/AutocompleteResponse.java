@@ -16,26 +16,25 @@
 
 package espace.core;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONObject;
+import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public abstract class ISpaceSource {
-
-	public abstract String getSourceName();
-
-	public abstract String getHttpQuery(CommonQuery q);
-
-	public abstract SourceResponse getResults(CommonQuery q);
-
-	public String autocompleteQuery(String term) {
-		return "";
+//everythign public and in one place for brevity
+public class AutocompleteResponse {
+	
+    public static class Suggestion {
+    	public String value;
+    	public DataJSON data;
+    }
+	public static class DataJSON {
+		public String category;
+		public int frequencey = -1;
+		public String field = "";
 	}
 	
-	public AutocompleteResponse autocompleteResponse(String response) {
-		return new AutocompleteResponse();
-	};
+	
+	public List<Suggestion> suggestions;
 }

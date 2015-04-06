@@ -1,4 +1,4 @@
-define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
+define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, template, app, autocomplete) {
 
   function TopBarViewModel(params) {
 
@@ -18,10 +18,8 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 		    		    return;
 		     }
 			}else{return;}
-
-
 		});
-
+		
 		this.route = params.route;
 
 		var self = this;
