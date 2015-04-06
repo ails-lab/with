@@ -165,7 +165,6 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.emailLogin           = function(popup, callback) {
 			if (self.loginValidation.isValid()) {
 				var json = ko.toJSON(self.loginValidation);
-				console.log(json);
 
 				$.ajax({
 					type        : "post",
