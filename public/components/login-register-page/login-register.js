@@ -127,8 +127,6 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				};
 
 				var json = ko.toJSON(data);
-				console.log(json);
-				// TODO: Submit the user information to the server
 				$.ajax({
 					type        : "post",
 					contentType : 'application/json',
@@ -137,13 +135,11 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/register",
 					data        : json,
 					success     : function(data, text) {
-						console.log("Success!");
-						console.log(data);
-						console.log(text);
+						// console.log(app.currentUser());
+						app.loadUser(data);
 						self.templateName('postregister');
 					},
 					error       : function(request, status, error) {
-						console.log(request.responseText);
 						var err = JSON.parse(request.responseText);
 						if (err.error.email !== undefined) {
 							self.email.setError(err.error.email);
