@@ -17,6 +17,7 @@
     "jquery-bridget": "latest",
     "knockout-validation": "~2.0.2",
     "knockout-amd-helpers": "~0.7.3",
+    "bower-knockout-mapping": "~2.4.1",
     "selectize": "latest",
     "flip": "latest"
   },

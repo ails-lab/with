@@ -4,13 +4,13 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 
 
 		$( document ).on( 'keypress', function( event ) {
-			
+
 			if(event.target.nodeName != 'INPUT') {
-				
+
 			 if (event.which == null) {
 		    	 var char=String.fromCharCode(event.which);
 		    	 toggleSearch("focus",char);
-		    	 
+
 		     } else if (event.which!=0 && event.charCode!=0) {
 		    	 var char=String.fromCharCode(event.which);
 		    	 toggleSearch("focus",char);
@@ -18,8 +18,8 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 		    		    return;
 		     }
 			}else{return;}
-		    
-		    
+
+
 		});
 
 		this.route = params.route;
@@ -30,6 +30,8 @@ define(['knockout', 'text!./top-bar.html', 'app'], function(ko, template, app) {
 				app.currentUser();
 			});
 		}
+
+		self.username = app.currentUser().username;
 
 	}
 

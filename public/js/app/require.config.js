@@ -26,12 +26,15 @@ var require = {
 		"google":               "https://apis.google.com/js/client:platform",
 		"knockout-validation":  "bower_modules/knockout-validation/dist/knockout.validation.min",
 		"knockout-amd-helpers": "bower_modules/knockout-amd-helpers/build/knockout-amd-helpers.min",
+		"komapping":            "bower_modules/bower-knockout-mapping/build/output/knockout.mapping-latest",
 		"selectize" :           "bower_modules/selectize/dist/js/standalone/selectize.min",
-		"flip":					"bower_modules/flip/dist/jquery.flip.min",	
+		"flip":					"bower_modules/flip/dist/jquery.flip.min",
 		"app":                  "js/app/app"
 	},
 	shim: {
+		"knockout":  { exports: 'ko' },
 		"bootstrap": { deps: ["jquery"] },
-		"facebook": { exports: "FB" }
+		"facebook":  { exports: "FB" },
+		"komapping": { deps: ['knockout'], exports: "komapping" }
 	}
 };
