@@ -50,7 +50,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.emailUser       = ko.observable('').extend({ required: true });
 		self.emailPass       = ko.observable('').extend({ required: true });
 		self.stayLogged      = ko.observable(false);
-		self.loginValidation = ko.validatedObservable({ username: self.emailUser, password: self.emailPass });
+		self.loginValidation = ko.validatedObservable({ email: self.emailUser, password: self.emailPass });
 
 		// Control variables
 		self.usingEmail  = ko.observable(true);
@@ -168,10 +168,14 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				console.log(json);
 
 				$.ajax({
-					type    : "get",
-					url     : "/api/login", //?email=" + "finikm@gmail.com&password=123456",
-					data    : { email: self.emailUser(), password: self.emailPass() },
-					success : function (data, text) {
+					type        : "post",
+					contentType : 'application/json',
+					dataType    : 'json',
+					processData : false,
+					url         : "/user/login",
+					data        : json,
+					success     : function (data, text) {
+						app.loadUser(data);
 						// TODO: Redirect to the appropriate page
 					},
 					error   : function (request, status, error) {
