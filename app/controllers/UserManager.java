@@ -139,14 +139,15 @@ public class UserManager extends Controller {
 			lastName = json.get("lastName").asText();
 		}
 		String password = null;
-		if (!json.has("password") && !json.has("facebookId")
-				&& !json.has("googleId")) {
-			error.put("password", "Password is Empty");
-		} else {
-			password = json.get("password").asText();
-			if (password.length() < 6) {
-				error.put("password",
-						"Password must contain more than 6 characters");
+		if (!json.has("facebookId") && !json.has("googleId")) {
+			if (!json.has("password")) {
+				error.put("password", "Password is Empty");
+			} else {
+				password = json.get("password").asText();
+				if (password.length() < 6) {
+					error.put("password",
+							"Password must contain more than 6 characters");
+				}
 			}
 		}
 		String username = null;
@@ -247,14 +248,14 @@ public class UserManager extends Controller {
 		}
 		if (u.checkPassword(password)) {
 			session().put("user", u.getDbId().toHexString());
-				// now return the whole user stuff, just for good measure
-				result = (ObjectNode) Json.parse(DB.getJson(u));
-				return ok(result);
-			} else {
-				error.put("password", "Invalid Password");
-				result.put("error", error);
-				return badRequest(result);
-			}
+			// now return the whole user stuff, just for good measure
+			result = (ObjectNode) Json.parse(DB.getJson(u));
+			return ok(result);
+		} else {
+			error.put("password", "Invalid Password");
+			result.put("error", error);
+			return badRequest(result);
+		}
 	}
 
 	/**
