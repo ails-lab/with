@@ -202,12 +202,12 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
 				return badRequest(Json
-						.parse("{\"error\":\"User not registered\""));
+						.parse("{\"error\":\"User not registered\"}"));
 			}
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
 			return badRequest(Json
-					.parse("{\"error\":\"Couldn't validate user\""));
+					.parse("{\"error\":\"Couldn't validate user\"}"));
 		}
 	}
 
@@ -226,12 +226,12 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
 				return badRequest(Json
-						.parse("{\"error\":\"User not registered\""));
+						.parse("{\"error\":\"User not registered\"}"));
 			}
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
 			return badRequest(Json
-					.parse("{\"error\":\"Couldn't validate user\""));
+					.parse("{\"error\":\"Couldn't validate user\"}"));
 		}
 	}
 
