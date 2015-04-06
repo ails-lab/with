@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -32,10 +33,24 @@ public class YouTubeSpaceSource implements ISpaceSource {
 
 	// TODO keep track of the pages links and go to the requested page.
 
+	private HashMap<String, String> roots;
+
+	public YouTubeSpaceSource() {
+		super();
+		roots = new HashMap<String, String>();
+	}
+
 	public String getHttpQuery(CommonQuery q) {
+		String token = getPageInfo(q.searchTerm, q.page, q.pageSize);
 		return getBaseURL() + "search?part=snippet&q="
 				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm) + "&maxResults=" + q.pageSize
-				+ "&type=video&key=" + getKey();
+				+ (token == null ? "" : ("&pageToken=" + token)) + "&type=video&key=" + getKey();
+	}
+
+	private String getPageInfo(String q, String page, String pageSize) {
+		String string = roots.get(getKey(q, page, pageSize));
+		System.out.println("Found info " + string);
+		return string;
 	}
 
 	private String getKey() {
@@ -86,12 +101,27 @@ public class YouTubeSpaceSource implements ISpaceSource {
 			}
 			res.items = a;
 			// res.facets = response.path("facets");
+
+			savePageDetails(q.searchTerm, q.page, q.pageSize, response.path("nextPageToken").asText());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return res;
+	}
+
+	private void savePageDetails(String q, String page, String pageSize, String nextPageToken) {
+		String key = getKey(q, page, pageSize);
+		if (!roots.containsKey(key)) {
+			roots.put(key, nextPageToken);
+			System.out.println("Saved [" + key + "]" + nextPageToken);
+		}
+	}
+
+	private String getKey(String q, String page, String pageSize) {
+		return q + "/" + pageSize;
 	}
 
 }
