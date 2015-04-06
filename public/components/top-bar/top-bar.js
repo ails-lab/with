@@ -18,8 +18,8 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		    		    return;
 		     }
 			}else{return;}
-
-			
+		});
+		
 		this.route = params.route;
 
 		var self = this;
