@@ -272,6 +272,7 @@ public class UserManager extends Controller {
 			session().put("user", u.getDbId().toHexString());
 			// now return the whole user stuff, just for good measure
 			result = (ObjectNode) Json.parse(DB.getJson(u));
+			result.remove("md5Password");
 			return ok(result);
 		} else {
 			error.put("password", "Invalid Password");
