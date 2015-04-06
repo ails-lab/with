@@ -175,8 +175,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/login",
 					data        : json,
 					success     : function (data, text) {
-						app.loadUser(data);
-						// TODO: Redirect to the appropriate page
+						app.loadUser(data, self.stayLogged());
+
+						if (typeof popup !== 'undefined') {
+							self.emailUser(null);
+							self.emailPass(null);
+							if (popup) { self.closeLoginPopup(); }
+
+							if (typeof callback !== 'undefined') {
+								callback();
+							}
+						}
+						else {
+							window.location.href = "#";
+						}
 					},
 					error   : function (request, status, error) {
 						console.log(request);
@@ -184,24 +196,6 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						// TODO: Show error messages
 					}
 				});
-
-				// $.post("/api/login", json, function(data, status) {
-				// 	// TODO: Before redirecting, if stayLogged is pressed, make sure user stays online (use a cookie?)
-				// 	// TODO: Add the user to the global app: app.currentUser('finik');
-				// 	console.log("Success");
-				// 	app.currentUser(data['username']);
-				// 	// TODO: Redirect to the appropriate page
-				// });
-
-				if (typeof popup !== 'undefined') {
-					self.emailUser(null);
-					self.emailPass(null);
-					if (popup) { self.closeLoginPopup(); }
-
-					if (typeof callback !== 'undefined') {
-						callback();
-					}
-				}
 			}
 			else {
 				self.loginValidation.errors.showAllMessages();
@@ -218,23 +212,36 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
 							request.execute(function(response) {
 								self.emailUser(response['emails'][0]['value']);
-								self.id('GG' + response['id']);
+								self.googleid(response['id']);
 
 								var json = ko.toJSON(self.loginValidation);
-								console.log(json);
-								// TODO: Send to server to sign in
-								// TODO: Add the user to the global app: app.currentUser('finik');
-								app.currentUser('finik'); // TODO: REMOVE
-								if (typeof popup !== 'undefined') {
-									if (popup) { self.closeLoginPopup(); }
 
-									if (typeof callback !== 'undefined') {
-										callback(params.item);
+								$.ajax({
+									type        : "get",
+									// contentType : 'application/json',
+									// dataType    : 'json',
+									// processData : false,
+									url         : "/user/googleLogin",
+									data        : { accessToken: authResult['access_token'] },
+									success     : function(data, text) {
+										app.loadUser(data, true);
+										if (typeof popup !== 'undefined') {
+											if (popup) { self.closeLoginPopup(); }
+
+											if (typeof callback !== 'undefined') {
+												callback(params.item);
+											}
+										}
+										else {
+											window.location.href = "#";
+										}
+									},
+									error       : function(request, status, error) {
+										console.log(request);
+										console.log(status);
+										console.log(error);
 									}
-								}
-								else {
-									window.location.href = "#";
-								}
+								});
 							});
 						});
 					}
@@ -245,11 +252,40 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			FB.login(function(response) {
 				if (response.status === 'connected') {
 					FB.api('/me', function(response) {
-						self.id('FB' + response.id);
+						self.facebookid(response.id);
 						self.emailUser(response.email);
 
 						var json = ko.toJSON(self.loginValidation);
 						console.log(json);
+
+						console.log(response);
+
+						$.ajax({
+							type        : "get",
+							// contentType : 'application/json',
+							// dataType    : 'json',
+							// processData : false,
+							url         : "/user/facebookLogin",
+							data        : { accessToken: FB.getAuthResponse()['accessToken'] },
+							success     : function(data, text) {
+								app.loadUser(data, true);
+								if (typeof popup !== 'undefined') {
+									if (popup) { self.closeLoginPopup(); }
+
+									if (typeof callback !== 'undefined') {
+										callback(params.item);
+									}
+								}
+								else {
+									window.location.href = "#";
+								}
+							},
+							error       : function(request, status, error) {
+								console.log(request);
+								console.log(status);
+								console.log(error);
+							}
+						});
 						// TODO: Send to server to sign in
 						// TODO: Add the user to the global app: app.currentUser('finik');
 						app.currentUser('finik'); // TODO: REMOVE
