@@ -188,13 +188,35 @@ public class UserManager extends Controller {
 	}
 
 	public static Result googleLogin(String accessToken) {
-		// WTF HttpClientBuilder available in eclipse, not in activator??
-
 		log.info(accessToken);
 		User u = null;
 		try {
 			HttpGet hg = new HttpGet(
 					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
+							+ accessToken);
+			HttpClient client = HttpClientBuilder.create().build();
+			HttpResponse response = client.execute(hg);
+			InputStream is = response.getEntity().getContent();
+			JsonNode res = Json.parse(is);
+			String email = res.get("email").asText();
+			u = DB.getUserDAO().getByEmail(email);
+			if (u == null) {
+				return badRequest(Json
+						.parse("{\"error\":\"User not registered\""));
+			}
+			return ok(Json.parse(DB.getJson(u)));
+		} catch (Exception e) {
+			return badRequest(Json
+					.parse("{\"error\":\"Couldn't validate user\""));
+		}
+	}
+
+	public static Result facebookLogin(String accessToken) {
+		log.info(accessToken);
+		User u = null;
+		try {
+			HttpGet hg = new HttpGet(
+					"https://graph.facebook.com/endpoint?access_token="
 							+ accessToken);
 			HttpClient client = HttpClientBuilder.create().build();
 			HttpResponse response = client.execute(hg);
@@ -250,6 +272,7 @@ public class UserManager extends Controller {
 			session().put("user", u.getDbId().toHexString());
 			// now return the whole user stuff, just for good measure
 			result = (ObjectNode) Json.parse(DB.getJson(u));
+			result.remove("md5Password");
 			return ok(result);
 		} else {
 			error.put("password", "Invalid Password");
