@@ -1,4 +1,4 @@
-define(['knockout', 'text!./item.html'], function(ko, template) {
+define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
   function ItemViewModel(params) {
 	  var self = this;
@@ -93,10 +93,13 @@ define(['knockout', 'text!./item.html'], function(ko, template) {
 		else return "";
 	});
 
-    self.collect=function(item){
-    		collectionShowPopup(item);
-
-
+    self.collect = function(item){
+		if (!isLogged()) {
+			showLoginPopup(item);
+		}
+		else {
+			collectionShow(item);
+		}
     }
 
   }
