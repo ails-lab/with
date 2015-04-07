@@ -17,8 +17,12 @@
 package controllers;
 
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.HttpsURLConnection;
 
 import model.User;
 
@@ -191,13 +195,19 @@ public class UserManager extends Controller {
 		log.info(accessToken);
 		User u = null;
 		try {
-			HttpGet hg = new HttpGet(
+			// HttpGet hg = new HttpGet(
+			// "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
+			// + accessToken);
+			URL url = new URL(
 					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
 							+ accessToken);
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpResponse response = client.execute(hg);
-			InputStream is = response.getEntity().getContent();
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			//HttpClient client = HttpClientBuilder.create().build();
+			//HttpResponse response = client.execute(hg);
+			InputStream is = connection.getInputStream();
+			//InputStream is = response.getEntity().getContent();
 			JsonNode res = Json.parse(is);
+			System.out.println(res.toString());
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
