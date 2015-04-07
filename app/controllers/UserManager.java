@@ -195,19 +195,12 @@ public class UserManager extends Controller {
 		log.info(accessToken);
 		User u = null;
 		try {
-			// HttpGet hg = new HttpGet(
-			// "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
-			// + accessToken);
 			URL url = new URL(
 					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-			//HttpClient client = HttpClientBuilder.create().build();
-			//HttpResponse response = client.execute(hg);
 			InputStream is = connection.getInputStream();
-			//InputStream is = response.getEntity().getContent();
 			JsonNode res = Json.parse(is);
-			System.out.println(res.toString());
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
 			if (u == null) {
@@ -225,12 +218,10 @@ public class UserManager extends Controller {
 		log.info(accessToken);
 		User u = null;
 		try {
-			HttpGet hg = new HttpGet(
-					"https://graph.facebook.com/endpoint?access_token="
-							+ accessToken);
-			HttpClient client = HttpClientBuilder.create().build();
-			HttpResponse response = client.execute(hg);
-			InputStream is = response.getEntity().getContent();
+			URL url = new URL("https://graph.facebook.com/endpoint?access_token="
+					+ accessToken);
+			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
 			u = DB.getUserDAO().getByEmail(email);
