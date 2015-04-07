@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -139,8 +140,8 @@ public class ESpaceSource extends ISpaceSource {
 		return res;
 	}
 	
-	public String autocompleteQuery(String term) {
-		return "http://www.europeana.eu/api/v2/suggestions.json?rows=4&phrases=false&query=" + term;
+	public String autocompleteQuery(String term, int limit) {
+		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
 	}
 	
 

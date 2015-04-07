@@ -60,20 +60,47 @@ public class ParallelAPICall {
     		new Function<Iterable<R>, Result>() {
     			List<R> finalResponses = new ArrayList<R>();
     			public Result apply(Iterable<R> responses) {
-    				for (R r: responses) {
-    					if (responseCollectionMethod.call(r))
-    						finalResponses.add(r);
-    				}
+    				finalResponses.addAll(iterateResponses(responseCollectionMethod, responses));
     				//Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()- initTime));
-    				if (!finalResponses.isEmpty()) {
-    					return play.mvc.Results.ok(Json.toJson(finalResponses));
-    				}
-    				else
-    					return play.mvc.Results.noContent();
+    				return toStatus(finalResponses);
     			}
     		}
         );
         return promiseResult;	
 	}
-
+	
+	public static <R> Promise<Result> combineResponses(final MethodCallable<R, Boolean> responseCollectionMethod,
+			Iterable<Promise<R>> promises, final MethodCallable<List<R>, List<R>> filter) {		
+		Promise<List<R>> promisesSequence = Promise.sequence(promises);		 
+        Promise<Result> promiseResult = promisesSequence.map(
+    		new Function<Iterable<R>, Result>() {
+    			public Result apply(Iterable<R> responses) {
+    				List<R> combinedResponses = iterateResponses(responseCollectionMethod, responses);
+    				List<R> finalResponses = filter.call(combinedResponses);
+    				//Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()- initTime));
+    				return toStatus(finalResponses);
+    			}
+    		}
+        );
+        return promiseResult;
+	}
+	
+	public static <R> List<R> iterateResponses(final MethodCallable<R, Boolean> responseCollectionMethod, Iterable<R> responses) {
+		List<R> finalResponses = new ArrayList<R>();
+		for (R r: responses) {
+			if (responseCollectionMethod.call(r))
+				finalResponses.add(r);
+		}
+		return finalResponses;
+	}
+	
+	
+	private static <R> Result toStatus(List<R> responses) {
+		if (!responses.isEmpty()) {
+			return play.mvc.Results.ok(Json.toJson(responses));
+		}
+		else
+			return play.mvc.Results.noContent();
+	}
+	
 }

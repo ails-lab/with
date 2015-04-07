@@ -41,6 +41,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	// TODO keep track of the pages links and go to the requested page.
 
 	private HashMap<String, String> roots;
+	private int autoCompleteLimit = 0;
 
 	public YouTubeSpaceSource() {
 		super();
@@ -132,7 +133,8 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	}
 
 	
-	public String autocompleteQuery(String term) {
+	public String autocompleteQuery(String term, int limit) {
+		autoCompleteLimit = limit;
 		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t" + 
 				"&key=" + getKey()+ "&q=" + term;
 	}
@@ -146,8 +148,8 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			else {
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = new ArrayList<Suggestion>();
-				int suggestionsLength = 4;
-				for (int i=0; i < suggestionsLength; i++) {
+				//int suggestionsLength = 4;
+				for (int i=0; i < autoCompleteLimit; i++) {
 					String suggestion = (String) suggestionsArray.get(i);
 					Suggestion s = new Suggestion();
 					s.value = suggestion;
