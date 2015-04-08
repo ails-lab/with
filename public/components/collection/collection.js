@@ -140,17 +140,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 
 	  self.selected_items2 = ko.observableArray();
 
-	  collectionShowPopup = function(record) {
-			if (app.currentUser() === undefined) {
-				showLoginPopup(record);
-			}
-			else {
-				collectionShow(record);
-			}
-	  }
-
 	  collectionShow = function(record) {
-	    	
+
 	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();

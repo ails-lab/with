@@ -306,7 +306,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	   		 //paramName: default is "query"
 	   		 paramName: "term",
 	   		 params: {
-	   			 source: selectedSources//[{sourceName: "Youtube"}, {sourceName:"Europeana"}]}
+	   			 source: selectedSources,//[{sourceName: "Youtube"}, {sourceName:"Europeana"}]}
+	   			 limit: 3
 	   		 },
 	   		 ajaxSettings: {
 	   			 traditional: true,
@@ -329,11 +330,20 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	   			}
 	   			return {"suggestions": result};
 	   		 },
-	   		 groupBy: "category",
+	   		 //groupBy: "category",
+	   		 //width: "600",
 	   		 orientation: "auto",
 		     onSearchComplete: function(query, suggestions) {	
 		    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
 		    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+		    	 for (var i in suggestions) {
+		    		 var category = suggestions[i].data.category;
+		    		 var s = $(".autocomplete-suggestion").get(i);
+		    		 //$(s).append("<div>a</div>");.
+		    	 }
+		    	 /*$(".autocomplete-suggestion").each(function(i) {
+		    		 alert(i + ": " + $(this).text()); 
+		    	 });*/
 		     }
 	 });
 	  

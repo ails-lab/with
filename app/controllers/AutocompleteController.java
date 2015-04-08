@@ -22,20 +22,21 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import akka.japi.Function;
+import akka.util.Collections;
 import espace.core.AutocompleteResponse;
+import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.ESpaceSources;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
-import play.Logger;
 import play.libs.F.Promise;
 import play.libs.F.Tuple;
 import play.mvc.BodyParser;
@@ -46,7 +47,7 @@ import utils.MethodCallable;
 public class AutocompleteController extends Controller {
 	
 	
-	public static Promise<Result> autocompleteExt(String term, List<String> sourceFromUI) {
+	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
 			sourcesForAutocomplete = ESpaceSources.getESources();
@@ -56,19 +57,19 @@ public class AutocompleteController extends Controller {
 					sourcesForAutocomplete.add(s);
 			}
 		}
-		return getSuggestionsResponse(sourcesForAutocomplete, term);
+		return getSuggestionsResponse(sourcesForAutocomplete, term, limit);
 	}
 	
 	//the union of the suggestions collected from the sources APIs is returned
 	//if no source returns suggestions, then empty content is returned
 	@BodyParser.Of(BodyParser.Json.class)
-	private static Promise<Result> getSuggestionsResponse(List<ISpaceSource> sourcesWithAutocomplete, final String term) {
+	private static Promise<Result> getSuggestionsResponse(List<ISpaceSource> sourcesWithAutocomplete, final String term, int limit) {
 		MethodCallable<Tuple<String, ISpaceSource>, AutocompleteResponse> methodQuery = new MethodCallable<Tuple<String, ISpaceSource>, AutocompleteResponse>() {
 			public AutocompleteResponse call(Tuple<String, ISpaceSource> input) {
 				try {
 					String autocompleteQuery = input._1;
 					ISpaceSource src = input._2;
-					URL url = new URL(autocompleteQuery);
+					URL url = new URL(autocompleteQuery.replace(" ", "%20"));
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 			        conn.setRequestMethod("GET");
 			        BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
@@ -78,7 +79,6 @@ public class AutocompleteController extends Controller {
 			            response.append(line);
 			        }
 			        rd.close();
-			        //Logger.debug("Called " +  autocompleteQuery + " and got " + response.toString());
 			        //transform response into standard json
 			        AutocompleteResponse standardResponse = src.autocompleteResponse(response.toString());;
 			        return standardResponse;
@@ -90,7 +90,7 @@ public class AutocompleteController extends Controller {
 		};
 		Iterable<Promise<AutocompleteResponse>> promises = new ArrayList<Promise<AutocompleteResponse>>();
 		for (final ISpaceSource source: sourcesWithAutocomplete) {
-			final String autocompleteQuery = source.autocompleteQuery(term);
+			final String autocompleteQuery = source.autocompleteQuery(term, limit);
 			if (!autocompleteQuery.isEmpty()) {
 				((ArrayList<Promise<AutocompleteResponse>>) promises).add(
 					ParallelAPICall.createPromise(methodQuery, new Tuple(autocompleteQuery, source))
@@ -102,8 +102,34 @@ public class AutocompleteController extends Controller {
 				return !response.suggestions.isEmpty();
 			}
 		};
-		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises);
-	}
 		
+		MethodCallable<List<AutocompleteResponse>, List<AutocompleteResponse>> filter = new MethodCallable<List<AutocompleteResponse>, List<AutocompleteResponse>>() {
+			public List<AutocompleteResponse> call(List<AutocompleteResponse> response) {
+				Set<String> values = new HashSet<String>();
+				List<AutocompleteResponse> finalResponses = new ArrayList<AutocompleteResponse>();
+				List<Suggestion> filteredSuggestions = new ArrayList<Suggestion>();	
+				for (AutocompleteResponse r: response) {
+					List<Suggestion> sugg = r.suggestions;
+					filteredSuggestions.addAll(sugg);
+				}
+				List<Suggestion> outSugg = filteredSuggestions.stream().filter(distinctByValue(p -> p.value)).collect(Collectors.toList());;
+				AutocompleteResponse ar = new AutocompleteResponse();
+				ar.suggestions = outSugg;
+				finalResponses.add(ar);
+				return finalResponses;
+			}
+		};
+		
+		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises, filter);
+	}
+	
+	public static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
+		Set<String> seen = new HashSet<String>();
+		return t -> { 
+			boolean contains = seen.contains(t.value);
+			seen.add(t.value); 
+			return !contains;//return (seen.putIfAbsent(t.value, Boolean.TRUE) == null);};
+		};
+	}
 
 }

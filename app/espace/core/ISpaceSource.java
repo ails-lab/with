@@ -31,7 +31,7 @@ public abstract class ISpaceSource {
 
 	public abstract SourceResponse getResults(CommonQuery q);
 
-	public String autocompleteQuery(String term) {
+	public String autocompleteQuery(String term, int limit) {
 		return "";
 	}
 	
