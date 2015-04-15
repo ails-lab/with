@@ -28,6 +28,13 @@ GET	     /collection/:id 	        			controllers.CollectionController.getCollect
 POST	 /collection/:id 						controllers.CollectionController.editCollection(id)
 DELETE   /collection/:id	                    controllers.CollectionController.deleteCollection(id)
 
+# Record Controller
+GET 	/record/findInCollections				controllers.RecordController.findInCollections(source: String ?="", recId: String ?="", annot: Boolean ?=false)
+GET		/record/:id								controllers.RecordController.getRecord(id, format: String ?="XML-EDM")
+POST 	/record/:id								controllers.RecordController.updateRecord(id, format: String ?="XML-EDM")
+DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
+
+
 # Media Controller
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=false) 
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false) 
@@ -42,3 +49,5 @@ POST	/user/login					controllers.UserManager.login()
 GET		/user/googleLogin			controllers.UserManager.googleLogin( accessToken:java.lang.String )
 GET		/user/facebookLogin			controllers.UserManager.facebookLogin( accessToken:java.lang.String )
 GET		/api/logout					controllers.UserManager.logout()
+
+

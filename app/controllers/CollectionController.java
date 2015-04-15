@@ -20,6 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionEntry;
@@ -31,8 +34,8 @@ import org.mongodb.morphia.Key;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.data.validation.Validation;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.With;
@@ -53,7 +56,7 @@ public class CollectionController extends Controller {
 	 * Get collection metadata (title, descr, thumbnail)
 	 */
 	public static Result getCollection(String id) {
-		ObjectNode result  = Json.newObject();
+			ObjectNode result = Json.newObject();
 
 			ObjectId colId = new ObjectId(id);
 			Collection c = null;
@@ -90,17 +93,37 @@ public class CollectionController extends Controller {
 			return ok(result);
 	}
 
+	/** still needs to be implemented in a better way
+	 * @param id
+	 * @return
+	 */
 	public static Result editCollection(String id) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		Collection collection = Json.fromJson(json, Collection.class);
-		if(DB.getCollectionDAO().makePermanent(collection) == null) {
+		if(json==null) {
+			result.put("message", "Invalid json!");
+			return badRequest(result);
+		}
+
+		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
+		Collection newVersion = Json.fromJson(json, Collection.class);
+		newVersion.setFirstEntries(oldVersion.getFirstEntries());
+		newVersion.setDbId(new ObjectId(id));
+
+		Set<ConstraintViolation<Collection>> violations =
+				Validation.getValidator().validate(newVersion);
+		for(ConstraintViolation<Collection> cv: violations) {
+			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
+			return badRequest(result);
+		}
+		if(DB.getCollectionDAO().makePermanent(newVersion) == null) {
+			log.error("Cannot save collection to database!");
 			result.put("message", "Cannot save collection to database!");
 			return internalServerError(result);
 		}
 
-		return ok(Json.toJson(collection));
+		return ok(Json.toJson(newVersion));
 	}
 
 	/**
@@ -109,18 +132,30 @@ public class CollectionController extends Controller {
 	 * @return
 	 */
 	//@With(UserLoggedIn.class)
-	@BodyParser.Of(BodyParser.Json.class)
 	public static Result createCollection() {
-
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
+		if(json==null) {
+			result.put("message", "Invalid json!");
+			return badRequest(result);
+		}
+
 		Key<Collection> colKey;
 		Collection newCollection = Json.fromJson(json, Collection.class);
-			if( (colKey = DB.getCollectionDAO().makePermanent(newCollection)) == null) {
-				result.put("message", "Cannot save Collection to database");
-				return internalServerError(result);
-			}
+
+
+		Set<ConstraintViolation<Collection>> violations =
+				Validation.getValidator().validate(newCollection);
+		for(ConstraintViolation<Collection> cv: violations) {
+			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
+			return badRequest(result);
+		}
+
+		if( (colKey = DB.getCollectionDAO().makePermanent(newCollection)) == null) {
+			result.put("message", "Cannot save Collection to database");
+			return internalServerError(result);
+		}
 		newCollection.setDbId(new ObjectId(colKey.getId().toString()));
 		//result.put("message", "Collection succesfully stored!");
 		//result.put("id", colKey.getId().toString());
@@ -135,6 +170,7 @@ public class CollectionController extends Controller {
 								String access,
 								int offset, int count) {
 
+
 		List<Collection> userCollections;
 		if(ownerId != null)
 			userCollections = DB.getCollectionDAO()
@@ -146,8 +182,11 @@ public class CollectionController extends Controller {
 			if(username != null)
 				u = DB.getUserDAO().getByUsername(username);
 
-			if( u == null)
-				return badRequest("User did not specified!");
+			if( u == null) {
+				result.put("message", "User did not specified!");
+				return badRequest(result);
+			}
+
 
 			userCollections = DB.getCollectionDAO()
 						.getByOwner(u.getDbId(), offset, count);
@@ -160,10 +199,14 @@ public class CollectionController extends Controller {
 	 * Retrieve all fields from the first 20 items
 	 * of all collections?
 	 */
-	@BodyParser.Of(BodyParser.Json.class)
 	public static Result listFirstRecordsOfUserCollections() {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+
+		if(json==null) {
+			result.put("message", "Invalid json!");
+			return badRequest(result);
+		}
 
 		if(json.has("userId")) {
 			String userId = json.get("userId").asText();
@@ -195,10 +238,14 @@ public class CollectionController extends Controller {
 	 * Adds a Record to a Collection
 	 */
 	//@With(UserLoggedIn.class)
-	@BodyParser.Of(BodyParser.Json.class)
 	public static Result addRecordToCollection(String collectionId) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+
+		if(json==null) {
+			result.put("message", "Invalid json!");
+			return badRequest(result);
+		}
 
 		RecordLink rLink = null;
 		CollectionEntry colEntry = null;
@@ -208,19 +255,28 @@ public class CollectionController extends Controller {
 			rLink = DB.getRecordLinkDAO().getByDbId(new ObjectId(recordLinkId));
 		} else {
 			rLink = Json.fromJson(json, RecordLink.class);
+
+			Set<ConstraintViolation<RecordLink>> violations =
+					Validation.getValidator().validate(rLink);
+			for(ConstraintViolation<RecordLink> cv: violations) {
+				result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
+				return badRequest(result);
+			}
+
 			Key<RecordLink> rLinkKey = DB.getRecordLinkDAO().makePermanent(rLink);
+			if(rLinkKey == null) {
+				result.put("message", "Cannot save RecordLink to database!");
+				return internalServerError(result);
+			}
 			recordLinkId = rLinkKey.getId().toString();
 			rLink.setDbId(new ObjectId(recordLinkId));
 		}
 
 		colEntry = new CollectionEntry();
-		colEntry.setRecordLink(rLink);
-		colEntry.setCollection(collectionId);
+		colEntry.setBaseLinkData(rLink);
+		colEntry.setCollectionId(new ObjectId(collectionId));
 
-		try {
-			DB.getCollectionEntryDAO().makePermanent(colEntry);
-		} catch(Exception e) {
-			log.error("Cannot save CollectionEntry to database!", e);
+		if(	DB.getCollectionEntryDAO().makePermanent(colEntry) == null ) {
 			result.put("message", "Cannot save CollectionEntry to database!");
 			return internalServerError(result);
 		}
@@ -231,7 +287,6 @@ public class CollectionController extends Controller {
 	 * Remove a Record from a Collection
 	 */
 	//@With(UserLoggedIn.class)
-	@BodyParser.Of(BodyParser.Json.class)
 	public static Result removeRecordFromCollection(String collectionId, String rLinkId,
 													int position, int version) {
 		ObjectNode result = Json.newObject();
@@ -253,21 +308,25 @@ public class CollectionController extends Controller {
 	 * List all Records from a Collection
 	 * using a start item and a page size
 	 */
-	@BodyParser.Of(BodyParser.Json.class)
 	public static Result listCollectionRecords(String collectionId, int start, int count) {
+		ObjectNode result = Json.newObject();
 
-			ObjectId colId = new ObjectId(collectionId);
+		ObjectId colId = new ObjectId(collectionId);
+		List<CollectionEntry> entries =
+			DB.getCollectionEntryDAO()
+					.getByCollectionOffsetCount(colId, start, count);
+		if(entries==null) {
+			result.put("message", "Cannot retrieve records from database!");
+			return internalServerError(result);
+		}
+		ArrayNode records = Json.newObject().arrayNode();
+		for(CollectionEntry e: entries) {
+			records.add(Json.toJson(e.getBaseLinkData()));
+		}
 
-			List<CollectionEntry> entries =
-				DB.getCollectionEntryDAO()
-						.getByCollectionOffsetCount(colId, start, count);
-			ArrayNode records = Json.newObject().arrayNode();
-			for(CollectionEntry e: entries) {
-				records.add(Json.toJson(e.getRecordLink()));
-			}
-
-			return ok(records);
+		return ok(records);
 	}
+
 
 	public static Result download(String id) {
 		return null;

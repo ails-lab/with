@@ -49,7 +49,7 @@ public class Collection {
 
 	@NotNull
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
-	private ObjectId owner;
+	private ObjectId ownerId;
 
 	@NotNull
 	@NotBlank
@@ -59,8 +59,7 @@ public class Collection {
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
-	@Embedded
-	private Record exampleRecord;
+
 	private boolean isPublic;
 	private Date created;
 	private Date lastModified;
@@ -119,21 +118,21 @@ public class Collection {
 		this.isPublic = isPublic;
 	}
 	public User retrieveOwner() {
-		return	DB.getUserDAO().getById(this.owner);
+		return	DB.getUserDAO().getById(this.ownerId);
 	}
 
 	public ObjectId getOwner() {
-		return this.owner;
+		return this.ownerId;
 	}
 
 	@JsonProperty
-	public void setOwner(ObjectId ownerId) {
-		this.owner = ownerId;
+	public void setOwnerId(ObjectId ownerId) {
+		this.ownerId = ownerId;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwnerId(User owner) {
 		//set owner to collection
-		this.owner = owner.getDbId();
+		this.ownerId = owner.getDbId();
 
 		//create a new collection metadata for owner
 		owner.getCollectionMetadata().add(collectMetadata());
@@ -176,15 +175,6 @@ public class Collection {
 	public void setThumbnail(Media thumbnail) {
 		this.thumbnail = thumbnail.getDbId();
 	}
-
-	public Record getExampleRecord() {
-		return exampleRecord;
-	}
-
-	public void setExampleRecord(Record exampleRecord) {
-		this.exampleRecord = exampleRecord;
-	}
-
 
 	public Date getCreated() {
 		return created;

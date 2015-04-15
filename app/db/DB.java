@@ -22,7 +22,6 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionEntry;
-import model.Record;
 import model.RecordLink;
 import model.Search;
 import model.SearchResult;
@@ -128,10 +127,6 @@ public class DB {
 		if( mediaDAO == null )
 			 mediaDAO = new MediaDAO();
 		return mediaDAO;
-	}
-
-	public static RecordDAO getRecordDAO() {
-		return (RecordDAO) getDAO(Record.class);
 	}
 
 	public static RecordLinkDAO getRecordLinkDAO() {

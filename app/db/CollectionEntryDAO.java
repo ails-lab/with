@@ -33,30 +33,55 @@ public class CollectionEntryDAO extends DAO<CollectionEntry> {
 		super(CollectionEntry.class);
 	}
 
-	public CollectionEntry getByRecLinkId(ObjectId recLinkId) {
+	/**
+	 * Retrieve all personalized records referred to
+	 * this record link
+	 * @param recLinkId
+	 * @return
+	 */
+	public List<CollectionEntry> getByRecLinkId(ObjectId recLinkId) {
 		Query<CollectionEntry> q = this.createQuery()
-				.field("recordLink").equal(recLinkId);
+				.field("baseLinkData._id").equal(recLinkId);
+		return this.find(q).asList();
+	}
+
+	/**
+	 * Retrieve the specific personalized record referred to
+	 * the record link and the specified collection
+	 * @param recLinkId
+	 * @param collectionId
+	 * @return
+	 */
+	public CollectionEntry getByPersonalizedRecord(ObjectId recLinkId, ObjectId collectionId) {
+		Query<CollectionEntry> q = this.createQuery()
+				.field("baseLinkData._id").equal(recLinkId)
+				.field("collection").equal(collectionId);
 		return this.findOne(q);
 	}
 
 	public int deleteByCollectionRecLinkId(ObjectId recLinkId, ObjectId colId) {
 		Query<CollectionEntry> q = this.createQuery()
-				.field("recordLink._id").equal(recLinkId)
+				.field("baseLinkData._id").equal(recLinkId)
 				.field("collection").equal(colId);
 		return this.deleteByQuery(q).getN();
 	}
 
 	public List<CollectionEntry> getByCollection(ObjectId colId) {
-		Query<CollectionEntry> q = this.createQuery()
-				.field("collection").equal(colId);
-		return this.find(q).asList();
+		return getByCollectionOffsetCount(colId, 0, -1);
 	}
 
 	public List<CollectionEntry> getByCollectionOffsetCount(ObjectId colId, int offset, int count) {
 		Query<CollectionEntry> q = this.createQuery()
-				.field("collection").equal(colId)
+				.field("collectionId").equal(colId)
 				.offset(offset)
 				.limit(count);
+		return this.find(q).asList();
+	}
+
+	public List<CollectionEntry> getBySource(String source,String sourceId) {
+		Query<CollectionEntry> q = this.createQuery()
+				.field("baseLinkData.source").equal(source)
+				.field("baseLinkData.sourceId").equal(sourceId);
 		return this.find(q).asList();
 	}
 }

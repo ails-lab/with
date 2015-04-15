@@ -16,6 +16,8 @@
 
 package model;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.bson.types.ObjectId;
@@ -42,15 +44,8 @@ public class RecordLink {
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
-	// optional link to the materialized Record
-	@NotNull
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
-	private ObjectId recordReference;
-
 	// which backend provided this entry
 	// Europeana, DPLA ....
-	@NotNull
-	@NotBlank
 	private String source;
 
 	// an optional URL for the thumbnail
@@ -67,20 +62,12 @@ public class RecordLink {
 	private String description;
 
 	// the id in the source system
-	@NotNull
-	@NotBlank
 	private String sourceId;
 	// a link to the record on its source
-	@NotNull
-	@NotBlank
 	private String sourceUrl;
 
-	@NotNull
-	@NotBlank
 	private String type;
 
-	@NotNull
-	@NotBlank
 	private String rights;
 
 
@@ -92,19 +79,15 @@ public class RecordLink {
 		this.dbId = dbId;
 	}
 
-	public Record retrieveRecordReference() {
-		Record record =
-				DB.getRecordDAO().getById(this.recordReference);
-		return record;
+	/**
+	 * Retrive all personalized records referred to this
+	 * (outside) record link
+	 * @return
+	 */
+	public List<CollectionEntry> retrievePersonalizedRecords() {
+		return DB.getCollectionEntryDAO().getByRecLinkId(this.dbId);
 	}
 
-	public ObjectId getRecordReference() {
-		return this.recordReference;
-	}
-
-	public void setRecordReference(Record recordReference) {
-		this.recordReference = recordReference.getDbID();
-	}
 
 	public String getSource() {
 		return source;
@@ -185,6 +168,5 @@ public class RecordLink {
 	public void setThumbnailUrl(String thumbnailUrl) {
 		this.thumbnailUrl = thumbnailUrl;
 	}
-
 
 }

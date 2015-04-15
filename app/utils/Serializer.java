@@ -64,7 +64,7 @@ public class Serializer {
 			if(json.has("ownerMail")) {
 				String ownerMail = json.get("ownerMail").asText();
 				User owner = DB.getUserDAO().getByEmail(ownerMail);
-				collection.setOwner(owner);
+				collection.setOwnerId(owner);
 			}
 
 			if(json.has("firstEntries")) {
