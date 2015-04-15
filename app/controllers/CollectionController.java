@@ -171,6 +171,7 @@ public class CollectionController extends Controller {
 								int offset, int count) {
 
 		ObjectNode result = Json.newObject();
+
 		List<Collection> userCollections;
 		if(ownerId != null)
 			userCollections = DB.getCollectionDAO()
