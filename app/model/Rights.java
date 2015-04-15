@@ -28,14 +28,13 @@ import org.bson.types.ObjectId;
  *
  */
 public class Rights {
-	public static final int NONE = 0;
-	public static final int READ = 1;
-	public static final int WRITE = 2;
-	public static final int OWN = 3;
+	public static enum Access {
+		NONE, READ, WRITE, OWN
+	}
 	
 	public ObjectId userId;
 	public ObjectId objectId;
-	public int access;
+	public Access access;
 	
 	public Date created;
 
@@ -58,11 +57,11 @@ public class Rights {
 		this.objectId = objectId;
 	}
 
-	public int getAccess() {
+	public Access getAccess() {
 		return access;
 	}
 
-	public void setAccess(int access) {
+	public void setAccess(Access access) {
 		this.access = access;
 	}
 
