@@ -17,11 +17,21 @@
 package model;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+
+import utils.Serializer;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
@@ -29,17 +39,33 @@ import db.DB;
 public class CollectionEntry {
 
 	@Id
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbID;
 
-	private ObjectId collection;
-	@Embedded
-	private RecordLink recordLink;
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	private ObjectId collectionId;
 
 	private Date created;
 
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
+
+	@Embedded
+	private RecordLink baseLinkData;
+
+	// there will be different serializations of the record available in here
+	// like "EDM" -> xml for the EDM
+	// "json EDM" -> json format of the EDM?
+	// "json UI" -> ...
+	// "source format" -> ...
+	private Map<String, String> content = new HashMap<String, String>();
+
+	// fixed-size, denormalization of Tags on this record
+	// When somebody adds a tag to a record, and the cap is not reached, it will go here
+	// This might get out of sync on tag deletes, since a deleted tag from one user doesn't necessarily delete
+	// the tag from here. Tag cleaning has to be performed regularly.
+	private Set<String> tags = new HashSet<String>();
 
 
 	// getter setter section
@@ -52,26 +78,28 @@ public class CollectionEntry {
 		this.dbID = dbID;
 	}
 
+	@JsonIgnore
 	public Collection getCollection() {
 		Collection collection =
-				DB.getCollectionDAO().getById(this.collection);
+				DB.getCollectionDAO().getById(this.collectionId);
 		return collection;
 	}
 
-	public void setCollection(Collection collection) {
-		this.collection = collection.getDbId();
+	public void setCollectionId(Collection collection) {
+		this.collectionId = collection.getDbId();
 	}
 
-	public void setCollection(String collectionId) {
-		this.collection = new ObjectId(collectionId);
+	@JsonProperty
+	public void setCollectionId(ObjectId collectionId) {
+		this.collectionId = collectionId;
 	}
 
-	public RecordLink getRecordLink() {
-		return recordLink;
+	public RecordLink getBaseLinkData() {
+		return baseLinkData;
 	}
 
-	public void setRecordLink(RecordLink recordLink) {
-		this.recordLink = recordLink;
+	public void setBaseLinkData(RecordLink recordLink) {
+		this.baseLinkData = recordLink;
 	}
 
 	public int getPosition() {
@@ -88,6 +116,22 @@ public class CollectionEntry {
 
 	public void setCreated(Date created) {
 		this.created = created;
+	}
+
+	public Set<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(Set<String> tags) {
+		this.tags = tags;
+	}
+
+	public Map<String, String> getContent() {
+		return content;
+	}
+
+	public void setContent(Map<String, String> content) {
+		this.content = content;
 	}
 
 }

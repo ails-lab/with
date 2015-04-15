@@ -59,7 +59,7 @@ public class CollectionDAOTest {
 		colMeta.setTitle(collection.getTitle());
 
 		User user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		collection.setOwner(user);
+		collection.setOwnerId(user);
 
 
 		//save the new created collection
@@ -137,10 +137,10 @@ public class CollectionDAOTest {
 
 			if (i == 42) {
 				user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-				collection.setOwner(user);
+				collection.setOwnerId(user);
 			} else {
 				user = DB.getUserDAO().find().asList().get(i);
-				collection.setOwner(user);
+				collection.setOwnerId(user);
 			}
 
 			//save the new created collection
@@ -167,8 +167,8 @@ public class CollectionDAOTest {
 
 				//create a collection entry for the RecordLink
 				CollectionEntry entry = new CollectionEntry();
-				entry.setCollection(collection);
-				entry.setRecordLink(recLink);
+				entry.setCollectionId(collection);
+				entry.setBaseLinkData(recLink);
 				Key<CollectionEntry> entryKey = DB.getCollectionEntryDAO().makePermanent(entry);
 				assertThat(entryKey).isNotNull();
 

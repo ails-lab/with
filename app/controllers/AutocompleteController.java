@@ -45,8 +45,8 @@ import play.mvc.Result;
 import utils.MethodCallable;
 
 public class AutocompleteController extends Controller {
-	
-	
+
+
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
@@ -59,7 +59,7 @@ public class AutocompleteController extends Controller {
 		}
 		return getSuggestionsResponse(sourcesForAutocomplete, term, limit);
 	}
-	
+
 	//the union of the suggestions collected from the sources APIs is returned
 	//if no source returns suggestions, then empty content is returned
 	@BodyParser.Of(BodyParser.Json.class)
@@ -85,7 +85,7 @@ public class AutocompleteController extends Controller {
 				} catch (IOException e) {
 					e.printStackTrace();
 					return new AutocompleteResponse();
-				}	
+				}
 		   }
 		};
 		Iterable<Promise<AutocompleteResponse>> promises = new ArrayList<Promise<AutocompleteResponse>>();
@@ -102,12 +102,12 @@ public class AutocompleteController extends Controller {
 				return !response.suggestions.isEmpty();
 			}
 		};
-		
+
 		MethodCallable<List<AutocompleteResponse>, List<AutocompleteResponse>> filter = new MethodCallable<List<AutocompleteResponse>, List<AutocompleteResponse>>() {
 			public List<AutocompleteResponse> call(List<AutocompleteResponse> response) {
 				Set<String> values = new HashSet<String>();
 				List<AutocompleteResponse> finalResponses = new ArrayList<AutocompleteResponse>();
-				List<Suggestion> filteredSuggestions = new ArrayList<Suggestion>();	
+				List<Suggestion> filteredSuggestions = new ArrayList<Suggestion>();
 				for (AutocompleteResponse r: response) {
 					List<Suggestion> sugg = r.suggestions;
 					filteredSuggestions.addAll(sugg);
@@ -119,15 +119,15 @@ public class AutocompleteController extends Controller {
 				return finalResponses;
 			}
 		};
-		
+
 		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises, filter);
 	}
-	
+
 	public static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
 		Set<String> seen = new HashSet<String>();
-		return t -> { 
+		return t -> {
 			boolean contains = seen.contains(t.value);
-			seen.add(t.value); 
+			seen.add(t.value);
 			return !contains;//return (seen.putIfAbsent(t.value, Boolean.TRUE) == null);};
 		};
 	}
