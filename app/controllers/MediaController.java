@@ -48,7 +48,7 @@ public class MediaController extends Controller {
 		try {
 			media = DB.getMediaDAO().findById(new ObjectId(mediaId));
 		} catch(Exception e) {
-			log.error("Cannot  media document from database", e);
+			log.error("Cannot retrieve media document from database", e);
 			return internalServerError("Cannot retrieve media document from database");
 		}
 
