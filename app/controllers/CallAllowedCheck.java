@@ -17,8 +17,7 @@
 package controllers;
 
 import static akka.pattern.Patterns.ask;
-import model.ApiKey;
-import model.ApiKey.AccessResponse;
+import model.ApiKey.Response;
 import play.libs.Akka;
 import play.libs.F.Promise;
 import play.mvc.Action;
@@ -27,13 +26,21 @@ import play.mvc.Result;
 import actors.ApiKeyManager;
 import akka.actor.ActorSelection;
 
+/**
+ * This Action extracts either the apikey information from the request or uses the remote address to ask
+ * the apiKeyManager actor if the call is allowed (and simultaneously to count it)
+ *  
+ * It doesn't yet count the volume .. I have no idea how to get that :-) 
+ * @author stabenau
+ *
+ */
 public class CallAllowedCheck extends Action.Simple {
 
 	@Override
 	public Promise<Result> call(Context ctx) throws Throwable {
 		// long reqSize = ctx.request().body();
 		String[] apikeys = ctx.request().queryString().get( "apikey");
-		ApiKeyManager.ApiAccess access = new ApiKeyManager.ApiAccess();
+		ApiKeyManager.Access access = new ApiKeyManager.Access();
 		if( apikeys != null ) {
 			access.apikey = apikeys[0];
 		} else if( ctx.session().containsKey("apikey")) {
@@ -48,10 +55,10 @@ public class CallAllowedCheck extends Action.Simple {
 	
 		return Promise.wrap(ask(api, access, 1000))
 				.flatMap((Object response) -> {
-					AccessResponse r;
-					if( response instanceof AccessResponse ) { 
-						r = (AccessResponse) response;
-						if( r == AccessResponse.ALLOWED )
+					Response r;
+					if( response instanceof Response ) { 
+						r = (Response) response;
+						if( r == Response.ALLOWED )
 							return delegate.call(ctx);
 					} 
 					return Promise.pure( (Result) badRequest(response.toString()));

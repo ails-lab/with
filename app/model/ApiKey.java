@@ -42,7 +42,7 @@ import play.Logger.ALogger;
 public class ApiKey {
 	public static final ALogger log = Logger.of(ApiKey.class);
 
-	public enum AccessResponse {
+	public static enum Response {
 		// INVALID_xxxx have to be checked somewhere else
 		INVALID_IP, EXPIRED_IP, INVALID_APIKEY, EXPIRED_APIKEY,
 		BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED,
@@ -151,37 +151,37 @@ public class ApiKey {
 	 * @param volume
 	 * @return
 	 */
-	public AccessResponse check( String call, long volume ) {
+	public Response check( String call, long volume ) {
 		if( expires != null ) {
 			if( new Date().after( expires )) {
 				if( StringUtils.isEmpty(ipPattern)) {
-					return AccessResponse.EXPIRED_APIKEY;
+					return Response.EXPIRED_APIKEY;
 				} else {
-					return AccessResponse.EXPIRED_IP;
+					return Response.EXPIRED_IP;
 				}
 			}
 		}
 		
 		CallLimit cl = getLimit( call );
 		if( cl == null ) {
-			return AccessResponse.BLOCKED_CALL;
+			return Response.BLOCKED_CALL;
 		}
 
-		AccessResponse res = null;
+		Response res = null;
 		
 		// check the limits
 		if(( volume > 0) && ( cl.volumeLimit >= 0 ) &&
 				(cl.volume + volume > cl.volumeLimit)) {
-			res = AccessResponse.VOLUME_LIMIT_REACHED;
+			res = Response.VOLUME_LIMIT_REACHED;
 		}
 		if(( cl.counterLimit >= 0 ) && (cl.counter +1 > cl.counterLimit)) {
-			res = AccessResponse.COUNT_LIMIT_REACHED;
+			res = Response.COUNT_LIMIT_REACHED;
 		}
 		
 		if( res == null  ) {
 			cl.counter += 1;
 			cl.volume += volume;
-			return AccessResponse.ALLOWED;
+			return Response.ALLOWED;
 		} else {
 			return res;
 		}
