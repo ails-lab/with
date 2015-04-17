@@ -144,21 +144,22 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			collname : self.collname
 		});
 
+	  var collections;
+		if (sessionStorage.getItem('UserCollections') !== null) 
+			collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+		else if (localStorage.getItem('UserCollections') !== null) 
+			collections = JSON.parse(localStorage.getItem("UserCollections"));
 
-	  /*load these from db and put on session storage upon login . For now use static array*/
+		/*load these from db and put on session storage upon login . For now use static array*/
 	/*  self.collectionitems = ko.observableArray([
 	                           		{'id': 1, 'name': ' Collection One'},
 	                           		{'id': 2, 'name': ' Collection Two'}
 	                           		]);
-    */
+	*/
 
 	  self.selected_items2 = ko.observableArray();
 
-	 
-
-	  collectionShow = function(record) {
-	    	self.record(record);
-		  
+	collectionShow = function(record) {
 	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();

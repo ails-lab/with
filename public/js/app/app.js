@@ -40,6 +40,25 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
+		storeUserCollections();
+	};
+	
+	storeUserCollections = function() {
+		var userData;
+		if (sessionStorage.getItem('User') !== null) {
+			userData = JSON.parse(sessionStorage.getItem("User"));
+		}
+		else if (localStorage.getItem('User') !== null) {
+			userData = JSON.parse(localStorage.getItem('User'));
+		}
+		getUserCollections(userData);
+	};
+
+	getUserCollections = function(userData) {
+		var username = userData.username;
+		var email = userData.email;
+		var ownerId =  userData._id.$oid;
+		//ownerId, email, 	access: String ?="owned", offset: Integer ?=0, count: Integer ?=10
 	};
 
 	logout           = function() {
