@@ -27,8 +27,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
 import play.Logger.ALogger;
-import controllers.CollectionController;
 import akka.actor.UntypedActor;
+import db.DB;
 /**
  * Keeps the API keys in memory, writes them to db occasionally and answers to 
  * request. There is to be one ApiKeyManager actor in the system!
@@ -41,7 +41,7 @@ public class ApiKeyManager extends UntypedActor  {
 	Hashtable<String, ApiKey> apiKeys = new Hashtable<String, ApiKey>();
 	List<ApiKey> ipPatterns = new ArrayList<ApiKey>();
 	
-	public static class ApiAccess implements Serializable {
+	public static class Access implements Serializable {
 		public String call;
 		public String ip;
 		public String apikey;
@@ -55,7 +55,7 @@ public class ApiKeyManager extends UntypedActor  {
 		}
 	}
 	
-	public static class ApiCreate implements Serializable {
+	public static class Create implements Serializable {
 		public String dbId;
 		
 		public String ip;
@@ -71,13 +71,53 @@ public class ApiKeyManager extends UntypedActor  {
 		public int position;
 	}
 	
+	/**
+	 * Send this to store current state
+	 * @author stabenau
+	 *
+	 */
+	public static class Store implements Serializable {
+		// just a marker
+	}
 	
+	/**
+	 * Send this to reread the state from database
+	 * @author stabenau
+	 *
+	 */
+	public static class Reset implements Serializable {
+		// just a marker
+	}
+	
+	
+	public ApiKeyManager() {
+		super();
+		readKeysFromDb();
+	}
+	
+	/**
+	 * Read everything from DB and overwrite whats in here.
+	 */
 	private void readKeysFromDb() {
-		// init from db
+		apiKeys.clear();
+		ipPatterns.clear();
+		for( ApiKey k: DB.getApiKeyDAO().find()) {
+			if( StringUtils.isEmpty(k.getIpPattern())) {
+				apiKeys.put( k.getKeyString(), k);
+			} else {
+				ipPatterns.add( k );
+			}
+		}
 	}
 	
 	private void writeKeysToDb() {
-		// sync to db
+		for( ApiKey k: apiKeys.values()) {
+			// safe or overwrite
+			DB.getApiKeyDAO().save(k);
+		}
+		for( ApiKey k:ipPatterns) {
+			DB.getApiKeyDAO().save(k);
+		}
 	}
 	
 	private ApiKey getByIp( String ip ) {
@@ -101,21 +141,21 @@ public class ApiKeyManager extends UntypedActor  {
 		return null;
 	}
 	
-	private void onApiAccess( ApiAccess access ) {
+	private void onApiAccess( Access access ) {
 		log.info( access.toString() );
 		ApiKey key = null;
 		if( !StringUtils.isEmpty(access.ip)) { 
 			key = getByIp(access.ip);
 			if( key == null ) { 
 				if( !access.update )
-					sender().tell( ApiKey.AccessResponse.INVALID_IP, self());
+					sender().tell( ApiKey.Response.INVALID_IP, self());
 				return;
 			}
 		} else {
 			key = apiKeys.get( access.apikey);
 			if( key == null ) {
 				if( !access.update )
-					sender().tell( ApiKey.AccessResponse.INVALID_APIKEY, self());
+					sender().tell( ApiKey.Response.INVALID_APIKEY, self());
 				return;
 			}
 		}
@@ -131,7 +171,7 @@ public class ApiKeyManager extends UntypedActor  {
 		sender().tell( msg, self());		
 	}
 	
-	private void onApiCreate( ApiCreate create ) {
+	private void onApiCreate( Create create ) {
 		// create apikey and return the secret
 		// create apikey for ip-pattern
 		
@@ -157,12 +197,20 @@ public class ApiKeyManager extends UntypedActor  {
 	@Override
 	public void onReceive(Object msg) throws Exception {
 		// TODO Auto-generated method stub
-		if( msg instanceof ApiAccess ) {
-			ApiAccess access = (ApiAccess) msg;
+		if( msg instanceof Access ) {
+			Access access = (Access) msg;
 			onApiAccess( access );
-		} else if( msg instanceof ApiCreate ) {
-			ApiCreate ac = (ApiCreate) msg;
+		} else if( msg instanceof Create ) {
+			Create ac = (Create) msg;
 			onApiCreate( ac );
+		} else if( msg instanceof Store ) {
+			writeKeysToDb();
+			// wait for the answer to be sure the store has happened
+			answer( new Store());
+		} else if( msg instanceof Reset ) {
+			readKeysFromDb();
+			// wait for the answer to be sure the read has happened
+			answer( new Reset());
 		}
 	}
 }
