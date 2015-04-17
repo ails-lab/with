@@ -19,6 +19,7 @@ package db;
 import java.util.HashMap;
 import java.util.Map;
 
+import model.ApiKey;
 import model.Collection;
 import model.CollectionEntry;
 import model.Record;
@@ -115,6 +116,10 @@ public class DB {
 		return (UserDAO) getDAO(User.class);
 	}
 
+	public static ApiKeyDAO getApiKeyDAO() {
+		return (ApiKeyDAO) getDAO(ApiKey.class);
+	}
+
 	public static CollectionDAO getCollectionDAO() {
 		return (CollectionDAO) getDAO(Collection.class);
 	}
@@ -145,6 +150,8 @@ public class DB {
 		return (CollectionEntryDAO) getDAO(CollectionEntry.class);
 	}
 
+	
+	
 	/**
 	 * Singleton DAO class for all the models
 	 * @param clazz
