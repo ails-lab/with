@@ -56,6 +56,8 @@ public class SearchController extends Controller {
 		return ok(Json.toJson(search(q)));
 	}
 	
+	// here is how the ApiKey check can be build into the controllers
+	// @With( CallAllowedCheck.class)
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
 
