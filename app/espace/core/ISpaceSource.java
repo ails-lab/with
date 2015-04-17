@@ -23,6 +23,8 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.RecordJSONMetadata.Format;
+
 public abstract class ISpaceSource {
 
 	public abstract String getSourceName();
@@ -38,4 +40,9 @@ public abstract class ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		return new AutocompleteResponse();
 	};
+	
+	public RecordJSONMetadata getJSONMetadata(String response) {
+		return new RecordJSONMetadata(Format.NULL, "");
+	}
+
 }

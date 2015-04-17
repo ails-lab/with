@@ -45,8 +45,6 @@ import play.mvc.Result;
 public class AutocompleteController extends Controller {
 	
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
-		final ALogger logger = Logger.of("access");
-		logger.error("!!!!!");
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
 			sourcesForAutocomplete = ESpaceSources.getESources();
