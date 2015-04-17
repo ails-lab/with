@@ -17,6 +17,9 @@
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
+import play.libs.Akka;
+import actors.ApiKeyManager;
+import akka.actor.Props;
 
 
 public class Global extends GlobalSettings {
@@ -24,5 +27,6 @@ public class Global extends GlobalSettings {
 	
 	@Override
 	public void onStart( Application app ) {
+		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
 	}
 }
