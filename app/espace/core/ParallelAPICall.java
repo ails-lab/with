@@ -20,11 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Json;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import controllers.UserManager;
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Result;
@@ -70,7 +72,7 @@ public class ParallelAPICall {
 	}
 	
 	public static <R> Promise<Result> combineResponses(final Function<R, Boolean> responseCollectionMethod,
-			Iterable<Promise<R>> promises, final Function<List<R>, List<R>> filter) {		
+			Iterable<Promise<R>> promises, final Function<List<R>, List<R>> filter) {	
 		Promise<List<R>> promisesSequence = Promise.sequence(promises);		 
         Promise<Result> promiseResult = promisesSequence.map(
     		new play.libs.F.Function<Iterable<R>, Result>() {

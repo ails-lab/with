@@ -35,6 +35,8 @@ import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.ESpaceSources;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.F.Promise;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -42,8 +44,9 @@ import play.mvc.Result;
 
 public class AutocompleteController extends Controller {
 	
-	
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
+		final ALogger logger = Logger.of("access");
+		logger.error("!!!!!");
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
 			sourcesForAutocomplete = ESpaceSources.getESources();
