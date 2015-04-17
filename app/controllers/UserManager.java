@@ -78,9 +78,12 @@ public class UserManager extends Controller {
 	/**
 	 * Propose new username when it is already in use.
 	 *
-	 * @param initial the initial username the user tried 
-	 * @param firstName the first name of the user
-	 * @param lastName the last name of the user
+	 * @param initial
+	 *            the initial username the user tried
+	 * @param firstName
+	 *            the first name of the user
+	 * @param lastName
+	 *            the last name of the user
 	 * @return the array node with two suggested alternative usernames
 	 */
 	private static ArrayNode proposeUsername(String initial, String firstName,
@@ -186,24 +189,15 @@ public class UserManager extends Controller {
 
 	}
 
-	/**
-	 * Should not be needed, is the same as login by email? Maybe need to store
-	 * if its a facebook or google or password log inner
-	 * 
-	 * @return
-	 */
-	public static Result findByFacebookId() {
-		return ok();
-	}
-
-	public static Result googleLogin(String accessToken) {
+	private static Result googleLogin(String googleId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
 			URL url = new URL(
 					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
 							+ accessToken);
-			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			HttpsURLConnection connection = (HttpsURLConnection) url
+					.openConnection();
 			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
@@ -212,6 +206,8 @@ public class UserManager extends Controller {
 				return badRequest(Json
 						.parse("{\"error\":\"User not registered\"}"));
 			}
+			u.setGoogleId(googleId);
+			DB.getUserDAO().makePermanent(u);
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -219,13 +215,15 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result facebookLogin(String accessToken) {
+	private static Result facebookLogin(String facebookId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
-			URL url = new URL("https://graph.facebook.com/endpoint?access_token="
-					+ accessToken);
-			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			URL url = new URL(
+					"https://graph.facebook.com/endpoint?access_token="
+							+ accessToken);
+			HttpsURLConnection connection = (HttpsURLConnection) url
+					.openConnection();
 			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
@@ -234,6 +232,8 @@ public class UserManager extends Controller {
 				return badRequest(Json
 						.parse("{\"error\":\"User not registered\"}"));
 			}
+			u.setFacebookId(facebookId);
+			DB.getUserDAO().makePermanent(u);
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -253,6 +253,32 @@ public class UserManager extends Controller {
 		ObjectNode error = (ObjectNode) Json.newObject();
 
 		User u = null;
+		if (json.has("facebookId")) {
+			String facebookId = json.get("facebookId").asText();
+			u = DB.getUserDAO().getByFacebookId(facebookId);
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				result = (ObjectNode) Json.parse(DB.getJson(u));
+				result.remove("md5Password");
+				return ok(result);
+			} else {
+				String accessToken = json.get("accessToken").asText();
+				return facebookLogin(facebookId, accessToken);
+			}
+		}
+		if (json.has("googleId")) {
+			String googleId = json.get("googleId").asText();
+			u = DB.getUserDAO().getByGoogleId(googleId);
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				result = (ObjectNode) Json.parse(DB.getJson(u));
+				result.remove("md5Password");
+				return ok(result);
+			} else {
+				String accessToken = json.get("accessToken").asText();
+				return googleLogin(googleId, accessToken);
+			}
+		}
 		String emailOrUserName = null;
 		if (json.has("email")) {
 			emailOrUserName = json.get("email").asText();

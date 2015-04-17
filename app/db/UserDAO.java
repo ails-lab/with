@@ -52,6 +52,14 @@ public class UserDAO extends DAO<User> {
 	public User getByUsername(String username) {
 		return this.findOne("username", username);
 	}
+	
+	public User getByFacebookId(String facebookId) {
+		return this.findOne("facebookId", facebookId);
+	}
+	
+	public User getByGoogleId(String googleId) {
+		return this.findOne("googleId", googleId);
+	}
 
 	/**
 	 * This method is updating one specific User. By default update method is
