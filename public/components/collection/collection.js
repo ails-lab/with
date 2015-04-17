@@ -157,7 +157,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 	    	$('#modal-'+self.modal()).removeClass('md-show');
 	    	$('#modal-'+self.modal()).css('display', 'none');
 
-	    }
+	  }
 
 	  self.privateToggle=function(e,arg){
 		  $(arg.currentTarget).parent().find('.btn').toggleClass('active');
@@ -170,7 +170,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 	  }
 
-
+	  self.createCollection = function(collection) {
+		  self.close();
+	  }
 
   }
 

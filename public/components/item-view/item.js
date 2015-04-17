@@ -5,7 +5,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
 	  self.route = params.route;
       var thumb="";
-
+      var recordId="";
 	  self.title = ko.observable(false);
 	  self.description=ko.observable(false);
 	  self.thumb = ko.observable("");
@@ -14,11 +14,9 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 	  self.creator=ko.observable("");
 	  self.provider=ko.observable("");
 	  self.apisource=ko.observable(true);
-
-
+	  
     itemShow = function(record) {
     	self.itemload(record);
-
     	$('#modal-1').css('display', 'block');
 
     	$('#modal-1').addClass('md-show');
@@ -56,9 +54,8 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		self.apisource(data.source);
 
 		self.view_url(data.view_url);
-
-
-
+		
+		recordId = data.id;
 	};
 
     self.close= function(){
