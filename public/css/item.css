@@ -6,6 +6,7 @@
 	max-width: 730px;
 	min-width: 320px;
 	max-height:80%;
+	min-height:420px;
 	overflow-y: scroll;
 	z-index: 1035;
 	visibility: hidden;
