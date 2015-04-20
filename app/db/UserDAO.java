@@ -87,6 +87,13 @@ public class UserDAO extends DAO<User> {
 				.equal(md5Pass));
 		return find(q).get();
 	}
+	
+	public List<User> getByUsernamePrefix(String prefix) {
+		Query<User> q = this.createQuery()
+				.field("username").startsWith(prefix);
+		return find(q).asList();
+		
+	}
 
 	/**
 	 * Return user collections
@@ -102,7 +109,7 @@ public class UserDAO extends DAO<User> {
 		return this.findOne(q).getUserCollections();
 	}
 
-	public List<String> getAllDisplayNames() {
+	public List<String> getAllUsernames() {
 		ArrayList<String> res = new ArrayList<String>();
 		withCollection(res, "", "username");
 		return res;

@@ -18,20 +18,15 @@ package controllers;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import org.bson.types.ObjectId;
+
 import model.User;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -46,34 +41,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 public class UserManager extends Controller {
+
 	public static final ALogger log = Logger.of(UserManager.class);
-
-	/**
-	 * Free to call by anybody, so we don't give lots of info.
-	 * 
-	 * @param email
-	 * @return
-	 */
-	public static Result findByEmail(String email) {
-		User u = DB.getUserDAO().getByEmail(email);
-		if (u != null) {
-			ObjectNode res = Json.newObject();
-			res.put("username", u.getUsername());
-			res.put("email", u.getEmail());
-			return ok(res);
-		} else {
-			return badRequest();
-		}
-	}
-
-	public static Result findByUsername(String username) {
-		User u = DB.getUserDAO().getByUsername(username);
-		if (u != null) {
-			return ok();
-		} else {
-			return badRequest();
-		}
-	}
 
 	/**
 	 * Propose new username when it is already in use.
@@ -326,5 +295,53 @@ public class UserManager extends Controller {
 	public static Result logout() {
 		session().clear();
 		return ok();
+	}
+
+	/**
+	 * Get a list of matching usernames
+	 *
+	 * @param prefix
+	 *            optional prefix of username
+	 * @return JSON document with an array of matching usernames (or all of
+	 *         them)
+	 */
+	public static Result listNames(String prefix) {
+		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+		ArrayNode result = Json.newObject().arrayNode();
+		for (User user : users) {
+			result.add(user.getUsername());
+		}
+		return ok(result);
+	}
+
+	/**
+	 * Find if email is already used.
+	 *
+	 * @param email
+	 *            the email
+	 * @return OK if the email is available or error if not
+	 */
+	public static Result emailAvailable(String email) {
+		User user = DB.getUserDAO().getByEmail(email);
+		if (user != null) {
+			return badRequest(Json.parse("{\"error\":\"Email not available\"}"));
+		} else {
+			return ok();
+		}
+	}
+
+	public static Result getUser(String id) {
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				return ok(DB.getJson(user));
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+			}
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
+					+ "\"}"));
+		}
 	}
 }
