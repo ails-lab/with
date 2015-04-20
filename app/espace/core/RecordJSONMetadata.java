@@ -14,19 +14,30 @@
  */
 
 
-import play.Application;
-import play.GlobalSettings;
-import play.Logger;
-import play.libs.Akka;
-import actors.ApiKeyManager;
-import akka.actor.Props;
+package espace.core;
 
-
-public class Global extends GlobalSettings {
-	static private final Logger.ALogger log = Logger.of(Global.class);
+public class RecordJSONMetadata {
 	
-	@Override
-	public void onStart( Application app ) {
-		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
+	public enum Format {
+		NULL,
+		JSONLD,
+		NLA
 	}
+	
+	private String jsonContent;
+	private Format format;
+	
+	public RecordJSONMetadata(Format format, String jsonContent) {
+		this.jsonContent = jsonContent;
+		this.format = format;
+	}
+	
+	public String getJsonContent() {
+		return jsonContent;
+	}
+	
+	public Format getFormat() {
+		return format;
+	}
+
 }

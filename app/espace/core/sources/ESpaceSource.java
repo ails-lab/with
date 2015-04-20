@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -31,7 +32,9 @@ import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
 import espace.core.SourceResponse;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
@@ -139,8 +142,8 @@ public class ESpaceSource extends ISpaceSource {
 		return res;
 	}
 	
-	public String autocompleteQuery(String term) {
-		return "http://www.europeana.eu/api/v2/suggestions.json?rows=4&phrases=false&query=" + term;
+	public String autocompleteQuery(String term, int limit) {
+		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
 	}
 	
 
@@ -172,5 +175,9 @@ public class ESpaceSource extends ISpaceSource {
 		}
 	}
 	
+	public RecordJSONMetadata getJSONMetadata(String response) {
+		String jsonContent = "";
+		return new RecordJSONMetadata(Format.JSONLD, jsonContent);
+	}
 	
 }
