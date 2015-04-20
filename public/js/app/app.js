@@ -57,8 +57,33 @@ define("app", ['knockout'], function(ko) {
 	getUserCollections = function(userData) {
 		var username = userData.username;
 		var email = userData.email;
-		var ownerId =  userData._id.$oid;
-		//ownerId, email, 	access: String ?="owned", offset: Integer ?=0, count: Integer ?=10
+		var userId =  userData._id.$oid;
+		$.ajax({
+			type        : "GET",
+			contentType : "application/json; charset=utf-8",
+			dataType    : "json",
+			url         : "/collection/list",
+			processData : false,
+			data        : "displayName=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20",
+				/*displayName: username,
+				ownerId: userId,
+				email: email,
+				offset: 0,
+				count: 20
+			}),*/
+			success     : function(data, text) {
+				// console.log(app.currentUser());
+				if (sessionStorage.getItem('User') !== null && sessionStorage.getItem('UserCollections') == null) {
+					sessionStorage.setItem("UserCollections", JSON.stringify(data));
+				}
+				else if (localStorage.getItem('User') !== null && localStorage.getItem('UserCollections') == null) {
+					localStorage.setItem("UserCollections", JSON.stringify(data));
+				}
+			},
+			error 		: function(request, status, error) {
+				//var err = JSON.parse(request.responseText);
+			}
+		});
 	};
 
 	logout           = function() {

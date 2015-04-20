@@ -151,11 +151,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			collections = JSON.parse(localStorage.getItem("UserCollections"));
 
 		/*load these from db and put on session storage upon login . For now use static array*/
-	/*  self.collectionitems = ko.observableArray([
+	  /*self.collectionitems = ko.observableArray([
 	                           		{'id': 1, 'name': ' Collection One'},
 	                           		{'id': 2, 'name': ' Collection Two'}
 	                           		]);
-	*/
+	   */
 
 	  self.selected_items2 = ko.observableArray();
 

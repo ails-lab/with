@@ -135,7 +135,6 @@ public class CollectionController extends Controller {
 								String access,
 								int offset, int count) {
 
-
 		List<Collection> userCollections;
 		if(ownerId != null)
 			userCollections = DB.getCollectionDAO()
