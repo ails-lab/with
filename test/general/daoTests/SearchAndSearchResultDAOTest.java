@@ -45,7 +45,7 @@ public class SearchAndSearchResultDAOTest {
 			List<Key<User>> userKeys = DB.getUserDAO().find().asKeyList();
 			assertThat(userKeys.size()).isEqualTo(1000);
 			// change to i%(TestUtils.r.nextInt(999)) for a not normalized distribution of Searches to the Users
-			ObjectId userId = new ObjectId(userKeys.get(i%(TestUtils.r.nextInt(999))).getId().toString());
+			ObjectId userId = new ObjectId(userKeys.get(i%((TestUtils.r.nextInt(999)+1))).getId().toString());
 			search.setUser(DB.getUserDAO().getById(userId).getDbId());
 
 			Key<Search> searchId = DB.getSearchDAO().makePermanent(search);

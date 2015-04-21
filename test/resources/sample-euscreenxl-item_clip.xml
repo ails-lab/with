@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eus:metadata xmlns:eus="http://www.euscreen.eu/schemas/euscreen/">
+  <eus:AdministrativeMetadata>
+    <eus:provider>CT</eus:provider>
+    <eus:publisherbroadcaster>Československá televize</eus:publisherbroadcaster>
+    <eus:iprRestrictions>Free Access - no re-use</eus:iprRestrictions>
+    <eus:rightsTermsAndConditions>The content provided by Česká televize is strictly for private use only 
+and protected by the copyright. Some videos could contain third party 
+material, the copyrights are held by the respective party. The use of 
+the content in any other form whatsoever, in particular for commercial 
+purposes, is prohibited without the prior written permission of Česká 
+televize. This includes in particular the reproduction, display, 
+publishing, editing, translation, microfilming and electronic processing
+ of the content as a whole or any parts thereof.</eus:rightsTermsAndConditions>
+    <eus:firstBroadcastChannel>ČST1</eus:firstBroadcastChannel>
+    <eus:identifier>EUS_E43B84275048F5C2C4A37AD3320C08B4</eus:identifier>
+    <eus:originalIdentifier>28836052901</eus:originalIdentifier>
+    <eus:filename>prodavacky.mp4</eus:filename>
+  </eus:AdministrativeMetadata>
+  <eus:ContentDescriptiveMetadata>
+    <eus:TitleSet>
+      <eus:TitleSetInOriginalLanguage>
+        <eus:title>Prodavačky</eus:title>
+        <eus:seriesOrCollectionTitle>Tip pro učiliště</eus:seriesOrCollectionTitle>
+      </eus:TitleSetInOriginalLanguage>
+      <eus:TitleSetInEnglish>
+        <eus:title>Shop assistants</eus:title>
+        <eus:seriesOrCollectionTitle>Tip for vacational schools</eus:seriesOrCollectionTitle>
+      </eus:TitleSetInEnglish>
+    </eus:TitleSet>
+    <eus:originallanguage>Czech</eus:originallanguage>
+    <eus:localKeyword>Publicistika</eus:localKeyword>
+    <eus:localKeyword>Generační tématika</eus:localKeyword>
+    <eus:localKeyword>Volný čas</eus:localKeyword>
+    <eus:localKeyword>Učni</eus:localKeyword>
+    <eus:localKeyword>Mládež</eus:localKeyword>
+    <eus:localKeyword>Školství</eus:localKeyword>
+    <eus:summary>Pořad o učních a pro učně, je návodem jak trávit volný čas na učilištích.</eus:summary>
+    <eus:summaryInEnglish>The broadcast for apprentices and students of vocational schools shows how could they spend free time.</eus:summaryInEnglish>
+    <eus:ThesaurusTerm thestermCode="http://thesaurus.euscreen.eu/EUscreenXL/v1/766"/>
+    <eus:genre>Factual</eus:genre>
+    <eus:topic>Lifestyle and consumerism</eus:topic>
+    <eus:extendedDescription>Divadlo poezie na obchodním učilišti v Mladé Boleslavi - vlastní tvorba, zkoušky, ukázky představení. Rozhovor s učnicemi a učni, jak jde dohromady prodávání a divadlo, jak jedno a druhé využijí v životě. Prodavačka metrového textilu předvádí různé typy chování prodavaček. Děvčata vypráví o svém vztahu k poezii, lásce, umění, citáty. Marek Vašut v roli Kašpárka - herecká etuda, host pořadu-hovoří o umění, divadle, poezii. Jiří Dědeček na návštěvě učiliště, rozhovor o jazyce, básních, epigramech. Pedagožka Jaroslava Jenčíková při zkoušce souboru. Libuše Šafránková recituje Máchu. Rozhovory s děvčaty o práci: co je mrzí a štve? Např. pracovní doba, naštvaní zákazníci.
+Theatre of Poetry from the vocational school of Business in Mladá Boleslav. Interview with apprentices and trainees: How the selling and theatre joins together. Saleswoman of linen depicts the various types of behaviour of shop assistants. The girls talk about their relationship with poetry, love and art. Actor Marek Vašut in the role of a jester - theatrical presentations, he talks about the art, theatre and poetry. Poet, folk singer and writer Jiří Dědeček talks about the language, poems and epigrams. Teacher Jaroslava Jenčíková during an ensamble rehearsal. Actress  Libuše Šafránková recites verse lines by Czech poet Karel Hynek Mácha. Interviews with the girls: what they are sad and upset about? E.g. working hours, unpleasant customers.
+</eus:extendedDescription>
+    <eus:episodeNumber>1</eus:episodeNumber>
+  </eus:ContentDescriptiveMetadata>
+  <eus:ObjectDescriptiveMetadata>
+    <eus:recordType>ITEM</eus:recordType>
+    <eus:contributor>Vacek, Milan (host, screenwriter)</eus:contributor>
+    <eus:contributor>Lederer, Alan (director)</eus:contributor>
+    <eus:relationIdentifier relationtype="isEpisodeOf"/>
+    <eus:LanguageInformation>
+      <eus:languageUsed>Czech</eus:languageUsed>
+      <eus:metadatalanguage>Czech</eus:metadatalanguage>
+    </eus:LanguageInformation>
+    <eus:SpatioTemporalInformation>
+      <eus:SpatialInformation>
+        <eus:GeographicalCoverage>Czech Republic</eus:GeographicalCoverage>
+        <eus:CountryofProduction>CZECH REPUBLIC</eus:CountryofProduction>
+      </eus:SpatialInformation>
+      <eus:TemporalInformation>
+        <eus:productionYear>1988</eus:productionYear>
+        <eus:broadcastDate>  06/09/1988</eus:broadcastDate>
+      </eus:TemporalInformation>
+    </eus:SpatioTemporalInformation>
+    <eus:TechnicalInformation>
+      <eus:materialType>VIDEO</eus:materialType>
+      <eus:itemDuration>00:29:24</eus:itemDuration>
+      <eus:aspectRatio>4:3</eus:aspectRatio>
+      <eus:itemColor>Colour</eus:itemColor>
+      <eus:itemSound>Mono</eus:itemSound>
+    </eus:TechnicalInformation>
+  </eus:ObjectDescriptiveMetadata>
+</eus:metadata>

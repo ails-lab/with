@@ -22,10 +22,9 @@ import general.TestUtils;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionEntry;
 import model.CollectionMetadata;
+import model.CollectionRecord;
 import model.Media;
-import model.RecordLink;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -59,7 +58,7 @@ public class CollectionDAOTest {
 		colMeta.setTitle(collection.getTitle());
 
 		User user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		collection.setOwner(user);
+		collection.setOwnerId(user);
 
 
 		//save the new created collection
@@ -137,10 +136,10 @@ public class CollectionDAOTest {
 
 			if (i == 42) {
 				user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-				collection.setOwner(user);
+				collection.setOwnerId(user);
 			} else {
 				user = DB.getUserDAO().find().asList().get(i);
-				collection.setOwner(user);
+				collection.setOwnerId(user);
 			}
 
 			//save the new created collection
@@ -148,7 +147,7 @@ public class CollectionDAOTest {
 			assertThat(colKey).isNotNull();
 
 			// save metadata to user
-			colMeta.setCollection(new ObjectId(colKey.getId().toString()));
+			colMeta.setCollectionId(new ObjectId(colKey.getId().toString()));
 			if(user.getCollectionMetadata().size() < 20 )
 				user.getCollectionMetadata().add(colMeta);
 			DB.getUserDAO().makePermanent(user);
@@ -162,19 +161,15 @@ public class CollectionDAOTest {
 			 */
 			//create a recordLInk (optionally a record)
 			for(int j = 0; j < TestUtils.r.nextInt(10000); j++) {
-				RecordLinkRecordDAO recordDAO = new RecordLinkRecordDAO();
-				RecordLink recLink = recordDAO.storeRecordLink();
-
-				//create a collection entry for the RecordLink
-				CollectionEntry entry = new CollectionEntry();
-				entry.setCollection(collection);
-				entry.setRecordLink(recLink);
-				Key<CollectionEntry> entryKey = DB.getCollectionEntryDAO().makePermanent(entry);
-				assertThat(entryKey).isNotNull();
+				RecordDAO recordDAO = new RecordDAO();
+				CollectionRecord record = recordDAO.storeRecordLink();
+				record.setCollectionId(collection.getDbId());
+				DB.getCollectionRecordDAO().makePermanent(record);
+				assertThat(record.getDbId()).isNotNull();
 
 				//fill with the to-20 recordLinks
 				if(collection.getFirstEntries().size() < 20)
-					collection.getFirstEntries().add(recLink);
+					collection.getFirstEntries().add(record);
 
 				//save the updated collection
 				DB.getCollectionDAO().makePermanent(collection);

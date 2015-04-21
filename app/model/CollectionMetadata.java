@@ -51,15 +51,16 @@ public class CollectionMetadata {
 	public ObjectId getCollectionId() {
 		return this.collectionId;
 	}
-	
+
+	public void setCollectionId(ObjectId collection) {
+		this.collectionId = collection;
+	}
+
+
 	public Collection getCollection() {
 		Collection collection =
 				DB.getCollectionDAO().getById(this.collectionId);
 		return collection;
-	}
-
-	public void setCollection(ObjectId collection) {
-		this.collectionId = collection;
 	}
 
 	public Media getThumbnail() {

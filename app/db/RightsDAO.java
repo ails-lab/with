@@ -16,24 +16,28 @@
 
 package db;
 
+import java.util.List;
+
+import model.Rights;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
-import model.RecordLink;
 import play.Logger;
 
-public class RecordLinkDAO extends DAO<RecordLink> {
-	static private final Logger.ALogger log = Logger.of(RecordLink.class);
 
-	public RecordLinkDAO() {
-		super( RecordLink.class );
+public class RightsDAO extends DAO<Rights> {
+	static private final Logger.ALogger log = Logger.of(Rights.class);
+
+
+	public RightsDAO() {
+		super(Rights.class);
 	}
 
-	public RecordLink getByDbId(ObjectId id) {
-		Query<RecordLink> q =
-				this.createQuery()
-				.field("_id").equal(id);
-		return this.findOne(q);
+	public List<Rights> getByOwner(ObjectId ownerId) {
+		Query<Rights> q = this.createQuery()
+				.field("ownerId").equal(ownerId);
+		return this.find(q).asList();
 	}
 
 }
