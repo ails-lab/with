@@ -144,26 +144,27 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			collname : self.collname
 		});
 
-	  var collections;
-		if (sessionStorage.getItem('UserCollections') !== null) 
-			collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		else if (localStorage.getItem('UserCollections') !== null) 
-			collections = JSON.parse(localStorage.getItem("UserCollections"));
-
+	  var collections = [];
+	  if (sessionStorage.getItem('UserCollections') !== null) 
+		  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+	  else if (localStorage.getItem('UserCollections') !== null) 
+		  collections = JSON.parse(localStorage.getItem("UserCollections"));
+	  if (collections.length>0)
+		  nocollection=false;
+	  self.collectionitems = ko.observableArray(collections);
 		/*load these from db and put on session storage upon login . For now use static array*/
 	  /*self.collectionitems = ko.observableArray([
 	                           		{'id': 1, 'name': ' Collection One'},
 	                           		{'id': 2, 'name': ' Collection Two'}
 	                           		]);
-	   */
-
+	*/
 	  self.selected_items2 = ko.observableArray();
 
 	collectionShow = function(record) {
-	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
-	    	else{self.modal("3");self.templateName('additem');}
-	    	self.open();
-	    }
+    	if(nocollection){self.modal("2");self.templateName('collection_new');}
+    	else{self.modal("3");self.templateName('additem');}
+    	self.open();
+    }
 
 	  self.open=function(){
 		  $('#modal-'+self.modal()).css('display', 'block');
@@ -193,6 +194,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					"contentType": "application/json",
 					"data": jsondata,
 					"success": function(data) {
+						//TODO: add new collection to self.collectionitems, probably to session/localStorage as well (?)
 						console.log(data);
 					},
 					

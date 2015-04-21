@@ -43,24 +43,17 @@ define("app", ['knockout'], function(ko) {
 		storeUserCollections();
 	};
 	
-	storeUserCollections = function() {
-		var userData;
-		if (sessionStorage.getItem('User') !== null) {
-			userData = JSON.parse(sessionStorage.getItem("User"));
-		}
-		else if (localStorage.getItem('User') !== null) {
-			userData = JSON.parse(localStorage.getItem('User'));
-		}
-		getUserCollections(userData);
+	storeUserCollections = function() {	
+		getUserCollections();
 	};
 
-	getUserCollections = function(userData) {
-		var username = userData.username;
-		var email = userData.email;
-		var userId =  userData._id.$oid;
+	getUserCollections = function() {
+		var username = self.currentUser.username();
+		var email = self.currentUser.email();
+		var userId =  self.currentUser._id();
 		$.ajax({
 			type        : "GET",
-			contentType : "application/json; charset=utf-8",
+			contentType : "application/json",
 			dataType    : "json",
 			url         : "/collection/list",
 			processData : false,
@@ -72,12 +65,12 @@ define("app", ['knockout'], function(ko) {
 				count: 20
 			}),*/
 			success     : function(data, text) {
-				// console.log(app.currentUser());
-				if (sessionStorage.getItem('User') !== null && sessionStorage.getItem('UserCollections') == null) {
-					sessionStorage.setItem("UserCollections", JSON.stringify(data));
+				console.log("User collections " + JSON.stringify(data));
+				if (sessionStorage.getItem('User') !== null) {
+					sessionStorage.setItem('UserCollections', JSON.stringify(data));
 				}
-				else if (localStorage.getItem('User') !== null && localStorage.getItem('UserCollections') == null) {
-					localStorage.setItem("UserCollections", JSON.stringify(data));
+				else if (localStorage.getItem('User') !== null) {
+					localStorage.setItem('UserCollections', JSON.stringify(data));
 				}
 			},
 			error 		: function(request, status, error) {
