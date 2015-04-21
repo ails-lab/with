@@ -16,16 +16,13 @@
 
 package controllers;
 
-import model.Collection;
 import model.Media;
-import model.RecordLink;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -65,10 +62,14 @@ public class MediaController extends Controller {
 	/**
 	 * edit metadata or the actual file of the media object
 	 */
-	@BodyParser.Of(BodyParser.Json.class)
 	public static Result editMetadataOrFile(String id, boolean file) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result  = Json.newObject();
+
+		if(json==null) {
+			result.put("message", "Invalid json!");
+			return badRequest(result);
+		}
 
 		if(file) {
 			return ok(Json.newObject().put("message", "not implemeted yet!"));
@@ -118,41 +119,6 @@ public class MediaController extends Controller {
 		}
 		result.put("message", "Succesfully delete object from database!");
 		return ok(result);
-	}
-
-	/**
-	 * get recordLink thumbnail
-	 */
-	public static Result getRecordLinkThumbnail(String rlinkId) {
-		RecordLink r = null;
-		Media thumbnail = null;
-		try {
-			r = DB.getRecordLinkDAO().getByDbId(new ObjectId(rlinkId));
-			thumbnail = r.retrieveThumbnail();
-		} catch(Exception e) {
-			log.error("Cannot retrieve record link or media document from database", e);
-			return internalServerError("Cannot retrieve record link or media document from database");
-		}
-		return ok(thumbnail.getData()).as(thumbnail.getMimeType());
-	}
-
-	/**
-	 * Return the thumbnail (in raw bytes) of a collection
-	 * @param colId
-	 * @return
-	 */
-	public static Result getCollectionThumbnail(String colId) {
-
-		Collection c = null;
-		Media thumbnail = null;
-		try {
-			c = DB.getCollectionDAO().getById(new ObjectId(colId));
-			thumbnail = c.retrieveThumbnail();
-		} catch(Exception e) {
-			log.error("Cannot retrieve collection or media document from database", e);
-			return internalServerError("Cannot retrieve collection or media document from database");
-		}
-		return ok(thumbnail.getData()).as(thumbnail.getMimeType());
 	}
 
 }
