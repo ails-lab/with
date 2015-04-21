@@ -165,6 +165,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		}
 
 		self._search = function() {
+		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
 			$.ajax({
