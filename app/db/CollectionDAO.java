@@ -57,7 +57,7 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getByOwner(ObjectId ownerId, int offset, int count) {
 		Query<Collection> q = this.createQuery()
-				.field("owner").equal(ownerId)
+				.field("ownerId").equal(ownerId)
 				.offset(offset)
 				.limit(count);
 		return this.find(q).asList();
@@ -67,7 +67,7 @@ public class CollectionDAO extends DAO<Collection> {
 	public User getCollectionOwner(ObjectId id) {
 		Query<Collection> q =  this.createQuery()
 				.field("_id").equal(id)
-				.retrievedFields(true, "owner");
+				.retrievedFields(true, "ownerId");
 		return findOne(q).retrieveOwner();
 	}
 
@@ -77,6 +77,7 @@ public class CollectionDAO extends DAO<Collection> {
 		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
 			if(colMeta.getCollectionId().equals(id))
 				owner.getCollectionMetadata().remove(colMeta);
+			DB.getUserDAO().makePermanent(owner);
 		}
 
 		Query<Collection> q = this.createQuery()
