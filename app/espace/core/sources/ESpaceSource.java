@@ -175,9 +175,4 @@ public class ESpaceSource extends ISpaceSource {
 		}
 	}
 	
-	public RecordJSONMetadata getJSONMetadata(String response) {
-		String jsonContent = "";
-		return new RecordJSONMetadata(Format.JSONLD, jsonContent);
-	}
-	
 }

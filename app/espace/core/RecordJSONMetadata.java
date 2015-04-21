@@ -20,6 +20,7 @@ public class RecordJSONMetadata {
 	
 	public enum Format {
 		NULL,
+		JSON,
 		JSONLD,
 		NLA
 	}

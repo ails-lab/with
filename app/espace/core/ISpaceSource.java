@@ -40,9 +40,5 @@ public abstract class ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		return new AutocompleteResponse();
 	};
-	
-	public RecordJSONMetadata getJSONMetadata(String response) {
-		return new RecordJSONMetadata(Format.NULL, "");
-	}
 
 }
