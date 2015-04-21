@@ -19,34 +19,51 @@ package model;
 import java.util.Date;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Id;
+
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Semantics is: The owner can create or remove a rights object
  * for Collection, Media, Search, ?? objects.
- * 
+ *
  * @author stabenau
  *
  */
 public class Rights {
+
+	@Id
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	public ObjectId dbId;
+
 	public static enum Access {
 		NONE, READ, WRITE, OWN
 	}
-	
-	public ObjectId userId;
+
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	public ObjectId receiverId;
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	public ObjectId ownerId;
+
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	public ObjectId objectId;
+	public String collectionName;
+
 	public Access access;
-	
+
 	public Date created;
 
-	// getter setter section
-	
 
-	public ObjectId getUserId() {
-		return userId;
+
+	// getter setter section
+	public ObjectId getDbId() {
+		return dbId;
 	}
 
-	public void setUserId(ObjectId userId) {
-		this.userId = userId;
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
 	}
 
 	public ObjectId getObjectId() {
@@ -56,6 +73,23 @@ public class Rights {
 	public void setObjectId(ObjectId objectId) {
 		this.objectId = objectId;
 	}
+
+	public ObjectId getReceiverId() {
+		return receiverId;
+	}
+
+	public void setReceiverId(ObjectId receiverId) {
+		this.receiverId = receiverId;
+	}
+
+	public ObjectId getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(ObjectId ownerId) {
+		this.ownerId = ownerId;
+	}
+
 
 	public Access getAccess() {
 		return access;
@@ -72,6 +106,15 @@ public class Rights {
 	public void setCreated(Date created) {
 		this.created = created;
 	}
-	
+
+	public String getCollectionName() {
+		return collectionName;
+	}
+
+	public void setCollectionName(String collectionName) {
+		this.collectionName = collectionName;
+	}
+
+
 }
 
