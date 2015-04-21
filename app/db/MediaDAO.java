@@ -51,8 +51,9 @@ public class MediaDAO  {
 		try {
 			// set metadata to media object
 			media.setType((String)gridfsDbFile.get("type"));
-			media.setMimeType(gridfsDbFile.getContentType());
-			media.setDuration(new Double((double) gridfsDbFile.get("duration")).floatValue());
+			media.setMimeType((String)gridfsDbFile.get("mimeType"));
+			if(gridfsDbFile.keySet().contains("duration"))
+				media.setDuration(new Double((double) gridfsDbFile.get("duration")).floatValue());
 			media.setHeight((int)gridfsDbFile.get("height"));
 			media.setWidth((int)gridfsDbFile.get("width"));
 			media.setDbId((ObjectId)gridfsDbFile.getId());

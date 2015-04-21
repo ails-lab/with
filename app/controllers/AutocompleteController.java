@@ -106,7 +106,7 @@ public class AutocompleteController extends Controller {
 					List<Suggestion> sugg = r.suggestions;
 					filteredSuggestions.addAll(sugg);
 				}
-				List<Suggestion> outSugg = filteredSuggestions.stream().filter(distinctByValue(p -> p.value)).collect(Collectors.toList());;
+				List<Suggestion> outSugg = filteredSuggestions.stream().filter(distinctByValue(p -> p.value)).collect(Collectors.toList());
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = outSugg;
 				finalResponses.add(ar);
