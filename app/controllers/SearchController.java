@@ -18,15 +18,16 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import play.Logger;
 import play.data.Form;
+import play.libs.F.Function0;
 import play.libs.Json;
-import play.libs.F.*;
+import play.libs.F.Promise;
 import play.mvc.*;
-import utils.MethodCallable;
 import espace.core.CommonQuery;
 import espace.core.ESpaceSources;
 import espace.core.ISpaceSource;
@@ -56,6 +57,9 @@ public class SearchController extends Controller {
 		return ok(Json.toJson(search(q)));
 	}
 	
+	// here is how the ApiKey check can be build into the controllers
+	// @With( CallAllowedCheck.class)
+	@SuppressWarnings("unchecked")
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
 
@@ -66,26 +70,18 @@ public class SearchController extends Controller {
 			try {
 				final CommonQuery q = Utils.parseJson(json);
 				Iterable<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
-				final long initTime = System.currentTimeMillis();
-				MethodCallable<Tuple<ISpaceSource, CommonQuery>, SourceResponse> methodQuery = new MethodCallable<Tuple<ISpaceSource, CommonQuery>, SourceResponse>() {
-					public SourceResponse call(Tuple<ISpaceSource, CommonQuery> tuple) {
-						ISpaceSource src = tuple._1;
-						CommonQuery q = tuple._2;		
-						return src.getResults(q);
-					}
-				};
+				//final long initTime = System.currentTimeMillis();
+				BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = 
+						(ISpaceSource src, CommonQuery cq)-> src.getResults(cq);
 				for (final ISpaceSource src : ESpaceSources.getESources()) {
 					if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
 						((List<Promise<SourceResponse>>) promises).add(
-							ParallelAPICall.<Tuple<ISpaceSource, CommonQuery>, SourceResponse>createPromise(methodQuery, new Tuple(src, q)));			
+							ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse>createPromise(methodQuery, src, q));			
 					}
 				}
 				//compose all futures, blocks until all futures finish
-				return ParallelAPICall.<SourceResponse>combineResponses(new MethodCallable<SourceResponse, Boolean>() {
-					public Boolean call(SourceResponse r) {
-						Logger.info(r.source + " found " + r.count);
-						return true;
-					}}, promises);		
+				return ParallelAPICall.<SourceResponse>combineResponses(
+						r -> {Logger.info(r.source + " found " + r.count); return true;}, promises);		
 			} catch (Exception e) {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
@@ -112,7 +108,7 @@ public class SearchController extends Controller {
 			public JsonNode apply() {
 				return Json.toJson(search(q));
 			}
-		}).map(new Function<JsonNode, Result>() {
+		}).map(new play.libs.F.Function<JsonNode, Result>() {
 			public Result apply(JsonNode i) {
 				Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()-initTime));
 				return ok(i);

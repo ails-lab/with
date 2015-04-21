@@ -16,6 +16,12 @@
 
 package model;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 
 import org.bson.types.ObjectId;
@@ -25,8 +31,10 @@ import org.mongodb.morphia.annotations.Id;
 
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
@@ -36,21 +44,14 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
-public class RecordLink {
+public class CollectionRecord {
 
 	@Id
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
-	// optional link to the materialized Record
-	@NotNull
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
-	private ObjectId recordReference;
-
 	// which backend provided this entry
 	// Europeana, DPLA ....
-	@NotNull
-	@NotBlank
 	private String source;
 
 	// an optional URL for the thumbnail
@@ -67,21 +68,37 @@ public class RecordLink {
 	private String description;
 
 	// the id in the source system
-	@NotNull
-	@NotBlank
 	private String sourceId;
 	// a link to the record on its source
-	@NotNull
-	@NotBlank
 	private String sourceUrl;
 
-	@NotNull
-	@NotBlank
 	private String type;
 
-	@NotNull
-	@NotBlank
 	private String rights;
+
+	//collection specific stuff...
+
+	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	private ObjectId collectionId;
+
+	private Date created;
+
+	// the place in the collection of this record,
+	// mostly irrelevant I would think ..
+	private int position;
+
+	// there will be different serializations of the record available in here
+	// like "EDM" -> xml for the EDM
+	// "json EDM" -> json format of the EDM?
+	// "json UI" -> ...
+	// "source format" -> ...
+	private final Map<String, String> content = new HashMap<String, String>();
+
+	// fixed-size, denormalization of Tags on this record
+	// When somebody adds a tag to a record, and the cap is not reached, it will go here
+	// This might get out of sync on tag deletes, since a deleted tag from one user doesn't necessarily delete
+	// the tag from here. Tag cleaning has to be performed regularly.
+	private final Set<String> tags = new HashSet<String>();
 
 
 	public ObjectId getDbId() {
@@ -90,20 +107,6 @@ public class RecordLink {
 
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
-	}
-
-	public Record retrieveRecordReference() {
-		Record record =
-				DB.getRecordDAO().getById(this.recordReference);
-		return record;
-	}
-
-	public ObjectId getRecordReference() {
-		return this.recordReference;
-	}
-
-	public void setRecordReference(Record recordReference) {
-		this.recordReference = recordReference.getDbID();
 	}
 
 	public String getSource() {
@@ -124,8 +127,18 @@ public class RecordLink {
 		return this.thumbnail;
 	}
 
-	public void setThumbnail(Media thumbnail) {
-		this.thumbnail = thumbnail.getDbId();
+	public void setThumbnail(ObjectId thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
+	public String getThumbnailUrl() {
+		return "/recordlink/" +
+				this.getDbId().toString() +
+				"/thumbnail";
+	}
+
+	public void setThumbnailUrl(String thumbnailUrl) {
+		this.thumbnailUrl = thumbnailUrl;
 	}
 
 	public String getTitle() {
@@ -176,15 +189,46 @@ public class RecordLink {
 		this.rights = rights;
 	}
 
-	public String getThumbnailUrl() {
-		return "/recordlink/" +
-				this.getDbId().toString() +
-				"/thumbnail";
+	@JsonIgnore
+	public Collection getCollection() {
+		return DB.getCollectionDAO().getById(this.collectionId);
 	}
 
-	public void setThumbnailUrl(String thumbnailUrl) {
-		this.thumbnailUrl = thumbnailUrl;
+	public ObjectId getCollectionId() {
+		return collectionId;
 	}
 
+	@JsonProperty
+	public void setCollectionId(ObjectId collectionId) {
+		this.collectionId = collectionId;
+	}
+
+	public void setCollectionId(Collection collection) {
+		this.collectionId = collection.getDbId();
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public int getPosition() {
+		return position;
+	}
+
+	public void setPosition(int position) {
+		this.position = position;
+	}
+
+	public Map<String, String> getContent() {
+		return content;
+	}
+
+	public Set<String> getTags() {
+		return tags;
+	}
 
 }

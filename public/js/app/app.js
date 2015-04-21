@@ -40,6 +40,43 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
+		storeUserCollections();
+	};
+	
+	storeUserCollections = function() {	
+		getUserCollections();
+	};
+
+	getUserCollections = function() {
+		var username = self.currentUser.username();
+		var email = self.currentUser.email();
+		var userId =  self.currentUser._id();
+		$.ajax({
+			type        : "GET",
+			contentType : "application/json",
+			dataType    : "json",
+			url         : "/collection/list",
+			processData : false,
+			data        : "displayName=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20",
+				/*displayName: username,
+				ownerId: userId,
+				email: email,
+				offset: 0,
+				count: 20
+			}),*/
+			success     : function(data, text) {
+				console.log("User collections " + JSON.stringify(data));
+				if (sessionStorage.getItem('User') !== null) {
+					sessionStorage.setItem('UserCollections', JSON.stringify(data));
+				}
+				else if (localStorage.getItem('User') !== null) {
+					localStorage.setItem('UserCollections', JSON.stringify(data));
+				}
+			},
+			error 		: function(request, status, error) {
+				//var err = JSON.parse(request.responseText);
+			}
+		});
 	};
 
 	logout           = function() {

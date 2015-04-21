@@ -1,5 +1,11 @@
-define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, template, selectize, app) {
+define(['knockout', 'text!./collection.html','selectize', 'app','knockout-validation'], function(ko, template, selectize, app) {
 
+	
+	ko.validation.init({
+		errorElementClass: 'has-error',
+		errorMessageClass: 'help-block'
+		
+	});
 
 	var inject_binding = function (allBindings, key, value) {
 	    return {
@@ -129,23 +135,36 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 	  self.route = params.route;
 	  self.templateName=ko.observable('collection_new');
 	  self.modal=ko.observable("3");
+	  self.record=ko.observable(true);
+	  self.collname=ko.observable('').extend({ required: true });
+	  
 	  var nocollection=true; /*picked up from browser session storage : should be stored upon login*/
+	  
+	  self.validationModel = ko.validatedObservable({
+			collname : self.collname
+		});
 
-	  /*load these from db and put on session storage upon login . For now use static array*/
-	  self.collectionitems = ko.observableArray([
+	  var collections = [];
+	  if (sessionStorage.getItem('UserCollections') !== null) 
+		  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+	  else if (localStorage.getItem('UserCollections') !== null) 
+		  collections = JSON.parse(localStorage.getItem("UserCollections"));
+	  if (collections.length>0)
+		  nocollection=false;
+	  self.collectionitems = ko.observableArray(collections);
+		/*load these from db and put on session storage upon login . For now use static array*/
+	  /*self.collectionitems = ko.observableArray([
 	                           		{'id': 1, 'name': ' Collection One'},
 	                           		{'id': 2, 'name': ' Collection Two'}
 	                           		]);
-
-
+	*/
 	  self.selected_items2 = ko.observableArray();
 
-	  collectionShow = function(record) {
-
-	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
-	    	else{self.modal("3");self.templateName('additem');}
-	    	self.open();
-	    }
+	collectionShow = function(record) {
+    	if(nocollection){self.modal("2");self.templateName('collection_new');}
+    	else{self.modal("3");self.templateName('additem');}
+    	self.open();
+    }
 
 	  self.open=function(){
 		  $('#modal-'+self.modal()).css('display', 'block');
@@ -159,6 +178,43 @@ define(['knockout', 'text!./collection.html','selectize', 'app'], function(ko, t
 
 	    }
 
+	  self.save=function(formElement){
+		  if (self.validationModel.isValid()) {
+			  console.log(app.currentUser._id.$oid);
+			  var jsondata=JSON.stringify({
+					ownerId: app.currentUser._id(),
+					title: self.collname(),
+					description:formElement.elements['details'].value,
+					public: $("#publiccoll .active").data("value")
+				});
+			  var collectionId=-1;
+			  $.ajax({
+					"url": "/collection/create",
+					"method": "post",
+					"contentType": "application/json",
+					"data": jsondata,
+					"success": function(data) {
+						//TODO: add new collection to self.collectionitems, probably to session/localStorage as well (?)
+						console.log(data);
+					},
+					
+					"error":function(result) {
+				        alert(result.statusText);
+						//$("#results").text('Status:'+result.status+', Error: ' +result.responseText);
+			             
+				     }});
+			  
+		  }
+		  else{
+			  self.validationModel.errors.showAllMessages();
+		  }
+	   
+	  }
+	  
+	  self.addRecord=function(collid){
+		  
+	  }
+	  
 	  self.privateToggle=function(e,arg){
 		  $(arg.currentTarget).parent().find('.btn').toggleClass('active');
 

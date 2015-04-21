@@ -19,10 +19,10 @@ package db;
 import java.util.HashMap;
 import java.util.Map;
 
+import model.ApiKey;
 import model.Collection;
-import model.CollectionEntry;
-import model.Record;
-import model.RecordLink;
+import model.CollectionRecord;
+import model.Rights;
 import model.Search;
 import model.SearchResult;
 import model.User;
@@ -115,6 +115,10 @@ public class DB {
 		return (UserDAO) getDAO(User.class);
 	}
 
+	public static ApiKeyDAO getApiKeyDAO() {
+		return (ApiKeyDAO) getDAO(ApiKey.class);
+	}
+
 	public static CollectionDAO getCollectionDAO() {
 		return (CollectionDAO) getDAO(Collection.class);
 	}
@@ -125,14 +129,6 @@ public class DB {
 		return mediaDAO;
 	}
 
-	public static RecordDAO getRecordDAO() {
-		return (RecordDAO) getDAO(Record.class);
-	}
-
-	public static RecordLinkDAO getRecordLinkDAO() {
-		return (RecordLinkDAO) getDAO(RecordLink.class);
-	}
-
 	public static SearchDAO getSearchDAO() {
 		return (SearchDAO) getDAO(Search.class);
 	}
@@ -141,10 +137,16 @@ public class DB {
 		return (SearchResultDAO) getDAO(SearchResult.class);
 	}
 
-	public static CollectionEntryDAO getCollectionEntryDAO() {
-		return (CollectionEntryDAO) getDAO(CollectionEntry.class);
+	public static CollectionRecordDAO getCollectionRecordDAO() {
+		return (CollectionRecordDAO) getDAO(CollectionRecord.class);
 	}
 
+	public static RightsDAO getRightsDAO() {
+		return (RightsDAO) getDAO(Rights.class);
+	}
+
+	
+	
 	/**
 	 * Singleton DAO class for all the models
 	 * @param clazz

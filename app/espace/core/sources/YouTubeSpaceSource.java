@@ -57,7 +57,6 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	private String getPageInfo(String q, String page, String pageSize) {
 		String string = roots.get(getKey(q, page, pageSize));
-		System.out.println("Found info " + string);
 		return string;
 	}
 

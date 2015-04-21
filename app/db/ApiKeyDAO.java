@@ -14,19 +14,28 @@
  */
 
 
-import play.Application;
-import play.GlobalSettings;
+package db;
+
+import java.util.List;
+
+import model.ApiKey;
+import model.Record;
 import play.Logger;
-import play.libs.Akka;
-import actors.ApiKeyManager;
-import akka.actor.Props;
 
+public class ApiKeyDAO extends DAO<ApiKey> {
+	static private final Logger.ALogger log = Logger.of(ApiKeyDAO.class);
 
-public class Global extends GlobalSettings {
-	static private final Logger.ALogger log = Logger.of(Global.class);
-	
-	@Override
-	public void onStart( Application app ) {
-		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
+	public ApiKeyDAO() {
+		super( ApiKey.class );
+	}
+
+	/**
+	 * Get the embedded RecordLink from a Record
+	 * @param dbId
+	 * @return
+	 */
+
+	public List<ApiKey> getAll() {
+		return find().asList();
 	}
 }

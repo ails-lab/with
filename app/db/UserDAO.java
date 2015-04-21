@@ -89,7 +89,7 @@ public class UserDAO extends DAO<User> {
 	public List<Collection> getUserTopCollectionsByEmail(String email) {
 		Query<User> q = this.createQuery()
 				.field("email").equal(email)
-				.retrievedFields(true, "collections.collection");
+				.retrievedFields(true, "collections.collectionId");
 
 		return this.findOne(q).getUserCollections();
 	}

@@ -76,8 +76,12 @@ public class UserManager extends Controller {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Propose new username when it is already in use.
+	 *
+	 * @param initial the initial username the user tried 
+	 * @param firstName the first name of the user
+	 * @param lastName the last name of the user
+	 * @return the array node with two suggested alternative usernames
 	 */
 	private static ArrayNode proposeUsername(String initial, String firstName,
 			String lastName) {
@@ -102,8 +106,9 @@ public class UserManager extends Controller {
 	}
 
 	/**
-	 * 
-	 * @return
+	 * Creates a user and stores him at the database
+	 *
+	 * @return the user JSON object (without the password) or JSON error
 	 */
 	@BodyParser.Of(BodyParser.Json.class)
 	public static Result register() {
@@ -236,6 +241,11 @@ public class UserManager extends Controller {
 		}
 	}
 
+	/**
+	 * Acquire a login cookie.
+	 *
+	 * @return OK status and the cookie or JSON error
+	 */
 	public static Result login() {
 
 		JsonNode json = request().body().asJson();
@@ -285,7 +295,7 @@ public class UserManager extends Controller {
 	/**
 	 * This action clears the session, the user is logged out.
 	 * 
-	 * @return
+	 * @return OK status
 	 */
 	public static Result logout() {
 		session().clear();

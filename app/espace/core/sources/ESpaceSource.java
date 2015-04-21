@@ -32,7 +32,9 @@ import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
 import espace.core.SourceResponse;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
@@ -173,5 +175,9 @@ public class ESpaceSource extends ISpaceSource {
 		}
 	}
 	
+	public RecordJSONMetadata getJSONMetadata(String response) {
+		String jsonContent = "";
+		return new RecordJSONMetadata(Format.JSONLD, jsonContent);
+	}
 	
 }

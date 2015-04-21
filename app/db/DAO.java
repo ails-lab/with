@@ -18,6 +18,7 @@ package db;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Key;
@@ -33,7 +34,6 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
 import com.mongodb.util.JSON;
 
 
@@ -182,5 +182,13 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				.getN();
 
 		return n;
+	}
+	
+	/**
+	 * Careful with this one! Too many results may come back.
+	 * @return
+	 */
+	public List<E> getAll() {
+		return find().asList();
 	}
 }
