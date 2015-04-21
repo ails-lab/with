@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eus:metadata xmlns:eus="http://www.euscreen.eu/schemas/euscreen/">
+    <eus:AdministrativeMetadata>
+        <eus:provider>BUFVC</eus:provider>
+        <eus:publisherbroadcaster>British Pathe Ltd. | Central Office of Information (COI)</eus:publisherbroadcaster>
+        <eus:firstBroadcastChannel>Test</eus:firstBroadcastChannel>
+        <eus:identifier>EUS_00000000000000000000000000000000</eus:identifier>
+        <eus:originalIdentifier>EUS1</eus:originalIdentifier>
+        <eus:filename>http://bufvc.ac.uk/wp-content/media/2013/04/ROUNDABOUT_1963_widget-homapage-pic.jpg</eus:filename>
+        <eus:landingPageURL>http://bufvc.ac.uk/newsonscreen/roundabout</eus:landingPageURL>
+    </eus:AdministrativeMetadata>
+    <eus:ContentDescriptiveMetadata>
+        <eus:TitleSet>
+            <eus:TitleSetInOriginalLanguage>
+                <eus:seriesOrCollectionTitle>Roundabout</eus:seriesOrCollectionTitle>
+            </eus:TitleSetInOriginalLanguage>
+            <eus:TitleSetInEnglish>
+                <eus:seriesOrCollectionTitle>Roundabout</eus:seriesOrCollectionTitle>
+            </eus:TitleSetInEnglish>
+        </eus:TitleSet>
+        <eus:originallanguage>English</eus:originallanguage>
+        <eus:LocalKeyword>newsreel</eus:LocalKeyword>
+        <eus:LocalKeyword>propaganda</eus:LocalKeyword>
+        <eus:LocalKeyword>Britain</eus:LocalKeyword>
+        <eus:LocalKeyword>Asia</eus:LocalKeyword>
+        <eus:LocalKeyword>arts</eus:LocalKeyword>
+        <eus:LocalKeyword>science</eus:LocalKeyword>
+        <eus:LocalKeyword>manufacturing</eus:LocalKeyword>
+        <eus:LocalKeyword>Commonwealth</eus:LocalKeyword>
+        <eus:summary>Roundabout was a monthly Technicolour cinemagazine series produced by the Central Office of Information (COI) from 1962 to 1974 to showcase British manufacturing and promote the ethos of the Commonwealth.</eus:summary>
+        <eus:summaryInEnglish>Roundabout was a monthly Technicolour cinemagazine series produced by the Central Office of Information (COI) from 1962 to 1974 to showcase British manufacturing and promote the ethos of the Commonwealth.</eus:summaryInEnglish>
+    </eus:ContentDescriptiveMetadata>
+    <eus:ObjectDescriptiveMetadata>
+        <eus:recordType>SERIES/COLLECTION</eus:recordType>
+        <eus:information>For a concise article on the history of the cinemagazine, see Linda Kaye, 'Roundabout: National Projection with a Technicolor Gloss' http://bufvc.ac.uk/newsonscreen/roundabout/roundabout-national-projection-with-a-technicolor-gloss (accessed October 2013)</eus:information>
+        <eus:contributor>Doe, John</eus:contributor>
+        <eus:relationIdentifier relationtype="hasEpisodes"/>
+        <eus:LanguageInformation>
+            <eus:languageUsed>English</eus:languageUsed>
+            <eus:metadatalanguage>English</eus:metadatalanguage>
+        </eus:LanguageInformation>
+        <eus:SpatioTemporalInformation>
+            <eus:SpatialInformation>
+                <eus:CountryofProduction>UNITED KINGDOM</eus:CountryofProduction>
+            </eus:SpatialInformation>
+            <eus:TemporalInformation>
+                <eus:productionYear>1962</eus:productionYear>
+                <eus:broadcastDate>1/1/1962</eus:broadcastDate>
+                <eus:lastBroadCastDate>1/6/1974</eus:lastBroadCastDate>
+                <eus:lastProductionYear>1974</eus:lastProductionYear>
+            </eus:TemporalInformation>
+        </eus:SpatioTemporalInformation>
+        <eus:TechnicalInformation>
+            <eus:materialType>VIDEO</eus:materialType>
+        </eus:TechnicalInformation>
+    </eus:ObjectDescriptiveMetadata>
+</eus:metadata>
