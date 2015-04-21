@@ -68,7 +68,7 @@ public class Collection {
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
-	private List<RecordLink> firstEntries = new ArrayList<RecordLink>();
+	private List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 
 	public ObjectId getDbId() {
@@ -81,16 +81,13 @@ public class Collection {
 	}
 
 
-	public void addEntry( CollectionEntry ce ) {
-
-	}
 	/**
 	 * Get the embeddable Metadata part
 	 * @return
 	 */
 	public CollectionMetadata collectMetadata() {
 		CollectionMetadata cm = new CollectionMetadata();
-		cm.setCollection(this.dbId);
+		cm.setCollectionId(this.dbId);
 		cm.setDescription(description);
 		cm.setThumbnail(thumbnail);
 		cm.setTitle(title);
@@ -117,11 +114,12 @@ public class Collection {
 	public void setPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
+
 	public User retrieveOwner() {
 		return	DB.getUserDAO().getById(this.ownerId);
 	}
 
-	public ObjectId getOwner() {
+	public ObjectId getOwnerId() {
 		return this.ownerId;
 	}
 
@@ -141,11 +139,11 @@ public class Collection {
 		DB.getUserDAO().makePermanent(owner);
 	}
 
-	public List<RecordLink> getFirstEntries() {
+	public List<CollectionRecord> getFirstEntries() {
 		return firstEntries;
 	}
 
-	public void setFirstEntries(List<RecordLink> firstEntries) {
+	public void setFirstEntries(List<CollectionRecord> firstEntries) {
 		this.firstEntries = firstEntries;
 	}
 

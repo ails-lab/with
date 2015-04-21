@@ -25,12 +25,10 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
-import model.CollectionEntry;
-import model.RecordLink;
+import model.CollectionRecord;
 import model.User;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.Key;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -38,7 +36,6 @@ import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.With;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -48,9 +45,6 @@ import db.DB;
 
 public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of( CollectionController.class);
-
-
-
 
 	/**
 	 * Get collection metadata (title, descr, thumbnail)
@@ -78,7 +72,7 @@ public class CollectionController extends Controller {
 	 * Json input, the collection dbId
 	 * @return
 	 */
-	@With(UserLoggedIn.class)
+	//@With(UserLoggedIn.class)
 	public static Result deleteCollection(String id) {
 		ObjectNode result = Json.newObject();
 
@@ -141,7 +135,6 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		Key<Collection> colKey;
 		Collection newCollection = Json.fromJson(json, Collection.class);
 
 
@@ -152,11 +145,10 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		if( (colKey = DB.getCollectionDAO().makePermanent(newCollection)) == null) {
+		if( DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
-		newCollection.setDbId(new ObjectId(colKey.getId().toString()));
 		//result.put("message", "Collection succesfully stored!");
 		//result.put("id", colKey.getId().toString());
 		return ok(Json.toJson(newCollection));
@@ -208,28 +200,28 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		if(json.has("userId")) {
-			String userId = json.get("userId").asText();
+		if(json.has("ownerId")) {
+			String userId = json.get("ownerId").asText();
 
 			//create a Map <collectionTitle, firstEntries>
-			Map<String, List<RecordLink>> firstEntries =
-					new HashMap<String, List<RecordLink>>();
+			Map<String, List<CollectionRecord>> firstEntries =
+					new HashMap<String, List<CollectionRecord>>();
 			for(Collection c: DB.getCollectionDAO().getByOwner(new ObjectId(userId)))
 				firstEntries.put(c.getTitle(), c.getFirstEntries());
 
 			ObjectNode collections = Json.newObject();
 			for(Entry<String, ?> entry: firstEntries.entrySet()) {
-				ArrayNode firstRecords = Json.newObject().arrayNode();
-				for(RecordLink recLink: (List<RecordLink>)entry.getValue()) {
+				/*ArrayNode firstRecords = Json.newObject().arrayNode();
+				for(CollectionRecord recLink: (List<CollectionRecord>)entry.getValue()) {
 					firstRecords.add(Json.toJson(recLink));
 					//firstRecords.add(Serializer.recordLinkToJson(recLink));
-				}
-				collections.put(entry.getKey(), firstRecords);
+				}*/
+				collections.put(entry.getKey(), Json.toJson(entry.getValue()));
 			}
 			result.put("userCollections", collections);
 			return ok(result);
 		} else {
-			result.put("message", "Did not specify the user!");
+			result.put("message", "Did not specify the owner!");
 			return badRequest(result);
 		}
 	}
@@ -247,59 +239,61 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		RecordLink rLink = null;
-		CollectionEntry colEntry = null;
+		CollectionRecord record = null;
 		String recordLinkId;
 		if(json.has("recordlink_id")) {
 			recordLinkId = json.get("recordlink_id").asText();
-			rLink = DB.getRecordLinkDAO().getByDbId(new ObjectId(recordLinkId));
+			record = DB.getCollectionRecordDAO().getById(new ObjectId(recordLinkId));
+			record.setDbId(null);
+			record.setCollectionId(new ObjectId(collectionId));
 		} else {
-			rLink = Json.fromJson(json, RecordLink.class);
+			record = Json.fromJson(json, CollectionRecord.class);
 
-			Set<ConstraintViolation<RecordLink>> violations =
-					Validation.getValidator().validate(rLink);
-			for(ConstraintViolation<RecordLink> cv: violations) {
+			Set<ConstraintViolation<CollectionRecord>> violations =
+					Validation.getValidator().validate(record);
+			for(ConstraintViolation<CollectionRecord> cv: violations) {
 				result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 				return badRequest(result);
 			}
-
-			Key<RecordLink> rLinkKey = DB.getRecordLinkDAO().makePermanent(rLink);
-			if(rLinkKey == null) {
-				result.put("message", "Cannot save RecordLink to database!");
-				return internalServerError(result);
-			}
-			recordLinkId = rLinkKey.getId().toString();
-			rLink.setDbId(new ObjectId(recordLinkId));
 		}
 
-		colEntry = new CollectionEntry();
-		colEntry.setBaseLinkData(rLink);
-		colEntry.setCollectionId(new ObjectId(collectionId));
-
-		if(	DB.getCollectionEntryDAO().makePermanent(colEntry) == null ) {
-			result.put("message", "Cannot save CollectionEntry to database!");
+		DB.getCollectionRecordDAO().makePermanent(record);
+		if(record.getDbId() == null) {
+			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
 		}
-		return ok(Json.toJson(rLink));
+
+		return ok(Json.toJson(record));
 	}
 
 	/**
 	 * Remove a Record from a Collection
 	 */
 	//@With(UserLoggedIn.class)
-	public static Result removeRecordFromCollection(String collectionId, String rLinkId,
+	public static Result removeRecordFromCollection(String collectionId, String recordId,
 													int position, int version) {
 		ObjectNode result = Json.newObject();
 
-		ObjectId colId     = new ObjectId(collectionId);
-		ObjectId recLinkId = new ObjectId(rLinkId);
+		//Remove record from collection.firstEntries
+		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
+		List<CollectionRecord> records = collection.getFirstEntries();
+		CollectionRecord temp = null;
+		for(CollectionRecord r: records) {
+			if( r.getDbId().toString().equals(recordId))
+				temp = r;
+			break;
+		}
+		if(temp!=null)
+			records.remove(temp);
+		DB.getCollectionDAO().makePermanent(collection);
 
-		 if(DB.getCollectionEntryDAO().deleteByCollectionRecLinkId(recLinkId, colId) == 0 ) {
+		if( DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId)).getN() == 0 ) {
 			 result.put("message", "Cannot delete CollectionEntry!");
 			 return internalServerError(result);
 		 }
 
-		result.put("message", "RecordLink succesfully removed from Collection with id: " + colId.toString());
+		result.put("message", "RecordLink succesfully removed from Collection with id: "
+								+ collectionId.toString());
 		return ok(result);
 
 	}
@@ -312,19 +306,19 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 
 		ObjectId colId = new ObjectId(collectionId);
-		List<CollectionEntry> entries =
-			DB.getCollectionEntryDAO()
+		List<CollectionRecord> records =
+			DB.getCollectionRecordDAO()
 					.getByCollectionOffsetCount(colId, start, count);
-		if(entries==null) {
+		if(records==null) {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
-		ArrayNode records = Json.newObject().arrayNode();
-		for(CollectionEntry e: entries) {
-			records.add(Json.toJson(e.getBaseLinkData()));
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for(CollectionRecord e: records) {
+			recordsList.add(Json.toJson(e));
 		}
 
-		return ok(records);
+		return ok(recordsList);
 	}
 
 
