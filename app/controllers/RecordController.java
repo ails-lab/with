@@ -18,7 +18,7 @@ package controllers;
 
 import java.util.List;
 
-import model.CollectionEntry;
+import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
 
@@ -45,19 +45,19 @@ public class RecordController extends Controller {
 	public static Result getRecord(String entryId, String format) {
 		ObjectNode result = Json.newObject();
 
-		CollectionEntry entry =
-				DB.getCollectionEntryDAO().get(new ObjectId(entryId));
+		CollectionRecord record =
+				DB.getCollectionRecordDAO().get(new ObjectId(entryId));
 
-		if(entry == null) {
+		if(record == null) {
 			log.error("Cannot retrieve user modifications from database");
 			result.put("message", "Cannot retrieve user modifications from database");
 			return internalServerError(result);
 		}
 
-		if(!format.equals("") && entry.getContent().containsKey(format)) {
-			return ok(Json.toJson(entry.getContent().get(format)));
+		if(!format.equals("") && record.getContent().containsKey(format)) {
+			return ok(Json.toJson(record.getContent().get(format)));
 		} else {
-			return ok(Json.toJson(entry));
+			return ok(Json.toJson(record));
 		}
 
 
@@ -69,14 +69,14 @@ public class RecordController extends Controller {
 	 * @param format
 	 * @return
 	 */
-	public static Result updateRecord(String colEntryId, String format) {
+	public static Result updateRecord(String recordId, String format) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		CollectionEntry colEntry =
-				DB.getCollectionEntryDAO().get(new ObjectId(colEntryId));
+		CollectionRecord record =
+				DB.getCollectionRecordDAO().get(new ObjectId(recordId));
 
-		if(colEntry == null) {
+		if(record == null) {
 			log.error("Cannot retrieve user modifications from database");
 			result.put("message", "Cannot retrieve user modifications from database");
 			return internalServerError(result);
@@ -97,11 +97,11 @@ public class RecordController extends Controller {
 	 * @param format
 	 * @return
 	 */
-	public static Result deleteRecord(String entryId, String format) {
+	public static Result deleteRecord(String recordId, String format) {
 		ObjectNode result = Json.newObject();
 
 		if(format.equals("")) {
-			 if( DB.getCollectionEntryDAO().deleteById(new ObjectId(entryId)).getN() != 1 ) {
+			 if( DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId)).getN() != 1 ) {
 				 log.error("Cannot delete Collection Entry from database!");
 				 result.put("message", "Cannot delete Collection Entry from database!");
 				 return internalServerError(result);
@@ -110,14 +110,14 @@ public class RecordController extends Controller {
 				 return ok(result);
 			 }
 		} else {
-			CollectionEntry entry = DB.getCollectionEntryDAO().get(new ObjectId(entryId));
-			if(entry.getContent().containsKey(format))
-				entry.getContent().remove(format);
-			if( DB.getCollectionEntryDAO().makePermanent(entry) != null) {
-				return ok(Json.toJson(entry));
+			CollectionRecord record = DB.getCollectionRecordDAO().get(new ObjectId(recordId));
+			if(record.getContent().containsKey(format))
+				record.getContent().remove(format);
+			if( DB.getCollectionRecordDAO().makePermanent(record) != null) {
+				return ok(Json.toJson(record));
 			} else {
-				log.error("Cannot delete specofic content from Collection entry!");
-				result.put("message", "Cannot delete specofic content from Collection entry!");
+				log.error("Cannot delete specific content from Collection entry!");
+				result.put("message", "Cannot delete specific content from Collection entry!");
 				return internalServerError(result);
 			}
 		}
@@ -133,11 +133,11 @@ public class RecordController extends Controller {
 	public static Result findInCollections(String source, String sourceId, boolean annotated) {
 		ObjectNode result = Json.newObject();
 
-		List<CollectionEntry> entries =
-				DB.getCollectionEntryDAO().getBySource(source, sourceId);
+		List<CollectionRecord> records =
+				DB.getCollectionRecordDAO().getBySource(source, sourceId);
 
-		if(entries != null)
-			return ok(Json.toJson(entries));
+		if(records != null)
+			return ok(Json.toJson(records));
 
 		result.put("message", "Cannot retrieve entries from db");
 		return internalServerError(result);

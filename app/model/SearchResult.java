@@ -44,7 +44,7 @@ public class SearchResult {
 
 	// embedd the recordLink in here
 	@Embedded
-	private RecordLink recordLink;
+	private CollectionRecord baseRecord;
 
 
 	public int getOffset() {
@@ -73,12 +73,12 @@ public class SearchResult {
 		this.search = search;
 	}
 
-	public RecordLink getRecordLink() {
-		return recordLink;
+	public CollectionRecord getBaseRecord() {
+		return baseRecord;
 	}
 
-	public void setRecordLink(RecordLink recordLink) {
-		this.recordLink = recordLink;
+	public void setBaseRecord(CollectionRecord baseRecord) {
+		this.baseRecord = baseRecord;
 	}
 
 }
