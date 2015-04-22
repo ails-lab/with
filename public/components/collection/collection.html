@@ -1,7 +1,24 @@
 				<div>
 					<div data-bind="template: { name: templateName, afterRender: open}"></div>
-
+					
 					<!-- ko ifnot: isLogged -->
 					<div data-bind="component: { name: 'popup-login', params: { item: $parent } }"></div>
 					<!-- /ko -->
+					
+					 <!-- Modal HTML -->
+				    <div id="myModal" class="modal fade">
+				        <div class="modal-dialog">
+				            <div class="modal-content">
+				                <div class="modal-header">
+				                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				                    <h4 class="modal-title">Confirmation</h4>
+				                </div>
+				                <div class="modal-body">
+				                    <p>Item added to collection</p>
+				                    
+				                </div>
+				                
+				            </div>
+				        </div>
+				    </div>
 				</div>

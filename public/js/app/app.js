@@ -57,7 +57,7 @@ define("app", ['knockout'], function(ko) {
 			dataType    : "json",
 			url         : "/collection/list",
 			processData : false,
-			data        : "displayName=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20",
+			data        : "username=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20",
 				/*displayName: username,
 				ownerId: userId,
 				email: email,

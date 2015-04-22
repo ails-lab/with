@@ -118,3 +118,7 @@
 .xxs{
 	font-size: 11px;
 }
+
+.modal-dialog{
+  width:300px;
+}
