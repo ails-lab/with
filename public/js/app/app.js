@@ -40,12 +40,9 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		storeUserCollections();
-	};
-	
-	storeUserCollections = function() {	
 		getUserCollections();
 	};
+	
 
 	getUserCollections = function() {
 		var username = self.currentUser.username();
