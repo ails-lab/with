@@ -92,7 +92,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
 							request.execute(function(response) {
 								self.title('You are almost ready...');
-								self.description('We loaded your account with your Google details. Help us with just a few more questions.' +
+								self.description('We have loaded your profile with your Google details. Help us with just a few more questions.' +
 									' You can always edit this or any other info in settings after joining.');
 								self.googleid(response['id']);
 								self.email(response['emails'][0]['value']);
@@ -243,9 +243,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 										}
 									},
 									error       : function(request, status, error) {
-										console.log(request);
-										console.log(status);
-										console.log(error);
+										var err = JSON.parse(request.responseText);
+										if (err.error === "User not registered") {
+											self.title('Before you use WITH for the first time, we have to create your profile...');
+											self.description('We have loaded your profile with your Google details. Help us with just a few more questions.' +
+												' You can always edit this or any other info in settings after joining.');
+											self.googleid(response['id']);
+											self.email(response['emails'][0]['value']);
+											self.firstName(response['name']['givenName']);
+											self.lastName(response['name']['familyName']);
+											self.username(response['name']['givenName'].toLowerCase() + '.' + response['name']['familyName'].toLowerCase());
+											self.gender(response['gender'] === 'male' ? 'Male' : (response['gender'] === 'female' ? 'Female' : 'Unspecified'));
+											self.usingEmail(false);
+											self.templateName('email');
+										}
 									}
 								});
 							});
@@ -259,7 +270,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				if (response.status === 'connected') {
 					FB.api('/me', function(response) {
 						var data = {
-							accessToken : response.access_token,
+							accessToken : FB.getAuthResponse()['accessToken'],
 							facebookId  : response.id
 						};
 
@@ -286,7 +297,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								}
 							},
 							error       : function(request, status, error) {
-								// TODO: Display error message
+								var err = JSON.parse(request.responseText);
+								if (err.error === "User not registered" || err.error === "Couldn't validate user") {
+									self.title('Before you use WITH for the first time, we have to create your profile...');
+									self.description('We have loaded your profile with your Facebook details. Help us with just a few more questions.' +
+										' You can always edit this or any other info in settings after joining.');
+									self.facebookid(response.id);
+									self.email(response.email);
+									self.firstName(response.first_name);
+									self.lastName(response.last_name);
+									self.username(response.first_name.toLowerCase() + '.' + response.last_name.toLowerCase());
+									self.gender(response.gender === 'male' ? 'Male' : (response.gender === 'female' ? 'Female' : 'Unspecified'));
+									self.usingEmail(false);
+									self.templateName('email');
+								}
 							}
 						});
 					});
