@@ -44,13 +44,9 @@ POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
-GET 	/user/byEmail							controllers.UserManager.findByEmail(email:java.lang.String)
-GET		/user/byUsername						controllers.UserManager.findByUsername(username:java.lang.String)
-POST	/user/register							controllers.UserManager.register()
-GET		/user/byFacebookId/						controllers.UserManager.findByFacebookId()
-POST	/user/login								controllers.UserManager.login()
-GET		/user/googleLogin						controllers.UserManager.googleLogin( accessToken:java.lang.String )
-GET		/user/facebookLogin						controllers.UserManager.facebookLogin( accessToken:java.lang.String )
-GET		/api/logout								controllers.UserManager.logout()
-
-
+POST	/user/register				controllers.UserManager.register()
+POST	/user/login					controllers.UserManager.login()
+GET		/user/logout				controllers.UserManager.logout()
+GET		/user/listNames				controllers.UserManager.listNames(prefix:java.lang.String ?= "")
+GET		/user/emailAvailable		controllers.UserManager.emailAvailable(email:java.lang.String)
+GET		/user/:id					controllers.UserManager.getUser(id)
