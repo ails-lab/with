@@ -58,7 +58,6 @@ public class CollectionRecord {
 	private String thumbnailUrl;
 
 	// an optional cached version of a thumbnail for this record'
-	@NotNull
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 

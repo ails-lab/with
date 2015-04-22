@@ -40,10 +40,6 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		storeUserCollections();
-	};
-
-	storeUserCollections = function() {
 		getUserCollections();
 	};
 
