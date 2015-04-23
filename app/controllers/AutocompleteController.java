@@ -26,24 +26,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.function.Function;
 
+import play.libs.F.Promise;
+import play.mvc.BodyParser;
+import play.mvc.Controller;
+import play.mvc.Result;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.ESpaceSources;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.F.Promise;
-import play.mvc.BodyParser;
-import play.mvc.Controller;
-import play.mvc.Result;
 
 public class AutocompleteController extends Controller {
-	
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
@@ -79,9 +76,9 @@ public class AutocompleteController extends Controller {
 				} catch (IOException e) {
 					e.printStackTrace();
 					return new AutocompleteResponse();
-				}	
+				}
 		};
-		
+
 		Iterable<Promise<AutocompleteResponse>> promises = new ArrayList<Promise<AutocompleteResponse>>();
 		for (final ISpaceSource source: sourcesWithAutocomplete) {
 			final String autocompleteQuery = source.autocompleteQuery(term, limit);
@@ -91,13 +88,13 @@ public class AutocompleteController extends Controller {
 				);
 			}
 		}
-		
-		Function<AutocompleteResponse, Boolean> responseCollectionMethod = 
+
+		Function<AutocompleteResponse, Boolean> responseCollectionMethod =
 				(AutocompleteResponse response) -> !response.suggestions.isEmpty();
-		
+
 		Function<List<AutocompleteResponse>, List<AutocompleteResponse>> filter = (List<AutocompleteResponse> response) -> {
 			List<AutocompleteResponse> finalResponses = new ArrayList<AutocompleteResponse>();
-			List<Suggestion> filteredSuggestions = new ArrayList<Suggestion>();	
+			List<Suggestion> filteredSuggestions = new ArrayList<Suggestion>();
 			for (AutocompleteResponse r: response) {
 				List<Suggestion> sugg = r.suggestions;
 				filteredSuggestions.addAll(sugg);
@@ -113,7 +110,6 @@ public class AutocompleteController extends Controller {
 	}
 	
 
-	
 	private static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
 		Set<String> seen = new HashSet<String>();
 		return t -> { 

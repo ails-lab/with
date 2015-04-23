@@ -40,10 +40,6 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		storeUserCollections();
-	};
-	
-	storeUserCollections = function() {	
 		getUserCollections();
 	};
 
@@ -80,9 +76,15 @@ define("app", ['knockout'], function(ko) {
 	};
 
 	logout           = function() {
-		sessionStorage.removeItem('User');
-		localStorage.removeItem('User');
-		isLogged(false);
+		$.ajax({
+			type        : "GET",
+			url         : "/user/logout",
+			success     : function() {
+				sessionStorage.removeItem('User');
+				localStorage.removeItem('User');
+				isLogged(false);
+			}
+		});
 	}
 
 	// Check if user information already exist in session
@@ -94,7 +96,6 @@ define("app", ['knockout'], function(ko) {
 		var data = JSON.parse(localStorage.getItem('User'));
 		loadUser(data, true);
 	}
-
 
 	return { currentUser: currentUser, loadUser: loadUser, logout: logout };
 });

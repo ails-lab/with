@@ -92,7 +92,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
 							request.execute(function(response) {
 								self.title('You are almost ready...');
-								self.description('We loaded your account with your Google details. Help us with just a few more questions.' +
+								self.description('We have loaded your profile with your Google details. Help us with just a few more questions.' +
 									' You can always edit this or any other info in settings after joining.');
 								self.googleid(response['id']);
 								self.email(response['emails'][0]['value']);
@@ -135,7 +135,6 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/register",
 					data        : json,
 					success     : function(data, text) {
-						// console.log(app.currentUser());
 						app.loadUser(data);
 						self.templateName('postregister');
 					},
@@ -190,9 +189,16 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						}
 					},
 					error   : function (request, status, error) {
-						console.log(request);
-						console.log(error);
-						// TODO: Show error messages
+						var err = JSON.parse(request.responseText);
+						if (err.error.email !== undefined) {
+							self.emailUser.setError(err.error.email);
+							self.emailUser.isModified(true);
+						}
+						if (err.error.password !== undefined) {
+							self.emailPass.setError(err.error.password);
+							self.emailPass.isModified(true);
+						}
+						self.loginValidation.errors.showAllMessages();
 					}
 				});
 			}
@@ -210,18 +216,19 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						gapi.client.load('plus','v1', function() {
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
 							request.execute(function(response) {
-								self.emailUser(response['emails'][0]['value']);
-								self.googleid(response['id']);
-
-								var json = ko.toJSON(self.loginValidation);
+								var data = {
+									accessToken : authResult['access_token'],
+									googleId    : response['id']
+								};
+								var json = ko.toJSON(data);
 
 								$.ajax({
-									type        : "get",
-									// contentType : 'application/json',
-									// dataType    : 'json',
-									// processData : false,
-									url         : "/user/googleLogin",
-									data        : { accessToken: authResult['access_token'] },
+									type        : "post",
+									contentType : "application/json",
+									dataType    : "json",
+									processData : "false",
+									url         : "/user/login",
+									data        : json,
 									success     : function(data, text) {
 										app.loadUser(data, true);
 										if (typeof popup !== 'undefined') {
@@ -236,9 +243,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 										}
 									},
 									error       : function(request, status, error) {
-										console.log(request);
-										console.log(status);
-										console.log(error);
+										var err = JSON.parse(request.responseText);
+										if (err.error === "User not registered") {
+											self.title('Before you use WITH for the first time, we have to create your profile...');
+											self.description('We have loaded your profile with your Google details. Help us with just a few more questions.' +
+												' You can always edit this or any other info in settings after joining.');
+											self.googleid(response['id']);
+											self.email(response['emails'][0]['value']);
+											self.firstName(response['name']['givenName']);
+											self.lastName(response['name']['familyName']);
+											self.username(response['name']['givenName'].toLowerCase() + '.' + response['name']['familyName'].toLowerCase());
+											self.gender(response['gender'] === 'male' ? 'Male' : (response['gender'] === 'female' ? 'Female' : 'Unspecified'));
+											self.usingEmail(false);
+											self.templateName('email');
+										}
 									}
 								});
 							});
@@ -251,21 +269,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			FB.login(function(response) {
 				if (response.status === 'connected') {
 					FB.api('/me', function(response) {
-						self.facebookid(response.id);
-						self.emailUser(response.email);
+						var data = {
+							accessToken : FB.getAuthResponse()['accessToken'],
+							facebookId  : response.id
+						};
 
-						var json = ko.toJSON(self.loginValidation);
-						console.log(json);
-
-						console.log(response);
+						var json = ko.toJSON(data);
 
 						$.ajax({
-							type        : "get",
-							// contentType : 'application/json',
-							// dataType    : 'json',
-							// processData : false,
-							url         : "/user/facebookLogin",
-							data        : { accessToken: FB.getAuthResponse()['accessToken'] },
+							type        : "post",
+							contentType : "application/json",
+							dataType    : "json",
+							processData : false,
+							url         : "/user/login",
+							data        : json,
 							success     : function(data, text) {
 								app.loadUser(data, true);
 								if (typeof popup !== 'undefined') {
@@ -280,24 +297,22 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								}
 							},
 							error       : function(request, status, error) {
-								console.log(request);
-								console.log(status);
-								console.log(error);
+								var err = JSON.parse(request.responseText);
+								if (err.error === "User not registered" || err.error === "Couldn't validate user") {
+									self.title('Before you use WITH for the first time, we have to create your profile...');
+									self.description('We have loaded your profile with your Facebook details. Help us with just a few more questions.' +
+										' You can always edit this or any other info in settings after joining.');
+									self.facebookid(response.id);
+									self.email(response.email);
+									self.firstName(response.first_name);
+									self.lastName(response.last_name);
+									self.username(response.first_name.toLowerCase() + '.' + response.last_name.toLowerCase());
+									self.gender(response.gender === 'male' ? 'Male' : (response.gender === 'female' ? 'Female' : 'Unspecified'));
+									self.usingEmail(false);
+									self.templateName('email');
+								}
 							}
 						});
-						// TODO: Send to server to sign in
-						// TODO: Add the user to the global app: app.currentUser('finik');
-						app.currentUser('finik'); // TODO: REMOVE
-						if (typeof popup !== 'undefined') {
-							if (popup) { self.closeLoginPopup(); }
-
-							if (typeof callback !== 'undefined') {
-								callback(params.item);
-							}
-						}
-						else {
-							window.location.href = "#";
-						}
 					});
 				}
 			}, {scope: 'email'});
