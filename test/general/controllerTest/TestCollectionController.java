@@ -60,7 +60,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test collection from Controller");
+		col.setTitle("Test collection from Controller " + TestUtils.randomString());
 		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -94,7 +94,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test collection from Controller");
+		col.setTitle("Test collection from Controller " + TestUtils.randomString());
 		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -127,7 +127,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test collection from Controller");
+		col.setTitle("Test collection from Controller " + TestUtils.randomString() + TestUtils.randomString());
 		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -139,7 +139,7 @@ public class TestCollectionController {
 			@Override
 			public void run() {
 				final ObjectNode json = Json.newObject();
-				json.put("title", "The EDITED test title");
+				json.put("title", "The EDITED test title " + TestUtils.randomString() + TestUtils.randomString());
 				json.put("ownerId", user.getDbId().toString());
 				Result result = route(fakeRequest("POST", "/collection/" + col.getDbId())
 						.withJsonBody(json));
@@ -172,7 +172,7 @@ public class TestCollectionController {
 			@Override
 			public void run() {
 				final ObjectNode json = Json.newObject();
-				json.put("title", "The newly CREATED test title");
+				json.put("title", "The newly CREATED test title " + TestUtils.randomString() + TestUtils.randomString());
 				json.put("ownerId", user.getDbId().toString());
 				Result result = route(fakeRequest("POST", "/collection/create")
 						.withJsonBody(json));
@@ -203,7 +203,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller");
+		col.setTitle("Test_1 collection from Controller " + TestUtils.randomString());
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -214,7 +214,7 @@ public class TestCollectionController {
 
 		Collection col1 = new Collection();
 		col1.setDescription("Collection from Controller");
-		col1.setTitle("Test_2 collection from Controller");
+		col1.setTitle("Test_2 collection from Controller " + TestUtils.randomString());
 		col1.setCategory("Dance");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
@@ -229,7 +229,7 @@ public class TestCollectionController {
 				json.put("title", "The newly CREATED test title");
 				json.put("ownerId", user.getDbId().toString());
 				Result result = route(fakeRequest("GET", "/collection/list?"
-						+ "displayName=Testuser&email=heres42@mongo.gr&"
+						+ "username=Testuser&email=heres42@mongo.gr&"
 						+ "ownerId=" + user.getDbId())
 						.withJsonBody(json));
 
@@ -264,7 +264,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller");
+		col.setTitle("Test_1 collection from Controller " + TestUtils.randomString());
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -276,7 +276,7 @@ public class TestCollectionController {
 
 		Collection col1 = new Collection();
 		col1.setDescription("Collection from Controller");
-		col1.setTitle("Test_2 collection from Controller");
+		col1.setTitle("Test_2 collection from Controller " + TestUtils.randomString());
 		col1.setCategory("Dance");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
@@ -319,7 +319,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller");
+		col.setTitle("Test_1 collection from Controller " + TestUtils.randomString());
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -330,7 +330,7 @@ public class TestCollectionController {
 
 		Collection col1 = new Collection();
 		col1.setDescription("Collection from Controller");
-		col1.setTitle("Test_2 collection from Controller");
+		col1.setTitle("Test_2 collection from Controller " + TestUtils.randomString());
 		col1.setCategory("Dance");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
@@ -348,10 +348,8 @@ public class TestCollectionController {
 			@Override
 			public void run() {
 				final ObjectNode json = Json.newObject();
-				json.put("title", "The newly CREATED test title");
-				json.put("ownerId", user.getDbId().toString());
 				Result result = route(fakeRequest("GET", "/collection/list?"
-						+ "displayName=Testuser&email=heres42@mongo.gr&"
+						+ "username=Testuser&email=heres42@mongo.gr&"
 						+ "ownerId=" + user.getDbId())
 						.withJsonBody(json));
 
