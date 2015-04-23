@@ -37,6 +37,8 @@ public class CollectionDAOTest {
 
 	@Test
 	public void testCRUD() {
+
+		DB.getDs().ensureIndexes(Collection.class);
 		Collection collection = new Collection();
 		collection.setDescription("Collection to test CRUD");
 		collection.setPublic(true);
@@ -117,7 +119,7 @@ public class CollectionDAOTest {
 			Collection collection = new Collection();
 			collection.setDescription("This is a test collection");
 			collection.setPublic(true);
-			collection.setTitle("The TEST collection");
+			collection.setTitle("Test Collection " + TestUtils.randomString());
 
 			//save the thumbnail for the collection
 			Media thumb = null;
