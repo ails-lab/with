@@ -189,7 +189,7 @@ public class UserManager extends Controller {
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://graph.facebook.com/endpoint?access_token="
+					"https://graph.facebook.com/me?fields=email&format=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
