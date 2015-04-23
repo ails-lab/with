@@ -19,7 +19,6 @@ package db;
 import java.util.List;
 
 import model.ApiKey;
-import model.Record;
 import play.Logger;
 
 public class ApiKeyDAO extends DAO<ApiKey> {

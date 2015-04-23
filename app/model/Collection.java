@@ -30,6 +30,7 @@ import org.mongodb.morphia.annotations.Id;
 
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -165,11 +166,13 @@ public class Collection {
 		return this.thumbnail;
 	}
 
-	@JsonProperty
+	//@JsonProperty
+	@JsonIgnore
 	public void setThumbnail(ObjectId thumbId) {
 		this.thumbnail = thumbId;
 	}
 
+	@JsonIgnore
 	public void setThumbnail(Media thumbnail) {
 		this.thumbnail = thumbnail.getDbId();
 	}

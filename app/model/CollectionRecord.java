@@ -58,7 +58,6 @@ public class CollectionRecord {
 	private String thumbnailUrl;
 
 	// an optional cached version of a thumbnail for this record'
-	@NotNull
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
@@ -127,14 +126,19 @@ public class CollectionRecord {
 		return this.thumbnail;
 	}
 
+	@JsonIgnore
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
 	}
 
-	public String getThumbnailUrl() {
+	/*public String getThumbnailUrl() {
 		return "/recordlink/" +
 				this.getDbId().toString() +
 				"/thumbnail";
+	}*/
+
+	public String getThumbnailUrl() {
+		return this.thumbnailUrl;
 	}
 
 	public void setThumbnailUrl(String thumbnailUrl) {
