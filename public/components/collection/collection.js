@@ -156,8 +156,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if (localStorage.getItem('UserCollections') !== null) 
-			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+		
 		  var jsonData = {};
 		 
 		    collections.forEach(function(collection) 
@@ -228,9 +227,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"success": function(data) {
 					self.id(data.dbId);
 					self.selectedCollection(data.title);
-					jsonData={"id":data.dbId,"name":data.title}
-			        storeUserCollections ();
-					findUserCollections();
+					var temp = [];
+					temp=JSON.parse(sessionStorage.getItem('UserCollections'));
+					temp.push(data);
+					sessionStorage.setItem('UserCollections', JSON.stringify(temp));
+					
 					callback(data.dbId);
 					
 				},

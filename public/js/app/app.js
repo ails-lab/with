@@ -40,16 +40,14 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		var username = self.currentUser.username();
-		var email = self.currentUser.email();
-		var userId =  self.currentUser._id();
+		
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
 			dataType    : "json",
 			url         : "/collection/list",
 			processData : false,
-			data        : "username=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20"}).done(
+			data        : "username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 				
 			function(data, text) {
 				console.log("User collections " + JSON.stringify(data));
