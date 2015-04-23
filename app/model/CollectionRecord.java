@@ -39,15 +39,14 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
-
 // there is an option Record link if the link is already materialized
 @Entity
-@JsonIgnoreProperties(ignoreUnknown=true)
-@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class CollectionRecord {
 
 	@Id
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
 	// which backend provided this entry
@@ -58,7 +57,7 @@ public class CollectionRecord {
 	private String thumbnailUrl;
 
 	// an optional cached version of a thumbnail for this record'
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
 	@NotNull
@@ -75,9 +74,9 @@ public class CollectionRecord {
 
 	private String rights;
 
-	//collection specific stuff...
+	// collection specific stuff...
 
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
 
 	private Date created;
@@ -94,11 +93,12 @@ public class CollectionRecord {
 	private final Map<String, String> content = new HashMap<String, String>();
 
 	// fixed-size, denormalization of Tags on this record
-	// When somebody adds a tag to a record, and the cap is not reached, it will go here
-	// This might get out of sync on tag deletes, since a deleted tag from one user doesn't necessarily delete
+	// When somebody adds a tag to a record, and the cap is not reached, it will
+	// go here
+	// This might get out of sync on tag deletes, since a deleted tag from one
+	// user doesn't necessarily delete
 	// the tag from here. Tag cleaning has to be performed regularly.
 	private final Set<String> tags = new HashSet<String>();
-
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -113,12 +113,16 @@ public class CollectionRecord {
 	}
 
 	public void setSource(String source) {
+		if (source.toLowerCase().contains("europeana")) {
+			this.source = "Europeana";
+		} else if (source.toLowerCase().contains("dpla")) {
+			this.source = "DPLA";
+		}
 		this.source = source;
 	}
 
 	public Media retrieveThumbnail() {
-		Media thumbnail =
-				DB.getMediaDAO().findById(this.thumbnail);
+		Media thumbnail = DB.getMediaDAO().findById(this.thumbnail);
 		return thumbnail;
 	}
 
@@ -131,9 +135,7 @@ public class CollectionRecord {
 	}
 
 	public String getThumbnailUrl() {
-		return "/recordlink/" +
-				this.getDbId().toString() +
-				"/thumbnail";
+		return "/recordlink/" + this.getDbId().toString() + "/thumbnail";
 	}
 
 	public void setThumbnailUrl(String thumbnailUrl) {
