@@ -147,10 +147,11 @@ public class CollectionController extends Controller {
 			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 			return badRequest(result);
 		}
+		/* this is not correct, check only the user's collections 
 		if( DB.getCollectionDAO().getByTitle(json.get("title").asText()) != null  ) {
 			result.put("message", "Title already exists! Please specify another title.");
 			return internalServerError(result);
-		}
+		}*/
 		if( DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);

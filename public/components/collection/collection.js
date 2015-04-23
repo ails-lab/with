@@ -173,10 +173,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	 
-	  
-
-	 
-
 	  collectionShow = function(record) {
 	    	self.record(record);
 	    	findUserCollections();
@@ -231,7 +227,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					temp=JSON.parse(sessionStorage.getItem('UserCollections'));
 					temp.push(data);
 					sessionStorage.setItem('UserCollections', JSON.stringify(temp));
-					
+					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					callback(data.dbId);
 					
 				},
@@ -292,8 +288,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				collectionId: collid
 				
 			});
-		  console.log("adding record");
-		  console.log(jsondata);
+		 
 		  $.ajax({
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
@@ -320,7 +315,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		    self.collname('');
 		    self.id(-1);
 		    self.validationModel.errors.showAllMessages(false);
-		    self.collectionlist([]);
 		    self.selected_items2([]);
 		    
 		}
