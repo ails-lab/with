@@ -141,57 +141,53 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  self.record=ko.observable(true);
 	  self.collname=ko.observable('').extend({ required: true });
 	  self.selectedCollection=ko.observable('');
+	  self.collectionlist = ko.observableArray([]);
 	  self.id=ko.observable(-1);
-	  var nocollection=true; /*picked up from browser session storage : should be stored upon login*/
-	  
+	 
+	  self.selected_items2 = ko.observableArray([]);
 	  self.validationModel = ko.validatedObservable({
 			collname : self.collname
 		});
 
+	  
 
-	  var collections = [];
-	  if (sessionStorage.getItem('UserCollections') !== null) 
-		  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-	  else if (localStorage.getItem('UserCollections') !== null) 
-		  collections = JSON.parse(localStorage.getItem("UserCollections"));
-	  if (collections.length>0)
-		  nocollection=false;
-	  
-	  
-	  /*  self.collectionitems = ko.observableArray([
- 		{'id': 1, 'name': ' Collection One'},
- 		{'id': 2, 'name': ' Collection Two'}
- 		]);
-*/
-	  
-	    var jsonData = {};
-	    var jsonCollist=[];
-	    collections.forEach(function(collection) 
-	    {
-	        
-	        jsonData={"id":collection.dbId,"name":collection.title}
-	        jsonCollist.push(jsonData);	
-	        	
-	        
-	    });
+	  findUserCollections=function(){
+		  self.collectionlist([]);
+		  var collections = [];
+		  if (sessionStorage.getItem('UserCollections') !== null) 
+			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+		  else if (localStorage.getItem('UserCollections') !== null) 
+			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+		  var jsonData = {};
+		 
+		    collections.forEach(function(collection) 
+		    {
+		        
+		        jsonData={"id":collection.dbId,"name":collection.title}
+		        self.collectionlist.push(jsonData);	
+		        	
+		        
+		    });
+		    
+		    
 	    
-	    self.collectionitems = ko.observableArray(jsonCollist);
-	    
-      
-	  self.selected_items2 = ko.observableArray();
+	  }
+	  
+	 
+	  
 
 	 
 
 	  collectionShow = function(record) {
 	    	self.record(record);
-		   console.log("collections:"+self.collectionitems());
-	    	if(nocollection){self.modal("2");self.templateName('collection_new');}
+	    	findUserCollections();
+	        if(self.collectionlist().length==0){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();
 	    }
 
 	  self.open=function(){
-		  self.reset();
+		  
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
 
@@ -206,32 +202,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  self.save=function(formElement){
 		  if (self.validationModel.isValid()) {
-			  console.log(app.currentUser._id);
+			 
 			  var jsondata=JSON.stringify({
 					ownerId: app.currentUser._id(),
 					title: self.collname(),
 					description:formElement.elements['details'].value,
 					public: $("#publiccoll .active").data("value")
 				});
-			  var collectionId=-1;
-			  $.ajax({
-					"url": "/collection/create",
-					"method": "post",
-					"contentType": "application/json",
-					"data": jsondata,
-					"success": function(data) {
-						self.id(data.dbId);
-						self.selectedCollection(data.title);
-						self.addRecord(data.dbId);
-						
-					},
-					
-					"error":function(result) {
-						$("#myModal").find("h4").html("An error occured");
-						$("#myModal").find("div.modal-body").html(result.statusText);
-				       
-						 
-				     }});
+			  self.saveCollection(jsondata,self.addRecord);
+			 
 			  
 		  }
 		  else{
@@ -240,10 +219,61 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	   
 	  }
 	  
-	  self.showAllMessages = ko.computed(function () {
-	         return self.validationModel.errors.showAllMessages();
-	     }, self, {deferEvaluation : true});
+	  self.saveCollection=function(jsondata,callback){
+		  $.ajax({
+				"url": "/collection/create",
+				"method": "post",
+				"contentType": "application/json",
+				"data": jsondata,
+				"success": function(data) {
+					self.id(data.dbId);
+					self.selectedCollection(data.title);
+					jsonData={"id":data.dbId,"name":data.title}
+			        storeUserCollections ();
+					findUserCollections();
+					callback(data.dbId);
+					
+				},
+				
+				"error":function(result) {
+					$("#myModal").find("h4").html("An error occured");
+					$("#myModal").find("div.modal-body").html(result.statusText);
+			       
+					 
+			     }});
+	  }
 
+	  
+	  self.addToCollections=function(){
+		  console.log(self.selected_items2());
+		  
+		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
+		  self.selected_items2().forEach(function (item) {
+			  /* now find if item is one of collection ids*/
+			  if ($.inArray(item, self.collectionlist().map(function(x) {
+				    return x.id;
+				})) != -1){
+				  /* add item to collection with this id */
+				  
+				  self.addRecord(item);
+			  }
+			  else{
+				  /*otherwise save this collection and then add the item */
+				  
+				  var jsondata=JSON.stringify({
+						ownerId: app.currentUser._id(),
+						title: item,
+						description:'',
+						public: false
+					});
+				  self.saveCollection(jsondata,self.addRecord);
+				  
+			  }
+			  
+		  });
+		  
+		  
+	  }
 	  
 	  self.addRecord=function(collid){
 		  
@@ -257,7 +287,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				rights: '',
 				type:'',
 				thumbnailUrl:self.record().thumb(),
-				thumbnail:self.record().thumb(),
 				sourceUrl:self.record().view_url(),
 				collectionId: collid
 				
@@ -271,7 +300,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"data": jsondata,
 				"success": function(data) {
 					console.log(data);
-					
 					self.close();
 					$("#myModal").modal('show');
 				},
@@ -291,7 +319,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		    self.collname('');
 		    self.id(-1);
 		    self.validationModel.errors.showAllMessages(false);
-		    self.collectionitems([]);
+		    self.collectionlist([]);
+		    self.selected_items2([]);
+		    
 		}
 
 	  
