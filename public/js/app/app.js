@@ -40,27 +40,18 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		getUserCollections();
-	};
-
-	getUserCollections = function() {
 		var username = self.currentUser.username();
 		var email = self.currentUser.email();
 		var userId =  self.currentUser._id();
-		$.ajax({
+		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
 			dataType    : "json",
 			url         : "/collection/list",
 			processData : false,
-			data        : "username=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20",
-				/*displayName: username,
-				ownerId: userId,
-				email: email,
-				offset: 0,
-				count: 20
-			}),*/
-			success     : function(data, text) {
+			data        : "username=" + username+"&ownerId=" + userId + "&email=" + email + "&offset=0" + "&count=20"}).done(
+				
+			function(data, text) {
 				console.log("User collections " + JSON.stringify(data));
 				if (sessionStorage.getItem('User') !== null) {
 					sessionStorage.setItem('UserCollections', JSON.stringify(data));
@@ -68,13 +59,17 @@ define("app", ['knockout'], function(ko) {
 				else if (localStorage.getItem('User') !== null) {
 					localStorage.setItem('UserCollections', JSON.stringify(data));
 				}
-			},
-			error 		: function(request, status, error) {
+				 
+			}).fail(function(request, status, error) {
+				 
 				//var err = JSON.parse(request.responseText);
 			}
-		});
+		);
+		
+		
 	};
 
+	
 	logout           = function() {
 		$.ajax({
 			type        : "GET",
@@ -82,6 +77,8 @@ define("app", ['knockout'], function(ko) {
 			success     : function() {
 				sessionStorage.removeItem('User');
 				localStorage.removeItem('User');
+				sessionStorage.removeItem('UserCollections');
+				localStorage.removeItem('UserCollections');
 				isLogged(false);
 			}
 		});

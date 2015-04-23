@@ -173,15 +173,16 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/login",
 					data        : json,
 					success     : function (data, text) {
+						var promise=
 						app.loadUser(data, self.stayLogged());
-
+            
 						if (typeof popup !== 'undefined') {
 							self.emailUser(null);
 							self.emailPass(null);
 							if (popup) { self.closeLoginPopup(); }
 
 							if (typeof callback !== 'undefined') {
-								callback();
+								$.when(promise).done(function(){callback()});
 							}
 						}
 						else {
