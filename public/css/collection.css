@@ -23,11 +23,14 @@
 }
 
 .md-modal-addto {
-	position: absolute;
-	  top: 5%;
+	  position: fixed;
+	  top:0%;
 	  left: 50%;
 	  width: 100%;
-	  overflow-y: scroll;
+	  max-width: 650px;
+	  min-width: 450px;
+	  height:320px;
+	  overflow-y: auto;
 	  z-index: 1037;
 	  background-color:white;
 	  visibility: hidden;
@@ -117,4 +120,8 @@
 
 .xxs{
 	font-size: 11px;
+}
+
+.modal-dialog{
+  width:300px;
 }
