@@ -257,8 +257,13 @@ public class CollectionController extends Controller {
 				return badRequest(result);
 			}
 		}
-
 		DB.getCollectionRecordDAO().makePermanent(record);
+
+		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
+		if( collection.getFirstEntries().size() < 20)
+			collection.getFirstEntries().add(record);
+		DB.getCollectionDAO().makePermanent(collection);
+
 		if(record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
