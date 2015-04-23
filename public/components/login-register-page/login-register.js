@@ -18,6 +18,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		// Template variables
 		self.title        = ko.observable('Join with your email address');
 		self.description  = ko.observable('');
+		self.hasAccount   = ko.observable(false);
 		if (typeof params.title !== 'undefined') {	// To avoid problems with template-less components
 			self.templateName = ko.observable(params.title.toLowerCase());
 		}
@@ -70,7 +71,19 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						self.username(response.first_name.toLowerCase() + '.' + response.last_name.toLowerCase());
 						self.gender(response.gender === 'male' ? 'Male' : (response.gender === 'female' ? 'Female' : 'Unspecified'));
 						self.usingEmail(false);
-						self.templateName('email');
+
+						$.ajax({
+							type    : "get",
+							url     : "/user/emailAvailable?email=" + response.email,
+							success : function() {
+								self.templateName('email');
+							},
+							error   : function() {
+								self.hasAccount(true);
+								self.templateName('login');
+								window.history.pushState(null, "Login", "#login");
+							}
+						});
 					});
 				}
 				else if (response.status === 'not_athorized') {
@@ -87,7 +100,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				'cookiepolicy' : 'single_host_origin',
 				'scope'        : 'profile email',
 				'callback'     : function(authResult) {
-					if (authResult['status']['signed_in']) {
+					if (authResult['status']['signed_in'] && authResult['status']['method'] == 'PROMPT') {
 						gapi.client.load('plus','v1', function() {
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
 							request.execute(function(response) {
@@ -101,7 +114,19 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								self.username(response['name']['givenName'].toLowerCase() + '.' + response['name']['familyName'].toLowerCase());
 								self.gender(response['gender'] === 'male' ? 'Male' : (response['gender'] === 'female' ? 'Female' : 'Unspecified'));
 								self.usingEmail(false);
-								self.templateName('email');
+
+								$.ajax({
+									type    : "get",
+									url     : "/user/emailAvailable?email=" + response['emails'][0]['value'],
+									success : function() {
+										self.template('email');
+									},
+									error   : function(request, status, error) {
+										self.hasAccount(true);
+										self.templateName('login');
+										window.history.pushState(null, "Login", "#login");
+									}
+								});
 							});
 						});
 					}
@@ -175,7 +200,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					success     : function (data, text) {
 						var promise=
 						app.loadUser(data, self.stayLogged());
-            
+
 						if (typeof popup !== 'undefined') {
 							self.emailUser(null);
 							self.emailPass(null);
