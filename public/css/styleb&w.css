@@ -506,12 +506,11 @@ button.close {
 /*---------------*/
 
 figure.effect-with  {
-
-
-	display: block;
-    width: 100%;
-    height: 100%;
-    position:relative;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  min-height: 100%;
+  position: fixed;
 }
 
 .landFlip{
@@ -546,7 +545,9 @@ figure.effect-with img {
 	-webkit-transform: scale(1);
 	transform: scale(1);
 	display: block;
+    max-width: 100%;
     width: 100%;
+    height: auto;
 }
 
 figure.effect-with:hover img {
@@ -658,7 +659,7 @@ figure.effect-with:hover p {
 
 .intro-effect-grid .gridmosaic {
 
-    height:350px;
+    height:40%;
     left: 0;
     list-style: outside none none;
     margin: 0;
@@ -753,8 +754,8 @@ figure.effect-with:hover p {
 .intro-effect-grid {
     border: 0;
     zoom: 1; /* IE6&7 */
-    height: 330px;
-  margin-bottom: 50px;
+    
+  
 }
 
 .intro-effect-grid .gridmosaic:before,
@@ -913,4 +914,13 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 #login h2 {
   font-family:'Annie Use Your Telescope';
   margin: 2em 0 1em;
+}
+
+.main-content{
+	
+    position: absolute;
+    top: 50%;
+    padding-bottom:200px;
+    width:100%;
+	
 }

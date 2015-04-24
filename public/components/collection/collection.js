@@ -156,8 +156,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if (localStorage.getItem('UserCollections') !== null) 
-			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+		
 		  var jsonData = {};
 		 
 		    collections.forEach(function(collection) 
@@ -174,10 +173,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	 
-	  
-
-	 
-
 	  collectionShow = function(record) {
 	    	self.record(record);
 	    	findUserCollections();
@@ -187,7 +182,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    }
 
 	  self.open=function(){
-		  
+		  $('#modal-1').css('overflow-y', 'hidden');
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
 
@@ -195,6 +190,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  self.close= function(){
 		  self.reset();
+		  $('#modal-1').css('overflow-y', 'auto');
 	    	$('#modal-'+self.modal()).removeClass('md-show');
 	    	$('#modal-'+self.modal()).css('display', 'none');
 
@@ -228,9 +224,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"success": function(data) {
 					self.id(data.dbId);
 					self.selectedCollection(data.title);
-					jsonData={"id":data.dbId,"name":data.title}
-			        storeUserCollections ();
-					findUserCollections();
+					var temp = [];
+					temp=JSON.parse(sessionStorage.getItem('UserCollections'));
+					temp.push(data);
+					sessionStorage.setItem('UserCollections', JSON.stringify(temp));
+					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					callback(data.dbId);
 					
 				},
@@ -291,8 +289,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				collectionId: collid
 				
 			});
-		  console.log("adding record");
-		  console.log(jsondata);
+		 
 		  $.ajax({
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
@@ -319,7 +316,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		    self.collname('');
 		    self.id(-1);
 		    self.validationModel.errors.showAllMessages(false);
-		    self.collectionlist([]);
 		    self.selected_items2([]);
 		    
 		}

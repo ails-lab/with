@@ -37,6 +37,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		});
 		self.password2    = ko.observable('').extend({ equal: self.password });
 		self.gender       = ko.observable();
+		self.record       = ko.observable();
 
 		self.validationModel = ko.validatedObservable({
 			firstName : self.firstName,
@@ -207,7 +208,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							if (popup) { self.closeLoginPopup(); }
 
 							if (typeof callback !== 'undefined') {
-								$.when(promise).done(function(){callback()});
+								$.when(promise).done(function(){callback(self.record())});
 							}
 						}
 						else {
@@ -345,6 +346,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		}
 
 		showLoginPopup            = function(record) {
+			self.record(record);
 			$('#loginPopup').addClass('open');
 		}
 

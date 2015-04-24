@@ -21,6 +21,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
     	$('#modal-1').addClass('md-show');
     	$('body').css('overflow', 'hidden');
+    	$('#modal-1').css('overflow-y', 'auto');
     }
 
     self.itemload = function(e) {
