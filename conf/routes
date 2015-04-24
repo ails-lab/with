@@ -52,5 +52,6 @@ POST	/user/login								controllers.UserManager.login()
 GET		/user/googleLogin						controllers.UserManager.googleLogin( accessToken:java.lang.String )
 GET		/user/facebookLogin						controllers.UserManager.facebookLogin( accessToken:java.lang.String )
 GET		/api/logout								controllers.UserManager.logout()
+GET		/user/token								controllers.UserManager.getToken()
 
 
