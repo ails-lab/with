@@ -18,7 +18,8 @@ package controllers;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
+import java.util.Date;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,14 +27,11 @@ import javax.net.ssl.HttpsURLConnection;
 
 import model.User;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Crypto;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -47,6 +45,7 @@ import db.DB;
 
 public class UserManager extends Controller {
 	public static final ALogger log = Logger.of(UserManager.class);
+	private static final long TOKENTIMEOUT = 10*1000l /* 10 sec */ ;
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
@@ -300,5 +299,34 @@ public class UserManager extends Controller {
 	public static Result logout() {
 		session().clear();
 		return ok();
+	}
+	
+	private boolean loginWithToken( String token ) {
+		try {
+			JsonNode input = Json.parse(Crypto.decryptAES(token));
+			String userId = input.get( "user").asText();
+			long timestamp = input.get( "timestamp" ).asLong();
+			if( new Date().getTime() < timestamp + TOKENTIMEOUT ) {
+				if( DB.getUserDAO().get( new ObjectId(userId)) != null ) {
+					session().put( "user", userId );
+					return true;
+				}
+			}
+		} catch( Exception e ) {
+			// likely invalid token
+		}
+		return false;
+	}
+	
+	public static Result getToken() {
+		String userId = session().get( "user");
+		if( userId == null ) return badRequest();
+		ObjectNode result = Json.newObject();
+		result.put( "user", userId );
+		result.put( "timestamp", new Date().getTime());
+		// just to make them all different
+		result.put( "random", new Random().nextInt());
+		String token = Crypto.encryptAES(result.asText());
+		return ok( token );
 	}
 }
