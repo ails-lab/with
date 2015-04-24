@@ -52,7 +52,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
-	 * 
+	 *
 	 * @param email
 	 * @return
 	 */
