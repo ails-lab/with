@@ -66,7 +66,6 @@ public class User {
 	private int collectedRecords;
 	private double storageLimit;
 
-
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -115,8 +114,10 @@ public class User {
 	 * @param password
 	 */
 	public void setPassword(String password) {
-		String pass = computeMD5(this.getEmail(), password);
-		this.setMd5Password(pass);
+		if (!password.isEmpty()) {
+			String pass = computeMD5(this.getEmail(), password);
+			this.setMd5Password(pass);
+		}
 	}
 
 	/**
