@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
 
 public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of(CollectionController.class);
@@ -239,6 +241,7 @@ public class CollectionController extends Controller {
 	 * @throws InstantiationException
 	 */
 	// @With(UserLoggedIn.class)
+	// TODO: catch the exceptions
 	public static Result addRecordToCollection(String collectionId)
 			throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException {
@@ -263,12 +266,17 @@ public class CollectionController extends Controller {
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 
-			String sourceClassName = "espace.core.sources" + source
+			String sourceClassName = "espace.core.sources." + source
 					+ "SpaceSource";
 			Class<?> sourceClass = Class.forName(sourceClassName);
 			ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-			s.getRecordFromSource(sourceId);
-
+			ArrayList<RecordJSONMetadata> records = s.getRecordFromSource(sourceId);
+			HashMap<String, String> content = new HashMap<String, String>();
+			for(RecordJSONMetadata jsonMetadata : records) {
+				content.put(jsonMetadata.getFormat(), jsonMetadata.getJsonContent());
+				
+			}
+			record.setContent(content);
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
 			for (ConstraintViolation<CollectionRecord> cv : violations) {

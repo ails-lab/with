@@ -25,7 +25,7 @@ import play.Logger;
 import espace.core.sources.DNZSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
-import espace.core.sources.ESpaceSource;
+import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.sources.NLASpaceSource;
 import espace.core.sources.YouTubeSpaceSource;
 
@@ -35,7 +35,7 @@ public class ESpaceSources {
 
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
-		esources.add(new ESpaceSource());
+		esources.add(new EuropeanaSpaceSource());
 		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
 		esources.add(new DNZSpaceSource());
@@ -46,7 +46,7 @@ public class ESpaceSources {
 	
 	public static Map<String, ISpaceSource> initSourceByNameMap() {
 		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
-		ISpaceSource s = new ESpaceSource();
+		ISpaceSource s = new EuropeanaSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new DPLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
