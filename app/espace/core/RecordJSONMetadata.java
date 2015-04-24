@@ -17,28 +17,33 @@
 package espace.core;
 
 public class RecordJSONMetadata {
-	
+
 	public enum Format {
-		NULL,
-		JSON,
-		JSONLD,
-		NLA
+		NULL, JSON, JSONLD, NLA
 	}
-	
+
 	private String jsonContent;
 	private Format format;
-	
+
 	public RecordJSONMetadata(Format format, String jsonContent) {
 		this.jsonContent = jsonContent;
 		this.format = format;
 	}
-	
+
 	public String getJsonContent() {
 		return jsonContent;
 	}
-	
-	public Format getFormat() {
-		return format;
+
+	public String getFormat() {
+		switch (format) {
+		case JSON:
+			return "JSON";
+		case JSONLD:
+			return "JSON-LD";
+		default:
+			return "NULL";
+
+		}
 	}
 
 }

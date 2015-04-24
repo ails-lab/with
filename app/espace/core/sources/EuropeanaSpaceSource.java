@@ -39,7 +39,7 @@ import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class ESpaceSource extends ISpaceSource {
+public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
@@ -206,15 +206,15 @@ public class ESpaceSource extends ISpaceSource {
 		try {
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
-							+ recordId + ".json?wskey=ANnuDzRpW");
-
+							+ recordId + ".json?wskey=SECRET_KEY");
+			System.out.println(response.toString());
 			JsonNode record = response.get("object");
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
-							+ recordId + ".jsonld?wskey=ANnuDzRpW");
-			record = response.get("object");
+							+ recordId + ".jsonld?wskey=SECRET_KEY");
+			record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record
 					.toString()));
 			return jsonMetadata;
