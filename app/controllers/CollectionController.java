@@ -111,7 +111,7 @@ public class CollectionController extends Controller {
 			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 			return badRequest(result);
 		}
-		if( DB.getCollectionDAO().getByTitle(json.get("title").asText()) != null  ) {
+		if( DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(), newVersion.getTitle()) != null  ) {
 			result.put("message", "Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}
@@ -147,7 +147,7 @@ public class CollectionController extends Controller {
 			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 			return badRequest(result);
 		}
-		if( DB.getCollectionDAO().getByTitle(json.get("title").asText()) != null  ) {
+		if( DB.getCollectionDAO().getByOwnerAndTitle(newCollection.getOwnerId(), newCollection.getTitle()) != null  ) {
 			result.put("message", "Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}

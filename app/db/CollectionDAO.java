@@ -45,6 +45,13 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.findOne("title", title);
 	}
 
+	public Collection getByOwnerAndTitle(ObjectId ownerId, String title) {
+		Query<Collection> q = this.createQuery()
+				.field("ownerId").equal(ownerId)
+				.field("title").equal(title);
+		return this.findOne(q);
+	}
+
 	public Collection getById(ObjectId id) {
 		Query<Collection> q = this.createQuery()
 				.field("_id").equal(id);

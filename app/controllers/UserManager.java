@@ -18,20 +18,12 @@ package controllers;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import model.User;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -50,7 +42,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
-	 * 
+	 *
 	 * @param email
 	 * @return
 	 */
@@ -78,7 +70,7 @@ public class UserManager extends Controller {
 	/**
 	 * Propose new username when it is already in use.
 	 *
-	 * @param initial the initial username the user tried 
+	 * @param initial the initial username the user tried
 	 * @param firstName the first name of the user
 	 * @param lastName the last name of the user
 	 * @return the array node with two suggested alternative usernames
@@ -94,7 +86,7 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByUsername(proposedName);
 		} while (u != null);
 		names.add(proposedName);
-		if (firstName == null || lastName == null)
+		if ((firstName == null) || (lastName == null))
 			return names;
 		proposedName = firstName + "_" + lastName;
 		i = 0;
@@ -115,7 +107,7 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		String email = null;
 		if (json.has("email")) {
@@ -189,7 +181,7 @@ public class UserManager extends Controller {
 	/**
 	 * Should not be needed, is the same as login by email? Maybe need to store
 	 * if its a facebook or google or password log inner
-	 * 
+	 *
 	 * @return
 	 */
 	public static Result findByFacebookId() {
@@ -250,7 +242,7 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		User u = null;
 		String emailOrUserName = null;
@@ -294,7 +286,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * This action clears the session, the user is logged out.
-	 * 
+	 *
 	 * @return OK status
 	 */
 	public static Result logout() {
