@@ -46,6 +46,7 @@ import db.DB;
 
 public class UserManager extends Controller {
 
+
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10*1000l /* 10 sec */ ;
 
@@ -85,6 +86,7 @@ public class UserManager extends Controller {
 	 *            the first name of the user
 	 * @param lastName
 	 *            the last name of the user
+
 	 * @return the array node with two suggested alternative usernames
 	 */
 	private static ArrayNode proposeUsername(String initial, String firstName,
@@ -98,7 +100,7 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByUsername(proposedName);
 		} while (u != null);
 		names.add(proposedName);
-		if (firstName == null || lastName == null)
+		if ((firstName == null) || (lastName == null))
 			return names;
 		proposedName = firstName + "_" + lastName;
 		i = 0;
@@ -119,7 +121,7 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		String email = null;
 		if (json.has("email")) {
@@ -221,7 +223,7 @@ public class UserManager extends Controller {
 		User u = null;
 		try {
 			URL url = new URL(
-					"https://graph.facebook.com/endpoint?access_token="
+					"https://graph.facebook.com/me?fields=email&format=json&access_token="
 							+ accessToken);
 			HttpsURLConnection connection = (HttpsURLConnection) url
 					.openConnection();
@@ -251,7 +253,7 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		User u = null;
 		if (json.has("facebookId")) {
@@ -321,7 +323,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * This action clears the session, the user is logged out.
-	 * 
+	 *
 	 * @return OK status
 	 */
 	public static Result logout() {

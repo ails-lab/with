@@ -1,7 +1,10 @@
 				<h1>login</h1>
 
-				<p class="lead">Use Facebook, Google or your email to login. <br />
+				<p class="lead" data-bind="ifnot: hasAccount">Use Facebook, Google or your email to login. <br />
 				Don't have a WITH account yet? No worries, <a href="#register">joining</a> is easy.</p>
+
+				<p class="lead" data-bind="if: hasAccount">You are already a member of <span>WITH</span>. <br />
+				Please use one of the options below to login.</p>
 
 				<br />
 

@@ -1,12 +1,12 @@
 
 
 .md-modal-coll {
-	position: absolute;
+	position: fixed;
 	top:5%;
 	left: 50%;
-	width: 50%;
+	width: 100%;
 	max-width: 330px;
-	min-width: 320px;
+	
 	z-index: 1037;
 	visibility: hidden;
 	display:none;
@@ -28,7 +28,7 @@
 	  left: 50%;
 	  width: 100%;
 	  max-width: 650px;
-	  min-width: 450px;
+	 
 	  height:320px;
 	  overflow-y: auto;
 	  z-index: 1037;
