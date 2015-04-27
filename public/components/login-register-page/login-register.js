@@ -21,15 +21,22 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			
 			if( event.data ==  "requestToken" ) {
 				if( isLogged() ) {
-					// here comes the requester with origin!
-					$.ajax( {
-						url: "/user/token",
-						type: "GET"	
-					}).done( function (data,text ) {
-						source.postMessage( "Token: " + data, "*" );
-						window.removeEventListener( "message", tokenRequest );
+					// we trust localhost and ntua, 
+					// TODO: make a requester for allow access to origin
+					if( new RegExp( "^https?://localhost(:|/)").test( origin ) ||
+						new RegExp( "^https?://[^/:]*.image.ntua.gr(:|/)").test( origin )	|| 
+								false /* or new RegExp in here */ ) {
+						$.ajax( {
+							url: "/user/token",
+							type: "GET"	
+						}).done( function (data,text ) {
+							source.postMessage( "Token: " + data, "*" );
+							window.removeEventListener( "message", tokenRequest );
 
-					} );
+						} );
+					} else {
+						console.log( "rejected from " + origin );
+					}
 				}
 			}
 		}
