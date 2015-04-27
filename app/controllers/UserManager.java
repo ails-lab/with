@@ -331,21 +331,25 @@ public class UserManager extends Controller {
 		return ok();
 	}
 	
-	private boolean loginWithToken( String token ) {
+	public static Result loginWithToken( String token ) {
 		try {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
 			String userId = input.get( "user").asText();
 			long timestamp = input.get( "timestamp" ).asLong();
 			if( new Date().getTime() < timestamp + TOKENTIMEOUT ) {
-				if( DB.getUserDAO().get( new ObjectId(userId)) != null ) {
+				User u = DB.getUserDAO().get( new ObjectId(userId));
+				if( u != null ) {
 					session().put( "user", userId );
-					return true;
+					ObjectNode result = Json.newObject();
+					result = (ObjectNode) Json.parse(DB.getJson(u));
+					result.remove("md5Password");
+					return ok(result);
 				}
 			}
 		} catch( Exception e ) {
 			// likely invalid token
 		}
-		return false;
+		return badRequest();
 	}
 	
 	public static Result getToken() {
