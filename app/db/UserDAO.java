@@ -52,6 +52,14 @@ public class UserDAO extends DAO<User> {
 	public User getByUsername(String username) {
 		return this.findOne("username", username);
 	}
+	
+	public User getByFacebookId(String facebookId) {
+		return this.findOne("facebookId", facebookId);
+	}
+	
+	public User getByGoogleId(String googleId) {
+		return this.findOne("googleId", googleId);
+	}
 
 	/**
 	 * This method is updating one specific User. By default update method is
@@ -79,6 +87,13 @@ public class UserDAO extends DAO<User> {
 				.equal(md5Pass));
 		return find(q).get();
 	}
+	
+	public List<User> getByUsernamePrefix(String prefix) {
+		Query<User> q = this.createQuery()
+				.field("username").startsWith(prefix);
+		return find(q).asList();
+		
+	}
 
 	/**
 	 * Return user collections
@@ -94,7 +109,7 @@ public class UserDAO extends DAO<User> {
 		return this.findOne(q).getUserCollections();
 	}
 
-	public List<String> getAllDisplayNames() {
+	public List<String> getAllUsernames() {
 		ArrayList<String> res = new ArrayList<String>();
 		withCollection(res, "", "username");
 		return res;

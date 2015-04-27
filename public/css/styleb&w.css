@@ -85,7 +85,7 @@ margin-right: 0;
 
 .maincontent{
 	padding-bottom:100px;
-	
+
 }
 
   .mycarousel{
@@ -482,14 +482,14 @@ button.close {
   text-align: center;
   cursor: pointer;
   color: #fff;
-	
+
 }
 
 
 
 .grid figure h2 {
   word-spacing: -0.15em;
-  
+
 }
 
 .grid figure figcaption {
@@ -506,8 +506,8 @@ button.close {
 /*---------------*/
 
 figure.effect-with  {
-	
-	
+
+
 	display: block;
     width: 100%;
     height: 100%;
@@ -515,7 +515,7 @@ figure.effect-with  {
 }
 
 .landFlip{
-   
+
     position:absolute;
     left:0;
     top:0;
@@ -523,7 +523,7 @@ figure.effect-with  {
     height:100%;
     border:1px solid #ddd;
     background-color:#f1f1f1;
-    
+
 }
 
 .landData{
@@ -535,7 +535,7 @@ figure.effect-with  {
 .landDescription{
     font-size:13px;
     padding:50px 10px 20px 20px;
-    
+
 }
 
 
@@ -572,7 +572,7 @@ figure.effect-with p {
 }
 
 figure.effect-with h2 {
-	
+
 	font-size: 1em;
 	font-weight: 400;
   font-size:30px;
@@ -582,11 +582,11 @@ figure.effect-with h2 {
 }
 
 figure.effect-with h2 span{
-	
+
   font-size: 30px;
- 
+
   font-weight: 800;
- 
+
 }
 
 figure.effect-with p {
@@ -608,7 +608,7 @@ figure.effect-with p.p2 {
   transition: opacity 0.35s ease 0s, transform 0.35s ease 0s;
   float: left;
   top: 100px;
-	
+
 }
 
 figure.effect-with h2 {
@@ -617,7 +617,7 @@ figure.effect-with h2 {
 	transition: transform 0.35s;
 	-webkit-transform: translate3d(0,20px,0);
 	transform: translate3d(0,20px,0);
-	
+
 }
 
 figure.effect-with:hover h2 {
@@ -633,11 +633,11 @@ figure.effect-with h2::after {
 	left: 0;
 	width: 100%;
 	height: 1px;
-	
+
 	content: '';
 	-webkit-transform: translate3d(0,80px,0);
 	transform: translate3d(0,80px,0);
-	
+
 }
 
 figure.effect-with h2::after,
@@ -657,7 +657,7 @@ figure.effect-with:hover p {
 /*grid tryout*/
 
 .intro-effect-grid .gridmosaic {
-    
+
     height:350px;
     left: 0;
     list-style: outside none none;
@@ -678,7 +678,7 @@ figure.effect-with:hover p {
     pointer-events: none;
     position: absolute;
     top: 0;
-    
+
     width: 100%;
 }
 
@@ -692,8 +692,8 @@ figure.effect-with:hover p {
     position: absolute;
     opacity: 0.9;
      border: 1px solid #e1e1e1;
-   
-	
+
+
 }
 
 
@@ -710,15 +710,15 @@ figure.effect-with:hover p {
 
 
 .intro-effect-grid .gridmosaic li:nth-child(2) {
-  
+
     height: 50%;
     left: 0;
     top: 50%;
     width: 25%;
-    
+
 }
 .intro-effect-grid .gridmosaic li:nth-child(3) {
-    
+
     height: 100%;
     left: 25%;
     top: 0;
@@ -733,12 +733,12 @@ figure.effect-with:hover p {
 .intro-effect-grid .gridmosaic li:nth-child(5) {
     height: 50%;
     left: 50%;
-   
+
     top: 50%;
-  
+
     width: 25%;
-    
-    
+
+
 }
 
 
@@ -774,7 +774,7 @@ figure.effect-with:hover p {
 }
 
 .outlay{
-	
+
   	margin: 0 10px 10px;
   	padding: 15px;
   	padding-bottom: 10px;
@@ -783,13 +783,13 @@ figure.effect-with:hover p {
 	float:left;
 	display: inline-block;
 	position:relative;
-	
+
 	border: 1px solid rgb(215,215,215);
 	min-width: 350px;
 	min-height:100px;
 	text-align:left;
   	/*box-shadow: 0 10px 7px -5px rgba(0, 0, 0, 0.1);*/
-  
+
 }
 
 
@@ -804,7 +804,7 @@ figure.effect-with:hover p {
 .exhibit img{max-height:100%}
 
 .outlay h2{
-  
+
   font-size: 1em;
   font-weight: 500;
   font-size: 25px;
@@ -826,7 +826,7 @@ figure.effect-with:hover p {
   border: 0;
   margin: 5px 0 10px 0;
   text-align: left;
-  
+
 
 }
 
@@ -842,23 +842,23 @@ figure.effect-with:hover p {
     position: relative;
     width:70%;
     z-index: 2;
-   
+
 }
 
 .square {
     border: 0px;
     float: left;
-   
+
 }
 .bigsquare {
     width: 40%;
     height: 100%;
-    
+
 }
 .littlesquare {
     width: 20%;
     height: 50%;
-   
+
 }
 
 img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
@@ -875,32 +875,42 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 
 .back{
 	padding: 20px 20px 0px 20px;
-	
+
     font-size:100%;
     display:block;
     overflow-y:scroll;
     position:relative;
-    
+
  }
- 
+
  .back b{
    color:#EC5A62;
    font-size:120%;
    padding-right:5px;
  }
- 
+
  .back p{
   opacity:1;
   min-height: 30px;
  }
- 
+
  .imholder{
     height:350px; opacity: 0.2; z-index: -100; position: relative;display:none;background-size: 100% 100%;
  }
- 
+
  .unselectable {
   -moz-user-select: none;
   -khtml-user-select: none;
   -webkit-user-select: none;
   user-select: none;
+}
+
+/* Login/Register */
+#login h1, #login h2 {
+  color: black;
+}
+
+#login h2 {
+  font-family:'Annie Use Your Telescope';
+  margin: 2em 0 1em;
 }

@@ -111,6 +111,10 @@ public class CollectionController extends Controller {
 			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 			return badRequest(result);
 		}
+		if( DB.getCollectionDAO().getByTitle(json.get("title").asText()) != null  ) {
+			result.put("message", "Title already exists! Please specify another title.");
+			return internalServerError(result);
+		}
 		if(DB.getCollectionDAO().makePermanent(newVersion) == null) {
 			log.error("Cannot save collection to database!");
 			result.put("message", "Cannot save collection to database!");
@@ -137,14 +141,17 @@ public class CollectionController extends Controller {
 
 		Collection newCollection = Json.fromJson(json, Collection.class);
 
-
 		Set<ConstraintViolation<Collection>> violations =
 				Validation.getValidator().validate(newCollection);
 		for(ConstraintViolation<Collection> cv: violations) {
 			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 			return badRequest(result);
 		}
-
+		/* this is not correct, check only the user's collections 
+		if( DB.getCollectionDAO().getByTitle(json.get("title").asText()) != null  ) {
+			result.put("message", "Title already exists! Please specify another title.");
+			return internalServerError(result);
+		}*/
 		if( DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
@@ -162,7 +169,7 @@ public class CollectionController extends Controller {
 								String access,
 								int offset, int count) {
 
-
+		ObjectNode result = Json.newObject();
 		List<Collection> userCollections;
 		if(ownerId != null)
 			userCollections = DB.getCollectionDAO()
@@ -256,8 +263,13 @@ public class CollectionController extends Controller {
 				return badRequest(result);
 			}
 		}
-
 		DB.getCollectionRecordDAO().makePermanent(record);
+
+		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
+		if( collection.getFirstEntries().size() < 20)
+			collection.getFirstEntries().add(record);
+		DB.getCollectionDAO().makePermanent(collection);
+
 		if(record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);

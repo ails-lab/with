@@ -22,15 +22,15 @@
 		</div>
 		<div class="emailLogin">
 			<form class="form form-inline">
-				<div class="form-group" data-bind="validationElement: emailUser">
+				<div class="form-group" data-bind="validationElement: emailUser" style="vertical-align: top;">
 					<label class="sr-only" for="useremail">Email address</label>
 					<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser; hasFocus: true;">
 				</div>
-				<div class="form-group" data-bind="validationElement: emailPass">
+				<div class="form-group" data-bind="validationElement: emailPass" style="vertical-align: top;">
 					<label class="sr-only" for="userpass">Email address</label>
 					<input type="password" class="form-control" id="userpass" placeholder="Password" data-bind="value: emailPass;">
 				</div>
-				<button type="submit" class="btn btn-primary" data-bind="click: function() { emailLogin(true, collectionShow); }">Login</button>
+				<button type="submit" class="btn btn-primary" data-bind="click: function() { emailLogin(true, collectionShow); }" style="vertical-align: top;">Login</button>
 		</div>
 	</div>
 

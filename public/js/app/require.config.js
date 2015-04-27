@@ -27,7 +27,7 @@ var require = {
 		"knockout-validation":  "bower_modules/knockout-validation/dist/knockout.validation.min",
 		"knockout-amd-helpers": "bower_modules/knockout-amd-helpers/build/knockout-amd-helpers.min",
 		"selectize" :           "bower_modules/selectize/dist/js/standalone/selectize.min",
-		"flip":					"bower_modules/flip/dist/jquery.flip.min",	
+		"flip":					"bower_modules/flip/dist/jquery.flip.min",
 		"app":                  "js/app/app",
 		"autocomplete":			"bower_modules/devbridge-autocomplete/dist/jquery.autocomplete.min"
 	},
