@@ -56,7 +56,10 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	}
 
 	private String getPageInfo(String q, String page, String pageSize) {
-		String string = roots.get(getKey(q, page, pageSize));
+		if (page == null || page.equals("1")) {
+			return null;
+		}
+		String string = roots.get(getPrevKey(q, page, pageSize));
 		return string;
 	}
 
@@ -81,6 +84,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
+			System.out.println(httpQuery);
 			// System.out.println(response.toString());
 			JsonNode docs = response.path("items");
 			res.totalCount = Utils.readIntAttr(response.path("pageInfo"), "totalResults", true);
@@ -128,27 +132,30 @@ public class YouTubeSpaceSource extends ISpaceSource {
 	}
 
 	private String getKey(String q, String page, String pageSize) {
-		return q + "/" + pageSize;
+		return q + "/" + page + "/" + pageSize;
 	}
 
-	
+	private String getPrevKey(String q, String page, String pageSize) {
+		return q + "/" + (Integer.parseInt(page) - 1) + "/" + pageSize;
+	}
+
 	public String autocompleteQuery(String term, int limit) {
 		autoCompleteLimit = limit;
-		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t" + 
-				"&key=" + getKey()+ "&q=" + term;
+		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t" + "&key="
+				+ getKey() + "&q=" + term;
 	}
-	
+
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
 			JSONArray jsonResp = new JSONArray(response);
 			JSONArray suggestionsArray = jsonResp.getJSONArray(1);
-			if (suggestionsArray.length()==0)
+			if (suggestionsArray.length() == 0)
 				return new AutocompleteResponse();
 			else {
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = new ArrayList<Suggestion>();
-				//int suggestionsLength = 4;
-				for (int i=0; i < autoCompleteLimit; i++) {
+				// int suggestionsLength = 4;
+				for (int i = 0; i < autoCompleteLimit; i++) {
 					String suggestion = (String) suggestionsArray.get(i);
 					Suggestion s = new Suggestion();
 					s.value = suggestion;
