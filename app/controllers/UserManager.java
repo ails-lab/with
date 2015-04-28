@@ -18,7 +18,9 @@ package controllers;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,7 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Crypto;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -45,6 +48,34 @@ public class UserManager extends Controller {
 
 
 	public static final ALogger log = Logger.of(UserManager.class);
+	private static final long TOKENTIMEOUT = 10*1000l /* 10 sec */ ;
+
+	/**
+	 * Free to call by anybody, so we don't give lots of info.
+	 * 
+	 * @param email
+	 * @return
+	 */
+	public static Result findByEmail(String email) {
+		User u = DB.getUserDAO().getByEmail(email);
+		if (u != null) {
+			ObjectNode res = Json.newObject();
+			res.put("username", u.getUsername());
+			res.put("email", u.getEmail());
+			return ok(res);
+		} else {
+			return badRequest();
+		}
+	}
+
+	public static Result findByUsername(String username) {
+		User u = DB.getUserDAO().getByUsername(username);
+		if (u != null) {
+			return ok();
+		} else {
+			return badRequest();
+		}
+	}
 
 	/**
 	 * Propose new username when it is already in use.
@@ -299,7 +330,40 @@ public class UserManager extends Controller {
 		session().clear();
 		return ok();
 	}
-
+	
+	public static Result loginWithToken( String token ) {
+		try {
+			JsonNode input = Json.parse(Crypto.decryptAES(token));
+			String userId = input.get( "user").asText();
+			long timestamp = input.get( "timestamp" ).asLong();
+			if( new Date().getTime() < timestamp + TOKENTIMEOUT ) {
+				User u = DB.getUserDAO().get( new ObjectId(userId));
+				if( u != null ) {
+					session().put( "user", userId );
+					ObjectNode result = Json.newObject();
+					result = (ObjectNode) Json.parse(DB.getJson(u));
+					result.remove("md5Password");
+					return ok(result);
+				}
+			}
+		} catch( Exception e ) {
+			// likely invalid token
+		}
+		return badRequest();
+	}
+	
+	public static Result getToken() {
+		String userId = session().get( "user");
+		if( userId == null ) return badRequest();
+		ObjectNode result = Json.newObject();
+		result.put( "user", userId );
+		result.put( "timestamp", new Date().getTime());
+		// just to make them all different
+		result.put( "random", new Random().nextInt());
+		String enc = Crypto.encryptAES(result.toString());
+		return ok( enc );
+	}
+	
 	/**
 	 * Get a list of matching usernames
 	 *

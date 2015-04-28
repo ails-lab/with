@@ -15,6 +15,33 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 	function LoginRegisterViewModel(params) {
 		var self = this;
 
+		function tokenRequest( event ) {
+			var origin = event.origin;
+			var source = event.source;
+			
+			if( event.data ==  "requestToken" ) {
+				if( isLogged() ) {
+					// we trust localhost and ntua, 
+					// TODO: make a requester for allow access to origin
+					if( new RegExp( "^https?://localhost(:|/)").test( origin ) ||
+						new RegExp( "^https?://[^/:]*.image.ntua.gr(:|/)").test( origin )	|| 
+								false /* or new RegExp in here */ ) {
+						$.ajax( {
+							url: "/user/token",
+							type: "GET"	
+						}).done( function (data,text ) {
+							source.postMessage( "Token: " + data, "*" );
+							window.removeEventListener( "message", tokenRequest );
+
+						} );
+					} else {
+						console.log( "rejected from " + origin );
+					}
+				}
+			}
+		}
+		window.addEventListener( "message", tokenRequest, false );
+		
 		// Template variables
 		self.title        = ko.observable('Join with your email address');
 		self.description  = ko.observable('');
