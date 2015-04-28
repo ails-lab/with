@@ -34,7 +34,7 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String itemId) {
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		return null;
 	}
 

@@ -207,7 +207,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
 							+ recordId + ".json?wskey=SECRET_KEY");
-			System.out.println(response.toString());
 			JsonNode record = response.get("object");
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
