@@ -162,7 +162,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					data        : json,
 					success     : function(data, text) {
 						app.loadUser(data);
-						self.templateName('postregister');
+						// self.templateName('postregister');
+						self.completeRegistration();
 					},
 					error       : function(request, status, error) {
 						var err = JSON.parse(request.responseText);
@@ -364,7 +365,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		}
 
 		self.completeRegistration = function() {
-			// TODO: Get values, send to server and redirect to the landing page
+			// TODO: Get values, send to server
+			window.location.href = "#";
 		}
 
 		self.route = params.route;
