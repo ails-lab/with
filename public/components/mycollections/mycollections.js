@@ -1,4 +1,4 @@
-define(['knockout', 'text!./profile.html'  ], function(ko, template) {
+define(['knockout', 'text!./mycollections.html'  ], function(ko, template) {
 
 	
 

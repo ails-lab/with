@@ -28,12 +28,6 @@ public class ApiKeyDAO extends DAO<ApiKey> {
 		super( ApiKey.class );
 	}
 
-	/**
-	 * Get the embedded RecordLink from a Record
-	 * @param dbId
-	 * @return
-	 */
-
 	public List<ApiKey> getAll() {
 		return find().asList();
 	}
