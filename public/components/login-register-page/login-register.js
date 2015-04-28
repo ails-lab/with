@@ -354,6 +354,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			$('.externalLogin').slideUp();
 		}
 
+		self.scrollDownEmail      = function() {
+			$('.externalLogin').slideDown();
+		}
+
 		self.closeLoginPopup      = function() {
 			$('#loginPopup').removeClass('open');
 			$('.externalLogin').slideDown();	// Reset dialog state

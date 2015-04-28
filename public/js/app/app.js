@@ -40,7 +40,7 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		
+
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
@@ -48,7 +48,7 @@ define("app", ['knockout'], function(ko) {
 			url         : "/collection/list",
 			processData : false,
 			data        : "username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
-				
+
 			function(data, text) {
 				console.log("User collections " + JSON.stringify(data));
 				if (sessionStorage.getItem('User') !== null) {
@@ -57,17 +57,14 @@ define("app", ['knockout'], function(ko) {
 				else if (localStorage.getItem('User') !== null) {
 					localStorage.setItem('UserCollections', JSON.stringify(data));
 				}
-				 
+
 			}).fail(function(request, status, error) {
-				 
+
 				//var err = JSON.parse(request.responseText);
 			}
 		);
-		
-		
 	};
 
-	
 	logout           = function() {
 		$.ajax({
 			type        : "GET",
