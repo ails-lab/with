@@ -50,6 +50,8 @@ public class CollectionRecord {
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
+	private boolean isPublic;
+
 	// which backend provided this entry
 	// Europeana, DPLA ....
 	private String source;
@@ -233,6 +235,14 @@ public class CollectionRecord {
 
 	public Set<String> getTags() {
 		return tags;
+	}
+
+	public boolean isPublic() {
+		return isPublic;
+	}
+
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
 	}
 
 }

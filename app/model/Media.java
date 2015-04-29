@@ -40,12 +40,12 @@ public class Media {
 	@JsonIgnore
 	private ObjectId dbId;
 	// examples, but there might be more
-	
+
 	// the owner
 	private ObjectId ownerId;
-	
+
 	private boolean isPublic;
-	
+
 	private int width, height;
 
 	// IMAGE, VIDEO, AUDIO, TXT
@@ -61,6 +61,7 @@ public class Media {
 	@JsonIgnore
 	private byte[] data;
 
+	private String filename;
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -158,4 +159,11 @@ public class Media {
 		this.isPublic = isPublic;
 	}
 
+	public String getFilename() {
+		return this.filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
 }
