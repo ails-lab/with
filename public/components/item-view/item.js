@@ -100,6 +100,12 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		}
     }
 
+    self.recordSelect= function (e){
+		console.log(e);
+		itemShow(e);
+		
+	}
+    
   }
 
   return { viewModel: ItemViewModel, template: template };
