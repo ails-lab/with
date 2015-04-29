@@ -298,6 +298,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"success": function(data) {
 					console.log(data);
 					self.close();
+					$("#myModal").find("h4").html("Success!");
+					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").modal('show');
 				},
 				

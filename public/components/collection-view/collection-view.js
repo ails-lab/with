@@ -103,12 +103,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  self.selectedRecord=ko.observable(false);
 		
 	  self.loading = ko.observable(false);
-		self.scrolled= function(data, event) {
-	        var elem = event.target;
-	        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight - 200)) {
-	        	self.searchNext();
-	        }
-	    },
+	  
+	  
+		
 		self.previous = ko.observable(-1);
 		self.page = ko.observable(1);
 		self.pageSize=ko.observable(20);
@@ -171,7 +168,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 			
 	 self.moreItems=function(){
-		 
+		 if(collectionitems.length()==20){
+			 
+		 }
 	 }		
 
 	 
@@ -180,6 +179,13 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			itemShow(e);
 			
 		}
+	 
+	 window.onscroll = function(ev) {
+		    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+		    	//self.searchNext();
+		    	console.log("searching for more");
+		    }
+		};
   }
 
 
