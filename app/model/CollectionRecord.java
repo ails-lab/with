@@ -117,8 +117,11 @@ public class CollectionRecord {
 			this.source = "Europeana";
 		} else if (source.toLowerCase().contains("dpla")) {
 			this.source = "DPLA";
+		} else if (source.toLowerCase().contains("nla")) {
+			this.source = "NLA";
+		} else {
+			this.source = source;
 		}
-		this.source = source;
 	}
 
 	public Media retrieveThumbnail() {
@@ -230,7 +233,7 @@ public class CollectionRecord {
 	public void setPosition(int position) {
 		this.position = position;
 	}
-	
+
 	public void setContent(Map<String, String> content) {
 		this.content = content;
 	}

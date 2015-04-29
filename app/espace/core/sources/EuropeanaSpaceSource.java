@@ -201,18 +201,19 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		String key = "SECRET_KEY";
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
-							+ recordId + ".json?wskey=SECRET_KEY");
+							+ recordId + ".json?wskey=" + key);
 			JsonNode record = response.get("object");
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
-							+ recordId + ".jsonld?wskey=SECRET_KEY");
+							+ recordId + ".jsonld?wskey=" + key);
 			record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record
 					.toString()));
