@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import play.Logger;
-import espace.core.sources.DNZSpaceSource;
+import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.EuropeanaSpaceSource;
@@ -38,7 +38,7 @@ public class ESpaceSources {
 		esources.add(new EuropeanaSpaceSource());
 		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
-		esources.add(new DNZSpaceSource());
+		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
 		Logger.info("Initialization of sources list");
@@ -52,7 +52,7 @@ public class ESpaceSources {
 		sourcesMap.put(s.getSourceName(), s);
 		s = new NLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
-		s = new DNZSpaceSource();
+		s = new DigitalNZSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new EuropeanaFashionSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
