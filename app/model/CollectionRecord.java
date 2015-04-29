@@ -149,6 +149,7 @@ public class CollectionRecord {
 	public String getThumbnailUrl() {
 		return this.thumbnailUrl;
 
+
 	}
 
 	public void setThumbnailUrl(String thumbnailUrl) {
