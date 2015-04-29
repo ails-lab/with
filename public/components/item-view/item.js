@@ -5,7 +5,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
 	  self.route = params.route;
       var thumb="";
-      var recordId="";
+      self.recordId=ko.observable("");
 	  self.title = ko.observable(false);
 	  self.description=ko.observable(false);
 	  self.thumb = ko.observable("");
@@ -21,6 +21,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
     	$('#modal-1').addClass('md-show');
     	$('body').css('overflow', 'hidden');
+    	$('#modal-1').css('overflow-y', 'auto');
     }
 
     self.itemload = function(e) {
@@ -55,7 +56,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
 		self.view_url(data.view_url);
 		
-		recordId = data.id;
+		self.recordId = data.id;
 	};
 
     self.close= function(){
@@ -63,7 +64,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
     	$("#modal-1").find("div[id^='modal-']").removeClass('md-show').css('display', 'none');
     	$('#modal-1').removeClass('md-show');
     	$('#modal-1').css('display', 'none');
-
+    	$("#myModal").modal('hide'); 
 
 
     	$('body').css('overflow', 'auto');
@@ -99,6 +100,12 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		}
     }
 
+    self.recordSelect= function (e){
+		console.log(e);
+		itemShow(e);
+		
+	}
+    
   }
 
   return { viewModel: ItemViewModel, template: template };

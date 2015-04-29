@@ -21,16 +21,27 @@
 			<div class="footer">Don't have an account? <a href="#">Joining is quick and easy</a>.</div>
 		</div>
 		<div class="emailLogin">
-			<form class="form form-inline">
-				<div class="form-group" data-bind="validationElement: emailUser">
-					<label class="sr-only" for="useremail">Email address</label>
-					<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser; hasFocus: true;">
+			<form class="form">
+				<div class="col-md-5 col-sm-5 col-ms-5 col-xs-12">
+					<div class="form-group" data-bind="validationElement: emailUser" style="vertical-align: top;">
+						<label class="sr-only" for="useremail">Email address</label>
+						<input type="email" class="form-control" id="useremail" placeholder="Enter email" data-bind="value: emailUser; hasFocus: true;">
+					</div>
 				</div>
-				<div class="form-group" data-bind="validationElement: emailPass">
-					<label class="sr-only" for="userpass">Email address</label>
-					<input type="password" class="form-control" id="userpass" placeholder="Password" data-bind="value: emailPass;">
+				<div class="col-md-5 col-sm-5 col-ms-5 col-xs-12">
+					<div class="form-group" data-bind="validationElement: emailPass" style="vertical-align: top;">
+						<label class="sr-only" for="userpass">Email address</label>
+						<input type="password" class="form-control" id="userpass" placeholder="Password" data-bind="value: emailPass;">
+					</div>
 				</div>
-				<button type="submit" class="btn btn-primary" data-bind="click: function() { emailLogin(true, collectionShow); }">Login</button>
+				<div class="col-md-2 col-sm-2 col-ms-2 col-xs-12">
+					<button type="submit" class="btn btn-primary btn-block" data-bind="click: function() { emailLogin(true, collectionShow); }" style="vertical-align: top;">Login</button>
+				</div>
+
+				<div class="col-xs-12">
+					<button type="button" class="btn btn-link" data-bind="click: function() { scrollDownEmail(); }">Login with Facebook or Google</span></button>
+				</div>
+			</form>
 		</div>
 	</div>
 

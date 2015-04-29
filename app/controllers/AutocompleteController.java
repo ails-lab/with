@@ -109,8 +109,7 @@ public class AutocompleteController extends Controller {
 
 		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises, filter);
 	}
-
-
+	
 
 	private static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
 		Set<String> seen = new HashSet<String>();

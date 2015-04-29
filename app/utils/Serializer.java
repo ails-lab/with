@@ -30,6 +30,7 @@ public class Serializer {
 	public static final ALogger log = Logger.of( Serializer.class);
 
 
+
 	public static class ObjectIdSerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object oid, JsonGenerator jsonGen, SerializerProvider provider)

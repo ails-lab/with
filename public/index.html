@@ -16,6 +16,7 @@
 			<link rel="stylesheet" type="text/css" href="css/item.css">
 			<link rel="stylesheet" type="text/css" href="css/collection.css">
 			<link rel="stylesheet" type="text/css" href="css/styleb&w.css">
+			<link rel="stylesheet" type="text/css" href="css/login.css" />
 			<link rel="stylesheet" type="text/css" href="css/profile.css">
 			<link rel="stylesheet" type="text/css" href="css/selectize.bootstrap3.css">
 		<!-- endbuild -->
@@ -35,16 +36,16 @@
 	</head>
 	<body>
 	   <top-bar params="route: route"></top-bar>
-		
 
-		    
             <div class="row">
-			<div class="maincontent" data-bind="component: { name: route().page, params: route }">
-				<div id="fb-root"></div>
-			</div>
+				<div class="maincontent" data-bind="component: { name: route().page, params: route }">
+
+				</div>
             </div>
-		<div id="fb-root"></div>
-<nav-bar params="route: route"></nav-bar>
+
+			<div id="fb-root"></div>
+
+			<nav-bar params="route: route"></nav-bar>
 
 		<script src="js/ie10-viewport-bug-workaround.js"></script>
 	</body>

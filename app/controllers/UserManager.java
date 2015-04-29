@@ -18,14 +18,21 @@ package controllers;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import model.User;
+
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Crypto;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
@@ -38,7 +45,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 public class UserManager extends Controller {
+
+
 	public static final ALogger log = Logger.of(UserManager.class);
+	private static final long TOKENTIMEOUT = 10*1000l /* 10 sec */ ;
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
@@ -70,9 +80,13 @@ public class UserManager extends Controller {
 	/**
 	 * Propose new username when it is already in use.
 	 *
-	 * @param initial the initial username the user tried
-	 * @param firstName the first name of the user
-	 * @param lastName the last name of the user
+	 * @param initial
+	 *            the initial username the user tried
+	 * @param firstName
+	 *            the first name of the user
+	 * @param lastName
+	 *            the last name of the user
+
 	 * @return the array node with two suggested alternative usernames
 	 */
 	private static ArrayNode proposeUsername(String initial, String firstName,
@@ -178,24 +192,15 @@ public class UserManager extends Controller {
 
 	}
 
-	/**
-	 * Should not be needed, is the same as login by email? Maybe need to store
-	 * if its a facebook or google or password log inner
-	 *
-	 * @return
-	 */
-	public static Result findByFacebookId() {
-		return ok();
-	}
-
-	public static Result googleLogin(String accessToken) {
+	private static Result googleLogin(String googleId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
 			URL url = new URL(
 					"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token="
 							+ accessToken);
-			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			HttpsURLConnection connection = (HttpsURLConnection) url
+					.openConnection();
 			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
@@ -204,6 +209,8 @@ public class UserManager extends Controller {
 				return badRequest(Json
 						.parse("{\"error\":\"User not registered\"}"));
 			}
+			u.setGoogleId(googleId);
+			DB.getUserDAO().makePermanent(u);
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -211,13 +218,15 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result facebookLogin(String accessToken) {
+	private static Result facebookLogin(String facebookId, String accessToken) {
 		log.info(accessToken);
 		User u = null;
 		try {
-			URL url = new URL("https://graph.facebook.com/endpoint?access_token="
-					+ accessToken);
-			HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+			URL url = new URL(
+					"https://graph.facebook.com/me?fields=email&format=json&access_token="
+							+ accessToken);
+			HttpsURLConnection connection = (HttpsURLConnection) url
+					.openConnection();
 			InputStream is = connection.getInputStream();
 			JsonNode res = Json.parse(is);
 			String email = res.get("email").asText();
@@ -226,6 +235,8 @@ public class UserManager extends Controller {
 				return badRequest(Json
 						.parse("{\"error\":\"User not registered\"}"));
 			}
+			u.setFacebookId(facebookId);
+			DB.getUserDAO().makePermanent(u);
 			return ok(Json.parse(DB.getJson(u)));
 		} catch (Exception e) {
 			return badRequest(Json
@@ -245,6 +256,32 @@ public class UserManager extends Controller {
 		ObjectNode error = Json.newObject();
 
 		User u = null;
+		if (json.has("facebookId")) {
+			String facebookId = json.get("facebookId").asText();
+			u = DB.getUserDAO().getByFacebookId(facebookId);
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				result = (ObjectNode) Json.parse(DB.getJson(u));
+				result.remove("md5Password");
+				return ok(result);
+			} else {
+				String accessToken = json.get("accessToken").asText();
+				return facebookLogin(facebookId, accessToken);
+			}
+		}
+		if (json.has("googleId")) {
+			String googleId = json.get("googleId").asText();
+			u = DB.getUserDAO().getByGoogleId(googleId);
+			if (u != null) {
+				session().put("user", u.getDbId().toHexString());
+				result = (ObjectNode) Json.parse(DB.getJson(u));
+				result.remove("md5Password");
+				return ok(result);
+			} else {
+				String accessToken = json.get("accessToken").asText();
+				return googleLogin(googleId, accessToken);
+			}
+		}
 		String emailOrUserName = null;
 		if (json.has("email")) {
 			emailOrUserName = json.get("email").asText();
@@ -292,5 +329,86 @@ public class UserManager extends Controller {
 	public static Result logout() {
 		session().clear();
 		return ok();
+	}
+	
+	public static Result loginWithToken( String token ) {
+		try {
+			JsonNode input = Json.parse(Crypto.decryptAES(token));
+			String userId = input.get( "user").asText();
+			long timestamp = input.get( "timestamp" ).asLong();
+			if( new Date().getTime() < timestamp + TOKENTIMEOUT ) {
+				User u = DB.getUserDAO().get( new ObjectId(userId));
+				if( u != null ) {
+					session().put( "user", userId );
+					ObjectNode result = Json.newObject();
+					result = (ObjectNode) Json.parse(DB.getJson(u));
+					result.remove("md5Password");
+					return ok(result);
+				}
+			}
+		} catch( Exception e ) {
+			// likely invalid token
+		}
+		return badRequest();
+	}
+	
+	public static Result getToken() {
+		String userId = session().get( "user");
+		if( userId == null ) return badRequest();
+		ObjectNode result = Json.newObject();
+		result.put( "user", userId );
+		result.put( "timestamp", new Date().getTime());
+		// just to make them all different
+		result.put( "random", new Random().nextInt());
+		String enc = Crypto.encryptAES(result.toString());
+		return ok( enc );
+	}
+	
+	/**
+	 * Get a list of matching usernames
+	 *
+	 * @param prefix
+	 *            optional prefix of username
+	 * @return JSON document with an array of matching usernames (or all of
+	 *         them)
+	 */
+	public static Result listNames(String prefix) {
+		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+		ArrayNode result = Json.newObject().arrayNode();
+		for (User user : users) {
+			result.add(user.getUsername());
+		}
+		return ok(result);
+	}
+
+	/**
+	 * Find if email is already used.
+	 *
+	 * @param email
+	 *            the email
+	 * @return OK if the email is available or error if not
+	 */
+	public static Result emailAvailable(String email) {
+		User user = DB.getUserDAO().getByEmail(email);
+		if (user != null) {
+			return badRequest(Json.parse("{\"error\":\"Email not available\"}"));
+		} else {
+			return ok();
+		}
+	}
+
+	public static Result getUser(String id) {
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				return ok(DB.getJson(user));
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+			}
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
+					+ "\"}"));
+		}
 	}
 }

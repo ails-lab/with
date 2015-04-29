@@ -1,11 +1,14 @@
 				<h1>login</h1>
 
-				<p class="lead">Use Facebook, Google or your email to login. <br />
+				<p class="lead" data-bind="ifnot: hasAccount">Use Facebook, Google or your email to login. <br />
 				Don't have a WITH account yet? No worries, <a href="#register">joining</a> is easy.</p>
+
+				<p class="lead" data-bind="if: hasAccount">You are already a member of <span>WITH</span>. <br />
+				Please use one of the options below to login.</p>
 
 				<br />
 
-				<div class="container text-left">
+				<div class="container">
 					<div class="row">
 						<div class="col-lg-5 col-lg-offset-1">
 							<button class="facebook huge" type="button" data-bind="click: function() { fbLogin(); }">
@@ -40,10 +43,14 @@
 						</div>
 					</div>
 
-					<div class="row text-right" style="margin-top: 20px;">
+					<div class="row" style="margin-top: 20px;">
 						<div class="col-lg-9 col-lg-offset-1">
 							<div class="well well-sm">
-								<a class="btn btn-primary" data-bind="click: function() { emailLogin(); }">Login</a>
+								<div class="row">
+									<div class="col-md-2 col-md-offset-10 col-sm-4 col-sm-offset-4 col-xs-12">
+										<a class="btn btn-primary btn-block" data-bind="click: function() { emailLogin(); }">Login</a>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

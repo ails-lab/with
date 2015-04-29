@@ -147,6 +147,7 @@ public class CollectionController extends Controller {
 			result.put("message", "["+cv.getPropertyPath()+"] " + cv.getMessage());
 			return badRequest(result);
 		}
+
 		if( DB.getCollectionDAO().getByOwnerAndTitle(newCollection.getOwnerId(), newCollection.getTitle()) != null  ) {
 			result.put("message", "Title already exists! Please specify another title.");
 			return internalServerError(result);
