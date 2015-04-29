@@ -115,10 +115,13 @@ public class CollectionRecord {
 	public void setSource(String source) {
 		if (source.toLowerCase().contains("europeana")) {
 			this.source = "Europeana";
-		} else if (source.toLowerCase().contains("dpla")) {
+		} else if (source.equalsIgnoreCase("DPLA")) {
 			this.source = "DPLA";
-		} else if (source.toLowerCase().contains("nla")) {
+		} else if (source.equalsIgnoreCase("NLA")) {
 			this.source = "NLA";
+		} else if ((source.equalsIgnoreCase("DNZ"))
+				|| (source.equalsIgnoreCase("DigitalNZ"))) {
+			this.source = "DigitalNZ";
 		} else {
 			this.source = source;
 		}
