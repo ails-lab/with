@@ -111,7 +111,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		try {
 			response = HttpConnector
 					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
-							+ "&api_key=SECRET_KEY");
+							+ "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record
 					.toString()));
