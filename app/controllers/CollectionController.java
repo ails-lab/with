@@ -218,14 +218,9 @@ public class CollectionController extends Controller {
 				firstEntries.put(c.getTitle(), c.getFirstEntries());
 
 			ObjectNode collections = Json.newObject();
-			for(Entry<String, ?> entry: firstEntries.entrySet()) {
-				/*ArrayNode firstRecords = Json.newObject().arrayNode();
-				for(CollectionRecord recLink: (List<CollectionRecord>)entry.getValue()) {
-					firstRecords.add(Json.toJson(recLink));
-					//firstRecords.add(Serializer.recordLinkToJson(recLink));
-				}*/
+			for(Entry<String, ?> entry: firstEntries.entrySet())
 				collections.put(entry.getKey(), Json.toJson(entry.getValue()));
-			}
+
 			result.put("userCollections", collections);
 			return ok(result);
 		} else {
