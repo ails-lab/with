@@ -74,7 +74,7 @@ public class CollectionController extends Controller {
 	/**
 	 * Action to delete a Collection from database. Json input, the collection
 	 * dbId
-	 * 
+	 *
 	 * @return
 	 */
 	// @With(UserLoggedIn.class)
@@ -94,7 +94,7 @@ public class CollectionController extends Controller {
 
 	/**
 	 * still needs to be implemented in a better way
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -141,7 +141,7 @@ public class CollectionController extends Controller {
 	/**
 	 * Action to store a Collection to the database. Json input with collection
 	 * fields
-	 * 
+	 *
 	 * @return
 	 */
 	// @With(UserLoggedIn.class)
@@ -254,7 +254,7 @@ public class CollectionController extends Controller {
 
 	/**
 	 * Adds a Record to a Collection
-	 * 
+	 *
 	 * @throws ClassNotFoundException
 	 * @throws IllegalAccessException
 	 * @throws InstantiationException
@@ -276,8 +276,7 @@ public class CollectionController extends Controller {
 		String recordLinkId;
 		if (json.has("recordlink_id")) {
 			recordLinkId = json.get("recordlink_id").asText();
-			record = DB.getCollectionRecordDAO().getById(
-					new ObjectId(recordLinkId));
+			record = DB.getCollectionRecordDAO().getById(new ObjectId(recordLinkId));
 			record.setDbId(null);
 			record.setCollectionId(new ObjectId(collectionId));
 		} else {
@@ -289,13 +288,12 @@ public class CollectionController extends Controller {
 					+ "SpaceSource";
 			Class<?> sourceClass = Class.forName(sourceClassName);
 			ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-			ArrayList<RecordJSONMetadata> records = s.getRecordFromSource(sourceId);
-			HashMap<String, String> content = new HashMap<String, String>();
-			for(RecordJSONMetadata jsonMetadata : records) {
-				content.put(jsonMetadata.getFormat(), jsonMetadata.getJsonContent());
-				
+
+			ArrayList<RecordJSONMetadata> recordsData = s.getRecordFromSource(sourceId);
+			for(RecordJSONMetadata data : recordsData) {
+				record.getContent().put(data.getFormat(), data.getJsonContent());
+
 			}
-			record.setContent(content);
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
