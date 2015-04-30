@@ -8,6 +8,11 @@ body {
 	/*overflow-x: hidden;
 	overflow-y: scroll;*/
 	font-size: 1.2em;
+	overflow-y:auto;
+}
+
+.noscroll{
+	overflow-y:hidden;
 }
 
 a{text-decoration: none}
