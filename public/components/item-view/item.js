@@ -20,7 +20,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
     	$('#modal-1').css('display', 'block');
 
     	$('#modal-1').addClass('md-show');
-    	$('body').css('overflow', 'hidden');
+    	
     	$('#modal-1').css('overflow-y', 'auto');
     }
 
@@ -67,7 +67,6 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
     	$("#myModal").modal('hide'); 
 
 
-    	$('body').css('overflow', 'auto');
     }
 
     self.changeSource=function(item){
@@ -100,6 +99,12 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		}
     }
 
+    self.recordSelect= function (e){
+		console.log(e);
+		itemShow(e);
+		
+	}
+    
   }
 
   return { viewModel: ItemViewModel, template: template };
