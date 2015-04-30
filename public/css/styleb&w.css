@@ -673,7 +673,7 @@ figure.effect-with:hover p {
     padding: 0.4em 1em;
     text-transform: none;
     position: relative;
-    width:70%;
+    width:100%;
     z-index: 2;
 
 }
