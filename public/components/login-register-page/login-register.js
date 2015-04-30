@@ -147,7 +147,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									type    : "get",
 									url     : "/user/emailAvailable?email=" + response['emails'][0]['value'],
 									success : function() {
-										self.template('email');
+										self.templateName('email');
 									},
 									error   : function(request, status, error) {
 										self.hasAccount(true);
@@ -188,9 +188,11 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/register",
 					data        : json,
 					success     : function(data, text) {
-						app.loadUser(data);
+						var promise=app.loadUser(data);
+						/*make sure call is finished before proceeding*/
+						$.when(promise).done(function(){
 						// self.templateName('postregister');
-						self.completeRegistration();
+						self.completeRegistration();});
 					},
 					error       : function(request, status, error) {
 						var err = JSON.parse(request.responseText);
@@ -229,19 +231,20 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					success     : function (data, text) {
 						var promise=
 						app.loadUser(data, self.stayLogged());
-
-						if (typeof popup !== 'undefined') {
-							self.emailUser(null);
-							self.emailPass(null);
-							if (popup) { self.closeLoginPopup(); }
-
-							if (typeof callback !== 'undefined') {
-								$.when(promise).done(function(){callback(self.record())});
+						$.when(promise).done(function(){
+							if (typeof popup !== 'undefined') {
+								self.emailUser(null);
+								self.emailPass(null);
+								if (popup) { self.closeLoginPopup(); }
+	
+								if (typeof callback !== 'undefined') {
+									callback(self.record());
+								}
 							}
-						}
-						else {
-							window.location.href = "#";
-						}
+							else {
+								window.location.href = "#";
+							}
+						});
 					},
 					error   : function (request, status, error) {
 						var err = JSON.parse(request.responseText);
@@ -285,17 +288,22 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									url         : "/user/login",
 									data        : json,
 									success     : function(data, text) {
-										app.loadUser(data, true);
-										if (typeof popup !== 'undefined') {
-											if (popup) { self.closeLoginPopup(); }
-
-											if (typeof callback !== 'undefined') {
-												callback(params.item);
+										var promise=app.loadUser(data, true);
+										
+										/*make sure call is finished before proceeding*/
+										$.when(promise).done(function(){
+										
+											if (typeof popup !== 'undefined') {
+												if (popup) { self.closeLoginPopup(); }
+	
+												if (typeof callback !== 'undefined') {
+													callback(params.item);
+												}
 											}
-										}
-										else {
-											window.location.href = "#";
-										}
+											else {
+												window.location.href = "#";
+										    }
+										});
 									},
 									error       : function(request, status, error) {
 										var err = JSON.parse(request.responseText);
@@ -339,17 +347,19 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							url         : "/user/login",
 							data        : json,
 							success     : function(data, text) {
-								app.loadUser(data, true);
-								if (typeof popup !== 'undefined') {
-									if (popup) { self.closeLoginPopup(); }
-
-									if (typeof callback !== 'undefined') {
-										callback(params.item);
+								var promise=app.loadUser(data, true);
+								$.when(promise).done(function(){
+									if (typeof popup !== 'undefined') {
+										if (popup) { self.closeLoginPopup(); }
+	
+										if (typeof callback !== 'undefined') {
+											callback(params.item);
+										}
 									}
-								}
-								else {
-									window.location.href = "#";
-								}
+									else {
+										window.location.href = "#";
+									}
+									});
 							},
 							error       : function(request, status, error) {
 								var err = JSON.parse(request.responseText);
