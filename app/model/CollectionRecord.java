@@ -90,7 +90,7 @@ public class CollectionRecord {
 	// "json EDM" -> json format of the EDM?
 	// "json UI" -> ...
 	// "source format" -> ...
-	private Map<String, String> content = new HashMap<String, String>();
+	private final Map<String, String> content = new HashMap<String, String>();
 
 	// fixed-size, denormalization of Tags on this record
 	// When somebody adds a tag to a record, and the cap is not reached, it will
@@ -236,10 +236,6 @@ public class CollectionRecord {
 
 	public void setPosition(int position) {
 		this.position = position;
-	}
-
-	public void setContent(Map<String, String> content) {
-		this.content = content;
 	}
 
 	public Map<String, String> getContent() {
