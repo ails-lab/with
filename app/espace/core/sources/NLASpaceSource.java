@@ -16,13 +16,20 @@
 
 package espace.core.sources;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.w3c.dom.Document;
+
+import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
@@ -39,9 +46,14 @@ public class NLASpaceSource extends ISpaceSource {
 				+ "&zone=picture,book,music,article"
 				+ "&q="
 				+ Utils.spacesFormatQuery(q.searchTerm, "%20")
-				+ (Utils.hasAny(q.termToExclude) ? "%20NOT%20" + Utils.spacesFormatQuery(q.termToExclude, "%20")
-						+ "%20" : "") + "&n=" + q.pageSize + "&s="
-				+ ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + "&encoding=json&reclevel=full";
+				+ (Utils.hasAny(q.termToExclude) ? "%20NOT%20"
+						+ Utils.spacesFormatQuery(q.termToExclude, "%20")
+						+ "%20" : "")
+				+ "&n="
+				+ q.pageSize
+				+ "&s="
+				+ ((Integer.parseInt(q.page) - 1) * Integer
+						.parseInt(q.pageSize)) + "&encoding=json&reclevel=full";
 	}
 
 	public String getSourceName() {
@@ -73,9 +85,12 @@ public class NLASpaceSource extends ISpaceSource {
 				JsonNode o = pa.get(i);
 				if (!o.path("name").asText().equals("people")) {
 					System.out.print(o.path("name").asText() + " ");
-					res.totalCount += Utils.readIntAttr(o.path("records"), "totalCount", true);
-					res.count += Utils.readIntAttr(o.path("records"), "n", true);
-					res.startIndex = Utils.readIntAttr(o.path("records"), "s", true);
+					res.totalCount += Utils.readIntAttr(o.path("records"),
+							"totalCount", true);
+					res.count += Utils
+							.readIntAttr(o.path("records"), "n", true);
+					res.startIndex = Utils.readIntAttr(o.path("records"), "s",
+							true);
 
 					JsonNode aa = o.path("records").path("work");
 
@@ -85,23 +100,32 @@ public class NLASpaceSource extends ISpaceSource {
 						// System.out.println(item.toString());
 						ItemsResponse it = new ItemsResponse();
 						it.id = Utils.readAttr(item, "id", true);
-						it.thumb = Utils.readArrayAttr(Utils.findNode(item.path("identifier"), new Pair<String>("type",
-								"url"), new Pair<String>("linktype", "thumbnail")), "value", false);
+						it.thumb = Utils.readArrayAttr(Utils.findNode(item
+								.path("identifier"), new Pair<String>("type",
+								"url"), new Pair<String>("linktype",
+								"thumbnail")), "value", false);
 						// TODO not present
 						it.fullresolution = null;
 						it.title = Utils.readLangAttr(item, "title", false);
-						it.description = Utils.readLangAttr(item, "abstract", false);
+						it.description = Utils.readLangAttr(item, "abstract",
+								false);
 						it.year = Utils.readArrayAttr(item, "issued", true);
 
 						// TODO are they the same?
-						it.creator = Utils.readLangAttr(item, "contributor", false);
-						it.dataProvider = Utils.readLangAttr(item, "contributor", false);
+						it.creator = Utils.readLangAttr(item, "contributor",
+								false);
+						it.dataProvider = Utils.readLangAttr(item,
+								"contributor", false);
 
 						it.url = new MyURL();
-						it.url.original = Utils.readArrayAttr(Utils.findNode(item.path("identifier"), new Pair<String>(
-								"type", "url"), new Pair<String>("linktype", "fulltext, restricted, unknown")),
+						it.url.original = Utils.readArrayAttr(Utils.findNode(
+								item.path("identifier"), new Pair<String>(
+										"type", "url"), new Pair<String>(
+										"linktype",
+										"fulltext, restricted, unknown")),
 								"value", false);
-						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl", false);
+						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl",
+								false);
 
 						a.add(it);
 
@@ -117,6 +141,30 @@ public class NLASpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector
+					.getURLContent("http://api.trove.nla.gov.au/work/"
+							+ recordId + "?key=" + Key
+							+ "&encoding=json&reclevel=full");
+			JsonNode record = response;
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+					.toString()));
+			Document xmlResponse = HttpConnector
+					.getURLContentAsXML("http://api.trove.nla.gov.au/work/"
+							+ recordId + "?key=" + Key
+							+ "&encoding=xml&reclevel=full");
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer
+					.serializeXML(xmlResponse)));
+			return jsonMetadata;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return jsonMetadata;
+		}
 	}
 
 }

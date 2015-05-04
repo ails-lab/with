@@ -17,13 +17,6 @@
 package espace.core;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import org.json.JSONObject;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import espace.core.RecordJSONMetadata.Format;
 
 public abstract class ISpaceSource {
 
@@ -36,13 +29,13 @@ public abstract class ISpaceSource {
 	public String autocompleteQuery(String term, int limit) {
 		return "";
 	}
-	
+
 	public AutocompleteResponse autocompleteResponse(String response) {
 		return new AutocompleteResponse();
-	};
-	
-	public RecordJSONMetadata getJSONMetadata(String response) {
-		return new RecordJSONMetadata(Format.NULL, "");
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		return null;
 	}
 
 }
