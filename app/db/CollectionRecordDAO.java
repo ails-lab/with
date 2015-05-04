@@ -62,6 +62,16 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).asList();
 	}
 
+	/**
+	 * Retrieve the total amount of records within a collection
+	 */
+	public long getItemCount(ObjectId colId) {
+		Query<CollectionRecord> q = this.createQuery()
+				.field("collectionId").equal(colId);
+		return this.find(q).countAll();
+	}
+
+
 	public List<CollectionRecord> getBySource(String source,String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
 				.field("source").equal(source)
