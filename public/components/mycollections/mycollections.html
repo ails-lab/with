@@ -18,7 +18,9 @@
 					 <div class="content">
 					   <h3 data-bind="text: title"></h3>
 					   <div data-bind="text: description"></div>
-					  <!--  ko if: $data.hasOwnProperty("category") --><b>Categorized as:</b> <div data-bind="text: category"></div> <!-- /ko -->
+					  <!--  ko if: $data.hasOwnProperty("category") -->
+					  	<b>Categorized as:</b> <div data-bind="text: category"></div>
+					  <!-- /ko -->
 					   <span class="pull-left"><b>Items: </b> items count 
 					   		<b>Visibility: </b><i class="fa fa-eye-slash" title="secret"></i>
 					   		<!-- ko if: public --> public <!-- /ko -->
@@ -32,7 +34,8 @@
 				 	 <div class="row-fluid">
 				  	 <div class="imcontainer">
 				  	 	<!-- ko foreach: firstEntries -->
-				  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}"> </div>
+				  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}">
+				  	 		 </div>
 				  	 		<!--  <div><figure class="masonryitem"><img  data-bind="attr: {src: thumbnailUrl}"><figcaption data-bind="text: title"></figcaption></figure></div> -->
 				  	 	 <!-- /ko -->
 				  	 </div>
