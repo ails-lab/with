@@ -70,6 +70,11 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 
+		//check itemCount
+		int itemCount;
+		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c.getItemCount() )
+			c.setItemCount(itemCount);
+
 		result = (ObjectNode) Json.toJson(c);
 		result.put("owner", collectionOwner.getUsername());
 		return ok(result);
@@ -112,10 +117,14 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
+		//new collection changes
+		ObjectId oldId =  new ObjectId(id);
+		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
 		Collection newVersion = Json.fromJson(json, Collection.class);
 		newVersion.setFirstEntries(oldVersion.getFirstEntries());
-		newVersion.setDbId(new ObjectId(id));
+		newVersion.setDbId(oldId);
+		newVersion.setLastModified(new Date());
+		newVersion.setItemCount((int)DB.getCollectionRecordDAO().getItemCount(oldId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newVersion);
@@ -307,6 +316,7 @@ public class CollectionController extends Controller {
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
 		collection.itemCountIncr();
+		collection.setLastModified(new Date());
 		if (collection.getFirstEntries().size() < 20)
 			collection.getFirstEntries().add(record);
 		DB.getCollectionDAO().makePermanent(collection);
@@ -341,6 +351,8 @@ public class CollectionController extends Controller {
 		}
 		if (temp != null)
 			records.remove(temp);
+		collection.setLastModified(new Date());
+		collection.itemCountDiscr();
 		DB.getCollectionDAO().makePermanent(collection);
 
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))

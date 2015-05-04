@@ -216,4 +216,8 @@ public class Collection {
 		this.itemCount++;
 	}
 
+	public void itemCountDiscr() {
+		this.itemCount--;
+	}
+
 }
