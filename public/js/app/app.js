@@ -77,6 +77,7 @@ define("app", ['knockout'], function(ko) {
 				isLogged(false);
 			}
 		});
+		window.location.href="/assets/index.html";
 	}
 
 	// Check if user information already exist in session

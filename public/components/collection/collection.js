@@ -287,7 +287,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		 
 		  var jsondata=JSON.stringify({
 				source: self.record().apisource(),
-				originalId:self.record().recordId,
+				sourceId:self.record().recordId,
 				title: self.record().title(),
 				
 				description:self.record().description(),
