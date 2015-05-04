@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,17 +58,21 @@ public class CollectionController extends Controller {
 
 		ObjectId colId = new ObjectId(id);
 		Collection c = null;
+		User collectionOwner = null;
 		try {
 			c = DB.getCollectionDAO().getById(colId);
+			collectionOwner = DB.getUserDAO().getById(c.getOwnerId());
 		} catch (Exception e) {
-			log.error("Cannot retrieve metadata for the specified collection!",
+			log.error("Cannot retrieve metadata for the specified collection or user!",
 					e);
 			result.put("message",
-					"Cannot retrieve metadata for the specified collection!");
+					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
 		}
 
-		return ok(Json.toJson(c));
+		result = (ObjectNode) Json.toJson(c);
+		result.put("owner", collectionOwner.getUsername());
+		return ok(result);
 
 	}
 
@@ -154,6 +159,8 @@ public class CollectionController extends Controller {
 		}
 
 		Collection newCollection = Json.fromJson(json, Collection.class);
+		newCollection.setCreated(new Date());
+		newCollection.setLastModified(new Date());
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -299,6 +306,7 @@ public class CollectionController extends Controller {
 
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
+		collection.itemCountIncr();
 		if (collection.getFirstEntries().size() < 20)
 			collection.getFirstEntries().add(record);
 		DB.getCollectionDAO().makePermanent(collection);
