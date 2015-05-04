@@ -75,9 +75,9 @@ define("app", ['knockout'], function(ko) {
 				sessionStorage.removeItem('UserCollections');
 				localStorage.removeItem('UserCollections');
 				isLogged(false);
+				window.location.href="/assets/index.html";
 			}
 		});
-		window.location.href="/assets/index.html";
 	}
 
 	// Check if user information already exist in session
