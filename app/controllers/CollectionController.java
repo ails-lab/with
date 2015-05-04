@@ -310,7 +310,8 @@ public class CollectionController extends Controller {
 	 * List all Records from a Collection
 	 * using a start item and a page size
 	 */
-	public static Result listCollectionRecords(String collectionId, int start, int count) {
+	public static Result listCollectionRecords(String collectionId, String format,
+												int start, int count) {
 		ObjectNode result = Json.newObject();
 
 		ObjectId colId = new ObjectId(collectionId);
@@ -321,11 +322,19 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
+
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for(CollectionRecord e: records) {
-			recordsList.add(Json.toJson(e));
+			if( format.equals("all")) {
+				recordsList.add(Json.toJson(e.getContent()));
+			} else if( !format.equals("default") ) {
+				recordsList.add(e.getContent().get(format));
+			}
+			else {
+				e.getContent().clear();
+				recordsList.add(Json.toJson(e));
+			}
 		}
-
 		return ok(recordsList);
 	}
 
