@@ -245,7 +245,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 	  }
@@ -315,7 +315,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 		  

@@ -453,11 +453,12 @@ font-size: 15px;
   padding: 0 10px;}
 
 #more{
-	 bottom:40px;
+	 bottom:100px;
 	 right:40px;
 	 padding: 5px;
      position: fixed;
      z-index:1032;
+     font-size:25px;
 	    }
 
 
