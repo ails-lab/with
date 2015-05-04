@@ -16,28 +16,36 @@
 
 package espace.core.sources;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.w3c.dom.Document;
+
+import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
 import espace.core.SourceResponse;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class DNZSpaceSource extends ISpaceSource {
+public class DigitalNZSpaceSource extends ISpaceSource {
 
 	/**
-	 * user: espace password: with2015 email: gardero@gmail.com
+	 * National Library of New Zealand
 	 */
-	private String Key = "Qcv9eq67Ep32HDbYXmsx";
+	private String Key = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
-		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
+		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key
+				+ "&text=" + Utils.spacesPlusFormatQuery(q.searchTerm)
+				+ "&per_page=" + q.pageSize + "&page=" + q.page;
 	}
 
 	public String getSourceName() {
@@ -69,7 +77,8 @@ public class DNZSpaceSource extends ISpaceSource {
 
 			res.totalCount = Utils.readIntAttr(o, "result_count", true);
 			res.count += Utils.readIntAttr(o, "per_page", true);
-			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1) * res.count;
+			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1)
+					* res.count;
 
 			JsonNode aa = o.path("results");
 
@@ -83,15 +92,18 @@ public class DNZSpaceSource extends ISpaceSource {
 
 				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
 				// TODO not present
-				it.fullresolution = Utils.readArrayAttr(item, "large_thumbnail_url", false);
+				it.fullresolution = Utils.readArrayAttr(item,
+						"large_thumbnail_url", false);
 				// TODO read date and take year?
 				it.year = null; // Utils.readArrayAttr(item, "issued", true);
 				// TODO use author?
 				it.dataProvider = null;// Utils.readLangAttr(item,
 										// "contributor", false);
 				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "landing_url", false);
-				it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
+				it.url.original = Utils.readArrayAttr(item, "landing_url",
+						false);
+				it.url.fromSourceAPI = "http://www.digitalnz.org/records/"
+						+ it.id;
 				a.add(it);
 
 			}
@@ -104,6 +116,28 @@ public class DNZSpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector
+					.getURLContent("http://api.digitalnz.org/v3/records/"
+							+ recordId + ".json?api_key=" + Key);
+			JsonNode record = response;
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+					.toString()));
+			Document xmlResponse = HttpConnector
+					.getURLContentAsXML("http://api.digitalnz.org/v3/records/"
+							+ recordId + ".xml?api_key=" + Key);
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer
+					.serializeXML(xmlResponse)));
+			return jsonMetadata;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return jsonMetadata;
+		}
 	}
 
 }

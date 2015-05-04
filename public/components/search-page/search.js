@@ -146,7 +146,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
 		  }
 		else{
-			$('.withsearch-content').css({'overflow-x': 'scroll'});
+			$('.withsearch-content').css({'overflow-x': 'auto'});
 		  }
 		
 		};
@@ -350,14 +350,18 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if(  evt === 'focus' && isOpen ) return false;
 
 			if( isOpen ) {
+				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
 				withinput.blur();
+				
 			}
 			else {
 				var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 			    // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
 			    var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 
+			    /* put no scroll to body to eliminate double vertical scrollbars*/
+			    $("body").addClass("noscroll");
 				withsearch.addClass('open');
 				withinput.focus();
 				if(isOpera || isFirefox)

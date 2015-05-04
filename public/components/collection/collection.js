@@ -156,7 +156,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		
+		  else if(localStorage.getItem('UserCollections') !== null) 
+			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 		  var jsonData = {};
 		 
 		    collections.forEach(function(collection) 
@@ -225,9 +226,17 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					self.id(data.dbId);
 					self.selectedCollection(data.title);
 					var temp = [];
-					temp=JSON.parse(sessionStorage.getItem('UserCollections'));
-					temp.push(data);
-					sessionStorage.setItem('UserCollections', JSON.stringify(temp));
+					if(sessionStorage.getItem('UserCollections')!=undefined){
+					   temp=JSON.parse(sessionStorage.getItem('UserCollections'));
+					   temp.push(data);
+					   sessionStorage.setItem('UserCollections', JSON.stringify(temp));  
+					}
+					else if(localStorage.getItem('UserCollections')){
+						temp=JSON.parse(localStorage.getItem('UserCollections'));
+						temp.push(data);
+						localStorage.setItem('UserCollections', JSON.stringify(temp));
+					}
+					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					callback(data.dbId);
 					
@@ -278,7 +287,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		 
 		  var jsondata=JSON.stringify({
 				source: self.record().apisource(),
-				originalId:self.record().recordId,
+				sourceId:self.record().recordId,
 				title: self.record().title(),
 				
 				description:self.record().description(),
@@ -298,6 +307,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"success": function(data) {
 					console.log(data);
 					self.close();
+					$("#myModal").find("h4").html("Success!");
+					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").modal('show');
 				},
 				

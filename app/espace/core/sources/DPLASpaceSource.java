@@ -18,17 +18,18 @@ package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
 import espace.core.SourceResponse;
-import espace.core.Utils;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
+import espace.core.Utils;
 
 public class DPLASpaceSource extends ISpaceSource {
 
@@ -36,10 +37,14 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
-		return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
-				+ "&page=" + q.page + "&page_size=" + q.pageSize;
+		return "http://api.dp.la/v2/items?api_key="
+				+ DPLAKey
+				+ "&q="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
+						: q.searchTerm)
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
+						+ Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
+						: "") + "&page=" + q.page + "&page_size=" + q.pageSize;
 	}
 
 	public String getSourceName() {
@@ -75,14 +80,19 @@ public class DPLASpaceSource extends ISpaceSource {
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
 				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
-				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+				it.title = Utils.readLangAttr(item.path("sourceResource"),
+						"title", false);
+				it.description = Utils.readLangAttr(
+						item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"),
+						"creator", false);
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
+				it.dataProvider = Utils.readLangAttr(item.path("provider"),
+						"name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
+				it.url.fromSourceAPI = "http://dp.la/item/"
+						+ Utils.readAttr(item, "id", false);
 				a.add(it);
 			}
 			res.items = a;
@@ -93,6 +103,23 @@ public class DPLASpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector
+					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
+							+ "&api_key=" + DPLAKey);
+			JsonNode record = response.get("docs").get(0);
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record
+					.toString()));
+			return jsonMetadata;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return jsonMetadata;
+		}
 	}
 
 }

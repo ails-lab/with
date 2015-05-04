@@ -18,6 +18,10 @@ package utils;
 
 import java.io.IOException;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
+
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -27,16 +31,23 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class Serializer {
-	public static final ALogger log = Logger.of( Serializer.class);
-
+	public static final ALogger log = Logger.of(Serializer.class);
 
 
 	public static class ObjectIdSerializer extends JsonSerializer<Object> {
 		@Override
-		public void serialize(Object oid, JsonGenerator jsonGen, SerializerProvider provider)
-				throws IOException,	JsonProcessingException {
-					jsonGen.writeString(oid.toString());
+		public void serialize(Object oid, JsonGenerator jsonGen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			jsonGen.writeString(oid.toString());
 		}
 
+	}
+
+	public static String serializeXML(Document doc) {
+		DOMImplementationLS domImplementation = (DOMImplementationLS) doc
+				.getImplementation();
+		LSSerializer lsSerializer = domImplementation.createLSSerializer();
+		return lsSerializer.writeToString(doc);
 	}
 }
