@@ -84,7 +84,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-			System.out.println(httpQuery);
+			// System.out.println(httpQuery);
 			// System.out.println(response.toString());
 			JsonNode docs = response.path("items");
 			res.totalCount = Utils.readIntAttr(response.path("pageInfo"), "totalResults", true);
@@ -127,7 +127,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		String key = getKey(q, page, pageSize);
 		if (!roots.containsKey(key)) {
 			roots.put(key, nextPageToken);
-			System.out.println("Saved [" + key + "]" + nextPageToken);
+			// System.out.println("Saved [" + key + "]" + nextPageToken);
 		}
 	}
 

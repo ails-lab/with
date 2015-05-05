@@ -28,7 +28,7 @@ public class CommonFilterResponse implements Cloneable {
 
 	public void addValue(String value) {
 		if (value != null && !suggestedValues.contains(value)) {
-			System.out.println(filterName + " Added " + value);
+			// System.out.println(filterName + " Added " + value);
 			suggestedValues.add(value);
 		}
 	}

@@ -109,10 +109,10 @@ public class DNZSpaceSource extends ISpaceSource {
 				// System.out.println(item.toString());
 
 				List<String> v = Utils.readArrayAttr(item, "category", false);
-				System.out.println("add " + v);
-				String t = v.get(0);
-				countValue(type, t);
-
+				// System.out.println("add " + v);
+				for (String string : v) {
+					countValue(type, string);
+				}
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 				it.title = Utils.readLangAttr(item, "title", false);

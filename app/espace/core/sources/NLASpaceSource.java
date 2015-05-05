@@ -105,7 +105,7 @@ public class NLASpaceSource extends ISpaceSource {
 
 					JsonNode aa = o.path("records").path("work");
 
-					System.out.println(aa.size());
+					// System.out.println(aa.size());
 
 					for (JsonNode item : aa) {
 						// System.out.println(item.toString());
@@ -113,7 +113,7 @@ public class NLASpaceSource extends ISpaceSource {
 						List<String> v = Utils.readArrayAttr(item, "type", false);
 						// type.addValue(vmap.translateToCommon(type.filterID,
 						// ));
-						System.out.println("add " + v);
+						// System.out.println("add " + v);
 						for (String string : v) {
 							countValue(type, string);
 						}
@@ -145,7 +145,7 @@ public class NLASpaceSource extends ISpaceSource {
 			}
 
 			res.items = a;
-			System.out.println(type);
+			// System.out.println(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
