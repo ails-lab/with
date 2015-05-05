@@ -18,6 +18,8 @@ package espace.core;
 
 import java.io.IOException;
 
+import org.w3c.dom.Document;
+
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.ws.WS;
@@ -27,14 +29,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 public class HttpConnector {
 
-	private static final int CONNECTION_RETRIES = 3;
 	private static final int TIMEOUT_CONNECTION = 40000;
-	private static final int STATUS_OK_START = 200;
-	private static final int STATUS_OK_END = 299;
-	private static final String ENCODING = "UTF-8";
 
 	public static JsonNode getURLContent(String url) throws IOException {
-		System.out.println(url);
 		Promise<JsonNode> jsonPromise = WS.url(url).get().map(new Function<WSResponse, JsonNode>() {
 			public JsonNode apply(WSResponse response) {
 				JsonNode json = response.asJson();
@@ -44,4 +41,13 @@ public class HttpConnector {
 		return jsonPromise.get(TIMEOUT_CONNECTION);
 	}
 
+	public static Document getURLContentAsXML(String url) throws IOException {
+		Promise<Document> xmlPromise = WS.url(url).get().map(new Function<WSResponse, Document>() {
+			public Document apply(WSResponse response) {
+				Document xml = response.asXml();
+				return xml;
+			}
+		});
+		return xmlPromise.get(TIMEOUT_CONNECTION);
+	}
 }

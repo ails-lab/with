@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 
 import play.Logger;
-import espace.core.sources.DNZSpaceSource;
+import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
-import espace.core.sources.ESpaceSource;
+import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.sources.NLASpaceSource;
 import espace.core.sources.YouTubeSpaceSource;
 
@@ -35,10 +35,10 @@ public class ESpaceSources {
 
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
-		esources.add(new ESpaceSource());
+		esources.add(new EuropeanaSpaceSource());
 		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
-		esources.add(new DNZSpaceSource());
+		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
 		Logger.info("Initialization of sources list");
@@ -46,13 +46,13 @@ public class ESpaceSources {
 	
 	public static Map<String, ISpaceSource> initSourceByNameMap() {
 		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
-		ISpaceSource s = new ESpaceSource();
+		ISpaceSource s = new EuropeanaSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new DPLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new NLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
-		s = new DNZSpaceSource();
+		s = new DigitalNZSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new EuropeanaFashionSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);

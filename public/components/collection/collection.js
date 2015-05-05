@@ -156,7 +156,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if(localStorage.getItem('UserCollections') !== null) 
+		  else if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 		  var jsonData = {};
 		 
@@ -245,7 +245,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 	  }
@@ -287,7 +287,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		 
 		  var jsondata=JSON.stringify({
 				source: self.record().apisource(),
-				originalId:self.record().recordId,
+				sourceId:self.record().recordId,
 				title: self.record().title(),
 				
 				description:self.record().description(),
@@ -315,7 +315,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 		  

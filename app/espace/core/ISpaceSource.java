@@ -46,10 +46,14 @@ public abstract class ISpaceSource {
 
 	public AutocompleteResponse autocompleteResponse(String response) {
 		return new AutocompleteResponse();
-	};
+	}
 
 	public RecordJSONMetadata getJSONMetadata(String response) {
 		return new RecordJSONMetadata(Format.NULL, "");
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		return null;
 	}
 
 	private FilterValuesMap vmap;

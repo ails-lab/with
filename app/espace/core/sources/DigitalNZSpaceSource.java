@@ -29,29 +29,35 @@ import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
-import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class EuropeanaFashionSpaceSource extends ISpaceSource {
+public class DigitalNZSpaceSource extends ISpaceSource {
+
+	/**
+	 * National Library of New Zealand
+	 */
+	private String Key = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
-		return "http://www.europeanafashion.eu/api/search/"
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm) + "/" + q.pageSize + "/" + ""
-				+ ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1);
-		// return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
-		// + Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" :
-		// q.searchTerm)
-		// + (Utils.hasAny(q.termToExclude) ? "+NOT+(" +
-		// Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
-		// + "&page=" + q.page + "&page_size=" + q.pageSize;
+		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key
+				+ "&text=" + Utils.spacesPlusFormatQuery(q.searchTerm)
+				+ "&per_page=" + q.pageSize + "&page=" + q.page;
 	}
 
 	public String getSourceName() {
-		return "EFashion";
+		return "DigitalNZ";
+	}
+
+	public String getDPLAKey() {
+		return Key;
+	}
+
+	public void setDPLAKey(String dPLAKey) {
+		Key = dPLAKey;
 	}
 
 	@Override
@@ -63,33 +69,47 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-			// System.out.println(response.toString());
-			JsonNode docs = response.path("results");
-			res.totalCount = Utils.readIntAttr(response, "total", true);
-			res.count = docs.size();
-			res.startIndex = Utils.readIntAttr(response, "offset", true);
+
 			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
-			for (JsonNode item : docs) {
+			JsonNode o = response.path("search");
+			// System.out.print(o.path("name").asText() + " ");
+
+			res.totalCount = Utils.readIntAttr(o, "result_count", true);
+			res.count += Utils.readIntAttr(o, "per_page", true);
+			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1)
+					* res.count;
+
+			JsonNode aa = o.path("results");
+
+			for (JsonNode item : aa) {
+				// System.out.println(item.toString());
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
-				it.thumb = Utils.readArrayAttr(item, "thumbnail", false);
-				it.fullresolution = null;
 				it.title = Utils.readLangAttr(item, "title", false);
+				it.creator = Utils.readLangAttr(item, "creator", false);
 				it.description = Utils.readLangAttr(item, "description", false);
-				// it.creator = Utils.readLangAttr(item.path("sourceResource"),
-				// "creator", false);
-				// it.year = null;
-				// it.dataProvider = Utils.readLangAttr(item.path("provider"),
-				// "name", false);
+
+				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
+				// TODO not present
+				it.fullresolution = Utils.readArrayAttr(item,
+						"large_thumbnail_url", false);
+				// TODO read date and take year?
+				it.year = null; // Utils.readArrayAttr(item, "issued", true);
+				// TODO use author?
+				it.dataProvider = null;// Utils.readLangAttr(item,
+										// "contributor", false);
 				it.url = new MyURL();
-				// it.url.original = Utils.readArrayAttr(item, "isShownAt",
-				// false);
-				it.url.fromSourceAPI = "http://www.europeanafashion.eu/record/a/" + it.id;
+				it.url.original = Utils.readArrayAttr(item, "landing_url",
+						false);
+				it.url.fromSourceAPI = "http://www.digitalnz.org/records/"
+						+ it.id;
 				a.add(it);
+
 			}
+
 			res.items = a;
-			res.facets = response.path("facets");
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -97,17 +117,22 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
 		return res;
 	}
-	
+
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
 			response = HttpConnector
-					.getURLContent("http://www.europeanafashion.eu/record/"
-							+ recordId );
+					.getURLContent("http://api.digitalnz.org/v3/records/"
+							+ recordId + ".json?api_key=" + Key);
 			JsonNode record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
+			Document xmlResponse = HttpConnector
+					.getURLContentAsXML("http://api.digitalnz.org/v3/records/"
+							+ recordId + ".xml?api_key=" + Key);
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer
+					.serializeXML(xmlResponse)));
 			return jsonMetadata;
 		} catch (IOException e) {
 			e.printStackTrace();

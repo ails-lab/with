@@ -29,10 +29,12 @@ import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
 import espace.core.SourceResponse;
-import espace.core.Utils;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
+import espace.core.Utils;
 
 public class DPLASpaceSource extends ISpaceSource {
 
@@ -114,6 +116,20 @@ public class DPLASpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
+			JsonNode record = response.get("docs").get(0);
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
+			return jsonMetadata;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return jsonMetadata;
+		}
 	}
 
 }

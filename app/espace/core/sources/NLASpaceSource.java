@@ -16,8 +16,13 @@
 
 package espace.core.sources;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.w3c.dom.Document;
+
+import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -26,6 +31,8 @@ import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
@@ -145,6 +152,24 @@ public class NLASpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector.getURLContent("http://api.trove.nla.gov.au/work/" + recordId + "?key=" + Key
+					+ "&encoding=json&reclevel=full");
+			JsonNode record = response;
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record.toString()));
+			Document xmlResponse = HttpConnector.getURLContentAsXML("http://api.trove.nla.gov.au/work/" + recordId
+					+ "?key=" + Key + "&encoding=xml&reclevel=full");
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer.serializeXML(xmlResponse)));
+			return jsonMetadata;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return jsonMetadata;
+		}
 	}
 
 }
