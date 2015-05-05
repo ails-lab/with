@@ -28,7 +28,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	    	imagesLoaded( $element, function() {
 	    		if (!($element.data('masonry'))){
 	        		
-	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
+	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 5,isInitLayout: false});
 	        			
 	        	}
 	    		$('#columns > figure').each(function () {
