@@ -49,6 +49,9 @@ public class User {
 	private String lastName;
 
 	private Gender gender;
+	private String about;
+	private String location;
+
 	private String facebookId;
 	private String googleId;
 
@@ -182,6 +185,22 @@ public class User {
 
 	public void setMd5Password(String md5Password) {
 		this.md5Password = md5Password;
+	}
+
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
 	}
 
 	public List<Search> getSearchHistory() {
