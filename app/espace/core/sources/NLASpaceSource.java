@@ -145,6 +145,8 @@ public class NLASpaceSource extends ISpaceSource {
 			}
 
 			res.items = a;
+			res.filters = new ArrayList<>();
+			res.filters.add(type);
 			// System.out.println(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

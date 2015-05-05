@@ -110,6 +110,8 @@ public class DPLASpaceSource extends ISpaceSource {
 			}
 			res.items = a;
 			res.facets = response.path("facets");
+			res.filters = new ArrayList<>();
+			res.filters.add(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

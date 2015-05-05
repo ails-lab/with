@@ -148,8 +148,10 @@ public class SearchController extends Controller {
 		r1.responces = res;
 		ArrayList<CommonFilterResponse> merge = new ArrayList<CommonFilterResponse>();
 		for (SourceResponse sourceResponse : res) {
+			System.out.println(sourceResponse.filters);
 			FiltersHelper.merge(merge, sourceResponse.filters);
 		}
+		System.out.println(merge);
 		return ok(views.html.testsearch.render(userForm, res, merge));
 	}
 
