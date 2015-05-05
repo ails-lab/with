@@ -16,19 +16,31 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else'], function(ko, 
 		self.deleteMyCollection = function(collection) {
 			collectionId = collection.dbId;
 			collectionTitle = collection.title;
-			showDelCollPopup(collectionTitle);
+			showDelCollPopup(collectionTitle, collectionId);
 		};
 		
-		showDelCollPopup = function(collectionTitle) {
-			 
+		showDelCollPopup = function(collectionTitle, collectionId) {
+			$("#myModal").find("h4").html("Do you want to delete this collection?");
+			var body = $("#myModal").find("div.modal-body");
+			body.empty();
+	        var confirmBtn = $('<button> Confirm </button>').appendTo(body);
+	        confirmBtn.click(function() {
+	        	deleteCollection(collectionId);
+	        	$("#myModal").modal('hide');
+	        });
+	        var cancelBtn = $('<button> Cancel </button>').appendTo(body);
+	        cancelBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        });
+			$("#myModal").modal('show');
 		};
 		
 		self.closeDelCollPopup = function() {
 			
 		};
 		
-		self.deleteCollection = function() {
-			alert(collectionId);
+		deleteCollection = function(collectionId) {
+			//TODO: remove deleted collection from UserCollections in sessionStorage and reload mycollections
 		};
 	
 	}
