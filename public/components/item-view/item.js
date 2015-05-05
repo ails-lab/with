@@ -86,7 +86,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		else if(self.apisource() == "DigitalNZ") return "images/logos/digitalnz.png";
 		else if(self.apisource() == "DigitalNZ") return "images/logos/digitalnz.png";
 		else if(self.apisource() == "EFashion") return "images/logos/eufashion.png";
-
+		else if(self.apisource() == "YouTube") return "images/logos/youtube.jpg";
 		else return "";
 	});
 
