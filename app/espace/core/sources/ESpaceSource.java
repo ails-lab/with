@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -28,6 +29,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
+import espace.core.CommonFilter;
+import espace.core.CommonFilterResponse;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
 import espace.core.HttpConnector;
@@ -41,15 +45,42 @@ import espace.core.Utils;
 
 public class ESpaceSource extends ISpaceSource {
 
+	public ESpaceSource() {
+		super();
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "&qf=TYPE:IMAGE");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "&qf=TYPE:VIDEO");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "&qf=TYPE:SOUND");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "&qf=TYPE:TEXT");
+	}
+
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
 		eq.addSearch(getSearchTerm(q));
 		eq.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 		eq.addSearchParam("rows", "" + q.pageSize);
 		eq.addSearchParam("profile", "rich+facets");
+		// filters(q, eq);
 		euroAPI(q, eq);
-		return eq.getHttp();
+		String http = eq.getHttp();
+		http = addfilters(q, http);
+		return http;
 	}
+
+	// private void filters(CommonQuery q, EuropeanaQuery eq) {
+	// if (q.filters != null) {
+	// for (CommonFilter filter : q.filters) {
+	// switch (filter.filterID) {
+	// case CommonFilters.TYPE_ID:
+	// eq.addSearch(Utils.getFacetsAttr(
+	// vmap.translateToSpecific(filter.filterID, filter.value), "TYPE"));
+	// break;
+	//
+	// default:
+	// break;
+	// }
+	// }
+	// }
+	// }
 
 	private String getSearchTerm(CommonQuery q) {
 		if (Utils.hasAny(q.searchTerm))
@@ -110,6 +141,7 @@ public class ESpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
+		CommonFilterResponse type = CommonFilterResponse.typeFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -118,6 +150,8 @@ public class ESpaceSource extends ISpaceSource {
 			if (response.path("success").asBoolean()) {
 				for (JsonNode item : response.path("items")) {
 					ItemsResponse it = new ItemsResponse();
+					String t = Utils.readAttr(item, "type", false);
+					countValue(type, t);
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
 					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
@@ -134,18 +168,21 @@ public class ESpaceSource extends ISpaceSource {
 			}
 			res.items = a;
 			res.facets = response.path("facets");
+			res.filters = new ArrayList<>();
+			res.filters.add(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		// protected void countValue(CommonFilterResponse type, String t) {
+		// type.addValue(vmap.translateToCommon(type.filterID, t));
+		// }
 		return res;
 	}
-	
+
 	public String autocompleteQuery(String term, int limit) {
 		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
 	}
-	
 
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
@@ -156,7 +193,7 @@ public class ESpaceSource extends ISpaceSource {
 				JSONArray items = jsonResp.getJSONArray("items");
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = new ArrayList<Suggestion>();
-				for (int i=0; i < items.length(); i++) {
+				for (int i = 0; i < items.length(); i++) {
 					JSONObject item = items.getJSONObject(i);
 					Suggestion s = new Suggestion();
 					s.value = item.getString("term");
@@ -174,10 +211,10 @@ public class ESpaceSource extends ISpaceSource {
 			return new AutocompleteResponse();
 		}
 	}
-	
+
 	public RecordJSONMetadata getJSONMetadata(String response) {
 		String jsonContent = "";
 		return new RecordJSONMetadata(Format.JSONLD, jsonContent);
 	}
-	
+
 }

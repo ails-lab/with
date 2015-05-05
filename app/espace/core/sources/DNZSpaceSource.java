@@ -17,9 +17,14 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonFilter;
+import espace.core.CommonFilterResponse;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -35,10 +40,36 @@ public class DNZSpaceSource extends ISpaceSource {
 	 */
 	private String Key = "Qcv9eq67Ep32HDbYXmsx";
 
-	public String getHttpQuery(CommonQuery q) {
-		return "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
+	public DNZSpaceSource() {
+		super();
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images", "&or[category][]=Images");
+		// addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Other");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio", "&or[category][]=Audio");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books", "&or[category][]=Books");
 	}
+
+	public String getHttpQuery(CommonQuery q) {
+		String qstr = "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
+		qstr = addfilters(q, qstr);
+		return qstr;
+	}
+
+	// private String filters(CommonQuery q, String qstr) {
+	// if (q.filters != null) {
+	// for (CommonFilter filter : q.filters) {
+	// if (filter.filterID.equals(CommonFilters.TYPE_ID)) {
+	// // eq.addSearch(Utils.getFacetsAttr(filter.value, "TYPE"));
+	// List<String> v = vmap.translateToSpecific(filter.filterID, filter.value);
+	// for (String string : v) {
+	// if (v != null)
+	// qstr += ("&or[category][]=" + Utils.spacesPlusFormatQuery(string));
+	// }
+	// }
+	// }
+	// }
+	// return qstr;
+	// }
 
 	public String getSourceName() {
 		return "DigitalNZ";
@@ -59,6 +90,8 @@ public class DNZSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
+		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 
@@ -68,13 +101,18 @@ public class DNZSpaceSource extends ISpaceSource {
 			// System.out.print(o.path("name").asText() + " ");
 
 			res.totalCount = Utils.readIntAttr(o, "result_count", true);
-			res.count += Utils.readIntAttr(o, "per_page", true);
 			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1) * res.count;
 
 			JsonNode aa = o.path("results");
 
 			for (JsonNode item : aa) {
 				// System.out.println(item.toString());
+
+				List<String> v = Utils.readArrayAttr(item, "category", false);
+				System.out.println("add " + v);
+				String t = v.get(0);
+				countValue(type, t);
+
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 				it.title = Utils.readLangAttr(item, "title", false);
@@ -95,6 +133,7 @@ public class DNZSpaceSource extends ISpaceSource {
 				a.add(it);
 
 			}
+			res.count = a.size();
 
 			res.items = a;
 

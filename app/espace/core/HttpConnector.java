@@ -34,6 +34,7 @@ public class HttpConnector {
 	private static final String ENCODING = "UTF-8";
 
 	public static JsonNode getURLContent(String url) throws IOException {
+		System.out.println(url);
 		Promise<JsonNode> jsonPromise = WS.url(url).get().map(new Function<WSResponse, JsonNode>() {
 			public JsonNode apply(WSResponse response) {
 				JsonNode json = response.asJson();

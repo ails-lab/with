@@ -17,9 +17,12 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonFilterResponse;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -33,12 +36,26 @@ public class NLASpaceSource extends ISpaceSource {
 
 	private String Key = "SECRET_KEY";
 
+	public NLASpaceSource() {
+		super();
+		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
+		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Image",
+		// "%20format%3AImage");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Image", "%20format%3APhotograph");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Video", "%20format%3AVideo");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Sound", "%20format%3ASound");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books", "%20format%3ABooks");
+		// addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
+	}
+
 	public String getHttpQuery(CommonQuery q) {
+		String spacesFormatQuery = Utils.spacesFormatQuery(q.searchTerm, "%20");
+		spacesFormatQuery = addfilters(q, spacesFormatQuery);
 		return "http://api.trove.nla.gov.au/result?key="
 				+ Key
 				+ "&zone=picture,book,music,article"
 				+ "&q="
-				+ Utils.spacesFormatQuery(q.searchTerm, "%20")
+				+ spacesFormatQuery
 				+ (Utils.hasAny(q.termToExclude) ? "%20NOT%20" + Utils.spacesFormatQuery(q.termToExclude, "%20")
 						+ "%20" : "") + "&n=" + q.pageSize + "&s="
 				+ ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + "&encoding=json&reclevel=full";
@@ -63,6 +80,8 @@ public class NLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
+		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -83,6 +102,15 @@ public class NLASpaceSource extends ISpaceSource {
 
 					for (JsonNode item : aa) {
 						// System.out.println(item.toString());
+
+						List<String> v = Utils.readArrayAttr(item, "type", false);
+						// type.addValue(vmap.translateToCommon(type.filterID,
+						// ));
+						System.out.println("add " + v);
+						for (String string : v) {
+							countValue(type, string);
+						}
+
 						ItemsResponse it = new ItemsResponse();
 						it.id = Utils.readAttr(item, "id", true);
 						it.thumb = Utils.readArrayAttr(Utils.findNode(item.path("identifier"), new Pair<String>("type",
@@ -110,7 +138,7 @@ public class NLASpaceSource extends ISpaceSource {
 			}
 
 			res.items = a;
-
+			System.out.println(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
