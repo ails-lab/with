@@ -53,3 +53,4 @@ GET		/user/emailAvailable		controllers.UserManager.emailAvailable(email:java.lan
 GET		/user/token					controllers.UserManager.getToken()
 GET 	/user/loginWithToken		controllers.UserManager.loginWithToken( token: java.lang.String )
 GET		/user/:id					controllers.UserManager.getUser(id)
+PUT		/user/:id					controllers.UserManager.editUser(id)
