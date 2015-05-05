@@ -103,7 +103,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector
-					.getURLContent("http://www.europeanafashion.eu/record/"
+					.getURLContent("http://www.europeanafashion.eu/api/record/"
 							+ recordId );
 			JsonNode record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
