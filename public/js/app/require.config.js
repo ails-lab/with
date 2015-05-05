@@ -29,7 +29,8 @@ var require = {
 		"selectize" :           "bower_modules/selectize/dist/js/standalone/selectize.min",
 		"flip":					"bower_modules/flip/dist/jquery.flip.min",
 		"app":                  "js/app/app",
-		"autocomplete":			"bower_modules/devbridge-autocomplete/dist/jquery.autocomplete.min"
+		"autocomplete":			"bower_modules/devbridge-autocomplete/dist/jquery.autocomplete.min",
+		"knockout-else":		"bower_modules/knockout-else/dist/knockout-else"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
