@@ -16,6 +16,8 @@
 
 package controllers;
 
+import javax.xml.bind.DatatypeConverter;
+
 import model.Media;
 
 import org.bson.types.ObjectId;
@@ -32,24 +34,22 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 public class MediaController extends Controller {
-	public static final ALogger log = Logger.of( MediaController.class);
-
+	public static final ALogger log = Logger.of(MediaController.class);
 
 	/**
 	 * get the specified media object from DB
 	 */
 	public static Result getMetadataOrFile(String mediaId, boolean file) {
 
-
 		Media media = null;
 		try {
 			media = DB.getMediaDAO().findById(new ObjectId(mediaId));
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
 			return internalServerError("Cannot retrieve media document from database");
 		}
 
-		if(file) {
+		if (file) {
 			return ok(media.getData()).as(media.getMimeType());
 		} else {
 			JsonNode result = Json.toJson(media);
@@ -58,20 +58,19 @@ public class MediaController extends Controller {
 
 	}
 
-
 	/**
 	 * edit metadata or the actual file of the media object
 	 */
 	public static Result editMetadataOrFile(String id, boolean file) {
 		JsonNode json = request().body().asJson();
-		ObjectNode result  = Json.newObject();
+		ObjectNode result = Json.newObject();
 
-		if(json==null) {
+		if (json == null) {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
 
-		if(file) {
+		if (file) {
 			return ok(Json.newObject().put("message", "not implemeted yet!"));
 		} else {
 			Media newMedia = null;
@@ -80,20 +79,20 @@ public class MediaController extends Controller {
 
 				// set metadata
 
-				if(json.has("width"))
+				if (json.has("width"))
 					newMedia.setWidth(json.get("width").asInt());
-				if(json.has("height"))
+				if (json.has("height"))
 					newMedia.setHeight(json.get("height").asInt());
-				if(json.has("duration"))
-					newMedia.setDuration((float)json.get("duration").asDouble());
-				if(json.has("mimeType"))
+				if (json.has("duration"))
+					newMedia.setDuration((float) json.get("duration")
+							.asDouble());
+				if (json.has("mimeType"))
 					newMedia.setMimeType(json.get("mimeType").asText());
-				if(json.has("type"))
+				if (json.has("type"))
 					newMedia.setType(json.get("type").asText());
 
-
 				DB.getMediaDAO().makePermanent(newMedia);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				log.error("Cannot store Media object to database!", e);
 				result.put("message", "Cannot store Media object to database");
 				return internalServerError(result);
@@ -104,21 +103,37 @@ public class MediaController extends Controller {
 		}
 	}
 
-
 	/**
 	 * delete a media object from database
 	 */
 	public static Result deleteMedia(String id) {
-		ObjectNode result  = Json.newObject();
+		ObjectNode result = Json.newObject();
 
 		try {
 			DB.getMediaDAO().deleteById(new ObjectId(id));
-		} catch(Exception e) {
+		} catch (Exception e) {
 			result.put("message", "Cannot delete media object from database");
 			return internalServerError(result);
 		}
 		result.put("message", "Succesfully delete object from database!");
 		return ok(result);
+	}
+
+	public static Result uploadImage() {
+		JsonNode json = request().body().asJson();
+		String base64Image = json.get("image").asText();
+		byte[] image = DatatypeConverter.parseBase64Binary(base64Image);
+		Media media = new Media();
+		media.setType("IMAGE");
+		media.setMimeType("image/jpeg");
+		media.setData(image);
+		try {
+			DB.getMediaDAO().makePermanent(media);
+			return ok();
+		} catch (Exception e) {
+			return badRequest(e.getMessage());
+
+		}
 	}
 
 }
