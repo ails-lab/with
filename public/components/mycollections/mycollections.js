@@ -1,4 +1,4 @@
-define(['knockout', 'text!./mycollections.html', 'knockout-else'], function(ko, template, KnockoutElse) {
+define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 
 	
 
@@ -7,11 +7,15 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else'], function(ko, 
 		var self = this;
 		self.route = params.route;
 		var collections = [];
-		if (sessionStorage.getItem('UserCollections') !== null) 
-		  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		if (localStorage.getItem('UserCollections') !== null) 
-		  collections = JSON.parse(localStorage.getItem("UserCollections"));
-		self.myCollections = ko.observableArray(collections);
+		var promise = app.getUserCollections();
+		self.myCollections = ko.observableArray([]);
+		$.when(promise).done(function() {
+			if (sessionStorage.getItem('UserCollections') !== null) 
+			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+			if (localStorage.getItem('UserCollections') !== null) 
+			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+			self.myCollections(collections);
+		});
 		
 		self.deleteMyCollection = function(collection) {
 			collectionId = collection.dbId;
@@ -40,6 +44,19 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else'], function(ko, 
 		};
 		
 		deleteCollection = function(collectionId) {
+			$.ajax({
+				"url": "/collection/"+collectionId,
+				"method": "DELETE",
+				//"contentType": "application/json",
+				//"data": {id: collectionId}),
+				success: function(result){
+					self.myCollections.remove(function (item) {
+                        return item.dbId == collectionId;
+
+                    });
+				}
+			});
+			
 			//TODO: remove deleted collection from UserCollections in sessionStorage and reload mycollections
 		};
 	
