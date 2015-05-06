@@ -1,9 +1,11 @@
 
 <div class="container-fluid">
-<div id="withcollection" class="row" >
+<div id="withcollection" class="row">
 				<div class="col-lg-12">
-				 <span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> </h2><div style="text-transform:lowercase">by <a href="/collectionbyuser"><!-- ko text:currentUser.username --><!-- /ko --></a></div></span>
-				
+				 <span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> <span data-bind="visible: itemCount() > -1  " style="text-transform:lowercase">&nbsp;&nbsp;(<!-- ko text:itemCount --><!-- /ko -->  items)</span></h2> </span>
+				     <div data-bind="visible: owner.length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:currentUser.username --><!-- /ko --></a></i></div>
+				     <span data-bind="text:desc.display"></span><span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
+				     <hr></hr>
 					<!-- ko if: citems().length > 0 -->
 					 <div id="withsearch-content-masonry">
 					  <div id="columns" data-bind="foreach: citems, masonry"><figure class="masonryitem"><a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="text: title"></figcaption></figure></div>
@@ -12,7 +14,7 @@
 					<!-- /ko -->
 				 <div id="more" data-bind='visible: loading' >
 				    
-				    <img src="images/loading.gif"/>
+				   <i class="fa fa-spinner fa-pulse"></i>
 				</div>
 				</div>
 				
@@ -20,4 +22,3 @@
 			
 </div>
 </div>
-<item-view params="route: route"></item-view>	

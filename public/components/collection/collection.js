@@ -156,7 +156,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if(localStorage.getItem('UserCollections') !== null) 
+		  else if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 		  var jsonData = {};
 		 
@@ -245,14 +245,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 	  }
 
 	  
 	  self.addToCollections=function(){
-		  console.log(self.selected_items2());
+		  //console.log(self.selected_items2());
 		  
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 		  self.selected_items2().forEach(function (item) {
@@ -286,8 +286,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  
 		 
 		  var jsondata=JSON.stringify({
-				source: self.record().apisource(),
-				sourceId:self.record().recordId,
+				source: self.record().source(),
+				sourceId:self.record().recordId(),
 				title: self.record().title(),
 				
 				description:self.record().description(),
@@ -298,15 +298,16 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				collectionId: collid
 				
 			});
-		 
+		  console.log("record to add");
+		  console.log(jsondata);
+		  self.close();
 		  $.ajax({
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function(data) {
-					console.log(data);
-					self.close();
+					
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").modal('show');
@@ -315,7 +316,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 		  

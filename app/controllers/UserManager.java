@@ -112,14 +112,21 @@ public class UserManager extends Controller {
 	}
 
 	/**
-	 * Creates a user and stores him at the database
-	 *
-	 * @return the user JSON object (without the password) or JSON error
+	 * Validation checks for register and put user
+	 * 
+	 * * @param json the json of the user to create
+	 * 
+	 * @return result of checks, empty or error, may contain username proposal
 	 */
-	@BodyParser.Of(BodyParser.Json.class)
-	public static Result register() {
 
-		JsonNode json = request().body().asJson();
+	// only used by register() for now
+
+	// change name?
+
+	// TODO blank checks
+
+	private static ObjectNode validateUser(JsonNode json) {
+
 		ObjectNode result = Json.newObject();
 		ObjectNode error = Json.newObject();
 
@@ -172,17 +179,42 @@ public class UserManager extends Controller {
 		} else {
 			username = json.get("username").asText();
 			if (DB.getUserDAO().getByUsername(username) != null) {
-				error.put("username", "Username Already in Use");
+				error.put("usernposeUsernameame", "Username Already in Use");
 				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);
 
 			}
 		}
-		// If everything is ok store the user at the database
+
 		if (error.size() != 0) {
 			result.put("error", error);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Creates a user and stores him at the database
+	 *
+	 * @return the user JSON object (without the password) or JSON error
+	 */
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result register() {
+
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		// ObjectNode error = (ObjectNode) Json.newObject();
+
+		// copied from here
+
+		result = validateUser(json);
+
+		// If everything is ok store the user at the database
+
+		if (result.has("error")) {
 			return badRequest(result);
 		}
+
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
 		session().put("user", user.getDbId().toHexString());
@@ -411,4 +443,57 @@ public class UserManager extends Controller {
 					+ "\"}"));
 		}
 	}
+
+	public static Result editUser(String id) {
+
+		// Only changes first and last name for testing purposes
+		//
+		// should use validateRegister() in the future
+
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+
+		String firstName = null;
+		if (!json.has("firstName")) {
+			error.put("firstName", "First Name is Empty");
+		} else {
+			firstName = json.get("firstName").asText();
+		}
+		String lastName = null;
+		if (!json.has("lastName")) {
+			error.put("lastName", "Last Name is Empty");
+		} else {
+			lastName = json.get("lastName").asText();
+		}
+
+		if (error.size() != 0) {
+			result.put("error", error);
+			return badRequest(result);
+
+		}
+
+		// If everything is ok store the user at the database
+
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				user.setFirstName(firstName);
+				user.setLastName(lastName);
+				DB.getUserDAO().makePermanent(user);
+				result = (ObjectNode) Json.parse(DB.getJson(user));
+				result.remove("md5Password");
+				return ok(result);
+
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+				
+			}
+		} catch (IllegalArgumentException e) {
+			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
+		}
+
+	}
+
 }

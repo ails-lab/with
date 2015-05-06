@@ -127,3 +127,13 @@
   padding-top: 15%;
 }
 
+#withcollection #columns{
+	width:100%;
+	padding:0;
+	
+}
+
+
+ .morecontent span {
+display: none;
+}

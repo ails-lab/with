@@ -39,7 +39,8 @@ var require = {
 		"jquery.fileupload-process" : "bower_modules/jquery-file-upload/js/jquery.fileupload-process",
 		"blueimp-load-image"        : "bower_modules/blueimp-load-image/js/load-image.all.min",
 		"jquery.fileupload"         : "bower_modules/jquery-file-upload/js/jquery.fileupload",
-		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image"
+		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
+		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

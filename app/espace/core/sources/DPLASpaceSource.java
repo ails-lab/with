@@ -18,9 +18,14 @@ package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonFilter;
+import espace.core.CommonFilterResponse;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -37,14 +42,21 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
-		return "http://api.dp.la/v2/items?api_key="
-				+ DPLAKey
-				+ "&q="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
-						: q.searchTerm)
-				+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
-						+ Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
-						: "") + "&page=" + q.page + "&page_size=" + q.pageSize;
+		String qstr = "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
+				+ "&page=" + q.page + "&page_size=" + q.pageSize;
+		qstr = addfilters(q, qstr);
+		return qstr;
+	}
+
+	public DPLASpaceSource() {
+		super();
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", "&sourceResource.type=image");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", "&sourceResource.type=%22moving%20image%22");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", "&sourceResource.type=sound");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", "&sourceResource.type=text");
+		// TODO: what to do with physical objects?
 	}
 
 	public String getSourceName() {
@@ -66,6 +78,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
+		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -76,27 +90,28 @@ public class DPLASpaceSource extends ISpaceSource {
 			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
 			for (JsonNode item : docs) {
+
+				String t = Utils.readAttr(item.path("sourceResource"), "type", false);
+				countValue(type, t);
+
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
 				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"),
-						"title", false);
-				it.description = Utils.readLangAttr(
-						item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"),
-						"creator", false);
+				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
+				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"),
-						"name", false);
+				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/"
-						+ Utils.readAttr(item, "id", false);
+				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
 				a.add(it);
 			}
 			res.items = a;
 			res.facets = response.path("facets");
+			res.filters = new ArrayList<>();
+			res.filters.add(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -109,14 +124,11 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
-					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
-							+ "&api_key=" + DPLAKey);
+			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record
-					.toString()));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
 			return jsonMetadata;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return jsonMetadata;
 		}

@@ -20,7 +20,8 @@
     "selectize": "latest",
     "flip": "latest",
     "devbridge-autocomplete": "~1.2.18",
-    "jquery-file-upload": "latest"
+    "jquery-file-upload": "latest",
+    "knockout-else": "1.0.11"
   },
   "resolutions": {
     "knockout": "~3.2.0"

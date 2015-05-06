@@ -60,6 +60,9 @@ public class CommonQuery {
 	public String searchTerm;
 	public String termToExclude;
 	public List<String> source;
+
+	public List<CommonFilter> filters;
+
 	public EuropeanaAPI europeanaAPI;
 
 	public CommonQuery(String generalQueryBody) {

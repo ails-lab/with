@@ -1,7 +1,6 @@
 define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 	var self         = this;
-	// self.popupName   = ko.observable('login-popup');
 	self.currentUser = {
 		"_id"              : ko.observable(),
 		"email"            : ko.observable(),
@@ -42,6 +41,11 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 		isLogged(true);
 
+		return getUserCollections();
+
+	};
+
+	getUserCollections = function() {
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
@@ -102,5 +106,5 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		loadUser(data, true);
 	}
 
-	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout };
+	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout, getUserCollections: getUserCollections };
 });

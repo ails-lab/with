@@ -17,7 +17,7 @@
 					      <div class="itemlabel">Description
 					      </div>
 					       <div class="value">
-					      <textarea class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" data-bind="text: $parent.description"></textarea>
+					      <textarea class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" data-bind="text: $parent.record().description()"></textarea>
 					      </div>
 					      
 					 </div>
@@ -30,7 +30,7 @@
 					      </div>
 					  </div>
 				 </div>
-				  <div class="col-md-3"><img data-bind="attr: { src:$parent.thumb, alt: $parent.title }" class="img-responsive"/></div>
+				  <div class="col-md-3"><img data-bind="attr: { src:$parent.record().thumb(), alt: $parent.record().title() }" class="img-responsive"/></div>
 					  
 		     </div>
 </div>

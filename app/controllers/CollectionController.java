@@ -63,12 +63,19 @@ public class CollectionController extends Controller {
 			c = DB.getCollectionDAO().getById(colId);
 			collectionOwner = DB.getUserDAO().getById(c.getOwnerId());
 		} catch (Exception e) {
-			log.error("Cannot retrieve metadata for the specified collection or user!",
+			log.error(
+					"Cannot retrieve metadata for the specified collection or user!",
 					e);
 			result.put("message",
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
 		}
+
+		// check itemCount
+		int itemCount;
+		if ((itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c
+				.getItemCount())
+			c.setItemCount(itemCount);
 
 		result = (ObjectNode) Json.toJson(c);
 		result.put("owner", collectionOwner.getUsername());
@@ -112,10 +119,15 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
+		// new collection changes
+		ObjectId oldId = new ObjectId(id);
+		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
 		Collection newVersion = Json.fromJson(json, Collection.class);
 		newVersion.setFirstEntries(oldVersion.getFirstEntries());
-		newVersion.setDbId(new ObjectId(id));
+		newVersion.setDbId(oldId);
+		newVersion.setLastModified(new Date());
+		newVersion.setItemCount((int) DB.getCollectionRecordDAO().getItemCount(
+				oldId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newVersion);
@@ -125,7 +137,6 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-
 		if (DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(),
 				newVersion.getTitle()) != null) {
 			result.put("message",
@@ -133,7 +144,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
-
 
 			log.error("Cannot save collection to database!");
 			result.put("message", "Cannot save collection to database!");
@@ -171,7 +181,6 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-
 		if (DB.getCollectionDAO().getByOwnerAndTitle(
 				newCollection.getOwnerId(), newCollection.getTitle()) != null) {
 			result.put("message",
@@ -179,7 +188,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
-
 
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
@@ -283,23 +291,26 @@ public class CollectionController extends Controller {
 		String recordLinkId;
 		if (json.has("recordlink_id")) {
 			recordLinkId = json.get("recordlink_id").asText();
-			record = DB.getCollectionRecordDAO().getById(new ObjectId(recordLinkId));
+			record = DB.getCollectionRecordDAO().getById(
+					new ObjectId(recordLinkId));
 			record.setDbId(null);
 			record.setCollectionId(new ObjectId(collectionId));
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
+			record.setCollectionId(new ObjectId(collectionId));
 
 			String sourceClassName = "espace.core.sources." + source
 					+ "SpaceSource";
 			Class<?> sourceClass = Class.forName(sourceClassName);
 			ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
 
-			ArrayList<RecordJSONMetadata> recordsData = s.getRecordFromSource(sourceId);
-			for(RecordJSONMetadata data : recordsData) {
-				record.getContent().put(data.getFormat(), data.getJsonContent());
-
+			ArrayList<RecordJSONMetadata> recordsData = s
+					.getRecordFromSource(sourceId);
+			for (RecordJSONMetadata data : recordsData) {
+				record.getContent()
+						.put(data.getFormat(), data.getJsonContent());
 			}
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
@@ -314,12 +325,12 @@ public class CollectionController extends Controller {
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
 		collection.itemCountIncr();
+		collection.setLastModified(new Date());
 		if (collection.getFirstEntries().size() < 20)
 			collection.getFirstEntries().add(record);
 		DB.getCollectionDAO().makePermanent(collection);
 
 		if (record.getDbId() == null) {
-
 
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
@@ -348,6 +359,8 @@ public class CollectionController extends Controller {
 		}
 		if (temp != null)
 			records.remove(temp);
+		collection.setLastModified(new Date());
+		collection.itemCountDiscr();
 		DB.getCollectionDAO().makePermanent(collection);
 
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
