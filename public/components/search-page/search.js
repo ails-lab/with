@@ -118,7 +118,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([]);
+		self.sources= ko.observableArray([ "Europeana","DPLA","YouTube","DigitalNZ","NLA"]);
 		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
