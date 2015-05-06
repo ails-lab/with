@@ -234,6 +234,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	 
 	 self.recordSelect= function (e){
 			console.log(e);
+			
 			itemShow(e);
 			
 		}

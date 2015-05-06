@@ -252,7 +252,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  
 	  self.addToCollections=function(){
-		  console.log(self.selected_items2());
+		  //console.log(self.selected_items2());
 		  
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 		  self.selected_items2().forEach(function (item) {
@@ -286,7 +286,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  
 		 
 		  var jsondata=JSON.stringify({
-				source: self.record().apisource(),
+				source: self.record().source(),
 				sourceId:self.record().recordId,
 				title: self.record().title(),
 				
@@ -298,15 +298,16 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				collectionId: collid
 				
 			});
-		 
+		  console.log("record to add");
+		  console.log(jsondata);
+		  self.close();
 		  $.ajax({
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function(data) {
-					console.log(data);
-					self.close();
+					
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").modal('show');
