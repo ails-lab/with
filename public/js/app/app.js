@@ -1,6 +1,7 @@
-define("app", ['knockout'], function(ko) {
+define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 	var self         = this;
+	// self.popupName   = ko.observable('login-popup');
 	self.currentUser = {
 		"_id"              : ko.observable(),
 		"email"            : ko.observable(),
@@ -50,7 +51,7 @@ define("app", ['knockout'], function(ko) {
 			data        : "username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 
 			function(data, text) {
-				console.log("User collections " + JSON.stringify(data));
+				// console.log("User collections " + JSON.stringify(data));
 				if (sessionStorage.getItem('User') !== null) {
 					sessionStorage.setItem('UserCollections', JSON.stringify(data));
 				}
@@ -75,9 +76,20 @@ define("app", ['knockout'], function(ko) {
 				sessionStorage.removeItem('UserCollections');
 				localStorage.removeItem('UserCollections');
 				isLogged(false);
+				window.location.href="/assets/index.html";
 			}
 		});
-		window.location.href="/assets/index.html";
+	}
+
+	showPopup        = function(name) {
+		popupName(name);
+		$('#popup').modal('show');
+	}
+
+	// Closing modal dialog and setting back to empty to dispose the component
+	closePopup       = function() {
+		$('#popup').modal('hide');
+		popupName("empty");
 	}
 
 	// Check if user information already exist in session
@@ -90,5 +102,5 @@ define("app", ['knockout'], function(ko) {
 		loadUser(data, true);
 	}
 
-	return { currentUser: currentUser, loadUser: loadUser, logout: logout };
+	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout };
 });

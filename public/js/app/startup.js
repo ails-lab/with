@@ -21,11 +21,18 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
 	});
+	ko.components.register('edit-profile', {
+		viewModel: { require: 'components/profile-page/profile' },
+		template: { require: 'text!components/profile-page/edit-profile.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
+	ko.components.register('empty', { template: '&nbsp;' });
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
+	popupName = ko.observable('empty');
+
 
 	// Start the application
-	ko.applyBindings({ route: router.currentRoute });
+	ko.applyBindings({ route: router.currentRoute, popupName: popupName });
 });

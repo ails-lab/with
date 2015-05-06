@@ -17,16 +17,16 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		       } else {
 		    		    return;
 		     }
-			}else{return;}
+			} else { return; }
 		});
-		
+
 		this.route = params.route;
 
-		var self = this;
-		self.logout = function() { app.logout(); }
+		var self       = this;
+		self.username  = app.currentUser.username;
 
-		self.username = app.currentUser.username;
-
+		editProfile    = function() { app.showPopup('edit-profile'); }
+		logout         = function() { app.logout(); }
 	}
 
 	return { viewModel: TopBarViewModel, template: template };
