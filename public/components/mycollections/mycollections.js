@@ -1,7 +1,19 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 
 	
-
+	function MyCollection(collectionData) {
+		this.title = ko.observable(collectionData.title);
+		this.description = ko.observable(collectionData.description);
+		if (collectionData.thumbnail != null)
+			this.thumbnail = ko.observable(collectionData.thumbnail);
+		this.itemCount = collectionData.itemCount;
+		this.isPublic = ko.observable(collectionData.isPublic);
+		this.created = collectionData.created;
+		this.lastModified = ko.observable(collectionData.lastModified);
+		if (collectionData.category != null)
+			this.category = ko.observable(collectionData.category);
+	}
+	
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
 		var self = this;
@@ -14,7 +26,9 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
 			if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
-			self.myCollections(collections);
+			self.myCollections(ko.utils.arrayMap(collections, function(collectionData) {
+			    return new MyCollection(collectionData);
+			}));
 		});
 		
 		self.deleteMyCollection = function(collection) {
