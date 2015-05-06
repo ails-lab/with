@@ -311,7 +311,6 @@ public class CollectionController extends Controller {
 			for (RecordJSONMetadata data : recordsData) {
 				record.getContent()
 						.put(data.getFormat(), data.getJsonContent());
-
 			}
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);

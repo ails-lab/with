@@ -197,8 +197,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
 			return jsonMetadata;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			return jsonMetadata;
 		}
 	}

@@ -134,8 +134,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer
 					.serializeXML(xmlResponse)));
 			return jsonMetadata;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			return jsonMetadata;
 		}
 	}

@@ -16,8 +16,6 @@
 
 package espace.core;
 
-import java.io.IOException;
-
 import org.w3c.dom.Document;
 
 import play.libs.F.Function;
@@ -31,25 +29,33 @@ public class HttpConnector {
 
 	private static final int TIMEOUT_CONNECTION = 40000;
 
-	public static JsonNode getURLContent(String url) throws IOException {
-		Promise<JsonNode> jsonPromise = WS.url(url).get()
-				.map(new Function<WSResponse, JsonNode>() {
-					public JsonNode apply(WSResponse response) {
-						JsonNode json = response.asJson();
-						return json;
-					}
-				});
-		return jsonPromise.get(TIMEOUT_CONNECTION);
+	public static JsonNode getURLContent(String url) throws Exception {
+		try {
+			Promise<JsonNode> jsonPromise = WS.url(url).get()
+					.map(new Function<WSResponse, JsonNode>() {
+						public JsonNode apply(WSResponse response) {
+							JsonNode json = response.asJson();
+							return json;
+						}
+					});
+			return jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 
-	public static Document getURLContentAsXML(String url) throws IOException {
-		Promise<Document> xmlPromise = WS.url(url).get()
-				.map(new Function<WSResponse, Document>() {
-					public Document apply(WSResponse response) {
-						Document xml = response.asXml();
-						return xml;
-					}
-				});
-		return xmlPromise.get(TIMEOUT_CONNECTION);
+	public static Document getURLContentAsXML(String url) throws Exception {
+		try {
+			Promise<Document> xmlPromise = WS.url(url).get()
+					.map(new Function<WSResponse, Document>() {
+						public Document apply(WSResponse response) {
+							Document xml = response.asXml();
+							return xml;
+						}
+					});
+			return xmlPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 }
