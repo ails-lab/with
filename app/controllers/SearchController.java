@@ -86,7 +86,7 @@ public class SearchController extends Controller {
 		}
 	}
 	
-	public static Promise<Result> searchWithFilters() {
+	public static Promise<Result> searchwithfilter() {
 		JsonNode json = request().body().asJson();
 
 		if (json == null) {

@@ -6,7 +6,7 @@
 GET     /                           controllers.Application.index()
 
 POST     /api/search                controllers.SearchController.search()
-POST     /api/advancedsearch        controllers.SearchController.searchWithFilter()
+POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
 GET      /api/testsearch            controllers.SearchController.testsearch()
 POST     /api/testsearch            controllers.SearchController.posttestsearch()
 
