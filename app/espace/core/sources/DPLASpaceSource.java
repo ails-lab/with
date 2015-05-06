@@ -128,7 +128,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			JsonNode record = response.get("docs").get(0);
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
 			return jsonMetadata;
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return jsonMetadata;
 		}

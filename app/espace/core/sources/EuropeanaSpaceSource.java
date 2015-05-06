@@ -208,8 +208,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
 			return jsonMetadata;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			return jsonMetadata;
 		}
 	}

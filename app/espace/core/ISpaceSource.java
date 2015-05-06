@@ -48,13 +48,8 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-	public RecordJSONMetadata getJSONMetadata(String response) {
-		return new RecordJSONMetadata(Format.NULL, "");
-	}
-
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
-		return null;
-	}
+	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(
+			String recordId);
 
 	private FilterValuesMap vmap;
 
@@ -62,7 +57,8 @@ public abstract class ISpaceSource {
 		type.addValue(vmap.translateToCommon(type.filterID, t));
 	}
 
-	protected void addMapping(String filterID, String commonValue, String specificValue, String querySegment) {
+	protected void addMapping(String filterID, String commonValue,
+			String specificValue, String querySegment) {
 		vmap.addMap(filterID, commonValue, specificValue, querySegment);
 	}
 
@@ -81,7 +77,8 @@ public abstract class ISpaceSource {
 	protected String addfilters(CommonQuery q, String qstr) {
 		if (q.filters != null) {
 			for (CommonFilter filter : q.filters) {
-				for (String subq : translateToQuery(filter.filterID, filter.value)) {
+				for (String subq : translateToQuery(filter.filterID,
+						filter.value)) {
 					qstr += subq;
 				}
 			}

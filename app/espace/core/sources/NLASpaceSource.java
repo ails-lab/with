@@ -168,8 +168,7 @@ public class NLASpaceSource extends ISpaceSource {
 					+ "?key=" + Key + "&encoding=xml&reclevel=full");
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer.serializeXML(xmlResponse)));
 			return jsonMetadata;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			return jsonMetadata;
 		}
 	}

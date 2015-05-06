@@ -19,6 +19,7 @@ package espace.core.sources;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.jena.atlas.logging.Log;
 import org.w3c.dom.Document;
 
 import utils.Serializer;
@@ -109,8 +110,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
 			return jsonMetadata;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			return jsonMetadata;
 		}
 	}
