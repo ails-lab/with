@@ -21,8 +21,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		var self = this;
 		self.route = params.route;
 		var collections = [];
-		var promise = app.getUserCollections();
 		self.myCollections = ko.observableArray([]);
+		var promise = app.getUserCollections();
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
@@ -55,8 +55,14 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			$("#myModal").modal('show');
 		};
 		
-		self.closeDelCollPopup = function() {
-			
+	    //Storage needs to be updated, because collection.js gets user collections from there
+		saveCollectionsToStorage = function(collections) {
+			if (sessionStorage.getItem('User') !== null) {
+				sessionStorage.setItem('UserCollections', JSON.stringify(collections));
+			}
+			else if (localStorage.getItem('User') !== null) {
+				localStorage.setItem('UserCollections', JSON.stringify(collections));
+			}
 		};
 		
 		deleteCollection = function(collectionId) {
@@ -69,6 +75,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections.remove(function (item) {
                         return item.dbId == collectionId;
                     });
+					saveCollectionsToStorage(self.myCollections());
 					//self.myCollections()[0].title("New title!");
 				}
 			});
