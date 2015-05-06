@@ -56,8 +56,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
                     });
 				}
 			});
-			
-			//TODO: remove deleted collection from UserCollections in sessionStorage and reload mycollections
 		};
 	
 	}
