@@ -22,15 +22,15 @@
 					 <div class="content">
 					   <h3 data-bind="text: title"></h3>
 					   <div data-bind="text: description"></div>
-					  <!--  ko if: $data.hasOwnProperty("category") -->
-					  	<b>Categorized as:</b> <div data-bind="text: category"></div>
-					  <!-- /ko -->
-					   <span class="pull-left"><b>Items: </b> items count 
-					   		<b>Visibility: </b><i class="fa fa-eye-slash" title="secret"></i>
-					   		<!-- ko if: public --> public <!-- /ko -->
-					   		<!-- ko ifnot: public --> restricted <!-- /ko --> 
-						</span>
-					   	<span class="pull-right"><b>Created:</b> creation date</span>
+					   <!--  ko if: $data.hasOwnProperty("category") -->
+					  		<div><b>Categorized as:</b> <div data-bind="text: category"></div></div>
+					   <!-- /ko -->
+					    <span class="pull-left"><b>Items: </b> <i data-bind="text: itemCount+',   '"> </i> 
+					    	<b>Visibility: </b><i class="fa fa-eye-slash" title="secret"></i>
+					   		<!-- ko if: isPublic --> public <!-- /ko -->
+					   		<!-- ko ifnot: isPublic --> restricted <!-- /ko --> 
+					    </span>
+					   	<span class="pull-right"><b>Created:</b> <i data-bind="text: created"></i> </span>
 					 </div>
 					 </div>
 					 <!--  ko if: firstEntries.length > 0 -->
