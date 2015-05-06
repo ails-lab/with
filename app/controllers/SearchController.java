@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -72,16 +73,7 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
-				Iterable<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
-				// final long initTime = System.currentTimeMillis();
-				BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
-						.getResults(cq);
-				for (final ISpaceSource src : ESpaceSources.getESources()) {
-					if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
-						((List<Promise<SourceResponse>>) promises).add(ParallelAPICall
-								.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery, src, q));
-					}
-				}
+				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
 					Logger.info(r.source + " found " + r.count);
@@ -92,6 +84,62 @@ public class SearchController extends Controller {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Promise<Result> searchWithFilters() {
+		JsonNode json = request().body().asJson();
+
+		if (json == null) {
+			return Promise.pure((Result) badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				final CommonQuery q = Utils.parseJson(json);
+				Iterable<Promise<SourceResponse>> promises = callSources(q);
+				// compose all futures, blocks until all futures finish
+				
+				Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);
+				return promisesSequence.map(
+						new play.libs.F.Function<Collection<SourceResponse>, Result>() {
+			    			List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
+			    			public Result apply(Collection<SourceResponse> responses) {
+			    				finalResponses.addAll(responses);
+			    				//Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()- initTime));
+
+			    				SearchResponse r1 = new SearchResponse();
+			    				r1.responces = finalResponses;
+			    				ArrayList<CommonFilterResponse> merge = new ArrayList<CommonFilterResponse>();
+			    				for (SourceResponse sourceResponse : finalResponses) {
+			    					System.out.println(sourceResponse.filters);
+			    					FiltersHelper.merge(merge, sourceResponse.filters);
+			    				}
+			    				r1.filters = merge;
+
+			    				return ok(Json.toJson(r1));
+			    			}
+			    		}
+				);
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				return Promise.pure((Result) badRequest(e.getMessage()));
+			}
+		}
+	}
+
+	private static Iterable<Promise<SourceResponse>> callSources(
+			final CommonQuery q) {
+		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
+		// final long initTime = System.currentTimeMillis();
+		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
+				.getResults(cq);
+		for (final ISpaceSource src : ESpaceSources.getESources()) {
+			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
+				promises.add(ParallelAPICall
+						.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery, src, q));
+			}
+		}
+		return promises;
 	}
 
 	public static Promise<Result> searchWithThreads() {
