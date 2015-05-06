@@ -58,8 +58,29 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 
 		// Save the changes and dispose the component
 		self.updateProfile = function() {
-			console.log(self.imageURL());
-			// TODO: Send to backend
+			// console.log(self.imageURL());
+			var data = {
+				firstName : self.firstName,
+				lastName  : self.lastName,
+				location  : self.location,
+				about     : self.aboutMe,
+				image     : self.imageURL
+			};
+			var json = ko.toJSON(data);
+			$.ajax({
+				type        : "put",
+				contentType : 'application/json',
+				dataType    : 'json',
+				processData : false,
+				url         : "/user/" + app.currentUser._id(),
+				data        : json,
+				success     : function(data) {
+					console.log(data);
+				},
+				error       : function(request, status, error) {
+					console.log(error);
+				}
+			});
 			app.closePopup();
 		}
 
