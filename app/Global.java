@@ -17,16 +17,15 @@
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
-import play.libs.Akka;
-import actors.ApiKeyManager;
-import akka.actor.Props;
+import db.DB;
 
 
 public class Global extends GlobalSettings {
 	static private final Logger.ALogger log = Logger.of(Global.class);
-	
+
 	@Override
 	public void onStart( Application app ) {
-		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
+		//Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
+		DB.getDs();
 	}
 }
