@@ -1,4 +1,4 @@
-define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloaded'], function(bridget,ko, template, masonry,imagesLoaded) {
+define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloaded','app'], function(bridget,ko, template, masonry,imagesLoaded,app) {
 
 	 $.bridget( 'masonry', masonry );	
 	 
@@ -118,6 +118,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  self.collname=ko.observable('');
 	  self.id=ko.observable(params.id);
 	  self.owner=ko.observable('');
+	  self.ownerId=ko.observable(-1);
 	  self.itemCount=ko.observable(0);
 	  self.citems = ko.observableArray([]);
   
@@ -126,14 +127,13 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		
 	  self.loading = ko.observable(false);
 	  
-	  	self.next = ko.observable(-1);
-		self.desc=ko.showMoreLess('');
-	    
+	  self.next = ko.observable(-1);
+	  self.desc=ko.showMoreLess('');
 	  
 	  self.loadCollection=function(id){
 		 
-		  self.loading(true);
-		  self.citems([]);
+	  self.loading(true);
+	  self.citems([]);
 		  $.ajax({
 				"url": "/collection/"+self.id(),
 				"method": "get",
@@ -144,6 +144,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					self.collname(data.title);
 					self.desc(data.description);
 					self.owner(data.owner);
+					self.ownerId(data.ownerId);
 					self.itemCount(data.itemCount);
 					var items = [];
 					for(var i in data.firstEntries){
@@ -167,25 +168,36 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					
 				},
 				
-				"error":function(result) {
+				 error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
 					
 					$("#myModal").find("h4").html("An error occured");
-					$("#myModal").find("div.modal-body").html(result.statusText);
+					$("#myModal").find("div.modal-body").html(errorThrown);
 			       
 					$("#myModal").modal('show');
 			     }});
 	  }
 	  
 	  self.loadCollection();
+	  self.isOwner =ko.pureComputed(function() {
+		  if( app.currentUser._id()==self.ownerId()){
+				return true;
+			}
+			else{
+				return false;
+			}
+		});
+
+	  
 	
-	  /*for testing "_id": ObjectId("553df544d4c67f0ff6392667"),*/
 	  self.loadNext = function() {
 			if(self.citems().length>=20){	
 				
 				self.moreItems();}
 			};
 
+	 		
+			
 			
 	 self.moreItems=function(){
 		
@@ -237,6 +249,41 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			
 			itemShow(e);
 			
+		}
+	 
+	 self.removeRecord= function (e){  
+		$("#myModal").find("h4").html("Delete item");
+		$("#myModal").find("div.modal-body").html("Are you sure you want to proceed?");
+		$("#myModal").find("div.modal-body").append('<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a></div')
+		
+		$("#myModal").modal('show');
+		$('.btn-danger').on('click', function(event) { 
+			$("#myModal").remove("div.modal-footer");
+			console.log(e);
+			 var jsondata=JSON.stringify({
+					recId: e.id()
+				});
+			$.ajax({
+                url: '/collection/'+self.id()+'/removeRecord?recId='+e.id(),
+                type: 'DELETE',
+                contentType: "application/json",
+				data:jsondata,
+                success: function (data, textStatus, xhr) {
+                    console.log(data);
+                    self.citems.remove(e);
+                    $("#myModal").find("h4").html("Done!");
+					$("#myModal").find("div.modal-body").html("Item removed from collection");
+			       
+					$("#myModal").modal('show');
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    $("#myModal").find("h4").html("An error occured");
+					$("#myModal").find("div.modal-body").html(errorThrown);
+					$("#myModal").modal('show');
+                }
+            });
+		});	 
+		
 		}
 	 
 	 $(window).scroll(scrollHandler());

@@ -25,7 +25,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.xml.bind.DatatypeConverter;
 
 import model.Media;
 import model.User;
@@ -435,7 +434,35 @@ public class UserManager extends Controller {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id));
 			if (user != null) {
-				return ok(DB.getJson(user));
+				if (user.getPhoto() != null) {
+					ObjectId photoId = user.getPhoto();
+					Media photo = DB.getMediaDAO().findById(photoId);
+					String image = photo.getMimeType() + ","
+							+ new String(photo.getData());
+					ObjectNode result = (ObjectNode) Json.parse(DB
+							.getJson(user));
+					result.put("image", image);
+					return ok(result.toString());
+				} else {
+					return ok(DB.getJson(user));
+				}
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+			}
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
+					+ "\"}"));
+		}
+	}
+
+	public static Result getUserPhoto(String id) {
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				ObjectId photoId = user.getPhoto();
+				return MediaController.getMetadataOrFile(photoId.toString(),
+						true);
 			} else {
 				return badRequest(Json
 						.parse("{\"error\":\"User does not exist\"}"));
@@ -451,7 +478,6 @@ public class UserManager extends Controller {
 		// Only changes first and last name for testing purposes
 		//
 		// should use validateRegister() in the future
-
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectNode error = (ObjectNode) Json.newObject();
@@ -478,16 +504,24 @@ public class UserManager extends Controller {
 			User user = DB.getUserDAO().getById(new ObjectId(id));
 			if (user != null) {
 				if (json.has("image")) {
-					String base64Image = json.get("image").asText();
-					byte[] image = DatatypeConverter
-							.parseBase64Binary(base64Image);
+					String imageUpload = json.get("image").asText();
+					String[] imageInfo = new String[2];
+					imageInfo = imageUpload.split(",");
+					String info = imageInfo[0];
+					String base64Image = imageInfo[1];
+					// byte[] image = DatatypeConverter
+					// .parseBase64Binary(base64Image);
+					byte[] image = base64Image.getBytes();
 					Media media = new Media();
 					media.setType("IMAGE");
-					media.setMimeType("image/jpeg");
+					media.setMimeType(info);
+					media.setHeight(100);
+					media.setWidth(100);
 					media.setOwnerId(user.getDbId());
 					media.setData(image);
 					try {
 						DB.getMediaDAO().makePermanent(media);
+						user.setPhoto(media);
 					} catch (Exception e) {
 						return badRequest(e.getMessage());
 					}
@@ -498,7 +532,6 @@ public class UserManager extends Controller {
 				result = (ObjectNode) Json.parse(DB.getJson(user));
 				result.remove("md5Password");
 				return ok(result);
-
 			} else {
 				return badRequest(Json
 						.parse("{\"error\":\"User does not exist\"}"));

@@ -375,11 +375,13 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
   		  if (e.keyCode == 27 && isOpen ) { 
   			self.reset();
   			toggleSearch(e,'');
+  			window.location.reload();
   		  }   // esc
   		});
         ctrlClose.on('click',function(event){
     		self.reset();
     		toggleSearch(event,'');
+    		window.location.reload();
     		}
     	);
         
