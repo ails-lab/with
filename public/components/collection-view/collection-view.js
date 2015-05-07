@@ -1,4 +1,4 @@
-define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloaded'], function(bridget,ko, template, masonry,imagesLoaded) {
+define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloaded','app'], function(bridget,ko, template, masonry,imagesLoaded,app) {
 
 	 $.bridget( 'masonry', masonry );	
 	 
@@ -132,8 +132,8 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  
 	  self.loadCollection=function(id){
 		 
-	    self.loading(true);
-		  self.citems([]);
+	  self.loading(true);
+	  self.citems([]);
 		  $.ajax({
 				"url": "/collection/"+self.id(),
 				"method": "get",
@@ -180,7 +180,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  
 	  self.loadCollection();
 	  self.isOwner =ko.pureComputed(function() {
-			if(currentUser !== undefined && currentUser._id()==self.ownerId()){
+		  if( app.currentUser._id()==self.ownerId()){
 				return true;
 			}
 			else{
@@ -190,7 +190,6 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 	  
 	
-	  /*for testing "_id": ObjectId("553df544d4c67f0ff6392667"),*/
 	  self.loadNext = function() {
 			if(self.citems().length>=20){	
 				
