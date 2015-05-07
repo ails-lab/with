@@ -49,6 +49,8 @@ i.facebook, button.facebook, .facebook { background-color: #3b5997; }
 i.twiter, button.google, .google { background-color: #cc3333; }
 i.email, button.email, .email { background-color: #B5B5B5; }
 
+button.facebook:disabled, button.google:disabled { background-color: #b5b5b5; }
+
 .facebook_huge,
 .google_huge,
 .email_huge,
@@ -131,14 +133,14 @@ button > i, button > span, .button > i, .button > span {
   margin: 10px 0;
 }
 
-button.facebook:hover {
+button.facebook:hover:enabled {
   background-image: linear-gradient(#3b5998, #354f87);
   border-color: #314a7e;
 }
-button.google:hover {
+button.google:hover:enabled {
   background-image: linear-gradient(#cc3334, #bb2d2d);
 }
-button.email:hover {
+button.email:hover:enabled {
   background-image: linear-gradient(#b5b5b5, #a1a1a1);
 }
 

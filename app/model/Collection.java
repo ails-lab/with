@@ -16,6 +16,7 @@
 
 package model;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -180,8 +181,8 @@ public class Collection {
 		this.thumbnail = thumbnail.getDbId();
 	}
 
-	public Date getCreated() {
-		return created;
+	public String getCreated() {
+		return DateFormat.getDateInstance().format(created);
 	}
 
 	public void setCreated(Date created) {

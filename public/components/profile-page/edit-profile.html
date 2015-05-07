@@ -1,0 +1,77 @@
+<div class="modal-dialog" id="popup">
+	<div class="modal-content text-left">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h4>Edit Profile</h4>
+		</div>
+		<div class="modal-body row">
+			<form>
+				<div class="row vertical-align">
+					<div class="col-xs-2 stuffed"><strong>Name</strong></div>
+					<div class="col-xs-5">
+						<div class="form-group">
+							<label class="sr-only" for="firstName">First Name</label>
+							<input type="text" class="form-control" id="firstName" placeholder="First Name" data-bind="value: firstName">
+						</div>
+					</div>
+					<div class="col-xs-5">
+						<div class="form-group">
+							<label class="sr-only" for="lastName">Last Name</label>
+							<input type="text" class="form-control" id="lastName" placeholder="Last Name" data-bind="value: lastName">
+						</div>
+					</div>
+				</div>
+				<div class="row vertical-align">
+					<div class="col-xs-2 stuffed"><strong>Picture</strong></div>
+					<div class="col-xs-2 stuffed">
+						<div data-bind="if: imageURL">
+							<img class="img-circle img-thumbnail" data-bind="attr: { src: imageURL }" />
+						</div>
+						<div data-bind="ifnot: imageURL" id="profile-image">
+							<img src="images/user.png" class="img-circle img-thumbnail" />
+						</div>
+					</div>
+					<div class="col-xs-2 text-center stuffed">
+						<div class="btn btn-default btn-file">
+							Browse <input type="file" id="imageupload" name="image" />
+						</div>
+					</div>
+					<div class="col-xs-2 text-center stuffed">
+						<p>&mdash; or &mdash;</p>
+					</div>
+					<div class="col-xs-4 text-center stuffed">
+						<p>Load your profile picture from: </p>
+
+						<button class="facebook" data-bind="enable: hasFacebook, click: loadFromFacebook">
+							<i class="facebook_small"></i>
+						</button>
+						<button class="google" data-bind="enable: hasGoogle, click: loadFromGoogle">
+							<i class="google_small"></i>
+						</button>
+					</div>
+				</div>
+ 				<div class="row vertical-align">
+					<div class="col-xs-2 stuffed"><strong>About me</strong></div>
+					<div class="col-xs-10">
+						<div class="form-group">
+							<textarea class="form-control" rows="3" data-bind="value: aboutMe"></textarea>
+						</div>
+					</div>
+				</div>
+				<div class="row vertical-align">
+					<div class="col-xs-2 stuffed"><strong>Location</strong></div>
+					<div class="col-xs-10">
+						<div class="form-group">
+							<label class="sr-only" for="location">Location</label>
+							<input type="text" class="form-control" id="location" placeholder="Location" data-bind="value: location">
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default" data-bind="click: closeWindow">Close</button>
+			<button type="button" class="btn btn-primary" data-bind="click: updateProfile">Save changes</button>
+		</div>
+	</div>
+</div>

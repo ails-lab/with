@@ -1,4 +1,4 @@
-define("app", ['knockout'], function(ko) {
+define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 	var self         = this;
 	self.currentUser = {
@@ -40,11 +40,11 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		
+
 		return getUserCollections();
 
 	};
-	
+
 	getUserCollections = function() {
 		return $.ajax({
 			type        : "GET",
@@ -53,8 +53,9 @@ define("app", ['knockout'], function(ko) {
 			url         : "/collection/list",
 			processData : false,
 			data        : "username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
+
 			function(data, text) {
-				console.log("User collections " + JSON.stringify(data));
+				// console.log("User collections " + JSON.stringify(data));
 				if (sessionStorage.getItem('User') !== null) {
 					sessionStorage.setItem('UserCollections', JSON.stringify(data));
 				}
@@ -63,6 +64,7 @@ define("app", ['knockout'], function(ko) {
 				}
 
 			}).fail(function(request, status, error) {
+
 				//var err = JSON.parse(request.responseText);
 			}
 		);
@@ -83,6 +85,17 @@ define("app", ['knockout'], function(ko) {
 		});
 	}
 
+	showPopup        = function(name) {
+		popupName(name);
+		$('#popup').modal('show');
+	}
+
+	// Closing modal dialog and setting back to empty to dispose the component
+	closePopup       = function() {
+		$('#popup').modal('hide');
+		popupName("empty");
+	}
+
 	// Check if user information already exist in session
 	if (sessionStorage.getItem('User') !== null) {
 		var data = JSON.parse(sessionStorage.getItem('User'));
@@ -93,5 +106,5 @@ define("app", ['knockout'], function(ko) {
 		loadUser(data, true);
 	}
 
-	return { currentUser: currentUser, loadUser: loadUser, logout: logout,  getUserCollections: getUserCollections};
+	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout, getUserCollections: getUserCollections };
 });
