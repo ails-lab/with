@@ -10,11 +10,13 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		"gender"           : ko.observable(),
 		"facebookId"       : ko.observable(),
 		"googleId"         : ko.observable(),
+		"image"            : ko.observable(),
 		"recordLimit"      : ko.observable(),
 		"collectedRecords" : ko.observable(),
-		"storageLimit"     : ko.observable()
+		"storageLimit"     : ko.observable(),
 	};
 	isLogged         = ko.observable(false);
+	// imageURL         = ko.computed(function() { return self.currentUser.image() ? self.currentUser.image() : 'images/user.png' } );
 
 	loadUser         = function(data, remember) {
 		self.currentUser._id(data._id.$oid);
@@ -28,6 +30,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		self.currentUser.recordLimit(data.recordLimit);
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
+		self.currentUser.image(data.image);
 
 		// Save to session
 		if (typeof(Storage) !== 'undefined') {

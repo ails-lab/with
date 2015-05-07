@@ -12,6 +12,10 @@
 
 .withlogo a{
 	color:#fff;
+  line-height: 32px;
+  display: block;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 
@@ -753,6 +757,10 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
   padding-top: 0;
 }
 
+#popup .modal-footer {
+  background-color: #f0f0f0;
+}
+
 .vertical-align {
   display: flex;
   align-items: center;
@@ -781,4 +789,17 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
     background: white;
     cursor: inherit;
     display: block;
+}
+
+/* Navbar Profile Image */
+.navbar-nav .img-thumbnail {
+  max-height: 32px;
+  padding: 0;
+  margin-right: 8px;
+}
+
+.navbar-nav > li > a {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 32px;
 }
