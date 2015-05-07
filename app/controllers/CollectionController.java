@@ -61,7 +61,7 @@ public class CollectionController extends Controller {
 		User collectionOwner = null;
 		try {
 			c = DB.getCollectionDAO().getById(colId);
-			collectionOwner = DB.getUserDAO().getById(c.getOwnerId());
+			collectionOwner = DB.getUserDAO().getById(c.getOwnerId(), null);
 		} catch (Exception e) {
 			log.error("Cannot retrieve metadata for the specified collection or user!",
 					e);
@@ -69,6 +69,8 @@ public class CollectionController extends Controller {
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
 		}
+
+
 
 		//check itemCount
 		int itemCount;
