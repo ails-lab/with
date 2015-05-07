@@ -8,8 +8,13 @@
 				     <hr></hr>
 					<!-- ko if: citems().length > 0 -->
 					 <div id="withsearch-content-masonry">
-					  <div id="columns" data-bind="foreach: citems, masonry"><figure class="masonryitem"><a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="text: title"></figcaption></figure></div>
-	            	</div>
+					  <div id="columns" data-bind="foreach: citems, masonry">
+							<figure class="masonryitem">
+							<!-- ko if: $parent.isOwner() -->
+							<span class="glyphicon glyphicon-remove-circle closeButton" data-bind="event: { click: $parent.removeRecord}"></span>
+							<!-- /ko -->
+							<a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="text: title"></figcaption></figure></div>
+				       </div>
 	    
 					<!-- /ko -->
 				 <div id="more" data-bind='visible: loading' >
