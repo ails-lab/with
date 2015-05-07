@@ -18,6 +18,7 @@ package general.controllerTest;
 
 // all test should use those
 import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.GET;
 import static play.test.Helpers.callAction;
 import static play.test.Helpers.contentAsString;
@@ -31,7 +32,9 @@ import static play.test.Helpers.status;
 import java.io.IOException;
 
 import model.User;
+import model.UserGroup;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import play.libs.Json;
@@ -43,6 +46,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import db.DB;
 
@@ -272,5 +279,41 @@ public class UserManagerTest {
 				DB.getUserDAO().makeTransient(u);
 			}
 		}
+	}
+
+	@Test
+	public void testAddUserToGroup() {
+		User user = new User();
+		user.setEmail("test@controller.gr");
+		user.setUsername("controller");
+		DB.getUserDAO().makePermanent(user);
+
+		UserGroup parentGroup = new UserGroup();
+		DB.getUserGroupDAO().makePermanent(parentGroup);
+
+		UserGroup parentGroup1 = new UserGroup();
+		parentGroup1.getParentGroups().add(parentGroup.getDbId());
+		DB.getUserGroupDAO().makePermanent(parentGroup1);
+
+		running( fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				Result result = route(fakeRequest("GET", "/user/addToGroup/" + user.getDbId()
+						+ "?gid=" + parentGroup1.getDbId()));
+
+			    JsonParser parser = new JsonParser();
+			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			    JsonElement el = parser.parse(contentAsString(result));
+			    System.out.println(gson.toJson(el));
+
+			    if(status(result) == 200)
+				    assertThat(status(result)).isEqualTo(OK);
+			    else {
+			    	System.out.println(status(result));
+			    	Assert.fail();
+			    }
+
+			}
+		});
 	}
 }

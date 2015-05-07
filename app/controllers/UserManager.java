@@ -21,12 +21,14 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
 import model.User;
+import model.UserGroup;
 
 import org.bson.types.ObjectId;
 
@@ -330,13 +332,13 @@ public class UserManager extends Controller {
 		session().clear();
 		return ok();
 	}
-	
+
 	public static Result loginWithToken( String token ) {
 		try {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
 			String userId = input.get( "user").asText();
 			long timestamp = input.get( "timestamp" ).asLong();
-			if( new Date().getTime() < timestamp + TOKENTIMEOUT ) {
+			if( new Date().getTime() < (timestamp + TOKENTIMEOUT) ) {
 				User u = DB.getUserDAO().get( new ObjectId(userId));
 				if( u != null ) {
 					session().put( "user", userId );
@@ -351,7 +353,7 @@ public class UserManager extends Controller {
 		}
 		return badRequest();
 	}
-	
+
 	public static Result getToken() {
 		String userId = session().get( "user");
 		if( userId == null ) return badRequest();
@@ -363,7 +365,7 @@ public class UserManager extends Controller {
 		String enc = Crypto.encryptAES(result.toString());
 		return ok( enc );
 	}
-	
+
 	/**
 	 * Get a list of matching usernames
 	 *
@@ -399,7 +401,7 @@ public class UserManager extends Controller {
 
 	public static Result getUser(String id) {
 		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id));
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				return ok(DB.getJson(user));
 			} else {
@@ -410,5 +412,36 @@ public class UserManager extends Controller {
 			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
 					+ "\"}"));
 		}
+	}
+
+	public static Result addUserToGroup(String uid, String gid) {
+		ObjectNode result = Json.newObject();
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
+		if(group==null) {
+			result.put("message", "Cannot retrieve group from database!");
+			return internalServerError(result);
+		}
+
+		group.getUsers().add(new ObjectId(uid));
+		Set<ObjectId> parentGroups = group.retrieveParents();
+
+		User user = DB.getUserDAO().get(new ObjectId(uid));
+		if(user==null) {
+			result.put("message", "Cannot retrieve user from database!");
+			return internalServerError(result);
+		}
+		parentGroups.add(group.getDbId());
+		user.addUserGroup(parentGroups);
+
+		if( !(DB.getUserDAO().makePermanent(user) == null) &&
+			!(DB.getUserGroupDAO().makePermanent(group) == null) ) {
+			result.put("message", "Group succesfully added to User");
+			return ok(result);
+		}
+
+		result.put("message", "Cannot store to database!");
+		return internalServerError(result);
+
 	}
 }
