@@ -19,6 +19,9 @@ package db;
 import java.util.List;
 
 import model.ApiKey;
+
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 
 public class ApiKeyDAO extends DAO<ApiKey> {
@@ -30,5 +33,12 @@ public class ApiKeyDAO extends DAO<ApiKey> {
 
 	public List<ApiKey> getAll() {
 		return find().asList();
+	}
+	
+	public List<ApiKey> getByIpPattern( String ipPattern ) {
+		Query<ApiKey> q = createQuery()
+					.field( "ipPattern")
+					.equal( ipPattern );
+		return find( q ).asList();
 	}
 }
