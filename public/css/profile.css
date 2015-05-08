@@ -87,8 +87,8 @@ div.closesign {
     height:100%;
     position:relative;
     display:inline-block;
-    overflow:scroll;
-	
+    overflow-y: hidden;
+    overflow-x: auto;
 	width:100%;
 }
 
@@ -104,7 +104,7 @@ div.closesign {
 
 
 .profilecoll div.imcontainer div.coll_figure > img {
-  
+  height:140px;
   max-height: 100%;
    padding: 10px;
     

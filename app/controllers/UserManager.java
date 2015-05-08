@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import model.Media;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -46,9 +47,8 @@ import db.DB;
 
 public class UserManager extends Controller {
 
-
 	public static final ALogger log = Logger.of(UserManager.class);
-	private static final long TOKENTIMEOUT = 10*1000l /* 10 sec */ ;
+	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
@@ -86,7 +86,7 @@ public class UserManager extends Controller {
 	 *            the first name of the user
 	 * @param lastName
 	 *            the last name of the user
-
+	 * 
 	 * @return the array node with two suggested alternative usernames
 	 */
 	private static ArrayNode proposeUsername(String initial, String firstName,
@@ -112,14 +112,21 @@ public class UserManager extends Controller {
 	}
 
 	/**
-	 * Creates a user and stores him at the database
-	 *
-	 * @return the user JSON object (without the password) or JSON error
+	 * Validation checks for register and put user
+	 * 
+	 * * @param json the json of the user to create
+	 * 
+	 * @return result of checks, empty or error, may contain username proposal
 	 */
-	@BodyParser.Of(BodyParser.Json.class)
-	public static Result register() {
 
-		JsonNode json = request().body().asJson();
+	// only used by register() for now
+
+	// change name?
+
+	// TODO blank checks
+
+	private static ObjectNode validateUser(JsonNode json) {
+
 		ObjectNode result = Json.newObject();
 		ObjectNode error = Json.newObject();
 
@@ -172,17 +179,42 @@ public class UserManager extends Controller {
 		} else {
 			username = json.get("username").asText();
 			if (DB.getUserDAO().getByUsername(username) != null) {
-				error.put("username", "Username Already in Use");
+				error.put("usernposeUsernameame", "Username Already in Use");
 				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);
 
 			}
 		}
-		// If everything is ok store the user at the database
+
 		if (error.size() != 0) {
 			result.put("error", error);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Creates a user and stores him at the database
+	 *
+	 * @return the user JSON object (without the password) or JSON error
+	 */
+	@BodyParser.Of(BodyParser.Json.class)
+	public static Result register() {
+
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		// ObjectNode error = (ObjectNode) Json.newObject();
+
+		// copied from here
+
+		result = validateUser(json);
+
+		// If everything is ok store the user at the database
+
+		if (result.has("error")) {
 			return badRequest(result);
 		}
+
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
 		session().put("user", user.getDbId().toHexString());
@@ -332,8 +364,8 @@ public class UserManager extends Controller {
 		session().clear();
 		return ok();
 	}
-	
-	public static Result loginWithToken( String token ) {
+
+	public static Result loginWithToken(String token) {
 		try {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
 			String userId = input.get( "user").asText();
@@ -351,25 +383,26 @@ public class UserManager extends Controller {
 					return ok(result);
 				}
 			}
-		} catch( Exception e ) {
+		} catch (Exception e) {
 			// likely invalid token
 			log.error( "Login with token failed", e );
 		}
 		return badRequest();
 	}
-	
+
 	public static Result getToken() {
-		String userId = session().get( "user");
-		if( userId == null ) return badRequest();
+		String userId = session().get("user");
+		if (userId == null)
+			return badRequest();
 		ObjectNode result = Json.newObject();
-		result.put( "user", userId );
-		result.put( "timestamp", new Date().getTime());
+		result.put("user", userId);
+		result.put("timestamp", new Date().getTime());
 		// just to make them all different
-		result.put( "random", new Random().nextInt());
+		result.put("random", new Random().nextInt());
 		String enc = Crypto.encryptAES(result.toString());
-		return ok( enc );
+		return ok(enc);
 	}
-	
+
 	/**
 	 * Get a list of matching usernames
 	 *
@@ -407,7 +440,18 @@ public class UserManager extends Controller {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id));
 			if (user != null) {
-				return ok(DB.getJson(user));
+				if (user.getPhoto() != null) {
+					ObjectId photoId = user.getPhoto();
+					Media photo = DB.getMediaDAO().findById(photoId);
+					String image = photo.getMimeType() + ","
+							+ new String(photo.getData());
+					ObjectNode result = (ObjectNode) Json.parse(DB
+							.getJson(user));
+					result.put("image", image);
+					return ok(result.toString());
+				} else {
+					return ok(DB.getJson(user));
+				}
 			} else {
 				return badRequest(Json
 						.parse("{\"error\":\"User does not exist\"}"));
@@ -417,4 +461,92 @@ public class UserManager extends Controller {
 					+ "\"}"));
 		}
 	}
+
+	public static Result getUserPhoto(String id) {
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				ObjectId photoId = user.getPhoto();
+				return MediaController.getMetadataOrFile(photoId.toString(),
+						true);
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+			}
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
+					+ "\"}"));
+		}
+	}
+
+	public static Result editUser(String id) {
+
+		// Only changes first and last name for testing purposes
+		//
+		// should use validateRegister() in the future
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+
+		String firstName = null;
+		if (!json.has("firstName")) {
+			error.put("firstName", "First Name is Empty");
+		} else {
+			firstName = json.get("firstName").asText();
+		}
+		String lastName = null;
+		if (!json.has("lastName")) {
+			error.put("lastName", "Last Name is Empty");
+		} else {
+			lastName = json.get("lastName").asText();
+		}
+		if (error.size() != 0) {
+			result.put("error", error);
+			return badRequest(result);
+
+		}
+		// If everything is ok store the user at the database
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id));
+			if (user != null) {
+				if (json.has("image")) {
+					String imageUpload = json.get("image").asText();
+					String[] imageInfo = new String[2];
+					imageInfo = imageUpload.split(",");
+					String info = imageInfo[0];
+					String base64Image = imageInfo[1];
+					// byte[] image = DatatypeConverter
+					// .parseBase64Binary(base64Image);
+					byte[] image = base64Image.getBytes();
+					Media media = new Media();
+					media.setType("IMAGE");
+					media.setMimeType(info);
+					media.setHeight(100);
+					media.setWidth(100);
+					media.setOwnerId(user.getDbId());
+					media.setData(image);
+					try {
+						DB.getMediaDAO().makePermanent(media);
+						user.setPhoto(media);
+					} catch (Exception e) {
+						return badRequest(e.getMessage());
+					}
+				}
+				user.setFirstName(firstName);
+				user.setLastName(lastName);
+				DB.getUserDAO().makePermanent(user);
+				result = (ObjectNode) Json.parse(DB.getJson(user));
+				result.remove("md5Password");
+				return ok(result);
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+
+			}
+		} catch (IllegalArgumentException e) {
+			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
+		}
+
+	}
+
 }

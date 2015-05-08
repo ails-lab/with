@@ -12,6 +12,10 @@
 
 .withlogo a{
 	color:#fff;
+  line-height: 32px;
+  display: block;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 
@@ -23,7 +27,7 @@
   font-family: 'Raleway', Arial, sans-serif;
   color:black;
   text-transform:uppercase;
-  margin-bottom:20px;
+  margin-bottom:10px;
   text-align: left;
   padding-top:10px
 }
@@ -284,172 +288,6 @@ padding-right: 0;
   color: #9d9d9d;
 }
 
-/* Facebook/google Icons */
-i.huge, button.huge, div.huge {
-  margin: 0 20px 0 0;
-  position: relative;
-  background-position: center center;
-  height: 170px;
-  width: 170px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
-  border-radius: 4px;
-}
-
-button.huge p {
-  position: absolute;
-  bottom: 10px;
-  visibility: hidden;
-  font-size: 14px;
-  font-weight: 400;
-  width: 100%;
-  text-align: center;
-  color: #fff;
-}
-
-button.huge > i { transition: background-position 0.5s ease-out 0s; }
-button.huge:hover > i { background-position: center -15px; }
-button.huge:hover > p { visibility: visible; }
-
-button.facebook, button.google, button.email, button.google,
-div.facebook, div.google, div.email, div.google {
-  border: 0 none;
-  padding: 0;
-}
-
-i.facebook, button.facebook, .facebook { background-color: #3b5997; }
-i.twiter, button.google, .google { background-color: #cc3333; }
-i.email, button.email, .email { background-color: #B5B5B5; }
-
-.facebook_huge,
-.google_huge,
-.email_huge,
-button:hover .facebook_huge,
-button:hover .google_huge,
-button:hover .email_huge {
-  display: inline-block;
-  width: 170px;
-  height: 170px;
-}
-
-.facebook_huge { background-image: url(../images/fb.png); }
-.google_huge { background-image: url(../images/google.png); }
-.email_huge { background-image: url(../images/email.png); }
-button:hover .facebook_huge { background-image: url(../images/fb_hover.png); }
-button:hover .google_huge { background-image: url(../images/google_hover.png); }
-button:hover .email_huge { background-image: url(../images/email_hover.png); }
-
-.vcenter {
-  display: flex;
-  align-items: center;
-}
-
-/* Popup Login */
-.dialog {
-  background-color: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 1px 100px 10px rgba(0, 0, 0, 0.35);
-  left: 50%;
-  position: fixed;
-  top: -200px;
-  opacity: 0;
-  transition: opacity 0.4s ease 0s;
-  z-index: -1;
-}
-
-.dialog > h2 {
-  font-size: 32px;
-  font-weight: 200;
-  padding-left: 10px;
-}
-
-.dialog.open {
-  opacity: 1;
-  position: absolute;
-  top: -20%; bottom: 0; left: 0; right: 0;
-  margin: auto;
-
-  z-index: 1040;
-}
-
-.externalLogin .footer {
-  font-weight: 500;
-  padding: 15px;
-}
-
-.facebook_small, .google_small, .email_small {
-  display: inline-block;
-  height: 40px;
-  width: 40px;
-  background-position: center center;
-  background-repeat: no-repeat;
-}
-.facebook_small { background-image: url(../images/fb_small.png); }
-.google_small { background-image: url(../images/google_small.png); }
-.email_small { background-image: url(../images/email_small.png); }
-
-button {
-  border-radius: 4px;
-}
-
-button > i, button > span, .button > i, .button > span {
-  vertical-align: middle;
-}
-
-.externalLogin button {
-  color: #fff;
-}
-
-button.facebook:hover {
-  background-image: linear-gradient(#3b5998, #354f87);
-  border-color: #314a7e;
-}
-button.google:hover {
-  background-image: linear-gradient(#cc3334, #bb2d2d);
-}
-button.email:hover {
-  background-image: linear-gradient(#b5b5b5, #a1a1a1);
-}
-
-#loginPopup {
-  box-sizing: border-box;
-  max-width: 570px;
-  padding: 10px;
-  width: 570px;
-  height: 220px;
-  text-align: center;
-}
-
-#loginPopup .externalLogin, #loginPopup .emailLogin {
-  float: left;
-  margin-right: 15px;
-  text-align: center;
-  width: 550px;
-  padding: 30px 0;
-}
-
-.emailLogin {
-  vertical-align: top;
-}
-
-#loginPopup .externalLogin > button {
-  font-size: 14px;
-  font-weight: 400;
-  height: 42px;
-  line-height: 14px;
-  margin-right: 9px;
-  text-align: left;
-  width: 130px;
-}
-
-#loginPopup {
-  overflow: hidden;
-}
-
-button.close {
-  padding-right: 5px!important;
-}
 
 
 .grid {
@@ -484,8 +322,6 @@ button.close {
   color: #fff;
 
 }
-
-
 
 .grid figure h2 {
   word-spacing: -0.15em;
@@ -754,8 +590,8 @@ figure.effect-with:hover p {
 .intro-effect-grid {
     border: 0;
     zoom: 1; /* IE6&7 */
-    
-  
+
+
 }
 
 .intro-effect-grid .gridmosaic:before,
@@ -841,7 +677,7 @@ figure.effect-with:hover p {
     padding: 0.4em 1em;
     text-transform: none;
     position: relative;
-    width:70%;
+    width:100%;
     z-index: 2;
 
 }
@@ -906,21 +742,64 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
   user-select: none;
 }
 
-/* Login/Register */
-#login h1, #login h2 {
-  color: black;
-}
-
-#login h2 {
-  font-family:'Annie Use Your Telescope';
-  margin: 2em 0 1em;
-}
-
 .main-content{
-	
+
     position: absolute;
     top: 50%;
     padding-bottom:200px;
     width:100%;
-	
+
+}
+
+/* Popup */
+#popup {
+  min-width: 50%;
+  padding-top: 0;
+}
+
+#popup .modal-footer {
+  background-color: #f0f0f0;
+}
+
+.vertical-align {
+  display: flex;
+  align-items: center;
+}
+
+.stuffed {
+  padding-bottom: 15px;
+}
+
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-file input[type=file] {
+    position: absolute;
+    top: 0;
+    right: 0;
+    min-width: 100%;
+    min-height: 100%;
+    font-size: 100px;
+    text-align: right;
+    filter: alpha(opacity=0);
+    opacity: 0;
+    outline: none;
+    background: white;
+    cursor: inherit;
+    display: block;
+}
+
+/* Navbar Profile Image */
+.navbar-nav .img-thumbnail {
+  max-height: 32px;
+  padding: 0;
+  margin-right: 8px;
+}
+
+.navbar-nav > li > a {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 32px;
 }

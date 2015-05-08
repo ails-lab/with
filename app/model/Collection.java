@@ -16,6 +16,7 @@
 
 package model;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Indexed;
 
 import utils.Serializer;
 
@@ -37,6 +39,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+
 @Entity
 @JsonIgnoreProperties(ignoreUnknown=true)
 @JsonInclude(value=JsonInclude.Include.NON_NULL)
@@ -54,13 +57,14 @@ public class Collection {
 
 	@NotNull
 	@NotBlank
+	@Indexed(name="indexed_title", unique=true, dropDups=true)
 	private String title;
 	private String description;
 
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
-
+	private int itemCount;
 	private boolean isPublic;
 	private Date created;
 	private Date lastModified;
@@ -177,8 +181,8 @@ public class Collection {
 		this.thumbnail = thumbnail.getDbId();
 	}
 
-	public Date getCreated() {
-		return created;
+	public String getCreated() {
+		return DateFormat.getDateInstance().format(created);
 	}
 
 	public void setCreated(Date created) {
@@ -199,6 +203,22 @@ public class Collection {
 
 	public void setCategory(String category) {
 		this.category = category;
+	}
+
+	public int getItemCount() {
+		return itemCount;
+	}
+
+	public void setItemCount(int itemCount) {
+		this.itemCount = itemCount;
+	}
+
+	public void itemCountIncr() {
+		this.itemCount++;
+	}
+
+	public void itemCountDiscr() {
+		this.itemCount--;
 	}
 
 }

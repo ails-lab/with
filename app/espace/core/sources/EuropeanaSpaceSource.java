@@ -16,8 +16,8 @@
 
 package espace.core.sources;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,18 +28,28 @@ import com.fasterxml.jackson.databind.JsonNode;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
+import espace.core.CommonFilterResponse;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
-import espace.core.SourceResponse;
 import espace.core.RecordJSONMetadata.Format;
+import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class ESpaceSource extends ISpaceSource {
+public class EuropeanaSpaceSource extends ISpaceSource {
+
+	public EuropeanaSpaceSource() {
+		super();
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "&qf=TYPE:IMAGE");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "&qf=TYPE:VIDEO");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "&qf=TYPE:SOUND");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "&qf=TYPE:TEXT");
+	}
 
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
@@ -47,8 +57,11 @@ public class ESpaceSource extends ISpaceSource {
 		eq.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 		eq.addSearchParam("rows", "" + q.pageSize);
 		eq.addSearchParam("profile", "rich+facets");
+		// filters(q, eq);
 		euroAPI(q, eq);
-		return eq.getHttp();
+		String http = eq.getHttp();
+		http = addfilters(q, http);
+		return http;
 	}
 
 	private String getSearchTerm(CommonQuery q) {
@@ -110,6 +123,7 @@ public class ESpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
+		CommonFilterResponse type = CommonFilterResponse.typeFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -118,6 +132,8 @@ public class ESpaceSource extends ISpaceSource {
 			if (response.path("success").asBoolean()) {
 				for (JsonNode item : response.path("items")) {
 					ItemsResponse it = new ItemsResponse();
+					String t = Utils.readAttr(item, "type", false);
+					countValue(type, t);
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
 					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
@@ -134,18 +150,21 @@ public class ESpaceSource extends ISpaceSource {
 			}
 			res.items = a;
 			res.facets = response.path("facets");
+			res.filters = new ArrayList<>();
+			res.filters.add(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		// protected void countValue(CommonFilterResponse type, String t) {
+		// type.addValue(vmap.translateToCommon(type.filterID, t));
+		// }
 		return res;
 	}
-	
+
 	public String autocompleteQuery(String term, int limit) {
 		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
 	}
-	
 
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
@@ -156,7 +175,7 @@ public class ESpaceSource extends ISpaceSource {
 				JSONArray items = jsonResp.getJSONArray("items");
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = new ArrayList<Suggestion>();
-				for (int i=0; i < items.length(); i++) {
+				for (int i = 0; i < items.length(); i++) {
 					JSONObject item = items.getJSONObject(i);
 					Suggestion s = new Suggestion();
 					s.value = item.getString("term");
@@ -174,10 +193,24 @@ public class ESpaceSource extends ISpaceSource {
 			return new AutocompleteResponse();
 		}
 	}
-	
-	public RecordJSONMetadata getJSONMetadata(String response) {
-		String jsonContent = "";
-		return new RecordJSONMetadata(Format.JSONLD, jsonContent);
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		String key = "SECRET_KEY";
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey="
+					+ key);
+			JsonNode record = response.get("object");
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record.toString()));
+			response = HttpConnector.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId
+					+ ".jsonld?wskey=" + key);
+			record = response;
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
+			return jsonMetadata;
+		} catch (Exception e) {
+			return jsonMetadata;
+		}
 	}
-	
+
 }

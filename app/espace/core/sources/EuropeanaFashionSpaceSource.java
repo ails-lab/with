@@ -18,17 +18,23 @@ package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
+
+import org.apache.jena.atlas.logging.Log;
+import org.w3c.dom.Document;
+
+import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.Utils;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
+import espace.core.Utils;
 
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
@@ -91,6 +97,22 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+	
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector
+					.getURLContent("http://www.europeanafashion.eu/api/record/"
+							+ recordId );
+			JsonNode record = response;
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+					.toString()));
+			return jsonMetadata;
+		} catch (Exception e) {
+			return jsonMetadata;
+		}
 	}
 
 }

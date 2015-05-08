@@ -15,16 +15,24 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 	ko.components.register('collection', { require: 'components/collection/collection' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
-	ko.components.register('profile', { require: 'components/profile/profile' });
+	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
+	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
 	});
+	ko.components.register('edit-profile', {
+		viewModel: { require: 'components/profile-page/profile' },
+		template: { require: 'text!components/profile-page/edit-profile.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
+	ko.components.register('empty', { template: '&nbsp;' });
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
+	popupName = ko.observable('empty');
+
 
 	// Start the application
-	ko.applyBindings({ route: router.currentRoute });
+	ko.applyBindings({ route: router.currentRoute, popupName: popupName });
 });

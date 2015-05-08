@@ -1,4 +1,4 @@
-define("app", ['knockout'], function(ko) {
+define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 	var self         = this;
 	self.currentUser = {
@@ -10,11 +10,13 @@ define("app", ['knockout'], function(ko) {
 		"gender"           : ko.observable(),
 		"facebookId"       : ko.observable(),
 		"googleId"         : ko.observable(),
+		"image"            : ko.observable(),
 		"recordLimit"      : ko.observable(),
 		"collectedRecords" : ko.observable(),
-		"storageLimit"     : ko.observable()
+		"storageLimit"     : ko.observable(),
 	};
 	isLogged         = ko.observable(false);
+	// imageURL         = ko.computed(function() { return self.currentUser.image() ? self.currentUser.image() : 'images/user.png' } );
 
 	loadUser         = function(data, remember) {
 		self.currentUser._id(data._id.$oid);
@@ -28,6 +30,7 @@ define("app", ['knockout'], function(ko) {
 		self.currentUser.recordLimit(data.recordLimit);
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
+		self.currentUser.image(data.image);
 
 		// Save to session
 		if (typeof(Storage) !== 'undefined') {
@@ -40,7 +43,12 @@ define("app", ['knockout'], function(ko) {
 		}
 
 		isLogged(true);
-		
+
+		return getUserCollections();
+
+	};
+
+	getUserCollections = function() {
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
@@ -48,26 +56,23 @@ define("app", ['knockout'], function(ko) {
 			url         : "/collection/list",
 			processData : false,
 			data        : "username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
-				
+
 			function(data, text) {
-				console.log("User collections " + JSON.stringify(data));
+				// console.log("User collections " + JSON.stringify(data));
 				if (sessionStorage.getItem('User') !== null) {
 					sessionStorage.setItem('UserCollections', JSON.stringify(data));
 				}
 				else if (localStorage.getItem('User') !== null) {
 					localStorage.setItem('UserCollections', JSON.stringify(data));
 				}
-				 
+
 			}).fail(function(request, status, error) {
-				 
+
 				//var err = JSON.parse(request.responseText);
 			}
 		);
-		
-		
 	};
 
-	
 	logout           = function() {
 		$.ajax({
 			type        : "GET",
@@ -78,8 +83,20 @@ define("app", ['knockout'], function(ko) {
 				sessionStorage.removeItem('UserCollections');
 				localStorage.removeItem('UserCollections');
 				isLogged(false);
+				window.location.href="/assets/index.html";
 			}
 		});
+	}
+
+	showPopup        = function(name) {
+		popupName(name);
+		$('#popup').modal('show');
+	}
+
+	// Closing modal dialog and setting back to empty to dispose the component
+	closePopup       = function() {
+		$('#popup').modal('hide');
+		popupName("empty");
 	}
 
 	// Check if user information already exist in session
@@ -92,5 +109,5 @@ define("app", ['knockout'], function(ko) {
 		loadUser(data, true);
 	}
 
-	return { currentUser: currentUser, loadUser: loadUser, logout: logout };
+	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout, getUserCollections: getUserCollections };
 });

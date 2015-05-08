@@ -15,9 +15,11 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			//{ url: 'search',    params: { page: 'search-page',   title: 'Search' } },
 			{ url: 'login',     params: { page: 'login-page',    title: 'Login' } },
 			{ url: 'profile',     params: { page: 'profile',    title: 'Profile' } },
+			{ url: 'mycollections',     params: { page: 'mycollections',    title: 'My Collections' } },
 			{ url: 'register',  params: { page: 'register-page', title: 'Register'} },
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
-			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } }
+			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
+			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } }
 			
 		]
 	});
