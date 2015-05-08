@@ -149,7 +149,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		});
 
 	  
-
 	  findUserCollections=function(){
 		  self.collectionlist([]);
 		  var collections = [];
@@ -173,6 +172,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  createNewCollection = function() {
+		  findUserCollections();
 		  self.modal("2");
 		  self.templateName('collection_new');
 		  self.open();
@@ -187,7 +187,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    }
 
 	  self.open=function(){
-		  alert($('#modal-'+self.modal()).find(".itemlabel").val());
 		  $('#modal-1').css('overflow-y', 'hidden');
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');

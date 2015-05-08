@@ -52,7 +52,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		showDelCollPopup = function(collectionTitle, collectionId) {
 			$("#myModal").find("h4").html("Do you want to delete this collection?");
 			var body = $("#myModal").find("div.modal-body");
-			body.empty();
+			body.html("All records in that collection will be deleted.");
 	        var confirmBtn = $('<button> Confirm </button>').appendTo(body);
 	        confirmBtn.click(function() {
 	        	deleteCollection(collectionId);
