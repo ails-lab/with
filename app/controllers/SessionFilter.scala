@@ -74,12 +74,19 @@ class SessionFilter extends Filter {
         .map { t => (System.currentTimeMillis() > (t + sessionTimeout )) }
        
       (sourceCheck, timeout) match {
-        case (true, Some( false )) |
-          ( true, None ) =>  next(rh).map{ result =>
+        // there was a lastAccessTime in the session
+        case (true, Some( false )) =>  next(rh).map{ result =>
             val session = rh.session
             result.withSession(session + ( "lastAccessTime" -> System.currentTimeMillis().toString()))
-          }
-        case( true, Some( true )) => Future.successful(Results.BadRequest( "The session timed out!" )) 
+        }
+        // no accessTime in the session
+        case ( true, None ) =>  next(rh)
+        // timeout, the user is removed from the session, lastAccessTime and sourceIp stay
+        // Action can complain about expired session (or not, if no session user is needed)
+        case( true, Some( true )) => next(rh).map{ result =>
+            val session = rh.session
+            result.withSession(session - "user" )
+          } 
         case( false, _ ) => Future.successful( Results.BadRequest( "Session invalid, ip don't match" ))
      }
 
