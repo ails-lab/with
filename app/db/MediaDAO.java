@@ -17,6 +17,8 @@
 package db;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.Media;
 
@@ -26,47 +28,51 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
-public class MediaDAO  {
+public class MediaDAO {
 	public static final ALogger log = Logger.of(MediaDAO.class);
 
-
-
-	/**Converts GridFSDBFile to Media object.
-	 * We use this method for convertion because we cannot cast directly to Media.
-	 * We also cannot add Media as a subclass to GridFSDBFile because otherwise
-	 * we will have to "_id" fields and the Morphia document mapper will fail.
+	/**
+	 * Converts GridFSDBFile to Media object. We use this method for convertion
+	 * because we cannot cast directly to Media. We also cannot add Media as a
+	 * subclass to GridFSDBFile because otherwise we will have to "_id" fields
+	 * and the Morphia document mapper will fail.
+	 * 
 	 * @param gridfsDbFile
 	 * @return
 	 */
 	private Media gridFsDbFileToMediaObj(GridFSDBFile gridfsDbFile) {
 
-		if(gridfsDbFile == null)
+		if (gridfsDbFile == null)
 			return null;
 
 		Media media = new Media();
 
 		try {
 			// set metadata to media object
-			media.setType((String)gridfsDbFile.get("type"));
-			media.setMimeType((String)gridfsDbFile.get("mimeType"));
-			if(gridfsDbFile.keySet().contains("duration"))
-				media.setDuration(new Double((double) gridfsDbFile.get("duration")).floatValue());
-			media.setHeight((int)gridfsDbFile.get("height"));
-			media.setWidth((int)gridfsDbFile.get("width"));
-			media.setDbId((ObjectId)gridfsDbFile.getId());
+			media.setType((String) gridfsDbFile.get("type"));
+			media.setMimeType((String) gridfsDbFile.get("mimeType"));
+			if (gridfsDbFile.keySet().contains("duration")) {
+				media.setDuration(new Double((double) gridfsDbFile
+						.get("duration")).floatValue());
+			}
+			media.setHeight((int) gridfsDbFile.get("height"));
+			media.setWidth((int) gridfsDbFile.get("width"));
+			media.setDbId((ObjectId) gridfsDbFile.getId());
 			media.setData(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 		} catch (IOException e) {
-			log.error("Error transforming media file's InputStream to raw bytes", e);
+			log.error(
+					"Error transforming media file's InputStream to raw bytes",
+					e);
 		} catch (Exception e) {
 			log.error("Error setting properties to Media object", e);
 		}
 
 		return media;
 	}
-
 
 	public Media findById(ObjectId dbId) {
 		GridFSDBFile media = null;
@@ -98,27 +104,29 @@ public class MediaDAO  {
 
 		try {
 
-			if( media.getDbId() != null ) {
+			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
 			} else {
 				mediaGridFsFile = DB.getGridFs().createFile(media.getData());
 			}
 
-			if(mediaGridFsFile == null)
+			if (mediaGridFsFile == null)
 				throw new Exception("Got a NULL mediaGridFsFile");
 
 			// set metadata
 
-			if(media.hasWidth())
+			if (media.hasWidth())
 				mediaGridFsFile.put("width", media.getWidth());
-			if(media.hasHeight())
+			if (media.hasHeight())
 				mediaGridFsFile.put("height", media.getHeight());
-			if(media.hasDuration())
+			if (media.hasDuration())
 				mediaGridFsFile.put("duration", media.getDuration());
-			if(media.hasMimeType())
+			if (media.hasMimeType())
 				mediaGridFsFile.put("mimeType", media.getMimeType());
-			if(media.hasType())
+			if (media.hasType())
 				mediaGridFsFile.put("type", media.getType());
+			if (media.hasOwner())
+				mediaGridFsFile.put("ownerId", media.getOwnerId());
 
 			// save the file
 			mediaGridFsFile.save();
@@ -129,6 +137,25 @@ public class MediaDAO  {
 		}
 	}
 
+	public ArrayList<Media> findByOwnerId(ObjectId ownerId) {
+		List<GridFSDBFile> files = new ArrayList<GridFSDBFile>();
+		try {
+			BasicDBObject query = new BasicDBObject("ownerId", ownerId);
+			files = DB.getGridFs().find(query);
+		} catch (Exception e) {
+			log.error("Problem in find file from GridFS " + ownerId);
+		}
+
+		if (files == null)
+			log.debug("Cannot find Media document with owner ID: " + ownerId);
+		else
+			log.debug("Succesfully found Media GridFS document");
+		ArrayList<Media> media = new ArrayList<Media>();
+		for (GridFSDBFile file : files) {
+			media.add(gridFsDbFileToMediaObj(file));
+		}
+		return media;
+	}
 
 	public void makeTransient(Media media) {
 		try {
