@@ -243,7 +243,7 @@ public class UserManager extends Controller {
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
-			return ok(Json.parse(DB.getJson(u)));
+			return getUser(u.getDbId().toString());
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
@@ -269,7 +269,7 @@ public class UserManager extends Controller {
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
-			return ok(Json.parse(DB.getJson(u)));
+			return getUser(u.getDbId().toString());
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
@@ -343,9 +343,7 @@ public class UserManager extends Controller {
 		if (u.checkPassword(password)) {
 			session().put("user", u.getDbId().toHexString());
 			// now return the whole user stuff, just for good measure
-			result = (ObjectNode) Json.parse(DB.getJson(u));
-			result.remove("md5Password");
-			return ok(result);
+			return getUser(u.getDbId().toString());
 		} else {
 			error.put("password", "Invalid Password");
 			result.put("error", error);
@@ -442,9 +440,9 @@ public class UserManager extends Controller {
 					ObjectNode result = (ObjectNode) Json.parse(DB
 							.getJson(user));
 					result.put("image", image);
-					return ok(result.toString());
+					return ok(result);
 				} else {
-					return ok(DB.getJson(user));
+					return ok(Json.parse(DB.getJson(user)));
 				}
 			} else {
 				return badRequest(Json
