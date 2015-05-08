@@ -119,21 +119,4 @@ public class MediaController extends Controller {
 		return ok(result);
 	}
 
-	public static Result uploadImage() {
-		JsonNode json = request().body().asJson();
-		String base64Image = json.get("image").asText();
-		byte[] image = DatatypeConverter.parseBase64Binary(base64Image);
-		Media media = new Media();
-		media.setType("IMAGE");
-		media.setMimeType("image/jpeg");
-		media.setData(image);
-		try {
-			DB.getMediaDAO().makePermanent(media);
-			return ok();
-		} catch (Exception e) {
-			return badRequest(e.getMessage());
-
-		}
-	}
-
 }
