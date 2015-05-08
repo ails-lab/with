@@ -28,6 +28,7 @@ import scala.concurrent.duration._
 import model.ApiKey
 import play.api.mvc.Controller
 import db.DB
+import play.api.Logger
 
 
 
@@ -38,6 +39,7 @@ import db.DB
  *  
  */
 class AccessFilter extends Filter {
+  val log = Logger(this.getClass())
 
   def apiKeyCheck(next: (RequestHeader) => Future[Result], rh:RequestHeader):Future[Result] = {
 		  implicit val timeout = new Timeout(1000.milliseconds)
@@ -56,7 +58,16 @@ class AccessFilter extends Filter {
 				  val apiActor = Akka.system.actorSelection("user/apiKeyManager"); 
 		  (apiActor ? access).flatMap {
 			  response => response match {
-		  	  case ApiKey.Response.ALLOWED => next( rh )
+		  	  case ApiKey.Response.ALLOWED => {
+            if( log.isDebugEnabled ) {
+              log.debug( "PATH: " + rh.path )
+              if( ! rh.session.isEmpty ) {
+                val ses = for( entry <- rh.session.data ) yield entry._1+": "+entry._2
+                log.debug( "Session: " + ses.mkString( "", "\n   ", "\n" ))
+              }
+            }
+           next( rh ) 
+          }
 		  	  case r:ApiKey.Response => Future.successful( Results.BadRequest( r.toString() ))
 		  	  case _ => Future.successful( Results.Forbidden )
 			  }
