@@ -134,7 +134,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
   function CollectionViewModel(params) {
 	  var self = this;
-
 	  self.route = params.route;
 	  self.templateName=ko.observable('collection_new');
 	  self.modal=ko.observable("3");
@@ -162,7 +161,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		 
 		    collections.forEach(function(collection) 
 		    {
-		        
+		        js
 		        jsonData={"id":collection.dbId,"name":collection.title}
 		        self.collectionlist.push(jsonData);	
 		        	
@@ -173,7 +172,12 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    
 	  }
 	  
-	 
+	  createNewCollection = function() {
+		  self.modal("2");
+		  self.templateName('collection_new');
+		  self.open();
+	  }
+	  
 	  collectionShow = function(record) {
 	    	self.record(record);
 	    	findUserCollections();
@@ -183,10 +187,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    }
 
 	  self.open=function(){
+		  alert($('#modal-'+self.modal()).find(".itemlabel").val());
 		  $('#modal-1').css('overflow-y', 'hidden');
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
-
 	  }
 
 	  self.close= function(){

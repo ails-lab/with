@@ -1,6 +1,9 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 
-	
+	function Entry(entryData) {
+		this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
+	}
+
 	function MyCollection(collectionData) {
 		this.title = ko.observable(collectionData.title);
 		this.dbId = collectionData.dbId;
@@ -13,7 +16,10 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		this.lastModified = ko.observable(collectionData.lastModified);
 		if (collectionData.category != null)
 			this.category = ko.observable(collectionData.category);
-		this.firstEntries = collectionData.firstEntries
+		this.firstEntries = ko.observableArray([]);
+		this.firstEntries(ko.utils.arrayMap(collectionData.firstEntries, function(entryData) {
+		    return new Entry(entryData);
+		}));
 	}
 	
 	function MyCollectionsModel(params) {
@@ -38,6 +44,10 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			collectionTitle = collection.title;
 			showDelCollPopup(collectionTitle, collectionId);
 		};
+		
+		self.createCollection = function() {
+			createNewCollection();
+		}
 		
 		showDelCollPopup = function(collectionTitle, collectionId) {
 			$("#myModal").find("h4").html("Do you want to delete this collection?");
