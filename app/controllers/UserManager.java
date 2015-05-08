@@ -348,6 +348,7 @@ public class UserManager extends Controller {
 			}
 		} catch( Exception e ) {
 			// likely invalid token
+			log.error( "Login with token failed", e );
 		}
 		return badRequest();
 	}
