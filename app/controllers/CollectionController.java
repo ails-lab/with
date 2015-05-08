@@ -123,7 +123,7 @@ public class CollectionController extends Controller {
 		ObjectId oldId =  new ObjectId(id);
 		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
 		Collection newVersion = Json.fromJson(json, Collection.class);
-		newVersion.setFirstEntries(oldVersion.getFirstEntries());
+		newVersion.getFirstEntries().addAll(oldVersion.getFirstEntries());
 		newVersion.setDbId(oldId);
 		newVersion.setLastModified(new Date());
 		newVersion.setItemCount((int)DB.getCollectionRecordDAO().getItemCount(oldId));

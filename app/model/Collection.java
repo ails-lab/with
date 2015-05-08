@@ -76,7 +76,7 @@ public class Collection {
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
-	private List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
+	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 	private final Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
@@ -166,10 +166,6 @@ public class Collection {
 
 	public List<CollectionRecord> getFirstEntries() {
 		return firstEntries;
-	}
-
-	public void setFirstEntries(List<CollectionRecord> firstEntries) {
-		this.firstEntries = firstEntries;
 	}
 
 	public String getThumbnailUrl() {
