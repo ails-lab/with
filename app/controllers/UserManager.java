@@ -274,6 +274,8 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByGoogleId(googleId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
+				session().put( "sourceIp", request().remoteAddress());
+				session().put("lastAccessTime", Long.toString( System.currentTimeMillis()));
 				result = (ObjectNode) Json.parse(DB.getJson(u));
 				result.remove("md5Password");
 				return ok(result);
@@ -340,6 +342,9 @@ public class UserManager extends Controller {
 				User u = DB.getUserDAO().get( new ObjectId(userId));
 				if( u != null ) {
 					session().put( "user", userId );
+					session().put( "sourceIp", request().remoteAddress());
+					session().put("lastAccessTime", Long.toString( System.currentTimeMillis()));
+
 					ObjectNode result = Json.newObject();
 					result = (ObjectNode) Json.parse(DB.getJson(u));
 					result.remove("md5Password");
