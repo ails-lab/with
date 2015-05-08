@@ -141,7 +141,8 @@ public class CollectionController extends Controller {
 		}
 
 		Collection newCollection = Json.fromJson(json, Collection.class);
-
+		newCollection.setOwnerId(new ObjectId( session().get("user")));
+		
 		Set<ConstraintViolation<Collection>> violations =
 				Validation.getValidator().validate(newCollection);
 		for(ConstraintViolation<Collection> cv: violations) {
@@ -239,6 +240,7 @@ public class CollectionController extends Controller {
 	 */
 	//@With(UserLoggedIn.class)
 	public static Result addRecordToCollection(String collectionId) {
+		log.info( "Im here with " + request().body().asText());
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
