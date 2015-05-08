@@ -70,8 +70,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 
-
-
 		//check itemCount
 		int itemCount;
 		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c.getItemCount() )
@@ -93,13 +91,11 @@ public class CollectionController extends Controller {
 	public static Result deleteCollection(String id) {
 		ObjectNode result = Json.newObject();
 
-		try {
-			DB.getCollectionDAO().deleteById(new ObjectId(id));
-		} catch (Exception e) {
-			log.error("Collection not deleted!", e);
-			result.put("message", "Could not delete collection from database!");
-			return internalServerError(result);
+		if( DB.getCollectionDAO().removeById(new ObjectId(id)) != 1 ) {
+			result.put("message", "Did not delete collection from database!");
+			return badRequest(result);
 		}
+
 		result.put("message", "Collection deleted succesfully from database");
 		return ok(result);
 	}
@@ -347,21 +343,22 @@ public class CollectionController extends Controller {
 		List<CollectionRecord> records = collection.getFirstEntries();
 		CollectionRecord temp = null;
 		for (CollectionRecord r : records) {
-			if (r.getDbId().toString().equals(recordId))
+			if (recordId.equals(r.getDbId()))
 				temp = r;
 			break;
 		}
 		if (temp != null)
 			records.remove(temp);
 		collection.setLastModified(new Date());
-		collection.itemCountDiscr();
-		DB.getCollectionDAO().makePermanent(collection);
 
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
+
+		collection.itemCountDec();
+		DB.getCollectionDAO().makePermanent(collection);
 
 		result.put("message",
 				"RecordLink succesfully removed from Collection with id: "

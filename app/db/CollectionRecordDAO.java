@@ -78,4 +78,10 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.field("sourceId").equal(sourceId);
 		return this.find(q).asList();
 	}
+
+	public int deleteByCollection(ObjectId colId) {
+		Query<CollectionRecord> q = this.createQuery()
+				.field("collectionId").equal(colId);
+		return this.deleteByQuery(q).getN();
+	}
 }
