@@ -78,17 +78,20 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q).retrieveOwner();
 	}
 
-
 	public int removeById(ObjectId id) {
-		User owner = getCollectionOwner(id);
+
+		Collection c = get(id);
+
+		User owner = c.retrieveOwner();
 		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
-			if(colMeta.getCollectionId().equals(id))
+			if(colMeta.getCollectionId().equals(id)) {
 				owner.getCollectionMetadata().remove(colMeta);
-			DB.getUserDAO().makePermanent(owner);
+				DB.getUserDAO().makePermanent(owner);
+				break;
+			}
 		}
 
-		Query<Collection> q = this.createQuery()
-				.field("_id").equal(id);
-		return deleteByQuery(q).getN();
+		DB.getCollectionRecordDAO().deleteByCollection(id);
+		return makeTransient(c);
 	}
 }

@@ -256,4 +256,9 @@ public class CollectionRecord {
 		this.isPublic = isPublic;
 	}
 
+	@Override
+	public boolean equals(Object record) {
+		return ((CollectionRecord)record).getDbId().equals(this.dbId);
+	}
+
 }
