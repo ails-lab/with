@@ -2,6 +2,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 
 	function Entry(entryData) {
 		this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
+		this.title = entryData.title;
+		this.sourceId = entryData.sourceId;
 	}
 
 	function MyCollection(collectionData) {
@@ -26,7 +28,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		KnockoutElse.init([spec={}]);
 		var self = this;
 		self.route = params.route;
-		self.templateName=ko.observable('userCollections');
 		var collections = [];
 		self.myCollections = ko.observableArray([]);
 		var promise = app.getUserCollections();
@@ -93,11 +94,14 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			});
 		};
 		
-		self.openTemplate = function(templateName) { 
-			  $('#modal-1').css('overflow-y', 'hidden');
-			  $("#"+templateName).css('display', 'block');
-		      $("#"+templateName).addClass('md-show');
-		};
+		
+		self.openEditCollectionPopup = function() {
+			app.showPopup("edit-collection");
+		}
+		
+		self.closeEditCollectionPopup = function() {
+			app.closePopup();
+		}
 		
 		editCollection = function() {//(title, description, category, isPublic, thumbnail) {
 			alert("1");

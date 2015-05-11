@@ -160,7 +160,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		 
 		    collections.forEach(function(collection) 
 		    {
-		        js
 		        jsonData={"id":collection.dbId,"name":collection.title}
 		        self.collectionlist.push(jsonData);	
 		        	

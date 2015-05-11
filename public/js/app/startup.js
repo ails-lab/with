@@ -26,6 +26,10 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 		viewModel: { require: 'components/profile-page/profile' },
 		template: { require: 'text!components/profile-page/edit-profile.html' }
 	});
+	ko.components.register('edit-collection', {
+		viewModel: { require: 'components/mycollections/mycollections' },
+		template: { require: 'text!components/mycollections/edit-collection.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });
