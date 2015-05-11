@@ -16,23 +16,23 @@
 
 import java.util.List;
 
-import com.mongodb.WriteConcern;
-
 import model.ApiKey;
+import controllers.AccessFilter;
+import controllers.SessionFilter;
+
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
-<<<<<<< HEAD
 import play.api.mvc.EssentialFilter;
 import play.libs.Akka;
 import actors.ApiKeyManager;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import controllers.AccessFilter;
-import controllers.SessionFilter;
-=======
->>>>>>> yiorgos/morphiaDB
+
+
+import com.mongodb.WriteConcern;
+
 import db.DB;
 
 
