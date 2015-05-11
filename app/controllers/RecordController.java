@@ -18,6 +18,7 @@ package controllers;
 
 import java.util.List;
 
+import model.Collection;
 import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
@@ -73,22 +74,38 @@ public class RecordController extends Controller {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		CollectionRecord record =
+		CollectionRecord oldRecord =
 				DB.getCollectionRecordDAO().get(new ObjectId(recordId));
-
-		if(record == null) {
+		if(oldRecord == null) {
 			log.error("Cannot retrieve user modifications from database");
 			result.put("message", "Cannot retrieve user modifications from database");
 			return internalServerError(result);
 		}
 
+		Collection collection =
+				DB.getCollectionDAO().get(oldRecord.getCollectionId());
+		collection.getFirstEntries().remove(oldRecord);
+
 		if(format.equals("")) {
-
+			CollectionRecord newRecord = Json.fromJson(json, CollectionRecord.class);
+			collection.getFirstEntries().add(newRecord);
+			if( (DB.getCollectionRecordDAO().makePermanent(oldRecord) != null) &&
+				(DB.getCollectionDAO().makePermanent(collection) != null) )
+				result.put("message", "Record updated sucessfully!");
+			else
+				result.put("message", "Record not updated!");
 		} else {
-
+			// input json like { "XML-EDM": " [...xml...] " }
+			oldRecord.getContent().put(format, json.get(format).asText());
+			collection.getFirstEntries().add(oldRecord);
+			if( (DB.getCollectionRecordDAO().makePermanent(oldRecord) != null) &&
+				(DB.getCollectionDAO().makePermanent(collection) != null) )
+				result.put("message", "Record updated sucessfully!");
+			else
+				result.put("message", "Record not updated!");
 		}
 
-		return ok();
+		return ok(result);
 	}
 
 	/**
@@ -100,8 +117,16 @@ public class RecordController extends Controller {
 	public static Result deleteRecord(String recordId, String format) {
 		ObjectNode result = Json.newObject();
 
+		CollectionRecord record = DB.getCollectionRecordDAO().get(new ObjectId(recordId));
+		Collection c = DB.getCollectionDAO().get(record.getCollectionId());
+
 		if(format.equals("")) {
-			 if( DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId)).getN() != 1 ) {
+			//update firstEntries
+			if( c.getFirstEntries().contains(record))
+				c.getFirstEntries().remove(record);
+			DB.getCollectionDAO().makePermanent(c);
+
+			if( DB.getCollectionRecordDAO().makeTransient(record) != 1 ) {
 				 log.error("Cannot delete Collection Entry from database!");
 				 result.put("message", "Cannot delete Collection Entry from database!");
 				 return internalServerError(result);
@@ -110,14 +135,21 @@ public class RecordController extends Controller {
 				 return ok(result);
 			 }
 		} else {
-			CollectionRecord record = DB.getCollectionRecordDAO().get(new ObjectId(recordId));
-			if(record.getContent().containsKey(format))
+			//update firstEntries
+			if( c.getFirstEntries().contains(record))
+				c.getFirstEntries().remove(record);
+
+			if(record.getContent().containsKey(format)) {
 				record.getContent().remove(format);
-			if( DB.getCollectionRecordDAO().makePermanent(record) != null) {
+				//update firstEntries
+				c.getFirstEntries().add(record);
+			}
+			if( (DB.getCollectionRecordDAO().makePermanent(record) != null) &&
+				(DB.getCollectionDAO().makePermanent(c) != null) ) {
 				return ok(Json.toJson(record));
 			} else {
-				log.error("Cannot delete specific content from Collection entry!");
-				result.put("message", "Cannot delete specific content from Collection entry!");
+				log.error("Cannot delete specific content from Collection item!");
+				result.put("message", "Cannot delete specific content from Collection item!");
 				return internalServerError(result);
 			}
 		}

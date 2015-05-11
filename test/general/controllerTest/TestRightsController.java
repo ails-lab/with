@@ -18,7 +18,6 @@ package general.controllerTest;
 
 import static org.fest.assertions.Assertions.assertThat;
 import static play.mvc.Http.Status.OK;
-import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
@@ -39,12 +38,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import play.mvc.Result;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-
 import db.DB;
 
 public class TestRightsController {
@@ -65,7 +58,7 @@ public class TestRightsController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller");
+		col.setTitle("Test_1 collection from Controller"+TestUtils.randomString()+"453s"+Math.random()+"4cs");
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -86,9 +79,9 @@ public class TestRightsController {
 
 		try {
 			record.getContent().put("XML-EDM",
-					new String(Files.readAllBytes(Paths.get("sample-euscreenxml-core.xml"))));
+					new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxml-core.xml"))));
 			record.getContent().put("XML-ITEM/CLIP",
-					new String(Files.readAllBytes(Paths.get("sample-euscreenxl-item_clip.xml"))));
+					new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxl-item_clip.xml"))));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -99,16 +92,11 @@ public class TestRightsController {
 			@Override
 			public void run() {
 				Result result = route(fakeRequest("POST", "/rights"
-						+ "/"+record.getDbId()
+						+ "/"+col.getDbId()
 						+ "/READ"
-						+ "?receiver="+receiver.getUsername()
-						+ "&owner="+user.getUsername()
-						+ "&collection="+col.getTitle()));
+						+ "?receiver="+receiver.getDbId()).withSession("user", user.getDbId().toString()));
 
-			    JsonParser parser = new JsonParser();
-			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			    JsonElement el = parser.parse(contentAsString(result));
-			    System.out.println(gson.toJson(el));
+				System.out.println(col.getDbId());
 
 			    if(status(result) == 200)
 				    assertThat(status(result)).isEqualTo(OK);
@@ -121,7 +109,7 @@ public class TestRightsController {
 		});
 
 		//test list rights
-		running( fakeApplication(), new Runnable() {
+		/*running( fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
 				Result result = route(fakeRequest("GET", "/rights"
@@ -141,7 +129,7 @@ public class TestRightsController {
 			    }
 
 			}
-		});
+		});*/
 
 
 	}

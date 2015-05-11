@@ -57,7 +57,7 @@ public class Search {
 
 	public User getUser() {
 		User user =
-				DB.getUserDAO().getById(this.user);
+				DB.getUserDAO().getById(this.user, null);
 		return user;
 	}
 

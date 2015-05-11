@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * A class to represent media, merge of all the interesting attributes and
  * access to the byte[] that is the data for it
- * 
+ *
  * @author stabenau
  *
  */
@@ -60,6 +60,9 @@ public class Media {
 	// the actual data .. GridFS
 	@JsonIgnore
 	private byte[] data;
+
+	private String filename;
+
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -161,4 +164,11 @@ public class Media {
 		this.isPublic = isPublic;
 	}
 
+	public String getFilename() {
+		return this.filename;
+	}
+
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
 }

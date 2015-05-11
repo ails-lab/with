@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +29,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 import model.Media;
 import model.User;
+import model.UserGroup;
 
 import org.bson.types.ObjectId;
 
@@ -52,7 +54,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
-	 * 
+	 *
 	 * @param email
 	 * @return
 	 */
@@ -86,7 +88,7 @@ public class UserManager extends Controller {
 	 *            the first name of the user
 	 * @param lastName
 	 *            the last name of the user
-	 * 
+	 *
 	 * @return the array node with two suggested alternative usernames
 	 */
 	private static ArrayNode proposeUsername(String initial, String firstName,
@@ -113,9 +115,9 @@ public class UserManager extends Controller {
 
 	/**
 	 * Validation checks for register and put user
-	 * 
+	 *
 	 * * @param json the json of the user to create
-	 * 
+	 *
 	 * @return result of checks, empty or error, may contain username proposal
 	 */
 
@@ -370,7 +372,7 @@ public class UserManager extends Controller {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
 			String userId = input.get( "user").asText();
 			long timestamp = input.get( "timestamp" ).asLong();
-			if( new Date().getTime() < timestamp + TOKENTIMEOUT ) {
+			if( new Date().getTime() < (timestamp + TOKENTIMEOUT) ) {
 				User u = DB.getUserDAO().get( new ObjectId(userId));
 				if( u != null ) {
 					session().put( "user", userId );
@@ -438,7 +440,7 @@ public class UserManager extends Controller {
 
 	public static Result getUser(String id) {
 		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id));
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				if (user.getPhoto() != null) {
 					ObjectId photoId = user.getPhoto();
@@ -464,7 +466,7 @@ public class UserManager extends Controller {
 
 	public static Result getUserPhoto(String id) {
 		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id));
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				ObjectId photoId = user.getPhoto();
 				return MediaController.getMetadataOrFile(photoId.toString(),
@@ -486,7 +488,7 @@ public class UserManager extends Controller {
 		// should use validateRegister() in the future
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		String firstName = null;
 		if (!json.has("firstName")) {
@@ -507,7 +509,7 @@ public class UserManager extends Controller {
 		}
 		// If everything is ok store the user at the database
 		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id));
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				if (json.has("image")) {
 					String imageUpload = json.get("image").asText();
@@ -549,4 +551,34 @@ public class UserManager extends Controller {
 
 	}
 
+	public static Result addUserToGroup(String uid, String gid) {
+		ObjectNode result = Json.newObject();
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
+		if(group==null) {
+			result.put("message", "Cannot retrieve group from database!");
+			return internalServerError(result);
+		}
+
+		group.getUsers().add(new ObjectId(uid));
+		Set<ObjectId> parentGroups = group.retrieveParents();
+
+		User user = DB.getUserDAO().get(new ObjectId(uid));
+		if(user==null) {
+			result.put("message", "Cannot retrieve user from database!");
+			return internalServerError(result);
+		}
+		parentGroups.add(group.getDbId());
+		user.addUserGroup(parentGroups);
+
+		if( !(DB.getUserDAO().makePermanent(user) == null) &&
+			!(DB.getUserGroupDAO().makePermanent(group) == null) ) {
+			result.put("message", "Group succesfully added to User");
+			return ok(result);
+		}
+
+		result.put("message", "Cannot store to database!");
+		return internalServerError(result);
+
+	}
 }

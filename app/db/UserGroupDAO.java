@@ -16,28 +16,15 @@
 
 package db;
 
-import java.util.List;
-
-import model.Rights;
-
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
-
+import model.UserGroup;
 import play.Logger;
 
+public class UserGroupDAO extends DAO<UserGroup>{
+	static private final Logger.ALogger log = Logger.of(UserGroup.class);
 
-public class RightsDAO extends DAO<Rights> {
-	static private final Logger.ALogger log = Logger.of(Rights.class);
 
-
-	public RightsDAO() {
-		super(Rights.class);
-	}
-
-	public List<Rights> getByOwner(ObjectId ownerId) {
-		Query<Rights> q = this.createQuery()
-				.field("ownerId").equal(ownerId);
-		return this.find(q).asList();
+	public UserGroupDAO() {
+		super(UserGroup.class);
 	}
 
 }
