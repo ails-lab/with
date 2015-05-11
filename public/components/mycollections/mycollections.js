@@ -26,6 +26,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		KnockoutElse.init([spec={}]);
 		var self = this;
 		self.route = params.route;
+		self.templateName=ko.observable('userCollections');
 		var collections = [];
 		self.myCollections = ko.observableArray([]);
 		var promise = app.getUserCollections();
@@ -92,8 +93,10 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			});
 		};
 		
-		self.openEditCollectionPopup = function(collection) { 
-			$("edit-collection").modal("open");
+		self.openTemplate = function(templateName) { 
+			  $('#modal-1').css('overflow-y', 'hidden');
+			  $("#"+templateName).css('display', 'block');
+		      $("#"+templateName).addClass('md-show');
 		};
 		
 		editCollection = function() {//(title, description, category, isPublic, thumbnail) {
