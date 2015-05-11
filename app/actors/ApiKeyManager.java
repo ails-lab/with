@@ -51,7 +51,7 @@ public class ApiKeyManager extends UntypedActor  {
 		public String toString( ) {
 			return ("Call: " + call + " ip: " + ip 
 					+ " apikey: " + apikey + " volume: " + volume 
-					+ "update: " + (update?"true":"false")); 
+					+ " update: " + (update?"true":"false")); 
 		}
 	}
 	
@@ -142,7 +142,7 @@ public class ApiKeyManager extends UntypedActor  {
 	}
 	
 	private void onApiAccess( Access access ) {
-		log.info( access.toString() );
+		log.debug( access.toString() );
 		ApiKey key = null;
 		if( !StringUtils.isEmpty(access.ip)) { 
 			key = getByIp(access.ip);

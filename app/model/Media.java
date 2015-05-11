@@ -24,28 +24,28 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-
 /**
- * A class to represent media, merge of all the interesting attributes
- * and access to the byte[] that is the data for it
+ * A class to represent media, merge of all the interesting attributes and
+ * access to the byte[] that is the data for it
+ * 
  * @author stabenau
  *
  */
 @Entity
-@JsonIgnoreProperties(ignoreUnknown=true)
-@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Media {
 
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
 	// examples, but there might be more
-	
+
 	// the owner
 	private ObjectId ownerId;
-	
+
 	private boolean isPublic;
-	
+
 	private int width, height;
 
 	// IMAGE, VIDEO, AUDIO, TXT
@@ -60,7 +60,6 @@ public class Media {
 	// the actual data .. GridFS
 	@JsonIgnore
 	private byte[] data;
-
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -140,6 +139,10 @@ public class Media {
 
 	public boolean hasData() {
 		return getData() != null;
+	}
+
+	public boolean hasOwner() {
+		return getOwnerId() != null;
 	}
 
 	public ObjectId getOwnerId() {

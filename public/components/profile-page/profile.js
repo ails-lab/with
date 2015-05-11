@@ -113,6 +113,8 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				data        : json,
 				success     : function(data) {
 					console.log(data);
+					// app.currentUser.image(self.imageURL());
+					app.loadUser(data, true, false);
 				},
 				error       : function(request, status, error) {
 					console.log(error);

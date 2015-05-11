@@ -133,6 +133,32 @@
 	
 }
 
+#withcollection #columns figure{
+	margin-bottom:20px;
+}
+
+#withcollection #columns figure:hover .closeButton{
+	display:inline-block;
+	
+}
+
+#withcollection #columns figure:hover{
+	
+    border:solid;
+    border-width: 1px;
+    border-color:grey;
+}
+
+.closeButton {
+  position: absolute;
+  right: -7px;
+  top: -10px;
+  display: none;
+  z-index: 2;
+  font-size: 15px;
+  background-color:white;
+  cursor:pointer;
+}
 
  .morecontent span {
 display: none;

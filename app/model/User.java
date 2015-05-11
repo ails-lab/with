@@ -26,6 +26,7 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -57,6 +58,7 @@ public class User {
 
 	private String md5Password;
 
+	private ObjectId photo;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
@@ -296,6 +298,22 @@ public class User {
 
 	public void setStorageLimit(double storageLimit) {
 		this.storageLimit = storageLimit;
+	}
+
+	public ObjectId getPhoto() {
+		return this.photo;
+	}
+
+	public Media retrievePhoto() {
+		return DB.getMediaDAO().findById(this.photo);
+	}
+
+	public void setPhoto(ObjectId photo) {
+		this.photo = photo;
+	}
+
+	public void setPhoto(Media photo) {
+		this.photo = photo.getDbId();
 	}
 
 }
