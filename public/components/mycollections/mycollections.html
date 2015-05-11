@@ -13,12 +13,15 @@
 					 <div class="container-fluid">
 					 <div class="row profile">
 					 <div class="col-xs-6 col-sm-6 col-md-4 pull-left" data-bind="attr: {id: dbId}">
+					 <div class="ui-icon ui-icon-pencil">
+					 	 <span> data-bind="click: openEditCollectionPopup">Edit</span>
+					 </div>
 					 <div class="closesign" >
 					 	<button type="button" title="delete" class="close" aria-label="delete" 
 					 		data-bind="click: $parent.deleteMyCollection">
 					 		<span aria-hidden="true">&times;</span>
 					 	</button>
-					 </div>
+					 </div>					 
 					 <div class="content">
 					   <h3 data-bind="text: title"></h3>
 					   <div data-bind="text: description"></div>
@@ -52,7 +55,6 @@
 					 </div>
 					 </div>
 					 </div> 
-				 
 				 <!-- /ko -->
 				 
 				 
