@@ -81,6 +81,7 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
 
+	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date created;
 
 	// the place in the collection of this record,
@@ -258,7 +259,11 @@ public class CollectionRecord {
 
 	@Override
 	public boolean equals(Object record) {
-		return ((CollectionRecord)record).getDbId().equals(this.dbId);
+		if( (((CollectionRecord)record).getDbId() != null) &&
+				(this.dbId != null) )
+			return ((CollectionRecord)record).getDbId().equals(this.dbId);
+		else
+			return false;
 	}
 
 }
