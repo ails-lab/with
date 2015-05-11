@@ -39,7 +39,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			}));
 		});
 		
-		//TODO: Problem: modal should not show before calling "show", however it does. Ask Anna-Marios.
 		//$("edit-collection").modal("open");
 		self.deleteMyCollection = function(collection) {
 			collectionId = collection.dbId;
@@ -94,7 +93,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 		
 		self.openEditCollectionPopup = function(collection) { 
-			app.showPopup("edit-collection");
+			$("edit-collection").modal("open");
 		};
 		
 		editCollection = function() {//(title, description, category, isPublic, thumbnail) {
