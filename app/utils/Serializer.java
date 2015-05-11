@@ -17,6 +17,8 @@
 package utils;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -40,6 +42,17 @@ public class Serializer {
 				SerializerProvider provider) throws IOException,
 				JsonProcessingException {
 			jsonGen.writeString(oid.toString());
+		}
+
+	}
+
+	public static class DateSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object date, JsonGenerator jsonGen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			jsonGen.writeString(sdf.format((Date)date));
 		}
 
 	}

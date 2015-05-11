@@ -22,6 +22,10 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import db.DB;
 
 @Entity
@@ -34,6 +38,7 @@ public class Search {
 	private ObjectId user;
 
 	// when the search was done
+	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date searchDate;
 
 	private String query;
