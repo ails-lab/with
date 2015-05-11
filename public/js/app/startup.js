@@ -16,6 +16,7 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
+	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
