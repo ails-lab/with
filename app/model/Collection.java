@@ -69,7 +69,9 @@ public class Collection {
 
 	private int itemCount;
 	private boolean isPublic;
+	@JsonSerialize(using=Serializer.DateSerializer.class)
 	private Date created;
+	@JsonSerialize(using=Serializer.DateSerializer.class)
 	private Date lastModified;
 	private String category;
 
