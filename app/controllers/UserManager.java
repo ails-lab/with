@@ -529,7 +529,7 @@ public class UserManager extends Controller {
 					media.setData(image);
 					try {
 						DB.getMediaDAO().makePermanent(media);
-						user.setPhoto(media);
+						user.setPhoto(media.getDbId());
 					} catch (Exception e) {
 						return badRequest(e.getMessage());
 					}

@@ -321,9 +321,9 @@ public class User {
 		this.photo = photo;
 	}
 
-	public void setPhoto(Media photo) {
-		this.photo = photo.getDbId();
-	}
+//	public void setPhoto(Media photo) {
+//		this.photo = photo.getDbId();
+//	}
 
 	public void addUserGroup(Set<ObjectId> groups) {
 		this.userGroupsIds.addAll(groups);
