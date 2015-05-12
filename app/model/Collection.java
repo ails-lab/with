@@ -199,8 +199,8 @@ public class Collection {
 		this.thumbnail = thumbnail.getDbId();
 	}
 
-	public String getCreated() {
-		return DateFormat.getDateInstance().format(created);
+	public Date getCreated() {
+		return created;
 	}
 
 	public void setCreated(Date created) {
