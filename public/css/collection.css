@@ -163,3 +163,8 @@
  .morecontent span {
 display: none;
 }
+
+.fake-link {
+    color: blue;
+    cursor: pointer;
+}

@@ -16,11 +16,13 @@
 
 package controllers;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import model.Rights;
-import model.Rights.Access;
+import model.Collection;
+import model.User.Access;
 
 import org.bson.types.ObjectId;
 
@@ -29,6 +31,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -38,34 +41,41 @@ public class RightsController extends Controller {
 	public static final ALogger log = Logger.of( CollectionController.class);
 
 
-	public static Result setRights(String objId, String right, String receiver, String owner, String collection) {
+	public static Result setRights(String colId, String right, String receiver) {
 		ObjectNode result = Json.newObject();
+		ObjectId curUserId = new ObjectId(session().get("user"));
 
-		Rights rightsEntry = new Rights();
-
+		Collection collection = null;
 		try {
-			rightsEntry.setCreated(new Date());
-			rightsEntry.setObjectId(new ObjectId(objId));
-			rightsEntry.setCollectionName(collection);
-			rightsEntry.setReceiverId(DB.getUserDAO().getByUsername(receiver).getDbId());
-			rightsEntry.setOwnerId(DB.getUserDAO().getByUsername(owner).getDbId());
-			rightsEntry.setAccess(Access.valueOf(right));
+			collection = DB.getCollectionDAO().get(new ObjectId(colId));
+
 		} catch (Exception e) {
-			log.error("Cannot set properties to rights entity", e);
-			result.put("message", "Cannot set properties to rights entity. Check parameters");
+			log.error("Cannot retrieve collection  from database!", e);
+			result.put("message", "Cannot retrieve collection from database!");
 			return internalServerError(result);
 		}
 
-		if( DB.getRightsDAO().makePermanent(rightsEntry) == null) {
-			result.put("mesage", "Cannot store rights entity to database!");
+		List<ObjectId> accessIds = new ArrayList<ObjectId>();
+		accessIds.add(curUserId);
+		if(!AccessManager.checkAccess(collection.getRights(), accessIds)) {
+			result.put("message", "Sorry! You do not own this collection so you cannot set rights. "
+									+ "Please contact the owner of this collection");
+			return badRequest(result);
+		}
+		// set rights
+		// the receiver can be either a User or a UserGroup
+		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
+		rightsMap.put(new ObjectId(receiver), Access.valueOf(right));
+		AccessManager.addRight(collection.getRights(), rightsMap);
+		if( DB.getCollectionDAO().makePermanent(collection) == null) {
+			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
 
-		return ok(Json.toJson(rightsEntry));
-
+		return ok();
 	}
 
-	public static Result listRights(String ownerId) {
+	/*public static Result listRights(String ownerId) {
 		ObjectNode result = Json.newObject();
 
 		if(ownerId.equals("")) {
@@ -73,16 +83,7 @@ public class RightsController extends Controller {
 			return badRequest(result);
 		}
 
-		List<Rights> rights = null;
-		try {
-			rights = DB.getRightsDAO().getByOwner(new ObjectId(ownerId));
-		} catch(Exception e) {
-			log.error("Cannot retrieve rights from database", e);
-			result.put("message", "Cannot retrieve rights from database");
-			return internalServerError(result);
-		}
 
-		return ok(Json.toJson(rights));
 
-	}
+	}*/
 }

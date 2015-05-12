@@ -15,7 +15,8 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 	ko.components.register('collection', { require: 'components/collection/collection' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
-	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
+	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
+	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
@@ -24,6 +25,10 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 	ko.components.register('edit-profile', {
 		viewModel: { require: 'components/profile-page/profile' },
 		template: { require: 'text!components/profile-page/edit-profile.html' }
+	});
+	ko.components.register('edit-collection', {
+		viewModel: { require: 'components/mycollections/mycollections' },
+		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
 
 	// ... or for template-only components, you can just point to a .html file directly:

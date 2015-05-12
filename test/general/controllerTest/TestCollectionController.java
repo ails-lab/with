@@ -63,7 +63,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test collection from Controller " + TestUtils.randomString());
+		col.setTitle("Test collection from Controller" + Math.random() +"yolo"+ TestUtils.randomString());
 		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -315,6 +315,7 @@ public class TestCollectionController {
 	@Test
 	public void testListCollectionRecords() {
 
+
 		User user = new User();
 		user.setEmail("test@controller.gr");
 		user.setUsername("controller");
@@ -322,7 +323,7 @@ public class TestCollectionController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller " + TestUtils.randomString());
+		col.setTitle("Test_1 collection from Controller " + TestUtils.randomString() + "test_purpose "+ Math.random() + TestUtils.randomString());
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -330,31 +331,27 @@ public class TestCollectionController {
 		col.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
-
-		Collection col1 = new Collection();
-		col1.setDescription("Collection from Controller");
-		col1.setTitle("Test_2 collection from Controller " + TestUtils.randomString());
-		col1.setCategory("Dance");
-		col1.setCreated(new Date());
-		col1.setLastModified(new Date());
-		col1.setPublic(false);
-		col1.setOwnerId(user);
-		DB.getCollectionDAO().makePermanent(col1);
-
 		for(int i=0;i<30;i++) {
 			CollectionRecord entry = new CollectionRecord();
 			entry.setCollectionId(col);
+			try {
+				entry.getContent().put("XML-EDM",
+						new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxml-core.xml"))));
+				entry.getContent().put("XML-ITEM/CLIP",
+						new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxl-item_clip.xml"))));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			DB.getCollectionRecordDAO().makePermanent(entry);
 		}
 
 		running( fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
-				final ObjectNode json = Json.newObject();
-				Result result = route(fakeRequest("GET", "/collection/list?"
-						+ "username=Testuser&email=heres42@mongo.gr&"
-						+ "ownerId=" + user.getDbId())
-						.withJsonBody(json));
+				Result result = route(fakeRequest("GET", "/collection/"	+ col.getDbId()	+ "/list"
+						+ "?"
+						+"format=XML-EDM"));
+
 
 			    JsonParser parser = new JsonParser();
 			    Gson gson = new GsonBuilder().setPrettyPrinting().create();

@@ -22,7 +22,7 @@ POST     /collection/create                     controllers.CollectionController
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
 DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, pos: Integer ?=0, version: Integer ?=-1)
-GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, start: Integer ?=0, count: Integer ?=10)
+GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)
@@ -35,9 +35,13 @@ GET		/record/:id								controllers.RecordController.getRecord(id, format: Strin
 POST 	/record/:id								controllers.RecordController.updateRecord(id, format: String ?="XML-EDM")
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
+#Group Manager
+POST	/group/create							controllers.GroupManager.createGroup()
+DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
+
 # Rights Controller
-GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
-POST 	/rights/:objId/:right					controllers.RightsController.setRights(objId, right, receiver: String, owner: String, collection: String)
+#GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
+POST 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, receiver: String)
 
 # Media Controller
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=false) 
@@ -56,3 +60,4 @@ GET 	/user/loginWithToken		controllers.UserManager.loginWithToken( token: java.l
 GET		/user/:id/photo				controllers.UserManager.getUserPhoto(id)
 GET		/user/:id					controllers.UserManager.getUser(id)
 PUT		/user/:id					controllers.UserManager.editUser(id)
+GET		/user/addToGroup/:id		controllers.UserManager.addUserToGroup(id, gid: String)

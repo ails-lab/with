@@ -118,7 +118,7 @@ public class TestRecordController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller");
+		col.setTitle("Test_1 collection from Controller **9** " + Math.random());
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
@@ -145,7 +145,11 @@ public class TestRecordController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		DB.getCollectionRecordDAO().makePermanent(record);
+		col.getFirstEntries().add(record);
+		DB.getCollectionDAO().makePermanent(col);
+
 
 		running( fakeApplication(), new Runnable() {
 			@Override

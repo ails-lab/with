@@ -18,7 +18,9 @@ package model;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
@@ -26,9 +28,9 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
-import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
+import db.DB;
 
 @Entity
 public class User {
@@ -39,6 +41,10 @@ public class User {
 
 	private enum Gender {
 		MALE, FEMALE, UNSPECIFIED
+	}
+
+	public static enum Access {
+		NONE, READ, WRITE, OWN
 	}
 
 	@Id
@@ -71,6 +77,9 @@ public class User {
 	private int collectedRecords;
 	private double storageLimit;
 
+	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
+	private final Set<ObjectId> whiteList = new HashSet<ObjectId>();
+
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -81,7 +90,7 @@ public class User {
 
 	/**
 	 * The search should already be stored in the database separately
-	 * 
+	 *
 	 * @param search
 	 */
 	public void addToHistory(Search search) {
@@ -98,7 +107,7 @@ public class User {
 
 	/**
 	 * The Collection should already be stored in the database separately
-	 * 
+	 *
 	 * @param col
 	 */
 	public void addToCollections(Collection col) {
@@ -115,7 +124,7 @@ public class User {
 
 	/**
 	 * md5 the password and set it in the right field
-	 * 
+	 *
 	 * @param password
 	 */
 	public void setPassword(String password) {
@@ -127,7 +136,7 @@ public class User {
 
 	/**
 	 * Is this the right password for the user?
-	 * 
+	 *
 	 * @param password
 	 * @return
 	 */
@@ -139,7 +148,7 @@ public class User {
 	/**
 	 * Computes the MD5 with email for this password. Use when authenticating a
 	 * user via password.
-	 * 
+	 *
 	 * @param password
 	 * @return
 	 */
@@ -312,8 +321,12 @@ public class User {
 		this.photo = photo;
 	}
 
-	public void setPhoto(Media photo) {
-		this.photo = photo.getDbId();
+//	public void setPhoto(Media photo) {
+//		this.photo = photo.getDbId();
+//	}
+
+	public void addUserGroup(Set<ObjectId> groups) {
+		this.userGroupsIds.addAll(groups);
 	}
 
 }

@@ -32,15 +32,9 @@ var require = {
 		"autocomplete"              : "bower_modules/devbridge-autocomplete/dist/jquery.autocomplete.min",
 		"jquery.ui.widget"          : "bower_modules/jquery-ui/ui/minified/widget.min",
 		"load-image"                : "bower_modules/blueimp-load-image/js/load-image",
-		"load-image-meta"           : "bower_modules/blueimp-load-image/js/load-image-meta",
-		"load-image-exif"           : "bower_modules/blueimp-load-image/js/load-image-exif",
-		"load-image-ios"            : "bower_modules/blueimp-load-image/js/load-image-ios",
 		"canvas-to-blob"            : "bower_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min",
-		"jquery.fileupload-process" : "bower_modules/jquery-file-upload/js/jquery.fileupload-process",
-		"blueimp-load-image"        : "bower_modules/blueimp-load-image/js/load-image.all.min",
 		"jquery.fileupload"         : "bower_modules/jquery-file-upload/js/jquery.fileupload",
-		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
-		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else"
+		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else",
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

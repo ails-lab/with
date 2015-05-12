@@ -49,6 +49,8 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
+	private boolean isPublic;
+
 	// which backend provided this entry
 	// Europeana, DPLA ....
 	private String source;
@@ -79,6 +81,7 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
 
+	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date created;
 
 	// the place in the collection of this record,
@@ -246,6 +249,23 @@ public class CollectionRecord {
 
 	public Set<String> getTags() {
 		return tags;
+	}
+
+	public boolean isPublic() {
+		return isPublic;
+	}
+
+	public void setPublic(boolean isPublic) {
+		this.isPublic = isPublic;
+	}
+
+	@Override
+	public boolean equals(Object record) {
+		if( (((CollectionRecord)record).getDbId() != null) &&
+				(this.dbId != null) )
+			return ((CollectionRecord)record).getDbId().equals(this.dbId);
+		else
+			return false;
 	}
 
 }

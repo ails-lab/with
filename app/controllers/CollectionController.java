@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,20 +62,18 @@ public class CollectionController extends Controller {
 		User collectionOwner = null;
 		try {
 			c = DB.getCollectionDAO().getById(colId);
-			collectionOwner = DB.getUserDAO().getById(c.getOwnerId());
+			collectionOwner = DB.getUserDAO().getById(c.getOwnerId(), null);
 		} catch (Exception e) {
-			log.error(
-					"Cannot retrieve metadata for the specified collection or user!",
-					e);
+			log.error("Cannot retrieve metadata for the specified collection or user!",	e);
 			result.put("message",
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
 		}
 
-		// check itemCount
+
+		//check itemCount
 		int itemCount;
-		if ((itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c
-				.getItemCount())
+		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c.getItemCount() )
 			c.setItemCount(itemCount);
 
 		result = (ObjectNode) Json.toJson(c);
@@ -93,13 +92,11 @@ public class CollectionController extends Controller {
 	public static Result deleteCollection(String id) {
 		ObjectNode result = Json.newObject();
 
-		try {
-			DB.getCollectionDAO().deleteById(new ObjectId(id));
-		} catch (Exception e) {
-			log.error("Collection not deleted!", e);
-			result.put("message", "Could not delete collection from database!");
-			return internalServerError(result);
+		if( DB.getCollectionDAO().removeById(new ObjectId(id)) != 1 ) {
+			result.put("message", "Did not delete collection from database!");
+			return badRequest(result);
 		}
+
 		result.put("message", "Collection deleted succesfully from database");
 		return ok(result);
 	}
@@ -119,15 +116,15 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		// new collection changes
-		ObjectId oldId = new ObjectId(id);
+
+		//new collection changes
+		ObjectId oldId =  new ObjectId(id);
 		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
 		Collection newVersion = Json.fromJson(json, Collection.class);
-		newVersion.setFirstEntries(oldVersion.getFirstEntries());
+		newVersion.getFirstEntries().addAll(oldVersion.getFirstEntries());
 		newVersion.setDbId(oldId);
 		newVersion.setLastModified(new Date());
-		newVersion.setItemCount((int) DB.getCollectionRecordDAO().getItemCount(
-				oldId));
+		newVersion.setItemCount((int)DB.getCollectionRecordDAO().getItemCount(oldId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newVersion);
@@ -172,6 +169,8 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
+		newCollection.setOwnerId(new ObjectId( session().get("user")));
+
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -204,6 +203,7 @@ public class CollectionController extends Controller {
 			String access, int offset, int count) {
 
 		ObjectNode result = Json.newObject();
+
 		List<Collection> userCollections;
 		if (ownerId != null)
 			userCollections = DB.getCollectionDAO().getByOwner(
@@ -249,16 +249,9 @@ public class CollectionController extends Controller {
 				firstEntries.put(c.getTitle(), c.getFirstEntries());
 
 			ObjectNode collections = Json.newObject();
-			for (Entry<String, ?> entry : firstEntries.entrySet()) {
-				/*
-				 * ArrayNode firstRecords = Json.newObject().arrayNode();
-				 * for(CollectionRecord recLink:
-				 * (List<CollectionRecord>)entry.getValue()) {
-				 * firstRecords.add(Json.toJson(recLink));
-				 * //firstRecords.add(Serializer.recordLinkToJson(recLink)); }
-				 */
+			for(Entry<String, ?> entry: firstEntries.entrySet())
 				collections.put(entry.getKey(), Json.toJson(entry.getValue()));
-			}
+
 			result.put("userCollections", collections);
 			return ok(result);
 		} else {
@@ -353,21 +346,22 @@ public class CollectionController extends Controller {
 		List<CollectionRecord> records = collection.getFirstEntries();
 		CollectionRecord temp = null;
 		for (CollectionRecord r : records) {
-			if (r.getDbId().toString().equals(recordId))
+			if (recordId.equals(r.getDbId()))
 				temp = r;
 			break;
 		}
 		if (temp != null)
 			records.remove(temp);
 		collection.setLastModified(new Date());
-		collection.itemCountDiscr();
-		DB.getCollectionDAO().makePermanent(collection);
 
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
+
+		collection.itemCountDec();
+		DB.getCollectionDAO().makePermanent(collection);
 
 		result.put("message",
 				"RecordLink succesfully removed from Collection with id: "
@@ -379,8 +373,8 @@ public class CollectionController extends Controller {
 	/**
 	 * List all Records from a Collection using a start item and a page size
 	 */
-	public static Result listCollectionRecords(String collectionId, int start,
-			int count) {
+	public static Result listCollectionRecords(String collectionId, String format,
+												int start, int count) {
 		ObjectNode result = Json.newObject();
 
 		ObjectId colId = new ObjectId(collectionId);
@@ -390,11 +384,19 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
-		ArrayNode recordsList = Json.newObject().arrayNode();
-		for (CollectionRecord e : records) {
-			recordsList.add(Json.toJson(e));
-		}
 
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for(CollectionRecord e: records) {
+			if( format.equals("all")) {
+				recordsList.add(Json.toJson(e.getContent()));
+			} else if( !format.equals("default") ) {
+				recordsList.add(e.getContent().get(format));
+			}
+			else {
+				e.getContent().clear();
+				recordsList.add(Json.toJson(e));
+			}
+		}
 		return ok(recordsList);
 	}
 

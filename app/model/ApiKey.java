@@ -139,7 +139,8 @@ public class ApiKey {
 	
 	private CallLimit getLimit( String call ) {
 		for( CallLimit cl: callLimits ) {
-			if( cl.pattern.matcher( call).matches()) return cl;
+			//if( cl.pattern.matcher( call).matches()) 
+				return cl;
 		}
 		return null;
 	}
