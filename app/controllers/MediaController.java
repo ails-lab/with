@@ -16,8 +16,6 @@
 
 package controllers;
 
-import javax.xml.bind.DatatypeConverter;
-
 import model.Media;
 
 import org.bson.types.ObjectId;
