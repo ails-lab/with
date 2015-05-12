@@ -22,7 +22,8 @@
     "devbridge-autocomplete": "~1.2.18",
     "jquery-file-upload": "latest",
     "knockout-else": "1.0.11",
-    "jquery-ui": "~1.11.4"
+    "jquery-ui": "~1.11.4",
+    "knockout-mapping": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"
