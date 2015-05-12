@@ -440,7 +440,7 @@ public class UserManager extends Controller {
 				if (user.getPhoto() != null) {
 					ObjectId photoId = user.getPhoto();
 					Media photo = DB.getMediaDAO().findById(photoId);
-					String image = photo.getMimeType() + ","
+					String image = "data:" + photo.getMimeType() + ","
 							+ new String(photo.getData());
 					ObjectNode result = (ObjectNode) Json.parse(DB
 							.getJson(user));
@@ -508,20 +508,28 @@ public class UserManager extends Controller {
 			if (user != null) {
 				if (json.has("image")) {
 					String imageUpload = json.get("image").asText();
-					String[] imageInfo = new String[2];
-					imageInfo = imageUpload.split(",");
-					String info = imageInfo[0];
-					String base64Image = imageInfo[1];
-					// byte[] image = DatatypeConverter
-					// .parseBase64Binary(base64Image);
-					byte[] image = base64Image.getBytes();
+					String mimeType = null;
+					byte[] imageBytes = null;
+					// if image is given in bytes
+					if (imageUpload.startsWith("data")) {
+						String[] imageInfo = new String[2];
+						imageInfo = imageUpload.split(",");
+						String info = imageInfo[0];
+						mimeType = info.substring(5);
+						String base64Image = imageInfo[1];
+						imageBytes = base64Image.getBytes();
+					} else if(imageUpload.startsWith("http")){
+						//download image
+					} else return badRequest(Json
+							.parse("{\"error\":\"Cannot set user photo\"}"));
+					
 					Media media = new Media();
 					media.setType("IMAGE");
-					media.setMimeType(info);
+					media.setMimeType(mimeType);
 					media.setHeight(100);
 					media.setWidth(100);
 					media.setOwnerId(user.getDbId());
-					media.setData(image);
+					media.setData(imageBytes);
 					try {
 						DB.getMediaDAO().makePermanent(media);
 						user.setPhoto(media.getDbId());
