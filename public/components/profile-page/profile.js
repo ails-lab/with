@@ -23,15 +23,13 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			type    : "get",
 			url     : "/user/" + app.currentUser._id(),
 			success : function(data) {
-				// console.log(data);
-				var obj = $.parseJSON(data);
-				self.firstName(obj.firstName);
-				self.lastName(obj.lastName);
-				self.aboutMe(obj.aboutMe);
-				self.imageURL(obj.image);
-				self.facebookId(obj.facebookId);
-				self.googleId(obj.googleId);
-				self.location(obj.location);
+				self.firstName(data.firstName);
+				self.lastName(data.lastName);
+				self.aboutMe(data.aboutMe);
+				self.imageURL(data.image);
+				self.facebookId(data.facebookId);
+				self.googleId(data.googleId);
+				self.location(data.location);
 			},
 			error   : function(request, status, error) {
 				console.log(request);
