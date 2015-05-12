@@ -2,14 +2,17 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 
 	function Entry(entryData) {
 		this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
-		this.title = entryData.title;
-		this.sourceId = entryData.sourceId;
+		//this.entryTitle = entryData.title;
+		//this.entrySourceId = entryData.sourceId;
 	}
 
 	function MyCollection(collectionData) {
-		this.title = ko.observable(collectionData.title);
-		this.dbId = collectionData.dbId;
-		this.description = ko.observable(collectionData.description);
+		if (collectionData.title != null)
+			this.title = ko.observable(collectionData.title);
+		if (collectionData.dbId != null)
+			this.dbId = collectionData.dbId;
+		if (collectionData.description != null)
+			this.description = ko.observable(collectionData.description);
 		if (collectionData.thumbnail != null)
 			this.thumbnail = ko.observable(collectionData.thumbnail);
 		this.itemCount = collectionData.itemCount;
@@ -29,6 +32,9 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		var self = this;
 		self.route = params.route;
 		var collections = [];
+		self.collectionToEdit = ko.observable(new MyCollection({}));
+		self.titleToEdit = ko.observable();
+		self.catrgoryToEdit = ko.observable();
 		self.myCollections = ko.observableArray([]);
 		var promise = app.getUserCollections();
 		$.when(promise).done(function() {
@@ -95,7 +101,12 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 		
 		
-		self.openEditCollectionPopup = function() {
+		self.openEditCollectionPopup = function(collection, event) {
+	        var context = ko.contextFor(event.target);
+			var index = context.$index();
+	        var myCollectionToEdit = self.myCollections()[index];
+	        self.collectionToEdit(myCollectionToEdit);
+	        alert(JSON.stringify(self.collectionToEdit().title()));
 			app.showPopup("edit-collection");
 		}
 		
@@ -103,8 +114,9 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			app.closePopup();
 		}
 		
-		editCollection = function() {//(title, description, category, isPublic, thumbnail) {
+		editCollection = function(collection) {//(title, description, category, isPublic, thumbnail) {
 			alert("1");
+			alert(collection.title);
 		};
 		
 		closeEditPopup = function() {
