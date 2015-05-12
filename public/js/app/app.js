@@ -29,7 +29,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		self.currentUser.recordLimit(data.recordLimit);
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
-		self.currentUser.image(data.photo);
+		self.currentUser.image(data.image);
 
 		// Save to session
 		if (typeof(Storage) !== 'undefined') {
