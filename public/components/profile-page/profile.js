@@ -8,8 +8,8 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 
 	function ProfileViewModel(params) {
 		var self         = this;
-		self.firstName   = ko.observable();
-		self.lastName    = ko.observable();
+		self.firstName   = ko.observable().extend({ required: true });
+		self.lastName    = ko.observable().extend({ required: true });
 		self.aboutMe     = ko.observable();
 		self.imageURL    = ko.observable();
 		self.location    = ko.observable();
@@ -17,6 +17,11 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		self.googleId    = ko.observable();
 		self.hasGoogle   = ko.computed(function() { return self.googleId() ? true : false; });
 		self.hasFacebook = ko.computed(function() { return self.facebookId() ? true : false; });
+
+		self.validationModel = ko.validatedObservable({
+			firstName : self.firstName,
+			lastName  : self.lastName,
+		});
 
 		// Load the User information from the database and initialize the template
 		$.ajax({
@@ -55,32 +60,32 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 
 		// Save the changes and dispose the component
 		self.updateProfile = function() {
-			// console.log(self.imageURL());
-			var data = {
-				firstName : self.firstName,
-				lastName  : self.lastName,
-				location  : self.location,
-				about     : self.aboutMe,
-				image     : self.imageURL
-			};
-			var json = ko.toJSON(data);
-			$.ajax({
-				type        : "put",
-				contentType : 'application/json',
-				dataType    : 'json',
-				processData : false,
-				url         : "/user/" + app.currentUser._id(),
-				data        : json,
-				success     : function(data) {
-					console.log(data);
-					// app.currentUser.image(self.imageURL());
-					app.loadUser(data, true, false);
-				},
-				error       : function(request, status, error) {
-					console.log(error);
-				}
-			});
-			app.closePopup();
+			if (self.validationModel.isValid()) {
+				var data = {
+					firstName : self.firstName,
+					lastName  : self.lastName,
+					location  : self.location,
+					about     : self.aboutMe,
+					image     : self.imageURL
+				};
+				var json = ko.toJSON(data);
+				$.ajax({
+					type        : "put",
+					contentType : 'application/json',
+					dataType    : 'json',
+					processData : false,
+					url         : "/user/" + app.currentUser._id(),
+					data        : json,
+					success     : function(data) {
+						console.log(data);
+						app.loadUser(data, true, false);
+					},
+					error       : function(request, status, error) {
+						console.log(error);
+					}
+				});
+				app.closePopup();
+			}
 		};
 
 		self.loadFromFacebook = function() {
