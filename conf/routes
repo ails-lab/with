@@ -23,6 +23,8 @@ POST     /collection/listByUser			        controllers.CollectionController.listF
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
 DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, pos: Integer ?=0, version: Integer ?=-1)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
+POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
+
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)

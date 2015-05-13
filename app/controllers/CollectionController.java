@@ -202,13 +202,13 @@ public class CollectionController extends Controller {
 	 */
 	public static Result list(String username, String ownerId, String email,
 			String access, int offset, int count) {
-
 		ObjectNode result = Json.newObject();
 
 		List<Collection> userCollections;
-		if (ownerId != null)
+		if (ownerId != null) {
 			userCollections = DB.getCollectionDAO().getByOwner(
 					new ObjectId(ownerId), offset, count);
+		}
 		else {
 			User u = null;
 			if (email != null)
