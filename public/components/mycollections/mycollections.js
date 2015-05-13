@@ -1,77 +1,51 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
-
+	
 	function Entry(entryData) {
-		this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
+		//this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
 		//this.entryTitle = entryData.title;
 		//this.entrySourceId = entryData.sourceId;
+		return ko.mapping.fromJS(entryData);
 	}
 
-	function MyCollection(collectionData) {
+	function MyCollection(collectionData, index) {
+		
 		var self=this;
-		self.title = ko.observable("");
-		self.dbId = ko.observable(-1);
-		self.description = ko.observable("");
-		self.thumbnail = ko.observable("");
-		self.itemCount =ko.observable(0);
-		self.isPublic = ko.observable(false);
-		self.created ="";
-		self.lastModified = ko.observable("");
-		self.category = ko.observable("");
-		self.firstEntries = ko.observableArray([]);
-		self.url="";
-		
-	   self.load=function(collectionData){
-		if (collectionData.title != null)
-			self.title (collectionData.title);
-		if (collectionData.dbId != null)
-			self.dbId (collectionData.dbId);
-		if (collectionData.description != null)
-			self.description(collectionData.description);
-		if (collectionData.thumbnail != null)
-			self.thumbnail(collectionData.thumbnail);
-		self.itemCount(collectionData.itemCount);
-		self.isPublic(collectionData.isPublic);
-		self.created = collectionData.created;
-		self.lastModified(collectionData.lastModified);
-		if (collectionData.category != null)
-			self.category (collectionData.category);
-		
-		self.firstEntries(ko.utils.arrayMap(collectionData.firstEntries, function(entryData) {
-		    return new Entry(entryData);
-		}));
-		self.url = ko.computed(function () {
-		       return "index.html#collectionview/" +self.dbId();
-		   }, this);
-		
-	   }
+		self.load = function() {
+			var editableCollection = ko.mapping.fromJS(collectionData);
+			editableCollection.firstEntries(ko.utils.arrayMap(collectionData.firstEntries, function(entryData) {
+			    return new Entry(entryData);
+			}));
+			return editableCollection;
+		}
 		
 		self.reload = function() {
 			$.ajax({
 				"url": "/collection/"+self.dbId(),
 				"method": "GET",
 				success: function(data){
-					self.title(data.title);
-					self.description(data.description);
-					self.itemCount(data.itemCount);
-					
-					self.firstEntries(ko.utils.arrayMap(data.firstEntries, function(entryData) {
-					    return new Entry(entryData);
-					}));
-					
-			      }
-			});}
+					//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
+					self.load();
+					//self.myCollections()[index] = 
+				}
+			});				
+		};
 		
-		if(collectionData != undefined) self.load(collectionData);
+		//ko.mapping = komapping;
+		if(collectionData != undefined) 
+			return self.load(collectionData); 
 	}
 	
 	function MyCollectionsModel(params) {
-		KnockoutElse.init([spec={}]);
+		KnockoutElse.init([spec={}]);;
 		var self = this;
 		self.route = params.route;
 		var collections = [];
-		self.collectionToEdit = ko.observable(new MyCollection({}));
+		self.index = ko.observable(0);
+		//self.collectionToEdit = ko.observable(new MyCollection({}));
 		self.titleToEdit = ko.observable();
-		self.catrgoryToEdit = ko.observable();
+		self.categoryToEdit = ko.observable();
+		self.descriptionToEdit = ko.observable();
+		self.isPublicToEdit = ko.observable();
 		self.myCollections = ko.observableArray([]);
 		var promise = app.getUserCollections();
 		$.when(promise).done(function() {
@@ -79,8 +53,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
 			if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
-			self.myCollections(ko.utils.arrayMap(collections, function(collectionData) {
-			    return new MyCollection(collectionData);
+			self.myCollections(ko.utils.arrayMap(collections, function(collectionData, index) {
+			    return new MyCollection(collectionData, index);
 			}));
 		});
 		
@@ -148,8 +122,9 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 	        var context = ko.contextFor(event.target);
 			var index = context.$index();
 	        var myCollectionToEdit = self.myCollections()[index];
-	        self.collectionToEdit(myCollectionToEdit);
-	        alert(JSON.stringify(self.collectionToEdit().title()));
+	        self.index(index);
+	        //self.collectionToEdit(new MyCollection(ko.toJSON(myCollectionToEdit)));
+	        //alert(JSON.stringify(self.collectionToEdit().title()));
 			app.showPopup("edit-collection");
 		}
 		
