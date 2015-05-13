@@ -16,7 +16,6 @@
 
 package model;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -143,10 +142,10 @@ public class Collection {
 			AccessManager.addRight(rights, ownerRights);
 
 			//create a new collection metadata for owner
-			User owner = DB.getUserDAO().get(ownerId);
+			/*User owner = DB.getUserDAO().get(ownerId);
 			owner.getCollectionMetadata().add(collectMetadata());
 			//save the new owner
-			DB.getUserDAO().makePermanent(owner);
+			DB.getUserDAO().makePermanent(owner);*/
 		}
 	}
 
@@ -159,10 +158,10 @@ public class Collection {
 			AccessManager.addRight(rights, ownerRights);
 
 			//create a new collection metadata for owner
-			owner.getCollectionMetadata().add(collectMetadata());
+			/*owner.getCollectionMetadata().add(collectMetadata());
 
 			//save the new owner
-			DB.getUserDAO().makePermanent(owner);
+			DB.getUserDAO().makePermanent(owner);*/
 		}
 	}
 

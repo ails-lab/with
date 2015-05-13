@@ -63,9 +63,9 @@ public class CollectionController extends Controller {
 			c = DB.getCollectionDAO().getById(colId);
 			collectionOwner = DB.getUserDAO().getById(c.getOwnerId(), null);
 		} catch (Exception e) {
-			log.error("Cannot retrieve metadata for the specified collection or user!",	e);
+			log.error("Cannot retrieve metadata for the specified collection!",	e);
 			result.put("message",
-					"Cannot retrieve metadata for the specified collection or user!");
+					"Cannot retrieve metadata for the specified collection!");
 			return internalServerError(result);
 		}
 
@@ -186,10 +186,12 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
-
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
+		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
+		owner.getCollectionMetadata().add(newCollection.collectMetadata());
+		DB.getUserDAO().makePermanent(owner);
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
 		return ok(Json.toJson(newCollection));
