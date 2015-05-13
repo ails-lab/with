@@ -28,7 +28,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	    	imagesLoaded( $element, function() {
 	    		if (!($element.data('masonry'))){
 	        		
-	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 5,isInitLayout: false});
+	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 5,isInitLayout: false,isFitWidth: true});
 	        			
 	        	}
 	    		$('#collcolumns > figure').each(function () {
@@ -277,6 +277,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
                 success: function (data, textStatus, xhr) {
                     console.log(data);
                     self.citems.remove(e);
+                    self.itemCount(self.itemCount()-1);
                     $("#myModal").find("h4").html("Done!");
 					$("#myModal").find("div.modal-body").html("Item removed from collection");
 			       
