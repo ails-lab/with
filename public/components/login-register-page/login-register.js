@@ -299,7 +299,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 												if (popup) { self.closeLoginPopup(); }
 
 												if (typeof callback !== 'undefined') {
-													callback(params.item);
+													callback(self.record());
 												}
 											}
 											else {
@@ -356,7 +356,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 										if (popup) { self.closeLoginPopup(); }
 
 										if (typeof callback !== 'undefined') {
-											callback(params.item);
+											callback(self.record());
 										}
 									}
 									else {
