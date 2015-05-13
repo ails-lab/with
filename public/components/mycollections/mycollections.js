@@ -121,7 +121,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 			var index = context.$index();
-	        var myCollectionToEdit = self.myCollections()[index];
+			alert(index);
+	        //var myCollectionToEdit = self.myCollections()[index];
 	        self.index(index);
 	        //self.collectionToEdit(new MyCollection(ko.toJSON(myCollectionToEdit)));
 	        //alert(JSON.stringify(self.collectionToEdit().title()));
@@ -140,6 +141,17 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		closeEditPopup = function() {
 			closePopup();
 		}
+		
+		self.privateToggle=function(e,arg){
+			  $(arg.currentTarget).parent().find('.btn').toggleClass('active');
+
+			    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
+			    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
+			    }
+
+
+			    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
+		  }
 	
 	}
 	

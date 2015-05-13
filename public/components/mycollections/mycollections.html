@@ -23,24 +23,23 @@
 					 	</button>
 					 </div>
 					   <h3 data-bind="text: title()"></h3>
-					   <div data-bind="text: description"></div>
+					   <div data-bind="text: description()"></div>
 					   <!--  ko if: $data.hasOwnProperty("category") -->
-					  		<div><b>Categorized as:</b> <div data-bind="text: category"></div></div>
+					  		<div><b>Categorized as:</b> <div data-bind="text: category()"></div></div>
 					   <!-- /ko -->
 					    <span class="pull-left"><b>Items: </b> <i data-bind="text: itemCount()+',   '"> </i> 
 					    	<b>Visibility: </b><i class="fa fa-eye-slash" title="secret"></i>
 					    </span>
-					   	<span class="pull-right"><b>Created:</b> <i data-bind="text: created"></i> </span>					   		
+					   	<span class="pull-right"><b>Created:</b> <i data-bind="text: created()"></i> </span>					   		
 					 </div>
 					 </div>
 					 <!--  ko if: itemCount() > 0 -->
 						 <div class="col-xs-6  col-sm-6  col-md-8">
 					 	 <div class="row-fluid">
 					  	 <div class="imcontainer">
-					  	  <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">
-					  	
+					  	  <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">	  	
 					  	 	<!-- ko foreach: firstEntries -->
-					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}">
+					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl()}">
 					  	 		 </div>
 					  	 	 <!-- /ko -->
 					  	 	 </a>
