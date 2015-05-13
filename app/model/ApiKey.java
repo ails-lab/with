@@ -26,6 +26,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Transient;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -61,6 +62,7 @@ public class ApiKey {
 		public String regexp;
 
 		// this shouldn't be stored in the db
+		@Transient
 		public Pattern pattern;
 		
 		// give back copies of this ...
@@ -72,6 +74,13 @@ public class ApiKey {
 			} catch( CloneNotSupportedException ce) { 
 				return null;
 			}
+		}
+		
+		public Pattern getPattern() {
+			if( pattern == null ) {
+				pattern = Pattern.compile(regexp);
+			}
+			return pattern;
 		}
 	}
 	
@@ -139,7 +148,7 @@ public class ApiKey {
 	
 	private CallLimit getLimit( String call ) {
 		for( CallLimit cl: callLimits ) {
-			if( cl.pattern.matcher( call).matches()) return cl;
+			if( cl.getPattern().matcher( call).matches()) return cl;
 		}
 		return null;
 	}
