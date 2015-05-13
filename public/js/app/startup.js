@@ -1,9 +1,11 @@
-define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], function($, ko, router) {
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], function($, ko, router, kom) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
 	ko.amdTemplateEngine.defaultSuffix                = '.tpl.html';
 	ko.amdTemplateEngine.defaultRequireTextPluginName = 'text';
+
+	ko.mapping = kom;
 
 	// Components can be packaged as AMD modules, such as the following:
 	ko.components.register('nav-bar', { require: 'components/nav-bar/nav-bar' });

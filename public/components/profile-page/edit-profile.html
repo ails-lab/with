@@ -6,18 +6,18 @@
 		</div>
 		<div class="modal-body row">
 			<form>
-				<div class="row vertical-align">
+				<div class="row">
 					<div class="col-xs-2 stuffed"><strong>Name</strong></div>
 					<div class="col-xs-5">
-						<div class="form-group">
+						<div class="form-group" data-bind="validationElement: firstName">
 							<label class="sr-only" for="firstName">First Name</label>
-							<input type="text" class="form-control" id="firstName" placeholder="First Name" data-bind="value: firstName">
+							<input type="text" class="form-control" id="firstName" placeholder="First Name" data-bind="value: firstName, valueUpdate: 'afterkeypress', hasFocus: true;">
 						</div>
 					</div>
 					<div class="col-xs-5">
-						<div class="form-group">
+						<div class="form-group" data-bind="validationElement: lastName">
 							<label class="sr-only" for="lastName">Last Name</label>
-							<input type="text" class="form-control" id="lastName" placeholder="Last Name" data-bind="value: lastName">
+							<input type="text" class="form-control" id="lastName" placeholder="Last Name" data-bind="value: lastName, valueUpdate: 'afterkeypress'">
 						</div>
 					</div>
 				</div>
@@ -50,7 +50,7 @@
 						</button>
 					</div>
 				</div>
- 				<div class="row vertical-align">
+ 				<div class="row">
 					<div class="col-xs-2 stuffed"><strong>About me</strong></div>
 					<div class="col-xs-10">
 						<div class="form-group">
@@ -58,7 +58,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="row vertical-align">
+				<div class="row">
 					<div class="col-xs-2 stuffed"><strong>Location</strong></div>
 					<div class="col-xs-10">
 						<div class="form-group">

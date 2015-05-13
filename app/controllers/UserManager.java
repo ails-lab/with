@@ -245,7 +245,7 @@ public class UserManager extends Controller {
 			}
 			u.setGoogleId(googleId);
 			DB.getUserDAO().makePermanent(u);
-			return ok(Json.parse(DB.getJson(u)));
+			return getUser(u.getDbId().toString());
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
@@ -271,7 +271,7 @@ public class UserManager extends Controller {
 			}
 			u.setFacebookId(facebookId);
 			DB.getUserDAO().makePermanent(u);
-			return ok(Json.parse(DB.getJson(u)));
+			return getUser(u.getDbId().toString());
 		} catch (Exception e) {
 			return badRequest(Json
 					.parse("{\"error\":\"Couldn't validate user\"}"));
@@ -295,9 +295,7 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByFacebookId(facebookId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
-				result = (ObjectNode) Json.parse(DB.getJson(u));
-				result.remove("md5Password");
-				return ok(result);
+				return getUser(u.getDbId().toHexString());
 			} else {
 				String accessToken = json.get("accessToken").asText();
 				return facebookLogin(facebookId, accessToken);
@@ -308,11 +306,10 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByGoogleId(googleId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
-				session().put( "sourceIp", request().remoteAddress());
-				session().put("lastAccessTime", Long.toString( System.currentTimeMillis()));
-				result = (ObjectNode) Json.parse(DB.getJson(u));
-				result.remove("md5Password");
-				return ok(result);
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime",
+						Long.toString(System.currentTimeMillis()));
+				return getUser(u.getDbId().toHexString());
 			} else {
 				String accessToken = json.get("accessToken").asText();
 				return googleLogin(googleId, accessToken);
@@ -347,9 +344,7 @@ public class UserManager extends Controller {
 		if (u.checkPassword(password)) {
 			session().put("user", u.getDbId().toHexString());
 			// now return the whole user stuff, just for good measure
-			result = (ObjectNode) Json.parse(DB.getJson(u));
-			result.remove("md5Password");
-			return ok(result);
+			return getUser(u.getDbId().toHexString());
 		} else {
 			error.put("password", "Invalid Password");
 			result.put("error", error);
@@ -370,15 +365,15 @@ public class UserManager extends Controller {
 	public static Result loginWithToken(String token) {
 		try {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
-			String userId = input.get( "user").asText();
-			long timestamp = input.get( "timestamp" ).asLong();
-			if( new Date().getTime() < (timestamp + TOKENTIMEOUT) ) {
-				User u = DB.getUserDAO().get( new ObjectId(userId));
-				if( u != null ) {
-					session().put( "user", userId );
-					session().put( "sourceIp", request().remoteAddress());
-					session().put("lastAccessTime", Long.toString( System.currentTimeMillis()));
-
+			String userId = input.get("user").asText();
+			long timestamp = input.get("timestamp").asLong();
+			if (new Date().getTime() < (timestamp + TOKENTIMEOUT)) {
+				User u = DB.getUserDAO().get(new ObjectId(userId));
+				if (u != null) {
+					session().put("user", userId);
+					session().put("sourceIp", request().remoteAddress());
+					session().put("lastAccessTime",
+							Long.toString(System.currentTimeMillis()));
 					ObjectNode result = Json.newObject();
 					result = (ObjectNode) Json.parse(DB.getJson(u));
 					result.remove("md5Password");
@@ -387,7 +382,7 @@ public class UserManager extends Controller {
 			}
 		} catch (Exception e) {
 			// likely invalid token
-			log.error( "Login with token failed", e );
+			log.error("Login with token failed", e);
 		}
 		return badRequest();
 	}
@@ -450,9 +445,9 @@ public class UserManager extends Controller {
 					ObjectNode result = (ObjectNode) Json.parse(DB
 							.getJson(user));
 					result.put("image", image);
-					return ok(result.toString());
+					return ok(result);
 				} else {
-					return ok(DB.getJson(user));
+					return ok(Json.parse(DB.getJson(user)));
 				}
 			} else {
 				return badRequest(Json
@@ -536,10 +531,16 @@ public class UserManager extends Controller {
 				}
 				user.setFirstName(firstName);
 				user.setLastName(lastName);
+				if(json.has("about")) {
+					user.setAbout(json.get("about").asText());					
+				}
+				if(json.has("location")) {
+					user.setLocation(json.get("location").asText());					
+				}
 				DB.getUserDAO().makePermanent(user);
 				result = (ObjectNode) Json.parse(DB.getJson(user));
 				result.remove("md5Password");
-				return ok(result);
+				return getUser(user.getDbId().toHexString());
 			} else {
 				return badRequest(Json
 						.parse("{\"error\":\"User does not exist\"}"));
@@ -555,7 +556,7 @@ public class UserManager extends Controller {
 		ObjectNode result = Json.newObject();
 
 		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
-		if(group==null) {
+		if (group == null) {
 			result.put("message", "Cannot retrieve group from database!");
 			return internalServerError(result);
 		}
@@ -564,15 +565,15 @@ public class UserManager extends Controller {
 		Set<ObjectId> parentGroups = group.retrieveParents();
 
 		User user = DB.getUserDAO().get(new ObjectId(uid));
-		if(user==null) {
+		if (user == null) {
 			result.put("message", "Cannot retrieve user from database!");
 			return internalServerError(result);
 		}
 		parentGroups.add(group.getDbId());
 		user.addUserGroup(parentGroups);
 
-		if( !(DB.getUserDAO().makePermanent(user) == null) &&
-			!(DB.getUserGroupDAO().makePermanent(group) == null) ) {
+		if (!(DB.getUserDAO().makePermanent(user) == null)
+				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 			result.put("message", "Group succesfully added to User");
 			return ok(result);
 		}

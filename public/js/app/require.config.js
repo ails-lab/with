@@ -35,6 +35,7 @@ var require = {
 		"canvas-to-blob"            : "bower_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min",
 		"jquery.fileupload"         : "bower_modules/jquery-file-upload/js/jquery.fileupload",
 		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else",
+		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
