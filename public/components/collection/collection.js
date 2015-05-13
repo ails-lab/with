@@ -323,11 +323,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
-						var collfound=false;
 						(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
 							if (o.dbId() == collid) {
 							 o.reload(collid);
-							 collfound=true;
 							
 						}});
 						
