@@ -16,7 +16,9 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +33,8 @@ import model.Media;
 import model.User;
 import model.UserGroup;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -440,8 +444,9 @@ public class UserManager extends Controller {
 				if (user.getPhoto() != null) {
 					ObjectId photoId = user.getPhoto();
 					Media photo = DB.getMediaDAO().findById(photoId);
-					String image = photo.getMimeType() + ","
-							+ new String(photo.getData());
+					// convert to base64 format
+					String image = "data:" + photo.getMimeType() + ";base64,"
+							+ new String(Base64.encodeBase64(photo.getData()));
 					ObjectNode result = (ObjectNode) Json.parse(DB
 							.getJson(user));
 					result.put("image", image);
@@ -508,20 +513,48 @@ public class UserManager extends Controller {
 			if (user != null) {
 				if (json.has("image")) {
 					String imageUpload = json.get("image").asText();
-					String[] imageInfo = new String[2];
-					imageInfo = imageUpload.split(",");
-					String info = imageInfo[0];
-					String base64Image = imageInfo[1];
-					// byte[] image = DatatypeConverter
-					// .parseBase64Binary(base64Image);
-					byte[] image = base64Image.getBytes();
+					String mimeType = null;
+					byte[] imageBytes = null;
+					// check if image is given in bytes
+					if (imageUpload.startsWith("data")) {
+						String[] imageInfo = new String[2];
+						imageInfo = imageUpload.split(",");
+						String info = imageInfo[0];
+						mimeType = info.substring(5);
+						// check if image is encoded in base64 format
+						imageBytes = imageInfo[1].getBytes();
+
+						// check if image is given as URL
+					} else if (imageUpload.startsWith("http")) {
+						try {
+							URL url = new URL(imageUpload);
+							HttpsURLConnection connection = (HttpsURLConnection) url
+									.openConnection();
+							mimeType = connection
+									.getHeaderField("content-type");
+							imageBytes = IOUtils.toByteArray(connection
+									.getInputStream());
+						} catch (MalformedURLException e) {
+							return badRequest(e.getMessage());
+						} catch (IOException e) {
+							return badRequest(e.getMessage());
+						}
+					} else {
+						return badRequest(Json
+								.parse("{\"error\":\"Unknown image format\"}"));
+					}
+					// check if image is encoded in base64 format
+					if (mimeType.contains("base64")) {
+						imageBytes = Base64.decodeBase64(imageBytes);
+						mimeType = mimeType.replace(";base64", "");
+					}
 					Media media = new Media();
 					media.setType("IMAGE");
-					media.setMimeType(info);
+					media.setMimeType(mimeType);
 					media.setHeight(100);
 					media.setWidth(100);
 					media.setOwnerId(user.getDbId());
-					media.setData(image);
+					media.setData(imageBytes);
 					try {
 						DB.getMediaDAO().makePermanent(media);
 						user.setPhoto(media.getDbId());
@@ -531,11 +564,11 @@ public class UserManager extends Controller {
 				}
 				user.setFirstName(firstName);
 				user.setLastName(lastName);
-				if(json.has("about")) {
-					user.setAbout(json.get("about").asText());					
+				if (json.has("about")) {
+					user.setAbout(json.get("about").asText());
 				}
-				if(json.has("location")) {
-					user.setLocation(json.get("location").asText());					
+				if (json.has("location")) {
+					user.setLocation(json.get("location").asText());
 				}
 				DB.getUserDAO().makePermanent(user);
 				result = (ObjectNode) Json.parse(DB.getJson(user));
