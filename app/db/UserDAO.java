@@ -38,9 +38,12 @@ public class UserDAO extends DAO<User> {
 		super(User.class);
 	}
 
-	public User getById(ObjectId id) {
+	public User getById(ObjectId id, List<String> retrievedFields) {
 		Query<User> q = this.createQuery()
 				.field("_id").equal(id);
+		if(retrievedFields!=null)
+			for(int i=0;i<retrievedFields.size();i++)
+				q.retrievedFields(true, retrievedFields.get(i));
 		return this.findOne(q);
 
 	}
@@ -52,11 +55,11 @@ public class UserDAO extends DAO<User> {
 	public User getByUsername(String username) {
 		return this.findOne("username", username);
 	}
-	
+
 	public User getByFacebookId(String facebookId) {
 		return this.findOne("facebookId", facebookId);
 	}
-	
+
 	public User getByGoogleId(String googleId) {
 		return this.findOne("googleId", googleId);
 	}
@@ -87,12 +90,12 @@ public class UserDAO extends DAO<User> {
 				.equal(md5Pass));
 		return find(q).get();
 	}
-	
+
 	public List<User> getByUsernamePrefix(String prefix) {
 		Query<User> q = this.createQuery()
 				.field("username").startsWith(prefix);
 		return find(q).asList();
-		
+
 	}
 
 	/**
@@ -116,7 +119,7 @@ public class UserDAO extends DAO<User> {
 	}
 
 	public int removeById(ObjectId id) {
-		User user = getById(id);
+		User user = getById(id, null);
 
 		//delete user realted searches
 		List<Search> userSearches = user.getSearchHistory();

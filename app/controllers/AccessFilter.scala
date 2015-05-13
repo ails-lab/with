@@ -29,6 +29,7 @@ import model.ApiKey
 import play.api.mvc.Controller
 import db.DB
 import play.api.Logger
+import org.bson.types.ObjectId
 
 
 
@@ -41,11 +42,42 @@ import play.api.Logger
 class AccessFilter extends Filter {
   val log = Logger(this.getClass())
 
+  def withSession( rh:RequestHeader, sessionData: Map[String,String]): RequestHeader = {
+          // make a new session cookie
+          val newCookie= Seq( Session.encode(sessionData))
+          
+          // replace cookie in header
+          val oldHeaders = rh.headers.toMap
+          var newHeaders = oldHeaders - Session.COOKIE_NAME + (( Session.COOKIE_NAME, newCookie))
+
+         rh.copy( headers = new Headers { val data: Seq[(String, Seq[String])] =  (newHeaders.toSeq) } )
+  }
+  
+  
+  def effektivUserIds(userId: Option[String], proxyId:Option[String] ): Seq[String] = {
+    // missing the optional retrieval of all the usergroups on userId
+    val userGroupIds = userId.map { id =>
+      id
+      val user = DB.getUserDAO.getById(new ObjectId( id ))
+      
+      // but really DB.getUserDAO().
+    }
+   Seq( userId, proxyId).flatten
+  }
+  
   def apiKeyCheck(next: (RequestHeader) => Future[Result], rh:RequestHeader):Future[Result] = {
 		  implicit val timeout = new Timeout(1000.milliseconds)
 		  val access = new ApiKeyManager.Access
 
-		  rh.queryString.get( "apikey") match {
+		  if( log.isDebugEnabled ) {
+			  log.debug( "PATH: " + rh.path )
+			  if( ! rh.session.isEmpty ) {
+				  val ses = for( entry <- rh.session.data ) yield entry._1+": "+entry._2
+						  log.debug( "Session: " + ses.mkString( "", "\n   ", "\n" ))
+			  }
+		  }
+
+      rh.queryString.get( "apikey") match {
   		  case Some(Seq( key, _ )) => access.apikey = key
   		  case _ => {
   			  rh.session.get( "apikey" ) match {
@@ -54,19 +86,21 @@ class AccessFilter extends Filter {
   			  }
   		  }
 		  } 
+      
+      val userId = rh.session.get( "user")
 		  access.call = rh.path
 				  val apiActor = Akka.system.actorSelection("user/apiKeyManager"); 
 		  (apiActor ? access).flatMap {
 			  response => response match {
+          case o:ObjectId => {
+               val sessionData = rh.session + (("effektivUserIds", effektivUserIds(userId, Some( o.toString())).mkString(",")))
+              val newRh = withSession( rh, sessionData.data )
+             next( newRh )            
+          }
 		  	  case ApiKey.Response.ALLOWED => {
-            if( log.isDebugEnabled ) {
-              log.debug( "PATH: " + rh.path )
-              if( ! rh.session.isEmpty ) {
-                val ses = for( entry <- rh.session.data ) yield entry._1+": "+entry._2
-                log.debug( "Session: " + ses.mkString( "", "\n   ", "\n" ))
-              }
-            }
-           next( rh ) 
+            val sessionData = rh.session + (("effektivUserIds", effektivUserIds(userId, None).mkString(",")))
+            val newRh = withSession( rh, sessionData.data )
+           next( newRh ) 
           }
 		  	  case r:ApiKey.Response => Future.successful( Results.BadRequest( r.toString() ))
 		  	  case _ => Future.successful( Results.Forbidden )

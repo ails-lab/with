@@ -29,6 +29,8 @@ import model.ApiKey
 import play.api.mvc.Controller
 import db.DB
 import play.api.Logger
+import play.api.mvc.Headers
+import play.api.mvc.Headers
 
 
 
@@ -81,9 +83,24 @@ class SessionFilter extends Filter {
         }
         // no accessTime in the session
         case ( true, None ) =>  next(rh)
+        
         // timeout, the user is removed from the session, lastAccessTime and sourceIp stay
         // Action can complain about expired session (or not, if no session user is needed)
-        case( true, Some( true )) => next(rh).map{ result =>
+        case( true, Some( true )) => 
+          // need to create a new session without the user entry
+          val s2 = rh.session - "user"
+  
+          // make a new session cookie
+          val newCookie= Seq( Session.encode(s2.data))
+          
+          // replace cookie in header
+          val oldHeaders = rh.headers.toMap
+          var newHeaders = oldHeaders - Session.COOKIE_NAME + (( Session.COOKIE_NAME, newCookie))
+
+          val newRh = rh.copy( headers = new Headers { val data: Seq[(String, Seq[String])] =  (newHeaders.toSeq) } )
+             
+          // remove the user from the response as well
+          next(newRh).map{ result => 
             val session = rh.session
             result.withSession(session - "user" )
           } 

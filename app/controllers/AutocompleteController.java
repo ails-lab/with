@@ -41,6 +41,7 @@ import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
 
 public class AutocompleteController extends Controller {
+
 	public static Promise<Result> autocompleteExt(String term, Integer limit, List<String> sourceFromUI) {
 		List<ISpaceSource> sourcesForAutocomplete = new ArrayList<ISpaceSource>();
 		if (sourceFromUI.isEmpty())
@@ -53,7 +54,7 @@ public class AutocompleteController extends Controller {
 		}
 		return getSuggestionsResponse(sourcesForAutocomplete, term, limit);
 	}
-	
+
 	//the union of the suggestions collected from the sources APIs is returned
 	//if no source returns suggestions, then empty content is returned
 	@BodyParser.Of(BodyParser.Json.class)
@@ -105,16 +106,16 @@ public class AutocompleteController extends Controller {
 			finalResponses.add(ar);
 			return finalResponses;
 		};
-		
+
 		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises, filter);
 	}
 	
 
 	private static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
 		Set<String> seen = new HashSet<String>();
-		return t -> { 
+		return t -> {
 			boolean contains = seen.contains(t.value);
-			seen.add(t.value); 
+			seen.add(t.value);
 			return !contains;//return (seen.putIfAbsent(t.value, Boolean.TRUE) == null);};
 		};
 	}

@@ -17,6 +17,8 @@
 package utils;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -33,12 +35,24 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 public class Serializer {
 	public static final ALogger log = Logger.of(Serializer.class);
 
+
 	public static class ObjectIdSerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object oid, JsonGenerator jsonGen,
 				SerializerProvider provider) throws IOException,
 				JsonProcessingException {
 			jsonGen.writeString(oid.toString());
+		}
+
+	}
+
+	public static class DateSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object date, JsonGenerator jsonGen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+			jsonGen.writeString(sdf.format((Date)date));
 		}
 
 	}

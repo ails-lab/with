@@ -1,19 +1,67 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 
-	
+	function Entry(entryData) {
+		this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
+		//this.entryTitle = entryData.title;
+		//this.entrySourceId = entryData.sourceId;
+	}
+
 	function MyCollection(collectionData) {
-		this.title = ko.observable(collectionData.title);
-		this.dbId = collectionData.dbId;
-		this.description = ko.observable(collectionData.description);
+		var self=this;
+		self.title = ko.observable("");
+		self.dbId = ko.observable(-1);
+		self.description = ko.observable("");
+		self.thumbnail = ko.observable("");
+		self.itemCount =ko.observable(0);
+		self.isPublic = ko.observable(false);
+		self.created ="";
+		self.lastModified = ko.observable("");
+		self.category = ko.observable("");
+		self.firstEntries = ko.observableArray([]);
+		self.url="";
+		
+	   self.load=function(collectionData){
+		if (collectionData.title != null)
+			self.title (collectionData.title);
+		if (collectionData.dbId != null)
+			self.dbId (collectionData.dbId);
+		if (collectionData.description != null)
+			self.description(collectionData.description);
 		if (collectionData.thumbnail != null)
-			this.thumbnail = ko.observable(collectionData.thumbnail);
-		this.itemCount = collectionData.itemCount;
-		this.isPublic = collectionData.isPublic;
-		this.created = collectionData.created;
-		this.lastModified = ko.observable(collectionData.lastModified);
+			self.thumbnail(collectionData.thumbnail);
+		self.itemCount(collectionData.itemCount);
+		self.isPublic(collectionData.isPublic);
+		self.created = collectionData.created;
+		self.lastModified(collectionData.lastModified);
 		if (collectionData.category != null)
-			this.category = ko.observable(collectionData.category);
-		this.firstEntries = collectionData.firstEntries
+			self.category (collectionData.category);
+		
+		self.firstEntries(ko.utils.arrayMap(collectionData.firstEntries, function(entryData) {
+		    return new Entry(entryData);
+		}));
+		self.url = ko.computed(function () {
+		       return "index.html#collectionview/" +self.dbId();
+		   }, this);
+		
+	   }
+		
+		self.reload = function() {
+			$.ajax({
+				"url": "/collection/"+self.dbId(),
+				"method": "GET",
+				success: function(data){
+					self.title(data.title);
+					self.description(data.description);
+					self.itemCount(data.itemCount);
+					
+					self.firstEntries(ko.utils.arrayMap(data.firstEntries, function(entryData) {
+					    return new Entry(entryData);
+					}));
+					
+			      }
+			});}
+		
+		if(collectionData != undefined) self.load(collectionData);
 	}
 	
 	function MyCollectionsModel(params) {
@@ -21,8 +69,11 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		var self = this;
 		self.route = params.route;
 		var collections = [];
-		var promise = app.getUserCollections();
+		self.collectionToEdit = ko.observable(new MyCollection({}));
+		self.titleToEdit = ko.observable();
+		self.catrgoryToEdit = ko.observable();
 		self.myCollections = ko.observableArray([]);
+		var promise = app.getUserCollections();
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
@@ -33,16 +84,21 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			}));
 		});
 		
+		//$("edit-collection").modal("open");
 		self.deleteMyCollection = function(collection) {
-			collectionId = collection.dbId;
-			collectionTitle = collection.title;
+			collectionId = collection.dbId();
+			collectionTitle = collection.title();
 			showDelCollPopup(collectionTitle, collectionId);
 		};
+		
+		self.createCollection = function() {
+			createNewCollection();
+		}
 		
 		showDelCollPopup = function(collectionTitle, collectionId) {
 			$("#myModal").find("h4").html("Do you want to delete this collection?");
 			var body = $("#myModal").find("div.modal-body");
-			body.empty();
+			body.html("All records in that collection will be deleted.");
 	        var confirmBtn = $('<button> Confirm </button>').appendTo(body);
 	        confirmBtn.click(function() {
 	        	deleteCollection(collectionId);
@@ -55,8 +111,14 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			$("#myModal").modal('show');
 		};
 		
-		self.closeDelCollPopup = function() {
-			
+	    //Storage needs to be updated, because collection.js gets user collections from there
+		saveCollectionsToStorage = function(collections) {
+			if (sessionStorage.getItem('User') !== null) {
+				sessionStorage.setItem('UserCollections', JSON.stringify(collections));
+			}
+			else if (localStorage.getItem('User') !== null) {
+				localStorage.setItem('UserCollections', JSON.stringify(collections));
+			}
 		};
 		
 		deleteCollection = function(collectionId) {
@@ -69,10 +131,40 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections.remove(function (item) {
                         return item.dbId == collectionId;
                     });
+					saveCollectionsToStorage(self.myCollections());
 					//self.myCollections()[0].title("New title!");
 				}
 			});
 		};
+		
+		
+		self.addNew=function(cdata){
+			var myc=new MyCollection(cdata);
+			self.myCollections.push(myc);
+			
+		}
+		
+		self.openEditCollectionPopup = function(collection, event) {
+	        var context = ko.contextFor(event.target);
+			var index = context.$index();
+	        var myCollectionToEdit = self.myCollections()[index];
+	        self.collectionToEdit(myCollectionToEdit);
+	        alert(JSON.stringify(self.collectionToEdit().title()));
+			app.showPopup("edit-collection");
+		}
+		
+		self.closeEditCollectionPopup = function() {
+			app.closePopup();
+		}
+		
+		editCollection = function(collection) {//(title, description, category, isPublic, thumbnail) {
+			alert("1");
+			alert(collection.title);
+		};
+		
+		closeEditPopup = function() {
+			closePopup();
+		}
 	
 	}
 	

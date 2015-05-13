@@ -16,20 +16,23 @@
 
 package model;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.NotNull;
+
+import model.User.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Indexed;
 
+import utils.AccessManager;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -57,7 +60,6 @@ public class Collection {
 
 	@NotNull
 	@NotBlank
-	@Indexed(name="indexed_title", unique=true, dropDups=true)
 	private String title;
 	private String description;
 
@@ -66,15 +68,18 @@ public class Collection {
 
 	private int itemCount;
 	private boolean isPublic;
+	@JsonSerialize(using=Serializer.DateSerializer.class)
 	private Date created;
+	@JsonSerialize(using=Serializer.DateSerializer.class)
 	private Date lastModified;
 	private String category;
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
-	private List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
+	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
+	private final Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
 		return this.dbId;
@@ -121,7 +126,7 @@ public class Collection {
 	}
 
 	public User retrieveOwner() {
-		return	DB.getUserDAO().getById(this.ownerId);
+		return	DB.getUserDAO().getById(this.ownerId, null);
 	}
 
 	public ObjectId getOwnerId() {
@@ -130,26 +135,38 @@ public class Collection {
 
 	@JsonProperty
 	public void setOwnerId(ObjectId ownerId) {
-		this.ownerId = ownerId;
+		if( this.ownerId == null ) {
+			this.ownerId = ownerId;
+			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
+			ownerRights.put(this.ownerId, Access.OWN);
+			AccessManager.addRight(rights, ownerRights);
+
+			//create a new collection metadata for owner
+			/*User owner = DB.getUserDAO().get(ownerId);
+			owner.getCollectionMetadata().add(collectMetadata());
+			//save the new owner
+			DB.getUserDAO().makePermanent(owner);*/
+		}
 	}
 
 	public void setOwnerId(User owner) {
 		//set owner to collection
-		this.ownerId = owner.getDbId();
+		if( this.ownerId == null ) {
+			this.ownerId = owner.getDbId();
+			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
+			ownerRights.put(this.ownerId, Access.OWN);
+			AccessManager.addRight(rights, ownerRights);
 
-		//create a new collection metadata for owner
-		owner.getCollectionMetadata().add(collectMetadata());
+			//create a new collection metadata for owner
+			/*owner.getCollectionMetadata().add(collectMetadata());
 
-		//save the new owner
-		DB.getUserDAO().makePermanent(owner);
+			//save the new owner
+			DB.getUserDAO().makePermanent(owner);*/
+		}
 	}
 
 	public List<CollectionRecord> getFirstEntries() {
 		return firstEntries;
-	}
-
-	public void setFirstEntries(List<CollectionRecord> firstEntries) {
-		this.firstEntries = firstEntries;
 	}
 
 	public String getThumbnailUrl() {
@@ -181,8 +198,8 @@ public class Collection {
 		this.thumbnail = thumbnail.getDbId();
 	}
 
-	public String getCreated() {
-		return DateFormat.getDateInstance().format(created);
+	public Date getCreated() {
+		return created;
 	}
 
 	public void setCreated(Date created) {
@@ -217,8 +234,12 @@ public class Collection {
 		this.itemCount++;
 	}
 
-	public void itemCountDiscr() {
+	public void itemCountDec() {
 		this.itemCount--;
+	}
+
+	public Map<ObjectId, Access> getRights() {
+		return rights;
 	}
 
 }
