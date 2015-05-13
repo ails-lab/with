@@ -294,24 +294,24 @@ public class CollectionController extends Controller {
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
-
-			
-			
-			if (!source.matches("DigitalNZ|DPLA|EuropeanaFashion,Europeana,NLA,YouTube")){
-				 source = "Europeana";
-			}
-
+					
 			String sourceClassName = "espace.core.sources." + source
 					+ "SpaceSource";
-			Class<?> sourceClass = Class.forName(sourceClassName);
-			ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
+			
+			try {
+				Class<?> sourceClass = Class.forName(sourceClassName);
+				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
+				ArrayList<RecordJSONMetadata> recordsData = s
+						.getRecordFromSource(sourceId);
 
-			ArrayList<RecordJSONMetadata> recordsData = s
-					.getRecordFromSource(sourceId);
-			for (RecordJSONMetadata data : recordsData) {
-				record.getContent()
-						.put(data.getFormat(), data.getJsonContent());
+				for (RecordJSONMetadata data : recordsData) {
+					record.getContent().put(data.getFormat(),
+							data.getJsonContent());
+				}
+			} catch (ClassNotFoundException e) {
+				// my class isn't there!
 			}
+
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
