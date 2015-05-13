@@ -16,7 +16,6 @@
 
 package controllers;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -346,22 +345,22 @@ public class CollectionController extends Controller {
 		List<CollectionRecord> records = collection.getFirstEntries();
 		CollectionRecord temp = null;
 		for (CollectionRecord r : records) {
-			if (recordId.equals(r.getDbId()))
+			if (recordId.equals(r.getDbId().toString())) {
 				temp = r;
-			break;
+				break;
+			}
 		}
 		if (temp != null)
 			records.remove(temp);
 		collection.setLastModified(new Date());
+		collection.itemCountDec();
+		DB.getCollectionDAO().makePermanent(collection);
 
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
-
-		collection.itemCountDec();
-		DB.getCollectionDAO().makePermanent(collection);
 
 		result.put("message",
 				"RecordLink succesfully removed from Collection with id: "
