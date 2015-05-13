@@ -15,13 +15,10 @@
 					 <div class="row profile">
 					 <div class="col-xs-6 col-sm-6 col-md-4 pull-left" data-bind="attr: {id: dbId}">
 					 <div class="content">
-				     <span class="glyphicon glyphicon-pencil pull-right" title="edit" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>			   					   	 			 	
-					 <div class="closesign" >
-					 	<button type="button" title="delete" class="close" aria-label="delete" 
-					 		data-bind="click: $parent.deleteMyCollection">
-					 		<span>&times;</span>
-					 	</button>
-					 </div>
+						<div class="btn-group pull-right" role="group">
+						<span class="glyphicon glyphicon-pencil" title="edit" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
+					 	<span class="glyphicon glyphicon-trash" title="edit" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
+					 	</div>
 					   <h3 data-bind="text: title()"></h3>
 					   <div data-bind="text: description()"></div>
 					   <!--  ko if: $data.hasOwnProperty("category") -->
@@ -29,6 +26,8 @@
 					   <!-- /ko -->
 					    <span class="pull-left"><b>Items: </b> <i data-bind="text: itemCount()+',   '"> </i> 
 					    	<b>Visibility: </b><i class="fa fa-eye-slash" title="secret"></i>
+					    	<!-- ko if: isPublic --> public <!-- /ko -->
+					   		<!-- ko ifnot: isPublic --> restricted <!-- /ko --> 
 					    </span>
 					   	<span class="pull-right"><b>Created:</b> <i data-bind="text: created()"></i> </span>					   		
 					 </div>
