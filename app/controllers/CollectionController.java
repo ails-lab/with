@@ -295,6 +295,12 @@ public class CollectionController extends Controller {
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
 
+			
+			
+			if (!source.matches("DigitalNZ|DPLA|EuropeanaFashion,Europeana,NLA,YouTube")){
+				 source = "Europeana";
+			}
+
 			String sourceClassName = "espace.core.sources." + source
 					+ "SpaceSource";
 			Class<?> sourceClass = Class.forName(sourceClassName);
