@@ -240,6 +240,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
+					if(self.route().request_=="mycollections"){
+						
+						ko.contextFor(mycollections).$data.addNew(data);
+						ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
+					}
 					callback(data.dbId);
 					
 				},
@@ -265,6 +270,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				  /* add item to collection with this id */
 				  
 				  self.addRecord(item);
+				  
 			  }
 			  else{
 				  /*otherwise save this collection and then add the item */
@@ -309,6 +315,24 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function(data) {
+					if(self.route().request_=="collectionview/"+collid){
+						 ko.contextFor(collcolumns).$data.citems.push(self.record());
+						  ko.contextFor(collcolumns).$data.citems.valueHasMutated();
+						  ko.contextFor(collcolumns).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
+						  ko.contextFor(collcolumns).$data.itemCount.valueHasMutated();  
+					  }
+					else if(self.route().request_=="mycollections"){
+						var obj=null;
+						var collfound=false;
+						(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
+							if (o.dbId() == collid) {
+							 o.reload(collid);
+							 collfound=true;
+							
+						}});
+						
+						
+					}
 					
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");

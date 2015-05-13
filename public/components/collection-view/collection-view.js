@@ -4,7 +4,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	 
 	 
 	 
-	 ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
 	    	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 			
@@ -15,7 +15,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 	    },
 	    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-	    	
+	    	console.log("update collection view fired");
 	    	var $element = $(element),
 	    	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
 	    	masonry = ko.utils.unwrapObservable(valueAccessor())
@@ -31,7 +31,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 5,isInitLayout: false});
 	        			
 	        	}
-	    		$('#columns > figure').each(function () {
+	    		$('#collcolumns > figure').each(function () {
 	 				
 	 	 		    $(this).animate({ opacity: 1 });
 	 			});
@@ -66,11 +66,11 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		    return observable;
 		};
 	 
-	 function Citem(data) {
+	 function Record(data) {
 			var self = this;
 			
 			
-			self.id = ko.observable(false);
+			self.recordId = ko.observable("");
 			self.title = ko.observable(false);
 			self.description=ko.observable(false);
 			self.thumb = ko.observable(false);
@@ -80,7 +80,6 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.creator=ko.observable("");
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
-			self.id=ko.observable("");
 			
 			
 			self.load = function(data) {
@@ -95,7 +94,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.source(data.source);
 				self.creator(data.creator);
 				self.provider(data.provider);
-				self.id(data.id);
+				self.recordId(data.id);
 			};
 
 			self.displayTitle = ko.computed(function() {
@@ -122,6 +121,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  self.itemCount=ko.observable(0);
 	  self.citems = ko.observableArray([]);
   
+	 
 	  self.description=ko.observable('');
 	  self.selectedRecord=ko.observable(false);
 		
@@ -132,8 +132,8 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  
 	  self.loadCollection=function(id){
 		 
-	  self.loading(true);
-	  self.citems([]);
+	      self.loading(true);
+	      self.citems([]);
 		  $.ajax({
 				"url": "/collection/"+self.id(),
 				"method": "get",
@@ -151,7 +151,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					 var result = data.firstEntries[i];
 					 
 					 
-					 var record = new Citem({
+					 var record = new Record({
 						id: result.dbId,
 						thumb: result.thumbnailUrl,
 						title: result.title,
@@ -216,7 +216,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					 var result = data[i];
 					 
 					 
-					 var record = new Citem({
+					 var record = new Record({
 						id: result.dbId,
 						thumb: result.thumbnailUrl,
 						title: result.title,
@@ -251,6 +251,12 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			
 		}
 	 
+	 
+	 self.addCollectionRecord= function (e){
+		 self.citems.push(e);
+			
+		}
+	 
 	 self.removeRecord= function (e){  
 		$("#myModal").find("h4").html("Delete item");
 		$("#myModal").find("div.modal-body").html("Are you sure you want to proceed?");
@@ -261,10 +267,10 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			$("#myModal").remove("div.modal-footer");
 			console.log(e);
 			 var jsondata=JSON.stringify({
-					recId: e.id()
+					recId: e.recordId()
 				});
 			$.ajax({
-                url: '/collection/'+self.id()+'/removeRecord?recId='+e.id(),
+                url: '/collection/'+self.id()+'/removeRecord?recId='+e.recordId(),
                 type: 'DELETE',
                 contentType: "application/json",
 				data:jsondata,

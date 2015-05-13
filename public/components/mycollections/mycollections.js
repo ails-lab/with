@@ -7,24 +7,61 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 	}
 
 	function MyCollection(collectionData) {
+		var self=this;
+		self.title = ko.observable("");
+		self.dbId = ko.observable(-1);
+		self.description = ko.observable("");
+		self.thumbnail = ko.observable("");
+		self.itemCount =ko.observable(0);
+		self.isPublic = ko.observable(false);
+		self.created ="";
+		self.lastModified = ko.observable("");
+		self.category = ko.observable("");
+		self.firstEntries = ko.observableArray([]);
+		self.url="";
+		
+	   self.load=function(collectionData){
 		if (collectionData.title != null)
-			this.title = ko.observable(collectionData.title);
+			self.title (collectionData.title);
 		if (collectionData.dbId != null)
-			this.dbId = collectionData.dbId;
+			self.dbId (collectionData.dbId);
 		if (collectionData.description != null)
-			this.description = ko.observable(collectionData.description);
+			self.description(collectionData.description);
 		if (collectionData.thumbnail != null)
-			this.thumbnail = ko.observable(collectionData.thumbnail);
-		this.itemCount = collectionData.itemCount;
-		this.isPublic = collectionData.isPublic;
-		this.created = collectionData.created;
-		this.lastModified = ko.observable(collectionData.lastModified);
+			self.thumbnail(collectionData.thumbnail);
+		self.itemCount(collectionData.itemCount);
+		self.isPublic(collectionData.isPublic);
+		self.created = collectionData.created;
+		self.lastModified(collectionData.lastModified);
 		if (collectionData.category != null)
-			this.category = ko.observable(collectionData.category);
-		this.firstEntries = ko.observableArray([]);
-		this.firstEntries(ko.utils.arrayMap(collectionData.firstEntries, function(entryData) {
+			self.category (collectionData.category);
+		
+		self.firstEntries(ko.utils.arrayMap(collectionData.firstEntries, function(entryData) {
 		    return new Entry(entryData);
 		}));
+		self.url = ko.computed(function () {
+		       return "index.html#collectionview/" +self.dbId();
+		   }, this);
+		
+	   }
+		
+		self.reload = function() {
+			$.ajax({
+				"url": "/collection/"+self.dbId(),
+				"method": "GET",
+				success: function(data){
+					self.title(data.title);
+					self.description(data.description);
+					self.itemCount(data.itemCount);
+					
+					self.firstEntries(ko.utils.arrayMap(data.firstEntries, function(entryData) {
+					    return new Entry(entryData);
+					}));
+					
+			      }
+			});}
+		
+		if(collectionData != undefined) self.load(collectionData);
 	}
 	
 	function MyCollectionsModel(params) {
@@ -49,8 +86,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		
 		//$("edit-collection").modal("open");
 		self.deleteMyCollection = function(collection) {
-			collectionId = collection.dbId;
-			collectionTitle = collection.title;
+			collectionId = collection.dbId();
+			collectionTitle = collection.title();
 			showDelCollPopup(collectionTitle, collectionId);
 		};
 		
@@ -100,6 +137,12 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			});
 		};
 		
+		
+		self.addNew=function(cdata){
+			var myc=new MyCollection(cdata);
+			self.myCollections.push(myc);
+			
+		}
 		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
