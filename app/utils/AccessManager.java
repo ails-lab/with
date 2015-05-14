@@ -16,23 +16,43 @@
 
 package utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import model.User;
 import model.User.Access;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import db.DB;
 
 public class AccessManager {
 	public static final ALogger log = Logger.of( AccessManager.class);
 
-	public static boolean checkAccess(Map<ObjectId, Access> rights, List<ObjectId> ids) {
-		for(ObjectId id: ids) {
-			if(rights.containsKey(id)) {
+	public static enum Action {
+		READ, EDIT, DELETE
+	};
+
+	public static final List<ObjectId> accessIds = new ArrayList<ObjectId>();
+
+	public static void initialise(ObjectId userId) {
+		accessIds.clear();
+		addIds(userId);
+	}
+
+	public static void addIds(ObjectId id) {
+		accessIds.add(id);
+		User user = DB.getUserDAO().get(id);
+		accessIds.addAll(user.getUserGroupsIds());
+	}
+
+	public static boolean checkAccess(Map<ObjectId, Access> rights, Action action) {
+		for(ObjectId id: accessIds) {
+			if(rights.containsKey(id) && (rights.get(id).ordinal() > action.ordinal()) ) {
 				return true;
 			}
 		}

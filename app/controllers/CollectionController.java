@@ -38,6 +38,8 @@ import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
+import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -53,10 +55,10 @@ public class CollectionController extends Controller {
 	/**
 	 * Get collection metadata (title, descr, thumbnail)
 	 */
-	public static Result getCollection(String id) {
+	public static Result getCollection(String collectionId) {
 		ObjectNode result = Json.newObject();
 
-		ObjectId colId = new ObjectId(id);
+		ObjectId colId = new ObjectId(collectionId);
 		Collection c = null;
 		User collectionOwner = null;
 		try {
@@ -68,6 +70,12 @@ public class CollectionController extends Controller {
 			result.put("message",
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
+		}
+
+		AccessManager.initialise(new ObjectId(session().get("user")));
+		if( !AccessManager.checkAccess(c.getRights(), Action.READ) ) {
+			result.put("message", "Sorry! You do not have access to this collection.");
+			return badRequest(result);
 		}
 
 		//check itemCount
@@ -118,6 +126,14 @@ public class CollectionController extends Controller {
 		//new collection changes
 		ObjectId oldId =  new ObjectId(id);
 		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
+
+		AccessManager.initialise(new ObjectId(session().get("user")));
+		if(!AccessManager.checkAccess(oldVersion.getRights(), Action.EDIT) ) {
+			result.put("message", "Sorry! You do not have access to this collection.");
+			return badRequest(result);
+		}
+
+
 		Collection newVersion = Json.fromJson(json, Collection.class);
 		newVersion.getFirstEntries().addAll(oldVersion.getFirstEntries());
 		newVersion.setDbId(oldId);
@@ -343,13 +359,17 @@ public class CollectionController extends Controller {
 		List<CollectionRecord> records = collection.getFirstEntries();
 		CollectionRecord temp = null;
 		for (CollectionRecord r : records) {
-			if (recordId.equals(r.getDbId()))
+			if (recordId.equals(r.getDbId().toString())) {
 				temp = r;
-			break;
+				break;
+			}
 		}
 		if (temp != null)
 			records.remove(temp);
 		collection.setLastModified(new Date());
+
+		collection.itemCountDec();
+		DB.getCollectionDAO().makePermanent(collection);
 
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
@@ -357,8 +377,7 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 
-		collection.itemCountDec();
-		DB.getCollectionDAO().makePermanent(collection);
+
 
 		result.put("message",
 				"RecordLink succesfully removed from Collection with id: "

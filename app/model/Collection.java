@@ -122,8 +122,12 @@ public class Collection {
 	public boolean isPublic() {
 		return isPublic;
 	}
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
+	}
+
+	public boolean getIsPublic() {
+		return this.isPublic;
 	}
 
 	public User retrieveOwner() {
@@ -136,7 +140,7 @@ public class Collection {
 
 	@JsonProperty
 	public void setOwnerId(ObjectId ownerId) {
-		if( ownerId.equals(this.ownerId) ) {
+		if( this.ownerId != null ) {
 			this.ownerId = ownerId;
 			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
 			ownerRights.put(this.ownerId, Access.OWN);
@@ -152,7 +156,7 @@ public class Collection {
 
 	public void setOwnerId(User owner) {
 		//set owner to collection
-		if( !owner.getDbId().equals(this.ownerId) ) {
+		if( this.ownerId != null ) {
 			this.ownerId = owner.getDbId();
 			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
 			ownerRights.put(this.ownerId, Access.OWN);

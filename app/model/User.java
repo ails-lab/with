@@ -292,4 +292,8 @@ public class User {
 		this.userGroupsIds.addAll(groups);
 	}
 
+	public Set<ObjectId> getUserGroupsIds() {
+		return userGroupsIds;
+	}
+
 }

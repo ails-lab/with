@@ -16,9 +16,7 @@
 
 package controllers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import model.Collection;
@@ -32,6 +30,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -43,7 +42,6 @@ public class RightsController extends Controller {
 
 	public static Result setRights(String colId, String right, String receiver) {
 		ObjectNode result = Json.newObject();
-		ObjectId curUserId = new ObjectId(session().get("user"));
 
 		Collection collection = null;
 		try {
@@ -55,9 +53,8 @@ public class RightsController extends Controller {
 			return internalServerError(result);
 		}
 
-		List<ObjectId> accessIds = new ArrayList<ObjectId>();
-		accessIds.add(curUserId);
-		if(!AccessManager.checkAccess(collection.getRights(), accessIds)) {
+		AccessManager.initialise(new ObjectId(session().get("user")));
+		if( !AccessManager.checkAccess(collection.getRights(), Action.DELETE) ) {
 			result.put("message", "Sorry! You do not own this collection so you cannot set rights. "
 									+ "Please contact the owner of this collection");
 			return badRequest(result);
