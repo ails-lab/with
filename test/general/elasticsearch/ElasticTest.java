@@ -16,12 +16,12 @@
 
 package general.elasticsearch;
 
-import model.CollectionRecord;
+import model.Collection;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import utils.ElasticSearcher;
+import utils.ElasticIndexer;
 import db.DB;
 
 public class ElasticTest {
@@ -34,7 +34,7 @@ public class ElasticTest {
 						 + " Type name: " + resp.getType()
 						 + " Document ID: " + resp.getId());
 		*/
-		/*for(int i=0;i<=2400;i++) {
+		/*for(int i=0;i<=2550;i++) {
 			Query<CollectionRecord> q = DB.getCollectionRecordDAO().createQuery().limit(50).offset(i);
 			List<CollectionRecord> records = DB.getCollectionRecordDAO().find(q).asList();
 			for(CollectionRecord rec: records) {
@@ -42,10 +42,15 @@ public class ElasticTest {
 			}
 		}*/
 
-		CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId("5534fa5fe4b0144a2e409bf1"));
+
+		Collection c = DB.getCollectionDAO().get(new ObjectId("5551ede5d4c67d37242c5971"));
+		ElasticIndexer indexer = new ElasticIndexer( c );
+		indexer.index();
+
+		/*CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId("5534fa5fe4b0144a2e409bf1"));
 		ElasticSearcher indexer = new ElasticSearcher( record );
 		indexer.indexSingleRecord();
-
+*/
 	}
 
 
