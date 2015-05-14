@@ -30,6 +30,7 @@ import play.api.mvc.Controller
 import db.DB
 import play.api.Logger
 import org.bson.types.ObjectId
+import scala.collection.JavaConversions._
 
 
 
@@ -42,6 +43,9 @@ import org.bson.types.ObjectId
 class AccessFilter extends Filter {
   val log = Logger(this.getClass())
 
+  /**
+   * Add a new session to the requestHeader, make a new one and return it.
+   */
   def withSession( rh:RequestHeader, sessionData: Map[String,String]): RequestHeader = {
           // make a new session cookie
           val newCookie= Seq( Session.encode(sessionData))
@@ -55,14 +59,20 @@ class AccessFilter extends Filter {
   
   
   def effektivUserIds(userId: Option[String], proxyId:Option[String] ): Seq[String] = {
-    // missing the optional retrieval of all the usergroups on userId
-    val userGroupIds = userId.map { id =>
-      id
-      val user = DB.getUserDAO.getById(new ObjectId( id ))
-      
-      // but really DB.getUserDAO().
+    val result = scala.collection.mutable.ArrayBuffer.empty[String]
+    for( id <- userId ) {
+        result.add(id)
+        val user = DB.getUserDAO.get(new ObjectId( id ))
+        val groupIds = user.getUserGroupsIds().map{ x => x.toString() }      
+        result.addAll( groupIds )
     }
-   Seq( userId, proxyId).flatten
+    for( proxy <- proxyId ) result.add( proxy )
+    for( id <- userId ) {
+        val user = DB.getUserDAO.get(new ObjectId( id ))
+        val groupIds = user.getUserGroupsIds().map{ x => x.toString() }      
+        result.addAll( groupIds )
+    }
+    result.toSeq
   }
   
   def apiKeyCheck(next: (RequestHeader) => Future[Result], rh:RequestHeader):Future[Result] = {
