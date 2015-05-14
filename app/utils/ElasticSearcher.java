@@ -29,21 +29,17 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
-import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder.Type;
-import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-
-
 
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
@@ -219,8 +215,8 @@ public class ElasticSearcher {
 		if(options.filters.size() > 0) {
 			for(String key: options.filters.keySet()) {
 				for(String value: options.filters.get(key)) {
-					if(options.filterType == FILTER_OR) ((OrFilterBuilder) filterBuilder).add(this.filter(key, value));
-					else ((AndFilterBuilder) filterBuilder).add(this.filter(key, value));
+					//if(options.filterType == FILTER_OR) ((OrFilterBuilder) filterBuilder).add(this.filter(key, value));
+					//else ((AndFilterBuilder) filterBuilder).add(this.filter(key, value));
 				}
 			}
 
@@ -250,8 +246,8 @@ public class ElasticSearcher {
 			e.printStackTrace();
 			return this.filter(key, null, null, value);
 		}
-	}
-*/
+	}*/
+
 	private FilterBuilder filter(String key, String fieldName, String nestedField, String value) {
 		FilterBuilder filter = FilterBuilders.termFilter(fieldName, value);
 		FilterBuilder nested = FilterBuilders.nestedFilter(nestedField, filter);
