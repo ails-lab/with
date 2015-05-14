@@ -27,6 +27,7 @@ libraryDependencies ++= Seq(
  "org.elasticsearch" % "elasticsearch" % "1.5.1",
  // validate the token from the login on web browser
  // "com.google.api-client" % "google-api-client" % "1.19.1"
- "org.json" % "org.json" % "chargebee-1.0"
+ "org.json" % "org.json" % "chargebee-1.0",
+ "com.typesafe.play" %% "play-mailer" % "2.4.0"
 )
 
