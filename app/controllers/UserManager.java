@@ -45,6 +45,7 @@ import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -585,6 +586,35 @@ public class UserManager extends Controller {
 
 	}
 
+	/**
+	 * This is just a skeleton until design issues are solved
+	 * 
+	 * @param id
+	 * @return
+	 */
+	
+	public static Result deleteUser(String id){
+		
+		ObjectNode result = Json.newObject();
+		//ObjectNode error = (ObjectNode) Json.newObject();
+
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
+			if (user != null) {
+				return ok(result);
+			} else {
+				return badRequest(Json
+						.parse("{\"error\":\"User does not exist\"}"));
+				
+			}
+		} catch (IllegalArgumentException e) {
+			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
+		}
+	}
+	
+	
+	
+	
 	public static Result addUserToGroup(String uid, String gid) {
 		ObjectNode result = Json.newObject();
 
@@ -615,4 +645,85 @@ public class UserManager extends Controller {
 		return internalServerError(result);
 
 	}
+	
+	/**
+	 * Incomplete, just checks email/username validity
+	 * 
+	 * @return OK status
+	 */
+	
+	
+	public static Result resetPassword(String emailOrUserName){
+		
+		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+		User u = null;
+
+		if (emailOrUserName != null) {
+			u = DB.getUserDAO().getByEmail(emailOrUserName);	//can a user register using an email as username?
+			if (u == null) {
+				u = DB.getUserDAO().getByUsername(emailOrUserName);
+				if (u == null) {
+					error.put("email", "Invalid Email Address or Username");	
+					result.put("error", error);
+					return badRequest(result);
+				}
+			}
+		} else {
+			error.put("email", "Need Email or Username");
+			result.put("error", error);
+			return badRequest(result);
+		}
+		
+		if (u.getFacebookId() != null) {
+			if (u.getGoogleId() != null) {
+				error.put("email", "User has registered with Facebook or Google account");
+				result.put("error", error);
+				return badRequest(result); //maybe change type?
+			}	
+		}
+		
+				
+		ObjectNode token = Json.newObject();
+		
+		String userId = u.getDbId().toString();
+		token.put("user", userId);
+		token.put("timestamp", new Date().getTime());
+		// just to make them all different
+		token.put("random", new Random().nextInt());
+		String enc = Crypto.encryptAES(token.toString());
+
+		
+		
+		//more complex email are schemes available - want to discuss first
+		SimpleEmail email = new SimpleEmail();
+		email.setFrom("admin@with.com");  //what is the correct one?
+		email.addTo(u.getEmail());
+		email.setSubject("WITH password reset");
+		//This will retrieve line separator dependent on OS.
+		String newLine = System.getProperty("line.separator");
+		String resetURL = play.Play.application().configuration().getString("application.baseUrl"); //expand accordingly
+		
+		
+		
+		email.setMsg("Dear user"+ u.getFirstName() +" " + u.getLastName() + "," + newLine 
+				+ "We received a request for a password reset. Please click on the "
+				+ "following link to confirm this request:" + newLine 
+				+ resetURL + "/" + enc
+				//token URL here
+				+ newLine + "Sincerely yours," + newLine + "The WITH team.");
+		
+		Mail.send(email); 
+		
+		result.put("message", "Email succesfully sent to user");
+
+		//need random password function in DB?
+		return ok(result);
+		
+	}
+	
+	
+	
+	
+	
 }

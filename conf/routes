@@ -62,4 +62,6 @@ GET 	/user/loginWithToken		controllers.UserManager.loginWithToken( token: java.l
 GET		/user/:id/photo				controllers.UserManager.getUserPhoto(id)
 GET		/user/:id					controllers.UserManager.getUser(id)
 PUT		/user/:id					controllers.UserManager.editUser(id)
+DELETE	/user/:id					controllers.UserManager.deleteUser(id) //incomplete
+GET		/user/resetPassword			controllers.UserManager.resetPassword(email or username) //incomplete
 GET		/user/addToGroup/:id		controllers.UserManager.addUserToGroup(id, gid: String)
