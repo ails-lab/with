@@ -323,12 +323,12 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
-						(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
+						/*(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
 							if (o.dbId() == collid) {
 							 o.reload(collid);
 							
-						}});
-						
+						}});*/
+						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 						
 					}
 					
@@ -367,8 +367,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 	  }
-
-
 
   }
 

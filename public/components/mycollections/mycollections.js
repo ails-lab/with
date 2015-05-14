@@ -9,18 +9,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		return entry;
 	}
 
-	self.reload = function(dbId) {
-		$.ajax({
-			"url": "/collection/"+dbId,
-			"method": "GET",
-			success: function(data){
-				//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
-				//self.myCollections()[index](self.load());
-				//alert(JSON.stringify(self.editableCollection()));
-				ko.mapping.fromJS(data, self.myCollections);
-			}
-		});				
-	};
+	
 	
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
@@ -109,9 +98,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		
 		
 		self.addNew=function(cdata){
-			var myc=new MyCollection(cdata);
-			self.myCollections.push(myc);
-			
+			self.myCollections.mappedCreate(cdata);
 		}
 		
 		self.openEditCollectionPopup = function(collection, event) {
@@ -159,6 +146,39 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			 self.isPublic = $("#publiccoll .active").data("value");
 
 		}
+		
+		self.reloadRecord = function(dbId, recordDataString) {
+			/*$.ajax({
+				"url": "/collection/"+dbId,
+				"method": "GET",
+				success: function(data){
+					//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
+					//self.myCollections()[index](self.load());
+					//alert(JSON.stringify(self.editableCollection()));
+					ko.mapping.fromJS(data, self.myCollections);
+					var collIndex = arrayFirstIndexOf(viewModel.items(), function(item) {
+						   return item.dbId === dbId;    
+					}));
+					self.myCollections()[collIndex].remove((data);
+				}
+			});*/
+			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
+				   return item.dbId() === dbId;    
+			});
+			var recordData = JSON.parse(recordDataString);
+			var recordObservable = ko.mapping.fromJS(recordData);
+			ko.mapping.fromJS(recordData, recordObservable);
+			self.myCollections()[collIndex].firstEntries.push(recordObservable);
+		};
+		
+		  arrayFirstIndexOf=function(array, predicate, predicateOwner) {
+			    for (var i = 0, j = array.length; i < j; i++) {
+			        if (predicate.call(predicateOwner, array[i])) {
+			            return i;
+			        }
+			    }
+			    return -1;
+			}
 	}
 	
 	return {viewModel: MyCollectionsModel, template: template};
