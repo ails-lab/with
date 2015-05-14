@@ -291,7 +291,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.addRecord=function(collid){
-		  
 		 
 		  var jsondata=JSON.stringify({
 				source: self.record().source(),

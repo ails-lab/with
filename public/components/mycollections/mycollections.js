@@ -107,7 +107,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		}
 		
 		self.closeEditCollectionPopup = function() {
-			alert("?");
 			app.closePopup();
 		}
 		
@@ -168,8 +167,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 		
 		self.reloadCollection = function(data) {
-			var newCollection = ko.observable();
-			ko.mapping.fromJS(data, {}, newCollection);
+			var newCollection = ko.mapping.fromJS(data);
+			ko.mapping.fromJS(data, newCollection);
 			self.myCollections.push(newCollection);
 		}
 		
