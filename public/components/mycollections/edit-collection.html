@@ -5,8 +5,10 @@
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			<h4>Edit Collection</h4>
 		</div>
+
+		<i data-bind="text: $parents[0].titleToEdit+'?'"></i>
 		<div class="modal-body row">
-			<form data-bind="submit: editCollection">
+			<form data-bind="submit: function() { $parent.editCollection}">
 				<div class="col-md-12">				  
 				  <div class="form-group">
 				    <div class="spec">
@@ -14,7 +16,7 @@
 				      </div>
 				       <div class="value">
 				      <input type="text" 
-				      data-bind="attr: {value: titleToEdit}" class="form-control input-sm xxs">
+				      data-bind="attr: {value: $parent.titleToEdit}" class="form-control input-sm xxs">
 				        </div>
 				      </div>
 				    </div>
@@ -23,8 +25,8 @@
 				      <div class="itemlabel">Is it public?
 				      </div>
 				     <div class="btn-group btn-toggle" id="publiccoll"> 
-					    <button class="btn btn-xs btn-default xxs" data-bind="event: {click:privateToggle}" data-value="true">Yes</button>
-					    <button class="btn btn-xs btn-primary active xxs" data-bind="event: {click:privateToggle}" data-value="false">No</button>
+					    <button class="btn btn-xs btn-default xxs" data-bind="event: {click:function() { $parent.privateToggle}}" data-value="true">Yes</button>
+					    <button class="btn btn-xs btn-primary active xxs" data-bind="event: {click: function() { $parent.privateToggle}}" data-value="false">No</button>
 					  </div>
 				    </div>
 				    </div>
@@ -33,7 +35,7 @@
 					      <div class="itemlabel">Description
 					      </div>
 					      <div class="value">
-					      <textarea data-bind="attr: {value: descriptionToEdit}" id="description" name="description" class="form-control input-sm xxs" ></textarea>
+					      <textarea data-bind="attr: {value: $parent.descriptionToEdit}" id="description" name="description" class="form-control input-sm xxs" ></textarea>
 					      </div>
 					    </div>
 					</div>
@@ -41,7 +43,7 @@
 			</form>
 		</div>
 		<div class="modal-footer">
-			<button type="button" class="btn btn-default" data-bind="click: closeEditCollectionPopup">Cancel</button>
+			<button type="button" class="btn btn-default" data-bind="click: function() { $parent.closeEditCollectionPopup}">Cancel</button>
 			<button type="submit" class="btn btn-primary">Apply</button>
 		</div>
 	</div>
