@@ -97,10 +97,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 		
 		
-		self.addNew=function(cdata){
-			self.myCollections.mappedCreate(cdata);
-		}
-		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 			var index = context.$index();
@@ -171,14 +167,20 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			self.myCollections()[collIndex].firstEntries.push(recordObservable);
 		};
 		
-		  arrayFirstIndexOf=function(array, predicate, predicateOwner) {
-			    for (var i = 0, j = array.length; i < j; i++) {
-			        if (predicate.call(predicateOwner, array[i])) {
-			            return i;
-			        }
-			    }
-			    return -1;
-			}
+		self.reloadCollection = function(data) {
+			var newCollection = ko.observable();
+			ko.mapping.fromJS(data, {}, newCollection);
+			self.myCollections.push(newCollection);
+		}
+		
+	  arrayFirstIndexOf=function(array, predicate, predicateOwner) {
+		    for (var i = 0, j = array.length; i < j; i++) {
+		        if (predicate.call(predicateOwner, array[i])) {
+		            return i;
+		        }
+		    }
+		    return -1;
+		}
 	}
 	
 	return {viewModel: MyCollectionsModel, template: template};
