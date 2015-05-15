@@ -19,6 +19,7 @@ package espace.core.sources;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.apache.jena.atlas.logging.Log;
 import org.w3c.dom.Document;
 
 import utils.Serializer;
@@ -103,14 +104,13 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector
-					.getURLContent("http://www.europeanafashion.eu/record/"
+					.getURLContent("http://www.europeanafashion.eu/api/record/"
 							+ recordId );
 			JsonNode record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
 					.toString()));
 			return jsonMetadata;
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
 			return jsonMetadata;
 		}
 	}

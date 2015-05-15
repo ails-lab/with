@@ -1,9 +1,12 @@
-define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], function($, ko, router) {
-
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], 
+		function($, ko, router, kom) {
+	
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
 	ko.amdTemplateEngine.defaultSuffix                = '.tpl.html';
 	ko.amdTemplateEngine.defaultRequireTextPluginName = 'text';
+
+	ko.mapping = kom;
 
 	// Components can be packaged as AMD modules, such as the following:
 	ko.components.register('nav-bar', { require: 'components/nav-bar/nav-bar' });
@@ -15,17 +18,29 @@ define(['jquery','knockout', './router', 'bootstrap', 'knockout-projections', 'k
 	ko.components.register('collection', { require: 'components/collection/collection' });
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
-	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
+	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
+	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
 	});
+	ko.components.register('edit-profile', {
+		viewModel: { require: 'components/profile-page/profile' },
+		template: { require: 'text!components/profile-page/edit-profile.html' }
+	});
+	ko.components.register('edit-collection', {
+		viewModel: { instance: 'components/mycollections/mycollections' },
+		template: { require: 'text!components/mycollections/edit-collection.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
+	ko.components.register('empty', { template: '&nbsp;' });
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
+	popupName = ko.observable('empty');
+
 
 	// Start the application
-	ko.applyBindings({ route: router.currentRoute });
+	ko.applyBindings({ route: router.currentRoute, popupName: popupName });
 });

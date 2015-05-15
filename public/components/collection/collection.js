@@ -134,7 +134,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
   function CollectionViewModel(params) {
 	  var self = this;
-
 	  self.route = params.route;
 	  self.templateName=ko.observable('collection_new');
 	  self.modal=ko.observable("3");
@@ -150,19 +149,17 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		});
 
 	  
-
 	  findUserCollections=function(){
 		  self.collectionlist([]);
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if(localStorage.getItem('UserCollections') !== null) 
+		  else if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 		  var jsonData = {};
 		 
 		    collections.forEach(function(collection) 
 		    {
-		        
 		        jsonData={"id":collection.dbId,"name":collection.title}
 		        self.collectionlist.push(jsonData);	
 		        	
@@ -173,7 +170,13 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    
 	  }
 	  
-	 
+	  createNewCollection = function() {
+		  findUserCollections();
+		  self.modal("2");
+		  self.templateName('collection_new');
+		  self.open();
+	  }
+	  
 	  collectionShow = function(record) {
 	    	self.record(record);
 	    	findUserCollections();
@@ -183,17 +186,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    }
 
 	  self.open=function(){
-		  $('#modal-1').css('overflow-y', 'hidden');
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
-
 	  }
 
 	  self.close= function(){
 		  self.reset();
-		  $('#modal-1').css('overflow-y', 'auto');
-	    	$('#modal-'+self.modal()).removeClass('md-show');
-	    	$('#modal-'+self.modal()).css('display', 'none');
+		  $('#modal-'+self.modal()).removeClass('md-show');
+	      $('#modal-'+self.modal()).css('display', 'none');
 
 	    }
 
@@ -238,6 +238,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
+					if(self.route().request_=="mycollections"){
+						
+						ko.contextFor(mycollections).$data.reloadCollection(data);
+						ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
+					}
 					callback(data.dbId);
 					
 				},
@@ -245,14 +250,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 	  }
 
 	  
 	  self.addToCollections=function(){
-		  console.log(self.selected_items2());
+		  //console.log(self.selected_items2());
 		  
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 		  self.selected_items2().forEach(function (item) {
@@ -263,6 +268,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				  /* add item to collection with this id */
 				  
 				  self.addRecord(item);
+				  
 			  }
 			  else{
 				  /*otherwise save this collection and then add the item */
@@ -283,11 +289,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.addRecord=function(collid){
-		  
 		 
 		  var jsondata=JSON.stringify({
-				source: self.record().apisource(),
-				sourceId:self.record().recordId,
+				source: self.record().source(),
+				sourceId:self.record().recordId(),
 				title: self.record().title(),
 				
 				description:self.record().description(),
@@ -298,15 +303,32 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				collectionId: collid
 				
 			});
-		 
+		  console.log("record to add");
+		  console.log(jsondata);
+		  self.close();
 		  $.ajax({
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function(data) {
-					console.log(data);
-					self.close();
+					if(self.route().request_=="collectionview/"+collid){
+						 ko.contextFor(collcolumns).$data.citems.push(self.record());
+						  ko.contextFor(collcolumns).$data.citems.valueHasMutated();
+						  ko.contextFor(collcolumns).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
+						  ko.contextFor(collcolumns).$data.itemCount.valueHasMutated();  
+					  }
+					else if(self.route().request_=="mycollections"){
+						var obj=null;
+						/*(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
+							if (o.dbId() == collid) {
+							 o.reload(collid);
+							
+						}});*/
+						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
+						
+					}
+					
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").modal('show');
@@ -315,7 +337,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-			       
+					$("#myModal").modal('show');
 					 
 			     }});
 		  
@@ -342,8 +364,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 	  }
-
-
 
   }
 

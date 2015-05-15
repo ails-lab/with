@@ -60,7 +60,6 @@ public class Collection {
 
 	@NotNull
 	@NotBlank
-	//@Indexed(name="indexed_title", unique=true, dropDups=true)
 	private String title;
 	private String description;
 
@@ -119,10 +118,10 @@ public class Collection {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 
@@ -136,33 +135,33 @@ public class Collection {
 
 	@JsonProperty
 	public void setOwnerId(ObjectId ownerId) {
-		if( ownerId.equals(this.ownerId) ) {
+		if( this.ownerId == null ) {
 			this.ownerId = ownerId;
 			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
 			ownerRights.put(this.ownerId, Access.OWN);
 			AccessManager.addRight(rights, ownerRights);
 
 			//create a new collection metadata for owner
-			User owner = DB.getUserDAO().get(ownerId);
+			/*User owner = DB.getUserDAO().get(ownerId);
 			owner.getCollectionMetadata().add(collectMetadata());
 			//save the new owner
-			DB.getUserDAO().makePermanent(owner);
+			DB.getUserDAO().makePermanent(owner);*/
 		}
 	}
 
 	public void setOwnerId(User owner) {
 		//set owner to collection
-		if( !owner.getDbId().equals(this.ownerId) ) {
+		if( this.ownerId == null ) {
 			this.ownerId = owner.getDbId();
 			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
 			ownerRights.put(this.ownerId, Access.OWN);
 			AccessManager.addRight(rights, ownerRights);
 
 			//create a new collection metadata for owner
-			owner.getCollectionMetadata().add(collectMetadata());
+			/*owner.getCollectionMetadata().add(collectMetadata());
 
 			//save the new owner
-			DB.getUserDAO().makePermanent(owner);
+			DB.getUserDAO().makePermanent(owner);*/
 		}
 	}
 

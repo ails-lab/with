@@ -6,6 +6,7 @@
 GET     /                           controllers.Application.index()
 
 POST     /api/search                controllers.SearchController.search()
+POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
 GET      /api/testsearch            controllers.SearchController.testsearch()
 POST     /api/testsearch            controllers.SearchController.posttestsearch()
 
@@ -22,6 +23,8 @@ POST     /collection/listByUser			        controllers.CollectionController.listF
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
 DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, pos: Integer ?=0, version: Integer ?=-1)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
+POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
+
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)
@@ -56,5 +59,7 @@ GET		/user/listNames				controllers.UserManager.listNames(prefix:java.lang.Strin
 GET		/user/emailAvailable		controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token					controllers.UserManager.getToken()
 GET 	/user/loginWithToken		controllers.UserManager.loginWithToken( token: java.lang.String )
+GET		/user/:id/photo				controllers.UserManager.getUserPhoto(id)
 GET		/user/:id					controllers.UserManager.getUser(id)
+PUT		/user/:id					controllers.UserManager.editUser(id)
 GET		/user/addToGroup/:id		controllers.UserManager.addUserToGroup(id, gid: String)

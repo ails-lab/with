@@ -84,7 +84,8 @@ public class CollectionDAO extends DAO<Collection> {
 
 		User owner = c.retrieveOwner();
 		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
-			if(colMeta.getCollectionId().equals(id)) {
+			if((colMeta.getCollectionId() != null) &&
+			colMeta.getCollectionId().equals(id)) {
 				owner.getCollectionMetadata().remove(colMeta);
 				DB.getUserDAO().makePermanent(owner);
 				break;

@@ -125,6 +125,9 @@ public class CollectionRecord {
 		} else if ((source.equalsIgnoreCase("DNZ"))
 				|| (source.equalsIgnoreCase("DigitalNZ"))) {
 			this.source = "DigitalNZ";
+		} else if ((source.equalsIgnoreCase("EFashion"))
+				|| (source.equalsIgnoreCase("EuropeanaFashion"))) {
+			this.source = "EuropeanaFashion";
 		} else {
 			this.source = source;
 		}
@@ -151,7 +154,6 @@ public class CollectionRecord {
 
 	public String getThumbnailUrl() {
 		return this.thumbnailUrl;
-
 
 	}
 

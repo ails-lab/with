@@ -1,8 +1,10 @@
-define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloaded'], function(bridget,ko, template, masonry,imagesLoaded) {
+define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloaded','app'], function(bridget,ko, template, masonry,imagesLoaded,app) {
 
 	 $.bridget( 'masonry', masonry );	
 	 
-	 ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+	 
+	 
+	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
 	    	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 			
@@ -13,7 +15,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 	    },
 	    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-	    	
+	    	console.log("update collection view fired");
 	    	var $element = $(element),
 	    	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
 	    	masonry = ko.utils.unwrapObservable(valueAccessor())
@@ -26,17 +28,18 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	    	imagesLoaded( $element, function() {
 	    		if (!($element.data('masonry'))){
 	        		
-	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
+	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 5,isInitLayout: false,isFitWidth: true});
 	        			
 	        	}
-	    		$('#columns > figure').each(function () {
+	    		$element.masonry( 'reloadItems' );
+	 			$element.masonry( 'layout' );
+	 			
+	    		
+	    		$('#collcolumns > figure').each(function () {
 	 				
 	 	 		    $(this).animate({ opacity: 1 });
 	 			});
 	    		
-	    		$element.masonry( 'reloadItems' );
-	 			$element.masonry( 'layout' );
-	 			
 	    		
 	 			
 	 		 });
@@ -44,9 +47,31 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	      }
 	    };
 	 
-	 function Citem(data) {
+	 
+	 ko.showMoreLess = function(initialText) {
+		 
+		  
+		    var observable = ko.observable(initialText);
+		    observable.limit = ko.observable(100);
+		    observable.showAll = ko.observable(false);
+		    observable.showButton = ko.computed(function() {
+		        return observable().length > observable.limit();
+		    });
+		    observable.toggleShowAll = function() {
+		        observable.showAll(!observable.showAll());
+		    };
+		    observable.display = ko.computed(function() {
+		        if (observable.showAll() || !observable.showButton()) { return observable(); }
+		        return observable().slice(0,observable.limit());
+		    }, observable);
+		    return observable;
+		};
+	 
+	 function Record(data) {
 			var self = this;
-			self.id = ko.observable(false);
+			
+			
+			self.recordId = ko.observable("");
 			self.title = ko.observable(false);
 			self.description=ko.observable(false);
 			self.thumb = ko.observable(false);
@@ -56,13 +81,8 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.creator=ko.observable("");
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
-			self.id=ko.observable("");
-			self.scrolled= function(data, event) {
-		        var elem = event.target;
-		        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight - 200)) {
-		        	self.loadNext();
-		        }
-		    },
+			
+			
 			self.load = function(data) {
 				if(data.title==undefined){
 					self.title("No title");
@@ -75,7 +95,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.source(data.source);
 				self.creator(data.creator);
 				self.provider(data.provider);
-				self.id(data.id);
+				self.recordId(data.id);
 			};
 
 			self.displayTitle = ko.computed(function() {
@@ -92,32 +112,29 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
    function CViewModel(params) {
 	  var self = this;
 
+	  
 	  self.route = params.route;
 	  
 	  self.collname=ko.observable('');
 	  self.id=ko.observable(params.id);
-	  
+	  self.owner=ko.observable('');
+	  self.ownerId=ko.observable(-1);
+	  self.itemCount=ko.observable(0);
 	  self.citems = ko.observableArray([]);
   
-	  
+	 
+	  self.description=ko.observable('');
 	  self.selectedRecord=ko.observable(false);
 		
 	  self.loading = ko.observable(false);
 	  
-	  
-		
-		self.previous = ko.observable(-1);
-		self.page = ko.observable(1);
-		self.pageSize=ko.observable(20);
-		self.next = ko.observable(-1);
-	    
+	  self.next = ko.observable(-1);
+	  self.desc=ko.showMoreLess('');
 	  
 	  self.loadCollection=function(id){
-		  self.page(1);
-		  self.next(1);
-		  self.previous(0);
-		  self.loading(true);
-		  self.citems([]);
+		 
+	      self.loading(true);
+	      self.citems([]);
 		  $.ajax({
 				"url": "/collection/"+self.id(),
 				"method": "get",
@@ -126,12 +143,16 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					console.log(data);
 					self.loading(false);
 					self.collname(data.title);
-						var items = [];
+					self.desc(data.description);
+					self.owner(data.owner);
+					self.ownerId(data.ownerId);
+					self.itemCount(data.itemCount);
+					var items = [];
 					for(var i in data.firstEntries){
 					 var result = data.firstEntries[i];
 					 
 					 
-					 var record = new Citem({
+					 var record = new Record({
 						id: result.dbId,
 						thumb: result.thumbnailUrl,
 						title: result.title,
@@ -142,7 +163,72 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 					
+					if(data.firstEntries.length==20){$(window).bind('scroll', scrollHandler);}
 					
+					self.citems.push.apply(self.citems, items);
+					
+				},
+				
+				 error: function (xhr, textStatus, errorThrown) {
+					self.loading(false);
+					
+					$("#myModal").find("h4").html("An error occured");
+					$("#myModal").find("div.modal-body").html(errorThrown);
+			       
+					$("#myModal").modal('show');
+			     }});
+	  }
+	  
+	  self.loadCollection();
+	  self.isOwner =ko.pureComputed(function() {
+		  if( app.currentUser._id()==self.ownerId()){
+				return true;
+			}
+			else{
+				return false;
+			}
+		});
+
+	  
+	
+	  self.loadNext = function() {
+			if(self.citems().length>=20){	
+				
+				self.moreItems();}
+			};
+
+	 		
+			
+			
+	 self.moreItems=function(){
+		
+		 self.loading(true);
+		 var offset=self.citems().length+1;
+		 $.ajax({
+				"url": "/collection/"+self.id()+"/list?count=20&start="+offset,
+				"method": "get",
+				"contentType": "application/json",
+				"success": function(data) {
+					console.log(data);
+					self.loading(false);
+					
+					var items = [];
+					for(var i in data){
+					 var result = data[i];
+					 
+					 
+					 var record = new Record({
+						id: result.dbId,
+						thumb: result.thumbnailUrl,
+						title: result.title,
+						view_url: result.sourceUrl,
+						creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
+						provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
+						source: result.source
+					  });
+					 items.push(record);}
+					
+					if(data.length==20){$(window).bind('scroll', scrollHandler);}
 					
 					self.citems.push.apply(self.citems, items);
 					
@@ -150,42 +236,77 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				
 				"error":function(result) {
 					self.loading(false);
-				//	$("#myModal").find("h4").html("An error occured");
-				//	$("#myModal").find("div.modal-body").html(result.statusText);
+					$(window).bind('scroll', scrollHandler);
+				
 			       
 					 
 			     }});
-	  }
-	  
-	  self.loadCollection();
-	
-	  
-	  self.loadNext = function() {
-			if(self.next()>0){	
-				self.page(self.next());
-				self.moreItems();}
-			};
-
-			
-	 self.moreItems=function(){
-		 if(collectionitems.length()==20){
-			 
-		 }
+		
 	 }		
 
 	 
 	 self.recordSelect= function (e){
 			console.log(e);
+			
 			itemShow(e);
 			
 		}
 	 
-	 window.onscroll = function(ev) {
-		    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-		    	//self.searchNext();
-		    	console.log("searching for more");
-		    }
-		};
+	 
+	 self.addCollectionRecord= function (e){
+		 self.citems.push(e);
+			
+		}
+	 
+	 self.removeRecord= function (e){  
+		$("#myModal").find("h4").html("Delete item");
+		$("#myModal").find("div.modal-body").html("Are you sure you want to proceed?");
+		$("#myModal").find("div.modal-body").append('<div class="modal-footer"><button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a></div')
+		
+		$("#myModal").modal('show');
+		$('.btn-danger').on('click', function(event) { 
+			$("#myModal").remove("div.modal-footer");
+			console.log(e);
+			 var jsondata=JSON.stringify({
+					recId: e.recordId()
+				});
+			$.ajax({
+                url: '/collection/'+self.id()+'/removeRecord?recId='+e.recordId(),
+                type: 'DELETE',
+                contentType: "application/json",
+				data:jsondata,
+                success: function (data, textStatus, xhr) {
+                    console.log(data);
+                    self.citems.remove(e);
+                    self.itemCount(self.itemCount()-1);
+                    $("#myModal").find("h4").html("Done!");
+					$("#myModal").find("div.modal-body").html("Item removed from collection");
+			       
+					$("#myModal").modal('show');
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    $("#myModal").find("h4").html("An error occured");
+					$("#myModal").find("div.modal-body").html(errorThrown);
+					$("#myModal").modal('show');
+                }
+            });
+		});	 
+		
+		}
+	 
+	 $(window).scroll(scrollHandler());
+	 
+	 function scrollHandler(){
+		 if (self.loading()==false && $(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
+			 $(window).unbind('scroll');/*prevent from firing continuously*/
+			
+			 self.loadNext();
+		   }
+	 }
+	 
+	
+		
+		
   }
 
 

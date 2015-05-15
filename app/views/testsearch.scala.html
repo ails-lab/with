@@ -1,6 +1,8 @@
-@(qform:Form[espace.core.CommonQuery], content: List[espace.core.SourceResponse])
+@(qform:Form[espace.core.CommonQuery], content: List[espace.core.SourceResponse],filters: List[espace.core.CommonFilterResponse] )
 @import helper._
 @import helper.twitterBootstrap._
+
+
 
 @testsearchmain("Test search") {
 	@helper.form( action= routes.SearchController.posttestsearch() ){
@@ -22,9 +24,30 @@
 			</div>
 	}
 	
-	
+	<div id="hsection">
+ 	<div id="nav">
+ 	<div id="vsection">
+<ul >
+@for(p <- filters) {
+<li onClick="" >@p.filterName
+
+<ul >
+@for(pp <- p.suggestedValues) {
+<li onClick="" >@pp</li>
+
+}
+</ul> 	
+
+</li>
+
+}
+</ul> 	
+
+</div>
+ 	</div>
+	<div id="section">
 @if(content!=null) {
- 	
+
 <div id="tabs">
 <ul class="basictab">
 
@@ -47,7 +70,7 @@
     
     </div>
     <div  id="thinfo">
-  <b>Title: </b> <a href="@if(it.url!=null) {@it.url.original.get(0)} else {NA}"> 
+  <b>Title: </b> <a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
  @shorttext(it.title.get(0).value,40)
  </a><br/>
   <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
@@ -69,4 +92,7 @@
 }
 
 <div id="Display_content" onload="change('@content.get(0).source')">
+  </div>
+  
+ </div>
   </div>

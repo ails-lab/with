@@ -16,22 +16,24 @@
 
 package espace.core.sources;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.AutocompleteResponse;
+import espace.core.AutocompleteResponse.DataJSON;
+import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.RecordJSONMetadata;
+import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.AutocompleteResponse.DataJSON;
-import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
@@ -50,9 +52,12 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		String token = getPageInfo(q.searchTerm, q.page, q.pageSize);
-		return getBaseURL() + "search?part=snippet&q="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm) + "&maxResults=" + q.pageSize
-				+ (token == null ? "" : ("&pageToken=" + token)) + "&type=video&key=" + getKey();
+		return getBaseURL()
+				+ "search?part=snippet&q="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
+						: q.searchTerm) + "&maxResults=" + q.pageSize
+				+ (token == null ? "" : ("&pageToken=" + token))
+				+ "&type=video&key=" + getKey();
 	}
 
 	private String getPageInfo(String q, String page, String pageSize) {
@@ -84,10 +89,11 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		JsonNode response;
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
-			System.out.println(httpQuery);
+			// System.out.println(httpQuery);
 			// System.out.println(response.toString());
 			JsonNode docs = response.path("items");
-			res.totalCount = Utils.readIntAttr(response.path("pageInfo"), "totalResults", true);
+			res.totalCount = Utils.readIntAttr(response.path("pageInfo"),
+					"totalResults", true);
 			res.count = docs.size();
 			res.startIndex = 0;
 			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
@@ -95,17 +101,23 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			for (JsonNode item : docs) {
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item.path("id"), "videoId", true);
-				it.thumb = Utils.readArrayAttr(item.path("snippet").path("thumbnails").path("default"), "url", false);
-				it.fullresolution = Utils.readArrayAttr(item.path("snippet").path("thumbnails").path("high"), "url",
+				it.thumb = Utils
+						.readArrayAttr(item.path("snippet").path("thumbnails")
+								.path("default"), "url", false);
+				it.fullresolution = Utils.readArrayAttr(item.path("snippet")
+						.path("thumbnails").path("high"), "url", false);
+				it.title = Utils.readLangAttr(item.path("snippet"), "title",
 						false);
-				it.title = Utils.readLangAttr(item.path("snippet"), "title", false);
-				it.description = Utils.readLangAttr(item.path("snippet"), "description", false);
+				it.description = Utils.readLangAttr(item.path("snippet"),
+						"description", false);
 				it.creator = null;// Utils.readLangAttr(item.path("sourceResource"),
 									// "creator", false);
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("snippet"), "channelTitle", false);
+				it.dataProvider = Utils.readLangAttr(item.path("snippet"),
+						"channelTitle", false);
 				it.url = new MyURL();
-				it.url.fromSourceAPI = "https://www.youtube.com/watch?v=" + it.id;
+				it.url.fromSourceAPI = "https://www.youtube.com/watch?v="
+						+ it.id;
 				it.url.original = new ArrayList<String>();
 				it.url.original.add(it.url.fromSourceAPI);
 				a.add(it);
@@ -113,7 +125,8 @@ public class YouTubeSpaceSource extends ISpaceSource {
 			res.items = a;
 			// res.facets = response.path("facets");
 
-			savePageDetails(q.searchTerm, q.page, q.pageSize, response.path("nextPageToken").asText());
+			savePageDetails(q.searchTerm, q.page, q.pageSize,
+					response.path("nextPageToken").asText());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -123,11 +136,12 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		return res;
 	}
 
-	private void savePageDetails(String q, String page, String pageSize, String nextPageToken) {
+	private void savePageDetails(String q, String page, String pageSize,
+			String nextPageToken) {
 		String key = getKey(q, page, pageSize);
 		if (!roots.containsKey(key)) {
 			roots.put(key, nextPageToken);
-			System.out.println("Saved [" + key + "]" + nextPageToken);
+			// System.out.println("Saved [" + key + "]" + nextPageToken);
 		}
 	}
 
@@ -141,8 +155,8 @@ public class YouTubeSpaceSource extends ISpaceSource {
 
 	public String autocompleteQuery(String term, int limit) {
 		autoCompleteLimit = limit;
-		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t" + "&key="
-				+ getKey() + "&q=" + term;
+		return "http://suggestqueries.google.com/complete/search?hl=en&ds=yt&client=youtube&json=t"
+				+ "&key=" + getKey() + "&q=" + term;
 	}
 
 	public AutocompleteResponse autocompleteResponse(String response) {
@@ -169,6 +183,22 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		} catch (JSONException e) {
 			e.printStackTrace();
 			return new AutocompleteResponse();
+		}
+	}
+
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector
+					.getURLContent("https://www.googleapis.com/youtube/v3/videos?id="
+							+ recordId + "&part=snippet&key=" + getKey());
+			JsonNode record = response.get("items").get(0);
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+					.toString()));
+			return jsonMetadata;
+		} catch (Exception e) {
+			return jsonMetadata;
 		}
 	}
 }

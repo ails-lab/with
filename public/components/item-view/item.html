@@ -10,36 +10,36 @@
 				<span class="collectit"> collect it</span></span>
 				 
 				
-				<!-- ko text: title --><!-- /ko --> 
+				<!-- ko text: record().title() --><!-- /ko --> 
 				
 				</h3>
 				<collection params="route: route"></collection>	
 				<hr class="faded">
 				
 			  <div class="container-fluid">
-				   <div class="row">
+				   <div class="row" style="overflow-y:auto;max-height:400px">
 					  <div class="col-md-6">
 					    <div class="spec">
 					      <div class="itemlabel">Description
 					      </div>
-					      <div class="value" data-bind="text:description"> 
+					      <div class="value" data-bind="text:record().description()"> 
 					      </div>
 					      </div>
 					      
 					     
 					    
-					     <div class="spec" data-bind="if: creator">
+					     <div class="spec" data-bind="if: record().creator()">
 					      <div class="itemlabel">Creator
 					      </div>
-					      <div class="value" data-bind="text:creator">
+					      <div class="value" data-bind="text:record().creator()">
 					      
 					      </div>
 					    </div>
 					  
-					   <div class="spec" data-bind="if: provider">
+					   <div class="spec" data-bind="if: record().provider()">
 					      <div class="itemlabel">Provider
 					      </div>
-					      <div class="value" data-bind="text:provider">
+					      <div class="value" data-bind="text:record().provider()">
 					      
 					      </div>
 					    </div>
@@ -49,7 +49,7 @@
 					      </div>
 					      <div class="value">
 					      
-					      <div><img  class="logo" data-bind="attr:{src:sourceImage}"/>
+					      <div><img  class="logo" data-bind="attr:{src:record().sourceImage()}"/>
 					      </div>
 					      </div>
 					    </div>
@@ -57,7 +57,7 @@
 					   <div class="spec">
 					     
 					      <div class="value">
-					      <a data-bind="attr: { href:view_url}" target="_blank">More details </a>
+					      <a data-bind="attr: { href:record().view_url()}" target="_blank">More details </a>
 					      
 					      </div>
 					    </div>
@@ -66,7 +66,7 @@
 					  
 					  
 					  </div>
-					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:fullres, alt: title }" class="itemim"/></div>
+					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:record().fullres(), alt: record().title() }" class="itemim"/></div>
 					</div>
 				 </div>
 			

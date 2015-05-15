@@ -2,6 +2,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	
 	 $.bridget( 'masonry', masonry );
 	
+	 
+
+ 	
 	
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
@@ -12,37 +15,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		        $element.masonry("destroy");
 		    });
 
-    },
-    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    	
-    	var $element = $(element),
-    	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
-    	masonry = ko.utils.unwrapObservable(valueAccessor())
-    	if (!list.length){
-			
-			return;
-		}
-    	
-        
-    	imagesLoaded( $element, function() {
-    		if (!($element.data('masonry'))){
-        		
-        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
-        			
-        	}
-    		$('#columns > figure').each(function () {
- 				
- 	 		    $(this).animate({ opacity: 1 });
- 			});
-    		
-    		$element.masonry( 'reloadItems' );
- 			$element.masonry( 'layout' );
- 			
-    		
- 			
- 		 });
-		 
-      }
+    }
     };
     
 	
@@ -52,7 +25,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.id = ko.observable(false);
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
-		self.thumb = ko.observable(false);
+		self.thumb = ko.observable("//placehold.it/200x200");
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
 		self.source=ko.observable(false);
@@ -118,7 +91,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([]);
+		self.sources= ko.observableArray([ "Europeana","DPLA","YouTube","DigitalNZ","NLA"]);
 		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
@@ -144,6 +117,18 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
+			self.searching(true);
+			imagesLoaded( '#columns', function() {
+				  $('#columns').masonry( 'reloadItems' );
+	    		  $('#columns').masonry( 'layout' );
+	    		  $('#columns > figure').each(function () {
+		
+	    			  $(this).animate({ opacity: 1 });
+	    		  	});
+	    		  self.searching(false);
+	    		  
+	    		    
+	    		  });
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -251,7 +236,20 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						}
 						
 					}
-						self.searching(false);
+					 imagesLoaded( '#columns', function() {
+						  $('#columns').masonry( 'reloadItems' );
+			    		  $('#columns').masonry( 'layout' );
+			    		  $('#columns > figure').each(function () {
+ 				
+			    			  $(this).animate({ opacity: 1 });
+			    		  	});
+			    		  self.searching(false);
+			    		  
+			    		    
+			    		  });
+
+					
+					
 						if(moreitems){
 							self.next(self.page()+1);
 						}else{
@@ -350,6 +348,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if(  evt === 'focus' && isOpen ) return false;
 
 			if( isOpen ) {
+				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+		    	$("#myModal").modal('hide'); 
+		    	$("body").removeClass("modal-open");
+		         
+			
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
 				withinput.blur();
@@ -372,14 +375,17 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		};
 
 	    $(document).keyup(function(e) {
-  		  if (e.keyCode == 27 && isOpen ) { 
+	       if (e.keyCode == 27 && isOpen ) { 
   			self.reset();
   			toggleSearch(e,'');
+  			
   		  }   // esc
   		});
         ctrlClose.on('click',function(event){
+       	 
     		self.reset();
     		toggleSearch(event,'');
+    		
     		}
     	);
         

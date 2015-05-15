@@ -59,4 +59,5 @@ public class SourceResponse {
 	public List<ItemsResponse> items;
 	public String source;
 	public JsonNode facets;
+	public List<CommonFilterResponse> filters;
 }
