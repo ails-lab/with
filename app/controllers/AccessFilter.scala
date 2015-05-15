@@ -31,7 +31,8 @@ import db.DB
 import play.api.Logger
 import org.bson.types.ObjectId
 import scala.collection.JavaConversions._
-
+import play.api.http.HeaderNames._
+import scala.collection.mutable.ArrayBuffer
 
 
 /**
@@ -43,20 +44,7 @@ import scala.collection.JavaConversions._
 class AccessFilter extends Filter {
   val log = Logger(this.getClass())
 
-  /**
-   * Add a new session to the requestHeader, make a new one and return it.
-   */
-  def withSession( rh:RequestHeader, sessionData: Map[String,String]): RequestHeader = {
-          // make a new session cookie
-          val newCookie= Seq( Session.encode(sessionData))
-          
-          // replace cookie in header
-          val oldHeaders = rh.headers.toMap
-          var newHeaders = oldHeaders - Session.COOKIE_NAME + (( Session.COOKIE_NAME, newCookie))
-
-         rh.copy( headers = new Headers { val data: Seq[(String, Seq[String])] =  (newHeaders.toSeq) } )
-  }
-  
+   
   
   def effektivUserIds(userId: Option[String], proxyId:Option[String] ): Seq[String] = {
     val result = scala.collection.mutable.ArrayBuffer.empty[String]
@@ -104,13 +92,24 @@ class AccessFilter extends Filter {
 			  response => response match {
           case o:ObjectId => {
                val sessionData = rh.session + (("effektivUserIds", effektivUserIds(userId, Some( o.toString())).mkString(",")))
-              val newRh = withSession( rh, sessionData.data )
-             next( newRh )            
+              val newRh = FilterUtils.withSession( rh, sessionData.data )
+              
+             next( newRh ).map{ result => 
+              FilterUtils.outsession(result) match {
+                case Some( session ) => result.withSession( Session(session) - ("effektivUserIds"))
+                case None => result
+              }
+            }
           }
 		  	  case ApiKey.Response.ALLOWED => {
             val sessionData = rh.session + (("effektivUserIds", effektivUserIds(userId, None).mkString(",")))
-            val newRh = withSession( rh, sessionData.data )
-           next( newRh ) 
+            val newRh = FilterUtils.withSession( rh, sessionData.data )
+            next( newRh ).map { result => 
+              FilterUtils.outsession(result) match {
+                case Some( session ) => result.withSession( Session(session) - ("effektivUserIds"))
+                case None => result
+              }
+		  	    } 
           }
 		  	  case r:ApiKey.Response => Future.successful( Results.BadRequest( r.toString() ))
 		  	  case _ => Future.successful( Results.Forbidden )
@@ -128,5 +127,40 @@ class AccessFilter extends Filter {
      } else {
        apiKeyCheck( next, rh )
      }
+  }
+}
+
+object FilterUtils {
+   /**
+   * Add a new session to the requestHeader, make a new one and return it.
+   */
+  def withSession( rh:RequestHeader, sessionData: Map[String,String]): RequestHeader = {
+          // make a new session cookie
+          val newCookie= Session.encode(sessionData)
+          
+          // replace cookie in header
+          val oldHeaders =  scala.collection.mutable.Map.empty ++ rh.headers.toMap
+          val cookies = ArrayBuffer.empty[Cookie]
+           for(  headerlines <- oldHeaders.get( COOKIE ); header <- headerlines ) {
+              val headerCookies = Cookies.decode( header )
+              for( cookie <- headerCookies ) {
+                cookies += cookie
+              }
+          }
+          // remove the old cookies
+          oldHeaders -= COOKIE
+          val newCookies = cookies.map { c =>
+            if( c.name == Session.COOKIE_NAME) {
+              new Cookie(c.name, newCookie, c.maxAge, c.path, c.domain, c.secure, c.httpOnly )              
+            } else c
+          }
+          oldHeaders += ((COOKIE, Seq(Cookies.encode( newCookies ))))
+
+         rh.copy( headers = new Headers { val data: Seq[(String, Seq[String])] =  (oldHeaders.toSeq) } )
+  }
+
+  def outsession( result: Result ): Option[Map[String,String]] = {
+        Cookies(result.header.headers.get(SET_COOKIE))
+        .get(Session.COOKIE_NAME).map(_.value).map(Session.decode)
   }
 }
