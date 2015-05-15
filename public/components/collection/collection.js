@@ -186,16 +186,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    }
 
 	  self.open=function(){
-		  $('#modal-1').css('overflow-y', 'hidden');
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
 	  }
 
 	  self.close= function(){
 		  self.reset();
-		  $('#modal-1').css('overflow-y', 'auto');
-	    	$('#modal-'+self.modal()).removeClass('md-show');
-	    	$('#modal-'+self.modal()).css('display', 'none');
+		  $('#modal-'+self.modal()).removeClass('md-show');
+	      $('#modal-'+self.modal()).css('display', 'none');
 
 	    }
 

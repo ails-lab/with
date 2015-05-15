@@ -348,6 +348,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if(  evt === 'focus' && isOpen ) return false;
 
 			if( isOpen ) {
+				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+		    	$("#myModal").modal('hide'); 
+
+			
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
 				withinput.blur();
@@ -370,7 +374,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		};
 
 	    $(document).keyup(function(e) {
-  		  if (e.keyCode == 27 && isOpen ) { 
+	       if (e.keyCode == 27 && isOpen ) { 
   			self.reset();
   			toggleSearch(e,'');
   			

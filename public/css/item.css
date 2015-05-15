@@ -7,7 +7,7 @@
 	min-width: 320px;
 	max-height:80%;
 	min-height:420px;
-	overflow-y: auto;
+	overflow-y: hidden;
 	overflow-x:hidden;
 	z-index: 1035;
 	visibility: hidden;
@@ -72,6 +72,7 @@
 	width:100%;
 	max-width:270px;
 	min-width: 120px;
+	margin-bottom: 20%;
 }
 
 
