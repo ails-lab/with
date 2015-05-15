@@ -30,7 +30,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		template: { require: 'text!components/profile-page/edit-profile.html' }
 	});
 	ko.components.register('edit-collection', {
-		viewModel: { require: 'components/mycollections/mycollections' },
+		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
 

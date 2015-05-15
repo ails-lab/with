@@ -25,13 +25,24 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
 		var self = this;
-		self.route = params.route;
+		//self.route = params.route;
 		var collections = [];
 		self.index = ko.observable(0);
-		//self.collectionToEdit = ko.observable(new MyCollection({}));
-		self.myCollections = ko.mapping.fromJS([]);
+		var mapping = {
+			'dbId': {
+				key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+		        }
+			},
+		    'firstEntries': {
+		        key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+		        }
+		    }
+		};
+		self.myCollections = ko.mapping.fromJS([], mapping);
 		var promise = app.getUserCollections();
-		self.titleToEdit = ko.observable("defaultTitle");
+		self.titleToEdit = ko.observable("?");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
 		$.when(promise).done(function() {
@@ -53,7 +64,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		
 		self.createCollection = function() {
 			createNewCollection();
-		}
+		};
 		
 		showDelCollPopup = function(collectionTitle, collectionId) {
 			$("#myModal").find("h4").html("Do you want to delete this collection?");
@@ -106,7 +117,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 			var index = context.$index();
-	        self.index(index);
 	        self.titleToEdit(self.myCollections()[index].title());
 	        self.descriptionToEdit(self.myCollections()[index].description());
 	        self.isPublicToEdit(self.myCollections()[index].isPublic());
@@ -114,16 +124,18 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		}
 		
 		self.closeEditCollectionPopup = function() {
+			alert("?");
 			app.closePopup();
 		}
 		
-		editCollection = function (title, description, isPublic) {
+		editCollection = function () {//title, description, isPublic) {
+			alert("1");
 			$.ajax({
 				"url": "/collection/"+collectionId,
 				"method": "POST",
-				"data": {"title": title,
-						"description": description,
-						"isPublic": isPublic
+				"data": {"title": self.titleToEdit(),
+						"description": self.descriptionToEdit(),
+						"isPublic": self.isPublicToEdit()
 					},
 				success: function(result){
 					self.myCollections.remove(function (item) {
