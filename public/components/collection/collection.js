@@ -186,16 +186,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	    }
 
 	  self.open=function(){
-		  $('#modal-1').css('overflow-y', 'hidden');
 		  $('#modal-'+self.modal()).css('display', 'block');
 	      $('#modal-'+self.modal()).addClass('md-show');
 	  }
 
 	  self.close= function(){
 		  self.reset();
-		  $('#modal-1').css('overflow-y', 'auto');
-	    	$('#modal-'+self.modal()).removeClass('md-show');
-	    	$('#modal-'+self.modal()).css('display', 'none');
+		  $('#modal-'+self.modal()).removeClass('md-show');
+	      $('#modal-'+self.modal()).css('display', 'none');
 
 	    }
 
@@ -242,7 +240,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					if(self.route().request_=="mycollections"){
 						
-						ko.contextFor(mycollections).$data.addNew(data);
+						ko.contextFor(mycollections).$data.reloadCollection(data);
 						ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
 					}
 					callback(data.dbId);
@@ -291,7 +289,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.addRecord=function(collid){
-		  
 		 
 		  var jsondata=JSON.stringify({
 				source: self.record().source(),
@@ -323,12 +320,12 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
-						(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
+						/*(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
 							if (o.dbId() == collid) {
 							 o.reload(collid);
 							
-						}});
-						
+						}});*/
+						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 						
 					}
 					
@@ -367,8 +364,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 	  }
-
-
 
   }
 

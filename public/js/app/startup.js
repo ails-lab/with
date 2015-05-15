@@ -1,5 +1,6 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], function($, ko, router, kom) {
-
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], 
+		function($, ko, router, kom) {
+	
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
 	ko.amdTemplateEngine.defaultSuffix                = '.tpl.html';
@@ -29,7 +30,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		template: { require: 'text!components/profile-page/edit-profile.html' }
 	});
 	ko.components.register('edit-collection', {
-		viewModel: { require: 'components/mycollections/mycollections' },
+		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
 

@@ -81,11 +81,10 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
     
     
     self.open=function(){
+     $("body").addClass("modal-open");
     	$('#modal-1').css('display', 'block');
 
     	$('#modal-1').addClass('md-show');
-    	
-    	$('#modal-1').css('overflow-y', 'auto');
 	  }
 
 	 
@@ -94,6 +93,8 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
     self.close= function(){
     	
+    	self.record().fullres('');
+    	 $("body").removeClass("modal-open");
     	$("#modal-1").find("div[id^='modal-']").removeClass('md-show').css('display', 'none');
     	$('#modal-1').removeClass('md-show');
     	$('#modal-1').css('display', 'none');

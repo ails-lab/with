@@ -41,5 +41,9 @@ var require = {
 		"knockout":  { exports: 'ko' },
 		"bootstrap": { deps: ["jquery"] },
 		"facebook":  { exports: "FB" },
+		/*"komapping": {
+            deps: ['knockout'],
+            exports: 'komapping'
+        }*/
 	}
 };
