@@ -22,7 +22,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
     
 	function Record(data) {
 		var self = this;
-		self.id = ko.observable(false);
+		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
 		self.thumb = ko.observable("//placehold.it/200x200");
@@ -32,7 +32,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.creator=ko.observable("");
 		self.provider=ko.observable("");
 		self.url=ko.observable("");
-		self.id=ko.observable("");
+		//self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
@@ -45,7 +45,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.source(data.source);
 			self.creator(data.creator);
 			self.provider(data.provider);
-			self.id(data.id);
+			self.recordId(data.recordId);
 		};
 
 		self.displayTitle = ko.computed(function() {
@@ -180,7 +180,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						 
 						 if(result !=null && result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
 						 var record = new Record({
-							id: result.id,
+							recordId: result.recordId || result.id,
 							thumb: result.thumb[0],
 							fullres: result.fullresolution,
 							title: result.title[0].value,
