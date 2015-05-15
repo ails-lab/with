@@ -3,7 +3,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 	function Record(data) {
 		var self = this;
 		
-		self.recordId = ko.observable(false);
+		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
 		self.thumb = ko.observable(false);
@@ -46,7 +46,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			
 			self.source(data.source);
 			
-			self.recordId(data.id);
+			self.recordId(data.recordId);
 		};
 
 		 self.sourceImage = ko.pureComputed(function() {
