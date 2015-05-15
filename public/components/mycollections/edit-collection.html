@@ -5,10 +5,8 @@
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 			<h4>Edit Collection</h4>
 		</div>
-
-		<i data-bind="text: $parents[0].titleToEdit+'?'"></i>
 		<div class="modal-body row">
-			<form data-bind="submit: function() { $parent.editCollection}">
+			<form> <!-- data-bind="submit: ko.contextFor(mycollections).$data.editCollection">-->
 				<div class="col-md-12">				  
 				  <div class="form-group">
 				    <div class="spec">
@@ -16,7 +14,8 @@
 				      </div>
 				       <div class="value">
 				      <input type="text" 
-				      data-bind="attr: {value: $parent.titleToEdit}" class="form-control input-sm xxs">
+				      data-bind="{value: ko.contextFor(mycollections).$data.titleToEdit, 
+				      attr: {value: ko.contextFor(mycollections).$data.myCollections()[ko.contextFor(mycollections).$data.index()].title()}}" class="form-control input-sm xxs">
 				        </div>
 				      </div>
 				    </div>
@@ -24,18 +23,28 @@
 				      <div class="spec">
 				      <div class="itemlabel">Is it public?
 				      </div>
+				      <!--  ko if: ko.contextFor(mycollections).$data.isPublicToEdit -->
 				     <div class="btn-group btn-toggle" id="publiccoll"> 
-					    <button class="btn btn-xs btn-default xxs" data-bind="event: {click:function() { $parent.privateToggle}}" data-value="true">Yes</button>
-					    <button class="btn btn-xs btn-primary active xxs" data-bind="event: {click: function() { $parent.privateToggle}}" data-value="false">No</button>
+					    <button class="btn btn-xs btn-primary active xxs" id="yes" data-bind="event: {click: ko.contextFor(mycollections).$data.privateToggle}" data-value="true">Yes</button>
+					    <button class="btn btn-xs btn-default xxs" id ="no" data-bind="event: {click: ko.contextFor(mycollections).$data.privateToggle}" data-value="false">No</button>
 					  </div>
-				    </div>
+				    <!-- /ko -->
+				    <!-- ko else -->
+				    	<div class="btn-group btn-toggle" id="publiccoll"> 
+					    <button class="btn btn-xs btn-default xxs" id="yes" data-bind="event: {click: ko.contextFor(mycollections).$data.privateToggle}" data-value="true">Yes</button>
+					    <button class="btn btn-xs btn-primary active xxs" id ="no" data-bind="event: {click: ko.contextFor(mycollections).$data.privateToggle}" data-value="false">No</button>
+					  </div>
+				     <!-- /ko -->
+				     </div>
 				    </div>
 				    <div class="form-group">
 					   <div class="spec">
 					      <div class="itemlabel">Description
 					      </div>
 					      <div class="value">
-					      <textarea data-bind="attr: {value: $parent.descriptionToEdit}" id="description" name="description" class="form-control input-sm xxs" ></textarea>
+					      <textarea data-bind="{value: ko.contextFor(mycollections).$data.descriptionToEdit, 
+					      attr: {value: ko.contextFor(mycollections).$data.myCollections()[ko.contextFor(mycollections).$data.index()].description()}" 
+					      id="description" name="description" class="form-control input-sm xxs" ></textarea>
 					      </div>
 					    </div>
 					</div>
@@ -43,8 +52,9 @@
 			</form>
 		</div>
 		<div class="modal-footer">
-			<button type="button" class="btn btn-default" data-bind="click: function() { $parent.closeEditCollectionPopup}">Cancel</button>
-			<button type="submit" class="btn btn-primary">Apply</button>
+			<button type="button" class="btn btn-default" data-bind="click: ko.contextFor(mycollections).$data.closeEditPopup">Cancel</button>
+			<!-- <button type="submit" class="btn btn-primary">Apply</button> -->
+			<button type="button" class="btn btn-primary" data-bind="click: ko.contextFor(mycollections).$data.editCollection">Apply</button>
 		</div>
 	</div>
 </div>
