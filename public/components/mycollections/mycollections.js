@@ -9,8 +9,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		return entry;
 	}
 
-	
-	
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
 		var self = this;
@@ -91,7 +89,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
-					saveCollectionsToStorage(self.myCollections);
+					saveCollectionsToStorage(self.myCollections());
 				}
 			});
 		};
@@ -163,13 +161,17 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			var recordData = JSON.parse(recordDataString);
 			var recordObservable = ko.mapping.fromJS(recordData);
 			ko.mapping.fromJS(recordData, recordObservable);
+			var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
+			self.myCollections()[collIndex].itemCount(newItemCount);
 			self.myCollections()[collIndex].firstEntries.push(recordObservable);
+			saveCollectionsToStorage(self.myCollections);
 		};
 		
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
 			self.myCollections.push(newCollection);
+			saveCollectionsToStorage(self.myCollections);
 		}
 		
 	  arrayFirstIndexOf=function(array, predicate, predicateOwner) {
