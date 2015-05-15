@@ -123,8 +123,9 @@ public class CollectionController extends Controller {
 		newVersion.getFirstEntries().addAll(oldVersion.getFirstEntries());
 		newVersion.setDbId(oldId);
 		newVersion.setLastModified(new Date());
-		newVersion.setItemCount((int)DB.getCollectionRecordDAO().getItemCount(oldId));
-
+		newVersion.setItemCount(oldVersion.getItemCount());
+		newVersion.setOwnerId(oldVersion.getOwnerId());
+		newVersion.setCreated(oldVersion.getCreated());
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newVersion);
 		for (ConstraintViolation<Collection> cv : violations) {
@@ -132,12 +133,14 @@ public class CollectionController extends Controller {
 					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 			return badRequest(result);
 		}
-
-		if (DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(),
-				newVersion.getTitle()) != null) {
-			result.put("message",
-					"Title already exists! Please specify another title.");
-			return internalServerError(result);
+		//if oldTitle = newTitle means description, isPublic, thumbnail or category changed
+		if (!newVersion.getTitle().equals(oldVersion.getTitle())) {
+			if (DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(),
+					newVersion.getTitle()) != null) {
+				result.put("message",
+						"Title already exists! Please specify another title.");
+				return internalServerError(result);
+			}
 		}
 		if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
 
