@@ -32,6 +32,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
+        self.thumbnailUrlToEdit = ko.observable();
         self.index = ko.observable(0);
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null) 
@@ -72,6 +73,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		
 	    //Storage needs to be updated, because collection.js gets user collections from there
 		saveCollectionsToStorage = function(collections) {
+			alert(JSON.stringify(collections));
 			if (sessionStorage.getItem('User') !== null) {
 				sessionStorage.setItem('UserCollections', JSON.stringify(collections));
 			}
@@ -102,6 +104,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			self.index(collIndex);
 	        self.titleToEdit(self.myCollections()[collIndex].title());
 	        self.descriptionToEdit(self.myCollections()[collIndex].description());
+	        self.thumbnailUrlToEdit(self.myCollections()[collIndex].thumbnailUrl());
 	        self.isPublicToEdit(self.myCollections()[collIndex].isPublic());
 			app.showPopup("edit-collection");
 		}
@@ -124,7 +127,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections()[collIndex].title(self.titleToEdit());
 					self.myCollections()[collIndex].description(self.descriptionToEdit());
 					self.myCollections()[collIndex].isPublic(self.isPublicToEdit());
-					saveCollectionsToStorage(self.myCollections);
+					saveCollectionsToStorage(self.myCollections());
 				},
 				error: function(error) {
 					var r = JSON.parse(error.responseText);
@@ -172,14 +175,14 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
 			self.myCollections()[collIndex].itemCount(newItemCount);
 			self.myCollections()[collIndex].firstEntries.push(recordObservable);
-			saveCollectionsToStorage(self.myCollections);
+			saveCollectionsToStorage(self.myCollections());
 		};
 		
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
 			self.myCollections.push(newCollection);
-			saveCollectionsToStorage(self.myCollections);
+			saveCollectionsToStorage(self.myCollections());
 		}
 		
 	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
