@@ -20,13 +20,13 @@ import java.util.Collection;
 
 public class FiltersHelper {
 
-	public static Collection<CommonFilterResponse> merge(Collection<CommonFilterResponse> mergedfilters,
-			Collection<CommonFilterResponse> newfilters) {
+	public static Collection<CommonFilterLogic> merge(Collection<CommonFilterLogic> mergedfilters,
+			Collection<CommonFilterLogic> newfilters) {
 		if (newfilters != null) {
-			for (CommonFilterResponse commonFilterResponse : newfilters) {
+			for (CommonFilterLogic commonFilterResponse : newfilters) {
 				boolean merged = false;
-				for (CommonFilterResponse old : mergedfilters) {
-					if (old.filterID.equals(commonFilterResponse.filterID)) {
+				for (CommonFilterLogic old : mergedfilters) {
+					if (old.data.filterID.equals(commonFilterResponse.data.filterID)) {
 						merged = true;
 						// Do the merge
 						merge(old, commonFilterResponse);
@@ -34,15 +34,16 @@ public class FiltersHelper {
 					}
 				}
 				if (!merged) {
-					mergedfilters.add(commonFilterResponse.clone());
+					CommonFilterLogic clone = commonFilterResponse.clone();
+					mergedfilters.add(clone);
 				}
 			}
 		}
 		return mergedfilters;
 	}
 
-	public static CommonFilterResponse merge(CommonFilterResponse a, CommonFilterResponse b) {
-		a.addValue(b.suggestedValues);
+	public static CommonFilterLogic merge(CommonFilterLogic a, CommonFilterLogic b) {
+		a.addValueCounts(b.values());
 		return a;
 	}
 

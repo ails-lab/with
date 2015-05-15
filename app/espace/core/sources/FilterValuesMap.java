@@ -63,6 +63,9 @@ public class FilterValuesMap {
 		if (specificValue != null) {
 			String k = getKey(filterID, specificValue);
 			List<String> v = getOrset(commonvalues, k, false);
+			if (v.isEmpty()) {
+				v.add(specificValue);
+			}
 			return v;
 		}
 		return null;
@@ -72,6 +75,9 @@ public class FilterValuesMap {
 		if (commonValue != null) {
 			String k = getKey(filterID, commonValue);
 			List<String> v = getOrset(specificvalues, k, false);
+			if (v.isEmpty()) {
+				v.add(commonValue);
+			}
 			return v;
 		}
 		return null;

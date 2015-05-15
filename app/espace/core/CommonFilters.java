@@ -20,7 +20,7 @@ public class CommonFilters {
 
 	public static final String TYPE_ID = "type";
 	public static final String TYPE_NAME = "Type";
-	public static final String VIDEO_ID = "video";
-	public static final String VIDEO_Name = "Video";
+	public static final String PROVIDER_ID = "provider";
+	public static final String PROVIDER_NAME = "Provider";
 
 }

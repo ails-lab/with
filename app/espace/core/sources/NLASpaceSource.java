@@ -26,7 +26,7 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.CommonFilterResponse;
+import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
@@ -87,7 +87,7 @@ public class NLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);

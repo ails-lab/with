@@ -16,19 +16,31 @@
 
 package espace.core;
 
-import java.util.List;
+public class ValueCount {
+	public String value;
+	public int count = 0;
 
-public class CommonFilterResponse {
-	public String filterName;
-	public String filterID;
-	public List<ValueCount> suggestedValues;
+	public ValueCount() {
+		super();
+	}
 
-	public CommonFilterResponse() {
+	public ValueCount(String value, int count) {
+		super();
+		this.value = value;
+		this.count = count;
+	}
+
+	public ValueCount(String value) {
+		this(value, 1);
+	}
+
+	public void add(int c) {
+		count += c;
 	}
 
 	@Override
 	public String toString() {
-		return "CommonFilterResponse [filterName=" + filterName + ", suggestedValues=" + suggestedValues + "]";
+		return "" + value + "(" + count + ")";
 	}
 
 }

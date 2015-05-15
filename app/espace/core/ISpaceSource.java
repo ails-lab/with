@@ -48,17 +48,27 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(
-			String recordId);
+	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId);
 
 	private FilterValuesMap vmap;
 
-	protected void countValue(CommonFilterResponse type, String t) {
-		type.addValue(vmap.translateToCommon(type.filterID, t));
+	protected void countValue(CommonFilterLogic type, String t) {
+		countValue(type, t, true, 1);
 	}
 
-	protected void addMapping(String filterID, String commonValue,
-			String specificValue, String querySegment) {
+	protected void countValue(CommonFilterLogic type, String t, int count) {
+		countValue(type, t, true, count);
+	}
+
+	protected void countValue(CommonFilterLogic type, String t, boolean toglobal, int count) {
+		if (toglobal)
+			type.addValue(vmap.translateToCommon(type.data.filterID, t), count);
+		else
+			type.addValue(t, count);
+
+	}
+
+	protected void addMapping(String filterID, String commonValue, String specificValue, String querySegment) {
 		vmap.addMap(filterID, commonValue, specificValue, querySegment);
 	}
 
@@ -77,8 +87,7 @@ public abstract class ISpaceSource {
 	protected String addfilters(CommonQuery q, String qstr) {
 		if (q.filters != null) {
 			for (CommonFilter filter : q.filters) {
-				for (String subq : translateToQuery(filter.filterID,
-						filter.value)) {
+				for (String subq : translateToQuery(filter.filterID, filter.value)) {
 					qstr += subq;
 				}
 			}

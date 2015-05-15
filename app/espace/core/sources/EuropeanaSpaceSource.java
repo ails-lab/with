@@ -28,7 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
-import espace.core.CommonFilterResponse;
+import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
@@ -123,7 +123,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -133,7 +134,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				for (JsonNode item : response.path("items")) {
 					ItemsResponse it = new ItemsResponse();
 					String t = Utils.readAttr(item, "type", false);
-					countValue(type, t);
+					// countValue(type, t);
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
 					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
@@ -150,8 +151,30 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 			res.items = a;
 			res.facets = response.path("facets");
+
+			for (JsonNode facet : response.path("facets")) {
+				for (JsonNode jsonNode : facet.path("fields")) {
+					String label = jsonNode.path("label").asText();
+					int count = jsonNode.path("count").asInt();
+					switch (facet.path("name").asText()) {
+					case "TYPE":
+						countValue(type, label, count);
+						break;
+
+					case "DATA_PROVIDER":
+						countValue(provider, label, false, count);
+						break;
+
+					default:
+						break;
+					}
+				}
+			}
+
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
+			res.filters.add(provider);
+			// res.filters.add(provider);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
