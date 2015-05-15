@@ -26,6 +26,7 @@
     "bootstrap-tagsinput": "latest",
     "smoke": "latest",
     "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip"
+    "bootstrap-select": "1.6.5"
   },
   "resolutions": {
     "knockout": "~3.2.0"

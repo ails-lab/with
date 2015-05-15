@@ -1,0 +1,80 @@
+
+<div class="exhibition">
+<div class="left"></div>  <!-- for scrolling the page when dragging item at left of page-->   
+<div class="outer"><!--
+--><div class="boxBasic boxItem" id="placeholder">
+	    <div  class="placeholderD1" data-bind="text: galleryName" contenteditable=true></div>
+	    <div  class="placeholderD2" data-bind="text: gallerySubtitle" contenteditable=true ></div>
+	</div><!-- 
+--><!-- ko template: { foreach: collectionItemsArray,
+			    beforeRemove: removeItem,
+			    afterAdd: showNewItem } --><!--
+--><div class ="boxBasic dashed-box droppable" data-bind="drop: {index: $index, array: $parent.collectionItemsArray}">
+	    <div id="droppable-Children">
+		<div class="droppable-placeholder-top">Add a new panel</div>
+		<div class="droppable-placeholder-bottom">Drag an image</div>
+	    </div><!--
+--></div><!--
+--><div class="boxBasic boxItem" data-bind="drag: {item: $data, move: true}">
+	    <div class="ImageDescription">
+		<img data-bind="attr: { src: thumbnailUrl}" class="itemImage"></img>
+		<div class="description d1" data-bind="text: title"></div>
+		<div class="description d2" data-bind="text: source"></div>
+		<div class="description d2" data-bind="text: description"> </div>
+		<div  class="EditButton" > 
+		    <div class="EditButtonText" data-bind="click: $parent.showPopUp"> EDIT </div>
+		</div>
+	    </div>
+	    <!--  ko if: $data.hasOwnProperty('additionalText')-->
+	    <div class="VideoText">
+		<img class="VideoImage" src= "http://www.cowfest.org/Resources/Pictures/media_video_icon_pc_800_clr_4466.png"> </img>
+		<div class="Text" data-bind="text: description"></div>
+	    </div>
+	    <!-- /ko -->
+	    <img  src="http://www.escrs.org/milan2012/images/button_close.png" data-bind="click: $parent.xButtonClicked" class="XButtonImage"> </img>
+    </div><!-- 
+ --><!-- /ko --><!-- 
+--><div class ="boxBasic dashed-box droppable" data-bind="drop: {index: collectionItemsArray().length, array: collectionItemsArray}">
+	    <div id="droppable-Children">
+		<div class="droppable-placeholder-top">Add a new panel</div>
+		<div class="droppable-placeholder-bottom">Drag an image</div>
+	    </div>
+    </div>
+</div> 
+    
+<div class="right"></div><!-- for scrolling the page when dragging item at right of page-->
+
+
+<div class="bottom">
+    <div class="bottom-left">
+	<div>Select a collection in order to drag objects to your exhibition</div>
+	
+	<select  id="CollectionSelect" class="selectpicker" data-bind="options: myCollections, optionsText: 'title', value: selectedCollection">
+	</select>
+	
+	<div id="clear">Clear all</div>
+    </div>
+    <div class="verticalLine"> </div>
+    <div id="outer-bottom">
+	<!-- ko foreach: userSavedItemsArray -->
+	<div class="bottom-box">
+	    <img class="draggable" data-bind="attr: { src: thumbnailUrl}, drag: {item: $data, move: false}, event: { mouseover: $parent.enableDetails, mouseout: $parent.disableDetails }" > </img>
+	    <img src="http://www.escrs.org/milan2012/images/button_close.png" class="XButtonImage" data-bind="click: $parent.xButtonClicked"> </img>
+	</div>
+	<!-- /ko -->
+    </div>
+     <!--  ko if: currentItemSet-->
+    <div id="hoverDetails" data-bind="visible: detailsEnabled">
+            
+	    <img data-bind="attr: { src: currentItem().thumbnailUrl}"></img>
+	    <div id="hoverTextArea">
+		<div  id="title" data-bind="text: currentItem().title"></div>
+		<div  id="creator" data-bind="text: currentItem().source"></div>
+		<div  id="provider" data-bind="text: currentItem().description"> </div>
+		<div  id="description" data-bind="text: currentItem().description"> </div>
+	    </div>
+    </div>
+    <!-- /ko -->
+</div>
+</div>
+<exhibition-item-edit params="route: route"> </exhibition-item-edit>
