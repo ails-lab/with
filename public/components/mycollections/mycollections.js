@@ -9,18 +9,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		return entry;
 	}
 
-	self.reload = function(dbId) {
-		$.ajax({
-			"url": "/collection/"+dbId,
-			"method": "GET",
-			success: function(data){
-				//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
-				//self.myCollections()[index](self.load());
-				//alert(JSON.stringify(self.editableCollection()));
-				ko.mapping.fromJS(data, self.myCollections);
-			}
-		});				
-	};
+	
 	
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
@@ -108,12 +97,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 		
 		
-		self.addNew=function(cdata){
-			var myc=new MyCollection(cdata);
-			self.myCollections.push(myc);
-			
-		}
-		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 			var index = context.$index();
@@ -124,7 +107,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		}
 		
 		self.closeEditCollectionPopup = function() {
-			alert("?");
 			app.closePopup();
 		}
 		
@@ -158,6 +140,45 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 			 self.isPublic = $("#publiccoll .active").data("value");
 
+		}
+		
+		self.reloadRecord = function(dbId, recordDataString) {
+			/*$.ajax({
+				"url": "/collection/"+dbId,
+				"method": "GET",
+				success: function(data){
+					//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
+					//self.myCollections()[index](self.load());
+					//alert(JSON.stringify(self.editableCollection()));
+					ko.mapping.fromJS(data, self.myCollections);
+					var collIndex = arrayFirstIndexOf(viewModel.items(), function(item) {
+						   return item.dbId === dbId;    
+					}));
+					self.myCollections()[collIndex].remove((data);
+				}
+			});*/
+			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
+				   return item.dbId() === dbId;    
+			});
+			var recordData = JSON.parse(recordDataString);
+			var recordObservable = ko.mapping.fromJS(recordData);
+			ko.mapping.fromJS(recordData, recordObservable);
+			self.myCollections()[collIndex].firstEntries.push(recordObservable);
+		};
+		
+		self.reloadCollection = function(data) {
+			var newCollection = ko.mapping.fromJS(data);
+			ko.mapping.fromJS(data, newCollection);
+			self.myCollections.push(newCollection);
+		}
+		
+	  arrayFirstIndexOf=function(array, predicate, predicateOwner) {
+		    for (var i = 0, j = array.length; i < j; i++) {
+		        if (predicate.call(predicateOwner, array[i])) {
+		            return i;
+		        }
+		    }
+		    return -1;
 		}
 	}
 	
