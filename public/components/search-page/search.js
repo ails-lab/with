@@ -350,7 +350,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if( isOpen ) {
 				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
 		    	$("#myModal").modal('hide'); 
-
+		    	$("body").removeClass("modal-open");
+		         
 			
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
@@ -381,6 +382,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
   		  }   // esc
   		});
         ctrlClose.on('click',function(event){
+       	 
     		self.reset();
     		toggleSearch(event,'');
     		
