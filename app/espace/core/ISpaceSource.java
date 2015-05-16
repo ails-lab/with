@@ -18,6 +18,7 @@ package espace.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.json.JSONObject;
 
@@ -66,6 +67,10 @@ public abstract class ISpaceSource {
 		else
 			type.addValue(t, count);
 
+	}
+
+	protected void addDefaultWriter(String filterId, Function<String, String> function) {
+		vmap.addDefaultWriter(filterId, function);
 	}
 
 	protected void addMapping(String filterID, String commonValue, String specificValue, String querySegment) {

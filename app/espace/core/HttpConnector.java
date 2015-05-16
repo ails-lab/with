@@ -42,6 +42,8 @@ public class HttpConnector {
 			});
 			return jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
+			Logger.error("calling: " + url);
+
 			throw e;
 		}
 	}

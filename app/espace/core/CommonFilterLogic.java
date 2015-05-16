@@ -18,7 +18,10 @@ package espace.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+
+import utils.SortedList;
 
 public class CommonFilterLogic<a> implements Cloneable {
 
@@ -75,12 +78,11 @@ public class CommonFilterLogic<a> implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "Logic [filterName=" + data.filterName + ", filterID=" + data.filterID + ", suggestedValues="
-				+ counts.values() + "]";
+		return "Filter [" + data.filterName + ", values=" + counts.values().size() + "]";
 	}
 
 	public CommonFilterResponse export() {
-		data.suggestedValues = new ArrayList<>();
+		data.suggestedValues = new SortedList<>(ValueCount.comparator());
 		data.suggestedValues.addAll(counts.values());
 		return data;
 	}

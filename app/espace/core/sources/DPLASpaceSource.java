@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -53,6 +54,18 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public DPLASpaceSource() {
 		super();
+		addDefaultWriter(CommonFilters.TYPE_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&sourceResource.type=" + Utils.spacesPlusFormatQuery(t);
+			}
+		});
+		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&provider.name=" + Utils.spacesPlusFormatQuery(t);
+			}
+		});
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", "&sourceResource.type=image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", "&sourceResource.type=%22moving%20image%22");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", "&sourceResource.type=sound");
@@ -80,6 +93,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -114,13 +128,14 @@ public class DPLASpaceSource extends ISpaceSource {
 			res.facets = response.path("facets");
 			res.filters = new ArrayList<>();
 
-			readList(response.path("facets").path("provider.name"), type);
+			readList(response.path("facets").path("provider.name"), provider);
 
 			readList(response.path("facets").path("sourceResource.type"), type);
 
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
-			// res.filters.add(provider);
+			res.filters.add(provider);
+			System.out.println(provider.export());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -131,7 +146,7 @@ public class DPLASpaceSource extends ISpaceSource {
 	}
 
 	private void readList(JsonNode json, CommonFilterLogic filter) {
-		System.out.println(json);
+		// System.out.println(json);
 		for (JsonNode f : json.path("terms")) {
 			String label = f.path("term").asText();
 			int count = f.path("count").asInt();

@@ -19,18 +19,21 @@ package espace.core.sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Function;
 
 public class FilterValuesMap {
 
 	private HashMap<String, List<String>> specificvalues;
 	private HashMap<String, List<String>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
+	private HashMap<String, Function<String, String>> writters;
 
 	public FilterValuesMap() {
 		super();
 		specificvalues = new HashMap<String, List<String>>();
 		commonvalues = new HashMap<String, List<String>>();
 		queryTexts = new HashMap<String, List<String>>();
+		writters = new HashMap<>();
 	}
 
 	private String getKey(String filterID, String value) {
@@ -87,9 +90,18 @@ public class FilterValuesMap {
 		if (commonValue != null) {
 			String k = getKey(filterID, commonValue);
 			List<String> v = getOrset(queryTexts, k, false);
+			if (v.isEmpty()) {
+				Function<String, String> w = writters.get(filterID);
+				if (w != null)
+					v.add(w.apply(commonValue));
+			}
 			return v;
 		}
 		return null;
+	}
+
+	public void addDefaultWriter(String filterId, Function<String, String> function) {
+		writters.put(filterId, function);
 	}
 
 }

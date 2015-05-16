@@ -18,6 +18,7 @@ package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +46,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super();
+		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&qf=DATA_PROVIDER%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
+			}
+		});
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "&qf=TYPE:IMAGE");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "&qf=TYPE:VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "&qf=TYPE:SOUND");
