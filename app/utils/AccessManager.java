@@ -31,28 +31,18 @@ import play.Logger.ALogger;
 import db.DB;
 
 public class AccessManager {
-	public static final ALogger log = Logger.of( AccessManager.class);
+	public static final ALogger log = Logger.of(AccessManager.class);
 
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
 
-	public static final List<ObjectId> accessIds = new ArrayList<ObjectId>();
-
-	public static void initialise(ObjectId userId) {
-		accessIds.clear();
-		addIds(userId);
-	}
-
-	public static void addIds(ObjectId id) {
-		accessIds.add(id);
-		User user = DB.getUserDAO().get(id);
-		accessIds.addAll(user.getUserGroupsIds());
-	}
-
-	public static boolean checkAccess(Map<ObjectId, Access> rights, Action action) {
-		for(ObjectId id: accessIds) {
-			if(rights.containsKey(id) && (rights.get(id).ordinal() > action.ordinal()) ) {
+	public static boolean checkAccess(Map<ObjectId, Access> rights,
+			List<String> userIds, Action action) {
+		for (String id : userIds) {
+			if (rights.containsKey(new ObjectId(id))
+					&& (rights.get(new ObjectId(id)).ordinal() > action
+							.ordinal())) {
 				return true;
 			}
 		}

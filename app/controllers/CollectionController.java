@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,9 +71,9 @@ public class CollectionController extends Controller {
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
 		}
-		AccessManager.initialise(new ObjectId(session().get("user")));
-		System.out.println(session().get("effectiveUserIds"));
-		if (!AccessManager.checkAccess(c.getRights(), Action.READ)) {
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)) {
 			result.put("error",
 					"User does not have read-access for the collection");
 			return forbidden(result);
@@ -102,8 +103,9 @@ public class CollectionController extends Controller {
 			result.put("error", "Cannot delete collection from database!");
 			return badRequest(result);
 		}
-		AccessManager.initialise(new ObjectId(session().get("user")));
-		if (!AccessManager.checkAccess(c.getRights(), Action.READ)) {
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)) {
 			result.put("message",
 					"Sorry! You do not have access to this collection.");
 			return badRequest(result);
@@ -130,9 +132,10 @@ public class CollectionController extends Controller {
 		// new collection changes
 		ObjectId oldId = new ObjectId(id);
 		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
-
-		AccessManager.initialise(new ObjectId(session().get("user")));
-		if (!AccessManager.checkAccess(oldVersion.getRights(), Action.EDIT)) {
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds,
+				Action.EDIT)) {
 			result.put("message",
 					"Sorry! You do not have access to this collection.");
 			return badRequest(result);
