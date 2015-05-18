@@ -301,6 +301,7 @@ public class CollectionController extends Controller {
 					new ObjectId(recordLinkId));
 			record.setDbId(null);
 			record.setCollectionId(new ObjectId(collectionId));
+			DB.getCollectionRecordDAO().makePermanent(record);
 			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
@@ -314,16 +315,17 @@ public class CollectionController extends Controller {
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 				return badRequest(result);
 			}
-			addContentToRecord(record.getDbId().toString(), source, sourceId);
-			return addRecordToFirstEntries(record, result, collectionId);
+			DB.getCollectionRecordDAO().makePermanent(record);
+			//record in first entries does not contain the content metadata
+			Status status = addRecordToFirstEntries(record, result, collectionId);
+			addContentToRecord(record.getDbId(), source, sourceId);
+			return status;
 		}
 		
 
 	}
 	
 	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, String collectionId) {
-		DB.getCollectionRecordDAO().makePermanent(record);
-
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
 		collection.itemCountIncr();
@@ -338,9 +340,8 @@ public class CollectionController extends Controller {
 		else return ok(Json.toJson(record));
 	}
 	
-	private static void addContentToRecord(String recordId, String source, String sourceId) {
-		BiFunction<String, String, Boolean> methodQuery = (String sourceClassName, String src) -> {		
-			CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId(recordId));
+	private static void addContentToRecord(ObjectId recordId, String source, String sourceId) {
+		BiFunction<CollectionRecord, String, Boolean> methodQuery = (CollectionRecord record, String sourceClassName) -> {		
 			try {
 				//TODO: create a Mint source class with respective methods
 				Class<?> sourceClass = Class.forName(sourceClassName);
@@ -361,8 +362,9 @@ public class CollectionController extends Controller {
 				return false;
 			}
 		};
+		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
 		String sourceClassName = "espace.core.sources." + source + "SpaceSource";	
-		ParallelAPICall.createPromise(methodQuery, recordId, sourceClassName);
+		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
 
 	/**
