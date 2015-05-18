@@ -16,12 +16,18 @@
 
 package controllers;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -36,6 +42,7 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.Json;
+import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -44,7 +51,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import espace.core.AutocompleteResponse;
 import espace.core.ISpaceSource;
+import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
 
 public class CollectionController extends Controller {
@@ -292,29 +301,12 @@ public class CollectionController extends Controller {
 					new ObjectId(recordLinkId));
 			record.setDbId(null);
 			record.setCollectionId(new ObjectId(collectionId));
+			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
-					
-			String sourceClassName = "espace.core.sources." + source
-					+ "SpaceSource";
-			
-			try {
-				Class<?> sourceClass = Class.forName(sourceClassName);
-				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-				ArrayList<RecordJSONMetadata> recordsData = s
-						.getRecordFromSource(sourceId);
-
-				for (RecordJSONMetadata data : recordsData) {
-					record.getContent().put(data.getFormat(),
-							data.getJsonContent());
-				}
-			} catch (ClassNotFoundException e) {
-				// my class isn't there!
-			}
-
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
@@ -322,7 +314,14 @@ public class CollectionController extends Controller {
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 				return badRequest(result);
 			}
+			addContentToRecord(record.getDbId().toString(), source, sourceId);
+			return addRecordToFirstEntries(record, result, collectionId);
 		}
+		
+
+	}
+	
+	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, String collectionId) {
 		DB.getCollectionRecordDAO().makePermanent(record);
 
 		Collection collection = DB.getCollectionDAO().getById(
@@ -332,14 +331,38 @@ public class CollectionController extends Controller {
 		if (collection.getFirstEntries().size() < 20)
 			collection.getFirstEntries().add(record);
 		DB.getCollectionDAO().makePermanent(collection);
-
 		if (record.getDbId() == null) {
-
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
 		}
-
-		return ok(Json.toJson(record));
+		else return ok(Json.toJson(record));
+	}
+	
+	private static void addContentToRecord(String recordId, String source, String sourceId) {
+		BiFunction<String, String, Boolean> methodQuery = (String sourceClassName, String src) -> {		
+			CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId(recordId));
+			try {
+				//TODO: create a Mint source class with respective methods
+				Class<?> sourceClass = Class.forName(sourceClassName);
+				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
+				ArrayList<RecordJSONMetadata> recordsData = s
+						.getRecordFromSource(sourceId);
+				for (RecordJSONMetadata data : recordsData) {
+					record.getContent().put(data.getFormat(),
+							data.getJsonContent());
+				}
+				return true;
+			} catch (ClassNotFoundException e) {
+				// my class isn't there!
+				return false;
+			} catch (InstantiationException e) {
+				return false;
+			} catch (IllegalAccessException e) {
+				return false;
+			}
+		};
+		String sourceClassName = "espace.core.sources." + source + "SpaceSource";	
+		ParallelAPICall.createPromise(methodQuery, recordId, sourceClassName);
 	}
 
 	/**

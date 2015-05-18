@@ -73,7 +73,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		
 	    //Storage needs to be updated, because collection.js gets user collections from there
 		saveCollectionsToStorage = function(collections) {
-			alert(JSON.stringify(collections));
 			if (sessionStorage.getItem('User') !== null) {
 				sessionStorage.setItem('UserCollections', JSON.stringify(collections));
 			}
