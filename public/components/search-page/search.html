@@ -1,68 +1,53 @@
 
-<div id="withsearchid" class="withsearch"  data-bind="event: { scroll: scrolled }">
+<div id="withsearchid" class="withsearch" data-bind="event: { scroll: scrolled }">
 				<form class="withsearch-form">
-					<input class="withsearch-input"  type="search" data-bind="value: term" placeholder="Search..."/>
+		<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
+		<div class="line">&nbsp;</div>
 					<button class="withsearch-submit" type="submit" data-bind="click: search">Search</button>
-					<span class="withsearch-view"><a data-bind="click: toggleSourceview" title="alter view"><i class="fa fa-th-large"></i></a></span>
+		<!-- <span class="withsearch-view"><a data-bind="click: toggleSourceview" title="alter view"><i class="fa fa-th-large"></i></a></span> -->
 				</form>
 				
 				<div class="withsearch-content">
-				
 					<!-- ko if: noResults -->
 						<p>Your search did not return results. Please try again.</p>
 					<!-- /ko -->
+
 					<!-- ko if: results().length > 0 && sourceview -->
-					
 					 <div class="scrollable">
 				    <!-- ko foreach: results -->
-				 
-				  
 					<div class="dummy-column">
 					<h2>
 					 <!-- ko text: source --><!-- /ko --> 
 					 <span class="withsearch-console"><a data-bind="attr: { href:consoleurl}" target="_blank"><i class="fa fa-external-link fa-1" title="API console"></i></a></span>
 					</h2>
+
 					 <!-- ko foreach: items -->
-					 
 					 <!-- ko if: thumb -->
 					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].recordSelect}">
 							<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
-							<span>
-							 <!-- ko text: title --><!-- /ko --> 
-							</span>
+								<span><!-- ko text: title --><!-- /ko --></span>
 						</a>
 						<!-- /ko -->    
 					   <!-- /ko -->    
 					</div>
-					
 					<!-- /ko -->
 					</div>
 					<!-- /ko --> 
-					
 					
 					<!-- ko ifnot: sourceview -->
 					<!-- ko if: mixresults().length > 0 -->
 					 <div id="withsearch-content-masonry">
 					  <div id="columns" data-bind="foreach: mixresults, masonry"><figure class="masonryitem"><a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="attr: { src:thumb, alt: title }" onerror="this.style.display='none'"/></a><figcaption data-bind="text: title"></figcaption></figure></div>
 	            	</div>
-	    
 					<!-- /ko -->
 					<!-- /ko -->
-			    
-			   	 
 		
 				 <div id="more" data-bind='visible: searching' >
-				   
-				    
 				   <i class="fa fa-spinner fa-pulse"></i>
-				
 				</div>
-				
-				
 				</div>
 				
 				<span class="withsearch-close"></span>
-			
 			</div>
 			
 			<div class="overlay"></div>
