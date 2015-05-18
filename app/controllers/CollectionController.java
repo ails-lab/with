@@ -22,6 +22,8 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -183,7 +185,6 @@ public class CollectionController extends Controller {
 		newCollection.setLastModified(new Date());
 		newCollection.setOwnerId(new ObjectId( session().get("user")));
 
-
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
 		for (ConstraintViolation<Collection> cv : violations) {
@@ -237,7 +238,11 @@ public class CollectionController extends Controller {
 			userCollections = DB.getCollectionDAO().getByOwner(u.getDbId(),
 					offset, count);
 		}
-
+		Collections.sort(userCollections, new Comparator<Collection>(){
+           public int compare (Collection c1, Collection c2){
+        	   return -c1.getCreated().compareTo(c2.getCreated());
+           }
+	    });
 		return ok(Json.toJson(userCollections));
 	}
 
@@ -430,7 +435,6 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
-
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for(CollectionRecord e: records) {
 			if( format.equals("all")) {
