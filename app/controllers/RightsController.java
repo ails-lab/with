@@ -37,8 +37,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 public class RightsController extends Controller {
-	public static final ALogger log = Logger.of( CollectionController.class);
-
+	public static final ALogger log = Logger.of(CollectionController.class);
 
 	public static Result setRights(String colId, String right, String receiver) {
 		ObjectNode result = Json.newObject();
@@ -54,17 +53,18 @@ public class RightsController extends Controller {
 		}
 
 		AccessManager.initialise(new ObjectId(session().get("user")));
-		if( !AccessManager.checkAccess(collection.getRights(), Action.DELETE) ) {
-			result.put("message", "Sorry! You do not own this collection so you cannot set rights. "
-									+ "Please contact the owner of this collection");
+		if (!AccessManager.checkAccess(collection.getRights(), Action.DELETE)) {
+			result.put("message",
+					"Sorry! You do not own this collection so you cannot set rights. "
+							+ "Please contact the owner of this collection");
 			return badRequest(result);
 		}
 		// set rights
 		// the receiver can be either a User or a UserGroup
 		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
 		rightsMap.put(new ObjectId(receiver), Access.valueOf(right));
-		AccessManager.addRight(collection.getRights(), rightsMap);
-		if( DB.getCollectionDAO().makePermanent(collection) == null) {
+		collection.getRights().putAll(rightsMap);
+		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
@@ -72,15 +72,15 @@ public class RightsController extends Controller {
 		return ok();
 	}
 
-	/*public static Result listRights(String ownerId) {
-		ObjectNode result = Json.newObject();
-
-		if(ownerId.equals("")) {
-			result.put("message", "No user specified!");
-			return badRequest(result);
-		}
-
-
-
-	}*/
+	/*
+	 * public static Result listRights(String ownerId) { ObjectNode result =
+	 * Json.newObject();
+	 * 
+	 * if(ownerId.equals("")) { result.put("message", "No user specified!");
+	 * return badRequest(result); }
+	 * 
+	 * 
+	 * 
+	 * }
+	 */
 }

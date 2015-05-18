@@ -59,13 +59,4 @@ public class AccessManager {
 		return false;
 	}
 
-	public static void addRight(Map<ObjectId, Access> rights, Map<ObjectId, Access> rightsToGive) {
-		rights.putAll(rightsToGive);
-	}
-
-	public static void removeRight(Map<ObjectId, Access> rights, Map<ObjectId, Access> rightToGo) {
-		for(Entry<ObjectId, Access> e: rightToGo.entrySet())
-			rights.remove(e.getKey(), e.getValue());
-	}
-
 }

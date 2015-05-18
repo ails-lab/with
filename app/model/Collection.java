@@ -138,12 +138,10 @@ public class Collection {
 
 	@JsonProperty
 	public void setOwnerId(ObjectId ownerId) {
-		HashMap<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
 		// Set owner for first time
 		if (this.ownerId == null) {
 			this.ownerId = ownerId;
-			ownerRights.put(this.ownerId, Access.OWN);
-			AccessManager.addRight(rights, ownerRights);
+			rights.put(this.ownerId, Access.OWN);
 			// Create a new collection metadata for owner
 			User owner = DB.getUserDAO().get(ownerId);
 			owner.getCollectionMetadata().add(collectMetadata());
@@ -152,8 +150,7 @@ public class Collection {
 			// Owner has changed
 		} else if (!this.ownerId.equals(ownerId)) {
 			// Remove rights for old owner
-			ownerRights.put(this.ownerId, Access.OWN);
-			AccessManager.removeRight(rights, ownerRights);
+			rights.remove(this.ownerId, Access.OWN);
 			User owner = DB.getUserDAO().get(this.ownerId);
 			owner.getCollectionMetadata().remove(collectMetadata());
 			DB.getUserDAO().makePermanent(owner);
