@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -318,7 +319,17 @@ public class CollectionController extends Controller {
 			DB.getCollectionRecordDAO().makePermanent(record);
 			//record in first entries does not contain the content metadata
 			Status status = addRecordToFirstEntries(record, result, collectionId);
-			addContentToRecord(record.getDbId(), source, sourceId);
+			JsonNode content = json.get("content");
+			if (content != null) {
+				Iterator<String> contentTypes = content.fieldNames();
+				while (contentTypes.hasNext()) {
+					String contentType = contentTypes.next();
+					String contentMetadata = content.get(contentType).asText();
+					record.getContent().put(contentType, contentMetadata);
+				}
+			}
+			else
+				addContentToRecord(record.getDbId(), source, sourceId);
 			return status;
 		}
 		
