@@ -137,9 +137,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  self.route = params.route;
 	  self.templateName=ko.observable('collection_new');
 	  self.modal=ko.observable("3");
-	  self.record=ko.observable(true);
+	  self.record=ko.observable(false);
 	  self.collname=ko.observable('').extend({ required: true });
 	  self.selectedCollection=ko.observable('');
+	  self.description=ko.observable('');
 	  self.collectionlist = ko.observableArray([]);
 	  self.id=ko.observable(-1);
 	 
@@ -192,8 +193,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  self.close= function(){
 		  self.reset();
-		  $('#modal-'+self.modal()).removeClass('md-show');
-	      $('#modal-'+self.modal()).css('display', 'none');
+		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
+		  
 
 	    }
 
@@ -203,11 +204,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			  var jsondata=JSON.stringify({
 					ownerId: app.currentUser._id(),
 					title: self.collname(),
-					description:formElement.elements['details'].value,
+					description:self.description(),
 					public: $("#publiccoll .active").data("value")
 				});
-			  self.saveCollection(jsondata,self.addRecord);
-			 
+			  if(!self.record()){
+				  /*new collection with no item saved inside, changed for mycolllections page*/
+				  self.saveCollection(jsondata,null);}
+			  else{ 
+				 
+			  self.saveCollection(jsondata,self.addRecord);}
 			  
 		  }
 		  else{
@@ -243,8 +248,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 						ko.contextFor(mycollections).$data.reloadCollection(data);
 						ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
 					}
-					callback(data.dbId);
-					
+					if(callback){
+					  callback(data.dbId);
+					 
+					}
+					self.close();
 				},
 				
 				"error":function(result) {
@@ -260,7 +268,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  //console.log(self.selected_items2());
 		  
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
-		  self.selected_items2().forEach(function (item) {
+			 self.selected_items2().forEach(function (item) {
+		 
 			  /* now find if item is one of collection ids*/
 			  if ($.inArray(item, self.collectionlist().map(function(x) {
 				    return x.id;
@@ -283,8 +292,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				  
 			  }
 			  
-		  });
-		  
+		     });
+		 
+		 self.close();
+		
 		  
 	  }
 	  
@@ -303,9 +314,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				collectionId: collid
 				
 			});
-		  console.log("record to add");
-		  console.log(jsondata);
-		  self.close();
+		  
 		  $.ajax({
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
@@ -345,11 +354,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.reset = function() {
-		  
+		  $(document).ajaxStop(function () {
 		    self.collname('');
+		    self.description('');
 		    self.id(-1);
+		    self.record(false);
 		    self.validationModel.errors.showAllMessages(false);
 		    self.selected_items2([]);
+		   
+		  });
 		    
 		}
 
