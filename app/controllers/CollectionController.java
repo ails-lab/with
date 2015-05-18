@@ -71,6 +71,7 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		AccessManager.initialise(new ObjectId(session().get("user")));
+		System.out.println(session().get("effectiveUserIds"));
 		if (!AccessManager.checkAccess(c.getRights(), Action.READ)) {
 			result.put("error",
 					"User does not have read-access for the collection");

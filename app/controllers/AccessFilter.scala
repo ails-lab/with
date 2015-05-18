@@ -46,7 +46,7 @@ class AccessFilter extends Filter {
 
    
   
-  def effektivUserIds(userId: Option[String], proxyId:Option[String] ): Seq[String] = {
+  def effectiveUserIds(userId: Option[String], proxyId:Option[String] ): Seq[String] = {
     val result = scala.collection.mutable.ArrayBuffer.empty[String]
     for( id <- userId ) {
         result.add(id)
@@ -54,9 +54,9 @@ class AccessFilter extends Filter {
         val groupIds = user.getUserGroupsIds().map{ x => x.toString() }      
         result.addAll( groupIds )
     }
-    for( proxy <- proxyId ) result.add( proxy )
-    for( id <- userId ) {
-        val user = DB.getUserDAO.get(new ObjectId( id ))
+    for( proxy <- proxyId ) {
+        result.add( proxy )
+        val user = DB.getUserDAO.get(new ObjectId( proxy ))
         val groupIds = user.getUserGroupsIds().map{ x => x.toString() }      
         result.addAll( groupIds )
     }
@@ -91,22 +91,22 @@ class AccessFilter extends Filter {
 		  (apiActor ? access).flatMap {
 			  response => response match {
           case o:ObjectId => {
-               val sessionData = rh.session + (("effektivUserIds", effektivUserIds(userId, Some( o.toString())).mkString(",")))
+               val sessionData = rh.session + (("effectiveUserIds", effectiveUserIds(userId, Some( o.toString())).mkString(",")))
               val newRh = FilterUtils.withSession( rh, sessionData.data )
               
              next( newRh ).map{ result => 
               FilterUtils.outsession(result) match {
-                case Some( session ) => result.withSession( Session(session) - ("effektivUserIds"))
+                case Some( session ) => result.withSession( Session(session) - ("effectiveUserIds"))
                 case None => result
               }
             }
           }
 		  	  case ApiKey.Response.ALLOWED => {
-            val sessionData = rh.session + (("effektivUserIds", effektivUserIds(userId, None).mkString(",")))
+            val sessionData = rh.session + (("effectiveUserIds", effectiveUserIds(userId, None).mkString(",")))
             val newRh = FilterUtils.withSession( rh, sessionData.data )
             next( newRh ).map { result => 
               FilterUtils.outsession(result) match {
-                case Some( session ) => result.withSession( Session(session) - ("effektivUserIds"))
+                case Some( session ) => result.withSession( Session(session) - ("effectiveUserIds"))
                 case None => result
               }
 		  	    } 

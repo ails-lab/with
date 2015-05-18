@@ -35,6 +35,7 @@ import java.util.Date;
 import model.Collection;
 import model.CollectionRecord;
 import model.User;
+import model.UserGroup;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -48,6 +49,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import controllers.GroupManager;
+import controllers.UserManager;
 import db.DB;
 
 public class TestCollectionController {
@@ -64,6 +67,14 @@ public class TestCollectionController {
 		user2.setEmail("user2@controller.gr");
 		user2.setUsername("user2");
 		DB.getUserDAO().makePermanent(user2);
+
+		UserGroup group = new UserGroup();
+		DB.getUserGroupDAO().makePermanent(group);
+
+		UserManager.addUserToGroup(user1.getDbId().toHexString(), group
+				.getDbId().toHexString());
+
+		System.out.println(user1.getUserGroupsIds());
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
@@ -83,13 +94,11 @@ public class TestCollectionController {
 				Result result = route(fakeRequest("GET",
 						"/collection/" + col.getDbId()).withSession("user",
 						user1.getDbId().toString()));
-				System.out.println(col.getRights().toString());
 				assertThat(status(result)).isEqualTo(OK);
 				// Check that read-access is forbidden for user with no rights
 				result = route(fakeRequest("GET",
 						"/collection/" + col.getDbId()).withSession("user",
 						user2.getDbId().toString()));
-				System.out.println(col.getRights().toString());
 				assertThat(status(result)).isEqualTo(FORBIDDEN);
 				// Check that change of owner for the collection updates the
 				// rights correctly
@@ -98,12 +107,10 @@ public class TestCollectionController {
 				result = route(fakeRequest("GET",
 						"/collection/" + col.getDbId()).withSession("user",
 						user1.getDbId().toString()));
-				System.out.println(col.getRights().toString());
 				assertThat(status(result)).isEqualTo(FORBIDDEN);
 				result = route(fakeRequest("GET",
 						"/collection/" + col.getDbId()).withSession("user",
 						user2.getDbId().toString()));
-				System.out.println(col.getRights().toString());
 				assertThat(status(result)).isEqualTo(OK);
 				JsonParser parser = new JsonParser();
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
