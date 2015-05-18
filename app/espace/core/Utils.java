@@ -27,6 +27,13 @@ import espace.core.SourceResponse.Lang;
 
 public class Utils {
 
+	public static String toLower(String text) {
+		if (text != null) {
+			return text.toLowerCase();
+		}
+		return text;
+	}
+
 	public static String spacesFormatQuery(String text, String space) {
 		return text.replaceAll("(\\s)+", space);
 	}
@@ -124,6 +131,13 @@ public class Utils {
 	public static Pair<String> getFacetsAttr(List<String> values, String NAME) {
 		if (values != null) {
 			return new Pair<String>(NAME, getORList(values));
+		}
+		return null;
+	}
+
+	public static Pair<String> getFacetsAttr(String value, String NAME) {
+		if (value != null) {
+			return new Pair<String>(NAME, value);
 		}
 		return null;
 	}

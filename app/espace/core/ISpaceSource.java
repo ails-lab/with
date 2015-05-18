@@ -17,8 +17,22 @@
 package espace.core;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONObject;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import espace.core.RecordJSONMetadata.Format;
+import espace.core.sources.FilterValuesMap;
+import espace.core.sources.TypeValues;
 
 public abstract class ISpaceSource {
+
+	public ISpaceSource() {
+		super();
+		vmap = new FilterValuesMap();
+	}
 
 	public abstract String getSourceName();
 
@@ -34,8 +48,42 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
-		return null;
+	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(
+			String recordId);
+
+	private FilterValuesMap vmap;
+
+	protected void countValue(CommonFilterResponse type, String t) {
+		type.addValue(vmap.translateToCommon(type.filterID, t));
+	}
+
+	protected void addMapping(String filterID, String commonValue,
+			String specificValue, String querySegment) {
+		vmap.addMap(filterID, commonValue, specificValue, querySegment);
+	}
+
+	protected List<String> translateToSpecific(String filterID, String value) {
+		return vmap.translateToSpecific(filterID, value);
+	}
+
+	protected List<String> translateToCommon(String filterID, String value) {
+		return vmap.translateToCommon(filterID, value);
+	}
+
+	protected List<String> translateToQuery(String filterID, String value) {
+		return vmap.translateToQuery(filterID, value);
+	}
+
+	protected String addfilters(CommonQuery q, String qstr) {
+		if (q.filters != null) {
+			for (CommonFilter filter : q.filters) {
+				for (String subq : translateToQuery(filter.filterID,
+						filter.value)) {
+					qstr += subq;
+				}
+			}
+		}
+		return qstr;
 	}
 
 }

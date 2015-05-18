@@ -22,7 +22,7 @@ text-decoration: none;
 }
 
 .withsearch {
-	width:1px;
+	width:0px;
 	height:0px;
 	background: #f1f1f1;
 	position: absolute;
@@ -389,18 +389,19 @@ input[type="search"] { /* reset normalize */
 }
 
 .masonryitem{
-	width: 200px; 
+	width: 185px; 
 	float:left;
 }
 
 
 #columns {
 
-column-gap: 15px;
-width: 90%;
+column-gap: 5px;
+width: 96%;
 /*
 max-width: 1500px;*/
 margin: 50px auto;
+
 }
 
 div#columns figure {
@@ -453,11 +454,12 @@ font-size: 15px;
   padding: 0 10px;}
 
 #more{
-	 bottom:40px;
+	 bottom:100px;
 	 right:40px;
 	 padding: 5px;
      position: fixed;
      z-index:1032;
+     font-size:25px;
 	    }
 
 
@@ -466,6 +468,7 @@ font-size: 15px;
     margin: 0 auto;
     font-weight:200;
     color:rgba(0, 0, 0, 0.52);
+   
 }
  
 /*Media Queries*/

@@ -5,28 +5,40 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 
 		$( document ).on( 'keypress', function( event ) {
 
-			if(event.target.nodeName != 'INPUT') {
+			if (event.target.nodeName != 'INPUT' && event.target.nodeName != 'TEXTAREA') {
+				if (event.which === null) {
+					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+			    	$("#myModal").modal('hide'); 
 
-			 if (event.which == null) {
-		    	 var char=String.fromCharCode(event.which);
-		    	 toggleSearch("focus",char);
+					
+					var char=String.fromCharCode(event.which);
+					toggleSearch("focus",char);
 
-		     } else if (event.which!=0 && event.charCode!=0) {
-		    	 var char=String.fromCharCode(event.which);
-		    	 toggleSearch("focus",char);
-		       } else {
-		    		    return;
-		     }
-			}else{return;}
+				}
+				else if (event.which !== 0 && event.charCode !== 0) {
+					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+			    	$("#myModal").modal('hide'); 
+
+					var chr = String.fromCharCode(event.which);
+					toggleSearch("focus", chr);
+				}
+				else {
+					return;
+				}
+			}
+			else {
+				return;
+			}
 		});
-		
+
 		this.route = params.route;
 
-		var self = this;
-		self.logout = function() { app.logout(); }
+		var self          = this;
+		self.username     = app.currentUser.username;
+		self.profileImage = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
 
-		self.username = app.currentUser.username;
-
+		editProfile       = function() { app.showPopup('edit-profile'); };
+		logout            = function() { app.logout(); };
 	}
 
 	return { viewModel: TopBarViewModel, template: template };

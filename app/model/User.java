@@ -30,6 +30,7 @@ import org.mongodb.morphia.annotations.Id;
 
 import play.Logger;
 import play.Logger.ALogger;
+import db.DB;
 
 @Entity
 public class User {
@@ -55,11 +56,15 @@ public class User {
 	private String lastName;
 
 	private Gender gender;
+	private String about;
+	private String location;
+
 	private String facebookId;
 	private String googleId;
 
 	private String md5Password;
 
+	private ObjectId photo;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
@@ -193,6 +198,22 @@ public class User {
 		this.md5Password = md5Password;
 	}
 
+	public String getAbout() {
+		return about;
+	}
+
+	public void setAbout(String about) {
+		this.about = about;
+	}
+
+	public String getLocation() {
+		return location;
+	}
+
+	public void setLocation(String location) {
+		this.location = location;
+	}
+
 	public List<Search> getSearchHistory() {
 		return searchHistory;
 	}
@@ -288,12 +309,32 @@ public class User {
 		this.storageLimit = storageLimit;
 	}
 
+	public ObjectId getPhoto() {
+		return this.photo;
+	}
+
+	public Media retrievePhoto() {
+		return DB.getMediaDAO().findById(this.photo);
+	}
+
+	public void setPhoto(ObjectId photo) {
+		this.photo = photo;
+	}
+
+	// public void setPhoto(Media photo) {
+	// this.photo = photo.getDbId();
+	// }
+
 	public void addUserGroup(Set<ObjectId> groups) {
 		this.userGroupsIds.addAll(groups);
 	}
 
 	public Set<ObjectId> getUserGroupsIds() {
 		return userGroupsIds;
+	}
+
+	public Set<ObjectId> getWhiteList() {
+		return whiteList;
 	}
 
 }

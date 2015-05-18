@@ -59,7 +59,6 @@ public class Collection {
 
 	@NotNull
 	@NotBlank
-	// @Indexed(name="indexed_title", unique=true, dropDups=true)
 	private String title;
 	private String description;
 
@@ -121,16 +120,12 @@ public class Collection {
 		this.description = description;
 	}
 
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
 
 	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
-	}
-
-	public boolean getIsPublic() {
-		return this.isPublic;
 	}
 
 	public User retrieveOwner() {

@@ -141,9 +141,9 @@ public class CollectionController extends Controller {
 		newVersion.getFirstEntries().addAll(oldVersion.getFirstEntries());
 		newVersion.setDbId(oldId);
 		newVersion.setLastModified(new Date());
-		newVersion.setItemCount((int) DB.getCollectionRecordDAO().getItemCount(
-				oldId));
-
+		newVersion.setItemCount(oldVersion.getItemCount());
+		newVersion.setOwnerId(oldVersion.getOwnerId());
+		newVersion.setCreated(oldVersion.getCreated());
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newVersion);
 		for (ConstraintViolation<Collection> cv : violations) {
@@ -151,12 +151,15 @@ public class CollectionController extends Controller {
 					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 			return badRequest(result);
 		}
-
-		if (DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(),
-				newVersion.getTitle()) != null) {
-			result.put("message",
-					"Title already exists! Please specify another title.");
-			return internalServerError(result);
+		// if oldTitle = newTitle means description, isPublic, thumbnail or
+		// category changed
+		if (!newVersion.getTitle().equals(oldVersion.getTitle())) {
+			if (DB.getCollectionDAO().getByOwnerAndTitle(
+					newVersion.getOwnerId(), newVersion.getTitle()) != null) {
+				result.put("message",
+						"Title already exists! Please specify another title.");
+				return internalServerError(result);
+			}
 		}
 		if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
 
@@ -187,6 +190,7 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
+		newCollection.setOwnerId(new ObjectId(session().get("user")));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -203,10 +207,12 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
-
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
+		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
+		owner.getCollectionMetadata().add(newCollection.collectMetadata());
+		DB.getUserDAO().makePermanent(owner);
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
 		return ok(Json.toJson(newCollection));
@@ -217,14 +223,13 @@ public class CollectionController extends Controller {
 	 */
 	public static Result list(String username, String ownerId, String email,
 			String access, int offset, int count) {
-
 		ObjectNode result = Json.newObject();
 
 		List<Collection> userCollections;
-		if (ownerId != null)
+		if (ownerId != null) {
 			userCollections = DB.getCollectionDAO().getByOwner(
 					new ObjectId(ownerId), offset, count);
-		else {
+		} else {
 			User u = null;
 			if (email != null)
 				u = DB.getUserDAO().getByEmail(email);
@@ -308,19 +313,24 @@ public class CollectionController extends Controller {
 			record = Json.fromJson(json, CollectionRecord.class);
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
+			record.setCollectionId(new ObjectId(collectionId));
 
 			String sourceClassName = "espace.core.sources." + source
 					+ "SpaceSource";
-			Class<?> sourceClass = Class.forName(sourceClassName);
-			ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
 
-			ArrayList<RecordJSONMetadata> recordsData = s
-					.getRecordFromSource(sourceId);
-			for (RecordJSONMetadata data : recordsData) {
-				record.getContent()
-						.put(data.getFormat(), data.getJsonContent());
-
+			try {
+				Class<?> sourceClass = Class.forName(sourceClassName);
+				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
+				ArrayList<RecordJSONMetadata> recordsData = s
+						.getRecordFromSource(sourceId);
+				for (RecordJSONMetadata data : recordsData) {
+					record.getContent().put(data.getFormat(),
+							data.getJsonContent());
+				}
+			} catch (ClassNotFoundException e) {
+				// my class isn't there!
 			}
+
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
@@ -370,7 +380,6 @@ public class CollectionController extends Controller {
 		if (temp != null)
 			records.remove(temp);
 		collection.setLastModified(new Date());
-
 		collection.itemCountDec();
 		DB.getCollectionDAO().makePermanent(collection);
 
