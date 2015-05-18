@@ -243,10 +243,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
+					
 					if(self.route().request_=="mycollections"){
-						
 						ko.contextFor(mycollections).$data.reloadCollection(data);
-						ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
+						//ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
 					}
 					if(callback){
 					  callback(data.dbId);

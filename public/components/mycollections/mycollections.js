@@ -1,9 +1,6 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 	
 	function Entry(entryData) {
-		//this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
-		//this.entryTitle = entryData.title;
-		//this.entrySourceId = entryData.sourceId;
 		var entry = ko.mapping.fromJS(entryData);
 		ko.mapping.fromJS(entryData, entry);
 		return entry;
@@ -32,7 +29,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
-        self.thumbnailUrlToEdit = ko.observable();
         self.index = ko.observable(0);
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null) 
@@ -103,7 +99,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			self.index(collIndex);
 	        self.titleToEdit(self.myCollections()[collIndex].title());
 	        self.descriptionToEdit(self.myCollections()[collIndex].description());
-	        self.thumbnailUrlToEdit(self.myCollections()[collIndex].thumbnailUrl());
 	        self.isPublicToEdit(self.myCollections()[collIndex].isPublic());
 			app.showPopup("edit-collection");
 		}
@@ -181,7 +176,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
 			self.myCollections.push(newCollection);
-			saveCollectionsToStorage(self.myCollections());
+			saveCollectionsToStorage(ko.mapping.toJS(self.myCollections));
 		}
 		
 	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
@@ -192,6 +187,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    }
 		    return -1;
 		}
+	    
 	}
 	
 	return {viewModel: MyCollectionsModel, template: template};
