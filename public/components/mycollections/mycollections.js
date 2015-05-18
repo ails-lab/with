@@ -175,7 +175,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
-			self.myCollections.push(newCollection);
+			self.myCollections.unshift(newCollection);
 			saveCollectionsToStorage(ko.mapping.toJS(self.myCollections));
 		}
 		

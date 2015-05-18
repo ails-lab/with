@@ -22,8 +22,11 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -182,7 +185,6 @@ public class CollectionController extends Controller {
 		newCollection.setLastModified(new Date());
 		newCollection.setOwnerId(new ObjectId( session().get("user")));
 
-
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
 		for (ConstraintViolation<Collection> cv : violations) {
@@ -236,7 +238,11 @@ public class CollectionController extends Controller {
 			userCollections = DB.getCollectionDAO().getByOwner(u.getDbId(),
 					offset, count);
 		}
-
+		Collections.sort(userCollections, new Comparator<Collection>(){
+           public int compare (Collection c1, Collection c2){
+        	   return -c1.getCreated().compareTo(c2.getCreated());
+           }
+	    });
 		return ok(Json.toJson(userCollections));
 	}
 
@@ -318,7 +324,17 @@ public class CollectionController extends Controller {
 			DB.getCollectionRecordDAO().makePermanent(record);
 			//record in first entries does not contain the content metadata
 			Status status = addRecordToFirstEntries(record, result, collectionId);
-			addContentToRecord(record.getDbId(), source, sourceId);
+			JsonNode content = json.get("content");
+			if (content != null) {
+				Iterator<String> contentTypes = content.fieldNames();
+				while (contentTypes.hasNext()) {
+					String contentType = contentTypes.next();
+					String contentMetadata = content.get(contentType).asText();
+					record.getContent().put(contentType, contentMetadata);
+				}
+			}
+			else
+				addContentToRecord(record.getDbId(), source, sourceId);
 			return status;
 		}
 		
@@ -419,7 +435,6 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
-
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for(CollectionRecord e: records) {
 			if( format.equals("all")) {
