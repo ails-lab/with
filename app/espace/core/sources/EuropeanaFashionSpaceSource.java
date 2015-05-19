@@ -16,13 +16,7 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-
-import org.apache.jena.atlas.logging.Log;
-import org.w3c.dom.Document;
-
-import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -41,8 +35,14 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
 		return "http://www.europeanafashion.eu/api/search/"
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm) + "/" + q.pageSize + "/" + ""
-				+ ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1);
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
+						: q.searchTerm)
+				+ "/"
+				+ q.pageSize
+				+ "/"
+				+ ""
+				+ ((Integer.parseInt(q.page) - 1)
+						* Integer.parseInt(q.pageSize) + 1);
 		// return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
 		// + Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" :
 		// q.searchTerm)
@@ -86,7 +86,8 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 				it.url = new MyURL();
 				// it.url.original = Utils.readArrayAttr(item, "isShownAt",
 				// false);
-				it.url.fromSourceAPI = "http://www.europeanafashion.eu/record/a/" + it.id;
+				it.url.fromSourceAPI = "http://www.europeanafashion.eu/record/a/"
+						+ it.id;
 				a.add(it);
 			}
 			res.items = a;
@@ -98,16 +99,16 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
 		return res;
 	}
-	
+
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
 			response = HttpConnector
 					.getURLContent("http://www.europeanafashion.eu/api/record/"
-							+ recordId );
+							+ recordId);
 			JsonNode record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
 					.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {

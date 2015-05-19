@@ -16,23 +16,19 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.CommonFilter;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
-import espace.core.SourceResponse;
 import espace.core.RecordJSONMetadata.Format;
+import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
@@ -43,10 +39,14 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
-		String qstr = "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
-				+ "&page=" + q.page + "&page_size=" + q.pageSize;
+		String qstr = "http://api.dp.la/v2/items?api_key="
+				+ DPLAKey
+				+ "&q="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
+						: q.searchTerm)
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
+						+ Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
+						: "") + "&page=" + q.page + "&page_size=" + q.pageSize;
 		qstr = addfilters(q, qstr);
 		String facets = "&facets=provider.name,sourceResource.type";
 		return qstr + facets;
@@ -70,6 +70,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", "&sourceResource.type=%22moving%20image%22");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", "&sourceResource.type=sound");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", "&sourceResource.type=text");
+
 		// TODO: what to do with physical objects?
 	}
 
@@ -114,14 +115,19 @@ public class DPLASpaceSource extends ISpaceSource {
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
 				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
-				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+				it.title = Utils.readLangAttr(item.path("sourceResource"),
+						"title", false);
+				it.description = Utils.readLangAttr(
+						item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"),
+						"creator", false);
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
+				it.dataProvider = Utils.readLangAttr(item.path("provider"),
+						"name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
+				it.url.fromSourceAPI = "http://dp.la/item/"
+						+ Utils.readAttr(item, "id", false);
 				a.add(it);
 			}
 			res.items = a;
@@ -158,9 +164,12 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
+			response = HttpConnector
+					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
+							+ "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record
+					.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();

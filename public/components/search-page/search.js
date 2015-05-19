@@ -1,65 +1,38 @@
 define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], function(bridget,ko, template,masonry,imagesLoaded) {
-	
+
 	 $.bridget( 'masonry', masonry );
-	
-	
+
+
+
+
+
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
     	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
-		
+
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-		       
+
 		        $element.masonry("destroy");
 		    });
 
-    },
-    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    	
-    	var $element = $(element),
-    	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
-    	masonry = ko.utils.unwrapObservable(valueAccessor())
-    	if (!list.length){
-			
-			return;
-		}
-    	
-        
-    	imagesLoaded( $element, function() {
-    		if (!($element.data('masonry'))){
-        		
-        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false,isFitWidth: true});
-        			
-        	}
-    		$('#columns > figure').each(function () {
- 				
- 	 		    $(this).animate({ opacity: 1 });
- 			});
-    		
-    		$element.masonry( 'reloadItems' );
- 			$element.masonry( 'layout' );
- 			
-    		
- 			
- 		 });
-		 
-      }
+    }
     };
-    
-	
-    
+
+
+
 	function Record(data) {
 		var self = this;
-		self.id = ko.observable(false);
+		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
-		self.thumb = ko.observable(false);
+		self.thumb = ko.observable("//placehold.it/200x200");
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
 		self.source=ko.observable(false);
 		self.creator=ko.observable("");
 		self.provider=ko.observable("");
 		self.url=ko.observable("");
-		self.id=ko.observable("");
+		//self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
@@ -72,7 +45,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.source(data.source);
 			self.creator(data.creator);
 			self.provider(data.provider);
-			self.id(data.id);
+			self.recordId(data.recordId);
 		};
 
 		self.displayTitle = ko.computed(function() {
@@ -89,29 +62,29 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.source = ko.observable("");
 		self.consoleurl=ko.observable("");
 		self.items=ko.observableArray([]);
-		
-		
+
+
 		self.load=function(data){
 			self.source=data.source;
 			self.consoleurl=data.consoleurl;
 			self.items=data.items;
 		};
-		
-		
-		self.addItem = function(c) {            
+
+
+		self.addItem = function(c) {
 	           self.items.push(new Record(c));
-	        };    
-	                 
-	            
-		
+	        };
+
+
+
 		self.append =function(newitems){
 			self.items.push.apply(self.items, newitems);
 			};
-		
+
 		if(data != undefined) self.load(data);
 	}
-	
-	
+
+
 	function SearchModel(params) {
 		var self = this;
 
@@ -123,7 +96,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
-		
+
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
@@ -140,19 +113,31 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
-		
+
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
+			self.searching(true);
+			imagesLoaded( '#columns', function() {
+				  $('#columns').masonry( 'reloadItems' );
+	    		  $('#columns').masonry( 'layout' );
+	    		  $('#columns > figure').each(function () {
+
+	    			  $(this).animate({ opacity: 1 });
+	    		  	});
+	    		  self.searching(false);
+
+
+	    		  });
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
 		  }
-		
+
 		};
-		
+
 		self.reset = function() {
-			
+
 			self.term("");
 			self.currentTerm = ko.observable("");
 			self.page(1);
@@ -179,10 +164,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				    source:self.sources()
 				}),
 				"success": function(data) {
-					
+
 					self.previous(self.page()-1);
 					var moreitems=false;
-					
+
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
@@ -192,10 +177,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						var items = [];
 						for(var j in data[i].items){
 						 var result = data[i].items[j];
-						 
+
 						 if(result !=null && result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
 						 var record = new Record({
-							id: result.id,
+							recordId: result.recordId || result.id,
 							thumb: result.thumb[0],
 							fullres: result.fullresolution,
 							title: result.title[0].value,
@@ -207,9 +192,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						 items.push(record);}
 						}
 						if(items.length>0){
-							
+
 							self.mixresults.push.apply(self.mixresults, items);
-							
+
 						}
 						api_console="";
 						if(source=="Europeana"){
@@ -244,14 +229,27 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 								}));
 								break;
 							}
-							
+
 						  }
 						if(srcCat.items.length>0 && (!found || self.results().length==0)){
 							self.results.push(srcCat);
 						}
-						
+
 					}
-						self.searching(false);
+					 imagesLoaded( '#columns', function() {
+						  $('#columns').masonry( 'reloadItems' );
+			    		  $('#columns').masonry( 'layout' );
+			    		  $('#columns > figure').each(function () {
+
+			    			  $(this).animate({ opacity: 1 });
+			    		  	});
+			    		  self.searching(false);
+
+
+			    		  });
+
+
+
 						if(moreitems){
 							self.next(self.page()+1);
 						}else{
@@ -262,8 +260,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			console.log(self.term());
 		 }
 		};
-		
-		
+
+
 		self.search = function() {
 			self.results([]);
 			self.mixresults([]);
@@ -278,11 +276,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.recordSelect= function (e){
 			console.log(e);
 			itemShow(e);
-			
+
 		}
-		
+
 		self.searchNext = function() {
-		if(self.next()>0){	
+		if(self.next()>0){
 			self.page(self.next());
 			self._search();}
 		};
@@ -294,7 +292,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 		self.defaultSource=function(item){
 			item.thumb('images/no_image.jpg');
-			
+
 	    }
 
 	  var withsearch = $( '#withsearchid' );
@@ -328,7 +326,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	   		 //groupBy: "category",
 	   		 //width: "600",
 	   		 orientation: "auto",
-		     onSearchComplete: function(query, suggestions) {	
+		     onSearchComplete: function(query, suggestions) {
 		    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
 		    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 		    	 for (var i in suggestions) {
@@ -337,11 +335,19 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		    		 //$(s).append("<div>a</div>");.
 		    	 }
 		    	 /*$(".autocomplete-suggestion").each(function(i) {
-		    		 alert(i + ": " + $(this).text()); 
+		    		 alert(i + ": " + $(this).text());
 		    	 });*/
-		     }
+		     },
+			 formatResult: function(suggestion, currentValue) {
+				var s = '<strong>' + currentValue + '</strong>';
+				s    += suggestion.value.substring(currentValue.length);
+				s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
+
+				return s;
+			 }
+
 	 });
-	  
+
 	  ctrlClose =$("span.withsearch-close");
 	  isOpen = false;
 		// show/hide search area
@@ -350,10 +356,15 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if(  evt === 'focus' && isOpen ) return false;
 
 			if( isOpen ) {
+				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+		    	$("#myModal").modal('hide');
+		    	$("body").removeClass("modal-open");
+
+
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
 				withinput.blur();
-				
+
 			}
 			else {
 				var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
@@ -366,27 +377,28 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				withinput.focus();
 				if(isOpera || isFirefox)
 				withinput.val(char);
-				
+
 			}
 			isOpen = !isOpen;
 		};
 
 	    $(document).keyup(function(e) {
-  		  if (e.keyCode == 27 && isOpen ) { 
+	       if (e.keyCode == 27 && isOpen ) {
   			self.reset();
   			toggleSearch(e,'');
-  			
+
   		  }   // esc
   		});
         ctrlClose.on('click',function(event){
+
     		self.reset();
     		toggleSearch(event,'');
-    		
+
     		}
     	);
-        
-       	 
+
+
   }
- 
+
   return { viewModel: SearchModel, template: template };
 });

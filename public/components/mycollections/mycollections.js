@@ -1,39 +1,35 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 	
 	function Entry(entryData) {
-		//this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
-		//this.entryTitle = entryData.title;
-		//this.entrySourceId = entryData.sourceId;
 		var entry = ko.mapping.fromJS(entryData);
 		ko.mapping.fromJS(entryData, entry);
 		return entry;
 	}
 
-	self.reload = function(dbId) {
-		$.ajax({
-			"url": "/collection/"+dbId,
-			"method": "GET",
-			success: function(data){
-				//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
-				//self.myCollections()[index](self.load());
-				//alert(JSON.stringify(self.editableCollection()));
-				ko.mapping.fromJS(data, self.myCollections);
-			}
-		});				
-	};
-	
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
 		var self = this;
-		self.route = params.route;
+		//self.route = params.route;
 		var collections = [];
 		self.index = ko.observable(0);
-		//self.collectionToEdit = ko.observable(new MyCollection({}));
-		self.myCollections = ko.mapping.fromJS([]);
+		var mapping = {
+			'dbId': {
+				key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+		        }
+			},
+		    'firstEntries': {
+		        key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+		        }
+		    }
+		};
+		self.myCollections = ko.mapping.fromJS([], mapping);
 		var promise = app.getUserCollections();
-		self.titleToEdit = ko.observable("defaultTitle");
+		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
+        self.index = ko.observable(0);
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
@@ -53,7 +49,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		
 		self.createCollection = function() {
 			createNewCollection();
-		}
+		};
 		
 		showDelCollPopup = function(collectionTitle, collectionId) {
 			$("#myModal").find("h4").html("Do you want to delete this collection?");
@@ -91,62 +87,107 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
-					saveCollectionsToStorage(self.myCollections);
+					saveCollectionsToStorage(self.myCollections());
 				}
 			});
 		};
 		
-		
-		self.addNew=function(cdata){
-			var myc=new MyCollection(cdata);
-			self.myCollections.push(myc);
-			
-		}
 		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
-			var index = context.$index();
-	        self.index(index);
-	        self.titleToEdit(self.myCollections()[index].title());
-	        self.descriptionToEdit(self.myCollections()[index].description());
-	        self.isPublicToEdit(self.myCollections()[index].isPublic());
+	        var collIndex = context.$index();
+			self.index(collIndex);
+	        self.titleToEdit(self.myCollections()[collIndex].title());
+	        self.descriptionToEdit(self.myCollections()[collIndex].description());
+	        self.isPublicToEdit(self.myCollections()[collIndex].isPublic());
 			app.showPopup("edit-collection");
 		}
 		
-		self.closeEditCollectionPopup = function() {
+		self.closeEditPopup = function() {
 			app.closePopup();
 		}
 		
-		editCollection = function (title, description, isPublic) {
+		self.editCollection = function () {
+			var collIndex = self.index();
 			$.ajax({
-				"url": "/collection/"+collectionId,
+				"url": "/collection/"+self.myCollections()[collIndex].dbId(),
 				"method": "POST",
-				"data": {"title": title,
-						"description": description,
-						"isPublic": isPublic
-					},
+				"contentType": "application/json",
+				"data": JSON.stringify({title: self.titleToEdit(),
+						description: self.descriptionToEdit(),
+						isPublic: self.isPublicToEdit()
+					}),
 				success: function(result){
-					self.myCollections.remove(function (item) {
-                        return item.dbId() == collectionId;
-                    });
-					saveCollectionsToStorage(self.myCollections);
+					self.myCollections()[collIndex].title(self.titleToEdit());
+					self.myCollections()[collIndex].description(self.descriptionToEdit());
+					self.myCollections()[collIndex].isPublic(self.isPublicToEdit());
+					saveCollectionsToStorage(self.myCollections());
+				},
+				error: function(error) {
+					var r = JSON.parse(error.responseText);
+					$("#myModal").find("h4").html("An error occured");
+					$("#myModal").find("div.modal-body").html(r.message);
+					$("#myModal").modal('show');
 				}
 			});
+			self.closeEditPopup();
 		};
 		
-		closeEditPopup = function() {
-			closePopup();
-		}
-		
 		self.privateToggle=function(e,arg){
-			$(arg.currentTarget).parent().find('.btn').toggleClass('active');
+			/*$(arg.currentTarget).parent().find('.btn').toggleClass('active');
 		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
 		    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
 		    }
-		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
-			 self.isPublic = $("#publiccoll .active").data("value");
-
+		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');*/
+		    if (self.isPublicToEdit())
+		    	self.isPublicToEdit(false);
+		    else
+		    	self.isPublicToEdit(true);
 		}
+		
+		self.reloadRecord = function(dbId, recordDataString) {
+			/*$.ajax({
+				"url": "/collection/"+dbId,
+				"method": "GET",
+				success: function(data){
+					//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
+					//self.myCollections()[index](self.load());
+					//alert(JSON.stringify(self.editableCollection()));
+					ko.mapping.fromJS(data, self.myCollections);
+					var collIndex = arrayFirstIndexOf(viewModel.items(), function(item) {
+						   return item.dbId === dbId;    
+					}));
+					self.myCollections()[collIndex].remove((data);
+				}
+			});*/
+			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
+				   return item.dbId() === dbId;    
+			});
+			var recordData = JSON.parse(recordDataString);
+			var recordObservable = ko.mapping.fromJS(recordData);
+			ko.mapping.fromJS(recordData, recordObservable);
+			var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
+			self.myCollections()[collIndex].itemCount(newItemCount);
+			self.myCollections()[collIndex].firstEntries.push(recordObservable);
+			saveCollectionsToStorage(self.myCollections());
+		};
+		
+		self.reloadCollection = function(data) {
+			var newCollection = ko.mapping.fromJS(data);
+			ko.mapping.fromJS(data, newCollection);
+			self.myCollections.unshift(newCollection);
+			saveCollectionsToStorage(ko.mapping.toJS(self.myCollections));
+		}
+		
+	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
+		    for (var i = 0, j = array.length; i < j; i++) {
+		        if (predicate.call(predicateOwner, array[i])) {
+		            return i;
+		        }
+		    }
+		    return -1;
+		}
+	    
 	}
 	
 	return {viewModel: MyCollectionsModel, template: template};

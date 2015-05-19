@@ -19,12 +19,14 @@ package controllers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import play.Logger;
+import play.Logger.ALogger;
 import play.data.Form;
 import play.libs.F.Function0;
 import play.libs.Json;
@@ -45,6 +47,7 @@ import espace.core.Utils;
 public class SearchController extends Controller {
 
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
+	public static final ALogger log = Logger.of(SearchController.class);
 
 	public static Result searchslow() {
 		System.out.println(request().body());
@@ -69,7 +72,14 @@ public class SearchController extends Controller {
 	@SuppressWarnings("unchecked")
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
-
+		if( log.isDebugEnabled()) {
+			StringBuilder sb = new StringBuilder();
+			for( Map.Entry<String,String> e: session().entrySet()) {
+				sb.append( e.getKey() + " = " + "'" + e.getValue() + "'\n");
+			}
+			log.debug( sb.toString());
+		}
+		
 		if (json == null) {
 			return Promise.pure((Result) badRequest("Expecting Json query"));
 		} else {
@@ -185,6 +195,7 @@ public class SearchController extends Controller {
 	}
 
 	public static Result posttestsearch() {
+		System.out.println("--------------------");
 		System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if (q == null || q.searchTerm == null) {

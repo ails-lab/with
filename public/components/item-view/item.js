@@ -3,7 +3,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 	function Record(data) {
 		var self = this;
 		
-		self.recordId = ko.observable(false);
+		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
 		self.thumb = ko.observable(false);
@@ -46,7 +46,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			
 			self.source(data.source);
 			
-			self.recordId(data.id);
+			self.recordId(data.recordId);
 		};
 
 		 self.sourceImage = ko.pureComputed(function() {
@@ -81,11 +81,10 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
     
     
     self.open=function(){
+     $("body").addClass("modal-open");
     	$('#modal-1').css('display', 'block');
 
     	$('#modal-1').addClass('md-show');
-    	
-    	$('#modal-1').css('overflow-y', 'auto');
 	  }
 
 	 
@@ -94,6 +93,8 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
     self.close= function(){
     	
+    	self.record().fullres('');
+    	 $("body").removeClass("modal-open");
     	$("#modal-1").find("div[id^='modal-']").removeClass('md-show').css('display', 'none');
     	$('#modal-1').removeClass('md-show');
     	$('#modal-1').css('display', 'none');
@@ -106,11 +107,11 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
    
     
     self.changeSource=function(item){
-    	if(item.fullres!=item.thumb){
-    		 $("#fullresim").attr('src',thumb);
+    	if(item.record().fullres()!=item.record().thumb()){
+    		 $("#fullresim").attr('src',item.record().thumb());
     	}
     	else{
-    		 $("#fullresim").attr('src',thumb);
+    		 $("#fullresim").attr('src',item.record().thumb());
     	}
 
     }

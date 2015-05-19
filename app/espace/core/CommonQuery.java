@@ -82,10 +82,13 @@ public class CommonQuery {
 		this.searchTerm = query;
 	}
 
+	
+
 	@Override
 	public String toString() {
-		return "CommonQuery [page=" + page + ", pageSize=" + pageSize + ", searchTerm=" + searchTerm
-				+ ", termToExclude=" + termToExclude + ", source=" + source + ", europeanaAPI=" + europeanaAPI + "]";
+		return "CommonQuery [searchTerm=" + searchTerm + ", page=" + page
+				+ ", pageSize=" + pageSize + ", source=" + source
+				+ ", filters=" + filters + "]";
 	}
 
 	public void validate() {

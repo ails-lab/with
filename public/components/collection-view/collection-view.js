@@ -31,14 +31,15 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	        		 $element.masonry( {itemSelector: '.masonryitem',gutter: 5,isInitLayout: false,isFitWidth: true});
 	        			
 	        	}
+	    		$element.masonry( 'reloadItems' );
+	 			$element.masonry( 'layout' );
+	 			
+	    		
 	    		$('#collcolumns > figure').each(function () {
 	 				
 	 	 		    $(this).animate({ opacity: 1 });
 	 			});
 	    		
-	    		$element.masonry( 'reloadItems' );
-	 			$element.masonry( 'layout' );
-	 			
 	    		
 	 			
 	 		 });
