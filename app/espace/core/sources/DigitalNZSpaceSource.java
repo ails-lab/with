@@ -16,7 +16,6 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,8 +31,8 @@ import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
-import espace.core.SourceResponse;
 import espace.core.RecordJSONMetadata.Format;
+import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
@@ -47,15 +46,19 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	public DigitalNZSpaceSource() {
 		super();
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images", "&or[category][]=Images");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images",
+				"&or[category][]=Images");
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Other");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio", "&or[category][]=Audio");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books", "&or[category][]=Books");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio",
+				"&or[category][]=Audio");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books",
+				"&or[category][]=Books");
 	}
 
 	public String getHttpQuery(CommonQuery q) {
-		String qstr = "http://api.digitalnz.org/v3/records.json?api_key=" + Key + "&text="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm) + "&per_page=" + q.pageSize + "&page=" + q.page;
+		String qstr = "http://api.digitalnz.org/v3/records.json?api_key=" + Key
+				+ "&text=" + Utils.spacesPlusFormatQuery(q.searchTerm)
+				+ "&per_page=" + q.pageSize + "&page=" + q.page;
 		qstr = addfilters(q, qstr);
 		return qstr;
 	}
@@ -90,7 +93,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			// System.out.print(o.path("name").asText() + " ");
 
 			res.totalCount = Utils.readIntAttr(o, "result_count", true);
-			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1) * res.count;
+			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1)
+					* res.count;
 
 			JsonNode aa = o.path("results");
 
@@ -110,15 +114,18 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
 				// TODO not present
-				it.fullresolution = Utils.readArrayAttr(item, "large_thumbnail_url", false);
+				it.fullresolution = Utils.readArrayAttr(item,
+						"large_thumbnail_url", false);
 				// TODO read date and take year?
 				it.year = null; // Utils.readArrayAttr(item, "issued", true);
 				// TODO use author?
 				it.dataProvider = null;// Utils.readLangAttr(item,
 										// "contributor", false);
 				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "landing_url", false);
-				it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
+				it.url.original = Utils.readArrayAttr(item, "landing_url",
+						false);
+				it.url.fromSourceAPI = "http://www.digitalnz.org/records/"
+						+ it.id;
 				a.add(it);
 
 			}
@@ -138,13 +145,17 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.digitalnz.org/v3/records/" + recordId + ".json?api_key="
-					+ Key);
+			response = HttpConnector
+					.getURLContent("http://api.digitalnz.org/v3/records/"
+							+ recordId + ".json?api_key=" + Key);
 			JsonNode record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record.toString()));
-			Document xmlResponse = HttpConnector.getURLContentAsXML("http://api.digitalnz.org/v3/records/" + recordId
-					+ ".xml?api_key=" + Key);
-			jsonMetadata.add(new RecordJSONMetadata(Format.XML, Serializer.serializeXML(xmlResponse)));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record
+					.toString()));
+			Document xmlResponse = HttpConnector
+					.getURLContentAsXML("http://api.digitalnz.org/v3/records/"
+							+ recordId + ".xml?api_key=" + Key);
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML_DNZ, Serializer
+					.serializeXML(xmlResponse)));
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;

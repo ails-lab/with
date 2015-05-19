@@ -539,6 +539,11 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
   padding-top: 0;
 }
 
+.editCollectionPopup {
+  min-width: 35%;
+  padding-top: 0;
+}
+
 #popup .modal-footer {
   background-color: #f0f0f0;
 }

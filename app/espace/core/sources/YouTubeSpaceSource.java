@@ -16,7 +16,6 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -194,7 +193,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 					.getURLContent("https://www.googleapis.com/youtube/v3/videos?id="
 							+ recordId + "&part=snippet&key=" + getKey());
 			JsonNode record = response.get("items").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_YOUTUBE, record
 					.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
