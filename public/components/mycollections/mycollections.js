@@ -1,9 +1,6 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
 	
 	function Entry(entryData) {
-		//this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
-		//this.entryTitle = entryData.title;
-		//this.entrySourceId = entryData.sourceId;
 		var entry = ko.mapping.fromJS(entryData);
 		ko.mapping.fromJS(entryData, entry);
 		return entry;
@@ -124,7 +121,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections()[collIndex].title(self.titleToEdit());
 					self.myCollections()[collIndex].description(self.descriptionToEdit());
 					self.myCollections()[collIndex].isPublic(self.isPublicToEdit());
-					saveCollectionsToStorage(self.myCollections);
+					saveCollectionsToStorage(self.myCollections());
 				},
 				error: function(error) {
 					var r = JSON.parse(error.responseText);
@@ -172,14 +169,14 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
 			self.myCollections()[collIndex].itemCount(newItemCount);
 			self.myCollections()[collIndex].firstEntries.push(recordObservable);
-			saveCollectionsToStorage(self.myCollections);
+			saveCollectionsToStorage(self.myCollections());
 		};
 		
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
-			self.myCollections.push(newCollection);
-			saveCollectionsToStorage(self.myCollections);
+			self.myCollections.unshift(newCollection);
+			saveCollectionsToStorage(ko.mapping.toJS(self.myCollections));
 		}
 		
 	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
@@ -190,6 +187,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    }
 		    return -1;
 		}
+	    
 	}
 	
 	return {viewModel: MyCollectionsModel, template: template};
