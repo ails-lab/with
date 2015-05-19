@@ -57,13 +57,13 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.TYPE_ID, new Function<String, String>() {
 			@Override
 			public String apply(String t) {
-				return "&sourceResource.type=" + Utils.spacesPlusFormatQuery(t);
+				return "&sourceResource.type=%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
 			}
 		});
 		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, String>() {
 			@Override
 			public String apply(String t) {
-				return "&provider.name=" + Utils.spacesPlusFormatQuery(t);
+				return "&provider.name=%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
 			}
 		});
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", "&sourceResource.type=image");
