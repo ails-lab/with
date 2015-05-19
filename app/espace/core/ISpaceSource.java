@@ -36,7 +36,9 @@ public abstract class ISpaceSource {
 
 	public abstract String getSourceName();
 
-	public abstract String getHttpQuery(CommonQuery q);
+	public String getHttpQuery(CommonQuery q) {
+		return "";
+	};
 
 	public abstract SourceResponse getResults(CommonQuery q);
 
@@ -48,8 +50,10 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(
-			String recordId);
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(
+			String recordId) {
+		return new ArrayList<RecordJSONMetadata>();
+	}
 
 	private FilterValuesMap vmap;
 
