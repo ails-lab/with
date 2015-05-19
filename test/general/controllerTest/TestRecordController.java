@@ -62,7 +62,7 @@ public class TestRecordController {
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
-		col.setPublic(false);
+		col.setIsPublic(false);
 		col.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
@@ -122,7 +122,7 @@ public class TestRecordController {
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
-		col.setPublic(false);
+		col.setIsPublic(false);
 		col.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
@@ -186,7 +186,7 @@ public class TestRecordController {
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
-		col.setPublic(false);
+		col.setIsPublic(false);
 		col.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
@@ -246,7 +246,7 @@ public class TestRecordController {
 		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
-		col.setPublic(false);
+		col.setIsPublic(false);
 		col.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
