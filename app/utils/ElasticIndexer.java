@@ -20,6 +20,8 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +31,8 @@ import model.Collection;
 import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -150,8 +154,8 @@ public class ElasticIndexer {
 			log.debug("No records within the collection to index!");
 		} else if( documents.size() == 1 ) {
 			IndexResponse response = getTransportClient().prepareIndex(
-					 getConf().getString("elasticsearch.index"),
-					 "record",
+					 getConf().getString("elasticsearch.index.name"),
+					 getConf().getString("elasticsearch.index.type"),
 					 record.getDbId().toString())
 					 	.setSource(documents.get(0))
 					 	.execute()
@@ -171,10 +175,36 @@ public class ElasticIndexer {
 		}
 	}
 
+	public CreateIndexResponse putMapping() {
+		/*XContentBuilder mapping = null;
+		try {
+			mapping = jsonBuilder().startObject().startObject("record").startObject("properties").startObject("*_all").field("type", "string").field("index", "not_analyzed")
+					.endObject()
+					.startObject("*").field("type", "string").endObject()
+					.endObject().endObject().endObject();
+			System.out.println(mapping.string());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+
+	//	getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
+		JsonNode mapping = null;;
+		try {
+			mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/mapping3.elastic"))));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		CreateIndexRequestBuilder cirb = getTransportClient().admin().indices().prepareCreate("with-mapping3");
+		cirb.addMapping("record", mapping.toString());
+		return cirb.execute().actionGet();
+	}
+
 	public IndexResponse indexSingleDocument() {
 		IndexResponse response = getTransportClient().prepareIndex(
-					getConf().getString("elasticsearch.index"),
-										"record",
+					getConf().getString("elasticsearch.index.name"),
+					getConf().getString("elasticsearch.index.type"),
 										record.getDbId().toString())
 					.setSource(prepareRecordDocument())
 					.execute()
@@ -191,8 +221,12 @@ public class ElasticIndexer {
 				Entry<String, JsonNode> entry = recordIt.next();
 				if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("tags")    &&
-					!entry.getKey().equals("dbId"))
+					!entry.getKey().equals("dbId")) {
+					//if( entry.getKey().equals("title") ) {
+						doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					//}
 					doc.field(entry.getKey(), entry.getValue().asText());
+				}
 			}
 			doc.endObject();
 		} catch (IOException e) {

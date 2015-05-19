@@ -38,6 +38,7 @@ import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.ElasticIndexer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -294,10 +295,10 @@ public class CollectionController extends Controller {
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
-					
+
 			String sourceClassName = "espace.core.sources." + source
 					+ "SpaceSource";
-			
+
 			try {
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
@@ -321,6 +322,9 @@ public class CollectionController extends Controller {
 			}
 		}
 		DB.getCollectionRecordDAO().makePermanent(record);
+
+		ElasticIndexer indexer = new ElasticIndexer(record);
+		indexer.index();
 
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
