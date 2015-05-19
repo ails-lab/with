@@ -16,7 +16,6 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.json.JSONArray;
@@ -45,16 +44,24 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super();
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "&qf=TYPE:IMAGE");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "&qf=TYPE:VIDEO");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "&qf=TYPE:SOUND");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "&qf=TYPE:TEXT");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE",
+				"&qf=TYPE:IMAGE");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO",
+				"&qf=TYPE:VIDEO");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND",
+				"&qf=TYPE:SOUND");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT",
+				"&qf=TYPE:TEXT");
 	}
 
 	public String getHttpQuery(CommonQuery q) {
 		EuropeanaQuery eq = new EuropeanaQuery();
 		eq.addSearch(getSearchTerm(q));
-		eq.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
+		eq.addSearchParam(
+				"start",
+				""
+						+ ((Integer.parseInt(q.page) - 1)
+								* Integer.parseInt(q.pageSize) + 1));
 		eq.addSearchParam("rows", "" + q.pageSize);
 		eq.addSearchParam("profile", "rich+facets");
 		// filters(q, eq);
@@ -67,8 +74,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	private String getSearchTerm(CommonQuery q) {
 		if (Utils.hasAny(q.searchTerm))
 			return Utils.spacesPlusFormatQuery(q.searchTerm)
-					+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
-							: "");
+					+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
+							+ Utils.spacesPlusFormatQuery(q.termToExclude)
+							+ ")" : "");
 		return null;
 	}
 
@@ -77,13 +85,20 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
 			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
 			if (q.europeanaAPI.facets != null) {
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE,
+						"TYPE"));
+				eq.addSearch(Utils.getFacetsAttr(
+						q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR,
+						"YEAR"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY,
+						"COUNTRY"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS,
+						"RIGHTS"));
+				eq.addSearch(Utils.getFacetsAttr(
+						q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC,
+						"UGC"));
 			}
 			if (q.europeanaAPI.refinement != null) {
 				if (q.europeanaAPI.refinement.refinementTerms != null) {
@@ -94,20 +109,29 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				if (q.europeanaAPI.refinement.spatialParams != null) {
 
 					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
-								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
+						eq.addSearch(new Utils.Pair<String>(
+								"pl_wgs84_pos_lat",
+								"["
+										+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint
+										+ "+TO+"
+										+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint
+										+ "]"));
 					}
 					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
-								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
+						eq.addSearch(new Utils.Pair<String>(
+								"pl_wgs84_pos_long",
+								"["
+										+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint
+										+ "+TO+"
+										+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint
+										+ "]"));
 					}
 				}
 			}
 
 			if (q.europeanaAPI.reusability != null) {
-				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
+				eq.addSearchParam("reusability",
+						Utils.getORList(q.europeanaAPI.reusability));
 			}
 		}
 	}
@@ -136,14 +160,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					countValue(type, t);
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
-					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
+					it.fullresolution = Utils.readArrayAttr(item,
+							"edmIsShownBy", false);
 					it.title = Utils.readLangAttr(item, "title", false);
-					it.description = Utils.readLangAttr(item, "dcDescription", false);
+					it.description = Utils.readLangAttr(item, "dcDescription",
+							false);
 					it.creator = Utils.readLangAttr(item, "dcCreator", false);
 					it.year = Utils.readArrayAttr(item, "year", false);
-					it.dataProvider = Utils.readLangAttr(item, "dataProvider", false);
+					it.dataProvider = Utils.readLangAttr(item, "dataProvider",
+							false);
 					it.url = new MyURL();
-					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
+					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
+							false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
 					a.add(it);
 				}
@@ -163,7 +191,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public String autocompleteQuery(String term, int limit) {
-		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
+		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit
+				+ "&phrases=false&query=" + term;
 	}
 
 	public AutocompleteResponse autocompleteResponse(String response) {
@@ -199,14 +228,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey="
-					+ key);
+			response = HttpConnector
+					.getURLContent("http://www.europeana.eu/api/v2/record/"
+							+ recordId + ".json?wskey=" + key);
 			JsonNode record = response.get("object");
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record.toString()));
-			response = HttpConnector.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId
-					+ ".jsonld?wskey=" + key);
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
+					.toString()));
+			response = HttpConnector
+					.getURLContent("http://www.europeana.eu/api/v2/record/"
+							+ recordId + ".jsonld?wskey=" + key);
 			record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record
+					.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;
