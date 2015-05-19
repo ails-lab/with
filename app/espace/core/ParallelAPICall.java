@@ -30,9 +30,8 @@ public class ParallelAPICall {
 
 	/**
 	 * @param methodQuery	method that forms and issues the API query
-	 * @param responseCollectionMethod		method that combines the API results and returns them as a List<R>
-	 * @param input		input parameters used as input to methodQuery's call method
-	 * @return 	a list of Promises with <R>
+	 * @param input1, input 2 input parameters used as input to methodQuery's call method
+	 * @return a Promise with result <R>
 	 */
 	public static <I, U, R> Promise<R> createPromise(final BiFunction<I, U, R> methodQuery,
 			final I input1, final U input2) {

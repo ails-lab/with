@@ -29,6 +29,8 @@ import model.ApiKey
 import play.api.mvc.Controller
 import db.DB
 import play.api.Logger
+import play.api.mvc.Headers
+import play.api.mvc.Headers
 
 
 
@@ -69,27 +71,36 @@ class SessionFilter extends Filter {
         case None => true
       }
       
-      val timeout = rh.session.get( "lastAccessTime")
-        .map { x => x.toLong }
-        .map { t => (System.currentTimeMillis() > (t + sessionTimeout )) }
-       
-      (sourceCheck, timeout) match {
-        // there was a lastAccessTime in the session
-        case (true, Some( false )) =>  next(rh).map{ result =>
-            val session = rh.session
-            result.withSession(session + ( "lastAccessTime" -> System.currentTimeMillis().toString()))
-        }
-        // no accessTime in the session
-        case ( true, None ) =>  next(rh)
-        // timeout, the user is removed from the session, lastAccessTime and sourceIp stay
-        // Action can complain about expired session (or not, if no session user is needed)
-        case( true, Some( true )) => next(rh).map{ result =>
-            val session = rh.session
-            result.withSession(session - "user" )
-          } 
-        case( false, _ ) => Future.successful( Results.BadRequest( "Session invalid, ip don't match" ))
-     }
+      if( sourceCheck ) {
+    	  val timeout = rh.session.get( "lastAccessTime")
+    			  .map { x => x.toLong }
+    	      .map { t => (System.currentTimeMillis() > (t + sessionTimeout )) }
 
-    }  
+        timeout match {
+           // no accessTime in the session
+           case None => next(rh)
+           
+           // timeout, remove user from incoming session
+           case Some( true ) => {
+        	   val sessionData = rh.session - ("user") + ("lastAccessTime" -> System.currentTimeMillis().toString())
+        		 val newRh = FilterUtils.withSession( rh, sessionData.data )
+        		 next(newRh)
+           }
+           
+           // no timeout, update the lastAccessTime in the cookie
+           case Some( false ) => {
+              next( rh ).map { result => 
+                FilterUtils.outsession(result) match {
+                  case Some( session ) => result.withSession( Session(session) + ("lastAccessTime" -> System.currentTimeMillis().toString()))
+                  case None => result.withSession( rh.session + ("lastAccessTime" -> System.currentTimeMillis().toString()))
+                }
+              } 
+           }
+         }
+      } else {
+    	  Future.successful( Results.BadRequest( "Session invalid, ip don't match" ))
+      }
+
+     }  
   }
 }

@@ -160,9 +160,14 @@ public class ApiKeyManager extends UntypedActor  {
 			}
 		}
 		
-		if( !access.update ) 
-			sender().tell( key.check( access.call, access.volume ), self());
-		else
+		if( !access.update ) {
+			ApiKey.Response res = key.check( access.call, access.volume );
+			if(( res == ApiKey.Response.ALLOWED) &&
+					key.getProxyUserId() != null ) {
+				sender().tell( key.getProxyUserId(), self());
+			} else 
+				sender().tell( res, self());
+		} else
 			key.updateVolume(access.call, access.volume);
 		
 	}
