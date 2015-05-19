@@ -190,6 +190,7 @@ public class SearchController extends Controller {
 	}
 
 	public static Result posttestsearch() {
+		System.out.println("--------------------");
 		System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if (q == null || q.searchTerm == null) {
