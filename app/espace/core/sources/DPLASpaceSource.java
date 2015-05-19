@@ -16,22 +16,19 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.CommonFilter;
-import espace.core.CommonFilterResponse;
+import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
-import espace.core.SourceResponse;
 import espace.core.RecordJSONMetadata.Format;
+import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
@@ -42,20 +39,38 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
-		String qstr = "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" : q.searchTerm)
-				+ (Utils.hasAny(q.termToExclude) ? "+NOT+(" + Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
-				+ "&page=" + q.page + "&page_size=" + q.pageSize;
+		String qstr = "http://api.dp.la/v2/items?api_key="
+				+ DPLAKey
+				+ "&q="
+				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
+						: q.searchTerm)
+				+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
+						+ Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
+						: "") + "&page=" + q.page + "&page_size=" + q.pageSize;
 		qstr = addfilters(q, qstr);
-		return qstr;
+		String facets = "&facets=provider.name,sourceResource.type";
+		return qstr + facets;
 	}
 
 	public DPLASpaceSource() {
 		super();
+		addDefaultWriter(CommonFilters.TYPE_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&sourceResource.type=%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
+			}
+		});
+		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&provider.name=%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
+			}
+		});
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", "&sourceResource.type=image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", "&sourceResource.type=%22moving%20image%22");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", "&sourceResource.type=sound");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", "&sourceResource.type=text");
+
 		// TODO: what to do with physical objects?
 	}
 
@@ -78,7 +93,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -91,27 +107,42 @@ public class DPLASpaceSource extends ISpaceSource {
 
 			for (JsonNode item : docs) {
 
-				String t = Utils.readAttr(item.path("sourceResource"), "type", false);
-				countValue(type, t);
+				// String t = Utils.readAttr(item.path("sourceResource"),
+				// "type", false);
+				// countValue(type, t);
 
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
 				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
-				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+				it.title = Utils.readLangAttr(item.path("sourceResource"),
+						"title", false);
+				it.description = Utils.readLangAttr(
+						item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"),
+						"creator", false);
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
+				it.dataProvider = Utils.readLangAttr(item.path("provider"),
+						"name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
+				it.url.fromSourceAPI = "http://dp.la/item/"
+						+ Utils.readAttr(item, "id", false);
 				a.add(it);
 			}
 			res.items = a;
 			res.facets = response.path("facets");
 			res.filters = new ArrayList<>();
+
+			readList(response.path("facets").path("provider.name"), provider);
+
+			readList(response.path("facets").path("sourceResource.type"), type);
+
+			res.filters = new ArrayList<>();
 			res.filters.add(type);
+			res.filters.add(provider);
+			System.out.println(provider.export());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -120,13 +151,25 @@ public class DPLASpaceSource extends ISpaceSource {
 		return res;
 	}
 
+	private void readList(JsonNode json, CommonFilterLogic filter) {
+		// System.out.println(json);
+		for (JsonNode f : json.path("terms")) {
+			String label = f.path("term").asText();
+			int count = f.path("count").asInt();
+			countValue(filter, label, count);
+		}
+	}
+
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
+			response = HttpConnector
+					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
+							+ "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD, record.toString()));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record
+					.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();

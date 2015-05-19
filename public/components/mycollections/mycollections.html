@@ -24,12 +24,13 @@
 					   <!--  ko if: $data.hasOwnProperty("category") -->
 					  		<div><b>Categorized as:</b> <div data-bind="text: category()"></div></div>
 					   <!-- /ko -->
-					    <span class="pull-left"><b>Items: </b> <i data-bind="text: itemCount()+',   '"> </i> 
-					    	<b>Visibility: </b><i class="fa fa-eye-slash" title="secret"></i>
+					    <span class="pull-left"><b>Items: </b> <i data-bind="text: itemCount()+'   '"> </i></span>
+					   	<span class="pull-right"><b>Created:</b> <i data-bind="text: created()"></i> </span>		
+					   	</br>			   		
+					 	<span  class="pull-left"><b>Visibility: </b><i title="secret"></i>
 					    	<!-- ko if: isPublic --> public <!-- /ko -->
 					   		<!-- ko ifnot: isPublic --> restricted <!-- /ko --> 
 					    </span>
-					   	<span class="pull-right"><b>Created:</b> <i data-bind="text: created()"></i> </span>					   		
 					 </div>
 					 </div>
 					 <!--  ko if: itemCount() > 0 -->
@@ -48,6 +49,7 @@
 					  <!-- /ko -->
 					  <!-- ko else -->
 					  	<!-- TODO: Make the message look nicer -->
+					  		</br>
 					  		<a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a>
 					  <!-- /ko -->
 					 </div>
