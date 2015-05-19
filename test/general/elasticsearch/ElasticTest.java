@@ -17,6 +17,7 @@
 package general.elasticsearch;
 
 import model.Collection;
+import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
@@ -44,7 +45,10 @@ public class ElasticTest {
 
 
 		Collection c = DB.getCollectionDAO().get(new ObjectId("5551ede5d4c67d37242c5971"));
-		ElasticIndexer indexer = new ElasticIndexer( c );
+		CollectionRecord r = DB.getCollectionRecordDAO().get(new ObjectId("5534fa5fe4b0144a2e409c09"));
+		//CollectionRecord r1 = DB.getCollectionRecordDAO().get(new ObjectId("5555fcfee4b09333f5c6b265"));
+		ElasticIndexer indexer = new ElasticIndexer( r );
+		indexer.putMapping();
 		indexer.index();
 
 		/*CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId("5534fa5fe4b0144a2e409bf1"));
