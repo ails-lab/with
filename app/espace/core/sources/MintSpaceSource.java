@@ -38,18 +38,16 @@ import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
-public class MintSpaceResource extends ISpaceSource {
+public class MintSpaceSource extends ISpaceSource {
 
 	// TODO keep track of the pages links and go to the requested page.
 
-	private String sourceName;
 
-	public MintSpaceResource() {
-		this.sourceName = "Mint";
+	public MintSpaceSource() {
 	}
 
 	public String getSourceName() {
-		return sourceName;
+		return "Mint";
 	}
 
 	@Override
