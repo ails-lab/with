@@ -535,8 +535,9 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 
 /* Popup */
 .profilePopup {
-  min-width: 50%;
+  width: 600px;
   padding-top: 0;
+  max-width: 90%;
 }
 
 .editCollectionPopup {
@@ -544,22 +545,32 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
   padding-top: 0;
 }
 
-#popup .modal-footer {
+#profile-image {
+  max-width: 80px;
+  margin-bottom: 10px;
+}
+
+.photo-group {
+  display: inline-block;
+  vertical-align: center;
+}
+
+.modal-footer {
   background-color: #f0f0f0;
-}
-
-.vertical-align {
-  display: flex;
-  align-items: center;
-}
-
-.stuffed {
-  padding-bottom: 15px;
 }
 
 .btn-file {
   position: relative;
   overflow: hidden;
+  background-color: #cccccc;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  padding: 6px 0;
+}
+
+.btn-file:hover {
+  border-color: #e6e6e6;
 }
 
 .btn-file input[type=file] {

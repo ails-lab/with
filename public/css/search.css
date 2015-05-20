@@ -158,7 +158,8 @@ input[type="search"] { /* reset normalize */
 }
 
 .withsearch-input:focus,
-.withsearch-submit:focus {
+.withsearch-submit:focus,
+.withsearch-view:focus {
 	outline: none;
 }
 
@@ -208,7 +209,7 @@ input[type="search"] { /* reset normalize */
 }
 
 .withsearch-view {
-	font-size: 3.8em;
+	font-size: 2.4em;
 	float: right;
 	cursor: pointer;
 	display: inline-block;
@@ -216,6 +217,7 @@ input[type="search"] { /* reset normalize */
 	border: none;
 	color: #dddddd;
 	padding: 0;
+	background-color: #f1f1f1!important;
 }
 
 .withsearch.open .withsearch-close {
@@ -552,7 +554,7 @@ only screen and (max-device-width : 399px){
 	}
 
 	.withsearch-view {
-		font-size: 1.9em;
+		font-size: 1.2em;
 	}
 
 	.withsearch-close {

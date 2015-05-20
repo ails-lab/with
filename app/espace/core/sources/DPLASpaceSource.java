@@ -17,10 +17,11 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.CommonFilterResponse;
+import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
@@ -47,19 +48,29 @@ public class DPLASpaceSource extends ISpaceSource {
 						+ Utils.spacesPlusFormatQuery(q.termToExclude) + ")"
 						: "") + "&page=" + q.page + "&page_size=" + q.pageSize;
 		qstr = addfilters(q, qstr);
-		return qstr;
+		String facets = "&facets=provider.name,sourceResource.type";
+		return qstr + facets;
 	}
 
 	public DPLASpaceSource() {
 		super();
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image",
-				"&sourceResource.type=image");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image",
-				"&sourceResource.type=%22moving%20image%22");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound",
-				"&sourceResource.type=sound");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text",
-				"&sourceResource.type=text");
+		addDefaultWriter(CommonFilters.TYPE_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&sourceResource.type=%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
+			}
+		});
+		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, String>() {
+			@Override
+			public String apply(String t) {
+				return "&provider.name=%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
+			}
+		});
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", "&sourceResource.type=image");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", "&sourceResource.type=%22moving%20image%22");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", "&sourceResource.type=sound");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", "&sourceResource.type=text");
+
 		// TODO: what to do with physical objects?
 	}
 
@@ -82,7 +93,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterResponse type = CommonFilterResponse.typeFilter();
+		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -95,9 +107,9 @@ public class DPLASpaceSource extends ISpaceSource {
 
 			for (JsonNode item : docs) {
 
-				String t = Utils.readAttr(item.path("sourceResource"), "type",
-						false);
-				countValue(type, t);
+				// String t = Utils.readAttr(item.path("sourceResource"),
+				// "type", false);
+				// countValue(type, t);
 
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
@@ -121,13 +133,31 @@ public class DPLASpaceSource extends ISpaceSource {
 			res.items = a;
 			res.facets = response.path("facets");
 			res.filters = new ArrayList<>();
+
+			readList(response.path("facets").path("provider.name"), provider);
+
+			readList(response.path("facets").path("sourceResource.type"), type);
+
+			res.filters = new ArrayList<>();
 			res.filters.add(type);
+			res.filters.add(provider);
+			System.out.println(provider.export());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 		return res;
+	}
+
+	private void readList(JsonNode json, CommonFilterLogic filter) {
+		// System.out.println(json);
+		for (JsonNode f : json.path("terms")) {
+			String label = f.path("term").asText();
+			int count = f.path("count").asInt();
+			countValue(filter, label, count);
+		}
 	}
 
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
