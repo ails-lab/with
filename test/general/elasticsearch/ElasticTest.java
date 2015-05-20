@@ -45,9 +45,9 @@ public class ElasticTest {
 
 
 		Collection c = DB.getCollectionDAO().get(new ObjectId("5551ede5d4c67d37242c5971"));
-		CollectionRecord r = DB.getCollectionRecordDAO().get(new ObjectId("5534fa5fe4b0144a2e409c09"));
-		//CollectionRecord r1 = DB.getCollectionRecordDAO().get(new ObjectId("5555fcfee4b09333f5c6b265"));
-		ElasticIndexer indexer = new ElasticIndexer( r );
+		//CollectionRecord r = DB.getCollectionRecordDAO().get(new ObjectId("5534fa5fe4b0144a2e409c09"));
+		CollectionRecord r1 = DB.getCollectionRecordDAO().get(new ObjectId("5555fcffe4b09333f5c6b276"));
+		ElasticIndexer indexer = new ElasticIndexer( r1 );
 		indexer.putMapping();
 		indexer.index();
 

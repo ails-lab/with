@@ -20,8 +20,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.elasticsearch.action.search.SearchResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
+
+import play.Logger;
+import utils.ElasticSearcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -39,22 +43,27 @@ import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
 public class MintSpaceSource extends ISpaceSource {
+	public static final Logger.ALogger log = Logger.of(MintSpaceSource.class);
 
-	// TODO keep track of the pages links and go to the requested page.
 
-
-	public MintSpaceSource() {
-	}
-
+	@Override
 	public String getSourceName() {
 		return "Mint";
 	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		//q includes searchTerm, page, pageSize
+		ElasticSearcher searcher = new ElasticSearcher();
+		String term = "\""+q.getQuery()+"\"" + "\"mint\"";
+		SearchResponse resp = searcher.search(term, Integer.parseInt(q.page), Integer.parseInt(q.pageSize));
+		searcher.closeClient();
+		return new SourceResponse(resp);
+	}
 
-		return new SourceResponse();
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		log.debug("Method not implemented yet");
+		return null;
 	}
 
 }

@@ -27,6 +27,9 @@ import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
 import espace.core.SourceResponse;
 
+/*
+ * This source is for internal search to WITH collections
+ */
 public class ElasticSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(ElasticSource.class);
 

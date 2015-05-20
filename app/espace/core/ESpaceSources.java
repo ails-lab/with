@@ -44,6 +44,7 @@ public class ESpaceSources {
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
 		esources.add(new ElasticSource());
+		esources.add(new MintSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 

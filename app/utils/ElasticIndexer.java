@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import model.Collection;
 import model.CollectionRecord;
 
-import org.bson.types.ObjectId;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -60,11 +60,11 @@ import db.DB;
 public class ElasticIndexer {
 	static private final Logger.ALogger log = Logger.of(ElasticIndexer.class);
 
-	private String json;
 	private static Config conf;
 	private static Client nodeClient;
 	private static TransportClient transportClient;
 	private static BulkProcessor bulkProcessor;
+	private static boolean hasMapping =  false;
 
 	private Collection collection;
 	private CollectionRecord record;
@@ -75,11 +75,6 @@ public class ElasticIndexer {
 
 	public ElasticIndexer( CollectionRecord record ) {
 		this.record = record;
-	}
-
-	private static JsonNode getJson(ObjectId recordId) {
-		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
-		return Json.toJson(record);
 	}
 
 	public static Config getConf() {
@@ -131,8 +126,7 @@ public class ElasticIndexer {
 		return transportClient;
 	}
 
-
-	public  void index() {
+	public void index() {
 		if( collection != null )
 			indexCollection();
 		else if( record != null )
@@ -142,7 +136,7 @@ public class ElasticIndexer {
 		}
 	}
 
-	public  void indexCollection() {
+	public void indexCollection() {
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 											.getByCollection(collection.getDbId());
 		List<XContentBuilder> documents = new ArrayList<XContentBuilder>();
@@ -153,7 +147,7 @@ public class ElasticIndexer {
 		if( documents.size() == 0 ) {
 			log.debug("No records within the collection to index!");
 		} else if( documents.size() == 1 ) {
-			IndexResponse response = getTransportClient().prepareIndex(
+				getTransportClient().prepareIndex(
 					 getConf().getString("elasticsearch.index.name"),
 					 getConf().getString("elasticsearch.index.type"),
 					 record.getDbId().toString())
@@ -175,32 +169,6 @@ public class ElasticIndexer {
 		}
 	}
 
-	public CreateIndexResponse putMapping() {
-		/*XContentBuilder mapping = null;
-		try {
-			mapping = jsonBuilder().startObject().startObject("record").startObject("properties").startObject("*_all").field("type", "string").field("index", "not_analyzed")
-					.endObject()
-					.startObject("*").field("type", "string").endObject()
-					.endObject().endObject().endObject();
-			System.out.println(mapping.string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-
-	//	getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
-		JsonNode mapping = null;;
-		try {
-			mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/mapping3.elastic"))));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		CreateIndexRequestBuilder cirb = getTransportClient().admin().indices().prepareCreate("with-mapping3");
-		cirb.addMapping("record", mapping.toString());
-		return cirb.execute().actionGet();
-	}
-
 	public IndexResponse indexSingleDocument() {
 		IndexResponse response = getTransportClient().prepareIndex(
 					getConf().getString("elasticsearch.index.name"),
@@ -210,6 +178,29 @@ public class ElasticIndexer {
 					.execute()
 					.actionGet();
 		return response;
+	}
+
+	public static CreateIndexResponse putMapping() {
+		if(!hasMapping) {
+			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
+			JsonNode mapping = null;
+			CreateIndexRequestBuilder cireqb = null;
+			CreateIndexResponse ciresp = null;
+			try {
+				mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+getConf().getString("elasticsearch.index.mapping")))));
+				cireqb = getTransportClient().admin().indices().prepareCreate(getConf().getString("elasticsearch.index.name"));
+				cireqb.addMapping(getConf().getString("elasticsearch.index.type"), mapping.toString());
+				ciresp = cireqb.execute().actionGet();
+			} catch(ElasticsearchException ese) {
+				log.error("Cannot put mapping!", ese);
+			} catch (IOException e) {
+				log.error("Cannot read mapping from file!", e);
+				return null;
+			}
+			hasMapping = true;
+			return ciresp;
+		}
+		return null;
 	}
 
 	public XContentBuilder prepareRecordDocument() {

@@ -138,7 +138,7 @@ public class ElasticSearcher {
 	 * @param from offset of results.
 	 * @return
 	 */
-	public SearchResponse search(String term, int from){ return search(term, new SearchOptions(from, DEFAULT_RESPONSE_COUNT)); }
+	public SearchResponse search(String term, int from, int count){ return search(term, new SearchOptions(from, count)); }
 	public SearchResponse search(String term) { return search(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT)); }
 
 	public SearchResponse search(String terms, SearchOptions options){
@@ -150,9 +150,13 @@ public class ElasticSearcher {
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
 		for(String term: list) {
+			term = term.replace("\"", "");
 			MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
 			if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
-			bool.should(query);
+			if(term.equals("mint"))
+				bool.must(query);
+			else
+				bool.should(query);
 		}
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
