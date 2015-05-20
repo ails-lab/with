@@ -802,7 +802,7 @@ public class UserManager extends Controller {
 			JsonNode input = Json.parse(Crypto.decryptAES(token));
 			String userId = input.get("user").asText();
 			long timestamp = input.get("timestamp").asLong();
-			if (new Date().getTime() < (timestamp + TOKENTIMEOUT*300 /*5 minutes*/)) {
+			if (new Date().getTime() < (timestamp + TOKENTIMEOUT*30 /*5 minutes*/)) {
 				u = DB.getUserDAO().get(new ObjectId(userId));
 				if (u != null) {
 					u.setPassword(newPassword);
@@ -819,8 +819,6 @@ public class UserManager extends Controller {
 				return badRequest(result);
 			}
 		} catch (Exception e) {
-			// likely invalid token
-			//log.error("Invalid token", e);
 			result.put("error", "Invalid token");
 			
 		}
