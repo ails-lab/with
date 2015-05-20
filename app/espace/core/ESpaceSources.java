@@ -22,8 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import play.Logger;
-import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.sources.DPLASpaceSource;
+import espace.core.sources.DigitalNZSpaceSource;
+import espace.core.sources.ElasticSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.sources.MintSpaceSource;
@@ -42,9 +43,11 @@ public class ESpaceSources {
 		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
+		esources.add(new ElasticSource());
+		esources.add(new MintSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
-	
+
 	public static Map<String, ISpaceSource> initSourceByNameMap() {
 		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
 		ISpaceSource s = new EuropeanaSpaceSource();
@@ -76,7 +79,7 @@ public class ESpaceSources {
 		final ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
 		ArrayList<Thread> t = new ArrayList<Thread>();
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
+			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
 				Thread tit = new Thread(new Runnable() {
 
 					@Override
