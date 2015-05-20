@@ -16,11 +16,36 @@
 
 package espace.core;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import model.CollectionRecord;
+
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
+
+import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class SourceResponse {
+
+	public SourceResponse() {}
+
+	public SourceResponse(SearchResponse resp) {
+		elasticrecords = new ArrayList<CollectionRecord>();
+		totalCount = (int)resp.getHits().getTotalHits();
+		for(SearchHit hit: resp.getHits().hits()) {
+				elasticrecords.add(hitToRecord(hit));
+		}
+	}
+
+	private CollectionRecord hitToRecord(SearchHit hit) {
+		JsonNode json = Json.parse(hit.getSourceAsString());
+		CollectionRecord record = Json.fromJson(json, CollectionRecord.class);
+		return record;
+	}
+
 	public static class Lang {
 		public Lang(String languageCode, String textValue) {
 			this.lang = languageCode;
@@ -56,6 +81,7 @@ public class SourceResponse {
 	public int totalCount;
 	public int startIndex;
 	public int count;
+	public List<CollectionRecord> elasticrecords;
 	public List<ItemsResponse> items;
 	public String source;
 	public JsonNode facets;
