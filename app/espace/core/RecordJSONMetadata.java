@@ -19,7 +19,12 @@ package espace.core;
 public class RecordJSONMetadata {
 
 	public enum Format {
-		NULL, JSON, JSONLD, XML
+		JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, 
+		JSON_EDM, JSONLD_EDM, XML_EDM,
+		JSONLD_DPLA,
+		JSON_NLA, XML_NLA, 
+		JSON_DNZ, XML_DNZ,
+		JSON_YOUTUBE
 	}
 
 	private String jsonContent;
@@ -36,14 +41,32 @@ public class RecordJSONMetadata {
 
 	public String getFormat() {
 		switch (format) {
-		case JSON:
-			return "JSON";
-		case JSONLD:
-			return "JSON-LD";
-		case XML:
-			return "XML";
+		case JSON_UNKNOWN:
+			return "JSON-UNKNOWN";
+		case JSONLD_UNKNOWN:
+			return "JSONLD-UNKNOWN";
+		case XML_UNKNOWN:
+			return "XML-UNKNOWN";
+		case JSON_EDM:
+			return "JSON-EDM";
+		case JSONLD_EDM:
+			return "JSONLD-EDM";
+		case XML_EDM:
+			return "XML-EDM";
+		case JSONLD_DPLA:
+			return "JSONLD-DPLA";
+		case JSON_NLA:
+			return "JSON-NLA";
+		case XML_NLA:
+			return "XML-NLA";
+		case JSON_DNZ:
+			return "JSON-DNZ";
+		case XML_DNZ:
+			return "XML-DNZ";
+		case JSON_YOUTUBE:
+			return "JSON-YOUTUBE";
 		default:
-			return "NULL";
+			return "UKNOWN";
 
 		}
 	}

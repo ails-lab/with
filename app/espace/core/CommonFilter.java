@@ -20,5 +20,10 @@ public class CommonFilter {
 
 	public String filterID;
 	public String value;
+	@Override
+	public String toString() {
+		return "CommonFilter [filterID=" + filterID + ", value=" + value + "]";
+	}
 
+	
 }

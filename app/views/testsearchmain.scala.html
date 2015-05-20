@@ -7,6 +7,7 @@
         <title>@title</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
         
 <style type="text/css">
@@ -14,8 +15,7 @@
 #nav {
     line-height:30px;
     background-color:#eeeeee;
-    height:300px;
-    width:200px;
+    width:400px;
     float:left;
     padding:5px;	      
 }
@@ -135,16 +135,44 @@ switch(namee){
         livetab='t3';
     break;
 }
-for(i=1;i<=3;i++){
-    document.getElementById("t"+i).style.backgroundColor="gray";
-}
-document.getElementById(livetab).style.backgroundColor="silver";
+//for(i=1;i<=3;i++){
+//    document.getElementById("t"+i).style.backgroundColor="gray";
+//}
+//document.getElementById(namee).style.backgroundColor="silver";
 //optional code ends here
  
 }
  
 function shorttext(text, size){
 	return text.substring(0,size)+"(...)";
+}
+ 
+function gothere(q, f, v){
+ //alert(q+" "+f+" "+v);
+var json1 = JSON.stringify({
+					"searchTerm": q,
+					"page": "1",
+					"pageSize":"20",
+				    "filters": [{ "filterID": f, value: v}]
+				});
+console.log( json1 );
+$.ajax({
+				"url": "/api/testsearch",
+				"method": "POST",
+				"contentType": "application/json",
+				//"dataType": "json",
+				"data": json1,
+
+				"success": function( data, textStatus, jQxhr ){
+            document.write(data);
+        },
+        "error": function( jqXhr, textStatus, errorThrown ){
+            console.log( errorThrown );
+        }
+				});
+ 
+
+ 	
 }
  
 </script>        

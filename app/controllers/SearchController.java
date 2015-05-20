@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -31,6 +32,8 @@ import play.libs.F.Function0;
 import play.libs.Json;
 import play.libs.F.Promise;
 import play.mvc.*;
+import utils.ListUtils;
+import espace.core.CommonFilterLogic;
 import espace.core.CommonFilterResponse;
 import espace.core.CommonQuery;
 import espace.core.ESpaceSources;
@@ -95,7 +98,7 @@ public class SearchController extends Controller {
 			}
 		}
 	}
-	
+
 	public static Promise<Result> searchwithfilter() {
 		JsonNode json = request().body().asJson();
 
@@ -107,29 +110,32 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
-				
+
 				Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);
-				return promisesSequence.map(
-						new play.libs.F.Function<Collection<SourceResponse>, Result>() {
-			    			List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
-			    			public Result apply(Collection<SourceResponse> responses) {
-			    				finalResponses.addAll(responses);
-			    				//Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis()- initTime));
+				return promisesSequence.map(new play.libs.F.Function<Collection<SourceResponse>, Result>() {
+					List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
 
-			    				SearchResponse r1 = new SearchResponse();
-			    				r1.responces = finalResponses;
-			    				ArrayList<CommonFilterResponse> merge = new ArrayList<CommonFilterResponse>();
-			    				for (SourceResponse sourceResponse : finalResponses) {
-			    					System.out.println(sourceResponse.filters);
-			    					FiltersHelper.merge(merge, sourceResponse.filters);
-			    				}
-			    				r1.filters = merge;
+					public Result apply(Collection<SourceResponse> responses) {
+						finalResponses.addAll(responses);
+						// Logger.debug("Total time for all sources to respond: "
+						// + (System.currentTimeMillis()- initTime));
 
-			    				return ok(Json.toJson(r1));
-			    			}
-			    		}
-				);
-				
+						SearchResponse r1 = new SearchResponse();
+						r1.responces = finalResponses;
+						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
+						for (SourceResponse sourceResponse : finalResponses) {
+							System.out.println(sourceResponse.filters);
+							FiltersHelper.merge(merge, sourceResponse.filters);
+						}
+						Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+							return o.export();
+						};
+						r1.filters = ListUtils.transform(merge, f);
+
+						return ok(Json.toJson(r1));
+					}
+				});
+
 			} catch (Exception e) {
 				e.printStackTrace();
 				return Promise.pure((Result) badRequest(e.getMessage()));
@@ -137,16 +143,15 @@ public class SearchController extends Controller {
 		}
 	}
 
-	private static Iterable<Promise<SourceResponse>> callSources(
-			final CommonQuery q) {
+	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 		// final long initTime = System.currentTimeMillis();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
 				.getResults(cq);
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
-				promises.add(ParallelAPICall
-						.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery, src, q));
+				promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
+						src, q));
 			}
 		}
 		return promises;
@@ -190,6 +195,7 @@ public class SearchController extends Controller {
 	}
 
 	public static Result posttestsearch() {
+		System.out.println("--------------------");
 		System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if (q == null || q.searchTerm == null) {
@@ -204,13 +210,18 @@ public class SearchController extends Controller {
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;
-		ArrayList<CommonFilterResponse> merge = new ArrayList<CommonFilterResponse>();
+		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
-			System.out.println(sourceResponse.filters);
+			System.out.println(sourceResponse.source + " Filters: " + sourceResponse.filters);
 			FiltersHelper.merge(merge, sourceResponse.filters);
 		}
-		System.out.println(merge);
-		return ok(views.html.testsearch.render(userForm, res, merge));
+		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+			return o.export();
+		};
+		List<CommonFilterResponse> merge1 = ListUtils.transform(merge, f);
+		// System.out.println(" Merged Filters: " + merge1);
+
+		return ok(views.html.testsearch.render(userForm, res, merge1));
 	}
 
 }
