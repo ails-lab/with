@@ -536,7 +536,12 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 /* Popup */
 .profilePopup {
   width: 600px;
+  padding-top: 0;
   max-width: 90%;
+}
+
+.editCollectionPopup {
+  min-width: 35%;
   padding-top: 0;
 }
 

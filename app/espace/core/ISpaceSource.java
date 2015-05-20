@@ -18,6 +18,7 @@ package espace.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.json.JSONObject;
 
@@ -36,7 +37,9 @@ public abstract class ISpaceSource {
 
 	public abstract String getSourceName();
 
-	public abstract String getHttpQuery(CommonQuery q);
+	public String getHttpQuery(CommonQuery q) {
+		return "";
+	};
 
 	public abstract SourceResponse getResults(CommonQuery q);
 
@@ -48,17 +51,38 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(
-			String recordId);
+//<<<<<<< HEAD
+//	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId);
+//=======
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(
+			String recordId) {
+		return new ArrayList<RecordJSONMetadata>();
+	}
+//>>>>>>> master
 
 	private FilterValuesMap vmap;
 
-	protected void countValue(CommonFilterResponse type, String t) {
-		type.addValue(vmap.translateToCommon(type.filterID, t));
+	protected void countValue(CommonFilterLogic type, String t) {
+		countValue(type, t, true, 1);
 	}
 
-	protected void addMapping(String filterID, String commonValue,
-			String specificValue, String querySegment) {
+	protected void countValue(CommonFilterLogic type, String t, int count) {
+		countValue(type, t, true, count);
+	}
+
+	protected void countValue(CommonFilterLogic type, String t, boolean toglobal, int count) {
+		if (toglobal)
+			type.addValue(vmap.translateToCommon(type.data.filterID, t), count);
+		else
+			type.addValue(t, count);
+
+	}
+
+	protected void addDefaultWriter(String filterId, Function<String, String> function) {
+		vmap.addDefaultWriter(filterId, function);
+	}
+
+	protected void addMapping(String filterID, String commonValue, String specificValue, String querySegment) {
 		vmap.addMap(filterID, commonValue, specificValue, querySegment);
 	}
 
@@ -77,8 +101,7 @@ public abstract class ISpaceSource {
 	protected String addfilters(CommonQuery q, String qstr) {
 		if (q.filters != null) {
 			for (CommonFilter filter : q.filters) {
-				for (String subq : translateToQuery(filter.filterID,
-						filter.value)) {
+				for (String subq : translateToQuery(filter.filterID, filter.value)) {
 					qstr += subq;
 				}
 			}
