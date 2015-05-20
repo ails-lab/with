@@ -6,64 +6,64 @@
 		</div>
 		<div class="modal-body row">
 			<form>
+				<div class="form-group">
+					<div class="row">
+						<div class="col-sm-2 col-ms-12 col-xs-12 text-center">
+							<div class="photo-group">
+								<div data-bind="if: imageURL" id="profile-image">
+									<img class="img-circle img-thumbnail" data-bind="attr: { src: imageURL }" />
+								</div>
+								<div data-bind="ifnot: imageURL" id="profile-image">
+									<img src="images/user.png" class="img-circle img-thumbnail" />
+								</div>
+							</div>
+						</div>
+						<br />
+						<div class="col-sm-4 col-ms-12 col-xs-12 text-center">
+							<div class="photo-group">
+								<p>Load your profile picture from: </p>
+
+								<div class="btn btn-default btn-file">
+									<span class="glyphicon glyphicon-folder-open"></span> <input type="file" id="imageupload" name="image" />
+								</div>
+								<button class="facebook" data-bind="enable: hasFacebook, click: loadFromFacebook">
+									<i class="facebook_small"></i>
+								</button>
+								<button class="google" data-bind="enable: hasGoogle, click: loadFromGoogle">
+									<i class="google_small"></i>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<div class="row">
-					<div class="col-xs-2 stuffed"><strong>Name</strong></div>
-					<div class="col-xs-5">
+					<div class="col-sm-6">
 						<div class="form-group" data-bind="validationElement: firstName">
-							<label class="sr-only" for="firstName">First Name</label>
+							<label for="firstName">First Name</label>
 							<input type="text" class="form-control" id="firstName" placeholder="First Name" data-bind="value: firstName, valueUpdate: 'afterkeypress', hasFocus: true;">
 						</div>
 					</div>
-					<div class="col-xs-5">
+					<div class="col-sm-6">
 						<div class="form-group" data-bind="validationElement: lastName">
-							<label class="sr-only" for="lastName">Last Name</label>
+							<label for="lastName">Last Name</label>
 							<input type="text" class="form-control" id="lastName" placeholder="Last Name" data-bind="value: lastName, valueUpdate: 'afterkeypress'">
 						</div>
 					</div>
 				</div>
-				<div class="row vertical-align">
-					<div class="col-xs-2 stuffed"><strong>Picture</strong></div>
-					<div class="col-xs-2 stuffed">
-						<div data-bind="if: imageURL">
-							<img class="img-circle img-thumbnail" data-bind="attr: { src: imageURL }" />
-						</div>
-						<div data-bind="ifnot: imageURL" id="profile-image">
-							<img src="images/user.png" class="img-circle img-thumbnail" />
-						</div>
-					</div>
-					<div class="col-xs-2 text-center stuffed">
-						<div class="btn btn-default btn-file">
-							Browse <input type="file" id="imageupload" name="image" />
-						</div>
-					</div>
-					<div class="col-xs-2 text-center stuffed">
-						<p>&mdash; or &mdash;</p>
-					</div>
-					<div class="col-xs-4 text-center stuffed">
-						<p>Load your profile picture from: </p>
 
-						<button class="facebook" data-bind="enable: hasFacebook, click: loadFromFacebook">
-							<i class="facebook_small"></i>
-						</button>
-						<button class="google" data-bind="enable: hasGoogle, click: loadFromGoogle">
-							<i class="google_small"></i>
-						</button>
-					</div>
-				</div>
  				<div class="row">
-					<div class="col-xs-2 stuffed"><strong>About me</strong></div>
-					<div class="col-xs-10">
+					<div class="col-sm-12">
 						<div class="form-group">
-							<textarea class="form-control" rows="3" data-bind="value: aboutMe"></textarea>
+							<label>About me</label>
 							<textarea class="form-control" rows="3" data-bind="value: about"></textarea>
 						</div>
 					</div>
 				</div>
 				<div class="row">
-					<div class="col-xs-2 stuffed"><strong>Location</strong></div>
-					<div class="col-xs-10">
+					<div class="col-sm-12">
 						<div class="form-group">
-							<label class="sr-only" for="location">Location</label>
+							<label for="location">Location</label>
 							<input type="text" class="form-control" id="location" placeholder="Location" data-bind="value: location">
 						</div>
 					</div>
