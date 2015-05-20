@@ -17,6 +17,7 @@
 package espace.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import model.CollectionRecord;
@@ -33,10 +34,21 @@ public class SourceResponse {
 	public SourceResponse() {}
 
 	public SourceResponse(SearchResponse resp) {
-		elasticrecords = new ArrayList<CollectionRecord>();
+		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
 		totalCount = (int)resp.getHits().getTotalHits();
 		for(SearchHit hit: resp.getHits().hits()) {
 				elasticrecords.add(hitToRecord(hit));
+		}
+		items = new ArrayList<ItemsResponse>(); 
+		for (CollectionRecord r: elasticrecords) {
+			ItemsResponse it = new ItemsResponse();
+			it.title = Arrays.asList(new Lang(null, r.getTitle()));
+			it.description = Arrays.asList(new Lang(null, r.getDescription()));
+			it.id = r.getSourceId();
+			it.thumb = Arrays.asList(r.getThumbnail().toString());
+			it.url = new MyURL();
+			it.url.fromSourceAPI = r.getSourceUrl();
+			items.add(it);
 		}
 	}
 
@@ -81,7 +93,6 @@ public class SourceResponse {
 	public int totalCount;
 	public int startIndex;
 	public int count;
-	public List<CollectionRecord> elasticrecords;
 	public List<ItemsResponse> items;
 	public String source;
 	public JsonNode facets;
