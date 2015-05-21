@@ -177,6 +177,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
 							false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
+					it.rights = Utils.readLangAttr(item, "rights", false);
 					a.add(it);
 				}
 			}

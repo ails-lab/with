@@ -75,6 +75,7 @@ public class SourceResponse {
 		public List<Lang> dataProvider;
 		public MyURL url;
 		public List<String> fullresolution;
+		public List<Lang> rights;
 	}
 
 	public String query;
