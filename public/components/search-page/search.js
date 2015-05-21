@@ -31,6 +31,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.source=ko.observable(false);
 		self.creator=ko.observable("");
 		self.provider=ko.observable("");
+		self.rights=ko.observable("");
 		self.url=ko.observable("");
 		//self.id=ko.observable("");
 		self.load = function(data) {
@@ -45,6 +46,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.source(data.source);
 			self.creator(data.creator);
 			self.provider(data.provider);
+			self.rights(data.rights);
 			self.recordId(data.recordId);
 		};
 
@@ -187,6 +189,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							view_url: result.url.fromSourceAPI,
 							creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
 							provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
+							rights: result.rights!==undefined && result.rights!==null && result.rights[0]!==undefined? result.rights[0].value : "",
+
 							source: source
 						  });
 						 items.push(record);}

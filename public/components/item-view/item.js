@@ -12,6 +12,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		self.source=ko.observable(false);
 		self.creator=ko.observable("");
 		self.provider=ko.observable("");
+		self.rights=ko.observable("");
 		self.url=ko.observable("");
 		self.id=ko.observable("");
 		self.load = function(data) {
@@ -39,6 +40,9 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 				}
 				if(data.provider!==undefined){
 					self.provider(data.provider);
+				}
+				if(data.rights!==undefined){
+					self.rights(data.rights);
 				}
 
 			

@@ -38,8 +38,12 @@ import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
 
+
+
 public class NLASpaceSource extends ISpaceSource {
 
+
+	
 	private String Key = "SECRET_KEY";
 
 	public NLASpaceSource() {
@@ -158,8 +162,13 @@ public class NLASpaceSource extends ISpaceSource {
 								"value", false);
 						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl",
 								false);
+						it.rights=null;
 
 						a.add(it);
+						
+						 
+
+						
 
 					}
 				}
