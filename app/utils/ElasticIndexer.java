@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
 
 import model.Collection;
 import model.CollectionRecord;
@@ -33,6 +34,8 @@ import model.CollectionRecord;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
+import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -40,6 +43,8 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.cluster.metadata.MappingMetaData;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
@@ -64,8 +69,6 @@ public class ElasticIndexer {
 	private static Client nodeClient;
 	private static TransportClient transportClient;
 	private static BulkProcessor bulkProcessor;
-	private static boolean hasMapping =  false;
-
 	private Collection collection;
 	private CollectionRecord record;
 
@@ -158,8 +161,11 @@ public class ElasticIndexer {
 			try {
 				int i = 0;
 				for(XContentBuilder doc: documents) {
-					getBulkProcessor().add(new IndexRequest("with", "record", records.get(i).getDbId().toString())
-													.source(doc));
+					getBulkProcessor().add(new IndexRequest(
+							getConf().getString("elasticsearch.index.name"),
+							getConf().getString("elasticsearch.index.type"),
+							records.get(i).getDbId().toString())
+					.source(doc));
 					i++;
 				}
 				getBulkProcessor().close();
@@ -180,8 +186,28 @@ public class ElasticIndexer {
 		return response;
 	}
 
+	private static boolean getMapping() {
+		GetMappingsResponse mapResp = null;
+		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = null;
+		try {
+			mapResp = getTransportClient().admin().indices().getMappings(new GetMappingsRequest().indices(getConf().getString("elasticsearch.index.name"))).get();
+			mappings = mapResp.getMappings();
+		} catch(ElasticsearchException ese) {
+			log.error("Client or error on mappings", ese);
+		} catch (InterruptedException e) {
+			log.error("Client or error on mappings", e);
+		} catch (ExecutionException e) {
+			log.error("Client or error on mappings", e);
+		}
+
+		if( (mappings!=null) && mappings.containsKey(getConf().getString("elasticsearch.index.name")))
+			return true;
+		return false;
+
+	}
+
 	public static CreateIndexResponse putMapping() {
-		if(!hasMapping) {
+		if(!getMapping()) {
 			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
 			JsonNode mapping = null;
 			CreateIndexRequestBuilder cireqb = null;
@@ -197,7 +223,6 @@ public class ElasticIndexer {
 				log.error("Cannot read mapping from file!", e);
 				return null;
 			}
-			hasMapping = true;
 			return ciresp;
 		}
 		return null;
