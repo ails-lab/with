@@ -22,18 +22,16 @@ import play.GlobalSettings;
 import play.Logger;
 import play.api.mvc.EssentialFilter;
 import play.libs.Akka;
-import utils.ElasticIndexer;
 import actors.ApiKeyManager;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-
 import controllers.AccessFilter;
 import controllers.SessionFilter;
-
 import com.mongodb.WriteConcern;
 
 import db.DB;
+import elastic.Elastic;
 
 
 public class Global extends GlobalSettings {
@@ -42,7 +40,7 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart( Application app ) {
 		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
-		ElasticIndexer.putMapping();
+		Elastic.putMapping();
 		setTestApikey();
 		// read keys into the Manager
 		ActorSelection api = Akka.system().actorSelection("user/apiKeyManager");

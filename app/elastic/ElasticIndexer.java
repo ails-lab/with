@@ -14,7 +14,7 @@
  */
 
 
-package utils;
+package elastic;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
@@ -65,10 +65,7 @@ import db.DB;
 public class ElasticIndexer {
 	static private final Logger.ALogger log = Logger.of(ElasticIndexer.class);
 
-	private static Config conf;
-	private static Client nodeClient;
-	private static TransportClient transportClient;
-	private static BulkProcessor bulkProcessor;
+
 	private Collection collection;
 	private CollectionRecord record;
 
@@ -80,54 +77,7 @@ public class ElasticIndexer {
 		this.record = record;
 	}
 
-	public static Config getConf() {
-		if( conf == null ) {
-			conf = ConfigFactory.load();
-		}
-		return conf;
-	}
 
-	public static Settings getSettings() {
-		Settings settings = ImmutableSettings.settingsBuilder()
-				.put("cluster.name", getConf().getString("elasticsearch.cluster")).build();
-		return settings;
-	}
-
-	/*
-	 * The benefit of using this Client
-	 * is the fact that operations are automatically
-	 * routed to the node(s) the operations need to be executed on,
-	 * without performing a "double hop".
-	 * For example, the index operation will automatically
-	 * be executed on the shard that it will end up existing at.
-	 */
-	public static Client getNodeClient() {
-		if( nodeClient == null) {
-			Node node = nodeBuilder()
-					.clusterName(getConf().getString("elasticsearch.cluster"))
-					.client(true)
-					.local(true)
-					.node();
-			nodeClient = node.client();
-		}
-		return nodeClient;
-	}
-
-	/*
-	 * The TransportClient connects remotely to an
-	 * elasticsearch cluster. It does not join the cluster,
-	 * but simply gets one or more initial transport addresses
-	 * and communicates with them.
-	 * Though most actions will probably be "two hop" operations.
-	 */
-	public static TransportClient getTransportClient() {
-		if( transportClient == null ) {
-			transportClient = new TransportClient(getSettings())
-					.addTransportAddress(new InetSocketTransportAddress(
-					getConf().getString("elasticsearch.host"), getConf().getInt("elasticsearch.port")));
-		}
-		return transportClient;
-	}
 
 	public void index() {
 		if( collection != null )
@@ -150,9 +100,9 @@ public class ElasticIndexer {
 		if( documents.size() == 0 ) {
 			log.debug("No records within the collection to index!");
 		} else if( documents.size() == 1 ) {
-				getTransportClient().prepareIndex(
-					 getConf().getString("elasticsearch.index.name"),
-					 getConf().getString("elasticsearch.index.type"),
+				Elastic.getTransportClient().prepareIndex(
+						Elastic.index,
+						Elastic.type,
 					 record.getDbId().toString())
 					 	.setSource(documents.get(0))
 					 	.execute()
@@ -161,14 +111,14 @@ public class ElasticIndexer {
 			try {
 				int i = 0;
 				for(XContentBuilder doc: documents) {
-					getBulkProcessor().add(new IndexRequest(
-							getConf().getString("elasticsearch.index.name"),
-							getConf().getString("elasticsearch.index.type"),
+					Elastic.getBulkProcessor().add(new IndexRequest(
+							Elastic.index,
+							Elastic.type,
 							records.get(i).getDbId().toString())
 					.source(doc));
 					i++;
 				}
-				getBulkProcessor().close();
+				Elastic.getBulkProcessor().close();
 			} catch (Exception e) {
 				log.error("Error in Bulk operations", e);
 			}
@@ -176,9 +126,9 @@ public class ElasticIndexer {
 	}
 
 	public IndexResponse indexSingleDocument() {
-		IndexResponse response = getTransportClient().prepareIndex(
-					getConf().getString("elasticsearch.index.name"),
-					getConf().getString("elasticsearch.index.type"),
+		IndexResponse response = Elastic.getTransportClient().prepareIndex(
+				Elastic.index,
+				Elastic.type,
 										record.getDbId().toString())
 					.setSource(prepareRecordDocument())
 					.execute()
@@ -186,11 +136,11 @@ public class ElasticIndexer {
 		return response;
 	}
 
-	private static boolean getMapping() {
+	private boolean hasMapping() {
 		GetMappingsResponse mapResp = null;
 		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = null;
 		try {
-			mapResp = getTransportClient().admin().indices().getMappings(new GetMappingsRequest().indices(getConf().getString("elasticsearch.index.name"))).get();
+			mapResp = Elastic.getTransportClient().admin().indices().getMappings(new GetMappingsRequest().indices(Elastic.index)).get();
 			mappings = mapResp.getMappings();
 		} catch(ElasticsearchException ese) {
 			log.error("Client or error on mappings", ese);
@@ -200,22 +150,22 @@ public class ElasticIndexer {
 			log.error("Client or error on mappings", e);
 		}
 
-		if( (mappings!=null) && mappings.containsKey(getConf().getString("elasticsearch.index.name")))
+		if( (mappings!=null) && mappings.containsKey(Elastic.index))
 			return true;
 		return false;
 
 	}
 
-	public static CreateIndexResponse putMapping() {
-		if(!getMapping()) {
+	public CreateIndexResponse putMapping() {
+		if(!hasMapping()) {
 			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
 			JsonNode mapping = null;
 			CreateIndexRequestBuilder cireqb = null;
 			CreateIndexResponse ciresp = null;
 			try {
-				mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+getConf().getString("elasticsearch.index.mapping")))));
-				cireqb = getTransportClient().admin().indices().prepareCreate(getConf().getString("elasticsearch.index.name"));
-				cireqb.addMapping(getConf().getString("elasticsearch.index.type"), mapping.toString());
+				mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+Elastic.mapping))));
+				cireqb = Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index);
+				cireqb.addMapping(Elastic.type, mapping.toString());
 				ciresp = cireqb.execute().actionGet();
 			} catch(ElasticsearchException ese) {
 				log.error("Cannot put mapping!", ese);
@@ -257,37 +207,4 @@ public class ElasticIndexer {
 
 	}
 
-	public static BulkProcessor getBulkProcessor() {
-		if( bulkProcessor == null ) {
-			bulkProcessor = BulkProcessor.builder(getTransportClient(),
-				new BulkProcessor.Listener() {
-
-					@Override
-					public void beforeBulk(long arg0, BulkRequest arg1) {
-						// TODO Auto-generated method stub
-
-					}
-
-					@Override
-					public void afterBulk(long arg0, BulkRequest arg1, Throwable arg2) {
-
-					}
-
-					@Override
-					public void afterBulk(long arg0, BulkRequest request,
-							BulkResponse response) {
-						if( response.hasFailures() ) {
-							log.error(response.buildFailureMessage());
-						}
-					}
-
-				})
-				.setBulkActions(1000)
-				.setBulkSize(new ByteSizeValue(5000))
-				.setFlushInterval(TimeValue.timeValueSeconds(5))
-				.setConcurrentRequests(1)
-				.build();
-		}
-		return bulkProcessor;
-	}
 }

@@ -14,7 +14,7 @@
  */
 
 
-package utils;
+package elastic;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -103,8 +103,8 @@ public class ElasticSearcher {
 	}
 
 	public ElasticSearcher() {
-		this.name = ElasticIndexer.getConf().getString("elasticsearch.index.name");
-		this.type = ElasticIndexer.getConf().getString("elasticsearch.index.type");
+		this.name = Elastic.index;
+		this.type = Elastic.type;
 	}
 
 	public SearchResponse execute(QueryBuilder query) {
@@ -197,7 +197,7 @@ public class ElasticSearcher {
 	// private utility methods
 
 	private Client getClient() {
-		return ElasticIndexer.getTransportClient();
+		return Elastic.getTransportClient();
 	}
 
 	private SearchRequestBuilder getSearchRequestBuilder() {

@@ -42,13 +42,13 @@ import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import utils.ElasticIndexer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticIndexer;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
