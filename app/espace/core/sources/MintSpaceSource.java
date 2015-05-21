@@ -31,7 +31,6 @@ import org.json.JSONException;
 
 import play.Logger;
 import play.libs.Json;
-import utils.ElasticSearcher;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import elastic.ElasticSearcher;
