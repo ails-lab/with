@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -42,7 +43,10 @@ import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -70,6 +74,11 @@ public class CollectionController extends Controller {
 			result.put("error",
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
+		}
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error",
+					"User does not have read-access for the collection");
+			return forbidden(result);
 		}
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
@@ -99,16 +108,25 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		Collection c = null;
 		c = DB.getCollectionDAO().getById(new ObjectId(id));
-		if (DB.getCollectionDAO().removeById(new ObjectId(id)) != 1) {
-			result.put("error", "Cannot delete collection from database!");
-			return badRequest(result);
+		try {
+			if (DB.getCollectionDAO().removeById(new ObjectId(id)) != 1) {
+				result.put("error", "Cannot delete collection from database!");
+				return badRequest(result);
+			}
+		} catch (Exception e) {
+			return internalServerError(e.toString());
+		}
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error",
+					"User does not have permission to delete the collection");
+			return forbidden(result);
 		}
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
-		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)) {
-			result.put("message",
-					"Sorry! You do not have access to this collection.");
-			return badRequest(result);
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.DELETE)) {
+			result.put("error",
+					"User does not have permission to delete the collection");
+			return forbidden(result);
 		}
 		result.put("message", "Collection deleted succesfully from database");
 		return ok(result);
@@ -119,59 +137,60 @@ public class CollectionController extends Controller {
 	 *
 	 * @param id
 	 * @return
+	 * @throws IOException
+	 * @throws JsonProcessingException
 	 */
-	public static Result editCollection(String id) {
+	public static Result editCollection(String id)
+			throws JsonProcessingException, IOException {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-
 		if (json == null) {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
-
-		// new collection changes
-		ObjectId oldId = new ObjectId(id);
-		Collection oldVersion = DB.getCollectionDAO().getById(oldId);
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
+		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
 		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds,
 				Action.EDIT)) {
-			result.put("message",
-					"Sorry! You do not have access to this collection.");
-			return badRequest(result);
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
 		}
-
-		Collection newVersion = Json.fromJson(json, Collection.class);
-		newVersion.getFirstEntries().addAll(oldVersion.getFirstEntries());
-		newVersion.setDbId(oldId);
+		String oldTitle = oldVersion.getTitle();
+		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
+		Collection newVersion = updater.readValue(json);
 		newVersion.setLastModified(new Date());
-		newVersion.setItemCount(oldVersion.getItemCount());
-		newVersion.setOwnerId(oldVersion.getOwnerId());
-		newVersion.setCreated(oldVersion.getCreated());
+
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newVersion);
 		for (ConstraintViolation<Collection> cv : violations) {
 			result.put("message",
 					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+		}
+		if (!violations.isEmpty()) {
 			return badRequest(result);
 		}
-		// if oldTitle = newTitle means description, isPublic, thumbnail or
-		// category changed
-		if (!newVersion.getTitle().equals(oldVersion.getTitle())) {
-			if (DB.getCollectionDAO().getByOwnerAndTitle(
-					newVersion.getOwnerId(), newVersion.getTitle()) != null) {
-				result.put("message",
-						"Title already exists! Please specify another title.");
-				return internalServerError(result);
-			}
+		if ((DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(),
+				newVersion.getTitle()) != null)
+				&& (!oldTitle.equals(newVersion.getTitle()))) {
+			result.put("message",
+					"Title already exists! Please specify another title.");
+			return internalServerError(result);
 		}
 		if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
-
 			log.error("Cannot save collection to database!");
 			result.put("message", "Cannot save collection to database!");
 			return internalServerError(result);
 		}
-
+		String m = DB.getJson(newVersion);
+		System.out.println(m.toString());
 		return ok(Json.toJson(newVersion));
 	}
 

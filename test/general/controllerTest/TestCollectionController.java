@@ -18,7 +18,8 @@ package general.controllerTest;
 
 //all test should use those
 import static org.fest.assertions.Assertions.assertThat;
-import static play.mvc.Http.Status.*;
+import static play.mvc.Http.Status.FORBIDDEN;
+import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.fakeRequest;
@@ -49,13 +50,12 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import controllers.GroupManager;
 import controllers.UserManager;
 import db.DB;
 
 public class TestCollectionController {
 
-	@Test
+	// @Test
 	public void testGetCollection() {
 
 		User user1 = new User();
@@ -109,10 +109,10 @@ public class TestCollectionController {
 						"/collection/" + col.getDbId()).withSession("user",
 						user2.getDbId().toString()));
 				assertThat(status(result)).isEqualTo(OK);
-				JsonParser parser = new JsonParser();
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				JsonElement el = parser.parse(contentAsString(result));
-				System.out.println(gson.toJson(el));
+				// JsonParser parser = new JsonParser();
+				// Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				// JsonElement el = parser.parse(contentAsString(result));
+				// System.out.println(gson.toJson(el));
 			}
 		});
 	}
@@ -120,10 +120,15 @@ public class TestCollectionController {
 	// @Test
 	public void testDeleteCollection() {
 
-		User user = new User();
-		user.setEmail("test" + TestUtils.randomString() + "@controller.gr");
-		user.setUsername("controller");
-		DB.getUserDAO().makePermanent(user);
+		User user1 = new User();
+		user1.setEmail("user1@controller.gr");
+		user1.setUsername("user1");
+		DB.getUserDAO().makePermanent(user1);
+
+		User user2 = new User();
+		user2.setEmail("user2@controller.gr");
+		user2.setUsername("user2");
+		DB.getUserDAO().makePermanent(user2);
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
@@ -133,25 +138,31 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setOwnerId(user1);
 		DB.getCollectionDAO().makePermanent(col);
 
 		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
-				Result result = route(fakeRequest("DELETE", "/collection/"
-						+ col.getDbId()));
+				Result result = route(fakeRequest("DELETE",
+						"/collection/" + col.getDbId()).withSession("user",
+						user1.getDbId().toHexString()));
 				assertThat(status(result)).isEqualTo(OK);
-
-				JsonParser parser = new JsonParser();
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				JsonElement el = parser.parse(contentAsString(result));
-				System.out.println(gson.toJson(el));
+				col.setOwnerId(user2);
+				DB.getCollectionDAO().makePermanent(col);
+				result = route(fakeRequest("DELETE",
+						"/collection/" + col.getDbId()).withSession("user",
+						user1.getDbId().toHexString()));
+				assertThat(status(result)).isEqualTo(FORBIDDEN);
+				// JsonParser parser = new JsonParser();
+				// Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				// JsonElement el = parser.parse(contentAsString(result));
+				// System.out.println(gson.toJson(el));
 			}
 		});
 	}
 
-	// @Test
+	@Test
 	public void testEditCollection() {
 
 		User user = new User();
@@ -177,9 +188,10 @@ public class TestCollectionController {
 				json.put("title",
 						"The EDITED test title " + TestUtils.randomString()
 								+ TestUtils.randomString());
-				json.put("ownerId", user.getDbId().toString());
+				json.put("ownerId", user.getDbId().toHexString());
 				Result result = route(fakeRequest("POST",
-						"/collection/" + col.getDbId()).withJsonBody(json));
+						"/collection/" + col.getDbId()).withJsonBody(json)
+						.withSession("user", user.getDbId().toHexString()));
 
 				JsonParser parser = new JsonParser();
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -192,7 +204,6 @@ public class TestCollectionController {
 					System.out.println(status(result));
 					Assert.fail();
 				}
-
 			}
 		});
 	}

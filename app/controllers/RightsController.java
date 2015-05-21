@@ -16,7 +16,9 @@
 
 package controllers;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import model.Collection;
@@ -51,9 +53,10 @@ public class RightsController extends Controller {
 			result.put("message", "Cannot retrieve collection from database!");
 			return internalServerError(result);
 		}
-
-		AccessManager.initialise(new ObjectId(session().get("user")));
-		if (!AccessManager.checkAccess(collection.getRights(), Action.DELETE)) {
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.DELETE)) {
 			result.put("message",
 					"Sorry! You do not own this collection so you cannot set rights. "
 							+ "Please contact the owner of this collection");
