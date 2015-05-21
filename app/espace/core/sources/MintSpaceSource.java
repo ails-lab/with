@@ -18,13 +18,19 @@ package espace.core.sources;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+
+import model.CollectionRecord;
 
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import play.Logger;
+import play.libs.Json;
 import utils.ElasticSearcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,6 +45,7 @@ import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
+import espace.core.SourceResponse.Lang;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
@@ -55,9 +62,10 @@ public class MintSpaceSource extends ISpaceSource {
 	public SourceResponse getResults(CommonQuery q) {
 		ElasticSearcher searcher = new ElasticSearcher();
 		String term = "\""+q.getQuery()+"\"" + "\"mint\"";
-		SearchResponse resp = searcher.search(term, Integer.parseInt(q.page), Integer.parseInt(q.pageSize));
+		int offset = Integer.parseInt(q.pageSize);
+		SearchResponse resp = searcher.search(term, Integer.parseInt(q.page), offset);
 		searcher.closeClient();
-		return new SourceResponse(resp);
+		return new SourceResponse(resp, getSourceName(), offset);
 	}
 
 	@Override
@@ -65,5 +73,7 @@ public class MintSpaceSource extends ISpaceSource {
 		log.debug("Method not implemented yet");
 		return null;
 	}
+	
+
 
 }

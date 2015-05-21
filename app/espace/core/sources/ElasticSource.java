@@ -50,7 +50,7 @@ public class ElasticSource extends ISpaceSource {
 		String term = q.getQuery();
 		SearchResponse resp = searcher.search(term);
 		searcher.closeClient();
-		return new SourceResponse(resp);
+		return new SourceResponse(resp, "With", Integer.parseInt(q.page));
 	}
 
 	@Override

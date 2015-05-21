@@ -32,24 +32,28 @@ import com.fasterxml.jackson.databind.JsonNode;
 public class SourceResponse {
 
 	public SourceResponse() {}
-
-	public SourceResponse(SearchResponse resp) {
+	
+	public SourceResponse(SearchResponse resp, String source, int offset) {
 		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
-		totalCount = (int)resp.getHits().getTotalHits();
+		this.totalCount = (int) resp.getHits().getTotalHits();
+		this.source = source;
 		for(SearchHit hit: resp.getHits().hits()) {
 				elasticrecords.add(hitToRecord(hit));
 		}
-		items = new ArrayList<ItemsResponse>(); 
+		this.count = elasticrecords.size();
+		this.startIndex = offset;
+		List<ItemsResponse> items = new ArrayList<ItemsResponse>(); 
 		for (CollectionRecord r: elasticrecords) {
 			ItemsResponse it = new ItemsResponse();
 			it.title = Arrays.asList(new Lang(null, r.getTitle()));
 			it.description = Arrays.asList(new Lang(null, r.getDescription()));
 			it.id = r.getSourceId();
-			it.thumb = Arrays.asList(r.getThumbnail().toString());
+			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
 			it.url.fromSourceAPI = r.getSourceUrl();
 			items.add(it);
 		}
+		this.items = items;
 	}
 
 	private CollectionRecord hitToRecord(SearchHit hit) {
