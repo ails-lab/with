@@ -54,14 +54,30 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		};
 
 		 self.sourceImage = ko.pureComputed(function() {
-				if(self.source() =="DPLA") return "images/logos/dpla.png";
+			 switch(self.source()) {
+			    case "DPLA":
+			    	return "images/logos/dpla.png";
+			    case "Europeana":
+			    	return "images/logos/europeana.jpeg";
+			    case "NLA":
+			    	return "images/logos/nla_logo.png";
+			    case "DigitalNZ":
+			    	return "images/logos/digitalnz.png";
+			    case "EFashion":
+			    	return "images/logos/eufashion.png";
+			    case "YouTube":
+			    	"images/logos/youtube.jpg";
+			    case "Mint":
+			    	return "images/logos/mint_logo.png";
+			    default: return "";
+			 }
+				/*if(self.source() =="DPLA") return "images/logos/dpla.png";
 				else if(self.source() == "Europeana") return "images/logos/europeana.jpeg";
 				else if(self.source() == "NLA") return "images/logos/nla_logo.png";
 				else if(self.source() == "DigitalNZ") return "images/logos/digitalnz.png";
-				else if(self.source() == "DigitalNZ") return "images/logos/digitalnz.png";
 				else if(self.source()== "EFashion") return "images/logos/eufashion.png";
 				else if(self.source() == "YouTube") return "images/logos/youtube.jpg";
-				else return "";
+				else return "";*/
 			});
 		if(data != undefined) self.load(data);
 	}

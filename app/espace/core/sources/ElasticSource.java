@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import org.elasticsearch.action.search.SearchResponse;
 
 import play.Logger;
-import utils.ElasticSearcher;
+import elastic.ElasticSearcher;
 import espace.core.CommonQuery;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
@@ -50,7 +50,7 @@ public class ElasticSource extends ISpaceSource {
 		String term = q.getQuery();
 		SearchResponse resp = searcher.search(term);
 		searcher.closeClient();
-		return new SourceResponse(resp);
+		return new SourceResponse(resp, "With", Integer.parseInt(q.page));
 	}
 
 	@Override
