@@ -25,10 +25,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import play.Logger;
-import utils.ElasticSearcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import elastic.ElasticSearcher;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import org.elasticsearch.action.search.SearchResponse;
 
 import play.Logger;
-import utils.ElasticSearcher;
+import elastic.ElasticSearcher;
 import espace.core.CommonQuery;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
