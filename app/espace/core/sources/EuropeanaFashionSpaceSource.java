@@ -33,7 +33,6 @@ import espace.core.Utils;
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
 	public String getHttpQuery(CommonQuery q) {
-		// q=zeus&api_key=2edebbb32b1f42f86aaa56fd2edc1a28&sourceResource.creator=Zeus
 		return "http://www.europeanafashion.eu/api/search/"
 				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
 						: q.searchTerm)
@@ -43,12 +42,6 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 				+ ""
 				+ ((Integer.parseInt(q.page) - 1)
 						* Integer.parseInt(q.pageSize) + 1);
-		// return "http://api.dp.la/v2/items?api_key=" + DPLAKey + "&q="
-		// + Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*" :
-		// q.searchTerm)
-		// + (Utils.hasAny(q.termToExclude) ? "+NOT+(" +
-		// Utils.spacesPlusFormatQuery(q.termToExclude) + ")" : "")
-		// + "&page=" + q.page + "&page_size=" + q.pageSize;
 	}
 
 	public String getSourceName() {

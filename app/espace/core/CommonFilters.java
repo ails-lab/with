@@ -22,5 +22,7 @@ public class CommonFilters {
 	public static final String TYPE_NAME = "Type";
 	public static final String PROVIDER_ID = "provider";
 	public static final String PROVIDER_NAME = "Provider";
+	public static final String CREATOR_ID = "creator";
+	public static final String CREATOR_NAME = "Creator";
 
 }

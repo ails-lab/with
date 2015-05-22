@@ -171,9 +171,24 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=" + spacesPlusFormatQuery(second.toString());
+			return first + "=" + spacesFormatQuery(second.toString(),"%20");
+		}
+		
+	}
+	
+	public static class LongPair<T> extends Pair<T>{
+		
+		public LongPair() {
+			super();
 		}
 
+		public LongPair(T first, T second) {
+			super(first, second);
+		}
+
+		public String getHttp() {
+			return first + "=%22" + spacesFormatQuery(second.toString(),"%20")+"%22";
+		}
 	}
 
 	public static JsonNode findNode(JsonNode path, Pair<String>... pair) {

@@ -21,18 +21,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import espace.core.Utils.Pair;
+
 public class FilterValuesMap {
 
 	private HashMap<String, List<String>> specificvalues;
-	private HashMap<String, List<String>> queryTexts;
+	private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
-	private HashMap<String, Function<String, String>> writters;
+	private HashMap<String, Function<String, Pair<String>>> writters;
 
 	public FilterValuesMap() {
 		super();
 		specificvalues = new HashMap<String, List<String>>();
 		commonvalues = new HashMap<String, List<String>>();
-		queryTexts = new HashMap<String, List<String>>();
+		queryTexts = new HashMap<String, List<Pair<String>>>();
 		writters = new HashMap<>();
 	}
 
@@ -40,10 +42,10 @@ public class FilterValuesMap {
 		return filterID + "/" + value;
 	}
 
-	private List<String> getOrset(HashMap<String, List<String>> map, String key, boolean addNew) {
-		List<String> res;
+	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key, boolean addNew) {
+		List<T> res;
 		if (!map.containsKey(key)) {
-			res = new ArrayList<String>();
+			res = new ArrayList<T>();
 			if (addNew)
 				map.put(key, res);
 		} else {
@@ -52,11 +54,11 @@ public class FilterValuesMap {
 		return res;
 	}
 
-	private List<String> getOrset(HashMap<String, List<String>> map, String key) {
+	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key) {
 		return getOrset(map, key, true);
 	}
 
-	public void addMap(String filterID, String commonValue, String specificValue, String queryText) {
+	public void addMap(String filterID, String commonValue, String specificValue, Pair<String> queryText) {
 		getOrset(specificvalues, getKey(filterID, commonValue)).add(specificValue);
 		getOrset(commonvalues, getKey(filterID, specificValue)).add(commonValue);
 		getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
@@ -86,12 +88,12 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public List<String> translateToQuery(String filterID, String commonValue) {
+	public List<Pair<String>> translateToQuery(String filterID, String commonValue) {
 		if (commonValue != null) {
 			String k = getKey(filterID, commonValue);
-			List<String> v = getOrset(queryTexts, k, false);
+			List<Pair<String>> v = getOrset(queryTexts, k, false);
 			if (v.isEmpty()) {
-				Function<String, String> w = writters.get(filterID);
+				Function<String, Pair<String>> w = writters.get(filterID);
 				if (w != null)
 					v.add(w.apply(commonValue));
 			}
@@ -100,7 +102,7 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public void addDefaultWriter(String filterId, Function<String, String> function) {
+	public void addDefaultWriter(String filterId, Function<String, Pair<String>> function) {
 		writters.put(filterId, function);
 	}
 

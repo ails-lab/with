@@ -17,6 +17,7 @@
 package espace.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
@@ -25,6 +26,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.RecordJSONMetadata.Format;
+import espace.core.Utils.Pair;
 import espace.core.sources.FilterValuesMap;
 import espace.core.sources.TypeValues;
 
@@ -65,6 +67,12 @@ public abstract class ISpaceSource {
 	protected void countValue(CommonFilterLogic type, String t) {
 		countValue(type, t, true, 1);
 	}
+	
+	protected void countValue(CommonFilterLogic type, Collection<String> t) {
+		for (String string : t) {
+			countValue(type, string, true, 1);
+		}
+	}
 
 	protected void countValue(CommonFilterLogic type, String t, int count) {
 		countValue(type, t, true, count);
@@ -78,12 +86,16 @@ public abstract class ISpaceSource {
 
 	}
 
-	protected void addDefaultWriter(String filterId, Function<String, String> function) {
+	protected void addDefaultWriter(String filterId, Function<String, Pair<String>> function) {
 		vmap.addDefaultWriter(filterId, function);
 	}
 
-	protected void addMapping(String filterID, String commonValue, String specificValue, String querySegment) {
+	protected void addMapping(String filterID, String commonValue, String specificValue, Pair<String> querySegment) {
 		vmap.addMap(filterID, commonValue, specificValue, querySegment);
+	}
+	
+	protected void addMapping(String filterID, String commonValue, String specificValue, String param, String value) {
+		vmap.addMap(filterID, commonValue, specificValue, new Pair<String>(param, value));
 	}
 
 	protected List<String> translateToSpecific(String filterID, String value) {
@@ -94,19 +106,34 @@ public abstract class ISpaceSource {
 		return vmap.translateToCommon(filterID, value);
 	}
 
-	protected List<String> translateToQuery(String filterID, String value) {
+//	protected List<String> translateToQuery(String filterID, String value) {
+//		return vmap.translateToQuery(filterID, value);
+//	}
+	
+	protected List<Pair<String>> translateToQuery(String filterID, String value) {
 		return vmap.translateToQuery(filterID, value);
 	}
 
-	protected String addfilters(CommonQuery q, String qstr) {
+//	protected String addfilters(CommonQuery q, String qstr) {
+//		if (q.filters != null) {
+//			for (CommonFilter filter : q.filters) {
+//				for (String subq : translateToQuery(filter.filterID, filter.value)) {
+//					qstr += subq;
+//				}
+//			}
+//		}
+//		return qstr;
+//	}
+	
+	protected QueryBuilder addfilters(CommonQuery q, QueryBuilder builder) {
 		if (q.filters != null) {
 			for (CommonFilter filter : q.filters) {
-				for (String subq : translateToQuery(filter.filterID, filter.value)) {
-					qstr += subq;
+				for (Pair<String> param : translateToQuery(filter.filterID, filter.value)) {
+					builder.add(param);
 				}
 			}
 		}
-		return qstr;
+		return builder;
 	}
 
 }
