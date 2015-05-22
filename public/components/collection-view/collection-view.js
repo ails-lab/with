@@ -261,7 +261,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	 self.removeRecord= function (e){
 		$("#myModal").find("h4").html("Delete item");
 		$("#myModal").find("div.modal-body").html("Are you sure you want to proceed?");
-		$("#myModal").find("div.modal-footer").append('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a>');
+		$("#myModal").find("div.modal-footer").html('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a>');
 
 		$("#myModal").modal('show');
 		$('.btn-danger').on('click', function(event) {
