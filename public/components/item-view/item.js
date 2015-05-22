@@ -18,8 +18,9 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			if(data.title==undefined){
 				self.title("No title");
 			}else{self.title(data.title);}
-			
-			self.url("#item/"+data.id);
+			if(data.id){self.recordId(data.id);}
+			else{self.recordId(data.recordId);}
+			self.url("#item/"+self.recordId());
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 			if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0 && data.fullres!="null"){
@@ -46,7 +47,6 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			
 			self.source(data.source);
 			
-			self.recordId(data.recordId);
 		};
 
 		 self.sourceImage = ko.pureComputed(function() {

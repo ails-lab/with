@@ -264,6 +264,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 		$("#myModal").modal('show');
 		$('.btn-danger').on('click', function(event) {
+		    $("#myModal").find("div.modal-footer").html('');
 			$("#myModal").remove("div.modal-footer");
 			console.log(e);
 			 var jsondata=JSON.stringify({
