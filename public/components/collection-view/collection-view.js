@@ -81,7 +81,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.creator=ko.observable("");
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
-
+			self.rights=ko.observable("");
 
 			self.load = function(data) {
 				if(data.title==undefined){
@@ -96,6 +96,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.creator(data.creator);
 				self.provider(data.provider);
 				self.recordId(data.id);
+				self.rights(data.rights);
 			};
 
 			self.displayTitle = ko.computed(function() {
@@ -150,16 +151,15 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					var items = [];
 					for(var i in data.firstEntries){
 					 var result = data.firstEntries[i];
-
-
 					 var record = new Record({
 						id: result.dbId,
 						thumb: result.thumbnailUrl,
 						title: result.title,
 						view_url: result.sourceUrl,
-						creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
-						provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
-						source: result.source
+						creator: result.creator,
+						provider: result.provider,
+						source: result.source,
+						rights: result.rights
 					  });
 					 items.push(record);}
 
@@ -215,16 +215,15 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					var items = [];
 					for(var i in data){
 					 var result = data[i];
-
-
 					 var record = new Record({
 						id: result.dbId,
 						thumb: result.thumbnailUrl,
 						title: result.title,
 						view_url: result.sourceUrl,
-						creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
-						provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
-						source: result.source
+						creator: result.creator,
+						provider: result.provider,
+						source: result.source,
+						rights: result.rights
 					  });
 					 items.push(record);}
 

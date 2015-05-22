@@ -2,7 +2,6 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
 	function Record(data) {
 		var self = this;
-		
 		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
@@ -43,10 +42,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 				}
 				if(data.rights!==undefined){
 					self.rights(data.rights);
-				}
-
-			
-			
+				}			
 			
 			self.source(data.source);
 			
@@ -71,14 +67,8 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			    	return "images/logos/mint_logo.png";
 			    default: return "";
 			 }
-				/*if(self.source() =="DPLA") return "images/logos/dpla.png";
-				else if(self.source() == "Europeana") return "images/logos/europeana.jpeg";
-				else if(self.source() == "NLA") return "images/logos/nla_logo.png";
-				else if(self.source() == "DigitalNZ") return "images/logos/digitalnz.png";
-				else if(self.source()== "EFashion") return "images/logos/eufashion.png";
-				else if(self.source() == "YouTube") return "images/logos/youtube.jpg";
-				else return "";*/
 			});
+			
 		if(data != undefined) self.load(data);
 	}
 	
