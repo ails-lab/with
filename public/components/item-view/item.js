@@ -127,13 +127,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
    
     
     self.changeSource=function(item){
-    	if(item.record().fullres()!=item.record().thumb()){
-    		 $("#fullresim").attr('src',item.record().thumb());
-    	}
-    	else{
-    		 $("#fullresim").attr('src',item.record().thumb());
-    	}
-
+    	item.record().fullres(item.record().thumb());
     }
 
    
