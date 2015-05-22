@@ -162,7 +162,7 @@ public class TestCollectionController {
 		});
 	}
 
-	@Test
+	//@Test
 	public void testEditCollection() {
 
 		User user = new User();
@@ -245,7 +245,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	@Test
 	public void testListUserCollections() {
 
 		User user = new User();
@@ -285,13 +285,12 @@ public class TestCollectionController {
 						"GET",
 						"/collection/list?"
 								+ "username=Testuser&email=heres42@mongo.gr&"
-								+ "ownerId=" + user.getDbId()).withJsonBody(
-						json));
+								+ "ownerId=" + user.getDbId().toHexString()));
 
-				JsonParser parser = new JsonParser();
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				JsonElement el = parser.parse(contentAsString(result));
-				System.out.println(gson.toJson(el));
+//				JsonParser parser = new JsonParser();
+//				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//				JsonElement el = parser.parse(contentAsString(result));
+//				System.out.println(gson.toJson(el));
 
 				if (status(result) == 200)
 					assertThat(status(result)).isEqualTo(OK);

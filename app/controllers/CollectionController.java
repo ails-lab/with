@@ -244,30 +244,35 @@ public class CollectionController extends Controller {
 	/**
 	 * list accessible collections
 	 */
-	public static Result list(String username, String ownerId, String email,
-			String access, int offset, int count) {
+	public static Result list(String filterByUser, String filterByUserId,
+			String filterByEmail, String access, int offset, int count) {
+
 		ObjectNode result = Json.newObject();
 
-		List<Collection> userCollections;
-		if (ownerId != null) {
-			userCollections = DB.getCollectionDAO().getByOwner(
-					new ObjectId(ownerId), offset, count);
-		} else {
-			User u = null;
-			if (email != null)
-				u = DB.getUserDAO().getByEmail(email);
-			if (username != null)
-				u = DB.getUserDAO().getByUsername(username);
-
-			if (u == null) {
-				result.put("message", "User did not specified!");
-				return badRequest(result);
-			}
-
-			userCollections = DB.getCollectionDAO().getByOwner(u.getDbId(),
-					offset, count);
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error", "User not specified");
+			return forbidden(result);
 		}
 
+		String[] userIds = session().get("effectiveUserIds").split(",");
+		String userId = userIds[0];
+
+		userId = "5541fd98e4b0817dd8bd5f89";
+		List<Collection> userCollections;
+		ObjectId ownerId;
+		if (filterByUserId != null) {
+			ownerId = new ObjectId(filterByUserId);
+		} else if (filterByUser != null) {
+			ownerId = DB.getUserDAO().getByUsername(filterByUser).getDbId();
+		} else if (filterByEmail != null) {
+			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
+		} else {
+			userCollections = DB.getCollectionDAO().getByReadAccess(
+					new ObjectId(userId), offset, count);
+			return ok(Json.toJson(userCollections));
+		}
+		userCollections = DB.getCollectionDAO().getByReadAccessFiltered(
+				new ObjectId(userId), ownerId, offset, count);
 		return ok(Json.toJson(userCollections));
 	}
 
