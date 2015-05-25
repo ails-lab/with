@@ -1,9 +1,6 @@
 define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
-	
+
 	function Entry(entryData) {
-		//this.entryThumbnailUrl = ko.observable(entryData.thumbnailUrl);
-		//this.entryTitle = entryData.title;
-		//this.entrySourceId = entryData.sourceId;
 		var entry = ko.mapping.fromJS(entryData);
 		ko.mapping.fromJS(entryData, entry);
 		return entry;
@@ -34,42 +31,46 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
         self.isPublicToEdit = ko.observable(true);
         self.index = ko.observable(0);
 		$.when(promise).done(function() {
-			if (sessionStorage.getItem('UserCollections') !== null) 
+			if (sessionStorage.getItem('UserCollections') !== null)
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-			if (localStorage.getItem('UserCollections') !== null) 
+			if (localStorage.getItem('UserCollections') !== null)
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 			/*self.myCollections(ko.utils.arrayMap(collections, function(collectionData) {
 			    return new MyCollection(collectionData);
 			}));*/
 			ko.mapping.fromJS(collections, self.myCollections);
 		});
-		
+
 		self.deleteMyCollection = function(collection) {
 			collectionId = collection.dbId();
 			collectionTitle = collection.title();
 			showDelCollPopup(collectionTitle, collectionId);
 		};
-		
+
 		self.createCollection = function() {
 			createNewCollection();
 		};
-		
+
 		showDelCollPopup = function(collectionTitle, collectionId) {
 			$("#myModal").find("h4").html("Do you want to delete this collection?");
 			var body = $("#myModal").find("div.modal-body");
 			body.html("All records in that collection will be deleted.");
-	        var confirmBtn = $('<button> Confirm </button>').appendTo(body);
-	        confirmBtn.click(function() {
-	        	deleteCollection(collectionId);
-	        	$("#myModal").modal('hide');
-	        });
-	        var cancelBtn = $('<button> Cancel </button>').appendTo(body);
-	        cancelBtn.click(function() {
-	        	$("#myModal").modal('hide');
-	        });
+
+			var footer = $("#myModal").find("div.modal-footer");
+			if (footer.is(':empty')) {
+		        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
+		        cancelBtn.click(function() {
+		        	$("#myModal").modal('hide');
+		        });
+		        var confirmBtn = $('<button type="button" class="btn btn-danger">Delete</button>').appendTo(footer);
+		        confirmBtn.click(function() {
+		        	deleteCollection(collectionId);
+		        	$("#myModal").modal('hide');
+		        });
+		    }
 			$("#myModal").modal('show');
 		};
-		
+
 	    //Storage needs to be updated, because collection.js gets user collections from there
 		saveCollectionsToStorage = function(collections) {
 			if (sessionStorage.getItem('User') !== null) {
@@ -79,7 +80,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 				localStorage.setItem('UserCollections', JSON.stringify(collections));
 			}
 		};
-		
+
 		deleteCollection = function(collectionId) {
 			$.ajax({
 				"url": "/collection/"+collectionId,
@@ -94,8 +95,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 				}
 			});
 		};
-		
-		
+
+
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
@@ -105,11 +106,11 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 	        self.isPublicToEdit(self.myCollections()[collIndex].isPublic());
 			app.showPopup("edit-collection");
 		}
-		
+
 		self.closeEditPopup = function() {
 			app.closePopup();
 		}
-		
+
 		self.editCollection = function () {
 			var collIndex = self.index();
 			$.ajax({
@@ -124,7 +125,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections()[collIndex].title(self.titleToEdit());
 					self.myCollections()[collIndex].description(self.descriptionToEdit());
 					self.myCollections()[collIndex].isPublic(self.isPublicToEdit());
-					saveCollectionsToStorage(self.myCollections);
+					saveCollectionsToStorage(self.myCollections());
 				},
 				error: function(error) {
 					var r = JSON.parse(error.responseText);
@@ -135,7 +136,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			});
 			self.closeEditPopup();
 		};
-		
+
 		self.privateToggle=function(e,arg){
 			/*$(arg.currentTarget).parent().find('.btn').toggleClass('active');
 		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
@@ -147,7 +148,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    else
 		    	self.isPublicToEdit(true);
 		}
-		
+
 		self.reloadRecord = function(dbId, recordDataString) {
 			/*$.ajax({
 				"url": "/collection/"+dbId,
@@ -158,13 +159,13 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					//alert(JSON.stringify(self.editableCollection()));
 					ko.mapping.fromJS(data, self.myCollections);
 					var collIndex = arrayFirstIndexOf(viewModel.items(), function(item) {
-						   return item.dbId === dbId;    
+						   return item.dbId === dbId;
 					}));
 					self.myCollections()[collIndex].remove((data);
 				}
 			});*/
 			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
-				   return item.dbId() === dbId;    
+				   return item.dbId() === dbId;
 			});
 			var recordData = JSON.parse(recordDataString);
 			var recordObservable = ko.mapping.fromJS(recordData);
@@ -172,16 +173,16 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
 			self.myCollections()[collIndex].itemCount(newItemCount);
 			self.myCollections()[collIndex].firstEntries.push(recordObservable);
-			saveCollectionsToStorage(self.myCollections);
+			saveCollectionsToStorage(self.myCollections());
 		};
-		
+
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
-			self.myCollections.push(newCollection);
-			saveCollectionsToStorage(self.myCollections);
+			self.myCollections.unshift(newCollection);
+			saveCollectionsToStorage(ko.mapping.toJS(self.myCollections));
 		}
-		
+
 	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
 		    for (var i = 0, j = array.length; i < j; i++) {
 		        if (predicate.call(predicateOwner, array[i])) {
@@ -190,7 +191,8 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    }
 		    return -1;
 		}
+
 	}
-	
+
 	return {viewModel: MyCollectionsModel, template: template};
 });

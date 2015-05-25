@@ -534,27 +534,43 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 }
 
 /* Popup */
-#popup {
-  min-width: 50%;
+.profilePopup {
+  width: 600px;
+  padding-top: 0;
+  max-width: 90%;
+}
+
+.editCollectionPopup {
+  min-width: 35%;
   padding-top: 0;
 }
 
-#popup .modal-footer {
+#profile-image {
+  max-width: 80px;
+  margin-bottom: 10px;
+}
+
+.photo-group {
+  display: inline-block;
+  vertical-align: center;
+}
+
+.modal-footer {
   background-color: #f0f0f0;
-}
-
-.vertical-align {
-  display: flex;
-  align-items: center;
-}
-
-.stuffed {
-  padding-bottom: 15px;
 }
 
 .btn-file {
   position: relative;
   overflow: hidden;
+  background-color: #cccccc;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  padding: 6px 0;
+}
+
+.btn-file:hover {
+  border-color: #e6e6e6;
 }
 
 .btn-file input[type=file] {
@@ -609,11 +625,11 @@ figure.effect-with p {
 	font-weight: 300;
 	font-size:15px;
 	padding: 10px 0;
-	
+
 }
 
 figure.effect-with h2 {
-	
+
 	font-size: 1em;
 	font-weight: 400;
   font-size:200%;
@@ -623,9 +639,9 @@ figure.effect-with h2 {
 }
 
 figure.effect-with h2 span{
-	
+
   font-size: 30px;
- 
+
   font-weight: 800;
 }
 
@@ -652,7 +668,7 @@ figure.effect-with p.p2 {
     text-transform: none;
     transform: translate3d(-360px, 0px, 0px);
     transition: opacity 0.35s ease 0s, transform 0.35s ease 0s;
-	
+
 }
 
 figure.effect-with h2 {
@@ -660,7 +676,7 @@ figure.effect-with h2 {
 	transition: transform 0.35s;
 	-webkit-transform: translate3d(0,20px,0);
 	transform: translate3d(0,20px,0);
-	
+
 }
 
 figure.effect-with:hover h2 {
@@ -668,7 +684,7 @@ figure.effect-with:hover h2 {
 	transform: translate3d(0,0,0);
 	font-weight:800;
 	 color:#EC5A62;
-	 
+
 }
 
 figure.effect-with h2::after {
@@ -727,7 +743,7 @@ figure.effect-with:hover p {
     background-position: 50% 50%;
     background-repeat: no-repeat;
     background-size: cover;
-    
+
     overflow: hidden;
     position: absolute;
     opacity: 1;
@@ -736,13 +752,13 @@ figure.effect-with:hover p {
 -ms-transition: background-size 0.3s ease-in;
 -o-transition: background-size 0.3s ease-in;
 -webkit-transition: background-size 0.3s ease-in;*/
-	
+
 }
 
 .intro-effect-grid .gridmosaic li:hover{
     opacity: 0.8;
     /*background-size: 110%;*/
-	
+
 }
 
 .intro-effect-grid .gridmosaic li:first-child {
@@ -778,9 +794,9 @@ figure.effect-with:hover p {
     background-image: url("../images/landing/aggregateb&w.jpg");
     height: 50%;
     left: 50%;
-   
+
     top: 50%;
-  
+
     width: 25%;
      transform:scaleX(1.02);
      z-index:-1;

@@ -10,7 +10,7 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		var self         = this;
 		self.firstName   = ko.observable().extend({ required: true });
 		self.lastName    = ko.observable().extend({ required: true });
-		self.aboutMe     = ko.observable();
+		self.about       = ko.observable();
 		self.imageURL    = ko.observable();
 		self.location    = ko.observable();
 		self.facebookId  = ko.observable();
@@ -30,7 +30,7 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			success : function(data) {
 				self.firstName(data.firstName);
 				self.lastName(data.lastName);
-				self.aboutMe(data.aboutMe);
+				self.about(data.about);
 				self.imageURL(data.image);
 				self.facebookId(data.facebookId);
 				self.googleId(data.googleId);
@@ -65,7 +65,7 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 					firstName : self.firstName,
 					lastName  : self.lastName,
 					location  : self.location,
-					about     : self.aboutMe,
+					about     : self.about,
 					image     : self.imageURL
 				};
 				var json = ko.toJSON(data);
@@ -77,7 +77,7 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 					url         : "/user/" + app.currentUser._id(),
 					data        : json,
 					success     : function(data) {
-						console.log(data);
+						// console.log(data);
 						app.loadUser(data, true, false);
 					},
 					error       : function(request, status, error) {

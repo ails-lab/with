@@ -66,6 +66,10 @@ public class CollectionRecord {
 	@NotBlank
 	private String title;
 	private String description;
+	
+	private String creator;
+	
+	private String provider;
 
 	// the id in the source system
 	private String sourceId;
@@ -175,6 +179,22 @@ public class CollectionRecord {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	public String getCreator() {
+		return creator;
+	}
+
+	public void setCreator(String creator) {
+		this.creator = creator;
+	}
+	
+	public String getProvider() {
+		return provider;
+	}
+
+	public void setProvider(String provider) {
+		this.provider = provider;
 	}
 
 	public String getSourceId() {

@@ -42,6 +42,15 @@
 					      
 					      </div>
 					    </div>
+					    
+					    <div class="spec" data-bind="if: record().rights()">
+					      <div class="itemlabel">Rights
+					      </div>
+					      <div class="value" data-bind="text:record().rights()">
+					      
+					      </div>
+					    </div>
+					    
 					  
 					   <div class="spec">
 					      <div class="itemlabel">Record source
@@ -78,5 +87,5 @@
 		
 <div class="md-overlay" data-bind="event: {click: close}"></div><!-- the overlay element -->
 
-<collection params="route: route, record:record()"></collection>	
+<collection params="route: route"></collection>	
 		

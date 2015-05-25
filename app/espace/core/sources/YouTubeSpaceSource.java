@@ -16,7 +16,6 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -163,13 +162,13 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		try {
 			JSONArray jsonResp = new JSONArray(response);
 			JSONArray suggestionsArray = jsonResp.getJSONArray(1);
-			if (suggestionsArray.length() == 0)
+			if (suggestionsArray == null || suggestionsArray.length() == 0)
 				return new AutocompleteResponse();
 			else {
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = new ArrayList<Suggestion>();
-				// int suggestionsLength = 4;
-				for (int i = 0; i < autoCompleteLimit; i++) {
+				int suggestionsLength = autoCompleteLimit < suggestionsArray.length() ? autoCompleteLimit : suggestionsArray.length();
+				for (int i = 0; i < suggestionsLength; i++) {
 					String suggestion = (String) suggestionsArray.get(i);
 					Suggestion s = new Suggestion();
 					s.value = suggestion;
@@ -194,7 +193,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 					.getURLContent("https://www.googleapis.com/youtube/v3/videos?id="
 							+ recordId + "&part=snippet&key=" + getKey());
 			JsonNode record = response.get("items").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON, record
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_YOUTUBE, record
 					.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {

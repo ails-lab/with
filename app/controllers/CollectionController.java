@@ -19,12 +19,16 @@ package controllers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import javax.validation.ConstraintViolation;
 
@@ -52,7 +56,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticIndexer;
 import espace.core.ISpaceSource;
+import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
 
 public class CollectionController extends Controller {
@@ -326,6 +332,11 @@ public class CollectionController extends Controller {
 					new ObjectId(userId), offset, count);
 			break;
 		}
+		Collections.sort(userCollections, new Comparator<Collection>() {
+			public int compare(Collection c1, Collection c2) {
+				return -c1.getCreated().compareTo(c2.getCreated());
+			}
+		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(
@@ -335,7 +346,7 @@ public class CollectionController extends Controller {
 
 						}
 					});
-			if(maxAccess.equals(Access.NONE)) {
+			if (maxAccess.equals(Access.NONE)) {
 				maxAccess = Access.READ;
 			}
 			c.put("access", maxAccess.toString());
@@ -405,16 +416,64 @@ public class CollectionController extends Controller {
 					new ObjectId(recordLinkId));
 			record.setDbId(null);
 			record.setCollectionId(new ObjectId(collectionId));
+			DB.getCollectionRecordDAO().makePermanent(record);
+			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
+			Set<ConstraintViolation<CollectionRecord>> violations = Validation
+					.getValidator().validate(record);
+			for (ConstraintViolation<CollectionRecord> cv : violations) {
+				result.put("message",
+						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+				return badRequest(result);
+			}
+			DB.getCollectionRecordDAO().makePermanent(record);
+			// record in first entries does not contain the content metadata
+			Status status = addRecordToFirstEntries(record, result,
+					collectionId);
+			JsonNode content = json.get("content");
+			if (content != null) {
+				Iterator<String> contentTypes = content.fieldNames();
+				while (contentTypes.hasNext()) {
+					String contentType = contentTypes.next();
+					String contentMetadata = content.get(contentType).asText();
+					record.getContent().put(contentType, contentMetadata);
+				}
+				DB.getCollectionRecordDAO().makePermanent(record);
+				ElasticIndexer indexer = new ElasticIndexer(record);
+				indexer.index();
+			} else
+				addContentToRecord(record.getDbId(), source, sourceId);
+			return status;
+		}
 
-			String sourceClassName = "espace.core.sources." + source
-					+ "SpaceSource";
+	}
 
+	private static Status addRecordToFirstEntries(CollectionRecord record,
+			ObjectNode result, String collectionId) {
+		Collection collection = DB.getCollectionDAO().getById(
+				new ObjectId(collectionId));
+		collection.itemCountIncr();
+		collection.setLastModified(new Date());
+		if (collection.getFirstEntries().size() < 20)
+			collection.getFirstEntries().add(record);
+		DB.getCollectionDAO().makePermanent(collection);
+		if (record.getDbId() == null) {
+			result.put("message", "Cannot save RecordLink to database!");
+			return internalServerError(result);
+		} else
+			return ok(Json.toJson(record));
+	}
+
+	private static void addContentToRecord(ObjectId recordId, String source,
+			String sourceId) {
+		BiFunction<CollectionRecord, String, Boolean> methodQuery = (
+				CollectionRecord record, String sourceClassName) -> {
 			try {
+				// TODO: create a Mint source class with respective methods
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
 				ArrayList<RecordJSONMetadata> recordsData = s
@@ -423,35 +482,23 @@ public class CollectionController extends Controller {
 					record.getContent().put(data.getFormat(),
 							data.getJsonContent());
 				}
+				DB.getCollectionRecordDAO().makePermanent(record);
+				ElasticIndexer indexer = new ElasticIndexer(record);
+				indexer.index();
+				return true;
 			} catch (ClassNotFoundException e) {
 				// my class isn't there!
+				return false;
+			} catch (InstantiationException e) {
+				return false;
+			} catch (IllegalAccessException e) {
+				return false;
 			}
-
-			Set<ConstraintViolation<CollectionRecord>> violations = Validation
-					.getValidator().validate(record);
-			for (ConstraintViolation<CollectionRecord> cv : violations) {
-				result.put("message",
-						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
-				return badRequest(result);
-			}
-		}
-		DB.getCollectionRecordDAO().makePermanent(record);
-
-		Collection collection = DB.getCollectionDAO().getById(
-				new ObjectId(collectionId));
-		collection.itemCountIncr();
-		collection.setLastModified(new Date());
-		if (collection.getFirstEntries().size() < 20)
-			collection.getFirstEntries().add(record);
-		DB.getCollectionDAO().makePermanent(collection);
-
-		if (record.getDbId() == null) {
-
-			result.put("message", "Cannot save RecordLink to database!");
-			return internalServerError(result);
-		}
-
-		return ok(Json.toJson(record));
+		};
+		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
+		String sourceClassName = "espace.core.sources." + source
+				+ "SpaceSource";
+		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
 
 	/**
@@ -506,7 +553,6 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
-
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {

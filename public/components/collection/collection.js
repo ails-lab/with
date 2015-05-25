@@ -243,10 +243,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
+					
 					if(self.route().request_=="mycollections"){
-						
 						ko.contextFor(mycollections).$data.reloadCollection(data);
-						ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
+						//ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
 					}
 					if(callback){
 					  callback(data.dbId);
@@ -305,9 +305,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				source: self.record().source(),
 				sourceId:self.record().recordId(),
 				title: self.record().title(),
-				
+				provider: self.record().provider(),
+				creator: self.record().creator(),
 				description:self.record().description(),
-				rights: '',
+				rights: self.record().rights(),
 				type:'',
 				thumbnailUrl:self.record().thumb(),
 				sourceUrl:self.record().view_url(),
