@@ -31,6 +31,7 @@ import javax.validation.ConstraintViolation;
 import model.Collection;
 import model.CollectionRecord;
 import model.User;
+import model.User.Access;
 
 import org.bson.types.ObjectId;
 
@@ -61,11 +62,20 @@ public class CollectionController extends Controller {
 	 * Get collection metadata (title, descr, thumbnail)
 	 */
 	public static Result getCollection(String collectionId) {
+
 		ObjectNode result = Json.newObject();
 		Collection c = null;
 		User collectionOwner = null;
+
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
+			if ((session().get("effectiveUserIds") == null)
+					&& (!c.getIsPublic())) {
+				result.put("error",
+						"User does not have read-access for the collection");
+				return forbidden(result);
+
+			}
 			collectionOwner = DB.getUserDAO().getById(c.getOwnerId(), null);
 		} catch (Exception e) {
 			log.error(
@@ -75,17 +85,17 @@ public class CollectionController extends Controller {
 					"Cannot retrieve metadata for the specified collection or user!");
 			return internalServerError(result);
 		}
-		if (session().get("effectiveUserIds") == null) {
+		Access maxAccess;
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)
+				&& !c.getIsPublic()) {
 			result.put("error",
 					"User does not have read-access for the collection");
 			return forbidden(result);
 		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
-		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)) {
-			result.put("error",
-					"User does not have read-access for the collection");
-			return forbidden(result);
+		if ((maxAccess = AccessManager.getMaxAccess(c.getRights(), userIds)) == Access.NONE) {
+			maxAccess = Access.READ;
 		}
 		// check itemCount
 		int itemCount;
@@ -94,6 +104,7 @@ public class CollectionController extends Controller {
 			c.setItemCount(itemCount);
 		result = (ObjectNode) Json.toJson(c);
 		result.put("owner", collectionOwner.getUsername());
+		result.put("access", maxAccess.toString());
 		return ok(result);
 	}
 
@@ -148,12 +159,13 @@ public class CollectionController extends Controller {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
+		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
+
 		if (session().get("effectiveUserIds") == null) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
 		}
-		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
 		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds,
@@ -162,6 +174,8 @@ public class CollectionController extends Controller {
 					"User does not have permission to edit the collection");
 			return forbidden(result);
 		}
+		Access maxAccess = AccessManager.getMaxAccess(oldVersion.getRights(),
+				userIds);
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
@@ -190,6 +204,7 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		String m = DB.getJson(newVersion);
+		result.put("access", maxAccess.toString());
 		System.out.println(m.toString());
 		return ok(Json.toJson(newVersion));
 	}
@@ -244,36 +259,89 @@ public class CollectionController extends Controller {
 	/**
 	 * list accessible collections
 	 */
+	@SuppressWarnings("serial")
 	public static Result list(String filterByUser, String filterByUserId,
 			String filterByEmail, String access, int offset, int count) {
 
-		ObjectNode result = Json.newObject();
-
-		if (session().get("effectiveUserIds") == null) {
-			result.put("error", "User not specified");
-			return forbidden(result);
-		}
-
-		String[] userIds = session().get("effectiveUserIds").split(",");
-		String userId = userIds[0];
-
-		userId = "5541fd98e4b0817dd8bd5f89";
+		ArrayNode result = Json.newObject().arrayNode();
 		List<Collection> userCollections;
-		ObjectId ownerId;
+
+		ObjectId ownerId = null;
 		if (filterByUserId != null) {
 			ownerId = new ObjectId(filterByUserId);
 		} else if (filterByUser != null) {
 			ownerId = DB.getUserDAO().getByUsername(filterByUser).getDbId();
 		} else if (filterByEmail != null) {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
-		} else {
-			userCollections = DB.getCollectionDAO().getByReadAccess(
-					new ObjectId(userId), offset, count);
-			return ok(Json.toJson(userCollections));
 		}
-		userCollections = DB.getCollectionDAO().getByReadAccessFiltered(
-				new ObjectId(userId), ownerId, offset, count);
-		return ok(Json.toJson(userCollections));
+
+		if (session().get("effectiveUserIds") == null) {
+			// return all public collections
+			if (ownerId == null) {
+				userCollections = DB.getCollectionDAO()
+						.getPublic(offset, count);
+			} else {
+				userCollections = DB.getCollectionDAO().getPublicFiltered(
+						ownerId, offset, count);
+			}
+			for (Collection collection : userCollections) {
+				ObjectNode c = (ObjectNode) Json.toJson(collection);
+				c.put("access", Access.READ.toString());
+				result.add(c);
+			}
+			return ok(result);
+		}
+		// TODO: must expand to support user groups
+		String[] userIds = session().get("effectiveUserIds").split(",");
+		String userId = userIds[0];
+		switch (access) {
+		case "read":
+			if (ownerId == null) {
+				userCollections = DB.getCollectionDAO().getByReadAccess(
+						new ObjectId(userId), offset, count);
+			} else {
+				userCollections = DB.getCollectionDAO()
+						.getByReadAccessFiltered(new ObjectId(userId), ownerId,
+								offset, count);
+
+			}
+			break;
+		case "write":
+			if (ownerId == null) {
+				userCollections = DB.getCollectionDAO().getByWriteAccess(
+						new ObjectId(userId), offset, count);
+			} else {
+				userCollections = DB.getCollectionDAO()
+						.getByWriteAccessFiltered(new ObjectId(userId),
+								ownerId, offset, count);
+
+			}
+			break;
+		case "owned":
+			userCollections = DB.getCollectionDAO().getByOwner(
+					new ObjectId(userId), offset, count);
+			break;
+		default:
+			userCollections = DB.getCollectionDAO().getByOwner(
+					new ObjectId(userId), offset, count);
+			break;
+		}
+		for (Collection collection : userCollections) {
+			ObjectNode c = (ObjectNode) Json.toJson(collection);
+			Access maxAccess = AccessManager.getMaxAccess(
+					collection.getRights(), new ArrayList<String>() {
+						{
+							add(userId);
+
+						}
+					});
+			if(maxAccess.equals(Access.NONE)) {
+				maxAccess = Access.READ;
+			}
+			c.put("access", maxAccess.toString());
+			result.add(c);
+		}
+		return ok(result);
 	}
 
 	/**

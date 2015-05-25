@@ -16,19 +16,15 @@
 
 package utils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import model.User;
 import model.User.Access;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
-import db.DB;
 
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
@@ -47,6 +43,20 @@ public class AccessManager {
 			}
 		}
 		return false;
+	}
+
+	public static Access getMaxAccess(Map<ObjectId, Access> rights,
+			List<String> userIds) {
+		Access maxAccess = Access.NONE;
+		for (String id : userIds) {
+			if (rights.containsKey(new ObjectId(id))) {
+				Access access = rights.get(new ObjectId(id));
+				if (access.ordinal() > maxAccess.ordinal()) {
+					maxAccess = access;
+				}
+			}
+		}
+		return maxAccess;
 	}
 
 }

@@ -69,12 +69,29 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getByReadAccess(ObjectId userId, int offset,
 			int count) {
-		return getByReadAccessFiltered(userId, userId, offset, count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("OWN"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ"),
+				this.createQuery().criteria("isPublic").equal(true) };
+		q.or(critiria);
+		return this.find(q).asList();
 	}
 
 	public List<Collection> getByWriteAccess(ObjectId userId, int offset,
 			int count) {
-		return getByWriteAccessFiltered(userId, userId, offset, count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("OWN"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE") };
+		q.or(critiria);
+		return this.find(q).asList();
 	}
 
 	public List<Collection> getByReadAccessFiltered(ObjectId userId,
@@ -87,7 +104,8 @@ public class CollectionDAO extends DAO<Collection> {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("WRITE"),
 				this.createQuery().criteria("rights." + userId.toHexString())
-						.equal("READ") };
+						.equal("READ"),
+				this.createQuery().criteria("isPublic").equal(true) };
 		q.or(critiria);
 		return this.find(q).asList();
 	}
@@ -102,6 +120,18 @@ public class CollectionDAO extends DAO<Collection> {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("WRITE") };
 		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getPublicFiltered(ObjectId ownerId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
+				.field("ownerId").equal(ownerId).offset(offset).limit(count);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getPublic(int offset, int count) {
+		Query<Collection> q = this.createQuery().field("isPublic").equal(true);
 		return this.find(q).asList();
 	}
 
