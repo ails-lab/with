@@ -85,7 +85,7 @@ public class CommonFilterLogic implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "Filter [" + data.filterName + ", values=" + counts.values() + "]";
+		return "Filter [" + data.filterName + ", values=" + counts.values().size() + "]";
 	}
 
 	public CommonFilterResponse export() {
@@ -105,5 +105,12 @@ public class CommonFilterLogic implements Cloneable {
 
 	public Collection<ValueCount> values() {
 		return counts.values();
+	}
+
+	public static CommonFilterLogic rightsFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.RIGHTS_ID;
+		r.data.filterName = CommonFilters.RIGHTS_NAME;
+		return r;
 	}
 }

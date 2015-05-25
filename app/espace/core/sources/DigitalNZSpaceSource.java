@@ -60,6 +60,13 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			}
 		});
 		
+		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("and[rights][]",t);
+			}
+		});
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images",
 				new Pair<String>("and[category][]","Images"));
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Other");
@@ -75,7 +82,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		builder.addSearchParam("text", q.searchTerm);
 		builder.addSearchParam("page",q.page);
 		builder.addSearchParam("per_page",q.pageSize);
-		builder.addSearchParam("facets","creator,category");
+		builder.addSearchParam("facets","creator,category,rights");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -100,6 +107,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -152,13 +160,14 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			
 
 			readList(o.path("facets").path("category"), type);
+			readList(o.path("facets").path("rights"), rights);
 
 			readList(o.path("facets").path("creator"), creator);
 
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
 			res.filters.add(creator);
-			
+			res.filters.add(rights);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

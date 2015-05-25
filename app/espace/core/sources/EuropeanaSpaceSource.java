@@ -62,6 +62,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				return new Pair<String>("qf","proxy_dc_creator%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
 			}
 		});
+		
+		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf","RIGHTS%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
+			}
+		});
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "qf","TYPE:IMAGE");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "qf","TYPE:VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "qf","TYPE:SOUND");
@@ -161,6 +169,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -205,6 +214,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						countValue(provider, label, false, count);
 						break;
 						
+					case "RIGHTS":
+						countValue(rights, label, false, count);
+						break;
+						
 					case "proxy_dc_creator":
 						countValue(creator, label, false, count);
 						break;
@@ -219,7 +232,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			res.filters.add(type);
 			res.filters.add(provider);
 			res.filters.add(creator);
-			// res.filters.add(provider);
+			res.filters.add(rights);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
