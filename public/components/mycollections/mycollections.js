@@ -1,4 +1,4 @@
-define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 
 	function Entry(entryData) {
 		var entry = ko.mapping.fromJS(entryData);
@@ -30,6 +30,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
         self.index = ko.observable(0);
+        self.apiUrl = ko.observable("http://www.kathimerini.gr/");
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null)
 			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
@@ -85,8 +86,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			$.ajax({
 				"url": "/collection/"+collectionId,
 				"method": "DELETE",
-				//"contentType": "application/json",
-				//"data": {id: collectionId}),
 				success: function(result){
 					self.myCollections.remove(function (item) {
                         return item.dbId() == collectionId;
@@ -138,11 +137,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 
 		self.privateToggle=function(e,arg){
-			/*$(arg.currentTarget).parent().find('.btn').toggleClass('active');
-		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
-		    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
-		    }
-		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');*/
 		    if (self.isPublicToEdit())
 		    	self.isPublicToEdit(false);
 		    else
@@ -191,7 +185,29 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    }
 		    return -1;
 		}
-
+	    
+	    self.getAPIUrl = function() {
+			var collIndex = self.index();
+			var collDbId = self.myCollections()[collIndex].dbId();
+			var title = self.myCollections()[collIndex].title();
+			$("#myModal").addClass("modal-info");
+			//$("#myModal").css("width", "600px");
+	    	$("#myModal").find("h4").html('API calls for collection "' + title + '"');
+			var body = $("#myModal").find("div.modal-body");
+			var url   = window.location.href.split("assets")[0];
+			var collectionCall = url + "collection/" + collDbId;
+			var recordsCall = collectionCall + "\list\start=0&offset=20&format=all";
+			body.html('<h5>Get collection data:<\h5> <font size="2"><pre>' + collectionCall + '</pre>' +
+					'<br> <h5>Get collection records:<\h5> <font size="2"><pre>' + recordsCall +'</pre></font>');
+			$("#myModal").modal('show');
+			$('#myModal').on('hidden.bs.modal', function () {
+				$("#myModal").removeClass("modal-info");
+			})
+	    }
+	    
+	    self.removeClass = function() {
+	    	$("#myModal").removeClass("modal-info");
+	    }
 	}
 
 	return {viewModel: MyCollectionsModel, template: template};

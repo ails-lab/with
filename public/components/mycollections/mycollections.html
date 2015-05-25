@@ -4,7 +4,10 @@
 				 <span class="withmain"><h2>My collections</h2></span>
 				 
 				 <p>
-				    <span class="glyphicon glyphicon-plus fake-link" data-bind="click: createCollection"> Create new</span>
+				    <!-- <span class="glyphicon glyphicon-plus fake-link" data-bind="click: createCollection">Create new</span> -->
+				    <div class="btn-group" role="group" aria-label="...">
+  						<button type="button" class="btn btn-primary"  data-bind="click: createCollection">Create new</button>
+  					</div>
 				</p>
 				<div id="mycollections">
 				 <!-- collections listed here -->
@@ -16,7 +19,8 @@
 					 <div class="col-xs-6 col-sm-6 col-md-4 pull-left" data-bind="attr: {id: dbId}">
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
-						<span class="glyphicon glyphicon-pencil" title="edit" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-circle-arrow-right" title="Get API calls" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>
+						<span class="glyphicon glyphicon-edit" title="edit" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
 					 	<span class="glyphicon glyphicon-trash" title="delete" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
 					 	</div>
 					   <h3 data-bind="text: title"></h3>
@@ -30,8 +34,7 @@
 					 	<span  class="pull-left"><b>Visibility: </b><i title="secret"></i>
 					    	<!-- ko if: isPublic --> public <!-- /ko -->
 					   		<!-- ko ifnot: isPublic --> restricted <!-- /ko --> 
-					    </span>
-					 </div>
+					    </span>					 </div>
 					 </div>
 					 <!--  ko if: itemCount() > 0 -->
 						 <div class="col-xs-6  col-sm-6  col-md-8">
