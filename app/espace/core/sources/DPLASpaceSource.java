@@ -143,6 +143,9 @@ public class DPLASpaceSource extends ISpaceSource {
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
 				it.url.fromSourceAPI = "http://dp.la/item/"
 						+ Utils.readAttr(item, "id", false);
+				it.rights = Utils.readLangAttr(
+						item.path("sourceResource"), "rights", false);
+
 				a.add(it);
 			}
 			res.items = a;

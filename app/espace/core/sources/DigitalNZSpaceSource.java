@@ -151,6 +151,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 						false);
 				it.url.fromSourceAPI = "http://www.digitalnz.org/records/"
 						+ it.id;
+				it.rights = Utils.readLangAttr(item, "rights_url", false);
+
 				a.add(it);
 
 			}

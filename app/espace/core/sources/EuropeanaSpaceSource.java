@@ -195,6 +195,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
 							false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
+					it.rights = Utils.readLangAttr(item, "rights", false);
 					a.add(it);
 				}
 			}
@@ -251,7 +252,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
 			JSONObject jsonResp = new JSONObject(response);
-			if (!jsonResp.getBoolean("success"))
+			if (jsonResp == null || !jsonResp.getBoolean("success"))
 				return new AutocompleteResponse();
 			else {
 				JSONArray items = jsonResp.getJSONArray("items");

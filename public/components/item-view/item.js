@@ -2,7 +2,6 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 
 	function Record(data) {
 		var self = this;
-		
 		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
@@ -12,14 +11,16 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		self.source=ko.observable(false);
 		self.creator=ko.observable("");
 		self.provider=ko.observable("");
+		self.rights=ko.observable("");
 		self.url=ko.observable("");
 		self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
 			}else{self.title(data.title);}
-			
-			self.url("#item/"+data.id);
+			if(data.id){self.recordId(data.id);}
+			else{self.recordId(data.recordId);}
+			self.url("#item/"+self.recordId());
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 			if(data.fullres!==undefined && data.fullres!=null && data.fullres[0].length>0 && data.fullres!="null"){
@@ -40,25 +41,34 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 				if(data.provider!==undefined){
 					self.provider(data.provider);
 				}
-
-			
-			
+				if(data.rights!==undefined){
+					self.rights(data.rights);
+				}			
 			
 			self.source(data.source);
 			
-			self.recordId(data.recordId);
 		};
 
 		 self.sourceImage = ko.pureComputed(function() {
-				if(self.source() =="DPLA") return "images/logos/dpla.png";
-				else if(self.source() == "Europeana") return "images/logos/europeana.jpeg";
-				else if(self.source() == "NLA") return "images/logos/nla_logo.png";
-				else if(self.source() == "DigitalNZ") return "images/logos/digitalnz.png";
-				else if(self.source() == "DigitalNZ") return "images/logos/digitalnz.png";
-				else if(self.source()== "EFashion") return "images/logos/eufashion.png";
-				else if(self.source() == "YouTube") return "images/logos/youtube.jpg";
-				else return "";
+			 switch(self.source()) {
+			    case "DPLA":
+			    	return "images/logos/dpla.png";
+			    case "Europeana":
+			    	return "images/logos/europeana.jpeg";
+			    case "NLA":
+			    	return "images/logos/nla_logo.png";
+			    case "DigitalNZ":
+			    	return "images/logos/digitalnz.png";
+			    case "EFashion":
+			    	return "images/logos/eufashion.png";
+			    case "YouTube":
+			    	"images/logos/youtube.jpg";
+			    case "Mint":
+			    	return "images/logos/mint_logo.png";
+			    default: return "";
+			 }
 			});
+			
 		if(data != undefined) self.load(data);
 	}
 	
@@ -107,13 +117,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
    
     
     self.changeSource=function(item){
-    	if(item.record().fullres()!=item.record().thumb()){
-    		 $("#fullresim").attr('src',item.record().thumb());
-    	}
-    	else{
-    		 $("#fullresim").attr('src',item.record().thumb());
-    	}
-
+    	item.record().fullres(item.record().thumb());
     }
 
    

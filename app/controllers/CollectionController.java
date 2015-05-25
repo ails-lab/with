@@ -16,11 +16,6 @@
 
 package controllers;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,8 +25,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.BiFunction;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import javax.validation.ConstraintViolation;
 
@@ -45,7 +40,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.Json;
-import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -54,7 +48,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import espace.core.AutocompleteResponse;
+import elastic.ElasticIndexer;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
@@ -314,6 +308,7 @@ public class CollectionController extends Controller {
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
+
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
@@ -332,15 +327,17 @@ public class CollectionController extends Controller {
 					String contentMetadata = content.get(contentType).asText();
 					record.getContent().put(contentType, contentMetadata);
 				}
+				DB.getCollectionRecordDAO().makePermanent(record);
+				ElasticIndexer indexer = new ElasticIndexer(record);
+				indexer.index();
 			}
 			else
 				addContentToRecord(record.getDbId(), source, sourceId);
 			return status;
 		}
-		
 
 	}
-	
+
 	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, String collectionId) {
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
@@ -355,9 +352,9 @@ public class CollectionController extends Controller {
 		}
 		else return ok(Json.toJson(record));
 	}
-	
+
 	private static void addContentToRecord(ObjectId recordId, String source, String sourceId) {
-		BiFunction<CollectionRecord, String, Boolean> methodQuery = (CollectionRecord record, String sourceClassName) -> {		
+		BiFunction<CollectionRecord, String, Boolean> methodQuery = (CollectionRecord record, String sourceClassName) -> {
 			try {
 				//TODO: create a Mint source class with respective methods
 				Class<?> sourceClass = Class.forName(sourceClassName);
@@ -368,6 +365,9 @@ public class CollectionController extends Controller {
 					record.getContent().put(data.getFormat(),
 							data.getJsonContent());
 				}
+				DB.getCollectionRecordDAO().makePermanent(record);
+				ElasticIndexer indexer = new ElasticIndexer(record);
+				indexer.index();
 				return true;
 			} catch (ClassNotFoundException e) {
 				// my class isn't there!
@@ -379,7 +379,7 @@ public class CollectionController extends Controller {
 			}
 		};
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
-		String sourceClassName = "espace.core.sources." + source + "SpaceSource";	
+		String sourceClassName = "espace.core.sources." + source + "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
 

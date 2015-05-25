@@ -162,13 +162,13 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		try {
 			JSONArray jsonResp = new JSONArray(response);
 			JSONArray suggestionsArray = jsonResp.getJSONArray(1);
-			if (suggestionsArray.length() == 0)
+			if (suggestionsArray == null || suggestionsArray.length() == 0)
 				return new AutocompleteResponse();
 			else {
 				AutocompleteResponse ar = new AutocompleteResponse();
 				ar.suggestions = new ArrayList<Suggestion>();
-				// int suggestionsLength = 4;
-				for (int i = 0; i < autoCompleteLimit; i++) {
+				int suggestionsLength = autoCompleteLimit < suggestionsArray.length() ? autoCompleteLimit : suggestionsArray.length();
+				for (int i = 0; i < suggestionsLength; i++) {
 					String suggestion = (String) suggestionsArray.get(i);
 					Suggestion s = new Suggestion();
 					s.value = suggestion;

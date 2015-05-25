@@ -16,55 +16,41 @@
 
 package espace.core.sources;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import model.CollectionRecord;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import play.Logger;
-import play.libs.Json;
-import com.fasterxml.jackson.databind.JsonNode;
-
 import elastic.ElasticSearcher;
-import espace.core.AutocompleteResponse;
-import espace.core.AutocompleteResponse.DataJSON;
-import espace.core.AutocompleteResponse.Suggestion;
 import espace.core.CommonQuery;
-import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
-import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.Lang;
-import espace.core.SourceResponse.MyURL;
-import espace.core.Utils;
 
-public class MintSpaceSource extends ISpaceSource {
-	public static final Logger.ALogger log = Logger.of(MintSpaceSource.class);
-
+/*
+ * This source is for internal search to WITH collections
+ */
+public class ElasticSource extends ISpaceSource {
+	public static final Logger.ALogger log = Logger.of(ElasticSource.class);
 
 	@Override
 	public String getSourceName() {
-		return "Mint";
+		return "elastic";
+	}
+
+	@Override
+	public String getHttpQuery(CommonQuery q) {
+		log.debug("Method not implemented yet");
+		return null;
 	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		ElasticSearcher searcher = new ElasticSearcher();
-		String term = "\""+q.getQuery()+"\"" + "\"mint\"";
-		int offset = Integer.parseInt(q.pageSize);
-		SearchResponse resp = searcher.search(term, Integer.parseInt(q.page), offset);
+		String term = q.getQuery();
+		SearchResponse resp = searcher.search(term);
 		searcher.closeClient();
-		return new SourceResponse(resp, getSourceName(), offset);
+		return new SourceResponse(resp, "With", Integer.parseInt(q.page));
 	}
 
 	@Override
@@ -72,7 +58,5 @@ public class MintSpaceSource extends ISpaceSource {
 		log.debug("Method not implemented yet");
 		return null;
 	}
-	
-
 
 }
