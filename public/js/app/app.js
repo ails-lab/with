@@ -48,6 +48,29 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		}
 	};
 
+	getPublicCollections = function() {
+		return $.ajax({
+			type        : "GET",
+			contentType : "application/json",
+			dataType    : "json",
+			url         : "/collection/list",
+			processData : false,
+			data        : "access=read&offset=0&count=20"}).done(
+					//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
+				//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
+
+					//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
+
+			function(data, text) {
+				// console.log("User collections " + JSON.stringify(data));
+				sessionStorage.setItem('PublicCollections', JSON.stringify(data));
+			}).fail(function(request, status, error) {
+
+				//var err = JSON.parse(request.responseText);
+			}
+		);
+	}
+	
 	getUserCollections = function() {
 		return $.ajax({
 			type        : "GET",
