@@ -15,7 +15,7 @@
 					 <div class="col-xs-6 col-sm-6 col-md-4 pull-left" data-bind="attr: {id: dbId}">
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
-					 	<span class="glyphicon glyphicon-link" title="API Link to this Collection" aria-hidden="true"></span>
+					 	<span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>
 						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
 					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
 					 	</div>

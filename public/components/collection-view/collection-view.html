@@ -7,7 +7,7 @@
 				     <span data-bind="text:desc.display"></span><span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
 				     <hr></hr>
 					<!-- ko if: citems().length > 0 -->
-					 <div id="withsearch-content-masonry">
+					 <div class="withsearch-content-masonry">
 					  <div id="collcolumns" data-bind="foreach: citems, masonrycoll">
 							<figure class="masonryitem">
 							<!-- ko if: $parent.isOwner() -->

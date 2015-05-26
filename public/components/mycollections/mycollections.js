@@ -1,4 +1,4 @@
-define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], function(ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 
 	function Entry(entryData) {
 		var entry = ko.mapping.fromJS(entryData);
@@ -10,7 +10,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		KnockoutElse.init([spec={}]);
 		var self = this;
 		//self.route = params.route;
-		var collections = [];
+		self.collections = [];
 		self.index = ko.observable(0);
 		var mapping = {
 			'dbId': {
@@ -24,26 +24,28 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		        }
 		    }
 		};
-		self.myCollections = ko.mapping.fromJS([], mapping);
+		//self.myCollections = ko.mapping.fromJS([], mapping);
+		self.myCollections = ko.observableArray([]);
 		var promise = app.getUserCollections();
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
         self.index = ko.observable(0);
+        self.apiUrl = ko.observable("");
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null)
-			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+			  self.collections = JSON.parse(sessionStorage.getItem("UserCollections"));
 			if (localStorage.getItem('UserCollections') !== null)
-			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+			  self.collections = JSON.parse(localStorage.getItem("UserCollections"));
 			/*self.myCollections(ko.utils.arrayMap(collections, function(collectionData) {
 			    return new MyCollection(collectionData);
 			}));*/
-			ko.mapping.fromJS(collections, self.myCollections);
+			ko.mapping.fromJS(self.collections, mapping, self.myCollections);
 		});
 
 		self.deleteMyCollection = function(collection) {
-			collectionId = collection.dbId();
-			collectionTitle = collection.title();
+			var collectionId = collection.dbId();
+			var collectionTitle = collection.title();
 			showDelCollPopup(collectionTitle, collectionId);
 		};
 
@@ -52,7 +54,9 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 
 		showDelCollPopup = function(collectionTitle, collectionId) {
-			$("#myModal").find("h4").html("Do you want to delete this collection?");
+			var myself = this;
+			myself.id = collectionId;
+			$("#myModal").find("h4").html("Do you want to delete collection "+collectionTitle+"?");
 			var body = $("#myModal").find("div.modal-body");
 			body.html("All records in that collection will be deleted.");
 
@@ -64,20 +68,25 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		        });
 		        var confirmBtn = $('<button type="button" class="btn btn-danger">Delete</button>').appendTo(footer);
 		        confirmBtn.click(function() {
-		        	deleteCollection(collectionId);
+		        	deleteCollection(myself.id);
 		        	$("#myModal").modal('hide');
 		        });
 		    }
 			$("#myModal").modal('show');
+			$('#myModal').on('hidden.bs.modal', function () {
+				$("#myModal").find("div.modal-footer").empty();
+			})
 		};
 
 	    //Storage needs to be updated, because collection.js gets user collections from there
 		saveCollectionsToStorage = function(collections) {
-			if (sessionStorage.getItem('User') !== null) {
-				sessionStorage.setItem('UserCollections', JSON.stringify(collections));
+			var collectionsUnwrapped = ko.mapping.toJS(collections);
+			if (sessionStorage.getItem('UserCollections') !== null) {
+				sessionStorage.setItem('UserCollections', JSON.stringify(collectionsUnwrapped));
 			}
-			else if (localStorage.getItem('User') !== null) {
-				localStorage.setItem('UserCollections', JSON.stringify(collections));
+			else if (localStorage.getItem('UserCollections') !== null) {
+				localStorage.setItem('UserCollections', JSON.stringify(collectionsUnwrapped));
+
 			}
 		};
 
@@ -85,13 +94,11 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			$.ajax({
 				"url": "/collection/"+collectionId,
 				"method": "DELETE",
-				//"contentType": "application/json",
-				//"data": {id: collectionId}),
 				success: function(result){
 					self.myCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
-					saveCollectionsToStorage(self.myCollections());
+					saveCollectionsToStorage(self.myCollections);
 				}
 			});
 		};
@@ -125,7 +132,7 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 					self.myCollections()[collIndex].title(self.titleToEdit());
 					self.myCollections()[collIndex].description(self.descriptionToEdit());
 					self.myCollections()[collIndex].isPublic(self.isPublicToEdit());
-					saveCollectionsToStorage(self.myCollections());
+					saveCollectionsToStorage(self.myCollections);
 				},
 				error: function(error) {
 					var r = JSON.parse(error.responseText);
@@ -138,11 +145,6 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		};
 
 		self.privateToggle=function(e,arg){
-			/*$(arg.currentTarget).parent().find('.btn').toggleClass('active');
-		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
-		    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
-		    }
-		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');*/
 		    if (self.isPublicToEdit())
 		    	self.isPublicToEdit(false);
 		    else
@@ -173,14 +175,14 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 			var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
 			self.myCollections()[collIndex].itemCount(newItemCount);
 			self.myCollections()[collIndex].firstEntries.push(recordObservable);
-			saveCollectionsToStorage(self.myCollections());
+			saveCollectionsToStorage(self.myCollections);
 		};
 
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
 			ko.mapping.fromJS(data, newCollection);
 			self.myCollections.unshift(newCollection);
-			saveCollectionsToStorage(ko.mapping.toJS(self.myCollections));
+			saveCollectionsToStorage(self.myCollections);
 		}
 
 	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
@@ -192,6 +194,28 @@ define(['knockout', 'text!./mycollections.html', 'knockout-else', 'app'], functi
 		    return -1;
 		}
 
+	    self.getAPIUrl = function() {
+			var collIndex = self.index();
+			var collDbId = self.myCollections()[collIndex].dbId();
+			var title = self.myCollections()[collIndex].title();
+			$("#myModal").addClass("modal-info");
+			//$("#myModal").css("width", "600px");
+	    	$("#myModal").find("h4").html('API calls for collection "' + title + '"');
+			var body = $("#myModal").find("div.modal-body");
+			var url   = window.location.href.split("assets")[0];
+			var collectionCall = url + "collection/" + collDbId;
+			var recordsCall = collectionCall + "/list/start=0&offset=20&format=all";
+			body.html('<h5>Get collection data:<\h5> <font size="2"><pre>' + collectionCall + '</pre>' +
+					'<br> <h5>Get collection records:<\h5> <font size="2"><pre>' + recordsCall +'</pre></font>');
+			$("#myModal").modal('show');
+			$('#myModal').on('hidden.bs.modal', function () {
+				$("#myModal").removeClass("modal-info");
+			})
+	    }
+
+	    self.removeClass = function() {
+	    	$("#myModal").removeClass("modal-info");
+	    }
 	}
 
 	return {viewModel: MyCollectionsModel, template: template};

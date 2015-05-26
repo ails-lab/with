@@ -150,7 +150,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		});
 
 	  
-	  findUserCollections=function(){
+	  self.findUserCollections=function(){
 		  self.collectionlist([]);
 		  var collections = [];
 		  if (sessionStorage.getItem('UserCollections') !== null) 
@@ -158,7 +158,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  else if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 		  var jsonData = {};
-		 
 		    collections.forEach(function(collection) 
 		    {
 		        jsonData={"id":collection.dbId,"name":collection.title}
@@ -166,13 +165,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		        	
 		        
 		    });
-		    
-		    
-	    
 	  }
 	  
 	  createNewCollection = function() {
-		  findUserCollections();
+		  self.findUserCollections();
 		  self.modal("2");
 		  self.templateName('collection_new');
 		  self.open();
@@ -180,7 +176,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  
 	  collectionShow = function(record) {
 	    	self.record(record);
-	    	findUserCollections();
+	    	self.findUserCollections();
 	        if(self.collectionlist().length==0){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();
@@ -266,10 +262,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  
 	  self.addToCollections=function(){
 		  //console.log(self.selected_items2());
-		  
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 			 self.selected_items2().forEach(function (item) {
-		 
 			  /* now find if item is one of collection ids*/
 			  if ($.inArray(item, self.collectionlist().map(function(x) {
 				    return x.id;
@@ -300,7 +294,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.addRecord=function(collid){
-		 
 		  var jsondata=JSON.stringify({
 				source: self.record().source(),
 				sourceId:self.record().recordId(),
@@ -336,9 +329,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 							
 						}});*/
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
-						
 					}
-					
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").modal('show');

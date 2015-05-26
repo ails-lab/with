@@ -151,12 +151,16 @@ public class ElasticSearcher {
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
 		for(String term: list) {
 			term = term.replace("\"", "");
-			MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
-			if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
-			if(term.equals("mint"))
-				bool.must(query);
-			else
+			if(term.equals("mint")) {
+				MatchQueryBuilder mintQuery = QueryBuilders.matchQuery("source", term);
+				//MatchQueryBuilder mintQuery_all = QueryBuilders.matchQuery("source_all", term);
+				if(term.indexOf(" ") >= 0) mintQuery.type(Type.PHRASE);
+				bool.must(mintQuery);
+			} else {
+				MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
+				if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
 				bool.should(query);
+			}
 		}
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
