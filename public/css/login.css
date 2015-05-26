@@ -83,7 +83,6 @@ button:hover .email_huge { background-image: url(../images/email_hover.png); }
   box-shadow: 0 1px 100px 10px rgba(0, 0, 0, 0.35);
   left: 50%;
   position: fixed;
-  top: -200px;
   opacity: 0;
   transition: opacity 0.4s ease 0s;
   z-index: -1;

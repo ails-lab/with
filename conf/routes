@@ -17,7 +17,7 @@ GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(te
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
 
 # Collection Controller (tested except some methods)
-GET 	 /collection/list						controllers.CollectionController.list(username, ownerId, email, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/list						controllers.CollectionController.list(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)

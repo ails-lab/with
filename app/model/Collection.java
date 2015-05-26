@@ -32,7 +32,6 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
-import utils.AccessManager;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,18 +43,17 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 
 @Entity
-@JsonIgnoreProperties(ignoreUnknown=true)
-@JsonInclude(value=JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Collection {
 	private static final int EMBEDDED_CAP = 20;
 
-
 	@Id
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
 	@NotNull
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId ownerId;
 
 	@NotNull
@@ -63,14 +61,14 @@ public class Collection {
 	private String title;
 	private String description;
 
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 
 	private int itemCount;
 	private boolean isPublic;
-	@JsonSerialize(using=Serializer.DateSerializer.class)
+	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date created;
-	@JsonSerialize(using=Serializer.DateSerializer.class)
+	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date lastModified;
 	private String category;
 
@@ -90,9 +88,9 @@ public class Collection {
 		this.dbId = id;
 	}
 
-
 	/**
 	 * Get the embeddable Metadata part
+	 * 
 	 * @return
 	 */
 	public CollectionMetadata collectMetadata() {
@@ -101,7 +99,6 @@ public class Collection {
 		cm.setDescription(description);
 		cm.setThumbnail(thumbnail);
 		cm.setTitle(title);
-
 		return cm;
 	}
 
@@ -109,24 +106,29 @@ public class Collection {
 	public String getTitle() {
 		return title;
 	}
+
 	public void setTitle(String title) {
 		this.title = title;
 	}
+
 	public String getDescription() {
 		return description;
 	}
+
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
 	public boolean getIsPublic() {
 		return isPublic;
 	}
+
 	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 
 	public User retrieveOwner() {
-		return	DB.getUserDAO().getById(this.ownerId, null);
+		return DB.getUserDAO().getById(this.ownerId, null);
 	}
 
 	public ObjectId getOwnerId() {
@@ -135,34 +137,30 @@ public class Collection {
 
 	@JsonProperty
 	public void setOwnerId(ObjectId ownerId) {
-		if( this.ownerId == null ) {
+		// Set owner for first time
+		if (this.ownerId == null) {
 			this.ownerId = ownerId;
-			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
-			ownerRights.put(this.ownerId, Access.OWN);
-			AccessManager.addRight(rights, ownerRights);
-
-			//create a new collection metadata for owner
-			/*User owner = DB.getUserDAO().get(ownerId);
+			rights.put(this.ownerId, Access.OWN);
+			// Create a new collection metadata for owner
+			User owner = DB.getUserDAO().get(ownerId);
 			owner.getCollectionMetadata().add(collectMetadata());
-			//save the new owner
-			DB.getUserDAO().makePermanent(owner);*/
+			// Save the new owner
+			DB.getUserDAO().makePermanent(owner);
+			// Owner has changed
+		} else if (!this.ownerId.equals(ownerId)) {
+			// Remove rights for old owner
+			rights.remove(this.ownerId, Access.OWN);
+			User owner = DB.getUserDAO().get(this.ownerId);
+			owner.getCollectionMetadata().remove(collectMetadata());
+			DB.getUserDAO().makePermanent(owner);
+			// Set new Owner
+			this.ownerId = null;
+			setOwnerId(ownerId);
 		}
 	}
 
 	public void setOwnerId(User owner) {
-		//set owner to collection
-		if( this.ownerId == null ) {
-			this.ownerId = owner.getDbId();
-			Map<ObjectId, Access> ownerRights = new HashMap<ObjectId, Access>();
-			ownerRights.put(this.ownerId, Access.OWN);
-			AccessManager.addRight(rights, ownerRights);
-
-			//create a new collection metadata for owner
-			/*owner.getCollectionMetadata().add(collectMetadata());
-
-			//save the new owner
-			DB.getUserDAO().makePermanent(owner);*/
-		}
+		setOwnerId(owner.getDbId());
 	}
 
 	public List<CollectionRecord> getFirstEntries() {
@@ -171,15 +169,14 @@ public class Collection {
 
 	public String getThumbnailUrl() {
 
-		if(firstEntries.size() > 0)
-			return 	firstEntries.get(0).getThumbnailUrl();
+		if (firstEntries.size() > 0)
+			return firstEntries.get(0).getThumbnailUrl();
 		return null;
 
 	}
 
 	public Media retrieveThumbnail() {
-		Media media =
-				DB.getMediaDAO().findById(this.thumbnail);
+		Media media = DB.getMediaDAO().findById(this.thumbnail);
 		return media;
 	}
 
@@ -187,7 +184,7 @@ public class Collection {
 		return this.thumbnail;
 	}
 
-	//@JsonProperty
+	// @JsonProperty
 	@JsonIgnore
 	public void setThumbnail(ObjectId thumbId) {
 		this.thumbnail = thumbId;
