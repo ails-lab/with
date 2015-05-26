@@ -262,9 +262,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  
 	  self.addToCollections=function(){
-		  findUserCollections();
+		 // findUserCollections();
 		  //console.log(self.selected_items2());
-		  alert(self.selected_items2());
+		 // alert(self.selected_items2());
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 			 self.selected_items2().forEach(function (item) {
 			  /* now find if item is one of collection ids*/
