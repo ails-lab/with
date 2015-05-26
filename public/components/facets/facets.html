@@ -1,0 +1,61 @@
+<div class="facetfilters">
+<button class="btn btn-default" id="facetsbtn" data-bind="click: showfacets" >
+<i class="fa fa-bars  pull-left"></i> Filter
+</button>
+  
+<div class="modalfacets" data-bind="if: visiblePanel">
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#datasources" data-toggle="tab">Sources</a></li>
+   <li><a href="#mediatype" data-toggle="tab">Media type</a></li>
+  <li><a href="#providers" data-toggle="tab">Providers</a></li>
+</ul>
+
+<div id="myTabContent" class="tab-content">
+  <div class="tab-pane active" id="datasources">
+     <ul class="thumbfilters">
+     
+     <li>
+      <input type="checkbox" value="Europeana" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
+      <img src="images/logos/europeanalogo.png" style="width:100px">
+     
+     </li>
+       
+       <li>
+      <input type="checkbox" value="DPLA" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
+      <img src="images/logos/dpla-logo.png" style="width:150px">
+      
+     </li>
+     <li>
+      <input type="checkbox" value="NLA" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
+      <img src="images/logos/nla.png" style="width:100px">
+      
+     </li>
+     <li>
+      <input type="checkbox" value="DigitalNZ"data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
+      <img src="images/logos/digitalnz1.png" style="width:100px">
+      
+     </li>
+     
+     <li><span>
+      <input type="checkbox" value="YouTube" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/></span>
+      <img src="images/logos/youtube.png" style="width:100px">
+     
+     </li>
+    
+    <li><span>
+      <input type="checkbox" value="Mint" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/></span>
+      <img src="images/logos/mint_logo.png" style="width:100px">
+     
+     </li>
+    </ul>
+  </div>
+   <div class="tab-pane" id="mediatype">
+    <p>Under development </p>
+  </div>
+  <div class="tab-pane" id="providers">
+    <p>Under development </p>
+  </div>
+  
+</div>
+</div>
+</div>
