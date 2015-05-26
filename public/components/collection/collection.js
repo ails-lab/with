@@ -158,7 +158,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		  else if (localStorage.getItem('UserCollections') !== null) 
 			  collections = JSON.parse(localStorage.getItem("UserCollections"));
 		  var jsonData = {};
-		 
 		    collections.forEach(function(collection) 
 		    {
 		        jsonData={"id":collection.dbId,"name":collection.title}
@@ -166,9 +165,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		        	
 		        
 		    });
-		    
-		    
-	    
+		    	    
 	  }
 	  
 	  createNewCollection = function() {
@@ -265,11 +262,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  
 	  self.addToCollections=function(){
+		  findUserCollections();
 		  //console.log(self.selected_items2());
-		  
+		  alert(self.selected_items2());
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 			 self.selected_items2().forEach(function (item) {
-		 
 			  /* now find if item is one of collection ids*/
 			  if ($.inArray(item, self.collectionlist().map(function(x) {
 				    return x.id;
@@ -300,7 +297,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.addRecord=function(collid){
-		 
 		  var jsondata=JSON.stringify({
 				source: self.record().source(),
 				sourceId:self.record().recordId(),
@@ -336,7 +332,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 							
 						}});*/
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
-						
 					}
 					
 					$("#myModal").find("h4").html("Success!");
