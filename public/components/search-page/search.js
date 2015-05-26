@@ -153,7 +153,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		}
 
 		self._search = function() {
-		if(self.page()==1 && (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)){self.sourceview(true);}
+			var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+			  
+		   if(self.page()==1 && (isFirefox || isSafari)){self.sourceview(true);}
 			
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 if(self.searching()==false && self.currentTerm()!=""){
