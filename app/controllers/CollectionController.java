@@ -350,6 +350,8 @@ public class CollectionController extends Controller {
 				maxAccess = Access.READ;
 			}
 			c.put("access", maxAccess.toString());
+			User user = DB.getUserDAO().getById(collection.getOwnerId(), new ArrayList<String>(Arrays.asList("username")));
+			c.put("owner", user.getUsername());
 			result.add(c);
 		}
 		return ok(result);
