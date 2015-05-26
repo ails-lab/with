@@ -74,7 +74,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    }
 			$("#myModal").modal('show');
 			$('#myModal').on('hidden.bs.modal', function () {
-				$("#myModal").find("div.modal-footer").html();
+				$("#myModal").find("div.modal-footer").empty();
 			})
 		};
 
