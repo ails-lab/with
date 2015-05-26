@@ -366,10 +366,20 @@ public class CollectionController extends Controller {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
-
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error", "User not specified");
+			return forbidden(result);
+		}
 		if (json.has("ownerId")) {
 			String userId = json.get("ownerId").asText();
-
+			List<String> userIds = Arrays.asList(session().get(
+					"effectiveUserIds").split(","));
+			String sessionId = userIds.get(0);
+			if (!userId.equals(sessionId)) {
+				result.put("error",
+						"User does not have access to requested records");
+				return forbidden(result);
+			}
 			// create a Map <collectionTitle, firstEntries>
 			Map<String, List<CollectionRecord>> firstEntries = new HashMap<String, List<CollectionRecord>>();
 			for (Collection c : DB.getCollectionDAO().getByOwner(
@@ -408,6 +418,20 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
+		Collection c = DB.getCollectionDAO()
+				.getById(new ObjectId(collectionId));
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.EDIT)) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
 		CollectionRecord record = null;
 		String recordLinkId;
 		if (json.has("recordlink_id")) {
@@ -512,6 +536,19 @@ public class CollectionController extends Controller {
 		// Remove record from collection.firstEntries
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.EDIT)) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
 		List<CollectionRecord> records = collection.getFirstEntries();
 		CollectionRecord temp = null;
 		for (CollectionRecord r : records) {
@@ -547,6 +584,21 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 
 		ObjectId colId = new ObjectId(collectionId);
+		Collection collection = DB.getCollectionDAO().getById(colId);
+		if ((session().get("effectiveUserIds") == null)
+				&& (!collection.getIsPublic())) {
+			result.put("error",
+					"User does not have read-access to the collection");
+			return forbidden(result);
+		}
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.READ) && (!collection.getIsPublic())) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 				.getByCollectionOffsetCount(colId, start, count);
 		if (records == null) {

@@ -55,7 +55,7 @@ import db.DB;
 
 public class TestCollectionController {
 
-	@Test
+	//@Test
 	public void testGetCollection() {
 
 		User user1 = new User();
@@ -281,14 +281,19 @@ public class TestCollectionController {
 				final ObjectNode json = Json.newObject();
 				json.put("title", "The newly CREATED test title");
 				json.put("ownerId", user.getDbId().toString());
-				Result result = route(fakeRequest("GET", "/collection/list?"
-						+ "username=Testuser&email=heres42@mongo.gr&"
-						+ "ownerId=" + user.getDbId().toHexString()));
+				Result result = route(fakeRequest(
+						"GET",
+						"/collection/list?" + "filterByUser=Testuser"
+								+ "filterByUserId="
+								+ user.getDbId().toHexString()
+								+ "&filterByEmail=heres42@mongo.gr")
+						.withSession("user", user.getDbId().toHexString()));
 
-				// JsonParser parser = new JsonParser();
-				// Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				// JsonElement el = parser.parse(contentAsString(result));
-				// System.out.println(gson.toJson(el));
+				System.out.println(status(result));
+				JsonParser parser = new JsonParser();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
 
 				if (status(result) == 200)
 					assertThat(status(result)).isEqualTo(OK);
