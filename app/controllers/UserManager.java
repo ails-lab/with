@@ -679,35 +679,41 @@ public class UserManager extends Controller {
 		ObjectNode result = Json.newObject();
 		ObjectNode error = (ObjectNode) Json.newObject();
 		User u = null;
+		String md5 = "";
 		
-		if (emailOrUserName != null) {
-			
-			//can a user register using an email as username?
-			//we use this kind of check in another function here
-			
-			u = DB.getUserDAO().getByEmail(emailOrUserName);	
-			if (u == null) {
-				u = DB.getUserDAO().getByUsername(emailOrUserName);
-				if (u == null) {
-					error.put("email", "Invalid Email Address or Username");	
-					result.put("error", error);
-					return badRequest(result);
-				}
-			}
-		} else {
-			error.put("email", "Need Email or Username");
+		if (emailOrUserName == null) {
+			error.put("email", "Email or Username are empty");
 			result.put("error", error);
 			return badRequest(result);
 		}
-		 
-		// NULL didn't work so i used "", maybe this is not a good fix 
 		
-		if (u.getFacebookId() != "" || u.getGoogleId() != "") {
-				error.put("email", "User has registered with Facebook or Google account");
+		//can a user register using an email as username?
+		//we use this kind of check in another function here
+			
+		u = DB.getUserDAO().getByEmail(emailOrUserName);	
+		if (u == null) {
+			u = DB.getUserDAO().getByUsername(emailOrUserName);
+			if (u == null) {
+				error.put("email", "Invalid Email Address or Username");	
 				result.put("error", error);
-				return badRequest(result); //maybe change type?	
+				return badRequest(result);
+			}
 		}
 		
+		md5 = u.getMd5Password();
+		if (md5 == ""){
+			// NULL didn't work so i used "", maybe this is not a good fix 
+			if (u.getFacebookId() != "") {
+					result.put("email", "User has registered with Facebook account");
+					return notFound(result); //maybe change type?	
+			} else if(u.getGoogleId() != ""){
+				result.put("email", "User has registered with Google account");
+				return notFound(result); //maybe change type?	
+			} //else {
+				//user exists but has no password and not fb or google - impossible?
+			//}
+		}
+		 
 		
 		String enc = encryptToken(u.getDbId().toString());
 		
