@@ -265,6 +265,9 @@ public class CollectionController extends Controller {
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
+		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),
+				new ArrayList<String>(Arrays.asList("username")));
+		c.put("owner", user.getUsername());
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
@@ -354,6 +357,58 @@ public class CollectionController extends Controller {
 
 						}
 					});
+			if (maxAccess.equals(Access.NONE)) {
+				maxAccess = Access.READ;
+			}
+			c.put("access", maxAccess.toString());
+			User user = DB.getUserDAO().getById(collection.getOwnerId(),
+					new ArrayList<String>(Arrays.asList("username")));
+			c.put("owner", user.getUsername());
+			result.add(c);
+		}
+		return ok(result);
+	}
+
+	public static Result listShared(String filterByUser, String filterByUserId,
+			String filterByEmail, int offset, int count) {
+
+		ArrayNode result = Json.newObject().arrayNode();
+		List<Collection> userCollections;
+
+		ObjectId ownerId = null;
+		if (filterByUserId != null) {
+			ownerId = new ObjectId(filterByUserId);
+		} else if (filterByUser != null) {
+			ownerId = DB.getUserDAO().getByUsername(filterByUser).getDbId();
+		} else if (filterByEmail != null) {
+			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
+		}
+
+		if (session().get("effectiveUserIds") == null) {
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
+		}
+		// TODO: must expand to support user groups
+		String[] userIds = session().get("effectiveUserIds").split(",");
+		String userId = userIds[0];
+		if (ownerId == null) {
+			userCollections = DB.getCollectionDAO().getShared(
+					new ObjectId(userId), offset, count);
+		} else {
+			userCollections = DB.getCollectionDAO().getSharedFiltered(
+					new ObjectId(userId), ownerId, offset, count);
+
+		}
+		Collections.sort(userCollections, new Comparator<Collection>() {
+			public int compare(Collection c1, Collection c2) {
+				return -c1.getCreated().compareTo(c2.getCreated());
+			}
+		});
+		for (Collection collection : userCollections) {
+			ObjectNode c = (ObjectNode) Json.toJson(collection);
+			Access maxAccess = AccessManager.getMaxAccess(
+					collection.getRights(),
+					new ArrayList<String>(Arrays.asList(userId)));
 			if (maxAccess.equals(Access.NONE)) {
 				maxAccess = Access.READ;
 			}
