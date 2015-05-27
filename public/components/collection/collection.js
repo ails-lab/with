@@ -320,10 +320,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"data": jsondata,
 				"success": function(data) {
 					if(self.route().request_=="collectionview/"+collid){
-						 ko.contextFor(collcolumns).$data.citems.push(self.record());
-						  ko.contextFor(collcolumns).$data.citems.valueHasMutated();
-						  ko.contextFor(collcolumns).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
-						  ko.contextFor(collcolumns).$data.itemCount.valueHasMutated();  
+						 self.record().recordId(data.dbId);
+						 ko.contextFor(withcollection).$data.citems.push(self.record());
+						  ko.contextFor(withcollection).$data.citems.valueHasMutated();
+						  ko.contextFor(withcollection).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
+						  ko.contextFor(withcollection).$data.itemCount.valueHasMutated();  
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
