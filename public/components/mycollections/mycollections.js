@@ -24,8 +24,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        }
 		    }
 		};
-		//self.myCollections = ko.mapping.fromJS([], mapping);
-		self.myCollections = ko.observableArray([]);
+		self.myCollections = ko.mapping.fromJS([], mapping);
+		//self.myCollections = ko.observableArray([]);
 		var promise = app.getUserCollections();
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
