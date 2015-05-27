@@ -652,8 +652,12 @@ public class CollectionController extends Controller {
 					"User does not have read-access to the collection");
 			return forbidden(result);
 		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
+		String effectiveUserIds = session().get("effectiveUserIds");
+		if( effectiveUserIds == null ) effectiveUserIds = "";
+		List<String> userIds = new ArrayList<String>();
+		for( String ui: effectiveUserIds.split(",")) {
+			if( ui.trim().length() > 0 ) userIds.add(ui );
+		}
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.READ) && (!collection.getIsPublic())) {
 			result.put("error",
