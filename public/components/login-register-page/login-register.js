@@ -23,8 +23,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				if( isLogged() ) {
 					// we trust localhost and ntua,
 					// TODO: make a requester for allow access to origin
-					if( new RegExp( "^https?://localhost(:|/)").test( origin ) ||
-						new RegExp( "^https?://[^/:]*.image.ntua.gr(:|/)").test( origin )	||
+					if( new RegExp( "^https?://localhost:?/?").test( origin ) ||
+						new RegExp( "^https?://[^/:]*.image.ntua.gr:?/?").test( origin )	||
 								false /* or new RegExp in here */ ) {
 						$.ajax( {
 							url: "/user/token",
