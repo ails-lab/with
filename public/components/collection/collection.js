@@ -188,10 +188,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 
 	  self.close= function(){
-		  self.reset();
+		  console.log("closed called");
 		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
-		  
-
+		  $(document).one("ajaxStop", function() {
+			  console.log("in ajax stop");
+				$("#myModal").modal('show');
+				self.reset();
+				
+		  });
 	    }
 
 	  self.save=function(formElement){
@@ -209,6 +213,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			  else{ 
 				 
 			  self.saveCollection(jsondata,self.addRecord);}
+			  self.close();
 			  
 		  }
 		  else{
@@ -248,13 +253,12 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  callback(data.dbId);
 					 
 					}
-					self.close();
+					
 				},
 				
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-					$("#myModal").modal('show');
 					 
 			     }});
 	  }
@@ -332,13 +336,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
-					$("#myModal").modal('show');
 				},
 				
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-					$("#myModal").modal('show');
 					 
 			     }});
 		  
@@ -346,7 +348,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.reset = function() {
-		  $(document).ajaxStop(function () {
+		 
 		    self.collname('');
 		    self.description('');
 		    self.id(-1);
@@ -354,7 +356,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		    self.validationModel.errors.showAllMessages(false);
 		    self.selected_items2([]);
 		   
-		  });
+		 
 		    
 		}
 
