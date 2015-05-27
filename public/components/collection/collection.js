@@ -224,7 +224,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.saveCollection=function(jsondata,callback){
-		  alert("ajax");
 		  $.ajax({
 				"url": "/collection/create",
 				"method": "post",

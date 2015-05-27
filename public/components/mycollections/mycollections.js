@@ -140,9 +140,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
                         return item.dbId() == collectionId;
                     });
 					var collections = self.getEditableFromStorage();
-					collections.remove(function (item) {
-                        return item.dbId == collectionId;
-                    });
+					var index = arrayFirstIndexOf(collections, function(item) {
+						   return item.dbId === collIectionId;
+					});
+					collections.splice(index, 1);
 					self.saveCollectionsToStorage(collections);
 				}
 			});
@@ -153,7 +154,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			if (collection.access == "OWN") {
+			if (collection.access() == "OWN") {
 				self.collectionSet = "my";
 				self.titleToEdit(self.myCollections()[collIndex].title());
 		        self.descriptionToEdit(self.myCollections()[collIndex].description());
