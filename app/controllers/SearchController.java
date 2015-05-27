@@ -33,6 +33,7 @@ import play.libs.Json;
 import play.libs.F.Promise;
 import play.mvc.*;
 import utils.ListUtils;
+import elastic.ElasticIndexer;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilterResponse;
 import espace.core.CommonQuery;
@@ -224,4 +225,15 @@ public class SearchController extends Controller {
 		return ok(views.html.testsearch.render(userForm, res, merge1));
 	}
 
+	public static Result reindex() {
+		Promise.promise(new Function0<String>() {
+			public String apply() throws Exception {
+				log.info( "Reindex started");
+				ElasticIndexer.reindex();
+				log.info( "Reindex finished");
+				return "ok";
+			}
+		});
+		return(ok());
+	}
 }
