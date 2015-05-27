@@ -41,15 +41,31 @@ import db.DB;
 public class RightsController extends Controller {
 	public static final ALogger log = Logger.of(CollectionController.class);
 
-	public static Result setRights(String colId, String right, String receiver) {
-		ObjectNode result = Json.newObject();
+	/**
+	 * Set access rights for object for user.
+	 *
+	 * @param colId
+	 *            the internal Id of the object you wish to share (or unshare)
+	 * @param right
+	 *            the right to give ("none" to withdraw previously given right)
+	 * @param username
+	 *            the username of user to give rights to (or take away from)
+	 * @param email
+	 *            the email of the user
+	 * @param userId
+	 *            the Id of the user
+	 * @return OK or Error with JSON detailing the problem
+	 * 
+	 */
+	public static Result setRights(String colId, String right, String username,
+			String email, String userId) {
 
+		ObjectNode result = Json.newObject();
 		Collection collection = null;
 		try {
 			collection = DB.getCollectionDAO().get(new ObjectId(colId));
-
 		} catch (Exception e) {
-			log.error("Cannot retrieve collection  from database!", e);
+			log.error("Cannot retrieve collection from database!", e);
 			result.put("message", "Cannot retrieve collection from database!");
 			return internalServerError(result);
 		}
@@ -57,21 +73,29 @@ public class RightsController extends Controller {
 				.split(","));
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.DELETE)) {
-			result.put("message",
+			result.put("error",
 					"Sorry! You do not own this collection so you cannot set rights. "
 							+ "Please contact the owner of this collection");
-			return badRequest(result);
+			return forbidden(result);
 		}
 		// set rights
 		// the receiver can be either a User or a UserGroup
 		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
-		rightsMap.put(new ObjectId(receiver), Access.valueOf(right));
+		if (username != null) {
+			userId = DB.getUserDAO().getByUsername(username).getDbId()
+					.toHexString();
+		} else if (email != null) {
+			userId = DB.getUserDAO().getByEmail(email).getDbId().toHexString();
+		} else if (userId == null) {
+			result.put("error", "Must specify user to give rights");
+			return badRequest(result);
+		}
+		rightsMap.put(new ObjectId(userId), Access.valueOf(right));
 		collection.getRights().putAll(rightsMap);
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
-
 		return ok();
 	}
 
