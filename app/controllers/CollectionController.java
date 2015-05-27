@@ -265,6 +265,9 @@ public class CollectionController extends Controller {
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
+		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),
+				new ArrayList<String>(Arrays.asList("username")));
+		c.put("owner", user.getUsername());
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
