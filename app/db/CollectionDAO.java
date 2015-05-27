@@ -123,6 +123,31 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.find(q).asList();
 	}
 
+	public List<Collection> getSharedFiltered(ObjectId userId,
+			ObjectId ownerId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ").criteria("isPublic").equal(false) };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getShared(ObjectId userId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.notEqual(userId).offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ").criteria("isPublic").equal(false) };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
 	public List<Collection> getPublicFiltered(ObjectId ownerId, int offset,
 			int count) {
 		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
