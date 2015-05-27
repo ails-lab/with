@@ -322,16 +322,15 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var url   = window.location.href.split("assets")[0];
 			var collectionCall = url + "collection/" + collDbId;
 			var recordsCall = collectionCall + "/list/start=0&offset=20&format=all";
+			var rightsCall = url + "rights/" + collDbId + "/WRITE?username=withuser";
 			body.html('<h5>Get collection data:<\h5> <font size="2"><pre>' + collectionCall + '</pre>' +
-					'<br> <h5>Get collection records:<\h5> <font size="2"><pre>' + recordsCall +'</pre></font>');
+					'<br> <h5>Get collection records:<\h5> <font size="2"><pre>' + recordsCall +'</pre></font>' +
+					'<br> <h5>Give rights to other user:<\h5> <font size="2"><pre>' + rightsCall +'</pre></font>' +
+					'<br> Results depend on logged in user\'s rights.');
 			$("#myModal").modal('show');
 			$('#myModal').on('hidden.bs.modal', function () {
 				$("#myModal").removeClass("modal-info");
 			})
-	    }
-
-	    self.removeClass = function() {
-	    	$("#myModal").removeClass("modal-info");
 	    }
 	    
 

@@ -243,7 +243,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 						temp.push(data);
 						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
-					
+					$("#myModal").find("h4").html("Success!");
+					$("#myModal").find("div.modal-body").html("<p>Collection created.</p>");
+					$("#myModal").find("div.modal-footer").html();
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 					if(self.route().request_=="mycollections"){
@@ -259,8 +261,10 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				
 				"error":function(result) {
 					//var r = JSON.parse(result.responseText);
-					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
+					$("#myModal").find("h4").html("An error occured.");
+					$("#myModal").find("div.modal-footer").html();
+
 					 
 			     }});
 	  }
@@ -339,12 +343,13 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
+					$("#myModal").find("div.modal-footer").html();
 				},
 				
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-					 
+					$("#myModal").find("div.modal-footer").html(); 
 			     }});
 		  
 		  
