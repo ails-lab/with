@@ -359,6 +359,14 @@ button.close {
   }
 }
 
+.resetPasswordPopup {
+  width: 400px;
+}
+
+.resetPasswordPopup .lead {
+  font-size: 120%;
+}
+
 @media (min-width: 480px) and (max-width: 768px) {
   .container {
     max-width: 748px;

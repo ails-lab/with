@@ -386,6 +386,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			}, {scope: 'email'});
 		};
 
+		self.forgotPassword       = function() {
+			app.showPopup('reset-password');
+		};
+
 		showLoginPopup            = function(record) {
 			self.record(record);
 			$('#loginPopup').addClass('open');

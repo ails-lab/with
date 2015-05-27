@@ -1,6 +1,6 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], 
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'],
 		function($, ko, router, kom) {
-	
+
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
 	ko.amdTemplateEngine.defaultSuffix                = '.tpl.html';
@@ -35,6 +35,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
+	ko.components.register('reset-password', { require: 'components/login-register-page/reset-password' });
 
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });
