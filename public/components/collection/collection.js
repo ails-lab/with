@@ -258,8 +258,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				},
 				
 				"error":function(result) {
+					var r = JSON.parse(result.responseText);
 					$("#myModal").find("h4").html("An error occured");
-					$("#myModal").find("div.modal-body").html(result.statusText);
+					$("#myModal").find("div.modal-body").html(r.message);
 					 
 			     }});
 	  }

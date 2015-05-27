@@ -99,10 +99,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.getEditableFromStorage = function () {
 			var collections = sessionStorage.getItem('EditableCollections');
-			if (collections == null) {
+			if (collections == undefined) {
 				collections = localStorage.getItem('EditableCollections');
 			}
-			if (collections != null)
+			if (collections != undefined)
 				return JSON.parse(collections);
 			else
 				return [];
@@ -141,7 +141,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
                     });
 					var collections = self.getEditableFromStorage();
 					var index = arrayFirstIndexOf(collections, function(item) {
-						   return item.dbId === collIectionId;
+						   return item.dbId === collectionId;
 					});
 					collections.splice(index, 1);
 					self.saveCollectionsToStorage(collections);
@@ -277,14 +277,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			if (data.access == "OWN") {
 				ko.mapping.fromJS(data, newCollection);
 				self.myCollections.unshift(newCollection);
-				alert(JSON.stringify(self.myCollections()[0].title()));
 			}
 			else {
 				ko.mapping.fromJS(data, newCollection);
 				self.sharedCollections.unshift(newCollection);
 			}
 			var editables = self.getEditableFromStorage();
-			self.saveCollectionsToStorage(editables.unshift({title: newCollection.title, dbId:newCollection.dbId}));
+			editables.unshift({title: newCollection.title, dbId:newCollection.dbId});
+			self.saveCollectionsToStorage(editables);
 		}
 		
 		self.checkCollectionSet = function(dbId) {
