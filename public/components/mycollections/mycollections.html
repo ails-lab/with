@@ -12,7 +12,7 @@
 					 <div class="profilecoll">
 					 <div class="container-fluid">
 					 <div class="row profile">
-					 <div class="col-xs-6 col-sm-6 col-md-4 pull-left" data-bind="attr: {id: dbId}">
+					 <div class="col-xs-6 col-sm-6 col-md-4 coll-body pull-left" data-bind="attr: {id: dbId}">
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
 					 	<span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>
@@ -53,8 +53,13 @@
 					  <!-- /ko -->
 					  <!-- ko else -->
 					  	<!-- TODO: Make the message look nicer -->
-					  		</br>
-					  		<a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a>
+					  	<div class="col-xs-6 col-sm-6 col-md-8 coll-message">
+					 	 <div class="row-fluid">
+					  	 <div class="imcontainer">
+					  		<h5><a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a></h5>
+					  	</div>
+					  	</div>
+					  	</div>
 					  <!-- /ko -->
 					 </div>
 					 </div>
@@ -63,7 +68,7 @@
 
 				 </div>
 			</div>
-			<div class="col-lg-12">
+			<div class="col-lg-12" data-bind="visible: sharedCollections().length">
 				 <span class="withmain"><h2>Collections shared with me</h2></span>
 				 <div id="sharedcollections">
 				 <!-- collections listed here -->
@@ -114,8 +119,13 @@
 					  <!-- ko else -->
 					  <!-- ko if: access()=="WRITE" -->
 					  	<!-- TODO: Make the message look nicer -->
-					  		</br>
-					  		<a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a>
+					  	<div class="col-xs-6 col-sm-6 col-md-8 coll-message">
+					 	 <div class="row-fluid">
+					  	 <div class="imcontainer">
+					  		<h5><a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a></h5>
+					  	</div>
+					  	</div>
+					  	</div>
 					   <!-- /ko -->
 					  <!-- /ko -->
 					 </div>
