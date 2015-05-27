@@ -72,12 +72,7 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		Collection c = null;
 		User collectionOwner = null;
-		String effectiveUserIds = session().get("effectiveUserIds");
-		if( effectiveUserIds == null ) effectiveUserIds = "";
-		List<String> userIds = new ArrayList<String>();
-		for( String ui: effectiveUserIds.split(",")) {
-			if( ui.trim().length() > 0 ) userIds.add(ui );
-		}
+		List<String> userIds = effectiveUserIds();
 		
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
@@ -286,6 +281,8 @@ public class CollectionController extends Controller {
 		List<Collection> userCollections;
 
 		ObjectId ownerId = null;
+		List<String> userIds = effectiveUserIds();
+		
 		if (filterByUserId != null) {
 			ownerId = new ObjectId(filterByUserId);
 		} else if (filterByUser != null) {
@@ -294,7 +291,7 @@ public class CollectionController extends Controller {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
 		}
 
-		if (session().get("effectiveUserIds") == null) {
+		if (userIds.isEmpty() ) {
 			// return all public collections
 			if (ownerId == null) {
 				userCollections = DB.getCollectionDAO()
@@ -310,9 +307,8 @@ public class CollectionController extends Controller {
 			}
 			return ok(result);
 		}
-		// TODO: must expand to support user groups
-		String[] userIds = session().get("effectiveUserIds").split(",");
-		String userId = userIds[0];
+		// ok, so there is a user id effective
+		String userId = userIds.get(0);
 		switch (access) {
 		case "read":
 			if (ownerId == null) {
@@ -353,12 +349,7 @@ public class CollectionController extends Controller {
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(
-					collection.getRights(), new ArrayList<String>() {
-						{
-							add(userId);
-
-						}
-					});
+					collection.getRights(), userIds );
 			if (maxAccess.equals(Access.NONE)) {
 				maxAccess = Access.READ;
 			}
@@ -689,5 +680,15 @@ public class CollectionController extends Controller {
 
 	public static Result download(String id) {
 		return null;
+	}
+	
+	private static List<String> effectiveUserIds() {
+		String effectiveUserIds = session().get("effectiveUserIds");
+		if( effectiveUserIds == null ) effectiveUserIds = "";
+		List<String> userIds = new ArrayList<String>();
+		for( String ui: effectiveUserIds.split(",")) {
+			if( ui.trim().length() > 0 ) userIds.add(ui );
+		}
+		return userIds;
 	}
 }
