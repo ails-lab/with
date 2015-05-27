@@ -211,7 +211,6 @@ public class CollectionController extends Controller {
 		}
 		String m = DB.getJson(newVersion);
 		result.put("access", maxAccess.toString());
-		System.out.println(m.toString());
 		return ok(Json.toJson(newVersion));
 	}
 

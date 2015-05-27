@@ -150,37 +150,38 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		});
 
 	  
-	  self.findUserCollections=function(){
+	  self.findEditableCollections=function(){
 		  self.collectionlist([]);
 		  var collections = [];
-		  if (sessionStorage.getItem('UserCollections') !== null) 
-			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if (localStorage.getItem('UserCollections') !== null) 
-			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+		  if (sessionStorage.getItem('EditableCollections') !== null) 
+			  collections = JSON.parse(sessionStorage.getItem("EditableCollections"));
+		  else if (localStorage.getItem('EditableCollections') !== null) 
+			  collections = JSON.parse(localStorage.getItem("EditableCollections"));
 		  var jsonData = {};
-		    collections.forEach(function(collection) 
-		    {
+		  for (var i=0; i<collections.length; i++) {
+		    //collections.forEach(function(collection) 
+			  var collection = collections[i];
 		        jsonData={"id":collection.dbId,"name":collection.title}
-		        self.collectionlist.push(jsonData);	
-		        	
-		        
-		    });
-	  }
+		        self.collectionlist.push(jsonData);	      
+		  }
+		    //});
+	  };
 	  
 	  createNewCollection = function() {
-		  self.findUserCollections();
+		  self.findEditableCollections();
 		  self.modal("2");
 		  self.templateName('collection_new');
 		  self.open();
+
 	  }
 	  
 	  collectionShow = function(record) {
 	    	self.record(record);
-	    	self.findUserCollections();
+	    	self.findEditableCollections();
 	        if(self.collectionlist().length==0){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();
-	    }
+    }
 
 	  self.open=function(){
 		  $('#modal-'+self.modal()).css('display', 'block');
@@ -232,15 +233,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					self.id(data.dbId);
 					self.selectedCollection(data.title);
 					var temp = [];
-					if(sessionStorage.getItem('UserCollections')!=undefined){
-					   temp=JSON.parse(sessionStorage.getItem('UserCollections'));
+					if(sessionStorage.getItem('EditableCollections')!=undefined){
+					   temp=JSON.parse(sessionStorage.getItem('EditableCollections'));
 					   temp.push(data);
-					   sessionStorage.setItem('UserCollections', JSON.stringify(temp));  
+					   sessionStorage.setItem('EditableCollections', JSON.stringify(temp));  
 					}
-					else if(localStorage.getItem('UserCollections')){
-						temp=JSON.parse(localStorage.getItem('UserCollections'));
+					else if(localStorage.getItem('EditableCollections')){
+						temp=JSON.parse(localStorage.getItem('EditableCollections'));
 						temp.push(data);
-						localStorage.setItem('UserCollections', JSON.stringify(temp));
+						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});

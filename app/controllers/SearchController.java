@@ -125,7 +125,7 @@ public class SearchController extends Controller {
 						r1.responces = finalResponses;
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-							System.out.println(sourceResponse.filters);
+							//System.out.println(sourceResponse.filters);
 							FiltersHelper.merge(merge, sourceResponse.filters);
 						}
 						Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
@@ -196,8 +196,8 @@ public class SearchController extends Controller {
 	}
 
 	public static Result posttestsearch() {
-		System.out.println("--------------------");
-		System.out.println(userForm.bindFromRequest().toString());
+		//System.out.println("--------------------");
+		//System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if (q == null || q.searchTerm == null) {
 			q = new CommonQuery();
@@ -213,7 +213,7 @@ public class SearchController extends Controller {
 		r1.responces = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
-			System.out.println(sourceResponse.source + " Filters: " + sourceResponse.filters);
+			//System.out.println(sourceResponse.source + " Filters: " + sourceResponse.filters);
 			FiltersHelper.merge(merge, sourceResponse.filters);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
