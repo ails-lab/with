@@ -74,7 +74,10 @@ public class CollectionController extends Controller {
 		User collectionOwner = null;
 		String effectiveUserIds = session().get("effectiveUserIds");
 		if( effectiveUserIds == null ) effectiveUserIds = "";
-		List<String> userIds = Arrays.asList( effectiveUserIds.split(","));
+		List<String> userIds = new ArrayList<String>();
+		for( String ui: effectiveUserIds.split(",")) {
+			if( ui.trim().length() > 0 ) userIds.add(ui );
+		}
 		
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
