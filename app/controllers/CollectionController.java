@@ -72,37 +72,37 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		Collection c = null;
 		User collectionOwner = null;
-
+		String effectiveUserIds = session().get("effectiveUserIds");
+		if( effectiveUserIds == null ) effectiveUserIds = "";
+		List<String> userIds = Arrays.asList( effectiveUserIds.split(","));
+		
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-			if ((session().get("effectiveUserIds") == null)
-					&& (!c.getIsPublic())) {
+			if( c== null ) {
+				result.put("error",
+						"Cannot retrieve metadata for the specified collection!");	
+				return internalServerError(result);
+			}
+			
+			if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)
+					&& !c.getIsPublic()) {
 				result.put("error",
 						"User does not have read-access for the collection");
 				return forbidden(result);
-
 			}
 			collectionOwner = DB.getUserDAO().getById(c.getOwnerId(), null);
 		} catch (Exception e) {
 			log.error(
 					"Cannot retrieve metadata for the specified collection or user!",
 					e);
-			result.put("error",
-					"Cannot retrieve metadata for the specified collection or user!");
-			return internalServerError(result);
+			return internalServerError( );
 		}
 		Access maxAccess;
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
-		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)
-				&& !c.getIsPublic()) {
-			result.put("error",
-					"User does not have read-access for the collection");
-			return forbidden(result);
-		}
+
 		if ((maxAccess = AccessManager.getMaxAccess(c.getRights(), userIds)) == Access.NONE) {
 			maxAccess = Access.READ;
 		}
+
 		// check itemCount
 		int itemCount;
 		if ((itemCount = (int) DB.getCollectionRecordDAO().getItemCount(
