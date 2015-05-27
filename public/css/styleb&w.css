@@ -865,12 +865,19 @@ padding-bottom: 15px;
 margin-bottom: 5px;
 }
 
-div#publiccolumns figure figcaption{
+div#publiccolumns figure figcaption {
   top: 40%;
+  width: 80%;
   position: absolute;
+  padding: 0;
+  margin: 0;
   text-align: center;
   text-transform: uppercase;
-  font-weight: bold;
+  font-weight: 400;
   color: white;
-  margin: 10px auto;
+  font-size: 1.2em;
+  text-decoration: overline;
+  text-decoration: underline overline;
+  display: block;
+  text-shadow: 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
 }
