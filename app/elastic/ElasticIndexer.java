@@ -190,22 +190,6 @@ public class ElasticIndexer {
 		return doc;
 	}
 
-	public static void reindex() {
-		Callback<Collection> callback = new Callback<Collection>() {
-
-			@Override
-			public void invoke(Collection c ) throws Throwable {
-				ElasticIndexer ei = new ElasticIndexer( c );
-				ei.index();
-			}
-		};
-		try {
-			DB.getCollectionDAO().onAll( callback, false );
-		} catch( Exception e ) {
-			log.error( "ReIndexing problem", e );
-		}
-	}
-	
 	public void parseXmlIntoDoc( String xmlContent ) {
 		
 	}
