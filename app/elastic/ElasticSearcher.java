@@ -220,8 +220,7 @@ public class ElasticSearcher {
 		.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		.setSize(options.count);
 		System.out.println("got in here!");
-//		search.addSort("record.source", SortOrder.ASC);
-		search.addSort( new FieldSortBuilder("record.source").order(SortOrder.ASC).missing("mint").ignoreUnmapped(true));
+		search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
 		FilterBuilder filterBuilder = null;
 
 		if(options.filterType == FILTER_OR) filterBuilder = FilterBuilders.orFilter();
