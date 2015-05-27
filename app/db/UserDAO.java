@@ -68,7 +68,7 @@ public class UserDAO extends DAO<User> {
 	 * This method is updating one specific User. By default update method is
 	 * invoked to all documents of a collection.
 	 **/
-	private void setSpecificUserField(String dbId, String fieldName,
+	private void setSpecificUserField(ObjectId dbId, String fieldName,
 			String value) {
 		Query<User> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<User> updateOps = this.createUpdateOperations();

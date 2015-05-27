@@ -78,8 +78,11 @@ public class CollectionController extends Controller {
 
 		//check itemCount
 		int itemCount;
-		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c.getItemCount() )
+		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(colId)) != c.getItemCount() ) {
 			c.setItemCount(itemCount);
+			DB.getCollectionDAO().setSpecificCollectionField(colId, "itemCount", Integer.toString(itemCount));
+		}
+
 
 		result = (ObjectNode) Json.toJson(c);
 		result.put("owner", collectionOwner.getUsername());
