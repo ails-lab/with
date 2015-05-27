@@ -95,7 +95,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 					  else if (localStorage.getItem('User') !== null) 
 						  localStorage.setItem("EditableCollections", JSON.stringify(editables));
 				}).fail(function(request, status, error) {
-					colsole.log(JSON.parse(request.responseText));
+					console.log(JSON.parse(request.responseText));
 				}
 			);
 	};
