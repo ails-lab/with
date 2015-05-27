@@ -25,6 +25,7 @@ import model.User;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -182,5 +183,31 @@ public class CollectionDAO extends DAO<Collection> {
 
 		DB.getCollectionRecordDAO().deleteByCollection(id);
 		return makeTransient(c);
+	}
+
+	/**
+	 * This method is updating one specific User. By default update method is
+	 * invoked to all documents of a collection.
+	 **/
+	public void setSpecificCollectionField(ObjectId dbId, String fieldName,
+			String value) {
+		Query<Collection> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<Collection> updateOps = this.createUpdateOperations();
+		updateOps.set(fieldName, value);
+		this.update(q, updateOps);
+	}
+
+	public void incItemCount(ObjectId dbId, String fieldName) {
+		Query<Collection> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<Collection> updateOps = this.createUpdateOperations();
+		updateOps.inc(fieldName);
+		this.update(q, updateOps);
+	}
+
+	public void decItemCount(ObjectId dbId, String fieldName) {
+		Query<Collection> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<Collection> updateOps = this.createUpdateOperations();
+		updateOps.dec(fieldName);
+		this.update(q, updateOps);
 	}
 }

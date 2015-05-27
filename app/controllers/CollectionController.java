@@ -78,10 +78,10 @@ public class CollectionController extends Controller {
 			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
 			if( c== null ) {
 				result.put("error",
-						"Cannot retrieve metadata for the specified collection!");	
+						"Cannot retrieve metadata for the specified collection!");
 				return internalServerError(result);
 			}
-			
+
 			if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)
 					&& !c.getIsPublic()) {
 				result.put("error",
@@ -103,9 +103,11 @@ public class CollectionController extends Controller {
 
 		// check itemCount
 		int itemCount;
-		if ((itemCount = (int) DB.getCollectionRecordDAO().getItemCount(
-				new ObjectId(collectionId))) != c.getItemCount())
+		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(new ObjectId(collectionId))) != c.getItemCount() ) {
 			c.setItemCount(itemCount);
+			DB.getCollectionDAO().setSpecificCollectionField(new ObjectId(collectionId), "itemCount", Integer.toString(itemCount));
+		}
+
 		result = (ObjectNode) Json.toJson(c);
 		result.put("owner", collectionOwner.getUsername());
 		result.put("access", maxAccess.toString());
