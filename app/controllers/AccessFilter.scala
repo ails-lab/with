@@ -93,9 +93,11 @@ class AccessFilter extends Filter {
       response =>
         response match {
           case o: ObjectId => {
-            val sessionData = rh.session + (("effectiveUserIds", effectiveUserIds(userId, Some(o.toString())).mkString(",")))
+            val userIds = effectiveUserIds(userId, Some(o.toString())).mkString(",")
+            val sessionData = rh.session + (("effectiveUserIds", userIds))
             val newRh = FilterUtils.withSession(rh, sessionData.data)
-
+            log.debug("EffectiveUserIds: " + userIds)
+          
             next(newRh).map { result =>
               FilterUtils.outsession(result) match {
                 case Some(session) => result.withSession(Session(session) - ("effectiveUserIds"))
@@ -104,7 +106,10 @@ class AccessFilter extends Filter {
             }
           }
           case ApiKey.Response.ALLOWED => {
-            val sessionData = rh.session + (("effectiveUserIds", effectiveUserIds(userId, None).mkString(",")))
+            val userIds = effectiveUserIds(userId, None).mkString(",")
+            val sessionData = rh.session + (("effectiveUserIds", userIds ))
+            log.debug("EffectiveUserIds: " + userIds)
+
             val newRh = FilterUtils.withSession(rh, sessionData.data)
             next(newRh).map { result =>
               FilterUtils.outsession(result) match {
