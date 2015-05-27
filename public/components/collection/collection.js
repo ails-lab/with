@@ -224,6 +224,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 	  
 	  self.saveCollection=function(jsondata,callback){
+		  alert("ajax");
 		  $.ajax({
 				"url": "/collection/create",
 				"method": "post",
@@ -238,14 +239,14 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					   temp.push(data);
 					   sessionStorage.setItem('EditableCollections', JSON.stringify(temp));  
 					}
-					else if(localStorage.getItem('EditableCollections')){
+					else if(localStorage.getItem('EditableCollections')!=undefined){
 						temp=JSON.parse(localStorage.getItem('EditableCollections'));
 						temp.push(data);
 						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
-					
+					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 					if(self.route().request_=="mycollections"){
 						ko.contextFor(mycollections).$data.reloadCollection(data);
 						//ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
