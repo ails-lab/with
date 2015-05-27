@@ -16,7 +16,7 @@
 
 package controllers;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,58 +32,82 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
 public class RightsController extends Controller {
-	public static final ALogger log = Logger.of( CollectionController.class);
+	public static final ALogger log = Logger.of(CollectionController.class);
 
+	/**
+	 * Set access rights for object for user.
+	 *
+	 * @param colId
+	 *            the internal Id of the object you wish to share (or unshare)
+	 * @param right
+	 *            the right to give ("none" to withdraw previously given right)
+	 * @param username
+	 *            the username of user to give rights to (or take away from)
+	 * @param email
+	 *            the email of the user
+	 * @param userId
+	 *            the Id of the user
+	 * @return OK or Error with JSON detailing the problem
+	 * 
+	 */
+	public static Result setRights(String colId, String right, String username,
+			String email, String userId) {
 
-	public static Result setRights(String colId, String right, String receiver) {
 		ObjectNode result = Json.newObject();
-		ObjectId curUserId = new ObjectId(session().get("user"));
-
 		Collection collection = null;
 		try {
 			collection = DB.getCollectionDAO().get(new ObjectId(colId));
-
 		} catch (Exception e) {
-			log.error("Cannot retrieve collection  from database!", e);
+			log.error("Cannot retrieve collection from database!", e);
 			result.put("message", "Cannot retrieve collection from database!");
 			return internalServerError(result);
 		}
-
-		List<ObjectId> accessIds = new ArrayList<ObjectId>();
-		accessIds.add(curUserId);
-		if(!AccessManager.checkAccess(collection.getRights(), accessIds)) {
-			result.put("message", "Sorry! You do not own this collection so you cannot set rights. "
-									+ "Please contact the owner of this collection");
-			return badRequest(result);
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.DELETE)) {
+			result.put("error",
+					"Sorry! You do not own this collection so you cannot set rights. "
+							+ "Please contact the owner of this collection");
+			return forbidden(result);
 		}
 		// set rights
 		// the receiver can be either a User or a UserGroup
 		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
-		rightsMap.put(new ObjectId(receiver), Access.valueOf(right));
-		AccessManager.addRight(collection.getRights(), rightsMap);
-		if( DB.getCollectionDAO().makePermanent(collection) == null) {
+		if (username != null) {
+			userId = DB.getUserDAO().getByUsername(username).getDbId()
+					.toHexString();
+		} else if (email != null) {
+			userId = DB.getUserDAO().getByEmail(email).getDbId().toHexString();
+		} else if (userId == null) {
+			result.put("error", "Must specify user to give rights");
+			return badRequest(result);
+		}
+		rightsMap.put(new ObjectId(userId), Access.valueOf(right));
+		collection.getRights().putAll(rightsMap);
+		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
-
 		return ok();
 	}
 
-	/*public static Result listRights(String ownerId) {
-		ObjectNode result = Json.newObject();
-
-		if(ownerId.equals("")) {
-			result.put("message", "No user specified!");
-			return badRequest(result);
-		}
-
-
-
-	}*/
+	/*
+	 * public static Result listRights(String ownerId) { ObjectNode result =
+	 * Json.newObject();
+	 * 
+	 * if(ownerId.equals("")) { result.put("message", "No user specified!");
+	 * return badRequest(result); }
+	 * 
+	 * 
+	 * 
+	 * }
+	 */
 }

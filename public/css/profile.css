@@ -13,17 +13,14 @@
 }
 
 .profile{
-
-    background: white;
-    padding: 10px 0 10px 0;
+    background: whitesmoke;
+    padding: 10px 0;
+    border: 1px solid rgb(215,215,215);
 }
 
 .profile:hover{
-	
-    background: whitesmoke;
     cursor:pointer;
-  
-	
+    border: 1px solid rgb(128,128,128);
 }
 
 div.closesign {
@@ -32,10 +29,6 @@ div.closesign {
 
 .profile:hover div.closesign {
     display: block;
-}
-
-.profile:hover div.content {
-    background:white;
 }
 
 .row-fluid{
@@ -48,13 +41,43 @@ div.closesign {
 
 
 .content{
-	border: 1px solid rgb(215,215,215);
-	padding:5px 5px 25px 5px;
+	/*border: 1px solid rgb(215,215,215);*/
+	/*padding: 5px;*/
 	background-color:whitesmoke;
-	min-height:130px;
+	min-height: 130px;
 }
 
-.content .h3,h3{
+.content .coll-footer {
+  display: table-cell;
+  vertical-align: bottom;
+  line-height: 1.5em;
+  padding: 0;
+}
+
+.coll-message {
+  height: 130px;
+  display: table;
+}
+
+.coll-message {
+  display: flex;
+  align-items: center;
+}
+
+.coll-body {
+  border-right: 1px solid rgb(215, 215, 215);
+}
+
+.coll-footer .label {
+  line-height: inherit;
+}
+
+.content .coll-descr {
+  display: block;
+  /*height: 95px;*/
+}
+
+.content .h3, h3{
 	margin-top:0;
 	font-size:18px;
 	white-space: nowrap;
@@ -72,14 +95,15 @@ div.closesign {
 
 .profilecoll > div.container-fluid{
 	padding-left:0;
+    margin-top: 15px;
 }
 
 .profilecoll .content div{
-	margin-bottom:8px;
-	white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-	
+	margin-bottom: 5px;
+	/*white-space: nowrap;*/
+  overflow: hidden;
+  text-overflow: ellipsis;
+
 }
 
 
@@ -94,18 +118,17 @@ div.closesign {
 
 .profilecoll div.imcontainer div.coll_figure {
   position: relative;
-  height: 140px;
-  
+  height: 130px;
+
   display: inline-block;
   text-align:center;
   vertical-align:middle;
-  
+
 }
 
 
 .profilecoll div.imcontainer div.coll_figure > img {
-  height:140px;
+  height: 130px;
   max-height: 100%;
-   padding: 10px;
-    
+  padding:3px;
 }

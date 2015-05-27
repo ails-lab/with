@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
+import model.Collection;
+
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -44,10 +46,13 @@ import org.elasticsearch.node.Node;
 
 import play.Logger;
 import play.libs.Json;
+import play.libs.F.Callback;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+
+import db.DB;
 
 public class Elastic {
 	public static final Logger.ALogger log = Logger.of(Elastic.class);
@@ -201,4 +206,25 @@ public class Elastic {
 		}
 		return null;
 	}
+	
+	public static void reindex() {
+		// hopefully delete index and reput it in place
+		getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
+		putMapping();
+		
+		Callback<Collection> callback = new Callback<Collection>() {
+		@Override
+			public void invoke(Collection c ) throws Throwable {
+				ElasticIndexer ei = new ElasticIndexer( c );
+				ei.index();
+			}
+		};
+		try {
+			DB.getCollectionDAO().onAll( callback, false );
+		} catch( Exception e ) {
+			log.error( "ReIndexing problem", e );
+		}
+	}
+	
 }
+

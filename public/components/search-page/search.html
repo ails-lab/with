@@ -4,7 +4,7 @@
 			<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
 			<div class="line">&nbsp;</div>
 			<button class="withsearch-submit" type="submit" data-bind="click: search">Search</button>
-			<button class="withsearch-view" data-bind="click: toggleSourceview" title="Change view...">
+			<button class="withsearch-view" data-bind="click: toggleSourceview, enable: searching()==false" title="Change view...">
 				<span class="glyphicon glyphicon-th" data-bind="visible: !sourceview()"></span>
 				<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview"></span>
 			</button>
@@ -45,7 +45,7 @@
 					<!-- ko if: mixresults().length > 0 -->
 					<facets params="name:'search-filters',params: {}"></facets>	
 					
-					 <div id="withsearch-content-masonry">
+					 <div class="withsearch-content-masonry">
 						  <div id="columns" data-bind="foreach: mixresults, masonry"><figure class="masonryitem"><a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="text: title"></figcaption></figure></div>
 	             	</div>
 					<!-- /ko -->

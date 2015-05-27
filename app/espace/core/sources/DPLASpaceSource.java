@@ -144,7 +144,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
 			res.filters.add(provider);
-			System.out.println(provider.export());
+			//System.out.println(provider.export());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -171,8 +171,9 @@ public class DPLASpaceSource extends ISpaceSource {
 					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
 							+ "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record
-					.toString()));
+			if (record != null)
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record
+						.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();

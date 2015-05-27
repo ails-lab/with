@@ -23,6 +23,7 @@ import model.CollectionMetadata;
 import model.User;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -33,12 +34,12 @@ public class CollectionDAO extends DAO<Collection> {
 	public static final ALogger log = Logger.of(CollectionDAO.class);
 
 	public CollectionDAO() {
-		super( Collection.class );
+		super(Collection.class);
 	}
 
 	public List<Collection> getCollectionsByIds(List<ObjectId> ids) {
-		Query<Collection> colQuery = this.createQuery()
-				.field("_id").hasAnyOf(ids);
+		Query<Collection> colQuery = this.createQuery().field("_id")
+				.hasAnyOf(ids);
 		return find(colQuery).asList();
 	}
 
@@ -47,34 +48,121 @@ public class CollectionDAO extends DAO<Collection> {
 	}
 
 	public Collection getByOwnerAndTitle(ObjectId ownerId, String title) {
-		Query<Collection> q = this.createQuery()
-				.field("ownerId").equal(ownerId)
-				.field("title").equal(title);
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).field("title").equal(title);
 		return this.findOne(q);
 	}
 
 	public Collection getById(ObjectId id) {
-		Query<Collection> q = this.createQuery()
-				.field("_id").equal(id);
+		Query<Collection> q = this.createQuery().field("_id").equal(id);
 		return findOne(q);
 	}
 
 	public List<Collection> getByOwner(ObjectId id) {
-		return getByOwner(id, 0, 0);
+		return getByOwner(id, 0, 1);
 	}
 
 	public List<Collection> getByOwner(ObjectId ownerId, int offset, int count) {
-		Query<Collection> q = this.createQuery()
-				.field("ownerId").equal(ownerId)
-				.offset(offset)
-				.limit(count);
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
+	public List<Collection> getByReadAccess(ObjectId userId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("OWN"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ"),
+				this.createQuery().criteria("isPublic").equal(true) };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getByWriteAccess(ObjectId userId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("OWN"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE") };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getByReadAccessFiltered(ObjectId userId,
+			ObjectId ownerId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("OWN"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ"),
+				this.createQuery().criteria("isPublic").equal(true) };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getByWriteAccessFiltered(ObjectId userId,
+			ObjectId ownerId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("OWN"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE") };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getSharedFiltered(ObjectId userId,
+			ObjectId ownerId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ").criteria("isPublic").equal(false) };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getShared(ObjectId userId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.notEqual(userId).offset(offset).limit(count);
+		Criteria[] critiria = {
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("WRITE"),
+				this.createQuery().criteria("rights." + userId.toHexString())
+						.equal("READ").criteria("isPublic").equal(false) };
+		q.or(critiria);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getPublicFiltered(ObjectId ownerId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
+				.field("ownerId").equal(ownerId).offset(offset).limit(count);
+		return this.find(q).asList();
+	}
+
+	public List<Collection> getPublic(int offset, int count) {
+		Query<Collection> q = this.createQuery().field("isPublic").equal(true);
+		return this.find(q).asList();
+	}
 
 	public User getCollectionOwner(ObjectId id) {
-		Query<Collection> q =  this.createQuery()
-				.field("_id").equal(id)
+		Query<Collection> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "ownerId");
 		return findOne(q).retrieveOwner();
 	}
@@ -84,9 +172,9 @@ public class CollectionDAO extends DAO<Collection> {
 		Collection c = get(id);
 
 		User owner = c.retrieveOwner();
-		for(CollectionMetadata colMeta: owner.getCollectionMetadata()) {
-			if((colMeta.getCollectionId() != null) &&
-			colMeta.getCollectionId().equals(id)) {
+		for (CollectionMetadata colMeta : owner.getCollectionMetadata()) {
+			if ((colMeta.getCollectionId() != null)
+					&& colMeta.getCollectionId().equals(id)) {
 				owner.getCollectionMetadata().remove(colMeta);
 				DB.getUserDAO().makePermanent(owner);
 				break;

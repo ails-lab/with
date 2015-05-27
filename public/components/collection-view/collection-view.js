@@ -117,6 +117,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  self.route = params.route;
 
 	  self.collname=ko.observable('');
+	  self.access=ko.observable("READ");
 	  self.id=ko.observable(params.id);
 	  self.owner=ko.observable('');
 	  self.ownerId=ko.observable(-1);
@@ -148,6 +149,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					self.owner(data.owner);
 					self.ownerId(data.ownerId);
 					self.itemCount(data.itemCount);
+					self.access(data.access);
 					var items = [];
 					for(var i in data.firstEntries){
 					 var result = data.firstEntries[i];
@@ -284,7 +286,6 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
                     self.itemCount(self.itemCount()-1);
                     $("#myModal").find("h4").html("Done!");
 					$("#myModal").find("div.modal-body").html("Item removed from collection");
-
 					$("#myModal").modal('show');
                 },
                 error: function (xhr, textStatus, errorThrown) {
