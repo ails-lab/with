@@ -61,9 +61,9 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 					//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 
-			function(data, text) {
+			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
-				sessionStorage.setItem('PublicCollections', JSON.stringify(data));
+				//sessionStorage.setItem('PublicCollections', JSON.stringify(data));
 			}).fail(function(request, status, error) {
 
 				//var err = JSON.parse(request.responseText);
@@ -72,7 +72,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 	}
 	
 	getCollectionsSharedWithMe = function() {
-		eturn $.ajax({
+		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
 			dataType    : "json",
@@ -84,13 +84,13 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 					//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 
-			function(data, text) {
+			function(data) {
 				return data;
 			}).fail(function(request, status, error) {
 				colsole.log(JSON.parse(request.responseText));
 			}
 		);
-	}
+	};
 	
 	getUserCollections = function() {
 		return $.ajax({
@@ -105,7 +105,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 					//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 
-			function(data, text) {
+			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
 				if (sessionStorage.getItem('User') !== null) {
 					sessionStorage.setItem('UserCollections', JSON.stringify(data));
@@ -156,5 +156,6 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		loadUser(storageData, true);
 	}
 
-	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout, getUserCollections: getUserCollections };
+	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout, 
+		getUserCollections: getUserCollections, getCollectionsSharedWithMe: getCollectionsSharedWithMe};
 });

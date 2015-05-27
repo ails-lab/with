@@ -34,15 +34,20 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.apiUrl = ko.observable("");
 		$.when(promise).done(function() {
 			if (sessionStorage.getItem('UserCollections') !== null)
-			  self.collections = JSON.parse(sessionStorage.getItem("UserCollections"));
+				ko.mapping.fromJS(JSON.parse(sessionStorage.getItem("UserCollections")), mapping, self.myCollections);
 			if (localStorage.getItem('UserCollections') !== null)
-			  self.collections = JSON.parse(localStorage.getItem("UserCollections"));
+				ko.mapping.fromJS(JSON.parse(localStorage.getItem("UserCollections")), mapping, self.myCollections);
 			/*self.myCollections(ko.utils.arrayMap(collections, function(collectionData) {
 			    return new MyCollection(collectionData);
 			}));*/
-			ko.mapping.fromJS(self.collections, mapping, self.myCollections);
+			
 		});
-
+		self.sharedCollections = ko.mapping.fromJS([], mapping);
+		var promiseShared = app.getCollectionsSharedWithMe();
+		$.when(promise).done(function(data) {
+			ko.mapping.fromJS(data, mapping, self.sharedCollections);
+		});
+		
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
 			var collectionTitle = collection.title();
