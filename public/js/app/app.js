@@ -44,7 +44,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		isLogged(true);
 
 		if (typeof(loadCollections) === 'undefined' || loadCollections === true) {
-			return getUserCollections();
+			return [self.getEditableCollections()];//[self.getEditableCollections(), self.getUserCollections()];
 		}
 	};
 
@@ -71,28 +71,36 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		);
 	}
 	
-	getCollectionsSharedWithMe = function() {
-		return $.ajax({
-			type        : "GET",
-			contentType : "application/json",
-			dataType    : "json",
-			url         : "/collection/list",
-			processData : false,
-			data        : "access=read&offset=0&count=20"}).done(
-					//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
-				//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
+	self.getEditableCollections = function() {
+		  return $.ajax({
+				type        : "GET",
+				contentType : "application/json",
+				dataType    : "json",
+				url         : "/collection/list",
+				processData : false,
+				data        : "access=write&offset=0&count=20"}).done(
+						//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
+					//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
 
-					//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
+						//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 
-			function(data) {
-				return data;
-			}).fail(function(request, status, error) {
-				colsole.log(JSON.parse(request.responseText));
-			}
-		);
+				function(data) {
+					var array = JSON.parse(JSON.stringify(data));
+					var editables = [];
+					array.forEach(function(item){
+						editables.push({title: item.title, dbId: item.dbId});
+					});
+					if (sessionStorage.getItem('User') !== null) 
+						  sessionStorage.setItem("EditableCollections", JSON.stringify(editables));
+					  else if (localStorage.getItem('User') !== null) 
+						  localStorage.setItem("EditableCollections", JSON.stringify(editables));
+				}).fail(function(request, status, error) {
+					colsole.log(JSON.parse(request.responseText));
+				}
+			);
 	};
 	
-	getUserCollections = function() {
+	self.getUserCollections = function() {
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
@@ -100,25 +108,19 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 			url         : "/collection/list",
 			processData : false,
 			data        : "access=owned&offset=0&count=20"}).done(
-					//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
-				//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
-
-					//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
-
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
-				if (sessionStorage.getItem('User') !== null) {
-					sessionStorage.setItem('UserCollections', JSON.stringify(data));
-				}
-				else if (localStorage.getItem('User') !== null) {
-					localStorage.setItem('UserCollections', JSON.stringify(data));
-				}
-
+				/*if (sessionStorage.getItem('User') !== null) 
+					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
+				  else if (localStorage.getItem('User') !== null) 
+					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
+				return data;
 			}).fail(function(request, status, error) {
 				//var err = JSON.parse(request.responseText);
 			}
 		);
 	};
+	
 
 	logout           = function() {
 		$.ajax({
@@ -127,6 +129,8 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 			success     : function() {
 				sessionStorage.removeItem('User');
 				localStorage.removeItem('User');
+				sessionStorage.removeItem('EditableCollections');
+				localStorage.removeItem('EditableCollections');
 				sessionStorage.removeItem('UserCollections');
 				localStorage.removeItem('UserCollections');
 				isLogged(false);
@@ -156,6 +160,6 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		loadUser(storageData, true);
 	}
 
-	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout, 
-		getUserCollections: getUserCollections, getCollectionsSharedWithMe: getCollectionsSharedWithMe};
+	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout,
+		getUserCollections: getUserCollections};
 });

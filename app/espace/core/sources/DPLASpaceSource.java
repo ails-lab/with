@@ -144,7 +144,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
 			res.filters.add(provider);
-			System.out.println(provider.export());
+			//System.out.println(provider.export());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

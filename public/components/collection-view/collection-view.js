@@ -284,7 +284,6 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
                     self.itemCount(self.itemCount()-1);
                     $("#myModal").find("h4").html("Done!");
 					$("#myModal").find("div.modal-body").html("Item removed from collection");
-
 					$("#myModal").modal('show');
                 },
                 error: function (xhr, textStatus, errorThrown) {
