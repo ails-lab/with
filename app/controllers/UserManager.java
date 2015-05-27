@@ -355,6 +355,10 @@ public class UserManager extends Controller {
 		}
 		if (u.checkPassword(password)) {
 			session().put("user", u.getDbId().toHexString());
+			session().put("sourceIp", request().remoteAddress());
+			session().put("lastAccessTime",
+					Long.toString(System.currentTimeMillis()));
+
 			// now return the whole user stuff, just for good measure
 			return getUser(u.getDbId().toHexString());
 		} else {
