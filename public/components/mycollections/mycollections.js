@@ -17,7 +17,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
-					colsole.log(JSON.parse(request.responseText));
+					console.log(JSON.parse(request.responseText));
 		});
 	};
 	
@@ -139,7 +139,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.sharedCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
-					var collections = getEditableFromStorage();
+					var collections = self.getEditableFromStorage();
 					collections.remove(function (item) {
                         return item.dbId == collectionId;
                     });

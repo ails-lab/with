@@ -48,7 +48,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		}
 	};
 
-	getPublicCollections = function() {
+	self.getPublicCollections = function() {
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
@@ -63,7 +63,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
-				//sessionStorage.setItem('PublicCollections', JSON.stringify(data));
+			sessionStorage.setItem('PublicCollections', JSON.stringify(data));
 			}).fail(function(request, status, error) {
 
 				//var err = JSON.parse(request.responseText);
@@ -131,6 +131,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 				localStorage.removeItem('User');
 				sessionStorage.removeItem('EditableCollections');
 				localStorage.removeItem('EditableCollections');
+				sessionStorage.removeItem('PublicCollections');
 				sessionStorage.removeItem('UserCollections');
 				localStorage.removeItem('UserCollections');
 				isLogged(false);
@@ -161,5 +162,5 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 	}
 
 	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout,
-		getUserCollections: getUserCollections};
+		getUserCollections: getUserCollections,getPublicCollections: getPublicCollections};
 });
