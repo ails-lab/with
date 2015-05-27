@@ -230,11 +230,17 @@ public class CollectionController extends Controller {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
-
+		if (session().get("effectiveUserIds") == null) {
+			result.put("error", "Must specify user for the collection");
+			return forbidden(result);
+		}
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		String userId = userIds.get(0);
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
-		newCollection.setOwnerId(new ObjectId(session().get("user")));
+		newCollection.setOwnerId(new ObjectId(userId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -257,9 +263,11 @@ public class CollectionController extends Controller {
 		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
 		owner.getCollectionMetadata().add(newCollection.collectMetadata());
 		DB.getUserDAO().makePermanent(owner);
+		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
+		c.put("access", Access.OWN.toString());
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
-		return ok(Json.toJson(newCollection));
+		return ok(c);
 	}
 
 	/**
@@ -350,7 +358,8 @@ public class CollectionController extends Controller {
 				maxAccess = Access.READ;
 			}
 			c.put("access", maxAccess.toString());
-			User user = DB.getUserDAO().getById(collection.getOwnerId(), new ArrayList<String>(Arrays.asList("username")));
+			User user = DB.getUserDAO().getById(collection.getOwnerId(),
+					new ArrayList<String>(Arrays.asList("username")));
 			c.put("owner", user.getUsername());
 			result.add(c);
 		}
