@@ -23,17 +23,19 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
 import play.libs.F.Function0;
-import play.libs.Json;
 import play.libs.F.Promise;
-import play.mvc.*;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
 import utils.ListUtils;
-import elastic.ElasticIndexer;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import elastic.Elastic;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilterResponse;
 import espace.core.CommonQuery;
@@ -229,7 +231,7 @@ public class SearchController extends Controller {
 		Promise.promise(new Function0<String>() {
 			public String apply() throws Exception {
 				log.info( "Reindex started");
-				ElasticIndexer.reindex();
+				Elastic.reindex();
 				log.info( "Reindex finished");
 				return "ok";
 			}
