@@ -235,7 +235,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.reloadRecord = function(dbId, recordDataString) {
-			alert("reload");
 			/*$.ajax({
 				"url": "/collection/"+dbId,
 				"method": "GET",
@@ -264,8 +263,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			if (collData.set == "shared") {
 				self.updateCollectionFirstEntries(self.sharedCollections(), collIndex, recordObservable);
 			}
-			
-			var editIndex = collData.editableIundex;
 		};
 		
 		self.updateCollectionFirstEntries = function(collectionSet, collIndex, recordObservable) {
@@ -276,9 +273,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
-			if (data.rights == "OWN") {
+			if (data.access == "OWN") {
 				ko.mapping.fromJS(data, newCollection);
 				self.myCollections.unshift(newCollection);
+				alert(JSON.stringify(self.myCollections()[0].title()));
 			}
 			else {
 				ko.mapping.fromJS(data, newCollection);
