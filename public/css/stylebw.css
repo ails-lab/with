@@ -167,7 +167,7 @@ margin-right: 0;
 .column {
     height: 100%;
     overflow: auto;
-    *zoom:1;
+    zoom:1;
 }
 
 .column:before, .column:after {
