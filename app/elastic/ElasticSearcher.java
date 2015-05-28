@@ -157,11 +157,11 @@ public class ElasticSearcher {
 				MatchQueryBuilder mintQuery = QueryBuilders.matchQuery("source", term);
 				//MatchQueryBuilder mintQuery_all = QueryBuilders.matchQuery("source_all", term);
 				if(term.indexOf(" ") >= 0) mintQuery.type(Type.PHRASE);
-				bool.must(mintQuery);
+				bool.should(mintQuery);
 			} else {
 				MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
 				if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
-				bool.should(query);
+				bool.must(query);
 			}
 		}
 		return this.execute(bool, options);
