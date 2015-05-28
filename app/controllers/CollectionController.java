@@ -643,34 +643,32 @@ public class CollectionController extends Controller {
 	public static Result listCollectionRecords(String collectionId,
 			String format, int start, int count) {
 		ObjectNode result = Json.newObject();
-
 		ObjectId colId = new ObjectId(collectionId);
 		Collection collection = DB.getCollectionDAO().getById(colId);
-		if ((session().get("effectiveUserIds") == null)
-				&& (!collection.getIsPublic())) {
+		
+		if( collection == null ) {
+			result.put( "error", "Invalid collection id" );
+			return forbidden(result);			
+		}
+		
+		List<String> userIds = effectiveUserIds();
+
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.READ) && (!collection.getIsPublic())) {
 			result.put("error",
 					"User does not have read-access to the collection");
 			return forbidden(result);
 		}
-		String effectiveUserIds = session().get("effectiveUserIds");
-		if( effectiveUserIds == null ) effectiveUserIds = "";
-		List<String> userIds = new ArrayList<String>();
-		for( String ui: effectiveUserIds.split(",")) {
-			if( ui.trim().length() > 0 ) userIds.add(ui );
-		}
-		if (!AccessManager.checkAccess(collection.getRights(), userIds,
-				Action.READ) && (!collection.getIsPublic())) {
-			result.put("error",
-					"User does not have permission to edit the collection");
-			return forbidden(result);
-		}
+
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 				.getByCollectionOffsetCount(colId, start, count);
+
 		if (records == null) {
 			result.put("message", "Cannot retrieve records from database!");
 			return internalServerError(result);
 		}
 		ArrayNode recordsList = Json.newObject().arrayNode();
+
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {
 				recordsList.add(Json.toJson(e.getContent()));
