@@ -24,7 +24,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 			    if(load){
 			      $(window).on("scroll.ko.scrollHandler", function(){
-			        if($(window).scrollTop() >=  $(window).height()/2){
+			        if($(window).scrollTop() >= $(document).height() - $(window).height()-300){
 			          if(self.updating){
 			            loadFunc()
 			            self.updating = false;

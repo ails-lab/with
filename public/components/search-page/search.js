@@ -103,7 +103,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
-	        if (elem.scrollTop > (elem.scrollHeight/2)) {
+	        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight - 300)) {
 	        	self.searchNext();
 	        }
 	    },
