@@ -140,6 +140,13 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		});
 	};
 
+	$('#myModal').on('hidden.bs.modal', function () {
+		$("#myModal").find("div.modal-body").html('');
+		$("#myModal").find("h4").html("");
+		$("#myModal").find("div.modal-footer").html('');
+
+	})
+	
 	showPopup        = function(name) {
 		popupName(name);
 		$('#popup').modal('show');
