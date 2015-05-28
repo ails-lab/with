@@ -63,7 +63,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
 			var collectionTitle = collection.title();
-			showDelCollPopup(collectionTitle, collectionId);
+			self.showDelCollPopup(collectionTitle, collectionId);
 		};
 
 		self.createCollection = function() {
@@ -72,7 +72,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 	    
 		
-		showDelCollPopup = function(collectionTitle, collectionId) {
+		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
 			$("#myModal").find("h4").html("Do you want to delete collection "+collectionTitle+"?");

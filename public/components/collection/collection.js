@@ -191,10 +191,12 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  self.close= function(){
 		  console.log("closed called");
 		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
+		  $("body").removeClass("modal-open");
 		  $(document).one("ajaxStop", function() {
-			  console.log("in ajax stop");
+			  if($('#myModal').find('h4.modal-title').is(':empty')==false)
 				$("#myModal").modal('show');
-				self.reset();
+			  else{console.log("not showing popup");}
+			   self.reset();
 				
 		  });
 	    }
@@ -246,6 +248,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Collection created.</p>");
 					$("#myModal").find("div.modal-footer").html();
+					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 					if(self.route().request_=="mycollections"){
