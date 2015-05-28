@@ -155,7 +155,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 			  
-		   if(self.page()==1 && (isFirefox || isSafari)){self.sourceview(true);}
+		   if(self.page()==1 && (isFirefox || isSafari)){self.sourceview(true);$('.withsearch-content').css({'overflow-x': 'auto'});}
 			
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 if(self.searching()==false && self.currentTerm()!=""){
