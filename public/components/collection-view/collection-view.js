@@ -24,7 +24,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 			    if(load){
 			      $(window).on("scroll.ko.scrollHandler", function(){
-			        if($(window).scrollTop() >= $(document).height() - $(window).height() - 10){
+			        if($(window).scrollTop() >= $(document).height() - $(window).height()-300){
 			          if(self.updating){
 			            loadFunc()
 			            self.updating = false;
@@ -74,7 +74,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	    		$element.masonry( 'reloadItems' );
 	 			$element.masonry( 'layout' );
 
-
+	 			bindingContext.$data.loading(false);
 	    		$('#collcolumns > figure').each(function () {
 
 	 	 		    $(this).animate({ opacity: 1 });
@@ -183,7 +183,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				"contentType": "application/json",
 				"success": function(data) {
 					console.log(data);
-					self.loading(false);
+					//self.loading(false);
 					self.collname(data.title);
 					self.desc(data.description);
 					self.owner(data.owner);
@@ -207,6 +207,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 				
 					self.citems.push.apply(self.citems, items);
+					self.loadNext();
 
 				},
 
@@ -251,7 +252,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				"contentType": "application/json",
 				"success": function(data) {
 					console.log(data);
-					self.loading(false);
+					//self.loading(false);
 
 					var items = [];
 					for(var i in data){
