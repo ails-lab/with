@@ -205,8 +205,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 
-					if(data.firstEntries.length==20){$(window).bind('scroll', scrollHandler);}
-
+				
 					self.citems.push.apply(self.citems, items);
 
 				},
@@ -269,16 +268,14 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 
-					if(data.length==20){$(window).bind('scroll', scrollHandler);}
-
+				
 					self.citems.push.apply(self.citems, items);
 
 				},
 
 				"error":function(result) {
 					self.loading(false);
-					$(window).bind('scroll', scrollHandler);
-
+					
 
 
 			     }});
