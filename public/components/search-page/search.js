@@ -368,6 +368,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if( isOpen ) {
 				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
 		    	$("#myModal").modal('hide');
+		    	$("#myModal").find("h4").html("");
 		    	$("body").removeClass("modal-open");
 
 
