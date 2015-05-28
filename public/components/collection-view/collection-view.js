@@ -233,9 +233,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 
 	  self.loadNext = function() {
-			if(self.citems().length>=19){
+			
 
-				self.moreItems();}
+				self.moreItems();
 			};
 
 
