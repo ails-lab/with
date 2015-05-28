@@ -2,7 +2,47 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 	 $.bridget( 'masonry', masonry );
 
+	 ko.bindingHandlers.scroll = {
 
+			  updating: true,
+
+			  init: function(element, valueAccessor, allBindingsAccessor) {
+			      var self = this
+			      self.updating = true;
+			      ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+			            $(window).off("scroll.ko.scrollHandler")
+			            self.updating = false
+			      });
+			  },
+
+			  update: function(element, valueAccessor, allBindingsAccessor){
+			    var props = allBindingsAccessor().scrollOptions
+			    var offset = props.offset ? props.offset : "0"
+			    var loadFunc = props.loadFunc
+			    var load = ko.utils.unwrapObservable(valueAccessor());
+			    var self = this;
+
+			    if(load){
+			      $(window).on("scroll.ko.scrollHandler", function(){
+			        if($(window).scrollTop() >= $(document).height() - $(window).height() - 10){
+			          if(self.updating){
+			            loadFunc()
+			            self.updating = false;
+			          }
+			        }
+			        else{
+			          self.updating = true;
+			        }
+			      });
+			    }
+			    else{
+			        element.style.display = "none";
+			        $(window).off("scroll.ko.scrollHandler")
+			        self.updating = false
+			    }
+			  }
+			 }
+			 
 
 	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
@@ -194,7 +234,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 
 	  self.loadNext = function() {
-			if(self.citems().length>=20){
+			if(self.citems().length>=19){
 
 				self.moreItems();}
 			};
@@ -298,18 +338,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 		}
 
-	 $(window).scroll(scrollHandler());
-
-	 function scrollHandler(){
-		 if (self.loading()==false && $(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
-			 $(window).unbind('scroll');/*prevent from firing continuously*/
-
-			 self.loadNext();
-		   }
-	 }
-
-
-
+	
 
   }
 
