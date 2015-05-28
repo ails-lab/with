@@ -225,7 +225,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
 			JSONObject jsonResp = new JSONObject(response);
-			if (jsonResp == null || !jsonResp.getBoolean("success"))
+			if (jsonResp == null || !jsonResp.getBoolean("success") || jsonResp.getJSONArray("items") == null)
 				return new AutocompleteResponse();
 			else {
 				JSONArray items = jsonResp.getJSONArray("items");
