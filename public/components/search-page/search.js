@@ -8,7 +8,6 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	console.log($element);
     	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
