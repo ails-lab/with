@@ -166,10 +166,10 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 			readList(o.path("facets").path("creator"), creator);
 
-			res.filters = new ArrayList<>();
-			res.filters.add(type);
-			res.filters.add(creator);
-			res.filters.add(rights);
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
+			res.filtersLogic.add(creator);
+			res.filtersLogic.add(rights);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

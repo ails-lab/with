@@ -158,7 +158,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			}
 			res.items = a;
 			res.facets = response.path("facets");
-			res.filters = new ArrayList<>();
+			res.filtersLogic = new ArrayList<>();
 
 			readList(response.path("facets").path("provider.name"), provider);
 
@@ -168,13 +168,13 @@ public class DPLASpaceSource extends ISpaceSource {
 
 			readList(response.path("facets").path("sourceResource.spatial.country"), country);
 
-			res.filters = new ArrayList<>();
-			res.filters.add(type);
-			res.filters.add(provider);
-			res.filters.add(creator);
-			res.filters.add(country);
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
+			res.filtersLogic.add(provider);
+			res.filtersLogic.add(creator);
+			res.filtersLogic.add(country);
 
-			res.filters.add(contributor);
+			res.filtersLogic.add(contributor);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

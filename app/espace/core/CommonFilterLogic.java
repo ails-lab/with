@@ -119,7 +119,6 @@ public class CommonFilterLogic implements Cloneable {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.COUNTRY_ID;
 		r.data.filterName = CommonFilters.COUNTRY_NAME;
-		r.global = false;
 		return r;
 	}
 
@@ -127,7 +126,6 @@ public class CommonFilterLogic implements Cloneable {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.YEAR_ID;
 		r.data.filterName = CommonFilters.YEAR_NAME;
-		r.global = false;
 		return r;
 	}
 
@@ -135,7 +133,6 @@ public class CommonFilterLogic implements Cloneable {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.CONTRIBUTOR_ID;
 		r.data.filterName = CommonFilters.CONTRIBUTOR_NAME;
-		r.global = false;
 		return r;
 	}
 }

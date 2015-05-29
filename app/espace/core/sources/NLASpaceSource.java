@@ -193,8 +193,8 @@ public class NLASpaceSource extends ISpaceSource {
 			}
 
 			res.items = a;
-			res.filters = new ArrayList<>();
-			res.filters.add(type);
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
 			
 		
 			

@@ -77,6 +77,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		});
 
+		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf", "proxy_dc_contributor%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
+			}
+		});
 		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
@@ -98,7 +104,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		builder.addSearchParam("rows", "" + q.pageSize);
 		builder.addSearchParam("profile", "rich+facets");
-		builder.addSearchParam("facet", "proxy_dc_creator,DEFAULT");
+		builder.addSearchParam("facet", "proxy_dc_creator,proxy_dc_contributor,DEFAULT");
 		// builder.addSearchParam("facet", "proxy_dc_creator");
 		return addfilters(q, builder).getHttp();
 	}
@@ -168,6 +174,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -216,6 +223,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					case "proxy_dc_creator":
 						countValue(creator, label, false, count);
 						break;
+					case "proxy_dc_contributor":
+						countValue(contributor, label, false, count);
+						break;
 					case "COUNTRY":
 						countValue(country, label, false, count);
 						break;
@@ -230,13 +240,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				}
 			}
 
-			res.filters = new ArrayList<>();
-			res.filters.add(type);
-			res.filters.add(provider);
-			res.filters.add(creator);
-			res.filters.add(rights);
-			res.filters.add(country);
-			res.filters.add(year);
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
+			res.filtersLogic.add(provider);
+			res.filtersLogic.add(creator);
+			res.filtersLogic.add(contributor);
+			res.filtersLogic.add(rights);
+			res.filtersLogic.add(country);
+			res.filtersLogic.add(year);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
