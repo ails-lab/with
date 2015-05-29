@@ -150,37 +150,38 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		});
 
 	  
-	  self.findUserCollections=function(){
+	  self.findEditableCollections=function(){
 		  self.collectionlist([]);
 		  var collections = [];
-		  if (sessionStorage.getItem('UserCollections') !== null) 
-			  collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		  else if (localStorage.getItem('UserCollections') !== null) 
-			  collections = JSON.parse(localStorage.getItem("UserCollections"));
+		  if (sessionStorage.getItem('EditableCollections') !== null) 
+			  collections = JSON.parse(sessionStorage.getItem("EditableCollections"));
+		  else if (localStorage.getItem('EditableCollections') !== null) 
+			  collections = JSON.parse(localStorage.getItem("EditableCollections"));
 		  var jsonData = {};
-		    collections.forEach(function(collection) 
-		    {
+		  for (var i=0; i<collections.length; i++) {
+		    //collections.forEach(function(collection) 
+			  var collection = collections[i];
 		        jsonData={"id":collection.dbId,"name":collection.title}
-		        self.collectionlist.push(jsonData);	
-		        	
-		        
-		    });
-	  }
+		        self.collectionlist.push(jsonData);	      
+		  }
+		    //});
+	  };
 	  
 	  createNewCollection = function() {
-		  self.findUserCollections();
+		  self.findEditableCollections();
 		  self.modal("2");
 		  self.templateName('collection_new');
 		  self.open();
+
 	  }
 	  
 	  collectionShow = function(record) {
 	    	self.record(record);
-	    	self.findUserCollections();
+	    	self.findEditableCollections();
 	        if(self.collectionlist().length==0){self.modal("2");self.templateName('collection_new');}
 	    	else{self.modal("3");self.templateName('additem');}
 	    	self.open();
-	    }
+    }
 
 	  self.open=function(){
 		  $('#modal-'+self.modal()).css('display', 'block');
@@ -188,10 +189,16 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 
 	  self.close= function(){
-		  self.reset();
+		  console.log("closed called");
 		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
-		  
-
+		  $("body").removeClass("modal-open");
+		  $(document).one("ajaxStop", function() {
+			  if($('#myModal').find('h4.modal-title').is(':empty')==false)
+				$("#myModal").modal('show');
+			  else{console.log("not showing popup");}
+			   self.reset();
+				
+		  });
 	    }
 
 	  self.save=function(formElement){
@@ -209,6 +216,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			  else{ 
 				 
 			  self.saveCollection(jsondata,self.addRecord);}
+			  self.close();
 			  
 		  }
 		  else{
@@ -227,19 +235,22 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					self.id(data.dbId);
 					self.selectedCollection(data.title);
 					var temp = [];
-					if(sessionStorage.getItem('UserCollections')!=undefined){
-					   temp=JSON.parse(sessionStorage.getItem('UserCollections'));
+					if(sessionStorage.getItem('EditableCollections')!=undefined){
+					   temp=JSON.parse(sessionStorage.getItem('EditableCollections'));
 					   temp.push(data);
-					   sessionStorage.setItem('UserCollections', JSON.stringify(temp));  
+					   sessionStorage.setItem('EditableCollections', JSON.stringify(temp));  
 					}
-					else if(localStorage.getItem('UserCollections')){
-						temp=JSON.parse(localStorage.getItem('UserCollections'));
+					else if(localStorage.getItem('EditableCollections')!=undefined){
+						temp=JSON.parse(localStorage.getItem('EditableCollections'));
 						temp.push(data);
-						localStorage.setItem('UserCollections', JSON.stringify(temp));
+						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
+					$("#myModal").find("h4").html("Success!");
+					$("#myModal").find("div.modal-body").html("<p>Collection created.</p>");
+					$("#myModal").find("div.modal-footer").html();
 					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
-					
+					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 					if(self.route().request_=="mycollections"){
 						ko.contextFor(mycollections).$data.reloadCollection(data);
 						//ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
@@ -248,13 +259,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  callback(data.dbId);
 					 
 					}
-					self.close();
+					
 				},
 				
 				"error":function(result) {
-					$("#myModal").find("h4").html("An error occured");
+					//var r = JSON.parse(result.responseText);
 					$("#myModal").find("div.modal-body").html(result.statusText);
-					$("#myModal").modal('show');
+					$("#myModal").find("h4").html("An error occured.");
+					$("#myModal").find("div.modal-footer").html();
+
 					 
 			     }});
 	  }
@@ -316,10 +329,11 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				"data": jsondata,
 				"success": function(data) {
 					if(self.route().request_=="collectionview/"+collid){
-						 ko.contextFor(collcolumns).$data.citems.push(self.record());
-						  ko.contextFor(collcolumns).$data.citems.valueHasMutated();
-						  ko.contextFor(collcolumns).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
-						  ko.contextFor(collcolumns).$data.itemCount.valueHasMutated();  
+						 self.record().recordId(data.dbId);
+						 ko.contextFor(withcollection).$data.citems.push(self.record());
+						  ko.contextFor(withcollection).$data.citems.valueHasMutated();
+						  ko.contextFor(withcollection).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
+						  ko.contextFor(withcollection).$data.itemCount.valueHasMutated();  
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
@@ -332,21 +346,20 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					}
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
-					$("#myModal").modal('show');
+					$("#myModal").find("div.modal-footer").html();
 				},
 				
 				"error":function(result) {
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
-					$("#myModal").modal('show');
-					 
+					$("#myModal").find("div.modal-footer").html(); 
 			     }});
 		  
 		  
 	  }
 	  
 	  self.reset = function() {
-		  $(document).ajaxStop(function () {
+		 
 		    self.collname('');
 		    self.description('');
 		    self.id(-1);
@@ -354,7 +367,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 		    self.validationModel.errors.showAllMessages(false);
 		    self.selected_items2([]);
 		   
-		  });
+		 
 		    
 		}
 

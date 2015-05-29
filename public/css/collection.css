@@ -128,18 +128,19 @@
 }
 
 .modal-info .modal-dialog {
-  width: 30%;
+  width: 40%;
 }
 
 #withcollection #collcolumns{
-	width:100%;
 	padding:0;
 	
 }
 
 
 #withcollection #collcolumns figure{
+	opacity:0;
 	margin-bottom:20px;
+	width:211px;
 }
 
 #withcollection #collcolumns figure:hover .closeButton{
@@ -157,7 +158,7 @@
 #collcolumns {
 
 column-gap: 5px;
-width: 96%;
+
 /*
 max-width: 1500px;*/
 margin: 50px auto;

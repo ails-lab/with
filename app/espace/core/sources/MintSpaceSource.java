@@ -61,10 +61,11 @@ public class MintSpaceSource extends ISpaceSource {
 	public SourceResponse getResults(CommonQuery q) {
 		ElasticSearcher searcher = new ElasticSearcher();
 		String term = "\""+q.getQuery()+"\"" + "\"mint\"";
-		int offset = Integer.parseInt(q.pageSize);
-		SearchResponse resp = searcher.search(term, Integer.parseInt(q.page), offset);
+		int count = Integer.parseInt(q.pageSize);
+		int offset = (Integer.parseInt(q.page)-1)*count;
+		SearchResponse resp = searcher.search(term, offset, count);
 		searcher.closeClient();
-		return new SourceResponse(resp, getSourceName(), offset);
+		return new SourceResponse(resp, getSourceName(), count);
 	}
 
 	@Override
@@ -72,7 +73,7 @@ public class MintSpaceSource extends ISpaceSource {
 		log.debug("Method not implemented yet");
 		return null;
 	}
-	
+
 
 
 }

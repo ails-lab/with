@@ -30,6 +30,7 @@ import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.QueryBuilder;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
@@ -48,36 +49,31 @@ public class NLASpaceSource extends ISpaceSource {
 
 	public NLASpaceSource() {
 		super();
-		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
-		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Image",
-		// "%20format%3AImage");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Image",
-				"%20format%3APhotograph");
+				"l-format","Photograph");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Video",
-				"%20format%3AVideo");
+				"l-format","Video");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Sound",
-				"%20format%3ASound");
+				"l-format","Sound");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books",
-				"%20format%3ABooks");
-		// addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
+				"l-format","Books");
 	}
 
 	public String getHttpQuery(CommonQuery q) {
-		String spacesFormatQuery = Utils.spacesFormatQuery(q.searchTerm, "%20");
-		spacesFormatQuery = addfilters(q, spacesFormatQuery);
-		return "http://api.trove.nla.gov.au/result?key="
-				+ Key
-				+ "&zone=picture,book,music,article"
-				+ "&q="
-				+ spacesFormatQuery
-				+ (Utils.hasAny(q.termToExclude) ? "%20NOT%20"
-						+ Utils.spacesFormatQuery(q.termToExclude, "%20")
-						+ "%20" : "")
-				+ "&n="
-				+ q.pageSize
-				+ "&s="
-				+ ((Integer.parseInt(q.page) - 1) * Integer
-						.parseInt(q.pageSize)) + "&encoding=json&reclevel=full";
+//		String spacesFormatQuery = Utils.spacesFormatQuery(q.searchTerm, "%20");
+//		spacesFormatQuery = addfilters(q, spacesFormatQuery);
+		QueryBuilder builder = new QueryBuilder("http://api.trove.nla.gov.au/result");
+		builder.addSearchParam("key", Key);
+		builder.addSearchParam("zone", "picture,book,music,article");
+		builder.addSearchParam("q", q.searchTerm);
+		// TODO term to exclude?
+		builder.addSearchParam("n", q.pageSize);
+		builder.addSearchParam("s", ""+((Integer.parseInt(q.page) - 1) * Integer
+						.parseInt(q.pageSize)));
+		builder.addSearchParam("encoding", "json");
+		builder.addSearchParam("reclevel", "full");
+		builder.addSearchParam("facet", "format");
+		return addfilters(q, builder).getHttp();
 	}
 
 	public String getSourceName() {
@@ -130,9 +126,9 @@ public class NLASpaceSource extends ISpaceSource {
 						// type.addValue(vmap.translateToCommon(type.filterID,
 						// ));
 						// System.out.println("add " + v);
-						for (String string : v) {
-							countValue(type, string);
-						}
+//						for (String string : v) {
+//							countValue(type, string);
+//						}
 
 						ItemsResponse it = new ItemsResponse();
 						it.id = Utils.readAttr(item, "id", true);
@@ -170,13 +166,38 @@ public class NLASpaceSource extends ISpaceSource {
 
 						
 
+						
+						
+						
 					}
+					JsonNode facet = o.path("facets").path("facet");
+					{
+//						System.out.println(">>>"+facet.toString());
+						for (JsonNode jsonNode : facet.path("term")) {
+							String label = jsonNode.path("search").asText();
+							int count = jsonNode.path("count").asInt();
+							JsonNode path = facet.path("name");
+//							System.out.println(" path "+path);
+							switch (path.asText()) {
+							case "format":
+								countValue(type, label, count);
+								break;
+							default:
+								break;
+							}
+						}
+					}
+					
+					
 				}
 			}
 
 			res.items = a;
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
+			
+		
+			
 			// System.out.println(type);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

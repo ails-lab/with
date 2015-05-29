@@ -20,7 +20,6 @@
     padding:5px;	      
 }
 #section {
-    width:1350px;
     float:left;
     padding:10px;
 }
@@ -39,8 +38,6 @@ clear:both;
 #thumbframe {
 	line-height:30px;
     background-color:#eeeeee;
-    width:400px;
-    height: 300px;
     float:left;
     border-width: 1px; border-style: outset; border-color: darkgray;
     padding:5px;
@@ -106,6 +103,73 @@ color: black;
 color: black;
 }
 
+
+.btn-2 {
+  background-color: #00AFD1;
+}
+.btn-2 .round {
+  background-color: #00c4eb;
+}
+
+
+.type-2 li:hover .round {
+  background: none;
+}
+.type-2 li:hover .round i {
+  left: 70%;
+}
+
+
+
+.type-2 li {
+  text-decoration: none;
+  -moz-border-radius: 30px;
+  -webkit-border-radius: 30px;
+  border-radius: 30px;
+  padding: 5px 8px 5px 8px;
+  color: #fff;
+  
+  font-family: sans-serif;
+  font-weight: bold;
+  position: relative;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  display: inline-block;
+}
+.type-2 li span {
+  position: relative;
+  z-index: 3;
+}
+.type-2 li .round {
+  -moz-border-radius: 50%;
+  -webkit-border-radius: 50%;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  -moz-transition: all 0.3s ease-out;
+  -o-transition: all 0.3s ease-out;
+  -webkit-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
+  z-index: 2;
+}
+.type-2 li .round i {
+  position: absolute;
+  top: 50%;
+  margin-top: -6px;
+  left: 50%;
+  margin-left: -4px;
+  -moz-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+}
+
+
 .basictab li.selected a{ /*selected tab effect*/
 position: relative;
 top: 1px;
@@ -120,6 +184,7 @@ color: black;
 var namee;
 function change(namee){
 	//alert(namee);
+	console.log("select "+namee);
 document.getElementById("Display_content").innerHTML=document.getElementById(namee).innerHTML;
  
 //optional Javascript code below - To change color of clicked tab

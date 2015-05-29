@@ -29,12 +29,14 @@
  	<div id="vsection">
 <ul >
 @for(p <- filters) {
-<li onClick="" >@p.filterName
+<li onClick="" class="type-2" >@p.filterName
 
 <ul >
-@for(pp <- p.suggestedValues) {
+@for(pp <- p.suggestedValues.slice(1,14)) {
 
-<li style="background-color: #f6ffd5;" onClick="gothere('zeus', '@p.filterID', '@pp.value')" >@pp</li>
+<li class="li1 btn btn-2" onClick="gothere('zeus', '@p.filterID', '@pp.value')" >
+  @shorttext(pp.value,20) (@pp.count)
+</li>
 
 }
 </ul> 	
@@ -67,9 +69,10 @@
   <div id="thumbframe">
   
   <div id="thumb"   >
-  <img alt="" src="@if(it.thumb!=null) {@it.thumb.get(0)} else {NA}" />  
+  <img alt="" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" />  
     
     </div>
+  <!--
     <div  id="thinfo">
   <b>Title: </b> <a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
  @shorttext(it.title.get(0).value,40)
@@ -77,7 +80,7 @@
   <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
   
   </div>
-  
+  --!>
   </div>
   }
   }

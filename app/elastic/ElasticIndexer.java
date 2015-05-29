@@ -17,7 +17,6 @@
 package elastic;
 
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,29 +35,17 @@ import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
 import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
-import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.settings.ImmutableSettings;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.node.Node;
 
 import play.Logger;
+import play.libs.F.Callback;
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 
 import db.DB;
 
@@ -204,7 +191,7 @@ public class ElasticIndexer {
 	}
 
 	public void parseXmlIntoDoc( String xmlContent ) {
-
+		
 	}
 
 }
