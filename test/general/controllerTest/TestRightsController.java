@@ -17,7 +17,9 @@
 package general.controllerTest;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static play.mvc.Http.Status.BAD_REQUEST;
 import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
@@ -37,7 +39,15 @@ import model.User;
 import org.junit.Assert;
 import org.junit.Test;
 
+import play.libs.Json;
 import play.mvc.Result;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import db.DB;
 
 public class TestRightsController {
@@ -94,12 +104,44 @@ public class TestRightsController {
 				Result result = route(fakeRequest("POST", "/rights"
 						+ "/"+col.getDbId()
 						+ "/READ"
-						+ "?receiver="+receiver.getDbId()).withSession("user", user.getDbId().toString()));
+						+ "?receiver="+receiver.getDbId())
+						.withSession("user", user.getDbId().toString()));
 
 				System.out.println(col.getDbId());
 
 			    if(status(result) == 200)
 				    assertThat(status(result)).isEqualTo(OK);
+			    else {
+			    	System.out.println(status(result));
+			    	Assert.fail();
+			    }
+
+			}
+		});
+
+		running( fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				final ObjectNode json = Json.newObject();
+				json.put("title", "The EDITED test title " + TestUtils.randomString() + TestUtils.randomString());
+				json.put("ownerId", user.getDbId().toString());
+				Result result = route(fakeRequest("POST", "/collection/" + col.getDbId())
+						.withJsonBody(json)
+						.withSession("user", receiver.getDbId().toString()));
+
+			    JsonParser parser = new JsonParser();
+			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			    JsonElement el = parser.parse(contentAsString(result));
+			    System.out.println(gson.toJson(el));
+
+			    if( status(result) == 200 ) {
+			    	System.out.println(status(result));
+				    assertThat(status(result)).isEqualTo(OK);
+			    }
+			    else if( status(result) == 400 ) {
+			    	System.out.println(status(result));
+				    assertThat(status(result)).isEqualTo(BAD_REQUEST);
+			    }
 			    else {
 			    	System.out.println(status(result));
 			    	Assert.fail();

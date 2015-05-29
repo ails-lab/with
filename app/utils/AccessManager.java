@@ -18,7 +18,6 @@ package utils;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import model.User.Access;
 
@@ -28,24 +27,36 @@ import play.Logger;
 import play.Logger.ALogger;
 
 public class AccessManager {
-	public static final ALogger log = Logger.of( AccessManager.class);
+	public static final ALogger log = Logger.of(AccessManager.class);
 
-	public static boolean checkAccess(Map<ObjectId, Access> rights, List<ObjectId> ids) {
-		for(ObjectId id: ids) {
-			if(rights.containsKey(id)) {
+	public static enum Action {
+		READ, EDIT, DELETE
+	};
+
+	public static boolean checkAccess(Map<ObjectId, Access> rights,
+			List<String> userIds, Action action) {
+		for (String id : userIds) {
+			if (rights.containsKey(new ObjectId(id))
+					&& (rights.get(new ObjectId(id)).ordinal() > action
+							.ordinal())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public static void addRight(Map<ObjectId, Access> rights, Map<ObjectId, Access> rightsToGive) {
-		rights.putAll(rightsToGive);
-	}
-
-	public static void removeRight(Map<ObjectId, Access> rights, Map<ObjectId, Access> rightToGo) {
-		for(Entry<ObjectId, Access> e: rightToGo.entrySet())
-			rights.remove(e.getKey(), e.getValue());
+	public static Access getMaxAccess(Map<ObjectId, Access> rights,
+			List<String> userIds) {
+		Access maxAccess = Access.NONE;
+		for (String id : userIds) {
+			if (rights.containsKey(new ObjectId(id))) {
+				Access access = rights.get(new ObjectId(id));
+				if (access.ordinal() > maxAccess.ordinal()) {
+					maxAccess = access;
+				}
+			}
+		}
+		return maxAccess;
 	}
 
 }

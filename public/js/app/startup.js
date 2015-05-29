@@ -21,6 +21,8 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
 	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
+	ko.components.register('facets', { require: 'components/facets/facets' });
+	
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }

@@ -252,7 +252,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
 			JSONObject jsonResp = new JSONObject(response);
-			if (jsonResp == null || !jsonResp.getBoolean("success"))
+			if (jsonResp == null || !jsonResp.getBoolean("success") || jsonResp.getJSONArray("items") == null)
 				return new AutocompleteResponse();
 			else {
 				JSONArray items = jsonResp.getJSONArray("items");
@@ -286,14 +286,17 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
 							+ recordId + ".json?wskey=" + key);
 			JsonNode record = response.get("object");
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
+			if (response != null)
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
 					.toString()));
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
 							+ recordId + ".jsonld?wskey=" + key);
-			record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record
-					.toString()));
+			if (response != null) {
+				record = response;
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record
+						.toString()));
+			}
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;

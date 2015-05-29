@@ -19,12 +19,9 @@ package espace.core.sources;
 import java.util.ArrayList;
 import java.util.function.Function;
 
-
 import utils.ListUtils;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
-
 
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
@@ -51,9 +48,9 @@ public class DPLASpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
 		builder.addSearchParam("api_key", DPLAKey);
 		builder.addSearchParam("q", q.searchTerm);
-		builder.addSearchParam("page",q.page);
-		builder.addSearchParam("page_size",q.pageSize);
-		builder.addSearchParam("facets","provider.name,sourceResource.type");
+		builder.addSearchParam("page", q.page);
+		builder.addSearchParam("page_size", q.pageSize);
+		builder.addSearchParam("facets", "provider.name,sourceResource.type");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -71,18 +68,18 @@ public class DPLASpaceSource extends ISpaceSource {
 				return new LongPair<String>("sourceResource.creator", t);
 			}
 		});
-		addDefaultWriter(CommonFilters.PROVIDER_ID,new Function<String, Pair<String>>() {
+		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
 				return new LongPair<String>("provider.name", t);
 			}
 		});
-		
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", new Pair<String>("sourceResource.type","image"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image",
-				new LongPair<String>("sourceResource.type","moving image"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", new Pair<String>("sourceResource.type","sound"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", new Pair<String>("sourceResource.type","text"));
+
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", new Pair<String>("sourceResource.type", "image"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", new LongPair<String>("sourceResource.type",
+				"moving image"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", new Pair<String>("sourceResource.type", "sound"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", new Pair<String>("sourceResource.type", "text"));
 
 		// TODO: what to do with physical objects?
 	}
@@ -129,22 +126,18 @@ public class DPLASpaceSource extends ISpaceSource {
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
 				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"),
-						"title", false);
-				it.description = Utils.readLangAttr(
-						item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"),
-						"creator", false);
-				countValue(creator,ListUtils.transform( it.creator, (Lang s)->{return s.value;}));
+				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
+				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+				countValue(creator, ListUtils.transform(it.creator, (Lang s) -> {
+					return s.value;
+				}));
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"),
-						"name", false);
+				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/"
-						+ Utils.readAttr(item, "id", false);
-				it.rights = Utils.readLangAttr(
-						item.path("sourceResource"), "rights", false);
+				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
+				it.rights = Utils.readLangAttr(item.path("sourceResource"), "rights", false);
 
 				a.add(it);
 			}
@@ -160,7 +153,6 @@ public class DPLASpaceSource extends ISpaceSource {
 			res.filters.add(type);
 			res.filters.add(provider);
 			res.filters.add(creator);
-			System.out.println(provider.export());
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -183,12 +175,10 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
-					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
-							+ "&api_key=" + DPLAKey);
+			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record
-					.toString()));
+			if (record != null)
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();
