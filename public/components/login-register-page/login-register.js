@@ -23,8 +23,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 				if( isLogged() ) {
 					// we trust localhost and ntua,
 					// TODO: make a requester for allow access to origin
-					if( new RegExp( "^https?://localhost(:|/)").test( origin ) ||
-						new RegExp( "^https?://[^/:]*.image.ntua.gr(:|/)").test( origin )	||
+					if( new RegExp( "^https?://localhost:?/?").test( origin ) ||
+						new RegExp( "^https?://[^/:]*.image.ntua.gr:?/?").test( origin )	||
 								false /* or new RegExp in here */ ) {
 						$.ajax( {
 							url: "/user/token",
@@ -190,9 +190,9 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/register",
 					data        : json,
 					success     : function(data, text) {
-						var promise = app.loadUser(data);
+						var promises = app.loadUser(data);
 						/*make sure call is finished before proceeding*/
-						$.when(promise).done(function(){
+						$.when.apply($, promises).done(function(){
 						// self.templateName('postregister');
 						self.completeRegistration();});
 					},
@@ -231,8 +231,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					url         : "/user/login",
 					data        : json,
 					success     : function (data, text) {
-						var promise = app.loadUser(data, self.stayLogged());
-						$.when(promise).done(function(){
+						var promises = app.loadUser(data, self.stayLogged());
+						$.when.apply($, promises).done(function(){
 							if (typeof popup !== 'undefined') {
 								self.emailUser(null);
 								self.emailPass(null);
@@ -290,10 +290,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									url         : "/user/login",
 									data        : json,
 									success     : function(data, text) {
-										var promise=app.loadUser(data, true);
+										var promises=app.loadUser(data, true);
 
 										/*make sure call is finished before proceeding*/
-										$.when(promise).done(function(){
+										$.when.apply($, promises).done(function(){
 
 											if (typeof popup !== 'undefined') {
 												if (popup) { self.closeLoginPopup(); }
@@ -350,8 +350,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							url         : "/user/login",
 							data        : json,
 							success     : function(data, text) {
-								var promise=app.loadUser(data, true);
-								$.when(promise).done(function(){
+								var promises=app.loadUser(data, true);
+								$.when.apply($, promises).done(function(){
 									if (typeof popup !== 'undefined') {
 										if (popup) { self.closeLoginPopup(); }
 

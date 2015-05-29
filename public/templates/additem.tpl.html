@@ -1,7 +1,7 @@
 <div class="md-modal-addto md-effect-1" id="modal-3">
 			<div class="md-content-coll">
 			   <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
-				<h3>Chose a collection</h3>
+				<h3>Choose a collection</h3>
 					<hr class="faded">
 			   <div class="form-group">
 					  <div class="col-md-9">
@@ -17,7 +17,7 @@
 					      <div class="itemlabel">Description
 					      </div>
 					       <div class="value">
-					      <textarea class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" data-bind="text: $parent.record().description()"></textarea>
+					      <textarea class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" data-bind="textInput: $parent.record().description()" disabled></textarea>
 					      </div>
 					      
 					 </div>

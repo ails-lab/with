@@ -18,6 +18,7 @@ GET     /assets/*file               			controllers.Assets.at(path="/public", fil
 
 # Collection Controller (tested except some methods)
 GET 	 /collection/list						controllers.CollectionController.list(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/listShared					controllers.CollectionController.listShared(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
@@ -66,3 +67,8 @@ GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id) 
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword/:newPassword		controllers.UserManager.changePassword(newPassword: String)
+
+
+# trigger reindex (for development / admin )
+
+GET	/api/reindex		controllers.SearchController.reindex()

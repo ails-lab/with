@@ -91,9 +91,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 * @param withWriteback
 	 * @throws Exception
 	 */
-	public void onAll( String condition, Callback<E> callback, boolean withWriteback ) throws Exception {
+	public void onAll( Callback<E> callback, boolean withWriteback ) throws Exception {
     	Query<E> q = (Query<E>) this.getDs().createQuery(entityClass);
-    	q.criteria(condition);
     	QueryResults<E> qr = this.find(q);
     	Iterator<E> i = qr.iterator();
     	while( i.hasNext()) {
@@ -104,8 +103,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
     				save(obj, WriteConcern.JOURNALED);
     			}
     		} catch( Throwable thr) {
-    			log.error( "Iterate over " + entityClass.getSimpleName() + " with condition " +
-    					condition, thr  );
+    			log.error( "Iterate over " + entityClass.getSimpleName(), thr  );
     		}
     	}
 	}

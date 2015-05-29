@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
 
 import model.CollectionRecord;
 
+import org.apache.lucene.search.Sort;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -42,6 +43,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
 public class ElasticSearcher {
@@ -218,8 +220,7 @@ public class ElasticSearcher {
 		.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		.setSize(options.count);
 		System.out.println("got in here!");
-		search.addSort("record.source", SortOrder.ASC);
-
+		search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
 		FilterBuilder filterBuilder = null;
 
 		if(options.filterType == FILTER_OR) filterBuilder = FilterBuilders.orFilter();

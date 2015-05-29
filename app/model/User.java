@@ -65,6 +65,7 @@ public class User {
 	private String md5Password;
 
 	private ObjectId photo;
+	private boolean superUser;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
@@ -335,6 +336,14 @@ public class User {
 
 	public Set<ObjectId> getWhiteList() {
 		return whiteList;
+	}
+
+	public boolean isSuperUser() {
+		return superUser;
+	}
+
+	public void setSuperUser(boolean isSuperUser) {
+		this.superUser = isSuperUser;
 	}
 
 }

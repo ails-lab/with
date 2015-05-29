@@ -127,6 +127,9 @@
   padding-top: 15%;
 }
 
+.modal-info .modal-dialog {
+  width: 40%;
+}
 
 #withcollection #collcolumns{
 	width:100%;

@@ -99,15 +99,4 @@ public class RightsController extends Controller {
 		return ok();
 	}
 
-	/*
-	 * public static Result listRights(String ownerId) { ObjectNode result =
-	 * Json.newObject();
-	 * 
-	 * if(ownerId.equals("")) { result.put("message", "No user specified!");
-	 * return badRequest(result); }
-	 * 
-	 * 
-	 * 
-	 * }
-	 */
 }
