@@ -52,73 +52,78 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
-				return new Pair<String>("qf","DATA_PROVIDER%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
+				return new Pair<String>("qf", "DATA_PROVIDER%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
 			}
 		});
-		
+
+		addDefaultWriter(CommonFilters.COUNTRY_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf", "COUNTRY%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
+			}
+		});
+
+		addDefaultWriter(CommonFilters.YEAR_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf", "YEAR%3A" + Utils.spacesFormatQuery(t, "%20"));
+			}
+		});
+
 		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
-				return new Pair<String>("qf","proxy_dc_creator%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
+				return new Pair<String>("qf", "proxy_dc_creator%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
 			}
 		});
-		
+
 		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
-				return new Pair<String>("qf","RIGHTS%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
+				return new Pair<String>("qf", "RIGHTS%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
 			}
 		});
-		
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "qf","TYPE:IMAGE");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "qf","TYPE:VIDEO");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "qf","TYPE:SOUND");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "qf","TYPE:TEXT");
+
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "qf", "TYPE:IMAGE");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "qf", "TYPE:VIDEO");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "qf", "TYPE:SOUND");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "qf", "TYPE:TEXT");
 	}
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", europeanaKey);
 		builder.addSearchParam("query", q.searchTerm);
-		builder.addSearchParam("start", ""
-				+ ((Integer.parseInt(q.page) - 1)
-						* Integer.parseInt(q.pageSize) + 1));
+		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
 		builder.addSearchParam("profile", "rich+facets");
 		builder.addSearchParam("facet", "proxy_dc_creator,DEFAULT");
-//		builder.addSearchParam("facet", "proxy_dc_creator");
+		// builder.addSearchParam("facet", "proxy_dc_creator");
 		return addfilters(q, builder).getHttp();
 	}
 
-//	private String getSearchTerm(CommonQuery q) {
-//		if (Utils.hasAny(q.searchTerm))
-//			return Utils.spacesPlusFormatQuery(q.searchTerm)
-//					+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
-//							+ Utils.spacesPlusFormatQuery(q.termToExclude)
-//							+ ")" : "");
-//		return null;
-//	}
+	// private String getSearchTerm(CommonQuery q) {
+	// if (Utils.hasAny(q.searchTerm))
+	// return Utils.spacesPlusFormatQuery(q.searchTerm)
+	// + (Utils.hasAny(q.termToExclude) ? "+NOT+("
+	// + Utils.spacesPlusFormatQuery(q.termToExclude)
+	// + ")" : "");
+	// return null;
+	// }
 
 	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
 		if (q.europeanaAPI != null) {
 			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
 			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
 			if (q.europeanaAPI.facets != null) {
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE,
-						"TYPE"));
-				eq.addSearch(Utils.getFacetsAttr(
-						q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR,
-						"YEAR"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY,
-						"COUNTRY"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS,
-						"RIGHTS"));
-				eq.addSearch(Utils.getFacetsAttr(
-						q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC,
-						"UGC"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
+				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
 			}
 			if (q.europeanaAPI.refinement != null) {
 				if (q.europeanaAPI.refinement.refinementTerms != null) {
@@ -129,28 +134,19 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				if (q.europeanaAPI.refinement.spatialParams != null) {
 
 					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
-						eq.addSearch(new Utils.Pair<String>(
-								"pl_wgs84_pos_lat",
-								"["
-										+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint
-										+ "+TO+"
-										+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint
-										+ "]"));
+						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
+								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
+								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
 					}
 					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
-						eq.addSearch(new Utils.Pair<String>(
-								"pl_wgs84_pos_long",
-								"["
-										+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint
-										+ "+TO+"
-										+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint
-										+ "]"));
+						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
+								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
+								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
 					}
 				}
 			}
 			if (q.europeanaAPI.reusability != null) {
-				eq.addSearchParam("reusability",
-						Utils.getORList(q.europeanaAPI.reusability));
+				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
 			}
 		}
 	}
@@ -170,6 +166,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
+		CommonFilterLogic country = CommonFilterLogic.countryFilter();
+		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -182,18 +180,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					// countValue(type, t);
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
-					it.fullresolution = Utils.readArrayAttr(item,
-							"edmIsShownBy", false);
+					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
 					it.title = Utils.readLangAttr(item, "title", false);
-					it.description = Utils.readLangAttr(item, "dcDescription",
-							false);
+					it.description = Utils.readLangAttr(item, "dcDescription", false);
 					it.creator = Utils.readLangAttr(item, "dcCreator", false);
 					it.year = Utils.readArrayAttr(item, "year", false);
-					it.dataProvider = Utils.readLangAttr(item, "dataProvider",
-							false);
+					it.dataProvider = Utils.readLangAttr(item, "dataProvider", false);
 					it.url = new MyURL();
-					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
-							false);
+					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
 					it.rights = Utils.readLangAttr(item, "rights", false);
 					a.add(it);
@@ -214,13 +208,20 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					case "DATA_PROVIDER":
 						countValue(provider, label, false, count);
 						break;
-						
+
 					case "RIGHTS":
 						countValue(rights, label, false, count);
 						break;
-						
+
 					case "proxy_dc_creator":
 						countValue(creator, label, false, count);
+						break;
+					case "COUNTRY":
+						countValue(country, label, false, count);
+						break;
+
+					case "YEAR":
+						countValue(year, label, false, count);
 						break;
 
 					default:
@@ -234,6 +235,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			res.filters.add(provider);
 			res.filters.add(creator);
 			res.filters.add(rights);
+			res.filters.add(country);
+			res.filters.add(year);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -245,8 +248,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public String autocompleteQuery(String term, int limit) {
-		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit
-				+ "&phrases=false&query=" + term;
+		return "http://www.europeana.eu/api/v2/suggestions.json?rows=" + limit + "&phrases=false&query=" + term;
 	}
 
 	public AutocompleteResponse autocompleteResponse(String response) {
@@ -282,20 +284,16 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
-					.getURLContent("http://www.europeana.eu/api/v2/record/"
-							+ recordId + ".json?wskey=" + key);
+			response = HttpConnector.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey="
+					+ key);
 			JsonNode record = response.get("object");
 			if (response != null)
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
-					.toString()));
-			response = HttpConnector
-					.getURLContent("http://www.europeana.eu/api/v2/record/"
-							+ recordId + ".jsonld?wskey=" + key);
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+			response = HttpConnector.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId
+					+ ".jsonld?wskey=" + key);
 			if (response != null) {
 				record = response;
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record
-						.toString()));
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record.toString()));
 			}
 			return jsonMetadata;
 		} catch (Exception e) {

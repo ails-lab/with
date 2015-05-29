@@ -26,6 +26,7 @@ import utils.SortedList;
 public class CommonFilterLogic implements Cloneable {
 
 	private HashMap<String, ValueCount> counts;
+	private boolean global = true;
 
 	public CommonFilterResponse data = new CommonFilterResponse();
 
@@ -75,7 +76,7 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.PROVIDER_NAME;
 		return r;
 	}
-	
+
 	public static CommonFilterLogic creatorFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.CREATOR_ID;
@@ -111,6 +112,22 @@ public class CommonFilterLogic implements Cloneable {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.RIGHTS_ID;
 		r.data.filterName = CommonFilters.RIGHTS_NAME;
+		return r;
+	}
+
+	public static CommonFilterLogic countryFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.COUNTRY_ID;
+		r.data.filterName = CommonFilters.COUNTRY_NAME;
+		r.global = false;
+		return r;
+	}
+
+	public static CommonFilterLogic yearFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.YEAR_ID;
+		r.data.filterName = CommonFilters.YEAR_NAME;
+		r.global = false;
 		return r;
 	}
 }
