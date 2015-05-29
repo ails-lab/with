@@ -30,5 +30,7 @@ public class CommonFilters {
 	public static final String COUNTRY_NAME = "Country";
 	public static final String YEAR_NAME = "Year";
 	public static final String YEAR_ID = "year";
+	public static final String CONTRIBUTOR_ID = "contributor";
+	public static final String CONTRIBUTOR_NAME = "Contributor";
 
 }

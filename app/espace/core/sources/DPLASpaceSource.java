@@ -50,7 +50,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		builder.addSearchParam("q", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
-		builder.addSearchParam("facets", "provider.name,sourceResource.type");
+		builder.addSearchParam("facets",
+				"provider.name,sourceResource.type,sourceResource.contributor,sourceResource.spatial.country");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -62,10 +63,22 @@ public class DPLASpaceSource extends ISpaceSource {
 				return new LongPair<String>("sourceResource.type", t);
 			}
 		});
+		addDefaultWriter(CommonFilters.COUNTRY_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new LongPair<String>("sourceResource.spatial.country", t);
+			}
+		});
 		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
 				return new LongPair<String>("sourceResource.creator", t);
+			}
+		});
+		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new LongPair<String>("sourceResource.contributor", t);
 			}
 		});
 		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, Pair<String>>() {
@@ -106,6 +119,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic country = CommonFilterLogic.countryFilter();
+		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -149,10 +164,17 @@ public class DPLASpaceSource extends ISpaceSource {
 
 			readList(response.path("facets").path("sourceResource.type"), type);
 
+			readList(response.path("facets").path("sourceResource.contributor"), contributor);
+
+			readList(response.path("facets").path("sourceResource.spatial.country"), country);
+
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
 			res.filters.add(provider);
 			res.filters.add(creator);
+			res.filters.add(country);
+
+			res.filters.add(contributor);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -130,4 +130,12 @@ public class CommonFilterLogic implements Cloneable {
 		r.global = false;
 		return r;
 	}
+
+	public static CommonFilterLogic contributorFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.CONTRIBUTOR_ID;
+		r.data.filterName = CommonFilters.CONTRIBUTOR_NAME;
+		r.global = false;
+		return r;
+	}
 }
