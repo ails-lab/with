@@ -23,7 +23,7 @@ import java.util.HashMap;
 
 import utils.SortedList;
 
-public class CommonFilterLogic<a> implements Cloneable {
+public class CommonFilterLogic implements Cloneable {
 
 	private HashMap<String, ValueCount> counts;
 
@@ -75,10 +75,17 @@ public class CommonFilterLogic<a> implements Cloneable {
 		r.data.filterName = CommonFilters.PROVIDER_NAME;
 		return r;
 	}
+	
+	public static CommonFilterLogic creatorFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.CREATOR_ID;
+		r.data.filterName = CommonFilters.CREATOR_NAME;
+		return r;
+	}
 
 	@Override
 	public String toString() {
-		return "Filter [" + data.filterName + ", values=" + counts.values() + "]";
+		return "Filter [" + data.filterName + ", values=" + counts.values().size() + "]";
 	}
 
 	public CommonFilterResponse export() {
@@ -98,5 +105,12 @@ public class CommonFilterLogic<a> implements Cloneable {
 
 	public Collection<ValueCount> values() {
 		return counts.values();
+	}
+
+	public static CommonFilterLogic rightsFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.RIGHTS_ID;
+		r.data.filterName = CommonFilters.RIGHTS_NAME;
+		return r;
 	}
 }

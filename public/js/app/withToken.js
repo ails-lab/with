@@ -33,6 +33,7 @@ function requestToken( doWithToken, withBase ) {
 	 setTimeout( 
 		function() { 
 			window.removeEventListener( "message", receiveToken );
+			clearInterval( regPostRequest );
 			if( !answered ) { doWithToken( undefined);} 
 		}, 60000 );	 
  }

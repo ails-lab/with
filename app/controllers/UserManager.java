@@ -355,6 +355,10 @@ public class UserManager extends Controller {
 		}
 		if (u.checkPassword(password)) {
 			session().put("user", u.getDbId().toHexString());
+			session().put("sourceIp", request().remoteAddress());
+			session().put("lastAccessTime",
+					Long.toString(System.currentTimeMillis()));
+
 			// now return the whole user stuff, just for good measure
 			return getUser(u.getDbId().toHexString());
 		} else {
@@ -773,7 +777,7 @@ public class UserManager extends Controller {
 	 * 	@return OK and user data
 	 ***/
 	
-	public static Result changePassword(String newPassword){
+	public static Result changePassword(String newPassword, String token){
 		
 		//123123
 		
@@ -782,54 +786,63 @@ public class UserManager extends Controller {
 		//JsonNode json = request().body().asJson();
 		//String newPassword = json.get("password").asText();
 		
-		if (newPassword.length() < 6) {
+		if(newPassword == ""){
+			
+			try {
+				JsonNode input = Json.parse(Crypto.decryptAES(token));
+				long timestamp = input.get("timestamp").asLong();
+				if (new Date().getTime() < (timestamp + TOKENTIMEOUT*360*24 /*24 hours*/)) {
+					result.put("message", "Token is valid");
+					return ok(result);
+				} else {
+					result.put("error", "Token timeout");
+					return badRequest(result);
+				}
+			} catch (Exception e) {
+				result.put("error", "Invalid token");
+			}
+			
+			
+		} else if (newPassword.length() < 6) {
 			result.put("password",
 					"Password must contain more than 6 characters");
 			return badRequest(result);
-		}
-		
-		
-		//commented out for testing
-	    //String uri = request().uri();
-		//might need to edit this accordingly to the correct uri format
-		//String token = uri;
-		
-		//testing until the form is done, input token here:
-		String token = "e27c561866fc57e033496f06981f8dcd30eea5e9f01a0968a70a2b6f7e7b39bd8930a828079cb37035265c36d30b449ed03763998ba95ae3c414332dfb0343d8c8c91f9fb165033aed4c1c44cc559d793387b04d49072200e31785548192fe51";
-	    
-		
-		User u = null;
-		
-		try {
-			JsonNode input = Json.parse(Crypto.decryptAES(token));
-			String userId = input.get("user").asText();
-			long timestamp = input.get("timestamp").asLong();
-			if (new Date().getTime() < (timestamp + TOKENTIMEOUT*30 /*5 minutes*/)) {
-				u = DB.getUserDAO().get(new ObjectId(userId));
-				if (u != null) {
-					u.setPassword(newPassword);
-					DB.getUserDAO().makePermanent(u);
-					result = (ObjectNode) Json.parse(DB.getJson(u));
-					//testing
-					//result.remove("md5Password");
-					return ok(result);
-				}else{
-					result.put("error", "User does not exist");
-				}
-			}else{
-				result.put("error", "Token timeout");
-				return badRequest(result);
-			}
-		} catch (Exception e) {
-			result.put("error", "Invalid token");
 			
+		} else {	
+			
+			User u = null;
+			
+			try {
+				JsonNode input = Json.parse(Crypto.decryptAES(token));
+				String userId = input.get("user").asText();
+				long timestamp = input.get("timestamp").asLong();
+				if (new Date().getTime() < (timestamp + TOKENTIMEOUT*360*24 /*24 hours*/)) {
+					u = DB.getUserDAO().get(new ObjectId(userId));
+					if (u != null) {
+						u.setPassword(newPassword);
+						DB.getUserDAO().makePermanent(u);
+						result = (ObjectNode) Json.parse(DB.getJson(u));
+						//testing
+						//result.remove("md5Password");
+						return ok(result);
+					}else{
+						result.put("error", "User does not exist");
+					}
+				}else{
+					result.put("error", "Token timeout");
+					return badRequest(result);
+				}
+			} catch (Exception e) {
+				result.put("error", "Invalid token");
+				
+			}
 		}
 		
 		return badRequest(result);
+		//token = "e27c561866fc57e033496f06981f8dcd30eea5e9f01a0968a70a2b6f7e7b39bd8930a828079cb37035265c36d30b449ed03763998ba95ae3c414332dfb0343d8c8c91f9fb165033aed4c1c44cc559d793387b04d49072200e31785548192fe51";
 
 		
 	}
-
 
 
 

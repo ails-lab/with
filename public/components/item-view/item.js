@@ -61,8 +61,9 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			    	return "images/logos/digitalnz.png";
 			    case "EFashion":
 			    	return "images/logos/eufashion.png";
-			    case "YouTube":
-			    	"images/logos/youtube.jpg";
+			    case "YouTube": {
+			    	return "images/logos/youtube.jpg";
+			    }
 			    case "Mint":
 			    	return "images/logos/mint_logo.png";
 			    default: return "";

@@ -17,7 +17,10 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.function.Function;
 
 import org.w3c.dom.Document;
 
@@ -30,12 +33,15 @@ import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.QueryBuilder;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
+import espace.core.Utils.Pair;
+import espace.core.Utils.LongPair;
 
 public class DigitalNZSpaceSource extends ISpaceSource {
 
@@ -46,21 +52,38 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	public DigitalNZSpaceSource() {
 		super();
+		
+		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("and[creator][]",t);
+			}
+		});
+		
+		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("and[rights][]",t);
+			}
+		});
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images",
-				"&or[category][]=Images");
+				new Pair<String>("and[category][]","Images"));
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Other");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio",
-				"&or[category][]=Audio");
+				new Pair<String>("and[category][]","Audio"));
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books",
-				"&or[category][]=Books");
+				new Pair<String>("and[category][]","Books"));
 	}
 
 	public String getHttpQuery(CommonQuery q) {
-		String qstr = "http://api.digitalnz.org/v3/records.json?api_key=" + Key
-				+ "&text=" + Utils.spacesPlusFormatQuery(q.searchTerm)
-				+ "&per_page=" + q.pageSize + "&page=" + q.page;
-		qstr = addfilters(q, qstr);
-		return qstr;
+		QueryBuilder builder = new QueryBuilder("http://api.digitalnz.org/v3/records.json");
+		builder.addSearchParam("api_key", Key);
+		builder.addSearchParam("text", q.searchTerm);
+		builder.addSearchParam("page",q.page);
+		builder.addSearchParam("per_page",q.pageSize);
+		builder.addSearchParam("facets","creator,category,rights");
+		return addfilters(q, builder).getHttp();
 	}
 
 	public String getSourceName() {
@@ -83,6 +106,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -134,7 +159,17 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			res.count = a.size();
 
 			res.items = a;
+			
 
+			readList(o.path("facets").path("category"), type);
+			readList(o.path("facets").path("rights"), rights);
+
+			readList(o.path("facets").path("creator"), creator);
+
+			res.filters = new ArrayList<>();
+			res.filters.add(type);
+			res.filters.add(creator);
+			res.filters.add(rights);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -143,6 +178,18 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		return res;
 	}
 
+	private void readList(JsonNode json, CommonFilterLogic filter) {
+//		 System.out.println("************************\n"+json.toString());
+		 for (Iterator<Entry<String, JsonNode>> iterator = json.fields(); iterator.hasNext();) {
+			Entry<String, JsonNode> v = iterator.next();
+			String label = v.getKey();
+			int count = v.getValue().asInt();
+			countValue(filter, label, v.getValue().asInt());
+//			System.out.println(label+"   "+count);
+		}
+	}
+	
+	
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;

@@ -23,16 +23,19 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
 import play.libs.F.Function0;
-import play.libs.Json;
 import play.libs.F.Promise;
-import play.mvc.*;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
 import utils.ListUtils;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import elastic.Elastic;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilterResponse;
 import espace.core.CommonQuery;
@@ -124,7 +127,7 @@ public class SearchController extends Controller {
 						r1.responces = finalResponses;
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-							System.out.println(sourceResponse.filters);
+							//System.out.println(sourceResponse.filters);
 							FiltersHelper.merge(merge, sourceResponse.filters);
 						}
 						Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
@@ -195,8 +198,8 @@ public class SearchController extends Controller {
 	}
 
 	public static Result posttestsearch() {
-		System.out.println("--------------------");
-		System.out.println(userForm.bindFromRequest().toString());
+		//System.out.println("--------------------");
+		//System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if (q == null || q.searchTerm == null) {
 			q = new CommonQuery();
@@ -212,7 +215,7 @@ public class SearchController extends Controller {
 		r1.responces = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
-			System.out.println(sourceResponse.source + " Filters: " + sourceResponse.filters);
+			//System.out.println(sourceResponse.source + " Filters: " + sourceResponse.filters);
 			FiltersHelper.merge(merge, sourceResponse.filters);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
@@ -224,4 +227,15 @@ public class SearchController extends Controller {
 		return ok(views.html.testsearch.render(userForm, res, merge1));
 	}
 
+	public static Result reindex() {
+		Promise.promise(new Function0<String>() {
+			public String apply() throws Exception {
+				log.info( "Reindex started");
+				Elastic.reindex();
+				log.info( "Reindex finished");
+				return "ok";
+			}
+		});
+		return(ok());
+	}
 }

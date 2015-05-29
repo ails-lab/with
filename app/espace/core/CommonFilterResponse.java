@@ -28,7 +28,7 @@ public class CommonFilterResponse {
 
 	@Override
 	public String toString() {
-		return "CommonFilterResponse [filterName=" + filterName + ", suggestedValues=" + suggestedValues + "]";
+		return "CommonFilterResponse [filterName=" + filterName + ", suggestedValues=" + suggestedValues.size() + "]";
 	}
 
 }

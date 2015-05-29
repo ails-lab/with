@@ -96,7 +96,7 @@ button:hover .email_huge { background-image: url(../images/email_hover.png); }
 
 .dialog.open {
   opacity: 1;
-  position: absolute;
+  position: fixed;
   top: 0; bottom: 0; left: 0; right: 0;
   margin: auto;
 

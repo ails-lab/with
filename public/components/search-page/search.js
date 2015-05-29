@@ -8,7 +8,6 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	console.log($element);
     	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
 
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
@@ -103,7 +102,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
-	        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight - 200)) {
+	        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight - 300)) {
 	        	self.searchNext();
 	        }
 	    },
@@ -153,7 +152,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		}
 
 		self._search = function() {
-		if(self.page()==1 && (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)){self.sourceview(true);}
+			var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
+			  
+		   if(self.page()==1 && (isFirefox || isSafari)){self.sourceview(true);$('.withsearch-content').css({'overflow-x': 'auto'});}
 			
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 if(self.searching()==false && self.currentTerm()!=""){
@@ -261,6 +263,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 						if(moreitems){
 							self.next(self.page()+1);
+							
 						}else{
 							self.next(-1);
 						}
@@ -365,6 +368,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			if( isOpen ) {
 				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
 		    	$("#myModal").modal('hide');
+		    	$("#myModal").find("h4").html("");
 		    	$("body").removeClass("modal-open");
 
 

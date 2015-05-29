@@ -34,54 +34,71 @@ import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.QueryBuilder;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
+import espace.core.Utils.Pair;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
 
+	private String europeanaKey = "SECRET_KEY";
+
 	public EuropeanaSpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, String>() {
+		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, Pair<String>>() {
 			@Override
-			public String apply(String t) {
-				return "&qf=DATA_PROVIDER%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22";
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf","DATA_PROVIDER%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
 			}
 		});
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "&qf=TYPE:IMAGE");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "&qf=TYPE:VIDEO");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "&qf=TYPE:SOUND");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "&qf=TYPE:TEXT");
+		
+		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf","proxy_dc_creator%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
+			}
+		});
+		
+		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("qf","RIGHTS%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22" );
+			}
+		});
+		
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "qf","TYPE:IMAGE");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "qf","TYPE:VIDEO");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "qf","TYPE:SOUND");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "qf","TYPE:TEXT");
 	}
 
 	public String getHttpQuery(CommonQuery q) {
-		EuropeanaQuery eq = new EuropeanaQuery();
-		eq.addSearch(getSearchTerm(q));
-		eq.addSearchParam(
-				"start",
-				""
-						+ ((Integer.parseInt(q.page) - 1)
-								* Integer.parseInt(q.pageSize) + 1));
-		eq.addSearchParam("rows", "" + q.pageSize);
-		eq.addSearchParam("profile", "rich+facets");
-		// filters(q, eq);
-		euroAPI(q, eq);
-		String http = eq.getHttp();
-		http = addfilters(q, http);
-		return http;
+		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
+		builder.addSearchParam("wskey", europeanaKey);
+		builder.addSearchParam("query", q.searchTerm);
+		builder.addSearchParam("start", ""
+				+ ((Integer.parseInt(q.page) - 1)
+						* Integer.parseInt(q.pageSize) + 1));
+
+		builder.addSearchParam("rows", "" + q.pageSize);
+		builder.addSearchParam("profile", "rich+facets");
+		builder.addSearchParam("facet", "proxy_dc_creator,DEFAULT");
+//		builder.addSearchParam("facet", "proxy_dc_creator");
+		return addfilters(q, builder).getHttp();
 	}
 
-	private String getSearchTerm(CommonQuery q) {
-		if (Utils.hasAny(q.searchTerm))
-			return Utils.spacesPlusFormatQuery(q.searchTerm)
-					+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
-							+ Utils.spacesPlusFormatQuery(q.termToExclude)
-							+ ")" : "");
-		return null;
-	}
+//	private String getSearchTerm(CommonQuery q) {
+//		if (Utils.hasAny(q.searchTerm))
+//			return Utils.spacesPlusFormatQuery(q.searchTerm)
+//					+ (Utils.hasAny(q.termToExclude) ? "+NOT+("
+//							+ Utils.spacesPlusFormatQuery(q.termToExclude)
+//							+ ")" : "");
+//		return null;
+//	}
 
 	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
 		if (q.europeanaAPI != null) {
@@ -131,7 +148,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					}
 				}
 			}
-
 			if (q.europeanaAPI.reusability != null) {
 				eq.addSearchParam("reusability",
 						Utils.getORList(q.europeanaAPI.reusability));
@@ -152,6 +168,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
+		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -196,6 +214,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					case "DATA_PROVIDER":
 						countValue(provider, label, false, count);
 						break;
+						
+					case "RIGHTS":
+						countValue(rights, label, false, count);
+						break;
+						
+					case "proxy_dc_creator":
+						countValue(creator, label, false, count);
+						break;
 
 					default:
 						break;
@@ -206,7 +232,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			res.filters = new ArrayList<>();
 			res.filters.add(type);
 			res.filters.add(provider);
-			// res.filters.add(provider);
+			res.filters.add(creator);
+			res.filters.add(rights);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -225,7 +252,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
 			JSONObject jsonResp = new JSONObject(response);
-			if (jsonResp == null || !jsonResp.getBoolean("success"))
+			if (jsonResp == null || !jsonResp.getBoolean("success") || jsonResp.getJSONArray("items") == null)
 				return new AutocompleteResponse();
 			else {
 				JSONArray items = jsonResp.getJSONArray("items");
@@ -259,14 +286,17 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
 							+ recordId + ".json?wskey=" + key);
 			JsonNode record = response.get("object");
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
+			if (response != null)
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record
 					.toString()));
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/"
 							+ recordId + ".jsonld?wskey=" + key);
-			record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record
-					.toString()));
+			if (response != null) {
+				record = response;
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record
+						.toString()));
+			}
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;

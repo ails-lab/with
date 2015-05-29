@@ -2,7 +2,47 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 	 $.bridget( 'masonry', masonry );
 
+	 ko.bindingHandlers.scroll = {
 
+			  updating: true,
+
+			  init: function(element, valueAccessor, allBindingsAccessor) {
+			      var self = this
+			      self.updating = true;
+			      ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+			            $(window).off("scroll.ko.scrollHandler")
+			            self.updating = false
+			      });
+			  },
+
+			  update: function(element, valueAccessor, allBindingsAccessor){
+			    var props = allBindingsAccessor().scrollOptions
+			    var offset = props.offset ? props.offset : "0"
+			    var loadFunc = props.loadFunc
+			    var load = ko.utils.unwrapObservable(valueAccessor());
+			    var self = this;
+
+			    if(load){
+			      $(window).on("scroll.ko.scrollHandler", function(){
+			        if($(window).scrollTop() >= $(document).height() - $(window).height()-300){
+			          if(self.updating){
+			            loadFunc()
+			            self.updating = false;
+			          }
+			        }
+			        else{
+			          self.updating = true;
+			        }
+			      });
+			    }
+			    else{
+			        element.style.display = "none";
+			        $(window).off("scroll.ko.scrollHandler")
+			        self.updating = false
+			    }
+			  }
+			 }
+			 
 
 	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
@@ -34,7 +74,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	    		$element.masonry( 'reloadItems' );
 	 			$element.masonry( 'layout' );
 
-
+	 			bindingContext.$data.loading(false);
 	    		$('#collcolumns > figure').each(function () {
 
 	 	 		    $(this).animate({ opacity: 1 });
@@ -117,6 +157,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	  self.route = params.route;
 
 	  self.collname=ko.observable('');
+	  self.access=ko.observable("READ");
 	  self.id=ko.observable(params.id);
 	  self.owner=ko.observable('');
 	  self.ownerId=ko.observable(-1);
@@ -142,12 +183,13 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				"contentType": "application/json",
 				"success": function(data) {
 					console.log(data);
-					self.loading(false);
+					//self.loading(false);
 					self.collname(data.title);
 					self.desc(data.description);
 					self.owner(data.owner);
 					self.ownerId(data.ownerId);
 					self.itemCount(data.itemCount);
+					self.access(data.access);
 					var items = [];
 					for(var i in data.firstEntries){
 					 var result = data.firstEntries[i];
@@ -163,9 +205,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 
-					if(data.firstEntries.length==20){$(window).bind('scroll', scrollHandler);}
-
+				
 					self.citems.push.apply(self.citems, items);
+					self.loadNext();
 
 				},
 
@@ -192,9 +234,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 
 	  self.loadNext = function() {
-			if(self.citems().length>=20){
+			
 
-				self.moreItems();}
+				self.moreItems();
 			};
 
 
@@ -210,7 +252,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				"contentType": "application/json",
 				"success": function(data) {
 					console.log(data);
-					self.loading(false);
+					//self.loading(false);
 
 					var items = [];
 					for(var i in data){
@@ -227,16 +269,14 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 
-					if(data.length==20){$(window).bind('scroll', scrollHandler);}
-
+				
 					self.citems.push.apply(self.citems, items);
 
 				},
 
 				"error":function(result) {
 					self.loading(false);
-					$(window).bind('scroll', scrollHandler);
-
+					
 
 
 			     }});
@@ -284,7 +324,6 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
                     self.itemCount(self.itemCount()-1);
                     $("#myModal").find("h4").html("Done!");
 					$("#myModal").find("div.modal-body").html("Item removed from collection");
-
 					$("#myModal").modal('show');
                 },
                 error: function (xhr, textStatus, errorThrown) {
@@ -297,18 +336,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 		}
 
-	 $(window).scroll(scrollHandler());
-
-	 function scrollHandler(){
-		 if (self.loading()==false && $(window).scrollTop() >= $(document).height() - $(window).height() - 10) {
-			 $(window).unbind('scroll');/*prevent from firing continuously*/
-
-			 self.loadNext();
-		   }
-	 }
-
-
-
+	
 
   }
 
