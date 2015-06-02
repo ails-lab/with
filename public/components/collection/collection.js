@@ -143,7 +143,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  self.description=ko.observable('');
 	  self.collectionlist = ko.observableArray([]);
 	  self.id=ko.observable(-1);
-	 
+	  self.ajaxConnections=0;
 	  self.selected_items2 = ko.observableArray([]);
 	  self.validationModel = ko.validatedObservable({
 			collname : self.collname
@@ -189,16 +189,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  }
 
 	  self.close= function(){
-		  console.log("closed called");
 		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
 		  $("body").removeClass("modal-open");
-		  $(document).one("ajaxStop", function() {
+		  console.log(self.ajaxConnections);
+		  if (0 == self.ajaxConnections) {
+			    // this was the last Ajax connection, do the thing
 			  if($('#myModal').find('h4.modal-title').is(':empty')==false)
-				$("#myModal").modal('show');
-			  else{console.log("not showing popup");}
-			   self.reset();
-				
-		  });
+					$("#myModal").modal('show');
+				self.reset();
+			  }
 	    }
 
 	  self.save=function(formElement){
@@ -216,7 +215,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			  else{ 
 				 
 			  self.saveCollection(jsondata,self.addRecord);}
-			  self.close();
+			  
 			  
 		  }
 		  else{
@@ -227,6 +226,9 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  
 	  self.saveCollection=function(jsondata,callback){
 		  $.ajax({
+			   "beforeSend": function(xhr) {
+				    self.ajaxConnections++;
+				  }, 
 				"url": "/collection/create",
 				"method": "post",
 				"contentType": "application/json",
@@ -259,15 +261,17 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  callback(data.dbId);
 					 
 					}
-					
+					self.ajaxConnections--;
+					self.close();
 				},
 				
 				"error":function(result) {
+					self.ajaxConnections--;
 					//var r = JSON.parse(result.responseText);
 					$("#myModal").find("div.modal-body").html(result.statusText);
 					$("#myModal").find("h4").html("An error occured.");
 					$("#myModal").find("div.modal-footer").html();
-
+					self.close();
 					 
 			     }});
 	  }
@@ -301,7 +305,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			  
 		     });
 		 
-		 self.close();
 		
 		  
 	  }
@@ -323,11 +326,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			});
 		  
 		  $.ajax({
+			  "beforeSend": function(xhr) {
+				    self.ajaxConnections++;
+				  }, 
 				"url": "/collection/"+collid+"/addRecord",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
 				"success": function(data) {
+					self.ajaxConnections--;
 					if(self.route().request_=="collectionview/"+collid){
 						 self.record().recordId(data.dbId);
 						 ko.contextFor(withcollection).$data.citems.push(self.record());
@@ -347,12 +354,15 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
 					$("#myModal").find("div.modal-footer").html();
+					self.close();
 				},
 				
 				"error":function(result) {
+					self.ajaxConnections--;
 					$("#myModal").find("h4").html("An error occured");
 					$("#myModal").find("div.modal-body").html(result.statusText);
 					$("#myModal").find("div.modal-footer").html(); 
+					self.close();
 			     }});
 		  
 		  
