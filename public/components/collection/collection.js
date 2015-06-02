@@ -191,7 +191,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 	  self.close= function(){
 		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
 		  $("body").removeClass("modal-open");
-		  console.log(self.ajaxConnections);
 		  if (0 == self.ajaxConnections) {
 			    // this was the last Ajax connection, do the thing
 			  if($('#myModal').find('h4.modal-title').is(':empty')==false)
@@ -255,7 +254,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 					if(self.route().request_=="mycollections"){
 						ko.contextFor(mycollections).$data.reloadCollection(data);
-						//ko.contextFor(mycollections).$data.myCollections.valueHasMutated();
 					}
 					if(callback){
 					  callback(data.dbId);
@@ -278,7 +276,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 
 	  
 	  self.addToCollections=function(){
-		  //console.log(self.selected_items2());
 		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
 			 self.selected_items2().forEach(function (item) {
 			  /* now find if item is one of collection ids*/
@@ -344,11 +341,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
-						/*(ko.contextFor(mycollections).$data.myCollections()).forEach(function(o){
-							if (o.dbId() == collid) {
-							 o.reload(collid);
-							
-						}});*/
+						
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 					}
 					$("#myModal").find("h4").html("Success!");
