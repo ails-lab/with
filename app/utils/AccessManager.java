@@ -16,6 +16,8 @@
 
 package utils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import db.DB;
 
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
@@ -36,6 +39,12 @@ public class AccessManager {
 	public static boolean checkAccess(Map<ObjectId, Access> rights,
 			List<String> userIds, Action action) {
 		for (String id : userIds) {
+			if (DB.getUserDAO()
+					.getById(new ObjectId(id),
+							new ArrayList<String>(Arrays.asList("superUser")))
+					.isSuperUser()) {
+				return true;
+			}
 			if (rights.containsKey(new ObjectId(id))
 					&& (rights.get(new ObjectId(id)).ordinal() > action
 							.ordinal())) {
@@ -49,6 +58,12 @@ public class AccessManager {
 			List<String> userIds) {
 		Access maxAccess = Access.NONE;
 		for (String id : userIds) {
+			if (DB.getUserDAO()
+					.getById(new ObjectId(id),
+							new ArrayList<String>(Arrays.asList("superUser")))
+					.isSuperUser()) {
+				return Access.OWN;
+			}
 			if (rights.containsKey(new ObjectId(id))) {
 				Access access = rights.get(new ObjectId(id));
 				if (access.ordinal() > maxAccess.ordinal()) {
@@ -57,6 +72,17 @@ public class AccessManager {
 			}
 		}
 		return maxAccess;
+	}
+
+	public static List<String> effectiveUserIds(String effectiveUserIds) {
+		if (effectiveUserIds == null)
+			effectiveUserIds = "";
+		List<String> userIds = new ArrayList<String>();
+		for (String ui : effectiveUserIds.split(",")) {
+			if (ui.trim().length() > 0)
+				userIds.add(ui);
+		}
+		return userIds;
 	}
 
 }
