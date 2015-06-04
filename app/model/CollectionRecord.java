@@ -79,6 +79,8 @@ public class CollectionRecord {
 	private String type;
 
 	private String rights;
+	
+	private ExhibitionRecord exhibition;
 
 	// collection specific stuff...
 

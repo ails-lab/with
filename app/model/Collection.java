@@ -71,6 +71,9 @@ public class Collection {
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date lastModified;
 	private String category;
+	
+	private boolean isExhibition;
+	private ExhibitionCollection exhibition;
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
@@ -237,6 +240,14 @@ public class Collection {
 
 	public Map<ObjectId, Access> getRights() {
 		return rights;
+	}
+
+	public boolean isExhibition() {
+		return isExhibition;
+	}
+
+	public void setExhibition(boolean isExhibition) {
+		this.isExhibition = isExhibition;
 	}
 
 }
