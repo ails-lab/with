@@ -56,20 +56,20 @@ margin-left: 8px;
 }
 
 h1{
- font-family:'Annie Use Your Telescope';
  font-size:4.9em;
  color:white;
  word-spacing:-10px;
  border:0;
+ font-weight:400;
 }
 
 
 h1 span{
- font-family:'Orbitron';
  text-transform:uppercase;
- font-size:0.6em;
+ font-size:0.8em;
  font-weight:900;
  border:0;
+ padding-left:10px;
 }
 
 
