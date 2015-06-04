@@ -363,12 +363,12 @@ public class CollectionController extends Controller {
 						new ObjectId(userId), offset, count);
 				break;
 			}
-			Collections.sort(userCollections, new Comparator<Collection>() {
-				public int compare(Collection c1, Collection c2) {
-					return -c1.getCreated().compareTo(c2.getCreated());
-				}
-			});
 		}
+		Collections.sort(userCollections, new Comparator<Collection>() {
+			public int compare(Collection c1, Collection c2) {
+				return -c1.getCreated().compareTo(c2.getCreated());
+			}
+		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(
