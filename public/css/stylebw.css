@@ -167,12 +167,12 @@ margin-right: 0;
 .column {
     height: 100%;
     overflow: auto;
-    zoom:1;
+    /*zoom:1;*/
 }
 
 .column:before, .column:after {
     content: "";
-    display: table;
+   /* display: table;*/
 }
 
 
@@ -387,7 +387,7 @@ padding-right: 0;
 
 .intro-effect-grid {
     border: 0;
-    zoom: 1; /* IE6&7 */
+    /*zoom: 1; /* IE6&7 */
 
 
 }
@@ -395,7 +395,7 @@ padding-right: 0;
 .intro-effect-grid .gridmosaic:before,
 .intro-effect-grid .gridmosaic:after {
     content: "";
-    display: table;
+   /* display: table;*/
 }
 
 .intro-effect-grid .gridmosaic:after {
