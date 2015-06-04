@@ -164,9 +164,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.displayTitle = ko.pureComputed(function() {
 				var distitle="";
 				distitle='<b>'+self.title()+'</b>';
-				if(self.creator().length>0)
+				if(self.creator()!==undefined && self.creator().length>0)
 					distitle+=", by "+self.creator();
-				if(self.provider().length>0 && self.provider()!=self.creator())
+				if(self.provider()!==undefined && self.provider().length>0 && self.provider()!=self.creator())
 					distitle+=", "+self.provider();
 				return distitle;
 			});
