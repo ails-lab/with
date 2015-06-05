@@ -8,7 +8,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	    $element.masonry( {itemSelector: '.masonryitem',gutter: 10,isInitLayout: false});
+    	    $element.masonry( {itemSelector: '.masonryitem',isInitLayout: false,gutter:15,isFitWidth: true});
 
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 
@@ -50,10 +50,35 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.recordId(data.recordId);
 		};
 
-		self.displayTitle = ko.computed(function() {
-			if(self.title != undefined) return self.title;
-			else if(self.description != undefined) return self.description;
-			else return "- No title -";
+		self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source()) {
+			    case "DPLA":
+			    	return "dpla.eu";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": {
+			    	return "youtube.com";
+			    }
+			    case "Mint":
+			    	return "mint";
+			    default: return "";
+			 }
+			});
+		
+		self.displayTitle = ko.pureComputed(function() {
+			var distitle="";
+			distitle='<b>'+self.title()+'</b>';
+			if(self.creator()!==undefined && self.creator().length>0)
+				distitle+=", by "+self.creator();
+			if(self.provider()!==undefined && self.provider().length>0 && self.provider()!=self.creator())
+				distitle+=", "+self.provider();
+			return distitle;
 		});
 
 		if(data != undefined) self.load(data);

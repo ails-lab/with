@@ -47,6 +47,11 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.findOne("title", title);
 	}
 
+	public List<Collection> getAll(int offset, int count) {
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		return this.find(q).asList();
+	}
+
 	public Collection getByOwnerAndTitle(ObjectId ownerId, String title) {
 		Query<Collection> q = this.createQuery().field("ownerId")
 				.equal(ownerId).field("title").equal(title);
