@@ -58,6 +58,14 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
+	public List<Collection> getExhibitionByOwner(ObjectId ownerId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).field("isExhibition").equal(true)
+				.offset(offset).limit(count);
+		return this.find(q).asList();
+	}
+
 	public List<Collection> getByOwner(ObjectId id) {
 		return getByOwner(id, 0, 1);
 	}
