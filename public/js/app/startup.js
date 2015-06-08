@@ -22,7 +22,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
-	
+
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
@@ -36,6 +36,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
 	ko.components.register('reset-password', { require: 'components/login-register-page/reset-password' });
+	ko.components.register('new-password', {
+		viewModel: { require: 'components/login-register-page/reset-password' },
+		template: { require: 'text!components/login-register-page/login-register.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });
