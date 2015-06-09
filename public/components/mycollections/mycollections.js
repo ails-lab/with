@@ -234,6 +234,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    else
 		    	self.isPublicToEdit(true);
 		}
+		
+		self.shareCollection = function(dbId) {
+			
+		}
 
 		self.reloadRecord = function(dbId, recordDataString) {
 			/*$.ajax({
