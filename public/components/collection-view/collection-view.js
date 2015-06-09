@@ -42,7 +42,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			    }
 			  }
 			 }
-			 
+
 
 	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
@@ -122,7 +122,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
 			self.rights=ko.observable("");
-			
+
 			self.load = function(data) {
 				if(data.title==undefined){
 					self.title("No title");
@@ -137,7 +137,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.provider(data.provider);
 				self.recordId(data.id);
 				self.rights(data.rights);
-				
+
 			};
 
 			self.sourceCredits = ko.pureComputed(function() {
@@ -160,7 +160,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				    default: return "";
 				 }
 				});
-			
+
 			self.displayTitle = ko.pureComputed(function() {
 				var distitle="";
 				distitle='<b>'+self.title()+'</b>';
@@ -231,7 +231,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 
-				
+
 					self.citems.push.apply(self.citems, items);
 					self.loadNext();
 
@@ -260,7 +260,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 
 	  self.loadNext = function() {
-			
+
 
 				self.moreItems();
 			};
@@ -295,7 +295,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					  });
 					 items.push(record);}
 
-				
+
 					self.citems.push.apply(self.citems, items);
 
 				},
@@ -326,7 +326,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		var footer = $("#myModal").find("div.modal-footer");
 		if (footer.is(':empty')) {
 			$("#myModal").find("div.modal-footer").append('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a>');
-		
+
 		}
 		$("#myModal").modal('show');
 		$('.btn-danger').on('click', function(event) {
@@ -359,7 +359,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 		}
 
-	
+	self.uploadItem = function() {
+		app.showPopup('image-upload');
+	};
 
   }
 

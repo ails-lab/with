@@ -1,6 +1,6 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], 
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'],
 		function($, ko, router, kom) {
-	
+
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
 	ko.amdTemplateEngine.defaultSuffix                = '.tpl.html';
@@ -22,7 +22,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
-	
+
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
@@ -34,6 +34,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('edit-collection', {
 		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }
+	});
+	ko.components.register('image-upload', {
+		viewModel: { require: 'components/media-uploader/media-uploader' },
+		template: { require: 'text!components/media-uploader/image-upload.html' }
 	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
