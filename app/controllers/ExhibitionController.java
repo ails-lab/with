@@ -47,51 +47,51 @@ public class ExhibitionController extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 
 		if (json == null) {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
-		if (session().get("effectiveUserIds") == null) {
-			result.put("error", "Must specify user for the collection");
+		if (userIds.isEmpty()) {
+			result.put("error", "Must specify user for the exhibition");
 			return forbidden(result);
 		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
 		String userId = userIds.get(0);
+		User owner = DB.getUserDAO().get(new ObjectId(userId));
 
-		Collection newCollection = Json.fromJson(json, Collection.class);
-		newCollection.setCreated(new Date());
-		newCollection.setLastModified(new Date());
-		newCollection.setOwnerId(new ObjectId(userId));
+		Collection newExhibition = Json.fromJson(json, Collection.class);
+		newExhibition.setCreated(new Date());
+		newExhibition.setLastModified(new Date());
+		newExhibition.setOwnerId(new ObjectId(userId));
+		newExhibition.setExhibition(true);
+		newExhibition.setTitle(getAvailableTitle(owner));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
-				.getValidator().validate(newCollection);
+				.getValidator().validate(newExhibition);
 		for (ConstraintViolation<Collection> cv : violations) {
 			result.put("message",
 					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 			return badRequest(result);
 		}
-
-		if (DB.getCollectionDAO().getByOwnerAndTitle(
-				newCollection.getOwnerId(), newCollection.getTitle()) != null) {
-			result.put("message",
-					"Title already exists! Please specify another title.");
-			return internalServerError(result);
-		}
-		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
+		if (DB.getCollectionDAO().makePermanent(newExhibition) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
-		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
-		owner.getCollectionMetadata().add(newCollection.collectMetadata());
+		owner.addExhibitionsCreated();
 		DB.getUserDAO().makePermanent(owner);
-		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
+		ObjectNode c = (ObjectNode) Json.toJson(newExhibition);
 		c.put("access", Access.OWN.toString());
-		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),
+		User user = DB.getUserDAO().getById(newExhibition.getOwnerId(),
 				new ArrayList<String>(Arrays.asList("username")));
 		c.put("owner", user.getUsername());
 		return ok(c);
+	}
 
+	/* Find a unique dummy title for the user exhibition */
+	private static String getAvailableTitle(User user) {
+		int exhibitionNum = user.getExhibitionsCreated();
+		return "Exhibition" + exhibitionNum;
 	}
 }

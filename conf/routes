@@ -26,6 +26,9 @@ DELETE   /collection/:id/removeRecord           controllers.CollectionController
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
 
+# Exhibition Controller
+POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
+
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)

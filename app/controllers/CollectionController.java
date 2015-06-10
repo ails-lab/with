@@ -270,7 +270,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
-		owner.getCollectionMetadata().add(newCollection.collectMetadata());
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
