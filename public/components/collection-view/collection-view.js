@@ -271,13 +271,13 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		};
 
 	 self.recordSelect= function (e){
-		 self.recordSelect= function (e){
+		
 				var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
 					   return record.recordId() === e;
 					});
 				itemShow(selrecord);
 
-			}
+			
 		}
 
 
