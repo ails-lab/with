@@ -131,11 +131,6 @@ public class CollectionDAOTest {
 			}
 			collection.setThumbnail(thumb);
 
-			// metadata for connection with user
-			CollectionMetadata colMeta = new CollectionMetadata();
-			colMeta.setDescription(collection.getDescription());
-			colMeta.setTitle(collection.getTitle());
-
 			if (i == 42) {
 				user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
 				collection.setOwnerId(user);
@@ -148,10 +143,9 @@ public class CollectionDAOTest {
 			Key<Collection> colKey = DB.getCollectionDAO().makePermanent(collection);
 			assertThat(colKey).isNotNull();
 
-			// save metadata to user
-			colMeta.setCollectionId(new ObjectId(colKey.getId().toString()));
-			if(user.getCollectionMetadata().size() < 20 )
-				user.getCollectionMetadata().add(colMeta);
+			// save collId in user
+			if(user.getCollectionIds().size() < 20 )
+				user.getCollectionIds().add(new ObjectId(colKey.getId().toString()));
 			DB.getUserDAO().makePermanent(user);
 
 

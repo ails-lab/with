@@ -92,7 +92,7 @@ public class Collection {
 	 * 
 	 * @return
 	 */
-	public CollectionMetadata collectMetadata() {
+/*	public CollectionMetadata collectMetadata() {
 		CollectionMetadata cm = new CollectionMetadata();
 		cm.setCollectionId(this.dbId);
 		cm.setDescription(description);
@@ -100,7 +100,7 @@ public class Collection {
 		cm.setTitle(title);
 		return cm;
 	}
-
+*/
 	// Getter setters
 	public String getTitle() {
 		return title;
@@ -140,9 +140,9 @@ public class Collection {
 		if (this.ownerId == null) {
 			this.ownerId = ownerId;
 			rights.put(this.ownerId, Access.OWN);
-			// Create a new collection metadata for owner
+			// Create a new collection id for owner
 			User owner = DB.getUserDAO().get(ownerId);
-			owner.getCollectionMetadata().add(collectMetadata());
+			owner.getCollectionIds().add(getDbId());
 			// Save the new owner
 			DB.getUserDAO().makePermanent(owner);
 			// Owner has changed
@@ -150,7 +150,7 @@ public class Collection {
 			// Remove rights for old owner
 			rights.remove(this.ownerId, Access.OWN);
 			User owner = DB.getUserDAO().get(this.ownerId);
-			owner.getCollectionMetadata().remove(collectMetadata());
+			owner.getCollectionIds().remove(getDbId());
 			DB.getUserDAO().makePermanent(owner);
 			// Set new Owner
 			this.ownerId = null;

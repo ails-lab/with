@@ -73,7 +73,7 @@ public class User {
 	private List<Search> searchHistory = new ArrayList<Search>();
 
 	@Embedded
-	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
+	private List<ObjectId> collections = new ArrayList<ObjectId>();
 	private int recordLimit;
 	private int collectedRecords;
 	private double storageLimit;
@@ -116,7 +116,7 @@ public class User {
 			log.error("Collection is not saved!");
 			return;
 		}
-		collections.add(col.collectMetadata());
+		collections.add(col.getDbId());
 		if (collections.size() > EMBEDDED_CAP) {
 			collections.remove(0);
 		}
@@ -223,11 +223,11 @@ public class User {
 		this.searchHistory = searcHistory;
 	}
 
-	public List<CollectionMetadata> getCollectionMetadata() {
+	public List<ObjectId> getCollectionIds() {
 		return collections;
 	}
 
-	public void setCollectionMetadata(List<CollectionMetadata> collections) {
+	public void setCollectionIds(List<ObjectId> collections) {
 		this.collections = collections;
 	}
 
@@ -241,8 +241,8 @@ public class User {
 
 	public List<Collection> getUserCollections() {
 		List<Collection> collections = new ArrayList<>();
-		for (CollectionMetadata colMetaData : getCollectionMetadata()) {
-			collections.add(colMetaData.getCollection());
+		for (ObjectId colId : getCollectionIds()) {
+			collections.add(DB.getCollectionDAO().getById(colId));
 		}
 		return collections;
 	}

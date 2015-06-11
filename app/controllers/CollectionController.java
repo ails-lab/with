@@ -249,7 +249,7 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
-		newCollection.setOwnerId(new ObjectId(userId));
+		//newCollection.setOwnerId(new ObjectId(userId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -269,9 +269,11 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
-		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
-		owner.getCollectionMetadata().add(newCollection.collectMetadata());
-		DB.getUserDAO().makePermanent(owner);
+		/*User owner = DB.getUserDAO().get(newCollection.getOwnerId());
+		owner.getCollectionIds().add(newCollection.getDbId());
+		DB.getUserDAO().makePermanent(owner);*/
+		newCollection.setOwnerId(new ObjectId(userId));
+		DB.getCollectionDAO().makePermanent(newCollection);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
 		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),
