@@ -40,12 +40,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        }
 		    }
 		};
+		//TODO: Load more myCollections with scrolling
 		self.myCollections = ko.mapping.fromJS([], mapping);
 		//self.myCollections = ko.observableArray([]);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observable(true);
         self.apiUrl = ko.observable("");
+        self.rightsToShare = ko.observable(true);
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
 			ko.mapping.fromJS(data, mapping, self.myCollections);
@@ -54,6 +56,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			  self.collections = JSON.parse(sessionStorage.getItem("UserCollections"));
 		if (localStorage.getItem('UserCollections') !== null)
 		    self.collections = JSON.parse(localStorage.getItem("UserCollections"));*/
+		//TODO: Load more sharedCollections with scrolling
 		self.sharedCollections = ko.mapping.fromJS([], mapping);
 		var promiseShared = getCollectionsSharedWithMe();
 		$.when(promiseShared).done(function(data) {
@@ -149,6 +152,15 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		};
 
+		self.openShareCollection = function(collection, event) {
+	        var context = ko.contextFor(event.target);
+	        var collIndex = context.$index();
+			self.index(collIndex);
+			self.rightsToShare(self.myCollections()[collIndex].rights());
+			alert(JSON.stringify(self.rightsToShare()));
+			//app.showPopup("share-collection");
+			
+		}
 
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
@@ -234,10 +246,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    else
 		    	self.isPublicToEdit(true);
 		}
-		
-		self.shareCollection = function(dbId) {
-			
-		}
+	
 
 		self.reloadRecord = function(dbId, recordDataString) {
 			/*$.ajax({
