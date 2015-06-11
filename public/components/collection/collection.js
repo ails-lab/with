@@ -214,6 +214,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 			  else{ 
 				 
 			  self.saveCollection(jsondata,self.addRecord);}
+			  self.close();
 			  
 			  
 		  }
@@ -249,7 +250,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					$("#myModal").find("h4").html("Success!");
 					$("#myModal").find("div.modal-body").html("<p>Collection created.</p>");
 					$("#myModal").find("div.modal-footer").html();
-					
 					self.collectionlist.push({"id":data.dbId,"name":data.title});
 					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 					if(self.route().request_=="mycollections"){
@@ -270,6 +270,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					$("#myModal").find("h4").html("An error occured.");
 					$("#myModal").find("div.modal-footer").html();
 					self.close();
+
 					 
 			     }});
 	  }
@@ -338,7 +339,6 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
-						
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 					}
 					$("#myModal").find("h4").html("Success!");
