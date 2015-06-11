@@ -400,7 +400,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		    var $item = $( image.img ).parents(".masonryitem" );
 		    ko.applyBindings(self, $item[ 0 ] );
 		    $item.show();
-		    $container.masonry( 'appended', $item, true ).masonry( 'layout' );
+		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
 		    
 		  }).always(self.searching(false));
 		  
