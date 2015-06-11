@@ -274,6 +274,7 @@ input[type="search"] { /* reset normalize */
 	background: #f1f1f1;
 	/*position: absolute;*/
 	opacity: 0;
+	overflow-y: hidden;
 }
 
 .scrollable{
@@ -432,13 +433,13 @@ margin: 50px auto;
 
 
 div.columns figure {
-opacity:0;
+opacity:1;
 background: #FFF none repeat scroll 0% 0%;
 box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.22);
 border-radius: 6px;
 width: 211px;
 column-break-inside: avoid;
-opacity:0;
+cursor:pointer;
 margin-bottom:15px;
 }
 

@@ -70,6 +70,36 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 			 }
 			});
 			
+		 self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source()) {
+			    case "DPLA":
+			    	return "dpla.eu";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": {
+			    	return "youtube.com";
+			    }
+			    case "Mint":
+			    	return "mint";
+			    default: return "";
+			 }
+			});
+		 self.displayTitle = ko.pureComputed(function() {
+				var distitle="";
+				distitle=self.title();
+				if(self.creator()!==undefined && self.creator().length>0)
+					distitle+=", by "+self.creator();
+				if(self.provider()!==undefined && self.provider().length>0 && self.provider()!=self.creator())
+					distitle+=", "+self.provider();
+				return distitle;
+			});
+
 		if(data != undefined) self.load(data);
 	}
 	

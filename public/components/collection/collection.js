@@ -334,10 +334,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					self.ajaxConnections--;
 					if(self.route().request_=="collectionview/"+collid){
 						 self.record().recordId(data.dbId);
-						 ko.contextFor(withcollection).$data.citems.push(self.record());
-						  ko.contextFor(withcollection).$data.citems.valueHasMutated();
-						  ko.contextFor(withcollection).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
-						  ko.contextFor(withcollection).$data.itemCount.valueHasMutated();  
+						 ko.contextFor(withcollection).$data.loadNext();
 					  }
 					else if(self.route().request_=="mycollections"){
 						var obj=null;
