@@ -63,13 +63,11 @@ public class ExhibitionControllerTest {
 				public void run() {
 					try {
 						ObjectNode json = Json.newObject();
-						json.put("", "");
 						User user = DB.getUserDAO().getByUsername(
 								"testExhibition");
 						Result result = route(fakeRequest("POST",
-								"/exhibition/create").withJsonBody(json)
-								.withSession("user",
-										user.getDbId().toHexString()));
+								"/exhibition/create").withSession("user",
+								user.getDbId().toHexString()));
 						assertThat(status(result)).isEqualTo(OK);
 						JsonParser parser = new JsonParser();
 						Gson gson = new GsonBuilder().setPrettyPrinting()

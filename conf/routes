@@ -28,6 +28,7 @@ POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
+PUT	     /exhibition/:id                     	controllers.ExhibitionController.editExhibition()
 
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
