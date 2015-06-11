@@ -461,6 +461,7 @@ div.columns figure figcaption{
    padding:10px 10px 20px 10px;
    font-weight: 400;
    font-size:1.1em;
+   word-wrap: break-word;
  	}
  	
 div.sourceCredits{ 	
