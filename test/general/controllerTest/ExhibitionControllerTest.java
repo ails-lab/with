@@ -17,11 +17,15 @@
 package general.controllerTest;
 
 // all test should use those
+import static org.fest.assertions.Assertions.assertThat;
+
+import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.fakeApplication;
 import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
 import static play.test.Helpers.running;
+import static play.test.Helpers.status;
 import model.User;
 
 import org.junit.Test;
@@ -44,14 +48,15 @@ public class ExhibitionControllerTest {
 	@Test
 	public void testCreateExhibition() {
 
-//		// make a user with password
-//		User user = new User();
-//		user.setEmail("test@test.com");
-//		user.setUsername("test0");
-//		// set password after email, email salts the password!
-//		user.setPassword("secret");
-//		DB.getUserDAO().makePermanent(user);
-		User user = DB.getUserDAO().getByUsername("test0");
+		// make a user with password
+		if (DB.getUserDAO().getByUsername("testExhibition") == null) {
+			User user = new User();
+			user.setEmail("test@test.com");
+			user.setUsername("testExhibition");
+			// set password after email, email salts the password!
+			user.setPassword("secret");
+			DB.getUserDAO().makePermanent(user);
+		}
 
 		try {
 			running(fakeApplication(), new Runnable() {
@@ -59,10 +64,13 @@ public class ExhibitionControllerTest {
 					try {
 						ObjectNode json = Json.newObject();
 						json.put("", "");
+						User user = DB.getUserDAO().getByUsername(
+								"testExhibition");
 						Result result = route(fakeRequest("POST",
 								"/exhibition/create").withJsonBody(json)
 								.withSession("user",
 										user.getDbId().toHexString()));
+						assertThat(status(result)).isEqualTo(OK);
 						JsonParser parser = new JsonParser();
 						Gson gson = new GsonBuilder().setPrettyPrinting()
 								.create();
@@ -74,10 +82,6 @@ public class ExhibitionControllerTest {
 				}
 			});
 		} finally {
-//			User u = DB.getUserDAO().getByUsername("user");
-//			if (u != null) {
-//				DB.getUserDAO().makeTransient(u);
-//			}
 		}
 	}
 }
