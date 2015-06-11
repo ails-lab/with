@@ -70,7 +70,6 @@ public class Collection {
 	private Date created;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date lastModified;
-	private String category;
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
@@ -209,14 +208,6 @@ public class Collection {
 
 	public void setLastModified(Date lastModified) {
 		this.lastModified = lastModified;
-	}
-
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
 	}
 
 	public int getItemCount() {

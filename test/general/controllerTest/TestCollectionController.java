@@ -77,7 +77,6 @@ public class TestCollectionController {
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test collection from Controller" + Math.random() + "yolo"
 				+ TestUtils.randomString());
-		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -134,7 +133,6 @@ public class TestCollectionController {
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test collection from Controller "
 				+ TestUtils.randomString());
-		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -174,7 +172,6 @@ public class TestCollectionController {
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test collection from Controller "
 				+ TestUtils.randomString() + TestUtils.randomString());
-		col.setCategory("Music");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -257,7 +254,6 @@ public class TestCollectionController {
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller "
 				+ TestUtils.randomString());
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -268,7 +264,6 @@ public class TestCollectionController {
 		col1.setDescription("Collection from Controller");
 		col1.setTitle("Test_2 collection from Controller "
 				+ TestUtils.randomString());
-		col1.setCategory("Dance");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
 		col1.setIsPublic(false);
@@ -322,7 +317,6 @@ public class TestCollectionController {
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller "
 				+ TestUtils.randomString());
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -334,7 +328,6 @@ public class TestCollectionController {
 		col1.setDescription("Collection from Controller");
 		col1.setTitle("Test_2 collection from Controller "
 				+ TestUtils.randomString());
-		col1.setCategory("Dance");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
 		col1.setIsPublic(false);
@@ -379,7 +372,6 @@ public class TestCollectionController {
 		col.setTitle("Test_1 collection from Controller "
 				+ TestUtils.randomString() + "test_purpose " + Math.random()
 				+ TestUtils.randomString());
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -441,7 +433,6 @@ public class TestCollectionController {
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller "
 				+ TestUtils.randomString());
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -452,7 +443,6 @@ public class TestCollectionController {
 		col1.setDescription("Collection from Controller");
 		col1.setTitle("Test_2 collection from Controller "
 				+ TestUtils.randomString());
-		col1.setCategory("Dance");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
 		col1.setIsPublic(false);
