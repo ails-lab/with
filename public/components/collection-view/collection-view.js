@@ -225,7 +225,10 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 
 	 self.moreItems=function(){
-     	 self.loading(true);
+	 if(self.loading==true){
+		  setTimeout(self.moreItems(), 300);}
+      if(self.loading()==false){
+		 self.loading(true);
 		 var offset=self.citems().length;
 		 $.ajax({
 				"url": "/collection/"+self.id()+"/list?count=20&start="+offset,
@@ -244,7 +247,8 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
       
 
 	 }
-
+	 }
+	 
 	 self.masonryImagesReveal = function( $items,$container ) {
 		  $items.hide();
 		  $container.append( $items );

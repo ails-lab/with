@@ -272,7 +272,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 					}
 					
 					
-					self.searching(false);
+					
 								
 
 						if(moreitems){
@@ -402,7 +402,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		    $item.show();
 		    $container.masonry( 'appended', $item, true ).masonry( 'layout' );
 		    
-		  });
+		  }).always(self.searching(false));
 		  
 		
 		};
