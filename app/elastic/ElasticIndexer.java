@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import model.Collection;
+import model.CollectionInfo;
 import model.CollectionRecord;
 
 import org.elasticsearch.ElasticsearchException;
@@ -42,10 +43,11 @@ import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import play.Logger;
-import play.libs.F.Callback;
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
@@ -166,6 +168,19 @@ public class ElasticIndexer {
 	}
 
 	public XContentBuilder prepareRecordDocument() {
+		//getRecordByUniqueId
+		/*List<CollectionRecord> sameRecords = DB.getCollectionRecordDAO()
+												.getBySource(null, record.getSourceId());*/
+		List<CollectionRecord> sameRecords = DB.getCollectionRecordDAO()
+												.getByUniqueId(record.getDataProviderId());
+		CollectionInfo infos = new CollectionInfo();
+		for(CollectionRecord r: sameRecords) {
+			if(r.getCollectionId() != null) {
+				infos.getCollectionIds().add(r.getCollectionId());
+				infos.getPosition().add(r.getPosition());
+				infos.getTags().add(r.getTags());
+			}
+		}
 		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
 		XContentBuilder doc = null;
 		try {
@@ -181,12 +196,34 @@ public class ElasticIndexer {
 					doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
+			
+			//while( infosIt.hasNext() ) {
+				ArrayNode array = Json.newObject().arrayNode();
+				for(int i = 0;i < infos.getCollectionIds().size(); i++) {
+					ObjectNode o = Json.newObject();
+					o.put("collection", infos.getCollectionIds().get(i).toString());
+					o.put("position", infos.getPosition().get(i));
+					ArrayNode tags = Json.newObject().arrayNode();
+					for(String tag: infos.getTags().get(i)) {
+						tags.add(tag);
+					}
+					o.put("tags", tags);
+					array.add(o);
+				}
+				doc.rawField("collection_specific", array.toString().getBytes());
+			//}
 			doc.endObject();
 		} catch (IOException e) {
 			log.error("Cannot create json document for indexing", e);
 			return null;
 		}
 
+		try {
+			System.out.println(doc.string());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return doc;
 	}
 

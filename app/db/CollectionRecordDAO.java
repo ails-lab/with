@@ -74,11 +74,18 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	public List<CollectionRecord> getBySource(String source,String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
-				.field("source").equal(source)
+				//.field("source").equal(source)
 				.field("sourceId").equal(sourceId);
 		return this.find(q).asList();
 	}
 
+	public List<CollectionRecord> getByUniqueId(String provid) {
+		Query<CollectionRecord> q = this.createQuery()
+				//.field("source").equal(source)
+				.field("dataProviderId:").equal(provid);
+		return this.find(q).asList();
+	}
+	
 	public int deleteByCollection(ObjectId colId) {
 		Query<CollectionRecord> q = this.createQuery()
 				.field("collectionId").equal(colId);
