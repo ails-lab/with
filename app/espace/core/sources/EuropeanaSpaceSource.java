@@ -196,9 +196,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 							false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
 					it.rights = Utils.readLangAttr(item, "rights", false);
-					it.externalId = it.fullresolution.get(0);
-					if (it.externalId == null || it.externalId == "")
-						it.externalId = it.url.original.get(0);
+					it.externalId = (it.fullresolution.get(0) == null || it.fullresolution.get(0) == "") ? 
+							it.fullresolution.get(0): it.url.original.get(0);
 					a.add(it);
 				}
 			}
