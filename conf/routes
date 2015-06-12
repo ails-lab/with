@@ -66,7 +66,7 @@ PUT		/user/:id				                controllers.UserManager.editUser(id)
 GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup(id, gid: String)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id) 
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
-POST	/user/changePassword/:newPassword		controllers.UserManager.changePassword(newPassword: String, token: String)
+POST	/user/changePassword/					controllers.UserManager.changePassword()
 
 # trigger reindex (for development / admin )
 

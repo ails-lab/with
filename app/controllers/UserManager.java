@@ -766,7 +766,6 @@ public class UserManager extends Controller {
 	}
 	
 	/***
-	 * 	PUT?
 	 * 	
 	 * 	Requests user's new password, checks for length.
 	 * 
@@ -777,16 +776,29 @@ public class UserManager extends Controller {
 	 * 	@return OK and user data
 	 ***/
 	
-	public static Result changePassword(String newPassword, String token){
+	public static Result changePassword(){
 		
 		//123123
 		
 		ObjectNode result = Json.newObject();
 		
-		//JsonNode json = request().body().asJson();
-		//String newPassword = json.get("password").asText();
+		JsonNode json = request().body().asJson();
+		String newPassword = null;
+		String token = null;
 		
-		if(newPassword == ""){
+		if(json.has("password")){
+			newPassword = json.get("password").asText();
+		}
+		
+		if(json.has("token")){
+			token = json.get("token").asText();
+		} else {
+			result.put("error", "Token is empty");
+			return badRequest(result);
+		}
+		
+		
+		if(newPassword == null){
 			
 			try {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
