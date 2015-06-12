@@ -18,7 +18,6 @@ package general.controllerTest;
 
 // all test should use those
 import static org.fest.assertions.Assertions.assertThat;
-
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.contentAsString;
 import static play.test.Helpers.fakeApplication;
@@ -33,6 +32,7 @@ import org.junit.Test;
 import play.libs.Json;
 import play.mvc.Result;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -62,13 +62,45 @@ public class ExhibitionControllerTest {
 			running(fakeApplication(), new Runnable() {
 				public void run() {
 					try {
-						ObjectNode json = Json.newObject();
 						User user = DB.getUserDAO().getByUsername(
 								"testExhibition");
 						Result result = route(fakeRequest("POST",
 								"/exhibition/create").withSession("user",
 								user.getDbId().toHexString()));
 						assertThat(status(result)).isEqualTo(OK);
+						JsonParser parser = new JsonParser();
+						Gson gson = new GsonBuilder().setPrettyPrinting()
+								.create();
+						JsonElement el = parser.parse(contentAsString(result));
+						System.out.println(gson.toJson(el));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		} finally {
+		}
+	}
+
+	@Test
+	public void testEditExhibition() {
+		try {
+			running(fakeApplication(), new Runnable() {
+				public void run() {
+					try {
+						ObjectNode json = Json.newObject();
+						json.put("title", "A title");
+						json.put("description", "A description");
+						User user = DB.getUserDAO().getByUsername(
+								"testExhibition");
+						Result result = route(fakeRequest("POST",
+								"/exhibition/create").withSession("user",
+								user.getDbId().toHexString()));
+						JsonNode ex = Json.parse(contentAsString(result));
+						result = route(fakeRequest("PUT",
+								"/exhibition/" + ex.get("dbId").asText())
+								.withJsonBody(json).withSession("user",
+										user.getDbId().toHexString()));
 						JsonParser parser = new JsonParser();
 						Gson gson = new GsonBuilder().setPrettyPrinting()
 								.create();
