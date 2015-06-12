@@ -65,16 +65,16 @@ public class User {
 	private String md5Password;
 
 	private ObjectId photo;
+	private boolean superUser;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
 
-	@Embedded
-	private List<CollectionMetadata> collections = new ArrayList<CollectionMetadata>();
 	private int recordLimit;
 	private int collectedRecords;
+	private int exhibitionsCreated;
 	private double storageLimit;
 
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
@@ -103,23 +103,6 @@ public class User {
 		if (searchHistory.size() > EMBEDDED_CAP) {
 			searchHistory.remove(0);
 		}
-	}
-
-	/**
-	 * The Collection should already be stored in the database separately
-	 *
-	 * @param col
-	 */
-	public void addToCollections(Collection col) {
-		if (col.getDbId() == null) {
-			log.error("Collection is not saved!");
-			return;
-		}
-		collections.add(col.collectMetadata());
-		if (collections.size() > EMBEDDED_CAP) {
-			collections.remove(0);
-		}
-
 	}
 
 	/**
@@ -222,28 +205,12 @@ public class User {
 		this.searchHistory = searcHistory;
 	}
 
-	public List<CollectionMetadata> getCollectionMetadata() {
-		return collections;
-	}
-
-	public void setCollectionMetadata(List<CollectionMetadata> collections) {
-		this.collections = collections;
-	}
-
 	public String getFacebookId() {
 		return facebookId;
 	}
 
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
-	}
-
-	public List<Collection> getUserCollections() {
-		List<Collection> collections = new ArrayList<>();
-		for (CollectionMetadata colMetaData : getCollectionMetadata()) {
-			collections.add(colMetaData.getCollection());
-		}
-		return collections;
 	}
 
 	public String getUsername() {
@@ -335,6 +302,26 @@ public class User {
 
 	public Set<ObjectId> getWhiteList() {
 		return whiteList;
+	}
+
+	public boolean isSuperUser() {
+		return superUser;
+	}
+
+	public void setSuperUser(boolean isSuperUser) {
+		this.superUser = isSuperUser;
+	}
+
+	public int getExhibitionsCreated() {
+		return exhibitionsCreated;
+	}
+
+	public void setExhibitionsCreated(int exhibitionsCreated) {
+		this.exhibitionsCreated = exhibitionsCreated;
+	}
+
+	public void addExhibitionsCreated() {
+		this.exhibitionsCreated++;
 	}
 
 }

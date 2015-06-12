@@ -72,11 +72,11 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		Collection c = null;
 		User collectionOwner = null;
-		List<String> userIds = effectiveUserIds();
-		
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-			if( c== null ) {
+			if (c == null) {
 				result.put("error",
 						"Cannot retrieve metadata for the specified collection!");
 				return internalServerError(result);
@@ -93,7 +93,7 @@ public class CollectionController extends Controller {
 			log.error(
 					"Cannot retrieve metadata for the specified collection or user!",
 					e);
-			return internalServerError( );
+			return internalServerError();
 		}
 		Access maxAccess;
 
@@ -103,9 +103,12 @@ public class CollectionController extends Controller {
 
 		// check itemCount
 		int itemCount;
-		if( (itemCount = (int) DB.getCollectionRecordDAO().getItemCount(new ObjectId(collectionId))) != c.getItemCount() ) {
+		if ((itemCount = (int) DB.getCollectionRecordDAO().getItemCount(
+				new ObjectId(collectionId))) != c.getItemCount()) {
 			c.setItemCount(itemCount);
-			DB.getCollectionDAO().setSpecificCollectionField(new ObjectId(collectionId), "itemCount", Integer.toString(itemCount));
+			DB.getCollectionDAO().setSpecificCollectionField(
+					new ObjectId(collectionId), "itemCount",
+					Integer.toString(itemCount));
 		}
 
 		result = (ObjectNode) Json.toJson(c);
@@ -122,31 +125,30 @@ public class CollectionController extends Controller {
 	 */
 	// @With(UserLoggedIn.class)
 	public static Result deleteCollection(String id) {
+
 		ObjectNode result = Json.newObject();
 		Collection c = null;
-		c = DB.getCollectionDAO().getById(new ObjectId(id));
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+
 		try {
+			c = DB.getCollectionDAO().getById(new ObjectId(id));
+			if (!AccessManager.checkAccess(c.getRights(), userIds,
+					Action.DELETE)) {
+				result.put("error",
+						"User does not have permission to delete the collection");
+				return forbidden(result);
+			}
 			if (DB.getCollectionDAO().removeById(new ObjectId(id)) != 1) {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
 			}
+			result.put("message",
+					"Collection deleted succesfully from database");
+			return ok(result);
 		} catch (Exception e) {
 			return internalServerError(e.toString());
 		}
-		if (session().get("effectiveUserIds") == null) {
-			result.put("error",
-					"User does not have permission to delete the collection");
-			return forbidden(result);
-		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
-		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.DELETE)) {
-			result.put("error",
-					"User does not have permission to delete the collection");
-			return forbidden(result);
-		}
-		result.put("message", "Collection deleted succesfully from database");
-		return ok(result);
 	}
 
 	/**
@@ -157,23 +159,18 @@ public class CollectionController extends Controller {
 	 * @throws IOException
 	 * @throws JsonProcessingException
 	 */
-	public static Result editCollection(String id)
-			throws JsonProcessingException, IOException {
+	public static Result editCollection(String id) {
+
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+
 		if (json == null) {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
 		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
-
-		if (session().get("effectiveUserIds") == null) {
-			result.put("error",
-					"User does not have permission to edit the collection");
-			return forbidden(result);
-		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
 		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds,
 				Action.EDIT)) {
 			result.put("error",
@@ -185,33 +182,45 @@ public class CollectionController extends Controller {
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
-		Collection newVersion = updater.readValue(json);
-		newVersion.setLastModified(new Date());
+		Collection newVersion;
+		try {
+			newVersion = updater.readValue(json);
 
-		Set<ConstraintViolation<Collection>> violations = Validation
-				.getValidator().validate(newVersion);
-		for (ConstraintViolation<Collection> cv : violations) {
-			result.put("message",
-					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+			newVersion.setLastModified(new Date());
+
+			Set<ConstraintViolation<Collection>> violations = Validation
+					.getValidator().validate(newVersion);
+			for (ConstraintViolation<Collection> cv : violations) {
+				result.put("message",
+						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+			}
+			if (!violations.isEmpty()) {
+				return badRequest(result);
+			}
+			if ((DB.getCollectionDAO().getByOwnerAndTitle(
+					newVersion.getOwnerId(), newVersion.getTitle()) != null)
+					&& (!oldTitle.equals(newVersion.getTitle()))) {
+				result.put("message",
+						"Title already exists! Please specify another title.");
+				return internalServerError(result);
+			}
+			if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
+				log.error("Cannot save collection to database!");
+				result.put("message", "Cannot save collection to database!");
+				return internalServerError(result);
+			}
+			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
+			c.put("access", maxAccess.toString());
+			User user = DB.getUserDAO().getById(newVersion.getOwnerId(),
+					new ArrayList<String>(Arrays.asList("username")));
+			c.put("owner", user.getUsername());
+			// result.put("message", "Collection succesfully stored!");
+			// result.put("id", colKey.getId().toString());
+			return ok(c);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		if (!violations.isEmpty()) {
-			return badRequest(result);
-		}
-		if ((DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(),
-				newVersion.getTitle()) != null)
-				&& (!oldTitle.equals(newVersion.getTitle()))) {
-			result.put("message",
-					"Title already exists! Please specify another title.");
-			return internalServerError(result);
-		}
-		if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
-			log.error("Cannot save collection to database!");
-			result.put("message", "Cannot save collection to database!");
-			return internalServerError(result);
-		}
-		String m = DB.getJson(newVersion);
-		result.put("access", maxAccess.toString());
-		return ok(Json.toJson(newVersion));
+		return ok();
 	}
 
 	/**
@@ -222,6 +231,7 @@ public class CollectionController extends Controller {
 	 */
 	// @With(UserLoggedIn.class)
 	public static Result createCollection() {
+
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 
@@ -260,7 +270,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
-		owner.getCollectionMetadata().add(newCollection.collectMetadata());
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
@@ -275,7 +284,6 @@ public class CollectionController extends Controller {
 	/**
 	 * list accessible collections
 	 */
-	@SuppressWarnings("serial")
 	public static Result list(String filterByUser, String filterByUserId,
 			String filterByEmail, String access, int offset, int count) {
 
@@ -283,8 +291,9 @@ public class CollectionController extends Controller {
 		List<Collection> userCollections;
 
 		ObjectId ownerId = null;
-		List<String> userIds = effectiveUserIds();
-		
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+
 		if (filterByUserId != null) {
 			ownerId = new ObjectId(filterByUserId);
 		} else if (filterByUser != null) {
@@ -292,8 +301,7 @@ public class CollectionController extends Controller {
 		} else if (filterByEmail != null) {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
 		}
-
-		if (userIds.isEmpty() ) {
+		if (userIds.isEmpty()) {
 			// return all public collections
 			if (ownerId == null) {
 				userCollections = DB.getCollectionDAO()
@@ -309,39 +317,50 @@ public class CollectionController extends Controller {
 			}
 			return ok(result);
 		}
-		// ok, so there is a user id effective
-		String userId = userIds.get(0);
-		switch (access) {
-		case "read":
-			if (ownerId == null) {
-				userCollections = DB.getCollectionDAO().getByReadAccess(
-						new ObjectId(userId), offset, count);
+		// Check if super user
+		if (AccessManager.checkAccess(new HashMap<ObjectId, Access>(), userIds,
+				Action.DELETE)) {
+			if (ownerId != null) {
+				userCollections = DB.getCollectionDAO().getByOwner(ownerId,
+						offset, count);
 			} else {
-				userCollections = DB.getCollectionDAO()
-						.getByReadAccessFiltered(new ObjectId(userId), ownerId,
-								offset, count);
-
+				userCollections = DB.getCollectionDAO().getAll(offset, count);
 			}
-			break;
-		case "write":
-			if (ownerId == null) {
-				userCollections = DB.getCollectionDAO().getByWriteAccess(
+		} else {
+			// ok, so there is a user id effective
+			String userId = userIds.get(0);
+			switch (access) {
+			case "read":
+				if (ownerId == null) {
+					userCollections = DB.getCollectionDAO().getByReadAccess(
+							new ObjectId(userId), offset, count);
+				} else {
+					userCollections = DB.getCollectionDAO()
+							.getByReadAccessFiltered(new ObjectId(userId),
+									ownerId, offset, count);
+
+				}
+				break;
+			case "write":
+				if (ownerId == null) {
+					userCollections = DB.getCollectionDAO().getByWriteAccess(
+							new ObjectId(userId), offset, count);
+				} else {
+					userCollections = DB.getCollectionDAO()
+							.getByWriteAccessFiltered(new ObjectId(userId),
+									ownerId, offset, count);
+
+				}
+				break;
+			case "owned":
+				userCollections = DB.getCollectionDAO().getByOwner(
 						new ObjectId(userId), offset, count);
-			} else {
-				userCollections = DB.getCollectionDAO()
-						.getByWriteAccessFiltered(new ObjectId(userId),
-								ownerId, offset, count);
-
+				break;
+			default:
+				userCollections = DB.getCollectionDAO().getByOwner(
+						new ObjectId(userId), offset, count);
+				break;
 			}
-			break;
-		case "owned":
-			userCollections = DB.getCollectionDAO().getByOwner(
-					new ObjectId(userId), offset, count);
-			break;
-		default:
-			userCollections = DB.getCollectionDAO().getByOwner(
-					new ObjectId(userId), offset, count);
-			break;
 		}
 		Collections.sort(userCollections, new Comparator<Collection>() {
 			public int compare(Collection c1, Collection c2) {
@@ -351,7 +370,7 @@ public class CollectionController extends Controller {
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(
-					collection.getRights(), userIds );
+					collection.getRights(), userIds);
 			if (maxAccess.equals(Access.NONE)) {
 				maxAccess = Access.READ;
 			}
@@ -369,8 +388,10 @@ public class CollectionController extends Controller {
 
 		ArrayNode result = Json.newObject().arrayNode();
 		List<Collection> userCollections;
-
 		ObjectId ownerId = null;
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+
 		if (filterByUserId != null) {
 			ownerId = new ObjectId(filterByUserId);
 		} else if (filterByUser != null) {
@@ -379,13 +400,12 @@ public class CollectionController extends Controller {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
 		}
 
-		if (session().get("effectiveUserIds") == null) {
+		if (userIds.isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
 		}
 		// TODO: must expand to support user groups
-		String[] userIds = session().get("effectiveUserIds").split(",");
-		String userId = userIds[0];
+		String userId = userIds.get(0);
 		if (ownerId == null) {
 			userCollections = DB.getCollectionDAO().getShared(
 					new ObjectId(userId), offset, count);
@@ -420,21 +440,22 @@ public class CollectionController extends Controller {
 	 * Retrieve all fields from the first 20 items of all collections?
 	 */
 	public static Result listFirstRecordsOfUserCollections() {
+
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 
 		if (json == null) {
 			result.put("message", "Invalid json!");
 			return badRequest(result);
 		}
-		if (session().get("effectiveUserIds") == null) {
+		if (userIds.isEmpty()) {
 			result.put("error", "User not specified");
 			return forbidden(result);
 		}
 		if (json.has("ownerId")) {
 			String userId = json.get("ownerId").asText();
-			List<String> userIds = Arrays.asList(session().get(
-					"effectiveUserIds").split(","));
 			String sessionId = userIds.get(0);
 			if (!userId.equals(sessionId)) {
 				result.put("error",
@@ -467,27 +488,15 @@ public class CollectionController extends Controller {
 	 * @throws InstantiationException
 	 */
 	// @With(UserLoggedIn.class)
-	// TODO: catch the exceptions
-	public static Result addRecordToCollection(String collectionId)
-			throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException {
+	public static Result addRecordToCollection(String collectionId) {
+
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 
-		if (json == null) {
-			result.put("message", "Invalid json!");
-			return badRequest(result);
-		}
-
-		if (session().get("effectiveUserIds") == null) {
-			result.put("error",
-					"User does not have permission to edit the collection");
-			return forbidden(result);
-		}
 		Collection c = DB.getCollectionDAO()
 				.getById(new ObjectId(collectionId));
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
 		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
@@ -592,18 +601,14 @@ public class CollectionController extends Controller {
 	// @With(UserLoggedIn.class)
 	public static Result removeRecordFromCollection(String collectionId,
 			String recordId, int position, int version) {
+
 		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 
 		// Remove record from collection.firstEntries
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
-		if (session().get("effectiveUserIds") == null) {
-			result.put("error",
-					"User does not have permission to edit the collection");
-			return forbidden(result);
-		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.EDIT)) {
 			result.put("error",
@@ -645,14 +650,13 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Collection collection = DB.getCollectionDAO().getById(colId);
-		
-		if( collection == null ) {
-			result.put( "error", "Invalid collection id" );
-			return forbidden(result);			
-		}
-		
-		List<String> userIds = effectiveUserIds();
 
+		if (collection == null) {
+			result.put("error", "Invalid collection id");
+			return forbidden(result);
+		}
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.READ) && (!collection.getIsPublic())) {
 			result.put("error",
@@ -685,14 +689,12 @@ public class CollectionController extends Controller {
 	public static Result download(String id) {
 		return null;
 	}
-	
-	private static List<String> effectiveUserIds() {
-		String effectiveUserIds = session().get("effectiveUserIds");
-		if( effectiveUserIds == null ) effectiveUserIds = "";
-		List<String> userIds = new ArrayList<String>();
-		for( String ui: effectiveUserIds.split(",")) {
-			if( ui.trim().length() > 0 ) userIds.add(ui );
-		}
-		return userIds;
-	}
+
+	/*
+	 * private static List<String> effectiveUserIds() { String effectiveUserIds
+	 * = session().get("effectiveUserIds"); if (effectiveUserIds == null)
+	 * effectiveUserIds = ""; List<String> userIds = new ArrayList<String>();
+	 * for (String ui : effectiveUserIds.split(",")) { if (ui.trim().length() >
+	 * 0) userIds.add(ui); } return userIds; }
+	 */
 }

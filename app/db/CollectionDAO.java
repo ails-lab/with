@@ -19,7 +19,6 @@ package db;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -47,6 +46,11 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.findOne("title", title);
 	}
 
+	public List<Collection> getAll(int offset, int count) {
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		return this.find(q).asList();
+	}
+
 	public Collection getByOwnerAndTitle(ObjectId ownerId, String title) {
 		Query<Collection> q = this.createQuery().field("ownerId")
 				.equal(ownerId).field("title").equal(title);
@@ -56,6 +60,14 @@ public class CollectionDAO extends DAO<Collection> {
 	public Collection getById(ObjectId id) {
 		Query<Collection> q = this.createQuery().field("_id").equal(id);
 		return findOne(q);
+	}
+
+	public List<Collection> getExhibitionByOwner(ObjectId ownerId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().field("ownerId")
+				.equal(ownerId).field("isExhibition").equal(true)
+				.offset(offset).limit(count);
+		return this.find(q).asList();
 	}
 
 	public List<Collection> getByOwner(ObjectId id) {
@@ -170,17 +182,6 @@ public class CollectionDAO extends DAO<Collection> {
 	public int removeById(ObjectId id) {
 
 		Collection c = get(id);
-
-		User owner = c.retrieveOwner();
-		for (CollectionMetadata colMeta : owner.getCollectionMetadata()) {
-			if ((colMeta.getCollectionId() != null)
-					&& colMeta.getCollectionId().equals(id)) {
-				owner.getCollectionMetadata().remove(colMeta);
-				DB.getUserDAO().makePermanent(owner);
-				break;
-			}
-		}
-
 		DB.getCollectionRecordDAO().deleteByCollection(id);
 		return makeTransient(c);
 	}
