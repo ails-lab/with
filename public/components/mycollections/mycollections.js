@@ -50,9 +50,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.rightsToShare = ko.observable(true);
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
-			alert(JSON.stringify(data));
 			ko.mapping.fromJS(data, mapping, self.myCollections);
-			alert(JSON.stringify(self.myCollections()[1].id()));
 		});
 		/*if (sessionStorage.getItem('UserCollections') !== null)
 			  self.collections = JSON.parse(sessionStorage.getItem("UserCollections"));
@@ -158,8 +156,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			self.rightsToShare(self.myCollections()[collIndex].rights());
-			alert(JSON.stringify(self.rightsToShare()));
+			self.rightsToShare(self.myCollections()[0].rights());
+			//alert(JSON.stringify(ko.toJS(self.rightsToShare())));
 			//app.showPopup("share-collection");
 			
 		}
