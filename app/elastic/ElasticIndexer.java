@@ -172,7 +172,7 @@ public class ElasticIndexer {
 		/*List<CollectionRecord> sameRecords = DB.getCollectionRecordDAO()
 												.getBySource(null, record.getSourceId());*/
 		List<CollectionRecord> sameRecords = DB.getCollectionRecordDAO()
-												.getByUniqueId(record.getDataProviderId());
+												.getByUniqueId(record.getExternalId());
 		CollectionInfo infos = new CollectionInfo();
 		for(CollectionRecord r: sameRecords) {
 			if(r.getCollectionId() != null) {

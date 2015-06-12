@@ -79,10 +79,9 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).asList();
 	}
 
-	public List<CollectionRecord> getByUniqueId(String provid) {
+	public List<CollectionRecord> getByUniqueId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
-				//.field("source").equal(source)
-				.field("dataProviderId:").equal(provid);
+				.field("externalId:").equal(extId);
 		return this.find(q).asList();
 	}
 	
