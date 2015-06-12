@@ -71,6 +71,9 @@ public class Collection {
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	private Date lastModified;
 
+	private boolean isExhibition;
+	private ExhibitionCollection exhibition;
+
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
@@ -140,19 +143,10 @@ public class Collection {
 		if (this.ownerId == null) {
 			this.ownerId = ownerId;
 			rights.put(this.ownerId, Access.OWN);
-			// Create a new collection metadata for owner
-			User owner = DB.getUserDAO().get(ownerId);
-			owner.getCollectionMetadata().add(collectMetadata());
-			// Save the new owner
-			DB.getUserDAO().makePermanent(owner);
 			// Owner has changed
 		} else if (!this.ownerId.equals(ownerId)) {
 			// Remove rights for old owner
 			rights.remove(this.ownerId, Access.OWN);
-			User owner = DB.getUserDAO().get(this.ownerId);
-			owner.getCollectionMetadata().remove(collectMetadata());
-			DB.getUserDAO().makePermanent(owner);
-			// Set new Owner
 			this.ownerId = null;
 			setOwnerId(ownerId);
 		}
@@ -228,6 +222,14 @@ public class Collection {
 
 	public Map<ObjectId, Access> getRights() {
 		return rights;
+	}
+
+	public boolean isExhibition() {
+		return isExhibition;
+	}
+
+	public void setExhibition(boolean isExhibition) {
+		this.isExhibition = isExhibition;
 	}
 
 }
