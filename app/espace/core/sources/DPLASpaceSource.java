@@ -141,18 +141,25 @@ public class DPLASpaceSource extends ISpaceSource {
 				it.id = Utils.readAttr(item, "id", true);
 				it.thumb = Utils.readArrayAttr(item, "object", false);
 				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
-				it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
-				countValue(creator, ListUtils.transform(it.creator, (Lang s) -> {
-					return s.value;
-				}));
+				it.title = Utils.readLangAttr(item.path("sourceResource"),
+						"title", false);
+				it.description = Utils.readLangAttr(
+						item.path("sourceResource"), "description", false);
+				it.creator = Utils.readLangAttr(item.path("sourceResource"),
+						"creator", false);
+				countValue(creator,
+						ListUtils.transform(it.creator, (Lang s) -> {
+							return s.value;
+						}));
 				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"), "name", false);
+				it.dataProvider = Utils.readLangAttr(item.path("provider"),
+						"name", false);
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
-				it.rights = Utils.readLangAttr(item.path("sourceResource"), "rights", false);
+				it.url.fromSourceAPI = "http://dp.la/item/"
+						+ Utils.readAttr(item, "id", false);
+				it.rights = Utils.readLangAttr(item.path("sourceResource"),
+						"rights", false);
 
 				a.add(it);
 			}
@@ -197,10 +204,13 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
+			response = HttpConnector
+					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
+							+ "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
 			if (record != null)
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA,
+						record.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();

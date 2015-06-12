@@ -26,6 +26,11 @@ DELETE   /collection/:id/removeRecord           controllers.CollectionController
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
 
+# Exhibition Controller
+POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
+PUT	     /exhibition/:id                     	controllers.ExhibitionController.editExhibition(id)
+GET	     /exhibition/:id                     	controllers.ExhibitionController.getExhibition(id)
+
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)
@@ -66,8 +71,7 @@ PUT		/user/:id				                controllers.UserManager.editUser(id)
 GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup(id, gid: String)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id) 
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
-POST	/user/changePassword/:newPassword		controllers.UserManager.changePassword(newPassword: String)
-
+POST	/user/changePassword					controllers.UserManager.changePassword()
 
 # trigger reindex (for development / admin )
 

@@ -16,10 +16,8 @@
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
 					 	<span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>
-						<!--  ko if: (access() ==  "OWN" || access() == "WRITE")-->
 						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
 					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
-					 	<!--  /ko -->
 					 	</div>
 					   <h3 data-bind="text: title"></h3>
 					   <div class="coll-descr" data-bind="text: description()"></div>
@@ -83,7 +81,9 @@
 					 	<span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>
 						<!--  ko if: (access() ==  "OWN" || access() == "WRITE")-->
 						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
+					 	<!--  ko if: access() ==  "OWN" -->
 					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
+					 	<!-- /ko -->
 					 	<!--  /ko -->
 					 	</div>
 					   <h3 data-bind="text: title"></h3>

@@ -56,20 +56,20 @@ margin-left: 8px;
 }
 
 h1{
- font-family:'Annie Use Your Telescope';
  font-size:4.9em;
  color:white;
  word-spacing:-10px;
  border:0;
+ font-weight:400;
 }
 
 
 h1 span{
- font-family:'Orbitron';
  text-transform:uppercase;
- font-size:0.6em;
+ font-size:0.8em;
  font-weight:900;
  border:0;
+ padding-left:10px;
 }
 
 
@@ -167,12 +167,12 @@ margin-right: 0;
 .column {
     height: 100%;
     overflow: auto;
-    zoom:1;
+    /*zoom:1;*/
 }
 
 .column:before, .column:after {
     content: "";
-    display: table;
+   /* display: table;*/
 }
 
 
@@ -387,7 +387,7 @@ padding-right: 0;
 
 .intro-effect-grid {
     border: 0;
-    zoom: 1; /* IE6&7 */
+    /*zoom: 1; /* IE6&7 */
 
 
 }
@@ -395,7 +395,7 @@ padding-right: 0;
 .intro-effect-grid .gridmosaic:before,
 .intro-effect-grid .gridmosaic:after {
     content: "";
-    display: table;
+   /* display: table;*/
 }
 
 .intro-effect-grid .gridmosaic:after {

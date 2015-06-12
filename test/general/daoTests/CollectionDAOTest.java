@@ -150,8 +150,6 @@ public class CollectionDAOTest {
 
 			// save metadata to user
 			colMeta.setCollectionId(new ObjectId(colKey.getId().toString()));
-			if(user.getCollectionMetadata().size() < 20 )
-				user.getCollectionMetadata().add(colMeta);
 			DB.getUserDAO().makePermanent(user);
 
 

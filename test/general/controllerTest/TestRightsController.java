@@ -69,7 +69,6 @@ public class TestRightsController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller"+TestUtils.randomString()+"453s"+Math.random()+"4cs");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);

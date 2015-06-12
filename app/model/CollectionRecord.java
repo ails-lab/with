@@ -49,6 +49,8 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
+	private String dataProviderId;
+	
 	private boolean isPublic;
 
 	// which backend provided this entry
@@ -76,9 +78,17 @@ public class CollectionRecord {
 	// a link to the record on its source
 	private String sourceUrl;
 
+	 //url to the provider web page for that record
+	private String isShownAt;
+	
+	//url to the (full resoultion) content - external on in the WITH db
+	private String isShownBy;
+	
 	private String type;
 
 	private String rights;
+	
+	private ExhibitionRecord exhibition;
 
 	// collection specific stuff...
 
@@ -113,6 +123,14 @@ public class CollectionRecord {
 
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
+	}
+
+	public String getDataProviderId() {
+		return dataProviderId;
+	}
+
+	public void setDataProviderId(String dataProviderId) {
+		this.dataProviderId = dataProviderId;
 	}
 
 	public String getSource() {
@@ -211,6 +229,22 @@ public class CollectionRecord {
 
 	public void setSourceUrl(String sourceUrl) {
 		this.sourceUrl = sourceUrl;
+	}
+
+	public String getIsShownAt() {
+		return isShownAt;
+	}
+
+	public void setIsShownAt(String isShownAt) {
+		this.isShownAt = isShownAt;
+	}
+
+	public String getIsShownBy() {
+		return isShownBy;
+	}
+
+	public void setIsShownBy(String isShownBy) {
+		this.isShownBy = isShownBy;
 	}
 
 	public String getType() {
