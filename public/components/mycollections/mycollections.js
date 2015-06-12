@@ -50,7 +50,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.rightsToShare = ko.observable(true);
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
+			alert(JSON.stringify(data));
 			ko.mapping.fromJS(data, mapping, self.myCollections);
+			alert(JSON.stringify(self.myCollections()[1].id()));
 		});
 		/*if (sessionStorage.getItem('UserCollections') !== null)
 			  self.collections = JSON.parse(sessionStorage.getItem("UserCollections"));
