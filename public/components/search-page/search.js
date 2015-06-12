@@ -1,14 +1,14 @@
 define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], function(bridget,ko, template,masonry,imagesLoaded) {
 
 	 $.bridget( 'masonry', masonry );
-
-
-
-
+	 var transDuration='0.4s';
+	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+	 if(isFirefox){transDuration=0;}
+	
 
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	    $element.masonry( {itemSelector: '.masonryitem',isInitLayout: false,gutter:15,isFitWidth: true});
+    	    $element.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 
@@ -25,7 +25,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
-		self.thumb = ko.observable("//placehold.it/200x200");
+		self.thumb = ko.observable("");
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
 		self.source=ko.observable(false);
@@ -73,7 +73,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
-			distitle='<b>'+self.title()+'</b>';
+			distitle=self.title();
 			if(self.creator()!==undefined && self.creator().length>0)
 				distitle+=", by "+self.creator();
 			if(self.provider()!==undefined && self.provider().length>0 && self.provider()!=self.creator())
@@ -115,6 +115,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	function SearchModel(params) {
 		var self = this;
 
+	
+		var $container = $('#columns');
+		var $request;
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
@@ -123,7 +126,6 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
-
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
@@ -144,18 +146,12 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
-			self.searching(true);
-			imagesLoaded( '#columns', function() {
-				  $('#columns').masonry( 'reloadItems' );
-	    		  $('#columns').masonry( 'layout' );
-	    		  $('#columns > figure').each(function () {
-
-	    			  $(this).animate({ opacity: 1 });
-	    		  	});
-	    		  self.searching(false);
-
-
-	    		  });
+			$container.masonry({
+			    itemSelector: '.masonryitem',
+			    gutter:15,isFitWidth: true,transitionDuration:transDuration
+			  });
+			
+			
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -164,7 +160,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		};
 
 		self.reset = function() {
-
+			if ($request != null){ 
+			    $request.abort();
+			    $request = null;
+			}
 			self.term("");
 			self.currentTerm = ko.observable("");
 			self.page(1);
@@ -174,18 +173,18 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.mixresults([]);
 			self.results([]);
 			self.searching(false);
+			
+			if ($container.data('masonry')){
+			 $container.masonry( 'remove', $container.find('.masonryitem') );
+			 }
 		}
 
 		self._search = function() {
-			var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-			  
-		   if(self.page()==1 && (isFirefox || isSafari)){self.sourceview(true);$('.withsearch-content').css({'overflow-x': 'auto'});}
 			
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
-			$.ajax({
+			$request=$.ajax({
 				"url": "/api/search",
 				"method": "post",
 				"contentType": "application/json",
@@ -196,7 +195,6 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				    source:self.sources()
 				}),
 				"success": function(data) {
-
 					self.previous(self.page()-1);
 					var moreitems=false;
 
@@ -226,7 +224,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						 items.push(record);}
 						}
 						if(items.length>0){
-							self.mixresults.push.apply(self.mixresults, items);
+							 var $newitems=getItems(items);
+						     self.mixresults.push.apply(self.mixresults, items);
+						   
+						     self.masonryImagesReveal( $newitems,$container );
+						 	 
 							}
 						api_console="";
 						if(source=="Europeana"){
@@ -270,21 +272,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 					}
 					
 					
-				
-				if(self.sourceview()==false){	
-					imagesLoaded( '#columns', function() {
-							  $('#columns').masonry( 'reloadItems' );
-				    		  $('#columns').masonry( 'layout' );
-				    		  $('#columns > figure').each(function () {
-	
-				    			  $(this).animate({ opacity: 1 });
-				    		  	});
-				    		  
-				    		  self.searching(false);
-				    	});
-				}	
-				else{ self.searching(false);}
 					
+								
 
 						if(moreitems){
 							self.next(self.page()+1);
@@ -294,27 +283,43 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						}
 				}
 			});
-			console.log(self.term());
+			//console.log(self.term());
 		 }
 		};
 
 
 		self.search = function() {
-			self.results([]);
-			self.mixresults([]);
+			self.results.removeAll();
+			self.mixresults.removeAll();
 			self.page(1);
 			self.next(1);
 			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
+			if ($container.data('masonry')){
+		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
+			}else{
+				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+				
+			}
 			self._search();
+			
 		};
 
 		self.recordSelect= function (e){
-			console.log(e);
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.recordId() === e;
+				});
+			itemShow(selrecord);
+
+		}
+
+        self.columnRecordSelect= function (e){
+			
 			itemShow(e);
 
 		}
+        
 
 		self.searchNext = function() {
 		if(self.next()>0){
@@ -329,8 +334,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 		self.defaultSource=function(item){
 			item.thumb('images/no_image.jpg');
-
-	    }
+	     }
 
 	  var withsearch = $( '#withsearchid' );
 	  var selectedSources = ["YouTube", "Europeana"];
@@ -382,6 +386,27 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			 }
 
 	 });
+	  
+	  self.masonryImagesReveal = function( $items,$container ) {
+		  $items.hide();
+		  $container.append( $items );
+		  if (!($container.data('masonry'))){
+		  	   
+				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+				
+			}
+		  $items.imagesLoaded().progress( function( imgLoad, image ) {
+			  
+		    var $item = $( image.img ).parents(".masonryitem" );
+		    ko.applyBindings(self, $item[ 0 ] );
+		    $item.show();
+		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
+		    
+		  }).always(self.searching(false));
+		  
+		
+		};
+
 
 	  ctrlClose =$("span.withsearch-close");
 	  isOpen = false;
@@ -399,6 +424,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
+				
 				withinput.blur();
 
 			}
@@ -432,7 +458,24 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
     		}
     	);
+        
+        
+        function getItem(record) {
+        	  var figure='<figure class="masonryitem"><a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
+				+'<div class="sourceCredits"><a href="'+record.view_url()+'" target="_new">'+record.sourceCredits()+'</a></figure>';
+        	  return figure;
+        	}
 
+          function getItems(data) {
+        	  var items = '';
+        	  for ( i in data) {
+        	    items += getItem(data[i]);
+        	  }
+        	  // return jQuery object
+        	  return $( items );
+        	}
+
+          
 
   }
 

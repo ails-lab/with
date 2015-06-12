@@ -131,25 +131,11 @@
   width: 40%;
 }
 
-#withcollection #collcolumns{
-	padding:0;
-	
-}
-
-
 
 #withcollection #collcolumns figure:hover .closeButton{
 	display:inline-block;
 	
 }
-
-#withcollection #collcolumns figure:hover{
-	
-    /*border:solid;
-    border-width: 1px;
-    border-color:grey;*/
-}
-
 
 
 

@@ -721,7 +721,9 @@ public class UserManager extends Controller {
 		
 		String enc = encryptToken(u.getDbId().toString());
 		
-		String resetURL = APPLICATION_URL;
+		//String resetURL = APPLICATION_URL;
+		String resetURL = "http://localhost:9000/assets/index.html#reset";
+		
 		//This will retrieve line separator dependent on OS.
 		String newLine = System.getProperty("line.separator");
 		
@@ -765,28 +767,36 @@ public class UserManager extends Controller {
 		
 	}
 	
-	/***
-	 * 	PUT?
-	 * 	
-	 * 	Requests user's new password, checks for length.
-	 * 
-	 *  Parses token from the URL sent in the resetPassword() email.
+	/*** 	
+	 * 	Parses token from the URL sent in the resetPassword() email.
 	 *  
 	 *  Changes stored password.
 	 * 
 	 * 	@return OK and user data
 	 ***/
 	
-	public static Result changePassword(String newPassword, String token){
+	public static Result changePassword(){
 		
-		//123123
 		
 		ObjectNode result = Json.newObject();
 		
-		//JsonNode json = request().body().asJson();
-		//String newPassword = json.get("password").asText();
+		JsonNode json = request().body().asJson();
+		String newPassword = null;
+		String token = null;
 		
-		if(newPassword == ""){
+		if(json.has("password")){
+			newPassword = json.get("password").asText();
+		}
+		
+		if(json.has("token")){
+			token = json.get("token").asText();
+		} else {
+			result.put("error", "Token is empty");
+			return badRequest(result);
+		}
+		
+		
+		if(newPassword == null){
 			
 			try {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
@@ -804,7 +814,7 @@ public class UserManager extends Controller {
 			
 			
 		} else if (newPassword.length() < 6) {
-			result.put("password",
+			result.put("error",
 					"Password must contain more than 6 characters");
 			return badRequest(result);
 			
@@ -822,8 +832,7 @@ public class UserManager extends Controller {
 						u.setPassword(newPassword);
 						DB.getUserDAO().makePermanent(u);
 						result = (ObjectNode) Json.parse(DB.getJson(u));
-						//testing
-						//result.remove("md5Password");
+						result.remove("md5Password");
 						return ok(result);
 					}else{
 						result.put("error", "User does not exist");
@@ -839,7 +848,6 @@ public class UserManager extends Controller {
 		}
 		
 		return badRequest(result);
-		//token = "e27c561866fc57e033496f06981f8dcd30eea5e9f01a0968a70a2b6f7e7b39bd8930a828079cb37035265c36d30b449ed03763998ba95ae3c414332dfb0343d8c8c91f9fb165033aed4c1c44cc559d793387b04d49072200e31785548192fe51";
 
 		
 	}

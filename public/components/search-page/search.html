@@ -30,7 +30,7 @@
 
 					 <!-- ko foreach: items -->
 					 <!-- ko if: thumb -->
-					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].recordSelect}">
+					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
 							<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
 								<span><!-- ko text: title --><!-- /ko --></span>
 						</a>
@@ -41,16 +41,13 @@
 					</div>
 					<!-- /ko -->
 
-					<!-- ko ifnot: sourceview -->
-					<!-- ko if: mixresults().length > 0 -->
-					<facets params="name:'search-filters',params: {}"></facets>	
-					
-					 <div class="withsearch-content-masonry">
-						  <div id="columns" class="columns" data-bind="foreach: mixresults, masonry"><figure class="masonryitem"><a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="html: displayTitle"></figcaption>
-							<div class="sourceCredits"><a data-bind="text:sourceCredits,attr: { href:view_url}" target="_new"></a></figure></div>
+					<facets data-bind="visible:mixresults().length>0" params="name:'search-filters',params: {}"></facets>	
+					 <div class="withsearch-content-masonry" data-bind="visible: sourceview()==false">
+					 
+						  <div id="columns" class="columns" data-bind="masonry,visible:mixresults().length>0"></div>
+						  
 	             	</div>
-					<!-- /ko -->
-					<!-- /ko -->
+					
 
 				 <div id="more" data-bind='visible: searching' >
 				   <i class="fa fa-spinner fa-pulse"></i>

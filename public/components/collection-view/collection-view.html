@@ -1,23 +1,17 @@
 
 <div class="container-fluid">
 <div id="withcollection">
-				 <span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> <span data-bind="visible: itemCount() > -1  " style="text-transform:lowercase">&nbsp;&nbsp;(<!-- ko text:itemCount --><!-- /ko -->  items)</span></h2> </span>
+				    <span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> <span data-bind="visible: itemCount() > -1  " style="text-transform:lowercase">&nbsp;&nbsp;(<!-- ko text:itemCount --><!-- /ko -->  items)</span></h2> </span>
 				     <div data-bind="visible: owner().length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:owner --><!-- /ko --></a></i></div>
 				     <span data-bind="text:desc.display"></span><span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
 				     <hr></hr>
-					<!-- ko if: citems().length > 0 -->
+					
 					 <div class="withsearch-content-masonry">
-					  <div id="collcolumns" class="columns" data-bind="foreach: citems, masonrycoll">
-							<figure class="masonryitem">
-							<!-- ko if: ($parent.access() == "WRITE" ||  $parent.access() == "OWN") -->
-							<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: $parent.removeRecord}"></span>
-							<!-- /ko -->
-							<a data-bind="event: { click: $parent.recordSelect}, attr: { href:url}"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a><figcaption data-bind="html: displayTitle"></figcaption>
-							<div class="sourceCredits"><a data-bind="text:sourceCredits,attr: { href:view_url}" target="_new"></a></div>
-							</figure></div>
+					  <div id="collcolumns" class="columns" data-bind="masonrycoll">
+							</div>
 				       </div>
 	    
-					<!-- /ko -->
+					
 				
 				
 			

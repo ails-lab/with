@@ -59,7 +59,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -119,7 +118,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller **9** " + Math.random());
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -183,7 +181,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -243,7 +240,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
