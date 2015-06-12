@@ -814,7 +814,7 @@ public class UserManager extends Controller {
 			
 			
 		} else if (newPassword.length() < 6) {
-			result.put("password",
+			result.put("error",
 					"Password must contain more than 6 characters");
 			return badRequest(result);
 			
