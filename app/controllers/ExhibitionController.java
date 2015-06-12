@@ -138,6 +138,39 @@ public class ExhibitionController extends Controller {
 		return ok(c);
 	}
 
+	public static Result getExhibition(String id) {
+
+		ObjectNode result = Json.newObject();
+		try {
+			List<String> userIds = AccessManager.effectiveUserIds(session()
+					.get("effectiveUserIds"));
+			Collection exhibition;
+			exhibition = DB.getCollectionDAO().getById(new ObjectId(id));
+			if (!AccessManager.checkAccess(exhibition.getRights(), userIds,
+					Action.READ)) {
+				result.put("error",
+						"User does not have read-access to the exhibition");
+				return forbidden(result);
+			}
+			if (!exhibition.isExhibition()) {
+				result.put("error",
+						"The requested resource is not an exhibition");
+				return badRequest(result);
+			}
+			ObjectNode c = (ObjectNode) Json.toJson(exhibition);
+			c.put("access",
+					AccessManager.getMaxAccess(exhibition.getRights(), userIds)
+							.toString());
+			User user = DB.getUserDAO().getById(exhibition.getOwnerId(),
+					new ArrayList<String>(Arrays.asList("username")));
+			c.put("owner", user.getUsername());
+			return ok(c);
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
 	/* Find a unique dummy title for the user exhibition */
 	private static String getAvailableTitle(User user) {
 		int exhibitionNum = user.getExhibitionsCreated();
