@@ -60,6 +60,13 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			}
 		});
 		
+		addDefaultWriter(CommonFilters.YEAR_ID, new Function<String, Pair<String>>() {
+			@Override
+			public Pair<String> apply(String t) {
+				return new Pair<String>("and[year][]",t);
+			}
+		});
+		
 		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
 			@Override
 			public Pair<String> apply(String t) {
@@ -82,7 +89,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		builder.addSearchParam("text", q.searchTerm);
 		builder.addSearchParam("page",q.page);
 		builder.addSearchParam("per_page",q.pageSize);
-		builder.addSearchParam("facets","creator,category,rights");
+		builder.addSearchParam("facets","year,creator,category,rights");
 		return addfilters(q, builder).getHttp();
 	}
 
