@@ -17,6 +17,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -220,8 +221,8 @@ public class Collection {
 		this.itemCount--;
 	}
 
-	public Map<ObjectId, Access> getRights() {
-		return rights;
+	public List<Map<ObjectId, Access>> getRights() {
+		return new ArrayList<Map<ObjectId, Access>>(Arrays.asList(rights));
 	}
 
 	public boolean isExhibition() {

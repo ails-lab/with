@@ -20,8 +20,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'register',  params: { page: 'register-page', title: 'Register'} },
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
-			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } }
-			
+			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } },
+			{ url: 'reset/{token}', params: { page: 'new-password', title: 'Reset Password' } }
 		]
 	});
 

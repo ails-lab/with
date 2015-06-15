@@ -97,7 +97,7 @@ public class ExhibitionController extends Controller {
 		}
 		Collection exhibition = DB.getCollectionDAO().getById(new ObjectId(id));
 		ObjectId ownerId = exhibition.getOwnerId();
-		if (!AccessManager.checkAccess(exhibition.getRights(), userIds,
+		if (!AccessManager.checkAccess(exhibition.getRights().get(0), userIds,
 				Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the exhibition");
@@ -130,7 +130,7 @@ public class ExhibitionController extends Controller {
 		}
 		ObjectNode c = (ObjectNode) Json.toJson(exhibition);
 		c.put("access",
-				AccessManager.getMaxAccess(exhibition.getRights(), userIds)
+				AccessManager.getMaxAccess(exhibition.getRights().get(0), userIds)
 						.toString());
 		User user = DB.getUserDAO().getById(ownerId,
 				new ArrayList<String>(Arrays.asList("username")));
@@ -146,7 +146,7 @@ public class ExhibitionController extends Controller {
 					.get("effectiveUserIds"));
 			Collection exhibition;
 			exhibition = DB.getCollectionDAO().getById(new ObjectId(id));
-			if (!AccessManager.checkAccess(exhibition.getRights(), userIds,
+			if (!AccessManager.checkAccess(exhibition.getRights().get(0), userIds,
 					Action.READ)) {
 				result.put("error",
 						"User does not have read-access to the exhibition");
@@ -159,7 +159,7 @@ public class ExhibitionController extends Controller {
 			}
 			ObjectNode c = (ObjectNode) Json.toJson(exhibition);
 			c.put("access",
-					AccessManager.getMaxAccess(exhibition.getRights(), userIds)
+					AccessManager.getMaxAccess(exhibition.getRights().get(0), userIds)
 							.toString());
 			User user = DB.getUserDAO().getById(exhibition.getOwnerId(),
 					new ArrayList<String>(Arrays.asList("username")));

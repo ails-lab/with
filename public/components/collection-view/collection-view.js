@@ -116,7 +116,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.sourceCredits = ko.pureComputed(function() {
 				 switch(self.source()) {
 				    case "DPLA":
-				    	return "dpla.eu";
+				    	return "dp.la";
 				    case "Europeana":
 				    	return "europeana.eu";
 				    case "NLA":

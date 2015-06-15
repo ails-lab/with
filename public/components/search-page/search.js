@@ -53,7 +53,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source()) {
 			    case "DPLA":
-			    	return "dpla.eu";
+			    	return "dp.la";
 			    case "Europeana":
 			    	return "europeana.eu";
 			    case "NLA":
