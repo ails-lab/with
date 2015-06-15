@@ -130,7 +130,6 @@ public class CollectionController extends Controller {
 		Collection c = null;
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(id));
 			if (!AccessManager.checkAccess(c.getRights(), userIds,
@@ -514,6 +513,7 @@ public class CollectionController extends Controller {
 			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
+
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
 			record.setCollectionId(new ObjectId(collectionId));
@@ -524,10 +524,24 @@ public class CollectionController extends Controller {
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 				return badRequest(result);
 			}
-			DB.getCollectionRecordDAO().makePermanent(record);
-			// record in first entries does not contain the content metadata
-			Status status = addRecordToFirstEntries(record, result,
-					collectionId);
+			Status status;
+			if (c.isExhibition()) {
+				if (!json.has("position")) {
+					result.put("error", "Must specify position os the record");
+					return badRequest(result);
+				}
+				int position = json.get("position").asInt();
+				DB.getCollectionRecordDAO().shiftRecordsToRight(
+						new ObjectId(collectionId), position);
+				record.setDbId(null);
+				DB.getCollectionRecordDAO().makePermanent(record);
+				status = addRecordToFirstEntries(record, result, collectionId,
+						position);
+			} else {
+				DB.getCollectionRecordDAO().makePermanent(record);
+				// record in first entries does not contain the content metadata
+				status = addRecordToFirstEntries(record, result, collectionId);
+			}
 			JsonNode content = json.get("content");
 			if (content != null) {
 				Iterator<String> contentTypes = content.fieldNames();
@@ -554,6 +568,32 @@ public class CollectionController extends Controller {
 		collection.setLastModified(new Date());
 		if (collection.getFirstEntries().size() < 20)
 			collection.getFirstEntries().add(record);
+		DB.getCollectionDAO().makePermanent(collection);
+		if (record.getDbId() == null) {
+			result.put("message", "Cannot save RecordLink to database!");
+			return internalServerError(result);
+		} else
+			return ok(Json.toJson(record));
+	}
+
+	private static Status addRecordToFirstEntries(CollectionRecord record,
+			ObjectNode result, String collectionId, int position) {
+
+		Collection collection = DB.getCollectionDAO().getById(
+				new ObjectId(collectionId));
+		collection.itemCountIncr();
+		collection.setLastModified(new Date());
+		String recordId = record.getDbId().toString();
+		List<CollectionRecord> records = collection.getFirstEntries();
+		for (CollectionRecord r : records) {
+			if (recordId.equals(r.getDbId().toString())) {
+				records.remove(r);
+				break;
+			}
+		}
+		if (collection.getFirstEntries().size() < 20) {
+			collection.getFirstEntries().add(position, record);
+		}
 		DB.getCollectionDAO().makePermanent(collection);
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
@@ -600,7 +640,7 @@ public class CollectionController extends Controller {
 	 */
 	// @With(UserLoggedIn.class)
 	public static Result removeRecordFromCollection(String collectionId,
-			String recordId, int position, int version) {
+			String recordId, int version) {
 
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
@@ -616,24 +656,26 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		List<CollectionRecord> records = collection.getFirstEntries();
-		CollectionRecord temp = null;
 		for (CollectionRecord r : records) {
 			if (recordId.equals(r.getDbId().toString())) {
-				temp = r;
+				records.remove(r);
 				break;
 			}
 		}
-		if (temp != null)
-			records.remove(temp);
 		collection.setLastModified(new Date());
 		collection.itemCountDec();
 		DB.getCollectionDAO().makePermanent(collection);
 
+		CollectionRecord record = DB.getCollectionRecordDAO().getById(
+				new ObjectId(recordId));
+		int position = record.getPosition();
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
+		DB.getCollectionRecordDAO().shiftRecordsToLeft(
+				new ObjectId(collectionId), position);
 
 		result.put("message",
 				"RecordLink succesfully removed from Collection with id: "
@@ -690,11 +732,4 @@ public class CollectionController extends Controller {
 		return null;
 	}
 
-	/*
-	 * private static List<String> effectiveUserIds() { String effectiveUserIds
-	 * = session().get("effectiveUserIds"); if (effectiveUserIds == null)
-	 * effectiveUserIds = ""; List<String> userIds = new ArrayList<String>();
-	 * for (String ui : effectiveUserIds.split(",")) { if (ui.trim().length() >
-	 * 0) userIds.add(ui); } return userIds; }
-	 */
 }
