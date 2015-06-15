@@ -38,6 +38,7 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -138,6 +139,30 @@ public class ExhibitionController extends Controller {
 		return ok(c);
 	}
 
+	public static Result listMyExhibitions(int offset, int count) {
+
+		ArrayNode result = Json.newObject().arrayNode();
+		try {
+			List<String> userIds = AccessManager.effectiveUserIds(session()
+					.get("effectiveUserIds"));
+			if (userIds.isEmpty()) {
+				return forbidden(Json
+						.parse("{\"error\" : \"User not specified\"}"));
+			}
+			String userId = userIds.get(0);
+			List<Collection> exhibitions = DB.getCollectionDAO()
+					.getExhibitionsByOwner(new ObjectId(userId), offset, count);
+			for (Collection exhibition : exhibitions) {
+				ObjectNode c = (ObjectNode) Json.toJson(exhibition);
+				result.add(c);
+			}
+			return ok(result);
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{\"error\":\""
+					+ e.getMessage() + "\""));
+		}
+	}
+
 	public static Result getExhibition(String id) {
 
 		ObjectNode result = Json.newObject();
@@ -165,6 +190,28 @@ public class ExhibitionController extends Controller {
 					new ArrayList<String>(Arrays.asList("username")));
 			c.put("owner", user.getUsername());
 			return ok(c);
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+	public static Result deleteExhibition(String id) {
+
+		ObjectNode result = Json.newObject();
+		try {
+			List<String> userIds = AccessManager.effectiveUserIds(session()
+					.get("effectiveUserIds"));
+			Collection exhibition;
+			exhibition = DB.getCollectionDAO().getById(new ObjectId(id));
+			if (!AccessManager.checkAccess(exhibition.getRights(), userIds,
+					Action.DELETE)) {
+				result.put("error",
+						"User does not have the right to delete the exhibition");
+				return forbidden(result);
+			}
+			DB.getCollectionDAO().makeTransient(exhibition);
+			return ok();
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);

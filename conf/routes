@@ -30,6 +30,8 @@ POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
 PUT	     /exhibition/:id                     	controllers.ExhibitionController.editExhibition(id)
 GET	     /exhibition/:id                     	controllers.ExhibitionController.getExhibition(id)
+DELETE	 /exhibition/:id						controllers.ExhibitionController.deleteExhibition(id)
+GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
