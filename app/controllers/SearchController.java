@@ -218,8 +218,8 @@ public class SearchController extends Controller {
 		r1.responces = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
-			 System.out.println(sourceResponse.source + " Filters: " +
-			 sourceResponse.filters);
+//			 System.out.println(sourceResponse.source + " Filters: " +
+//			 sourceResponse.filters);
 			FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {

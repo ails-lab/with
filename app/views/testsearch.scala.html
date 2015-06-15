@@ -67,16 +67,20 @@
   @if(p.items!=null){ 
   @for(it <- p.items) {
   <div id="thumbframe">
-  
+  <!--
   <div id="thumb"   >
-  <!--<img alt="" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> --!> 
+  <img alt="" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> 
     
     </div>
-  <!--
-    <div  id="thinfo">
-  <b>Title: </b> <a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
+    --!> 
+    
+    <b>Title: </b> <a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
  @shorttext(it.title.get(0).value,40)
  </a><br/>
+    
+  <!--
+    <div  id="thinfo">
+  
   <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
   
   </div>
