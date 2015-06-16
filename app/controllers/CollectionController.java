@@ -727,9 +727,22 @@ public class CollectionController extends Controller {
 		}
 		return ok(recordsList);
 	}
+	
 
 	public static Result download(String id) {
 		return null;
+	}
+
+	/**
+	 * Get collection metadata (title, descr, thumbnail)
+	 */
+	public static Result getFavorites() {
+	
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		ObjectId userId = new ObjectId(userIds.get(0));
+		String fav = DB.getCollectionDAO().getByOwnerAndTitle(userId, "_favorites").getDbId().toString();
+		return getCollection(fav);
 	}
 
 }
