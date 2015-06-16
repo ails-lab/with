@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import model.Collection;
 import model.Media;
 import model.User;
 import model.UserGroup;
@@ -59,10 +60,11 @@ public class UserManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
-	
-	//turns out this has to be called outside a controller else it turns to null
-	private static String APPLICATION_URL = play.Play.application().configuration().getString("application.baseUrl");
 
+	// turns out this has to be called outside a controller else it turns to
+	// null
+	private static String APPLICATION_URL = play.Play.application()
+			.configuration().getString("application.baseUrl");
 
 	/**
 	 * Free to call by anybody, so we don't give lots of info.
@@ -231,6 +233,11 @@ public class UserManager extends Controller {
 
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
+		Collection fav = new Collection();
+		fav.setCreated(new Date());
+		fav.setOwnerId(user.getDbId());
+		fav.setTitle("_favorites");
+		DB.getCollectionDAO().makePermanent(fav);
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
 		result.remove("md5Password");
@@ -402,11 +409,9 @@ public class UserManager extends Controller {
 		}
 		return badRequest();
 	}
-	
-	
-	
-	private static String encryptToken(String id){
-		
+
+	private static String encryptToken(String id) {
+
 		ObjectNode result = Json.newObject();
 		result.put("user", id);
 		result.put("timestamp", new Date().getTime());
@@ -414,7 +419,7 @@ public class UserManager extends Controller {
 		result.put("random", new Random().nextInt());
 		String enc = Crypto.encryptAES(result.toString());
 		return enc;
-		
+
 	}
 
 	public static Result getToken() {
@@ -612,11 +617,11 @@ public class UserManager extends Controller {
 	 * @param id
 	 * @return
 	 */
-	
-	public static Result deleteUser(String id){
-		
+
+	public static Result deleteUser(String id) {
+
 		ObjectNode result = Json.newObject();
-		//ObjectNode error = (ObjectNode) Json.newObject();
+		// ObjectNode error = (ObjectNode) Json.newObject();
 
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
@@ -625,16 +630,13 @@ public class UserManager extends Controller {
 			} else {
 				return badRequest(Json
 						.parse("{\"error\":\"User does not exist\"}"));
-				
+
 			}
 		} catch (IllegalArgumentException e) {
 			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 		}
 	}
-	
-	
-	
-	
+
 	public static Result addUserToGroup(String uid, String gid) {
 		ObjectNode result = Json.newObject();
 
@@ -665,10 +667,10 @@ public class UserManager extends Controller {
 		return internalServerError(result);
 
 	}
-		
-	
+
 	/**
-	 * Checks email/username validity, checks if user has registered with Facebook or Google.
+	 * Checks email/username validity, checks if user has registered with
+	 * Facebook or Google.
 	 * 
 	 * Sends user an email with a url.
 	 * 
@@ -677,131 +679,141 @@ public class UserManager extends Controller {
 	 * @param emailOrUserName
 	 * @return OK status
 	 */
-	
-	public static Result resetPassword(String emailOrUserName){
-		
+
+	public static Result resetPassword(String emailOrUserName) {
+
 		ObjectNode result = Json.newObject();
 		ObjectNode error = (ObjectNode) Json.newObject();
 		User u = null;
 		String md5 = "";
-		
+
 		if (emailOrUserName == null) {
 			error.put("email", "Email or Username are empty");
 			result.put("error", error);
 			return badRequest(result);
 		}
-		
-		//can a user register using an email as username?
-		//we use this kind of check in another function here
-			
-		u = DB.getUserDAO().getByEmail(emailOrUserName);	
+
+		// can a user register using an email as username?
+		// we use this kind of check in another function here
+
+		u = DB.getUserDAO().getByEmail(emailOrUserName);
 		if (u == null) {
 			u = DB.getUserDAO().getByUsername(emailOrUserName);
 			if (u == null) {
-				error.put("email", "Invalid Email Address or Username");	
+				error.put("email", "Invalid Email Address or Username");
 				result.put("error", error);
 				return badRequest(result);
 			}
 		}
-		
+
 		md5 = u.getMd5Password();
-		if (md5 == ""){
-			// NULL didn't work so i used "", maybe this is not a good fix 
+		if (md5 == "") {
+			// NULL didn't work so i used "", maybe this is not a good fix
 			if (u.getFacebookId() != "") {
-					result.put("email", "User has registered with Facebook account");
-					return notFound(result); //maybe change type?	
-			} else if(u.getGoogleId() != ""){
+				result.put("email", "User has registered with Facebook account");
+				return notFound(result); // maybe change type?
+			} else if (u.getGoogleId() != "") {
 				result.put("email", "User has registered with Google account");
-				return notFound(result); //maybe change type?	
-			} //else {
-				//user exists but has no password and not fb or google - impossible?
-			//}
+				return notFound(result); // maybe change type?
+			} // else {
+				// user exists but has no password and not fb or google -
+				// impossible?
+			// }
 		}
-		 
-		
+
 		String enc = encryptToken(u.getDbId().toString());
-		
-		//String resetURL = APPLICATION_URL;
+
+		// String resetURL = APPLICATION_URL;
 		String resetURL = "http://localhost:9000/assets/index.html#reset";
-		
-		//This will retrieve line separator dependent on OS.
+
+		// This will retrieve line separator dependent on OS.
 		String newLine = System.getProperty("line.separator");
-		
-		//more complex email are schemes available - want to discuss first
+
+		// more complex email are schemes available - want to discuss first
 		Email email = new SimpleEmail();
-		
-		// I use this account for some other sites as well but we can use it for testing
-		try { 
+
+		// I use this account for some other sites as well but we can use it for
+		// testing
+		try {
 			email.setSmtpPort(587);
 			email.setHostName("smtp.gmail.com");
 			email.setDebug(false);
-			//email.setBounceAddress("karonissz@gmail.com");
-			email.setAuthenticator(new DefaultAuthenticator("karonissz@gmail.com", "12345678kostas")); 
+			// email.setBounceAddress("karonissz@gmail.com");
+			email.setAuthenticator(new DefaultAuthenticator(
+					"karonissz@gmail.com", "12345678kostas"));
 			email.setStartTLSEnabled(true);
 			email.setSSLOnConnect(false);
-			email.setFrom("karonissz@gmail.com", "kostas");  
+			email.setFrom("karonissz@gmail.com", "kostas");
 			email.setSubject("WITH password reset");
-			
+
 			email.addTo(u.getEmail());
-									
-			email.setMsg("Dear user: " + u.getFirstName() +" " + u.getLastName() + "," + newLine + newLine
+
+			email.setMsg("Dear user: "
+					+ u.getFirstName()
+					+ " "
+					+ u.getLastName()
+					+ ","
+					+ newLine
+					+ newLine
 					+ "We received a request for a password reset. Please click on the "
-					+ "following link to confirm this request:" + newLine + newLine 
-					+ resetURL + "/" + enc
-					//token URL here
-					+ newLine + newLine + "Sincerely yours," + newLine + "The WITH team.");
-			
+					+ "following link to confirm this request:" + newLine
+					+ newLine + resetURL + "/" + enc
+					// token URL here
+					+ newLine + newLine + "Sincerely yours," + newLine
+					+ "The WITH team.");
+
 			email.send();
 		} catch (EmailException e) {
 			error.put("email", "Email server error");
 			result.put("error", error);
-			return badRequest(result); //maybe change type?
+			return badRequest(result); // maybe change type?
 		}
-		
+
 		result.put("message", "Email succesfully sent to user");
-		
-		//used for testing
-		//result.put("url", resetURL + "/" + enc);
+
+		// used for testing
+		// result.put("url", resetURL + "/" + enc);
 
 		return ok(result);
-		
+
 	}
-	
-	/*** 	
-	 * 	Parses token from the URL sent in the resetPassword() email.
-	 *  
-	 *  Changes stored password.
+
+	/***
+	 * Parses token from the URL sent in the resetPassword() email.
 	 * 
-	 * 	@return OK and user data
+	 * Changes stored password.
+	 * 
+	 * @return OK and user data
 	 ***/
-	
-	public static Result changePassword(){
-		
-		
+
+	public static Result changePassword() {
+
 		ObjectNode result = Json.newObject();
-		
+
 		JsonNode json = request().body().asJson();
 		String newPassword = null;
 		String token = null;
-		
-		if(json.has("password")){
+
+		if (json.has("password")) {
 			newPassword = json.get("password").asText();
 		}
-		
-		if(json.has("token")){
+
+		if (json.has("token")) {
 			token = json.get("token").asText();
 		} else {
 			result.put("error", "Token is empty");
 			return badRequest(result);
 		}
-		
-		
-		if(newPassword == null){
-			
+
+		if (newPassword == null) {
+
 			try {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
 				long timestamp = input.get("timestamp").asLong();
-				if (new Date().getTime() < (timestamp + TOKENTIMEOUT*360*24 /*24 hours*/)) {
+				if (new Date().getTime() < (timestamp + TOKENTIMEOUT * 360 * 24 /*
+																				 * 24
+																				 * hours
+																				 */)) {
 					result.put("message", "Token is valid");
 					return ok(result);
 				} else {
@@ -811,22 +823,23 @@ public class UserManager extends Controller {
 			} catch (Exception e) {
 				result.put("error", "Invalid token");
 			}
-			
-			
+
 		} else if (newPassword.length() < 6) {
-			result.put("error",
-					"Password must contain more than 6 characters");
+			result.put("error", "Password must contain more than 6 characters");
 			return badRequest(result);
-			
-		} else {	
-			
+
+		} else {
+
 			User u = null;
-			
+
 			try {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
 				String userId = input.get("user").asText();
 				long timestamp = input.get("timestamp").asLong();
-				if (new Date().getTime() < (timestamp + TOKENTIMEOUT*360*24 /*24 hours*/)) {
+				if (new Date().getTime() < (timestamp + TOKENTIMEOUT * 360 * 24 /*
+																				 * 24
+																				 * hours
+																				 */)) {
 					u = DB.getUserDAO().get(new ObjectId(userId));
 					if (u != null) {
 						u.setPassword(newPassword);
@@ -834,30 +847,21 @@ public class UserManager extends Controller {
 						result = (ObjectNode) Json.parse(DB.getJson(u));
 						result.remove("md5Password");
 						return ok(result);
-					}else{
+					} else {
 						result.put("error", "User does not exist");
 					}
-				}else{
+				} else {
 					result.put("error", "Token timeout");
 					return badRequest(result);
 				}
 			} catch (Exception e) {
 				result.put("error", "Invalid token");
-				
+
 			}
 		}
-		
+
 		return badRequest(result);
 
-		
 	}
 
-
-
-
-
-
-
-	
-	
 }

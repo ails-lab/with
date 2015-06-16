@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
+import model.CollectionRecord;
 import model.User;
 import model.User.Access;
 
@@ -38,6 +39,7 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -85,95 +87,33 @@ public class ExhibitionController extends Controller {
 		return ok(c);
 	}
 
-	public static Result editExhibition(String id) {
-
-		JsonNode json = request().body().asJson();
-		ObjectNode result = Json.newObject();
-		List<String> userIds = AccessManager.effectiveUserIds(session().get(
-				"effectiveUserIds"));
-		if (json == null) {
-			result.put("error", "Invalid json");
-			return badRequest(result);
-		}
-		Collection exhibition = DB.getCollectionDAO().getById(new ObjectId(id));
-		ObjectId ownerId = exhibition.getOwnerId();
-		if (!AccessManager.checkAccess(exhibition.getRights().get(0), userIds,
-				Action.EDIT)) {
-			result.put("error",
-					"User does not have permission to edit the exhibition");
-			return forbidden(result);
-		}
-		if (json.has("title")) {
-			String title = json.get("title").asText();
-			if (DB.getCollectionDAO().getByOwnerAndTitle(ownerId, title) != null) {
-				result.put("error", "Title exists");
-				return badRequest(result);
-			}
-			exhibition.setTitle(title);
-		}
-		if (json.has("description")) {
-			String description = json.get("description").asText();
-			exhibition.setDescription(description);
-		}
-		exhibition.setLastModified(new Date());
-
-		Set<ConstraintViolation<Collection>> violations = Validation
-				.getValidator().validate(exhibition);
-		for (ConstraintViolation<Collection> cv : violations) {
-			result.put("error",
-					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
-			return badRequest(result);
-		}
-		if (DB.getCollectionDAO().makePermanent(exhibition) == null) {
-			result.put("error", "Cannot save Exhibition to database");
-			return internalServerError(result);
-		}
-		ObjectNode c = (ObjectNode) Json.toJson(exhibition);
-		c.put("access",
-				AccessManager.getMaxAccess(exhibition.getRights().get(0), userIds)
-						.toString());
-		User user = DB.getUserDAO().getById(ownerId,
-				new ArrayList<String>(Arrays.asList("username")));
-		c.put("owner", user.getUsername());
-		return ok(c);
-	}
-
-	public static Result getExhibition(String id) {
-
-		ObjectNode result = Json.newObject();
-		try {
-			List<String> userIds = AccessManager.effectiveUserIds(session()
-					.get("effectiveUserIds"));
-			Collection exhibition;
-			exhibition = DB.getCollectionDAO().getById(new ObjectId(id));
-			if (!AccessManager.checkAccess(exhibition.getRights().get(0), userIds,
-					Action.READ)) {
-				result.put("error",
-						"User does not have read-access to the exhibition");
-				return forbidden(result);
-			}
-			if (!exhibition.isExhibition()) {
-				result.put("error",
-						"The requested resource is not an exhibition");
-				return badRequest(result);
-			}
-			ObjectNode c = (ObjectNode) Json.toJson(exhibition);
-			c.put("access",
-					AccessManager.getMaxAccess(exhibition.getRights().get(0), userIds)
-							.toString());
-			User user = DB.getUserDAO().getById(exhibition.getOwnerId(),
-					new ArrayList<String>(Arrays.asList("username")));
-			c.put("owner", user.getUsername());
-			return ok(c);
-		} catch (Exception e) {
-			result.put("error", e.getMessage());
-			return internalServerError(result);
-		}
-	}
-
 	/* Find a unique dummy title for the user exhibition */
 	private static String getAvailableTitle(User user) {
 		int exhibitionNum = user.getExhibitionsCreated();
 		return "Exhibition" + exhibitionNum;
+	}
+
+	public static Result listMyExhibitions(int offset, int count) {
+
+		ArrayNode result = Json.newObject().arrayNode();
+		try {
+			List<String> userIds = AccessManager.effectiveUserIds(session()
+					.get("effectiveUserIds"));
+			if (userIds.isEmpty()) {
+				return forbidden(Json
+						.parse("{\"error\" : \"User not specified\"}"));
+			}
+			String userId = userIds.get(0);
+			List<Collection> exhibitions = DB.getCollectionDAO()
+					.getExhibitionsByOwner(new ObjectId(userId), offset, count);
+			for (Collection exhibition : exhibitions) {
+				ObjectNode c = (ObjectNode) Json.toJson(exhibition);
+				result.add(c);
+			}
+			return ok(result);
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{\"error\":\""
+					+ e.getMessage() + "\""));
+		}
 	}
 }

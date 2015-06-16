@@ -22,14 +22,16 @@ GET 	 /collection/listShared					controllers.CollectionController.listShared(fil
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
-DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, pos: Integer ?=0, version: Integer ?=-1)
+DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, version: Integer ?=-1)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
+GET		 /collection/favorites					controllers.CollectionController.getFavorites()
+POST     /collection/liked			            controllers.CollectionController.addToFavorites()
+DELETE   /collection/unliked			        controllers.CollectionController.removeFromFavorites(recId)
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-PUT	     /exhibition/:id                     	controllers.ExhibitionController.editExhibition(id)
-GET	     /exhibition/:id                     	controllers.ExhibitionController.getExhibition(id)
+GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)

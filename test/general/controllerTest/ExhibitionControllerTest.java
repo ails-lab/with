@@ -81,37 +81,4 @@ public class ExhibitionControllerTest {
 		} finally {
 		}
 	}
-
-	@Test
-	public void testEditExhibition() {
-		try {
-			running(fakeApplication(), new Runnable() {
-				public void run() {
-					try {
-						ObjectNode json = Json.newObject();
-						json.put("title", "A title");
-						json.put("description", "A description");
-						User user = DB.getUserDAO().getByUsername(
-								"testExhibition");
-						Result result = route(fakeRequest("POST",
-								"/exhibition/create").withSession("user",
-								user.getDbId().toHexString()));
-						JsonNode ex = Json.parse(contentAsString(result));
-						result = route(fakeRequest("PUT",
-								"/exhibition/" + ex.get("dbId").asText())
-								.withJsonBody(json).withSession("user",
-										user.getDbId().toHexString()));
-						JsonParser parser = new JsonParser();
-						Gson gson = new GsonBuilder().setPrettyPrinting()
-								.create();
-						JsonElement el = parser.parse(contentAsString(result));
-						System.out.println(gson.toJson(el));
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			});
-		} finally {
-		}
-	}
 }
