@@ -19,28 +19,22 @@ package elastic;
 import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ExecutionException;
 
 import model.Collection;
-import model.CollectionInfo;
 import model.CollectionRecord;
 
 import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.script.ScriptService.ScriptType;
 
 import play.Logger;
 import play.libs.Json;
@@ -71,8 +65,10 @@ public class ElasticIndexer {
 	public void index() {
 		if( collection != null )
 			indexCollection();
-		else if( record != null )
-			indexSingleDocument();
+		else if( record != null ) {
+			indexForGeneralSearch();
+			indexForWithinSearch();
+		}
 		else {
 			log.error("No records to index!");
 		}
@@ -81,19 +77,28 @@ public class ElasticIndexer {
 	public void indexCollection() {
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 											.getByCollection(collection.getDbId());
-		List<XContentBuilder> documents = new ArrayList<XContentBuilder>();
+		List<XContentBuilder> documents  = new ArrayList<XContentBuilder>();
+		List<XContentBuilder> mergedDocs = new ArrayList<XContentBuilder>();
 		for(CollectionRecord r: records) {
 			this.record = r;
 			documents.add(prepareRecordDocument());
+			mergedDocs.add(prepareMergedDocument());
 		}
 		if( documents.size() == 0 ) {
 			log.debug("No records within the collection to index!");
 		} else if( documents.size() == 1 ) {
 				Elastic.getTransportClient().prepareIndex(
-						Elastic.index,
-						Elastic.type,
-					 record.getDbId().toString())
+								Elastic.index,
+								Elastic.type_within,
+								record.getDbId().toString())
 					 	.setSource(documents.get(0))
+					 	.execute()
+					 	.actionGet();
+				Elastic.getTransportClient().prepareIndex(
+								Elastic.index,
+								Elastic.type_general,
+								record.getExternalId())
+					 	.setSource(mergedDocs.get(0))
 					 	.execute()
 					 	.actionGet();
 		} else {
@@ -102,9 +107,19 @@ public class ElasticIndexer {
 				for(XContentBuilder doc: documents) {
 					Elastic.getBulkProcessor().add(new IndexRequest(
 							Elastic.index,
-							Elastic.type,
+							Elastic.type_within,
 							records.get(i).getDbId().toString())
 					.source(doc));
+					i++;
+				}
+				Elastic.getBulkProcessor().close();
+				i = 0;
+				for(XContentBuilder mdoc: mergedDocs) {
+					Elastic.getBulkProcessor().add(new IndexRequest(
+							Elastic.index,
+							Elastic.type_general,
+							records.get(i).getExternalId())
+					.source(mdoc));
 					i++;
 				}
 				Elastic.getBulkProcessor().close();
@@ -113,105 +128,64 @@ public class ElasticIndexer {
 			}
 		}
 	}
-
-	public IndexResponse indexSingleDocument() {
-		IndexResponse response = Elastic.getTransportClient().prepareIndex(
-				Elastic.index,
-				Elastic.type,
-										record.getDbId().toString())
-					.setSource(prepareRecordDocument())
-					.execute()
-					.actionGet();
-		return response;
-	}
-
-	private boolean hasMapping() {
-		GetMappingsResponse mapResp = null;
-		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = null;
+	
+	public UpdateResponse indexForGeneralSearch() {
+		IndexRequest indexReq = new IndexRequest(
+				Elastic.index, Elastic.type_general, record.getExternalId())
+			.source(prepareMergedDocument());
+		UpdateResponse resp = null;
 		try {
-			mapResp = Elastic.getTransportClient().admin().indices().getMappings(new GetMappingsRequest().indices(Elastic.index)).get();
-			mappings = mapResp.getMappings();
-		} catch(ElasticsearchException ese) {
-			log.error("Client or error on mappings", ese);
-		} catch (InterruptedException e) {
-			log.error("Client or error on mappings", e);
-		} catch (ExecutionException e) {
-			log.error("Client or error on mappings", e);
+		resp = Elastic.getTransportClient().prepareUpdate(
+						Elastic.index, Elastic.type_general, record.getExternalId())
+			.addScriptParam("map", createEntryForRecord())
+			.setScript("ctx._source.collection_specific += map", ScriptType.INLINE)
+			.setUpsert(indexReq)
+			.execute().actionGet();
+		} catch (ElasticsearchException  e) {
+			log.error("Cannot update document!", e);
 		}
-
-		if( (mappings!=null) && mappings.containsKey(Elastic.index))
-			return true;
-		return false;
-
+	
+	return resp;
 	}
 
-	public CreateIndexResponse putMapping() {
-		if(!hasMapping()) {
-			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
-			JsonNode mapping = null;
-			CreateIndexRequestBuilder cireqb = null;
-			CreateIndexResponse ciresp = null;
-			try {
-				mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+Elastic.mapping))));
-				cireqb = Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index);
-				cireqb.addMapping(Elastic.type, mapping.toString());
-				ciresp = cireqb.execute().actionGet();
-			} catch(ElasticsearchException ese) {
-				log.error("Cannot put mapping!", ese);
-			} catch (IOException e) {
-				log.error("Cannot read mapping from file!", e);
-				return null;
-			}
-			return ciresp;
-		}
-		return null;
+	private   Map<String, Object> createEntryForRecord() {
+		Map<String, Object> doc = new HashMap<String, Object>();
+		doc.put("collection", record.getCollectionId().toString());
+		List<String> tags = new ArrayList<String>();
+		tags.addAll(record.getTags());
+		doc.put("tags", tags);
+		
+		return doc;
 	}
-
-	public XContentBuilder prepareRecordDocument() {
-		//getRecordByUniqueId
-		/*List<CollectionRecord> sameRecords = DB.getCollectionRecordDAO()
-												.getBySource(null, record.getSourceId());*/
-		List<CollectionRecord> sameRecords = DB.getCollectionRecordDAO()
-												.getByUniqueId(record.getExternalId());
-		CollectionInfo infos = new CollectionInfo();
-		for(CollectionRecord r: sameRecords) {
-			if(r.getCollectionId() != null) {
-				infos.getCollectionIds().add(r.getCollectionId());
-				infos.getPosition().add(r.getPosition());
-				infos.getTags().add(r.getTags());
-			}
-		}
+	
+	private XContentBuilder prepareMergedDocument() {
 		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
 		XContentBuilder doc = null;
 		try {
 			doc = jsonBuilder().startObject();
+			
 			while( recordIt.hasNext() ) {
 				Entry<String, JsonNode> entry = recordIt.next();
 				if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("tags")    &&
-					!entry.getKey().equals("dbId")) {
-					//if( entry.getKey().equals("title") ) {
+					!entry.getKey().equals("externalId")    &&
+					!entry.getKey().equals("collectionId")) {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-					//}
-					doc.field(entry.getKey(), entry.getValue().asText());
+						doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
 			
-			//while( infosIt.hasNext() ) {
-				ArrayNode array = Json.newObject().arrayNode();
-				for(int i = 0;i < infos.getCollectionIds().size(); i++) {
-					ObjectNode o = Json.newObject();
-					o.put("collection", infos.getCollectionIds().get(i).toString());
-					o.put("position", infos.getPosition().get(i));
-					ArrayNode tags = Json.newObject().arrayNode();
-					for(String tag: infos.getTags().get(i)) {
-						tags.add(tag);
-					}
-					o.put("tags", tags);
-					array.add(o);
-				}
-				doc.rawField("collection_specific", array.toString().getBytes());
-			//}
+			//add merged fields {collectionId, tags}
+			ArrayNode array = Json.newObject().arrayNode();
+			ObjectNode o = Json.newObject();
+			o.put("collection", record.getCollectionId().toString());
+			ArrayNode tags = Json.newObject().arrayNode();
+			for(String tag: record.getTags())
+				tags.add(tag);	
+			o.put("tags", tags);
+			array.add(o);
+			doc.rawField("collection_specific", array.toString().getBytes());
+			
 			doc.endObject();
 		} catch (IOException e) {
 			log.error("Cannot create json document for indexing", e);
@@ -224,6 +198,48 @@ public class ElasticIndexer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return doc;
+	}
+	
+	public IndexResponse indexForWithinSearch() {
+		IndexResponse response = Elastic.getTransportClient().prepareIndex(
+				Elastic.index,
+				Elastic.type_within,
+									record.getDbId().toString())
+				.setSource(prepareRecordDocument())
+				.execute()
+				.actionGet();
+		return response;
+	}
+	
+
+	private XContentBuilder prepareRecordDocument() {
+		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
+		XContentBuilder doc = null;
+		try {
+			doc = jsonBuilder().startObject();
+			while( recordIt.hasNext() ) {
+				Entry<String, JsonNode> entry = recordIt.next();
+				if( !entry.getKey().equals("content") &&
+					!entry.getKey().equals("dbId")) {
+						doc.field(entry.getKey()+"_all", entry.getValue().asText());
+						doc.field(entry.getKey(), entry.getValue().asText());
+				}
+			}
+			
+			doc.endObject();
+		} catch (IOException e) {
+			log.error("Cannot create json document for indexing", e);
+			return null;
+		}
+
+		try {
+			System.out.println(doc.string());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	
 		return doc;
 	}
 

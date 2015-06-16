@@ -1,0 +1,32 @@
+{
+  "merged_record": {
+    "dynamic_templates": [
+      {
+        "template_1": {
+          "match": "*_all",
+          "mapping": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      {
+        "template_2": {
+          "match": "^(?!.*_all$).*",
+          "mapping": {
+            "type": "string",
+            "index": "analyzed"
+          }
+        }
+      },
+      {
+        "template_3": {
+          "match": "collection",
+          "mapping": {
+            "type": "nested"
+          }
+        }
+      }
+    ]
+  }
+}
