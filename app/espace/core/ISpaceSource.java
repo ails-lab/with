@@ -86,16 +86,16 @@ public abstract class ISpaceSource {
 
 	}
 
-	protected void addDefaultWriter(String filterId, Function<String, Pair<String>> function) {
+	protected void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
 		vmap.addDefaultWriter(filterId, function);
 	}
 
-	protected void addMapping(String filterID, String commonValue, String specificValue, Pair<String> querySegment) {
-		vmap.addMap(filterID, commonValue, specificValue, querySegment);
+	protected void addMapping(String filterID, String commonValue, String... specificValue) {
+		vmap.addMap(filterID, commonValue, specificValue);
 	}
 	
-	protected void addMapping(String filterID, String commonValue, String specificValue, String param, String value) {
-		vmap.addMap(filterID, commonValue, specificValue, new Pair<String>(param, value));
+	protected void addMapping(String filterID, String commonValue, String specificValue) {
+		vmap.addMap(filterID, commonValue, specificValue);
 	}
 
 	protected List<String> translateToSpecific(String filterID, String value) {
@@ -110,8 +110,8 @@ public abstract class ISpaceSource {
 //		return vmap.translateToQuery(filterID, value);
 //	}
 	
-	protected List<Pair<String>> translateToQuery(String filterID, String value) {
-		return vmap.translateToQuery(filterID, value);
+	protected List<Pair<String>> translateToQuery(String filterID, List<String> values) {
+		return vmap.translateToQuery(filterID, values);
 	}
 
 //	protected String addfilters(CommonQuery q, String qstr) {
@@ -128,7 +128,7 @@ public abstract class ISpaceSource {
 	protected QueryBuilder addfilters(CommonQuery q, QueryBuilder builder) {
 		if (q.filters != null) {
 			for (CommonFilter filter : q.filters) {
-				for (Pair<String> param : translateToQuery(filter.filterID, filter.value)) {
+				for (Pair<String> param : translateToQuery(filter.filterID, filter.values)) {
 					builder.add(param);
 				}
 			}
