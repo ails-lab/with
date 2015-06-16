@@ -40,7 +40,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	/**
-	 * Retrieve records from sepcific collection
+	 * Retrieve records from specific collection
 	 * 
 	 * @param colId
 	 * @return
@@ -50,7 +50,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	/**
-	 * Retrieve records from sepcific collection by offset and count
+	 * Retrieve records from specific collection by offset and count
 	 * 
 	 * @param colId
 	 *            , offset, count
@@ -91,7 +91,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.createUpdateOperations().inc("position");
 		this.update(q, updateOps);
 	}
-	
+
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId).field("position").greaterThan(position);
@@ -99,5 +99,5 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.createUpdateOperations().dec("position");
 		this.update(q, updateOps);
 	}
-	
+
 }

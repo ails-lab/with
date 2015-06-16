@@ -26,6 +26,8 @@ DELETE   /collection/:id/removeRecord           controllers.CollectionController
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
 GET		 /collection/favorites					controllers.CollectionController.getFavorites()
+POST     /collection/liked			            controllers.CollectionController.addToFavorites()
+DELETE   /collection/unliked			        controllers.CollectionController.removeFromFavorites(recId)
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
