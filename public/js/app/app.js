@@ -14,6 +14,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		"recordLimit"      : ko.observable(),
 		"collectedRecords" : ko.observable(),
 		"storageLimit"     : ko.observable(),
+		"favorites"        : ko.observableArray(),
 	};
 	isLogged         = ko.observable(false);
 
@@ -48,6 +49,22 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		}
 	};
 
+	loadFavorites    = function(data) {
+		self.currentUser.favorites(data);
+	};
+
+	likeItem         = function(id) {
+		if (isLiked(id)) {
+			self.currentUser.favorites.remove(id);
+			return false;
+		}
+		else {
+			self.currentUser.favorites.push(id);
+			return true;
+		}
+
+	};
+
 	self.getPublicCollections = function() {
 		return $.ajax({
 			type        : "GET",
@@ -69,8 +86,8 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 				//var err = JSON.parse(request.responseText);
 			}
 		);
-	}
-	
+	};
+
 	self.getEditableCollections = function() {
 		  return $.ajax({
 				type        : "GET",
@@ -90,16 +107,16 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 					array.forEach(function(item){
 						editables.push({title: item.title, dbId: item.dbId});
 					});
-					if (sessionStorage.getItem('User') !== null) 
+					if (sessionStorage.getItem('User') !== null)
 						  sessionStorage.setItem("EditableCollections", JSON.stringify(editables));
-					  else if (localStorage.getItem('User') !== null) 
+					  else if (localStorage.getItem('User') !== null)
 						  localStorage.setItem("EditableCollections", JSON.stringify(editables));
 				}).fail(function(request, status, error) {
 					console.log(JSON.parse(request.responseText));
 				}
 			);
 	};
-	
+
 	self.getUserCollections = function() {
 		return $.ajax({
 			type        : "GET",
@@ -110,9 +127,9 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 			data        : "access=owned&offset=0&count=20"}).done(
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
-				/*if (sessionStorage.getItem('User') !== null) 
+				/*if (sessionStorage.getItem('User') !== null)
 					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
-				  else if (localStorage.getItem('User') !== null) 
+				  else if (localStorage.getItem('User') !== null)
 					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
 				return data;
 			}).fail(function(request, status, error) {
@@ -120,7 +137,10 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 			}
 		);
 	};
-	
+
+	self.isLiked     = function(id) {
+		return self.currentUser.favorites.indexOf(id) >= 0 ? true : false;
+	};
 
 	logout           = function() {
 		$.ajax({
@@ -145,8 +165,8 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 		$("#myModal").find("h4").html("");
 		$("#myModal").find("div.modal-footer").html('');
 
-	})
-	
+	});
+
 	showPopup        = function(name) {
 		popupName(name);
 		$('#popup').modal('show');
@@ -169,5 +189,7 @@ define("app", ['knockout', 'facebook'], function(ko, FB) {
 	}
 
 	return { currentUser: currentUser, loadUser: loadUser, showPopup: showPopup, closePopup: closePopup, logout: logout,
-		getUserCollections: getUserCollections,getPublicCollections: getPublicCollections};
+		getUserCollections: getUserCollections,getPublicCollections: getPublicCollections, isLiked: isLiked, loadFavorites: loadFavorites,
+		likeItem: likeItem
+	};
 });

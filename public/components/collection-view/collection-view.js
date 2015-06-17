@@ -4,7 +4,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 	 var transDuration='0.4s';
 	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 	 if(isFirefox){transDuration=0;}
-	
+
 
 	 ko.bindingHandlers.scroll = {
 
@@ -46,7 +46,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			    }
 			  }
 			 }
-			 
+
 
 	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
@@ -95,7 +95,8 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
 			self.rights=ko.observable("");
-			
+			self.isLiked = ko.computed(function() { return app.isLiked(self.recordId()); });
+
 			self.load = function(data) {
 				if(data.title==undefined){
 					self.title("No title");
@@ -110,7 +111,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.provider(data.provider);
 				self.recordId(data.id);
 				self.rights(data.rights);
-				
+
 			};
 
 			self.sourceCredits = ko.pureComputed(function() {
@@ -133,7 +134,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				    default: return "";
 				 }
 				});
-			
+
 			self.displayTitle = ko.pureComputed(function() {
 				var distitle="";
 				distitle='<b>'+self.title()+'</b>';
@@ -189,7 +190,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 					self.itemCount(data.itemCount);
 					self.access(data.access);
 					self.revealItems(data.firstEntries);
-					
+
 
 				},
 
@@ -216,7 +217,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
 
 	  self.loadNext = function() {
-			
+
 
 				self.moreItems();
 			};
@@ -235,49 +236,49 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				"method": "get",
 				"contentType": "application/json",
 				"success": function(data) {
-					
+
 					self.revealItems(data);
-					 
+
 
 				},
 
 				"error":function(result) {
 					self.loading(false);
 			     }});
-      
+
 
 	 }
 	 }
-	 
+
 	 self.masonryImagesReveal = function( $items,$container ) {
 		  $items.hide();
 		  $container.append( $items );
 		  if (!($container.data('masonry'))){
-		  	   
+
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-				
+
 			}
 		  $items.imagesLoaded().progress( function( imgLoad, image ) {
-			counter++;  
+			counter++;
 			var $item = $( image.img ).parents(".masonryitem" );
 		    ko.applyBindings(self, $item[ 0 ] );
 		    $item.show();
 		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
-		   
+
 		  }).always(function(){
 			  self.loading(false);});
-		  
-		
+
+
 		};
 
 	 self.recordSelect= function (e){
-		
+
 				var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
 					   return record.recordId() === e;
 					});
 				itemShow(selrecord);
 
-			
+
 		}
 
 
@@ -287,19 +288,19 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		}
 
 	 self.removeRecord= function (e){
-		
+
 		$("#myModal").find("h4").html("Delete item");
 		$("#myModal").find("div.modal-body").html("Are you sure you want to proceed?");
 		var footer = $("#myModal").find("div.modal-footer");
 		if (footer.is(':empty')) {
 			$("#myModal").find("div.modal-footer").append('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a>');
-		
+
 		}
 		$("#myModal").modal('show');
 		$('.btn-danger').on('click', function(event) {
 		    $("#myModal").find("div.modal-footer").html('');
 			$("#myModal").remove("div.modal-footer");
-			
+
 			 var jsondata=JSON.stringify({
 					recId: e
 				});
@@ -326,14 +327,30 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		});
 
 		}
-	 
+
+	self.likeRecord = function(id) {
+		if (app.likeItem(id)) {
+			$('#' + id + ' .star').addClass('active');
+		}
+		else {
+			$('#' + id + ' .star').removeClass('active');
+		}
+	};
+
+
 	 function getItem(record) {
-		 
+
 	  var figure='<figure class="masonryitem" id="'+record.recordId()+'">';
+	  if (record.isLiked()) {
+	  	figure += '<span class="star active"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.recordId()+'\', true); } }"></span></span>';
+	  }
+	  else {
+	  	figure += '<span class="star"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.recordId()+'\', false); } }"></span></span>';
+	  }
    	  if(self.access()=="WRITE" || self.access()=="OWN"){
    		  figure+='<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\''+record.recordId()+'\')}}"></span>';
    	  }
-   	  
+
    	  figure+='<a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
 			+'<div class="sourceCredits"><a href="'+record.view_url()+'" target="_new">'+record.sourceCredits()+'</a></figure>';
    	  return figure;
@@ -341,13 +358,13 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 
      function getItems(data) {
    	  var items = '';
-   	  for ( i in data) {
+   	  for (var i in data) {
    	    items += getItem(data[i]);
    	  }
    	  return $( items );
    	}
 
-     
+
    self.revealItems=function(data){
 	   var items = [];
 		for(var i in data){
@@ -365,10 +382,9 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 		 items.push(record);}
 		 self.citems.push.apply(self.citems, items);
 		 var $newitems=getItems(items);
-	    
+
 	     self.masonryImagesReveal( $newitems,$container );
    }
-	
 
   }
 
