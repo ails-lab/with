@@ -82,8 +82,8 @@ public class CollectionController extends Controller {
 				return internalServerError(result);
 			}
 
-			if (!AccessManager.checkAccess(c.getRights().get(0), userIds,
-					Action.READ) && !c.getIsPublic()) {
+			if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)
+					&& !c.getIsPublic()) {
 				result.put("error",
 						"User does not have read-access for the collection");
 				return forbidden(result);
@@ -96,9 +96,7 @@ public class CollectionController extends Controller {
 			return internalServerError();
 		}
 		Access maxAccess;
-
-		if ((maxAccess = AccessManager.getMaxAccess(c.getRights().get(0),
-				userIds)) == Access.NONE) {
+		if ((maxAccess = AccessManager.getMaxAccess(c.getRights(), userIds)) == Access.NONE) {
 			maxAccess = Access.READ;
 		}
 
@@ -133,7 +131,7 @@ public class CollectionController extends Controller {
 				"effectiveUserIds"));
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(id));
-			if (!AccessManager.checkAccess(c.getRights().get(0), userIds,
+			if (!AccessManager.checkAccess(c.getRights(), userIds,
 					Action.DELETE)) {
 				result.put("error",
 						"User does not have permission to delete the collection");
@@ -171,14 +169,14 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
-		if (!AccessManager.checkAccess(oldVersion.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds,
 				Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
 		}
-		Access maxAccess = AccessManager.getMaxAccess(oldVersion.getRights()
-				.get(0), userIds);
+		Access maxAccess = AccessManager.getMaxAccess(oldVersion.getRights(),
+				userIds);
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
@@ -370,7 +368,7 @@ public class CollectionController extends Controller {
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(collection
-					.getRights().get(0), userIds);
+					.getRights(), userIds);
 			if (collection.getTitle().equals("_favorites")) {
 				continue;
 			}
@@ -424,8 +422,8 @@ public class CollectionController extends Controller {
 		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(collection
-					.getRights().get(0),
+			Access maxAccess = AccessManager.getMaxAccess(
+					collection.getRights(),
 					new ArrayList<String>(Arrays.asList(userId)));
 			if (maxAccess.equals(Access.NONE)) {
 				maxAccess = Access.READ;
@@ -500,8 +498,7 @@ public class CollectionController extends Controller {
 
 		Collection c = DB.getCollectionDAO()
 				.getById(new ObjectId(collectionId));
-		if (!AccessManager.checkAccess(c.getRights().get(0), userIds,
-				Action.EDIT)) {
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
@@ -654,7 +651,7 @@ public class CollectionController extends Controller {
 		// Remove record from collection.firstEntries
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
-		if (!AccessManager.checkAccess(collection.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
@@ -708,7 +705,7 @@ public class CollectionController extends Controller {
 		}
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-		if (!AccessManager.checkAccess(collection.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.READ) && (!collection.getIsPublic())) {
 			result.put("error",
 					"User does not have read-access to the collection");
