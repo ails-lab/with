@@ -35,6 +35,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
+	ko.components.register('share-collection', {
+		viewModel: { instance: 'components/mycollections/mycollections' },
+		template: { require: 'text!components/mycollections/share-collection.html' }
+	});
 	ko.components.register('reset-password', { require: 'components/login-register-page/reset-password' });
 	ko.components.register('new-password', {
 		viewModel: { require: 'components/login-register-page/reset-password' },

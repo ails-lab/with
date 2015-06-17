@@ -1,4 +1,4 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'selectize'], function(bootstrap, ko, template, KnockoutElse, app, selectize) {
 
 	function Entry(entryData) {
 		var entry = ko.mapping.fromJS(entryData);
@@ -42,26 +42,34 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 		//TODO: Load more myCollections with scrolling
 		self.myCollections = ko.mapping.fromJS([], mapping);
-		//self.myCollections = ko.observableArray([]);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
-        self.isPublicToEdit = ko.observable(true);
+        self.isPublicToEdit = ko.observableArray([]);
         self.apiUrl = ko.observable("");
         self.rightsToShare = ko.observable(true);
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
-			ko.mapping.fromJS(data, mapping, self.myCollections);
+			//convert rights map to array
+			var newData = convertToRightsMap(data);
+			ko.mapping.fromJS(newData, mapping, self.myCollections);
 		});
-		/*if (sessionStorage.getItem('UserCollections') !== null)
-			  self.collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		if (localStorage.getItem('UserCollections') !== null)
-		    self.collections = JSON.parse(localStorage.getItem("UserCollections"));*/
 		//TODO: Load more sharedCollections with scrolling
 		self.sharedCollections = ko.mapping.fromJS([], mapping);
 		var promiseShared = getCollectionsSharedWithMe();
 		$.when(promiseShared).done(function(data) {
-			ko.mapping.fromJS(data, mapping, self.sharedCollections);
+			ko.mapping.fromJS(convertToRightsMap(data), mapping, self.sharedCollections);
 		});
+		
+		convertToRightsMap = function(data) {
+			$.each(data, function(j, c) {
+				var rightsArray = [];
+				$.each(c.rights, function(i, obj) {
+					rightsArray.push({"user": i, "rights": obj});
+			    });
+				data[j].rights = rightsArray;
+			});
+			return data;
+		}
 		
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
@@ -117,14 +125,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				sessionStorage.setItem('EditableCollections', JSON.stringify(collections));
 			if (localStorage.getItem('EditableCollections') != null)
 				localStorage.setItem('EditableCollections', JSON.stringify(collections));
-			/*var collectionsUnwrapped = ko.mapping.toJS(self.myCollections);
-			if (sessionStorage.getItem('UserCollections') !== null) {
-				sessionStorage.setItem('UserCollections', JSON.stringify(collectionsUnwrapped));
-			}
-			else if (localStorage.getItem('UserCollections') !== null) {
-				localStorage.setItem('UserCollections', JSON.stringify(collectionsUnwrapped));
-
-			}*/
 		};
 		
 		self.reoladRecordDeletion = function(collId, itemId) {
@@ -156,10 +156,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			self.rightsToShare(self.myCollections()[0].rights());
-			//alert(JSON.stringify(ko.toJS(self.rightsToShare())));
-			//app.showPopup("share-collection");
-			
+			self.rightsToShare(self.myCollections()[collIndex].rights());
+			app.showPopup("share-collection");
 		}
 
 		self.openEditCollectionPopup = function(collection, event) {
@@ -184,7 +182,89 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.closeEditPopup = function() {
 			app.closePopup();
 		}
+		
+		self.shareCollection = function() {
+			
+		}
+		
+		var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
+        '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
+		
+		$('#user-selection').selectize({
+		    persist: false,
+		    maxItems: null,
+		    valueField: 'user',
+		    labelField: 'user',
+		    searchField: ['username', 'email'],
+		    plugins: ['remove_button'],
+		    options: [
+		        {email: 'brian@thirdroute.com', username: 'Brian Reavis'},
+		        {email: 'nikola@tesla.com', username: 'Nikola Tesla'},
+		        {email: 'someone@gmail.com'}
+		    ],
+		    render: {
+		        item: function(item, escape) {
+		            return '<div>' +
+		                (item.username ? '<span class="name">' + escape(item.username) + '</span>' : '') +
+		                (item.email ? '<span class="email">' + escape(item.email) + '</span>' : '') +
+		            '</div>';
+		        },
+		        option: function(item, escape) {
+		            var label = item.username || item.email;
+		            var caption = item.username ? item.email : null;
+		            return '<div>' +
+		                '<span class="label">' + escape(label) + '</span>' +
+		                (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
+		            '</div>';
+		        }
+		    },
+		    createFilter: function(input) {
+		        var match, regex;
+		        // email@address.com
+		        regex = new RegExp('^' + REGEX_EMAIL + '$', 'i');
+		        match = input.match(regex);
+		        if (match) return !this.options.hasOwnProperty(match[0]);
 
+		        // name <email@address.com>
+		        regex = new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i');
+		        match = input.match(regex);
+		        if (match) return !this.options.hasOwnProperty(match[2]);
+
+		        return false;
+		    },
+		    create: function(input) {
+		        if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
+		            return {email: input};
+		        }
+		        var match = input.match(new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i'));
+		        if (match) {
+		            return {
+		                email : match[2],
+		                username  : $.trim(match[1])
+		            };
+		        }
+		        alert('Invalid email address.');
+		        return false;
+		    }
+		});
+		
+		/*self.autoCompleteUsername = function() {
+			$.ajax({
+				"url": "/listNames",
+				"method": "GET",
+				"contentType": "application/json",
+				"data": JSON.stringify({title: self.titleToEdit(),
+						description: self.descriptionToEdit(),
+						isPublic: self.isPublicToEdit()
+					}),
+				success: function(result) {
+					
+				},
+				error: function(error) {
+					
+				}
+		}*/
+		
 		self.editCollection = function () {
 			var collIndex = self.index();
 			var collId=-1;
@@ -204,9 +284,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					success: function(result){
 						if (self.collectionSet == "my") {
 							self.updateCollectionData(self.myCollections(), collIndex);
-							/*self.myCollections()[collIndex].title(self.titleToEdit());
-							self.myCollections()[collIndex].description(self.descriptionToEdit());
-							self.myCollections()[collIndex].isPublic(self.isPublicToEdit());*/
 						}
 						else if (self.collectionSet == "shared") {
 							self.updateCollectionData(self.sharedCollections(), collIndex);
@@ -249,29 +326,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	
 
 		self.reloadRecord = function(dbId, recordDataString) {
-			/*$.ajax({
-				"url": "/collection/"+dbId,
-				"method": "GET",
-				success: function(data){
-					//TODO: Confirm that 1) myCollections array is updated (recursively) 2) as well as firstEntries
-					//self.myCollections()[index](self.load());
-					//alert(JSON.stringify(self.editableCollection()));
-					ko.mapping.fromJS(data, self.myCollections);
-					var collIndex = arrayFirstIndexOf(viewModel.items(), function(item) {
-						   return item.dbId === dbId;
-					}));
-					self.myCollections()[collIndex].remove((data);
-				}
-			});*/
 			var recordData = JSON.parse(recordDataString);
 			var recordObservable = ko.mapping.fromJS(recordData);
 			ko.mapping.fromJS(recordData, recordObservable);
 			var collData = self.checkCollectionSet(dbId);
 			var collIndex = collData.index;
 			if (collData.set == "my") {
-				/*var newItemCount = self.myCollections()[collIndex].itemCount() + 1;
-				self.myCollections()[collIndex].itemCount(newItemCount);
-				self.myCollections()[collIndex].firstEntries.push(recordObservable);*/
 				self.updateCollectionFirstEntries(self.myCollections(), collIndex, recordObservable);
 			}
 			if (collData.set == "shared") {
