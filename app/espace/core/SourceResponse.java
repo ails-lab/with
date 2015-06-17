@@ -93,6 +93,7 @@ public class SourceResponse {
 		public MyURL url;
 		public List<String> fullresolution;
 		public List<Lang> rights;
+		public String externalId;
 	}
 
 	public String query;

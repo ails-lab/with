@@ -49,7 +49,7 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
-	private String dataProviderId;
+	private String externalId;
 	
 	private boolean isPublic;
 
@@ -126,11 +126,11 @@ public class CollectionRecord {
 	}
 
 	public String getDataProviderId() {
-		return dataProviderId;
+		return externalId;
 	}
 
-	public void setDataProviderId(String dataProviderId) {
-		this.dataProviderId = dataProviderId;
+	public void setDataProviderId(String externalId) {
+		this.externalId = externalId;
 	}
 
 	public String getSource() {
