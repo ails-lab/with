@@ -31,9 +31,12 @@ import org.json.JSONException;
 
 import play.Logger;
 import play.libs.Json;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
+import elastic.Elastic;
 import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
@@ -59,11 +62,17 @@ public class MintSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		ElasticSearcher searcher = new ElasticSearcher();
-		String term = "\""+q.getQuery()+"\"" + "\"mint\"";
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_general);
+		String term = q.getQuery();
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
-		SearchResponse resp = searcher.search(term, offset, count);
+		
+		SearchOptions elasticoptions = new SearchOptions(offset, count);
+		elasticoptions.addFilter("source", "mint");
+		if(q.user == null)	elasticoptions.addFilter("public", "true");
+		else elasticoptions.setUser(q.getUser());
+		
+		SearchResponse resp = searcher.search(term, elasticoptions);
 		searcher.closeClient();
 		return new SourceResponse(resp, getSourceName(), count);
 	}

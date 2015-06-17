@@ -59,6 +59,7 @@ public class CommonQuery {
 	public String pageSize = "20";
 	public String searchTerm;
 	public String termToExclude;
+	public String user;
 	public List<String> source;
 
 	public List<CommonFilter> filters;
@@ -100,4 +101,11 @@ public class CommonQuery {
 		}
 	}
 
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getUser() {
+		return user;
+	}
 }

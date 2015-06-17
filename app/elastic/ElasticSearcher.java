@@ -26,7 +26,6 @@ import java.util.regex.Pattern;
 
 import model.CollectionRecord;
 
-import org.apache.lucene.search.Sort;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -40,6 +39,8 @@ import org.elasticsearch.index.query.MatchQueryBuilder.Type;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
@@ -63,6 +64,7 @@ public class ElasticSearcher {
 		public int count = DEFAULT_COUNT;
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
+		public String user;
 
 		public SearchOptions() {
 		}
@@ -78,6 +80,10 @@ public class ElasticSearcher {
 
 		public void setCount(int count) {
 			this.count = count;
+		}
+		
+		public void setUser(String user) {
+			this.user = user;
 		}
 
 		public void addFilter(String key, String value) {
@@ -104,9 +110,9 @@ public class ElasticSearcher {
 		}
 	}
 
-	public ElasticSearcher() {
+	public ElasticSearcher(String type) {
 		this.name = Elastic.index;
-		this.type = Elastic.type;
+		this.type = type;
 	}
 
 	public SearchResponse execute(QueryBuilder query) {
@@ -145,25 +151,26 @@ public class ElasticSearcher {
 
 	public SearchResponse search(String terms, SearchOptions options){
 		if(terms == null) terms = "";
-
-		List<String> list = new ArrayList<String>();
+		
+		
+		/*List<String> list = new ArrayList<String>();
 		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
 		while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
-
+*/
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		for(String term: list) {
-			term = term.replace("\"", "");
-			if(term.equals("mint")) {
-				MatchQueryBuilder mintQuery = QueryBuilders.matchQuery("source", term);
-				//MatchQueryBuilder mintQuery_all = QueryBuilders.matchQuery("source_all", term);
-				if(term.indexOf(" ") >= 0) mintQuery.type(Type.PHRASE);
-				bool.should(mintQuery);
-			} else {
-				MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
-				if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
-				bool.must(query);
-			}
-		}
+		//term would be a whole phrase "bla bla bla" or a single word 'red'
+			//term = term.replace("\"", "");
+			//implementation with match query
+			/*MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
+			if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
+			query.operator(Operator.OR);
+			query.minimumShouldMatch("75%");*/
+		//implementation with query_string query
+		QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
+		str.defaultOperator(Operator.OR);
+			
+		bool.must(str);
+
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
 	}
@@ -206,16 +213,16 @@ public class ElasticSearcher {
 		return Elastic.getTransportClient();
 	}
 
-	private SearchRequestBuilder getSearchRequestBuilder() {
+	private SearchRequestBuilder getSearchRequestBuilder(String type) {
 		return this.getClient()
 		.prepareSearch(this.name)
-		.setTypes(this.type)
+		.setTypes(type)
 		.setSearchType(SearchType.QUERY_THEN_FETCH);
 	}
 
 	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options) {
 
-		SearchRequestBuilder search = this.getSearchRequestBuilder()
+		SearchRequestBuilder search = this.getSearchRequestBuilder(type)
 		.setFrom(options.offset)
 		.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		.setSize(options.count);
@@ -253,14 +260,9 @@ public class ElasticSearcher {
 	}
 
 	private FilterBuilder filter(String key, String value) {
-//		System.out.println("FILTER BUILDER: " + key + " - " + value);
-		try {
-			//return this.filter(key, Facets.getInstance().getField(key), Facets.getInstance().getNested(key), value);
-			throw new IOException("Not implemented filters, facets");
-		} catch (IOException e) {
-			e.printStackTrace();
-			return this.filter(key, null, null, value);
-		}
+		System.out.println("FILTER BUILDER: " + key + " - " + value);
+		FilterBuilder filter = FilterBuilders.termFilter(key, value);
+		return filter;
 	}
 
 	private FilterBuilder filter(String key, String fieldName, String nestedField, String value) {

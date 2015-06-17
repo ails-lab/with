@@ -31,6 +31,7 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -89,6 +90,11 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
+				if(	session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get(
+							"effectiveUserIds"));
+					q.setUser(userIds.get(0));
+				}
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
