@@ -162,9 +162,9 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 						+ it.id;
 				it.rights = Utils.readLangAttr(item, "rights_url", false);
 				it.externalId = it.fullresolution.get(0);
-				if (it.externalId == null || it.externalId == "")
+				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
 					it.externalId = it.url.original.get(0);
-				if (it.externalId == null || it.externalId =="")
+				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
 					it.externalId=getSourceName() + "_" + it.id;
 				a.add(it);
 
