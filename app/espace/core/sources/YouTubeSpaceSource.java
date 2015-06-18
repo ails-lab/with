@@ -119,6 +119,7 @@ public class YouTubeSpaceSource extends ISpaceSource {
 						+ it.id;
 				it.url.original = new ArrayList<String>();
 				it.url.original.add(it.url.fromSourceAPI);
+				it.externalId = it.url.fromSourceAPI;
 				a.add(it);
 			}
 			res.items = a;
