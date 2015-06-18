@@ -218,7 +218,7 @@ var json1 = JSON.stringify({
 					"searchTerm": q,
 					"page": "1",
 					"pageSize":"20",
-				    "filters": [{ "filterID": f, value: v}]
+				    "filters": [{ "filterID": f, values: [v]}]
 				});
 console.log( json1 );
 $.ajax({
@@ -229,6 +229,7 @@ $.ajax({
 				"data": json1,
 
 				"success": function( data, textStatus, jQxhr ){
+				document.clear();
             document.write(data);
         },
         "error": function( jqXhr, textStatus, errorThrown ){

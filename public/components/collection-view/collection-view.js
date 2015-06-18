@@ -95,6 +95,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
 			self.rights=ko.observable("");
+			self.externalId = ko.observable("");
 			self.isLiked = ko.computed(function() { return app.isLiked(self.recordId()); });
 
 			self.load = function(data) {
@@ -378,6 +379,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			provider: result.provider,
 			source: result.source,
 			rights: result.rights
+			externalId: result.externalId
 		  });
 		 items.push(record);}
 		 self.citems.push.apply(self.citems, items);

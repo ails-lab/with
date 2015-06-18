@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,9 @@ import espace.core.ParallelAPICall;
 import espace.core.SearchResponse;
 import espace.core.SourceResponse;
 import espace.core.Utils;
+import espace.core.sources.DPLASpaceSource;
+import espace.core.sources.DigitalNZSpaceSource;
+import espace.core.sources.EuropeanaSpaceSource;
 
 public class SearchController extends Controller {
 
@@ -213,6 +217,7 @@ public class SearchController extends Controller {
 	}
 
 	private static Result buildresult(CommonQuery q) {
+		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;
@@ -223,6 +228,7 @@ public class SearchController extends Controller {
 			FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+			System.out.println(o);
 			return o.export();
 		};
 		List<CommonFilterResponse> merge1 = ListUtils.transform(merge, f);

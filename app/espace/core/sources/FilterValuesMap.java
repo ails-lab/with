@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -26,15 +27,15 @@ import espace.core.Utils.Pair;
 public class FilterValuesMap {
 
 	private HashMap<String, List<String>> specificvalues;
-	private HashMap<String, List<Pair<String>>> queryTexts;
+//	private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
-	private HashMap<String, Function<String, Pair<String>>> writters;
+	private HashMap<String, Function<List<String>, Pair<String>>> writters;
 
 	public FilterValuesMap() {
 		super();
 		specificvalues = new HashMap<String, List<String>>();
 		commonvalues = new HashMap<String, List<String>>();
-		queryTexts = new HashMap<String, List<Pair<String>>>();
+//		queryTexts = new HashMap<String, List<Pair<String>>>();
 		writters = new HashMap<>();
 	}
 
@@ -58,10 +59,12 @@ public class FilterValuesMap {
 		return getOrset(map, key, true);
 	}
 
-	public void addMap(String filterID, String commonValue, String specificValue, Pair<String> queryText) {
-		getOrset(specificvalues, getKey(filterID, commonValue)).add(specificValue);
-		getOrset(commonvalues, getKey(filterID, specificValue)).add(commonValue);
-		getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
+	public void addMap(String filterID, String commonValue, String... specificValue) {
+		getOrset(specificvalues, getKey(filterID, commonValue)).addAll(Arrays.asList(specificValue));
+		for (String string : specificValue) {
+			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
+		}
+//		getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
 
 	public List<String> translateToCommon(String filterID, String specificValue) {
@@ -76,33 +79,39 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public List<String> translateToSpecific(String filterID, String commonValue) {
+	public List<String> translateToSpecific(String filterID, String... commonValue) {
+		return translateToSpecific(filterID, Arrays.asList(commonValue));
+	}
+	
+	public List<String> translateToSpecific(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
-			String k = getKey(filterID, commonValue);
-			List<String> v = getOrset(specificvalues, k, false);
-			if (v.isEmpty()) {
-				v.add(commonValue);
+			ArrayList<String> res = new ArrayList<String>();
+			for (String string : commonValue) {
+				String k = getKey(filterID, string);
+				List<String> v = getOrset(specificvalues, k, false);
+				if (v.isEmpty()) {
+					v.add(string);
+				}
+				res.addAll(v);
 			}
-			return v;
+			return res;
 		}
 		return null;
 	}
 
-	public List<Pair<String>> translateToQuery(String filterID, String commonValue) {
+	public List<Pair<String>> translateToQuery(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
-			String k = getKey(filterID, commonValue);
-			List<Pair<String>> v = getOrset(queryTexts, k, false);
-			if (v.isEmpty()) {
-				Function<String, Pair<String>> w = writters.get(filterID);
-				if (w != null)
-					v.add(w.apply(commonValue));
-			}
-			return v;
+			List<Pair<String>> res = new ArrayList<Pair<String>>();
+			List<String> values = translateToSpecific(filterID, commonValue);
+			Function<List<String>, Pair<String>> w = writters.get(filterID);
+			if (w != null)
+				res.add(w.apply(values));
+			return res;
 		}
 		return null;
 	}
 
-	public void addDefaultWriter(String filterId, Function<String, Pair<String>> function) {
+	public void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
 		writters.put(filterId, function);
 	}
 

@@ -17,11 +17,14 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -45,55 +48,43 @@ import espace.core.Utils.Pair;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
 
+	public static final String LABEL = "Europeana";
 	private String europeanaKey = "SECRET_KEY";
 
 	public EuropeanaSpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new Pair<String>("qf", "DATA_PROVIDER%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
-			}
-		});
+		
+		addDefaultWriter(CommonFilters.PROVIDER_ID, qfwriter("DATA_PROVIDER"));
+		addDefaultWriter(CommonFilters.COUNTRY_ID, qfwriter("COUNTRY"));
 
-		addDefaultWriter(CommonFilters.COUNTRY_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new Pair<String>("qf", "COUNTRY%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
-			}
-		});
+		addDefaultWriter(CommonFilters.YEAR_ID, qfwriter("YEAR"));
 
-		addDefaultWriter(CommonFilters.YEAR_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new Pair<String>("qf", "YEAR%3A" + Utils.spacesFormatQuery(t, "%20"));
-			}
-		});
+		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("proxy_dc_creator"));
+		
+		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, qfwriter("proxy_dc_contributor"));
 
-		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new Pair<String>("qf", "proxy_dc_creator%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
-			}
-		});
+		addDefaultWriter(CommonFilters.RIGHTS_ID, qfwriter("RIGHTS"));
 
-		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new Pair<String>("qf", "proxy_dc_contributor%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
-			}
-		});
-		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new Pair<String>("qf", "RIGHTS%3A%22" + Utils.spacesFormatQuery(t, "%20") + "%22");
-			}
-		});
+		addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE", "qf", "TYPE:IMAGE");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO", "qf", "TYPE:VIDEO");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND", "qf", "TYPE:SOUND");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT", "qf", "TYPE:TEXT");
+		
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
+	}
+
+	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
+		Function<String, String> function =
+				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				return new Pair<String>("qf", parameter+"%3A" + 
+						Utils.getORList(ListUtils.transform(t, 
+								function)));
+			}
+		};
 	}
 
 	public String getHttpQuery(CommonQuery q) {
@@ -158,7 +149,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public String getSourceName() {
-		return "Europeana";
+		return LABEL;
 	}
 
 	@Override
@@ -192,11 +183,16 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					it.description = Utils.readLangAttr(item, "dcDescription", false);
 					it.creator = Utils.readLangAttr(item, "dcCreator", false);
 					it.year = Utils.readArrayAttr(item, "year", false);
-					it.dataProvider = Utils.readLangAttr(item, "dataProvider", false);
+					it.dataProvider = Utils.readLangAttr(item, "edmDataProvider",
+							false);
 					it.url = new MyURL();
-					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
+					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
+							false);
 					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
 					it.rights = Utils.readLangAttr(item, "rights", false);
+					it.externalId = it.fullresolution.get(0);
+					if (it.externalId == null || it.externalId == "")
+						it.externalId = it.url.original.get(0);
 					a.add(it);
 				}
 			}

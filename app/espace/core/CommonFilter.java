@@ -16,13 +16,15 @@
 
 package espace.core;
 
+import java.util.List;
+
 public class CommonFilter {
 
 	public String filterID;
-	public String value;
+	public List<String> values;
 	@Override
 	public String toString() {
-		return "CommonFilter [filterID=" + filterID + ", value=" + value + "]";
+		return "CommonFilter [filterID=" + filterID + ", value=" + values + "]";
 	}
 
 	

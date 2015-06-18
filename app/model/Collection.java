@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.validation.constraints.NotNull;
 
@@ -221,8 +222,8 @@ public class Collection {
 		this.itemCount--;
 	}
 
-	public List<Map<ObjectId, Access>> getRights() {
-		return new ArrayList<Map<ObjectId, Access>>(Arrays.asList(rights));
+	public Map<ObjectId, Access> getRights() {
+		return rights;
 	}
 
 	public boolean isExhibition() {

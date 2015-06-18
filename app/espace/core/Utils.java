@@ -143,13 +143,19 @@ public class Utils {
 	}
 
 	public static String getORList(List<String> values) {
+		return getORList(values, true);
+	}
+	public static String getORList(List<String> values, boolean paren) {
 		String res = "";
 		if (values.size() > 1) {
-			res += "(" + spacesPlusFormatQuery(values.get(0));
+			if (paren)
+				res+="(";
+			res +=  spacesPlusFormatQuery(values.get(0));
 			for (int i = 1; i < values.size(); i++) {
-				res += "+OR+" + spacesPlusFormatQuery(values.get(i));
+				res += "%20OR%20" + spacesPlusFormatQuery(values.get(i));
 			}
-			res += ")";
+			if (paren)
+				res += ")";
 		} else {
 			res += spacesPlusFormatQuery(values.get(0));
 		}

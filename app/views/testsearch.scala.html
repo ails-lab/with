@@ -28,11 +28,14 @@
  	<div id="nav">
  	<div id="vsection">
 <ul >
+
+<!-- filters section  --!>
+
 @for(p <- filters) {
 <li onClick="" class="type-2" >@p.filterName
 
 <ul >
-@for(pp <- p.suggestedValues.slice(1,14)) {
+@for(pp <- p.suggestedValues.slice(0,14)) {
 
 <li class="li1 btn btn-2" onClick="gothere('zeus', '@p.filterID', '@pp.value')" >
   @shorttext(pp.value,20) (@pp.count)
@@ -44,6 +47,9 @@
 </li>
 
 }
+
+
+<!-- filters section  --!>
 </ul> 	
 
 </div>
