@@ -768,14 +768,13 @@ public class CollectionController extends Controller {
 				.getByOwnerAndTitle(userId, "_favorites").getDbId();
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 				.getByCollection(fav);
-
 		if (records == null) {
 			result.put("error", "Cannot retrieve records from database");
 			return internalServerError(result);
 		}
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for (CollectionRecord record : records) {
-			recordsList.add(record.getDbId().toString());
+			recordsList.add(record.getExternalId());
 		}
 		return ok(recordsList);
 	}
