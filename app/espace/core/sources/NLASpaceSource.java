@@ -172,6 +172,8 @@ public class NLASpaceSource extends ISpaceSource {
 								false);
 						if (it.url.original != null)
 							it.externalId = it.url.original.get(0);
+						else
+							it.externalId=getSourceName() + "_" + it.id;
 						it.rights=null;
 
 						a.add(it);

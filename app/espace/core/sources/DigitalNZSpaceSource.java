@@ -164,7 +164,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				it.externalId = it.fullresolution.get(0);
 				if (it.externalId == null || it.externalId == "")
 					it.externalId = it.url.original.get(0);
-
+				if (it.externalId == null || it.externalId =="")
+					it.externalId=getSourceName() + "_" + it.id;
 				a.add(it);
 
 			}
