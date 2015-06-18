@@ -49,6 +49,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.provider(data.provider);
 			self.rights(data.rights);
 			self.recordId(data.recordId);
+			self.externalId(data.externalId);
 		};
 
 		self.sourceCredits = ko.pureComputed(function() {
