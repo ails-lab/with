@@ -72,6 +72,19 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
+		
+		
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.PUBLIC_DOMAIN, "BY-ND");
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_ZERO, "CC-ZERO");
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY, "CC-BY");
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_SA, "CC-BY-SA");
+
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_NC, "CC-BY-NC");
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_NC_SA, "CC-BY-NC-SA");
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_NC_ND, "CC-BY-NC-ND");
+		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.OOC_NC, "OOC-NC");
+
+		
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
