@@ -125,14 +125,6 @@ public class CollectionRecord {
 		this.dbId = dbId;
 	}
 
-	public String getDataProviderId() {
-		return externalId;
-	}
-
-	public void setDataProviderId(String externalId) {
-		this.externalId = externalId;
-	}
-
 	public String getSource() {
 		return source;
 	}
@@ -199,6 +191,14 @@ public class CollectionRecord {
 		this.description = description;
 	}
 	
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
+
 	public String getCreator() {
 		return creator;
 	}

@@ -206,7 +206,7 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 					ownerId: app.currentUser._id(),
 					title: self.collname(),
 					description:self.description(),
-					public: $("#publiccoll .active").data("value")
+					isPublic: $("#publiccoll .active").data("value")
 				});
 			  if(!self.record()){
 				  /*new collection with no item saved inside, changed for mycolllections page*/
@@ -319,8 +319,8 @@ define(['knockout', 'text!./collection.html','selectize', 'app','knockout-valida
 				type:'',
 				thumbnailUrl:self.record().thumb(),
 				sourceUrl:self.record().view_url(),
-				collectionId: collid
-				
+				collectionId: collid,
+				externalId: self.record().externalId()
 			});
 		  
 		  $.ajax({

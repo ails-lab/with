@@ -14,6 +14,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 		self.rights=ko.observable("");
 		self.url=ko.observable("");
 		self.id=ko.observable("");
+		self.externalId = ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title("No title");
@@ -44,7 +45,7 @@ define(['knockout', 'text!./item.html', 'app'], function(ko, template, app) {
 				if(data.rights!==undefined){
 					self.rights(data.rights);
 				}			
-			
+			    self.externalId(data.externalId);
 			self.source(data.source);
 			
 		};

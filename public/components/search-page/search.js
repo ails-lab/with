@@ -33,6 +33,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.provider=ko.observable("");
 		self.rights=ko.observable("");
 		self.url=ko.observable("");
+		self.externalId = ko.observable("");
 		//self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
@@ -48,6 +49,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.provider(data.provider);
 			self.rights(data.rights);
 			self.recordId(data.recordId);
+			self.externalId(data.externalId);
 		};
 
 		self.sourceCredits = ko.pureComputed(function() {
@@ -218,7 +220,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
 							provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
 							rights: result.rights!==undefined && result.rights!==null && result.rights[0]!==undefined? result.rights[0].value : "",
-
+							externalId: result.externalId,
 							source: source
 						  });
 						 items.push(record);}
