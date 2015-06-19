@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
 import utils.ListUtils;
@@ -172,6 +173,9 @@ public class NLASpaceSource extends ISpaceSource {
 								false);
 						if (it.url.original != null)
 							it.externalId = it.url.original.get(0);
+						else
+							it.externalId=getSourceName() + "_" + it.id;
+						it.externalId = DigestUtils.md5Hex(it.externalId);
 						it.rights=null;
 
 						a.add(it);
