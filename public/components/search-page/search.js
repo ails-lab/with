@@ -184,6 +184,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self._search = function() {
 			
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
+		 self.currentTerm($(".withsearch-input").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
 			$request=$.ajax({
@@ -271,21 +272,17 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							self.results.push(srcCat);
 						}
 
-					}
-					
-					
-					
-								
+					}		
 
-						if(moreitems){
-							self.next(self.page()+1);
-							
-						}else{
-							self.next(-1);
-						}
+					if(moreitems){
+						self.next(self.page()+1);
+						
+					}else{
+						self.next(-1);
+					}
 				}
 			});
-			//console.log(self.term());
+
 		 }
 		};
 
@@ -375,18 +372,14 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		    	 for (var i in suggestions) {
 		    		 var category = suggestions[i].data.category;
 		    		 var s = $(".autocomplete-suggestion").get(i);
-		    		
 		    	 }
-		    	
 		     },
 			 formatResult: function(suggestion, currentValue) {
 				var s = '<strong>' + currentValue + '</strong>';
 				s    += suggestion.value.substring(currentValue.length);
 				s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
-
 				return s;
 			 }
-
 	 });
 	  
 	  self.masonryImagesReveal = function( $items,$container ) {
