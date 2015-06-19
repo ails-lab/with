@@ -16,6 +16,7 @@
 
 package model;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,6 +40,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 // there is an option Record link if the link is already materialized
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,7 +53,7 @@ public class CollectionRecord {
 	private ObjectId dbId;
 
 	private String externalId;
-	
+
 	private boolean isPublic;
 
 	// which backend provided this entry
@@ -68,9 +71,9 @@ public class CollectionRecord {
 	@NotBlank
 	private String title;
 	private String description;
-	
+
 	private String creator;
-	
+
 	private String provider;
 
 	// the id in the source system
@@ -78,16 +81,16 @@ public class CollectionRecord {
 	// a link to the record on its source
 	private String sourceUrl;
 
-	 //url to the provider web page for that record
+	// url to the provider web page for that record
 	private String isShownAt;
-	
-	//url to the (full resoultion) content - external on in the WITH db
+
+	// url to the (full resoultion) content - external on in the WITH db
 	private String isShownBy;
-	
+
 	private String type;
 
 	private String rights;
-	
+
 	private ExhibitionRecord exhibition;
 
 	// collection specific stuff...
@@ -190,13 +193,14 @@ public class CollectionRecord {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	public String getExternalId() {
 		return externalId;
 	}
 
 	public void setExternalId(String externalId) {
-		this.externalId = externalId;
+		this.externalId = DigestUtils.md5Hex(externalId);
+		System.out.println(this.externalId);
 	}
 
 	public String getCreator() {
@@ -206,7 +210,7 @@ public class CollectionRecord {
 	public void setCreator(String creator) {
 		this.creator = creator;
 	}
-	
+
 	public String getProvider() {
 		return provider;
 	}
@@ -315,9 +319,9 @@ public class CollectionRecord {
 
 	@Override
 	public boolean equals(Object record) {
-		if( (((CollectionRecord)record).getDbId() != null) &&
-				(this.dbId != null) )
-			return ((CollectionRecord)record).getDbId().equals(this.dbId);
+		if ((((CollectionRecord) record).getDbId() != null)
+				&& (this.dbId != null))
+			return ((CollectionRecord) record).getDbId().equals(this.dbId);
 		else
 			return false;
 	}
