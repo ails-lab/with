@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -193,6 +194,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					it.externalId = it.fullresolution.get(0);
 					if (it.externalId == null || it.externalId == "")
 						it.externalId = it.url.original.get(0);
+					it.externalId = DigestUtils.md5Hex(it.externalId);
 					a.add(it);
 				}
 			}

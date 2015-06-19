@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
 import utils.Serializer;
@@ -29,7 +29,6 @@ import utils.Serializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonFilterLogic;
-import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -40,8 +39,6 @@ import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
-import espace.core.Utils.Pair;
-import espace.core.Utils.LongPair;
 
 public class DigitalNZSpaceSource extends ISpaceSource {
 
@@ -166,6 +163,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 					it.externalId = it.url.original.get(0);
 				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
 					it.externalId=getSourceName() + "_" + it.id;
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 
 			}
