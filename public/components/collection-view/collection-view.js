@@ -110,7 +110,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.provider(data.provider);
 				self.recordId(data.id);
 				self.rights(data.rights);
-				seld.externalId(data.externalId);
+				self.externalId(data.externalId);
 			};
 
 			self.sourceCredits = ko.pureComputed(function() {
