@@ -118,6 +118,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	
 		var $container = $('#columns');
 		var $request;
+		self.filterselect=ko.observable(false);
+		self.filterselection=ko.observableArray([]);
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
@@ -138,6 +140,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.page = ko.observable(1);
 		self.pageSize=ko.observable(20);
 		self.next = ko.observable(-1);
+		self.filters=ko.observableArray([]);
 
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
@@ -160,10 +163,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		};
 
 		self.reset = function() {
-			if ($request != null){ 
-			    $request.abort();
-			    $request = null;
-			}
+			 if($request!==undefined)$request.abort();
+			
 			self.term("");
 			self.currentTerm = ko.observable("");
 			self.page(1);
@@ -185,19 +186,25 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
 			$request=$.ajax({
-				"url": "/api/search",
+				"url": "/api/advancedsearch",
 				"method": "post",
 				"contentType": "application/json",
 				"data": JSON.stringify({
 					searchTerm: self.currentTerm(),
 					page: self.page(),
 					pageSize:self.pageSize(),
-				    source:self.sources()
+				    source:self.sources(),
+				    filters:self.filterselection()
 				}),
-				"success": function(data) {
+				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
-
+                    var data=reply.responces;
+                   
+                    var filters=reply.filters;
+                    console.log(filters);
+                    self.filters.removeAll();
+                    self.filters().push.apply(self.filters(),filters);
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
@@ -288,7 +295,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		};
 
 
-		self.search = function() {
+      self.filtersearch = function() {
+    	  if($request!==undefined)$request.abort();
+    	   self.filterselect(true);
+			
 			self.results.removeAll();
 			self.mixresults.removeAll();
 			self.page(1);
@@ -302,8 +312,31 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 				
 			}
+			
 			self._search();
 			
+		};
+		
+		self.search = function() {
+			if($request!==undefined)$request.abort();
+	    	   
+			self.results.removeAll();
+			self.mixresults.removeAll();
+			self.page(1);
+			self.next(1);
+			self.previous(0);
+			self.currentTerm(self.term());
+			self.searching(false);
+			if ($container.data('masonry')){
+		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
+			}else{
+				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+				
+			}
+			
+			self._search();
+			self.filterselect(false);
+			ko.dataFor(searchfacets).initFacets();
 		};
 
 		self.recordSelect= function (e){
