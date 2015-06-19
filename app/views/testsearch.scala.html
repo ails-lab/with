@@ -5,108 +5,158 @@
 
 
 @testsearchmain("Test search") {
-	@helper.form( action= routes.SearchController.posttestsearch() ){
-	    
-
-<div id="hsection">
-	<div id="vsection">
-	@helper.inputText(qform("searchTerm"))
-	@helper.inputText(qform("termToExclude"))		
-	</div>
-	<div id="vsection">
 	
-	@inputNumber(qform("page"), '_default -> "2" )
-	</div>
-	</div>
-	<div id="hsection">
+	<div class="container">
+		
+		@helper.form( action= routes.SearchController.posttestsearch() ){
 	
-			<input type="submit" class="button" value="Search" />
+     		<div class="page-header">
+       			<h1>TEST SEARCH PAGE</h1>
+       			<p class="lead">Pretty and nifty.</p>
+     		</div>
+	
+			<div class="row" id="hsection">
+				<div id="vsection" class="col-md-7">
+					@helper.inputText(qform("searchTerm"))
+					@helper.inputText(qform("termToExclude"))		
+				</div>
+				<div id="vsection" class="col-md-3">
+					@inputNumber(qform("page"), '_default -> "2" )
+					<button type="submit" class="btn btn-default" value="Search">Search</button>
+				</div>
 			</div>
-	}
+		}
 	
-	<div id="hsection">
- 	<div id="nav">
- 	<div id="vsection">
-<ul >
-
-<!-- filters section  --!>
-
-@for(p <- filters) {
-<li onClick="" class="type-2" >@p.filterName
-
-<ul >
-@for(pp <- p.suggestedValues.slice(0,14)) {
-
-<li class="li1 btn btn-2" onClick="gothere('zeus', '@p.filterID', '@pp.value')" >
-  @shorttext(pp.value,20) (@pp.count)
-</li>
-
+	
+	
+		<div class="row" id="hsection">
+	 		 <div id="nav" class="col-md-3">
+		 			<!--
+		 			<div class="col-sm-12" id="hsection">
+							@for(p <- filters) {
+								<div onClick="" class="row" >	
+									<label id="filter-name">
+										@p.filterName
+									</label>		
+										
+									 
+									<ul class="list-group">
+										@for(pp <- p.suggestedValues.slice(0,14)) {
+											
+											//<li class="li1 btn btn-2" onClick="gothere('zeus', '@p.filterID', '@pp.value')" >
+		  									//	@shorttext(pp.value,20) (@pp.count)
+											//</li>
+											
+										
+											 <li class="list-group-item">
+											    //checkboxes dont work with onClick i think, we need to check out the functionality 
+  												<label><input type="checkbox" value="" onClick="gothere('zeus', '@p.filterID', '@pp.value')">
+		  											@shorttext(pp.value,20) (@pp.count)
+  												</label>
+											</li>
+											
+											 
+										}
+									</ul>
+									
+									
+									
+									 	
+								</div>
+							}
+					 </div>
+					 
+					 //-->
+					<div class="col-sm-12" id="hsection">
+						@for(p <- filters) {
+						<div class="form-group row">
+  							<label for="filter-name">
+  								Select @p.filterName:
+  							</label>
+  							
+  							<select multiple class="form-control" id="filter-name">
+  								@for(pp <- p.suggestedValues.slice(0,14)) {
+	    							<option>
+	    								@shorttext(pp.value,20) (@pp.count)
+	    							</option>
+	    						}
+  							</select>
+						</div>
+						}
+					</div>
+					
+					
+			</div>
+					 
+		 	
+				<div id="section" class="col-md-8">
+					@if(content!=null) {
+					
+							<div id="tabs" class="row">
+									<div id="ttt">
+									@for(p <- content) {
+										<button type="button" class="btn btn-sm btn-default" onClick="change('@p.source')" >
+											@p.source (@p.count)
+										</button>
+									}
+									</div>
+								
+							</div>
+							
+							
+							<div class="col-md-12" id="True-content">
+								
+								
+								
+								@for(p <- content) {
+									<div id="@p.source">
+										<div class="row">
+				  							<b>Source: </b> @p.source <br/>
+				  							<b>Count: </b>@p.count <br/>
+				  							<b>Query: </b>@p.query <br/>
+				  						</div>
+				  						
+				  						<div class="row">
+				  						
+				  						
+				  						@if(p.items!=null){
+				  							@for(it <- p.items) {
+				  								<div id="thumbframe" class="col-md-12">
+				  									
+				  									<div  id="thinfo" class="col-md-8">
+				    									<b>Title: </b> 
+				    									<a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
+				 											@shorttext(it.title.get(0).value,40)
+				 										</a><br/>
+				    									
+				  										<b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
+				   									</div>
+				  									
+				  									
+				  									<div id="thumb" class="col-md-3">
+				  										<img alt="NO IMAGE" class="img-thumbnail" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> 
+				    								</div>
+				    								
+				  								</div>
+				  							}
+				  						}
+				  						</div>
+									</div>
+								}
+							</div>
+							
+							<div id="Display_content">
+								<script>change('@content.get(0).source')</script>
+							</div>
+							
+					} else {
+				  		Nothing here	
+					}
+				</div>	
+		</div>
+		
+		
+	</div>	
 }
-</ul> 	
 
-</li>
-
-}
-
-
-<!-- filters section  --!>
-</ul> 	
-
-</div>
- 	</div>
-	<div id="section">
-@if(content!=null) {
-
-<div id="tabs">
-<ul class="basictab">
-
-@for(p <- content) {
-<li onClick="change('@p.source')" >@p.source</li>
-}
-</ul>
-
-@for(p <- content) {
-<div id="@p.source" class="content_tab">
-  <b>Source: </b> @p.source <br/>
-  <b>Count: </b>@p.count <br/>
-  <b>Query: </b>@p.query <br/>
-  @if(p.items!=null){ 
-  @for(it <- p.items) {
-  <div id="thumbframe">
-  <!--
-  <div id="thumb"   >
-  <img alt="" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> 
-    
-    </div>
-    --!> 
-    
-    <b>Title: </b> <a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
- @shorttext(it.title.get(0).value,40)
- </a><br/>
-    
-  <!--
-    <div  id="thinfo">
   
-  <b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
-  
-  </div>
-  --!>
-  </div>
-  }
-  }
-  
-  
-</div>
-}
-</div>
- 
-} else {
-  Nothing here	
-}	
-}
-
-<div id="Display_content" onload="change('@content.get(0).source')">
-  </div>
-  
- </div>
-  </div>
