@@ -367,8 +367,8 @@ public class CollectionController extends Controller {
 		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(collection
-					.getRights(), userIds);
+			Access maxAccess = AccessManager.getMaxAccess(
+					collection.getRights(), userIds);
 			if (collection.getTitle().equals("_favorites")) {
 				continue;
 			}
@@ -648,7 +648,6 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 
-		// Remove record from collection.firstEntries
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
@@ -656,6 +655,15 @@ public class CollectionController extends Controller {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
+		}
+		try {
+			if (DB.getCollectionRecordDAO().getById(new ObjectId(recordId)) == null) {
+				result.put("error", "Wrong recordId");
+				return internalServerError(result);
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 		List<CollectionRecord> records = collection.getFirstEntries();
 		for (CollectionRecord r : records) {
