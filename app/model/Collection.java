@@ -32,12 +32,14 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
@@ -67,8 +69,10 @@ public class Collection {
 	private int itemCount;
 	private boolean isPublic;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date lastModified;
 
 	// fixed-size list of entries
@@ -76,6 +80,7 @@ public class Collection {
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
+	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 	private final Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {

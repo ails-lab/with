@@ -19,13 +19,20 @@ package utils;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
+import model.User.Access;
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,6 +64,20 @@ public class Serializer {
 
 	}
 
+	public static class CustomMapSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object map, JsonGenerator jsonGen,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			Map<String, String> rights = new HashMap<String, String>();
+			for(Entry<ObjectId, Access> e: ((Map<ObjectId, Access>)map).entrySet()) {
+				rights.put(e.getKey().toString(), e.getValue().toString());
+			}
+			jsonGen.writeObject(Json.toJson(rights));
+		}
+
+	}
+	
 	public static String serializeXML(Document doc) {
 		DOMImplementationLS domImplementation = (DOMImplementationLS) doc
 				.getImplementation();
