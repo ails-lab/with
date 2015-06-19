@@ -19,18 +19,14 @@ package espace.core.sources;
 public class RightsValues {
 
 	//open
-	public static final String PUBLIC_DOMAIN = "http://creativecommons.org/publicdomain/mark/1.0/";
-	public static final String CC_ZERO = "http://creativecommons.org/publicdomain/zero/1.0/";
-	public static final String CC_BY = "http://creativecommons.org/licenses/by/";
-	public static final String CC_BY_SA= "http://creativecommons.org/licenses/by-sa/";
+	public static final String Public = "Public";
+	//You can use it with attribution
 	
-	//resticted
-	public static final String CC_BY_NC = "http://creativecommons.org/licenses/by-nc/";
-	public static final String CC_BY_NC_SA = "http://creativecommons.org/licenses/by-nc-sa/";
-	public static final String CC_BY_NC_ND = "http://creativecommons.org/licenses/by-nc-nd/";
-	public static final String BY_ND = "http://creativecommons.org/licenses/by-nd/";
-	public static final String OOC_NC = "http://www.europeana.eu/rights/out-of-copyright-non-commercial/";
+	public static final String Restricted = "Restricted";
+	//You can use it with restrictions
 	
-	//permission
-	//public static final String PERMISSION = "permission needed";
+	public static final String Permission = "Permission";
+	//You can use it with pemission
+	
+	
 }

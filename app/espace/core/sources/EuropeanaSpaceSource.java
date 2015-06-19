@@ -74,16 +74,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
 		
 		
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.PUBLIC_DOMAIN, "BY-ND");
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_ZERO, "CC-ZERO");
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY, "CC-BY");
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_SA, "CC-BY-SA");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/zero/1.0/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by-sa/");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-sa/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-nd/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nd/");		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
 
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_NC, "CC-BY-NC");
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_NC_SA, "CC-BY-NC-SA");
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.CC_BY_NC_ND, "CC-BY-NC-ND");
-		addMapping(CommonFilters.RIGHTS_NAME	, RightsValues.OOC_NC, "OOC-NC");
-
+		//pemission is not *creative*  
 		
 	}
 
