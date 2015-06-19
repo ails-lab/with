@@ -25,10 +25,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
 import model.Collection;
 import model.CollectionRecord;
+import model.User.Access;
 
+import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -60,11 +61,59 @@ public class ElasticIndexer {
 		this.record = record;
 	}
 
-
+	public ElasticIndexer( Collection c, CollectionRecord r ) {
+		this.collection = c;
+		this.record = r;
+	}
+	
+	public IndexResponse indexCollectionMetadata() {
+		if( collection == null ) 
+			log.error("No collection specified!");
+		
+		Iterator<Entry<String, JsonNode>> colIt = Json.toJson(collection).fields();
+		XContentBuilder doc = null;
+		try {
+			doc = jsonBuilder().startObject();
+			
+			while( colIt.hasNext() ) {
+				Entry<String, JsonNode> entry = colIt.next();
+				if( entry.getKey().equals("rights") ) {
+					ArrayNode array = Json.newObject().arrayNode();
+					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
+						ObjectNode right = Json.newObject();
+						right.put("user", e.getKey().toString());
+						right.put("access", e.getValue().toString());
+						array.add(right);
+					}
+   					doc.rawField(entry.getKey(), array.toString().getBytes());
+				} else if( !entry.getKey().equals("firstEntries") &&
+						  !entry.getKey().equals("rights") &&	
+						  !entry.getKey().equals("dbId")) {
+					doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					doc.field(entry.getKey(), entry.getValue().asText());
+				}
+			}
+		} catch(IOException e) {
+				log.error("Cannot create collection json document for indexing", e);
+		}
+		
+		IndexResponse response = Elastic.getTransportClient().prepareIndex(
+					Elastic.index,
+					Elastic.type_collection,
+					collection.getDbId().toString())
+				.setSource(doc)
+				.execute()
+				.actionGet();
+		return response;
+	}
 
 	public void index() {
-		if( collection != null )
-			indexCollection();
+		if( collection != null && record != null ) {
+			indexCollectionMetadata();
+			indexForGeneralSearch();
+			indexForWithinSearch();
+		} else if( collection != null )
+			indexCollectionMetadata();
 		else if( record != null ) {
 			indexForGeneralSearch();
 			indexForWithinSearch();
@@ -131,12 +180,17 @@ public class ElasticIndexer {
 	
 	public UpdateResponse indexForGeneralSearch() {
 		IndexRequest indexReq = new IndexRequest(
-				Elastic.index, Elastic.type_general, record.getExternalId())
+				Elastic.index, Elastic.type_general)
 			.source(prepareMergedDocument());
+		if( record.getExternalId() == null ) 
+			record.setExternalId(record.getDbId().toString());
+		indexReq.id(record.getExternalId());
 		UpdateResponse resp = null;
 		try {
-		resp = Elastic.getTransportClient().prepareUpdate(
-						Elastic.index, Elastic.type_general, record.getExternalId())
+		resp = Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.type_general)
+				.setId(record.getExternalId())
 			.addScriptParam("map", createEntryForRecord())
 			.setScript("ctx._source.collection_specific += map", ScriptType.INLINE)
 			.setUpsert(indexReq)
@@ -203,9 +257,9 @@ public class ElasticIndexer {
 	
 	public IndexResponse indexForWithinSearch() {
 		IndexResponse response = Elastic.getTransportClient().prepareIndex(
-				Elastic.index,
-				Elastic.type_within,
-									record.getDbId().toString())
+						Elastic.index,
+						Elastic.type_within,
+						record.getDbId().toString())
 				.setSource(prepareRecordDocument())
 				.execute()
 				.actionGet();
@@ -246,5 +300,4 @@ public class ElasticIndexer {
 	public void parseXmlIntoDoc( String xmlContent ) {
 		
 	}
-
 }

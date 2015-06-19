@@ -1,5 +1,5 @@
 {
-  "merged_record": {
+  "collection": {
     "dynamic_templates": [
       {
         "template_1": {
@@ -21,7 +21,7 @@
       },
       {
         "template_3": {
-          "match": "collection_specific",
+          "match": "rights",
           "mapping": {
             "type": "nested"
           }

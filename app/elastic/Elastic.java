@@ -62,12 +62,14 @@ public class Elastic {
 	private static TransportClient transportClient;
 	private static BulkProcessor bulkProcessor;
 
-	public static String cluster 		 = getConf().getString("elasticsearch.cluster");
-	public static String index   		 = getConf().getString("elasticsearch.index.name");
-	public static String mapping_within  = getConf().getString("elasticsearch.index.mapping_within");
-	public static String type_within     = getConf().getString("elasticsearch.index.type.within");
-	public static String mapping_general = getConf().getString("elasticsearch.index.mapping_general");
-	public static String type_general    = getConf().getString("elasticsearch.index.type.general");
+	public static String cluster 		    = getConf().getString("elasticsearch.cluster");
+	public static String index   		    = getConf().getString("elasticsearch.index.name");
+	public static String mapping_collection = getConf().getString("elasticsearch.index.mapping.collection");
+	public static String type_collection    = getConf().getString("elasticsearch.index.type.collection");
+	public static String mapping_within     = getConf().getString("elasticsearch.index.mapping.within");
+	public static String type_within        = getConf().getString("elasticsearch.index.type.within");
+	public static String mapping_general    = getConf().getString("elasticsearch.index.mapping.general");
+	public static String type_general       = getConf().getString("elasticsearch.index.type.general");
 	
 
 	private final static String host = getConf().getString("elasticsearch.host");
@@ -187,7 +189,8 @@ public class Elastic {
 
 		if( (mappings!=null) && (mappings.containsKey(index)) 
 				&& (mappings.get(index).containsKey(type_general) 
-					|| mappings.get(index).containsKey(type_within)) )
+					|| mappings.get(index).containsKey(type_within)
+					|| mappings.get(index).containsKey(type_collection)) )
 			return true;
 		return false;
 
@@ -198,14 +201,17 @@ public class Elastic {
 			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
 			JsonNode general_mapping = null;
 			JsonNode within_mapping = null;
+			JsonNode collection_mapping = null;
 			CreateIndexRequestBuilder cireqb = null;
 			CreateIndexResponse ciresp = null;
 			try {
 				general_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_general))));
 				within_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_within))));
+				collection_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_collection))));
 				cireqb = Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index);
 				cireqb.addMapping(type_general, general_mapping.toString());
 				cireqb.addMapping(type_within, within_mapping.toString());
+				cireqb.addMapping(type_collection, collection_mapping.toString());
 				ciresp = cireqb.execute().actionGet();
 			} catch(ElasticsearchException ese) {
 				log.error("Cannot put mapping!", ese);

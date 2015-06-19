@@ -34,13 +34,16 @@ import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder.Type;
+import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
+import org.elasticsearch.index.search.MatchQuery;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
@@ -50,8 +53,8 @@ import org.elasticsearch.search.sort.SortOrder;
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
 
-	private final String name;
-	private final String type;
+	private String name;
+	private String type;
 
 	private final Client client = null;
 	public static final int DEFAULT_COUNT = 10;
@@ -152,25 +155,35 @@ public class ElasticSearcher {
 	public SearchResponse search(String terms, SearchOptions options){
 		if(terms == null) terms = "";
 		
-		
-		/*List<String> list = new ArrayList<String>();
-		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
-		while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
-*/
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		//term would be a whole phrase "bla bla bla" or a single word 'red'
-			//term = term.replace("\"", "");
-			//implementation with match query
-			/*MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
-			if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
-			query.operator(Operator.OR);
-			query.minimumShouldMatch("75%");*/
-		//implementation with query_string query
-		QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
-		str.defaultOperator(Operator.OR);
+		
+		if(type.equals(Elastic.type_general)) {
+			/*
+			List<String> list = new ArrayList<String>();
+			Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
+			while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
+			 */
+			//implementation with query_string query
+			QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
+			str.defaultOperator(Operator.OR);
+				
+			bool.must(str);
+		} else if(type.equals(Elastic.type_collection)) {
 			
-		bool.must(str);
-
+			MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
+			
+			BoolQueryBuilder user = QueryBuilders.boolQuery();
+			MatchQueryBuilder user_match = QueryBuilders.matchQuery("rights.user", options.user);
+			user.must(user_match);
+			//MatchQueryBuilder access_match = QueryBuilders.matchQuery("rights.access", "");
+			//user.must(access_match);
+			NestedQueryBuilder nested = QueryBuilders.nestedQuery("rights", user);
+			
+			bool.must(match_all);
+			bool.must(nested);
+		} else {
+		}
+		
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
 	}
@@ -271,6 +284,10 @@ public class ElasticSearcher {
 		return nested;
 	}
 
+	public void setType(String type) {
+		this.type = type;
+	}
+	
 	public static List<CollectionRecord> extractRecordsFromResponseHits(SearchResponse response){
     	ArrayList<CollectionRecord> result = new ArrayList<CollectionRecord>();
 //    	play.Logger.debug("extract records");

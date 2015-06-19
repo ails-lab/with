@@ -46,15 +46,15 @@ public class ElasticTest {
 		}*/
 
 
-		Collection c = DB.getCollectionDAO().get(new ObjectId("5551ede5d4c67d37242c5971"));
+		Collection c = DB.getCollectionDAO().get(new ObjectId("55802c0ee4b07326b34b57c2"));
 		CollectionRecord r = DB.getCollectionRecordDAO().get(new ObjectId("5570299f44aefbeb0a81c4b7"));
 		CollectionRecord r1 = DB.getCollectionRecordDAO().get(new ObjectId("5570330344ae86da914cb469"));
 		r.setSource("MINT");
-		r.setPublic(true);
-		ElasticIndexer indexer = new ElasticIndexer( r1 );
+		r.setIsPublic(true);
+		ElasticIndexer indexer = new ElasticIndexer( c, r1 );
 		ElasticUpdater updater = new ElasticUpdater( r1 );
 		Elastic.putMapping();
-		indexer.index();
+		//indexer.index();
 		updater.update();
 		
 		/*CollectionRecord r2 = DB.getCollectionRecordDAO().get(new ObjectId("55350eede4b0cd1145214523"));
