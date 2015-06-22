@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
+
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -150,7 +152,8 @@ public class DPLASpaceSource extends ISpaceSource {
 						+ Utils.readAttr(item, "id", false);
 				it.rights = Utils.readLangAttr(item.path("sourceResource"),
 						"rights", false);
-
+				it.externalId = it.url.original.get(0);
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 			}
 			res.items = a;

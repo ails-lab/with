@@ -35,6 +35,7 @@ import play.mvc.Result;
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
 import espace.core.CommonFilterLogic;
@@ -214,10 +215,21 @@ public class SearchController extends Controller {
 		}
 		q.validate();
 		return buildresult(q);
+		
+		
+		//JsonNode json = request().body().asJson();
+		//
+		//CommonQuery q = json;
+		//ObjectNode result = Json.newObject();
+		//
+		//System.out.println(json);
+		//
+		//
+		//return ok(result);
 	}
 
 	private static Result buildresult(CommonQuery q) {
-		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
+//		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;

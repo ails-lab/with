@@ -95,7 +95,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			self.provider=ko.observable("");
 			self.url=ko.observable("");
 			self.rights=ko.observable("");
-			
+			self.externalId = ko.observable("");
 			self.load = function(data) {
 				if(data.title==undefined){
 					self.title("No title");
@@ -110,7 +110,7 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 				self.provider(data.provider);
 				self.recordId(data.id);
 				self.rights(data.rights);
-				
+				self.externalId(data.externalId);
 			};
 
 			self.sourceCredits = ko.pureComputed(function() {
@@ -360,7 +360,8 @@ define(['bridget','knockout', 'text!./collection-view.html','masonry','imagesloa
 			creator: result.creator,
 			provider: result.provider,
 			source: result.source,
-			rights: result.rights
+			rights: result.rights,
+			externalId: result.externalId
 		  });
 		 items.push(record);}
 		 self.citems.push.apply(self.citems, items);
