@@ -1,4 +1,4 @@
-define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui','autoscroll','app', 'bootstrap-select'], function(ko, template, jqueryUI, autoscroll, app, bootstrapSelect) {
+define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui','autoscroll','app', 'bootstrap-select', 'jquery.lazyload'], function(ko, template, jqueryUI, autoscroll, app, bootstrapSelect, jqueryLazyLoad) {
 
 
 function MyCollection(collectionData) {
@@ -22,7 +22,7 @@ var ExhibitionEditModel = function(params) {
     var self = this;
     self.route = params.route;	
     self.galleryName     = ko.observable('Add Title');
-    self.gallerySubtitle = ko.observable('Add Description'); 
+    self.gallerySubtitle = ko.observable("Add description"); 
     self.collectionItemsArray = ko.observableArray([]);
     
     var collections = [];
@@ -88,8 +88,9 @@ var ExhibitionEditModel = function(params) {
     self.showPopUp = function(data){
     	
 	console.log('show popup');
-	editItem(data);
-	}
+	editItem(data, 'PopUpVideoMode');
+	}	
+	
     //custom binding
     var _draggedItem;
     var _bIsMoveOperation;

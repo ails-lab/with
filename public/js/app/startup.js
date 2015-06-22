@@ -23,7 +23,8 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
 	ko.components.register('exhibition-edit', { require: 'components/exhibition-edit/exhibition-edit' });
-	ko.components.register('exhibition-item-edit', { require: 'components/exhibition-edit/popup-exhibition-edit' });
+	ko.components.register('popup-exhibition-edit', { require: 'components/exhibition-edit/popup-exhibition-edit' });
+	
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }

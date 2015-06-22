@@ -12,7 +12,7 @@
     "knockout-projections": "~1.1.0",
     "masonry": "~3.2.2",
     "holderjs": "~2.4.1",
-    "imagesloaded":"~3.1.7",
+    "imagesloaded": "~3.1.7",
     "jquery-bridget": "latest",
     "knockout-validation": "~2.0.2",
     "knockout-amd-helpers": "~0.7.3",
@@ -26,7 +26,8 @@
     "bootstrap-tagsinput": "latest",
     "smoke": "latest",
     "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip",
-    "bootstrap-select": "1.6.5"
+    "bootstrap-select": "1.6.5",
+    "jquery.lazyload": "~1.9.5"
   },
   "resolutions": {
     "knockout": "~3.2.0"

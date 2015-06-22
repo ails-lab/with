@@ -2,7 +2,7 @@
 <div class="exhibition">
 <div class="left"></div>  <!-- for scrolling the page when dragging item at left of page-->   
 <div class="outer"><!--
---><div class="boxBasic boxItem" id="placeholder">
+--><div class="boxBasic boxItem" id="placeholder">            
 	    <div  class="placeholderD1" data-bind="text: galleryName" contenteditable=true></div>
 	    <div  class="placeholderD2" data-bind="text: gallerySubtitle" contenteditable=true ></div>
 	</div><!-- 
@@ -71,10 +71,10 @@
 		<div  id="title" data-bind="text: currentItem().title"></div>
 		<div  id="creator" data-bind="text: currentItem().source"></div>
 		<div  id="provider" data-bind="text: currentItem().description"> </div>
-		<div  id="description" data-bind="text: currentItem().description"> </div>
+		<div  id="description">Space shuttle launch</div>
 	    </div>
     </div>
     <!-- /ko -->
 </div>
 </div>
-<exhibition-item-edit params="route: route"> </exhibition-item-edit>
+<popup-exhibition-edit params="route: route"></popup-exhibition-edit>	

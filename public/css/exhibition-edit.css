@@ -22,35 +22,6 @@ exhibition {
 	position:fixed;
         position relative;
 }
-/*#container {*/
-/*    position: absolute;*/
-/*    top: 0;*/
-/*    bottom: 80px;*/
-/*    left:0;*/
-/*    right:0; */
-/*    background-color: #F2F2F2;*/
-/*    z-index: 0;*/
-/*    overflow: visible;*/
-/*}*/
-/**/
-/*.outer {*/
-/*    position: absolute;*/
-/*    top: 0;*/
-/*    bottom: 0;*/
-/*    left:0;*/
-/*    right:0;*/
-/*    margin-top: 100px;*/
-/*    margin-top: 100px;*/
-/*    width:100%;*/
-/*    border-width: 2px;*/
-/*    border-color: pink;*/
-/*    white-space: nowrap;*/
-/*    display:inline-block;*/
-/*    overflow:scroll;*/
-/*    overflow-y: hidden;*/
-/*    background-color: #FAFAFA;*/
-/*    z-index: 1;*/
-/*}*/
 
 .outer {
     position: absolute;
@@ -105,7 +76,9 @@ exhibition {
     margin-left: 20px;
     margin-right: 20px;
     padding: 10px;
-    /*background-color: green;*/
+    border-width: 1px;
+    border-color: #D2D2D2;
+    border-style: solid;
 }
 
 
@@ -133,6 +106,8 @@ exhibition {
     text-align: center;
     margin-top: 30px;
     color: #696969;
+    outline-color: #696969;
+    cursor: text;
 }
 
 .placeholderD1 {
@@ -144,6 +119,8 @@ exhibition {
     margin-bottom: 40px;
     margin-top: 40px;
     color: #303030;
+    outline-color: #696969;
+    cursor: text;
 }
 
 .boxItem:hover:not(#placeholder) {
@@ -188,6 +165,7 @@ exhibition {
     right:-2px;
     height: 40px;
     background-color:#999999;
+    cursor: pointer;
 }
 
 .EditButtonText {
@@ -442,3 +420,8 @@ exhibition {
 
 
 /* Edit popup   */
+
+.separator {
+ margin-top: 10px;
+ margin-bottom: 10px;
+}
