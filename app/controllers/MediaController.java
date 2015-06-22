@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.util.Map;
+
 import model.Media;
 
 import org.bson.types.ObjectId;
@@ -24,6 +26,8 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http;
+import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -117,4 +121,23 @@ public class MediaController extends Controller {
 		return ok(result);
 	}
 
+	public static Result createMedia( boolean fileData ) {
+		final Http.MultipartFormData multipartBody = request().body().asMultipartFormData();
+		if( fileData ) {
+			if( multipartBody != null ) {
+				for( FilePart fp: multipartBody.getFiles() ) {
+					// lets start by making binary objects for every part
+					
+				}
+			}
+		} else {
+			final Map<String,String[]> req = request().body().asFormUrlEncoded();
+			if( req != null ) {
+				
+			} else {
+				final JsonNode jsonBody = request().body().asJson();
+			}
+		}
+		return ok();
+	}
 }
