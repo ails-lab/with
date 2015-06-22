@@ -79,11 +79,17 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	public List<CollectionRecord> getByUniqueId(String extId) {
-		Query<CollectionRecord> q = this.createQuery()
-				.field("externalId:").equal(extId);
+		Query<CollectionRecord> q = this.createQuery().field("externalId:")
+				.equal(extId);
 		return this.find(q).asList();
 	}
-	
+
+	public List<CollectionRecord> getByUniqueId(ObjectId colId, String extId) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId).field("externalId:").equal(extId);
+		return this.find(q).asList();
+	}
+
 	public int deleteByCollection(ObjectId colId) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId);

@@ -756,14 +756,18 @@ public class CollectionController extends Controller {
 		return addRecordToCollection(fav);
 	}
 
-	public static Result removeFromFavorites(String recordId) {
+	// delete with external id
+	public static Result removeFromFavorites(String externalId) {
 
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		ObjectId userId = new ObjectId(userIds.get(0));
-		String fav = DB.getCollectionDAO()
-				.getByOwnerAndTitle(userId, "_favorites").getDbId().toString();
-		return removeRecordFromCollection(fav, recordId, -1);
+		ObjectId fav = DB.getCollectionDAO()
+				.getByOwnerAndTitle(userId, "_favorites").getDbId();
+		List<CollectionRecord> record = DB.getCollectionRecordDAO()
+				.getByUniqueId(fav, externalId);
+		String recordId = record.get(0).getDbId().toString();
+		return removeRecordFromCollection(fav.toString(), recordId, -1);
 	}
 
 	public static Result getFavorites() {
