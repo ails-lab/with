@@ -231,7 +231,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						self.revealItems(data);
+						console.log(data.itemCount);
+						self.revealItems(data.records);
 					},
 					"error": function (result) {
 						self.loading(false);
