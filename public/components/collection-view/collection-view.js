@@ -135,9 +135,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			case "EFashion":
 				return "europeanafashion.eu";
 			case "YouTube":
-				{
-					return "youtube.com";
-				}
+				return "youtube.com";
 			case "Mint":
 				return "mint";
 			default:
@@ -181,7 +179,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		self.desc = ko.showMoreLess('');
 
 		self.loadCollection = function (id) {
-
 			self.loading(true);
 			self.citems([]);
 			$container.empty();
@@ -254,8 +251,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					isFitWidth: true,
 					transitionDuration: transDuration
 				});
-
 			}
+
 			$items.imagesLoaded().progress(function (imgLoad, image) {
 				counter++;
 				var $item = $(image.img).parents(".masonryitem");
@@ -308,6 +305,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 						$("#myModal").find("h4").html("Done!");
 						$("#myModal").find("div.modal-body").html("Item removed from collection");
 						$("#myModal").modal('show');
+						$container.masonry( 'layout');
 					},
 					error: function (xhr, textStatus, errorThrown) {
 						$("#myModal").find("h4").html("An error occured");
@@ -319,26 +317,25 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		};
 
 		self.likeRecord = function (id) {
-			// if (app.likeItem(id)) {
-			// 	$('#' + id + ' .star').addClass('active');
-			// } else {
-			// 	$('#' + id + ' .star').removeClass('active');
-			// }
-			console.log(id);
-			if (app.likeItem(id)) {
-				$('#' + id).addClass('active');
-			} else {
-				$('#' + id).removeClass('active');
-			}
+			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
+				return record.externalId() === id;
+			});
+
+			app.likeItem(rec, function (status) {
+				if (status) {
+					$('#' + id).addClass('active');
+				} else {
+					$('#' + id).removeClass('active');
+				}
+			});
 		};
 
 		function getItem(record) {
-
 			var figure = '<figure class="masonryitem" id="' + record.recordId() + '">';
 			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\', true); } }"></span></span>';
+				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
 			} else {
-				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\', false); } }"></span></span>';
+				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
 			}
 			if (self.access() == "WRITE" || self.access() == "OWN") {
 				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\')}}"></span>';

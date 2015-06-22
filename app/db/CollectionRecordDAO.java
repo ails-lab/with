@@ -41,7 +41,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	/**
 	 * Retrieve records from specific collection
-	 * 
+	 *
 	 * @param colId
 	 * @return
 	 */
@@ -51,7 +51,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	/**
 	 * Retrieve records from specific collection by offset and count
-	 * 
+	 *
 	 * @param colId
 	 *            , offset, count
 	 * @return
@@ -79,14 +79,14 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	public List<CollectionRecord> getByUniqueId(String extId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId:")
+		Query<CollectionRecord> q = this.createQuery().field("externalId")
 				.equal(extId);
 		return this.find(q).asList();
 	}
 
 	public List<CollectionRecord> getByUniqueId(ObjectId colId, String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
-				.equal(colId).field("externalId:").equal(extId);
+				.equal(colId).field("externalId").equal(extId);
 		return this.find(q).asList();
 	}
 
