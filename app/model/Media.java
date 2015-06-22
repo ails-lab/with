@@ -44,6 +44,8 @@ public class Media {
 	// the owner
 	private ObjectId ownerId;
 
+	
+	// only public media can be URL accessed by everybody
 	private boolean isPublic;
 
 	private int width, height;
@@ -63,7 +65,13 @@ public class Media {
 
 	private String filename;
 
-
+	private String thumbnailOf;
+	private String keyframeOf;
+	
+	// a URL which this media is caching
+	private String cacheOf;
+	private Rights rights = new Rights();
+	
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -170,5 +178,37 @@ public class Media {
 
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+
+	public String getThumbnailOf() {
+		return thumbnailOf;
+	}
+
+	public void setThumbnailOf(String thumbnailOf) {
+		this.thumbnailOf = thumbnailOf;
+	}
+
+	public String getKeyframeOf() {
+		return keyframeOf;
+	}
+
+	public void setKeyframeOf(String keyframeOf) {
+		this.keyframeOf = keyframeOf;
+	}
+
+	public String getCacheOf() {
+		return cacheOf;
+	}
+
+	public void setCacheOf(String cacheOf) {
+		this.cacheOf = cacheOf;
+	}
+
+	public Rights getRights() {
+		return rights;
+	}
+
+	public void setRights(Rights rights) {
+		this.rights = rights;
 	}
 }
