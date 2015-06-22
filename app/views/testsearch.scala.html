@@ -89,9 +89,9 @@
   								Select @p.filterName:
   							</label>
   							
-  							<select multiple name=@p.filterName class="form-control">
+  							<select multiple name=@p.filterName id=@p.filterID class="form-control">
   								@for(pp <- p.suggestedValues.slice(0,14)) {
-	    							<option filter=@p.filterName name="@pp.value">
+	    							<option filter=@p.filterName filterID=@p.filterID name="@pp.value">
 	    								@shorttext(pp.value,20) (@pp.count)
 	    							</option>
 	    						}
@@ -115,7 +115,7 @@
 							
 							$("select").each(function() {
 								
-								var thisfilter = $(this).attr('name');
+								var thisfilter = $(this).attr('id');
 								
 								var filter = new Object();
 								
@@ -125,7 +125,7 @@
 								
 								$( "select option:selected" ).each(function() {
 									
-									if($(this).attr('filter') == thisfilter){
+									if($(this).attr('filterID') == thisfilter){
 										str.push($( this ).attr('name'));
 									}
 	      						});
@@ -136,8 +136,9 @@
 								
 								if(str.length != 0){
 									filters.push(filter);
+									//filters.push(JSON.stringify(filter));
+								
 								}
-								//filters.push(JSON.stringify(filter));
 								
 							});
     						// $( "div" ).text( str );
@@ -147,7 +148,8 @@
     						queryJ.searchTerm = "zeus"; //$("#searchT").val();
     						queryJ.page = "1";
     						queryJ.pageSize = "20";
-    						queryJ.filters = JSON.stringify(filters);
+    						//queryJ.filters = JSON.stringify(filters);
+    						queryJ.filters = filters;
     						x=queryJ;
 
 						}

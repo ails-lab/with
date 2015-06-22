@@ -24,7 +24,7 @@ public class CommonFilter {
 	public List<String> values;
 	@Override
 	public String toString() {
-		return "CommonFilter [filterID=" + filterID + ", value=" + values + "]";
+		return "CommonFilter [filterID=" + filterID + ", values=" + values + "]";
 	}
 
 	
