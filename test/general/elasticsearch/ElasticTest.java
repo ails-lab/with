@@ -55,7 +55,7 @@ public class ElasticTest {
 		ElasticUpdater updater = new ElasticUpdater( r1 );
 		Elastic.putMapping();
 		//indexer.index();
-		updater.update();
+		//.update();
 		
 		/*CollectionRecord r2 = DB.getCollectionRecordDAO().get(new ObjectId("55350eede4b0cd1145214523"));
 		if( DB.getCollectionRecordDAO().countByUniqueId(r2.getExternalId()) > 1 ) {

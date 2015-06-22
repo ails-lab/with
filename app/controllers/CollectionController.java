@@ -265,6 +265,7 @@ public class CollectionController extends Controller {
 					"Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}
+		
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
@@ -274,6 +275,9 @@ public class CollectionController extends Controller {
 		DB.getUserDAO().makePermanent(owner);*/
 		newCollection.setOwnerId(new ObjectId(userId));
 		DB.getCollectionDAO().makePermanent(newCollection);
+		ElasticIndexer indexer = new ElasticIndexer(newCollection);
+		indexer.index();
+		
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
 		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),

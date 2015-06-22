@@ -16,16 +16,9 @@
 
 package elastic;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import model.CollectionRecord;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -36,15 +29,12 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder.Type;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
-import org.elasticsearch.index.search.MatchQuery;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -287,15 +277,5 @@ public class ElasticSearcher {
 	public void setType(String type) {
 		this.type = type;
 	}
-	
-	public static List<CollectionRecord> extractRecordsFromResponseHits(SearchResponse response){
-    	ArrayList<CollectionRecord> result = new ArrayList<CollectionRecord>();
-//    	play.Logger.debug("extract records");
-    	for(SearchHit hit: response.getHits().getHits()) {
-    		//result.add(JSONUtils.hitToRecord(hit));
-    	}
-
-    	return result;
-    }
 
 }
