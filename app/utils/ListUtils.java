@@ -69,8 +69,10 @@ public class ListUtils {
 
 	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function) {
 		List<R> res = new ArrayList<>();
-		for (T t : objects) {
-			res.add(function.apply(t));
+		if (objects!=null){
+			for (T t : objects) {
+				res.add(function.apply(t));
+			}
 		}
 		return res;
 	}

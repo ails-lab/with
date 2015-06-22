@@ -47,6 +47,24 @@ public class Utils {
 		return q1;
 	}
 
+	public static String replaceQuotes(String text){
+		String[] temp = text.split("\"");
+		text = "";
+		int b = 1;
+		
+		for(String s:temp){
+			text = text + s;
+			if(b!=temp.length){text=text+"%22";}
+			b++;
+		}
+		
+		//NOTE: THESE WON'T WORK for some reason
+		//url.replace("\"", "\\\"");
+		//String.join("%20", temp);
+		
+		return text;
+	}
+	
 	public static String readAttr(JsonNode json, String string, boolean force) throws Exception {
 		return readAttr(json, string, force, null);
 	}
@@ -143,13 +161,19 @@ public class Utils {
 	}
 
 	public static String getORList(List<String> values) {
+		return getORList(values, true);
+	}
+	public static String getORList(List<String> values, boolean paren) {
 		String res = "";
 		if (values.size() > 1) {
-			res += "(" + spacesPlusFormatQuery(values.get(0));
+			if (paren)
+				res+="(";
+			res +=  spacesPlusFormatQuery(values.get(0));
 			for (int i = 1; i < values.size(); i++) {
-				res += "+OR+" + spacesPlusFormatQuery(values.get(i));
+				res += "%20OR%20" + spacesPlusFormatQuery(values.get(i));
 			}
-			res += ")";
+			if (paren)
+				res += ")";
 		} else {
 			res += spacesPlusFormatQuery(values.get(0));
 		}

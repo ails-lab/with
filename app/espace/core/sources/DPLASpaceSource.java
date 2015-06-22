@@ -17,7 +17,10 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import utils.ListUtils;
 
@@ -41,6 +44,7 @@ import espace.core.Utils.LongPair;
 
 public class DPLASpaceSource extends ISpaceSource {
 
+	public static String LABEL = "DPLA";
 	private String DPLAKey = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
@@ -57,48 +61,36 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public DPLASpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.TYPE_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new LongPair<String>("sourceResource.type", t);
-			}
-		});
-		addDefaultWriter(CommonFilters.COUNTRY_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new LongPair<String>("sourceResource.spatial.country", t);
-			}
-		});
-		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new LongPair<String>("sourceResource.creator", t);
-			}
-		});
-		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new LongPair<String>("sourceResource.contributor", t);
-			}
-		});
-		addDefaultWriter(CommonFilters.PROVIDER_ID, new Function<String, Pair<String>>() {
-			@Override
-			public Pair<String> apply(String t) {
-				return new LongPair<String>("provider.name", t);
-			}
-		});
+		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
+		addDefaultWriter(CommonFilters.COUNTRY_ID, fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("sourceResource.creator"));
+		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, fwriter("sourceResource.contributor"));
+		addDefaultWriter(CommonFilters.PROVIDER_ID, fwriter("provider.name"));
+		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
 
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image", new Pair<String>("sourceResource.type", "image"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image", new LongPair<String>("sourceResource.type",
-				"moving image"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound", new Pair<String>("sourceResource.type", "sound"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text", new Pair<String>("sourceResource.type", "text"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text");
 
 		// TODO: what to do with physical objects?
 	}
+	
+	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		Function<String, String> function =
+				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				return new Pair<String>(parameter, 
+						Utils.getORList(ListUtils.transform(t, 
+								function), false));
+			}
+		};
+	}
 
 	public String getSourceName() {
-		return "DPLA";
+		return LABEL;
 	}
 
 	public String getDPLAKey() {
@@ -160,7 +152,8 @@ public class DPLASpaceSource extends ISpaceSource {
 						+ Utils.readAttr(item, "id", false);
 				it.rights = Utils.readLangAttr(item.path("sourceResource"),
 						"rights", false);
-
+				it.externalId = it.url.original.get(0);
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 			}
 			res.items = a;

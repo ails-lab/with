@@ -62,14 +62,6 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q);
 	}
 
-	public List<Collection> getExhibitionByOwner(ObjectId ownerId, int offset,
-			int count) {
-		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).field("isExhibition").equal(true)
-				.offset(offset).limit(count);
-		return this.find(q).asList();
-	}
-
 	public List<Collection> getByOwner(ObjectId id) {
 		return getByOwner(id, 0, 1);
 	}
@@ -177,6 +169,14 @@ public class CollectionDAO extends DAO<Collection> {
 		Query<Collection> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "ownerId");
 		return findOne(q).retrieveOwner();
+	}
+
+	public List<Collection> getExhibitionsByOwner(ObjectId ownerId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().field("isExhibition")
+				.equal(true).field("ownerId").equal(ownerId).offset(offset)
+				.limit(count);
+		return this.find(q).asList();
 	}
 
 	public int removeById(ObjectId id) {
