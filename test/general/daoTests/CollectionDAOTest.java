@@ -143,9 +143,7 @@ public class CollectionDAOTest {
 			Key<Collection> colKey = DB.getCollectionDAO().makePermanent(collection);
 			assertThat(colKey).isNotNull();
 
-			// save collId in user
-			if(user.getCollectionIds().size() < 20 )
-				user.getCollectionIds().add(new ObjectId(colKey.getId().toString()));
+			// save metadata to user
 			DB.getUserDAO().makePermanent(user);
 
 

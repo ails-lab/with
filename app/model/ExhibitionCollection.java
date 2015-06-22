@@ -14,18 +14,21 @@
  */
 
 
-package espace.core;
+package model;
 
-import java.util.List;
+public class ExhibitionCollection {
 
-public class CommonFilter {
+	private String intro;
 
-	public String filterID;
-	public List<String> values;
-	@Override
-	public String toString() {
-		return "CommonFilter [filterID=" + filterID + ", value=" + values + "]";
+	public ExhibitionCollection(String intro) {
+		this.intro = intro;
 	}
 
-	
+	public String getIntro() {
+		return intro;
+	}
+
+	public void setIntro(String intro) {
+		this.intro = intro;
+	}
 }

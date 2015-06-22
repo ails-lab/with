@@ -38,10 +38,9 @@ public class UserDAO extends DAO<User> {
 	}
 
 	public User getById(ObjectId id, List<String> retrievedFields) {
-		Query<User> q = this.createQuery()
-				.field("_id").equal(id);
-		if(retrievedFields!=null)
-			for(int i=0;i<retrievedFields.size();i++)
+		Query<User> q = this.createQuery().field("_id").equal(id);
+		if (retrievedFields != null)
+			for (int i = 0; i < retrievedFields.size(); i++)
 				q.retrievedFields(true, retrievedFields.get(i));
 		return this.findOne(q);
 
@@ -91,24 +90,9 @@ public class UserDAO extends DAO<User> {
 	}
 
 	public List<User> getByUsernamePrefix(String prefix) {
-		Query<User> q = this.createQuery()
-				.field("username").startsWith(prefix);
+		Query<User> q = this.createQuery().field("username").startsWith(prefix);
 		return find(q).asList();
 
-	}
-
-	/**
-	 * Return user collections
-	 *
-	 * @param email
-	 * @return
-	 */
-	public List<Collection> getUserTopCollectionsByEmail(String email) {
-		Query<User> q = this.createQuery()
-				.field("email").equal(email)
-				.retrievedFields(true, "collections.collectionId");
-
-		return this.findOne(q).getUserCollections();
 	}
 
 	public List<String> getAllUsernames() {
@@ -120,15 +104,16 @@ public class UserDAO extends DAO<User> {
 	public int removeById(ObjectId id) {
 		User user = getById(id, null);
 
-		//delete user realted searches
+		// delete user realted searches
 		List<Search> userSearches = user.getSearchHistory();
-		for(Search s: userSearches)
+		for (Search s : userSearches)
 			DB.getSearchDAO().makeTransient(s);
 
 		//delete user related collections
-		List<ObjectId> collectionIds = user.getCollectionIds();
+		/*List<ObjectId> collectionIds = user.getCollectionIds();
 		for (ObjectId cid: collectionIds)
 			DB.getCollectionDAO().removeById(cid);
+*/
 
 		return this.makeTransient(user);
 	}

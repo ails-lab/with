@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import utils.AccessManager;
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
 import espace.core.CommonFilterLogic;
@@ -47,6 +49,9 @@ import espace.core.ParallelAPICall;
 import espace.core.SearchResponse;
 import espace.core.SourceResponse;
 import espace.core.Utils;
+import espace.core.sources.DPLASpaceSource;
+import espace.core.sources.DigitalNZSpaceSource;
+import espace.core.sources.EuropeanaSpaceSource;
 
 public class SearchController extends Controller {
 
@@ -76,14 +81,14 @@ public class SearchController extends Controller {
 	@SuppressWarnings("unchecked")
 	public static Promise<Result> search() {
 		JsonNode json = request().body().asJson();
-		if( log.isDebugEnabled()) {
+		if (log.isDebugEnabled()) {
 			StringBuilder sb = new StringBuilder();
-			for( Map.Entry<String,String> e: session().entrySet()) {
-				sb.append( e.getKey() + " = " + "'" + e.getValue() + "'\n");
+			for (Map.Entry<String, String> e : session().entrySet()) {
+				sb.append(e.getKey() + " = " + "'" + e.getValue() + "'\n");
 			}
-			log.debug( sb.toString());
+			log.debug(sb.toString());
 		}
-		
+
 		if (json == null) {
 			return Promise.pure((Result) badRequest("Expecting Json query"));
 		} else {
@@ -120,6 +125,10 @@ public class SearchController extends Controller {
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 
+				Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+					return o.export();
+				};
+
 				Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);
 				return promisesSequence.map(new play.libs.F.Function<Collection<SourceResponse>, Result>() {
 					List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
@@ -133,12 +142,11 @@ public class SearchController extends Controller {
 						r1.responces = finalResponses;
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-							//System.out.println(sourceResponse.filters);
-							FiltersHelper.merge(merge, sourceResponse.filters);
+//							System.out.println(sourceResponse.filtersLogic);
+							FiltersHelper.merge(merge, sourceResponse.filtersLogic);
+							sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
 						}
-						Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
-							return o.export();
-						};
+
 						r1.filters = ListUtils.transform(merge, f);
 
 						return ok(Json.toJson(r1));
@@ -204,8 +212,8 @@ public class SearchController extends Controller {
 	}
 
 	public static Result posttestsearch() {
-		//System.out.println("--------------------");
-		//System.out.println(userForm.bindFromRequest().toString());
+		// System.out.println("--------------------");
+		 System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if (q == null || q.searchTerm == null) {
 			q = new CommonQuery();
@@ -213,18 +221,32 @@ public class SearchController extends Controller {
 		}
 		q.validate();
 		return buildresult(q);
+		
+		
+		//JsonNode json = request().body().asJson();
+		//
+		//CommonQuery q = json;
+		//ObjectNode result = Json.newObject();
+		//
+		//System.out.println(json);
+		//
+		//
+		//return ok(result);
 	}
 
 	private static Result buildresult(CommonQuery q) {
+//		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
-			//System.out.println(sourceResponse.source + " Filters: " + sourceResponse.filters);
-			FiltersHelper.merge(merge, sourceResponse.filters);
+//			 System.out.println(sourceResponse.source + " Filters: " +
+//			 sourceResponse.filters);
+			FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+			System.out.println(o);
 			return o.export();
 		};
 		List<CommonFilterResponse> merge1 = ListUtils.transform(merge, f);
@@ -236,12 +258,12 @@ public class SearchController extends Controller {
 	public static Result reindex() {
 		Promise.promise(new Function0<String>() {
 			public String apply() throws Exception {
-				log.info( "Reindex started");
+				log.info("Reindex started");
 				Elastic.reindex();
-				log.info( "Reindex finished");
+				log.info("Reindex finished");
 				return "ok";
 			}
 		});
-		return(ok());
+		return (ok());
 	}
 }

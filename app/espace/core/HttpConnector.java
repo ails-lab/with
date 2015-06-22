@@ -18,6 +18,8 @@ package espace.core;
 
 import org.w3c.dom.Document;
 
+import espace.core.Utils;
+
 import play.Logger;
 import play.libs.F.Function;
 import play.libs.F.Promise;
@@ -33,7 +35,9 @@ public class HttpConnector {
 	public static JsonNode getURLContent(String url) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
-
+			
+			url = Utils.replaceQuotes(url);
+			
 			Promise<JsonNode> jsonPromise = WS.url(url).get().map(new Function<WSResponse, JsonNode>() {
 				public JsonNode apply(WSResponse response) {
 					JsonNode json = response.asJson();

@@ -72,10 +72,9 @@ public class User {
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
 
-	@Embedded
-	private List<ObjectId> collections = new ArrayList<ObjectId>();
 	private int recordLimit;
 	private int collectedRecords;
+	private int exhibitionsCreated;
 	private double storageLimit;
 
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
@@ -104,23 +103,6 @@ public class User {
 		if (searchHistory.size() > EMBEDDED_CAP) {
 			searchHistory.remove(0);
 		}
-	}
-
-	/**
-	 * The Collection should already be stored in the database separately
-	 *
-	 * @param col
-	 */
-	public void addToCollections(Collection col) {
-		if (col.getDbId() == null) {
-			log.error("Collection is not saved!");
-			return;
-		}
-		collections.add(col.getDbId());
-		if (collections.size() > EMBEDDED_CAP) {
-			collections.remove(0);
-		}
-
 	}
 
 	/**
@@ -223,28 +205,12 @@ public class User {
 		this.searchHistory = searcHistory;
 	}
 
-	public List<ObjectId> getCollectionIds() {
-		return collections;
-	}
-
-	public void setCollectionIds(List<ObjectId> collections) {
-		this.collections = collections;
-	}
-
 	public String getFacebookId() {
 		return facebookId;
 	}
 
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
-	}
-
-	public List<Collection> getUserCollections() {
-		List<Collection> collections = new ArrayList<>();
-		for (ObjectId colId : getCollectionIds()) {
-			collections.add(DB.getCollectionDAO().getById(colId));
-		}
-		return collections;
 	}
 
 	public String getUsername() {
@@ -344,6 +310,18 @@ public class User {
 
 	public void setSuperUser(boolean isSuperUser) {
 		this.superUser = isSuperUser;
+	}
+
+	public int getExhibitionsCreated() {
+		return exhibitionsCreated;
+	}
+
+	public void setExhibitionsCreated(int exhibitionsCreated) {
+		this.exhibitionsCreated = exhibitionsCreated;
+	}
+
+	public void addExhibitionsCreated() {
+		this.exhibitionsCreated++;
 	}
 
 }

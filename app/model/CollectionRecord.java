@@ -88,6 +88,8 @@ public class CollectionRecord {
 
 	private String itemRights;
 
+	private ExhibitionRecord exhibition;
+
 	// collection specific stuff...
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -196,7 +198,7 @@ public class CollectionRecord {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	public String getCreator() {
 		return creator;
 	}

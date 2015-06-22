@@ -35,19 +35,20 @@ import elastic.Elastic;
 
 public class SourceResponse {
 
-	public SourceResponse() {}
-	
+	public SourceResponse() {
+	}
+
 	public SourceResponse(SearchResponse resp, String source, int offset) {
 		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
 		this.totalCount = (int) resp.getHits().getTotalHits();
 		this.source = source;
-		for(SearchHit hit: resp.getHits().hits()) {
-				elasticrecords.add(hitToRecord(hit));
+		for (SearchHit hit : resp.getHits().hits()) {
+			elasticrecords.add(hitToRecord(hit));
 		}
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
-		List<ItemsResponse> items = new ArrayList<ItemsResponse>(); 
-		for (CollectionRecord r: elasticrecords) {
+		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
+		for (CollectionRecord r : elasticrecords) {
 			ItemsResponse it = new ItemsResponse();
 			it.title = Arrays.asList(new Lang(null, r.getTitle()));
 			it.description = Arrays.asList(new Lang(null, r.getDescription()));
@@ -120,5 +121,6 @@ public class SourceResponse {
 	public List<ItemsResponse> items;
 	public String source;
 	public JsonNode facets;
-	public List<CommonFilterLogic> filters;
+	public List<CommonFilterResponse> filters;
+	public List<CommonFilterLogic> filtersLogic;
 }

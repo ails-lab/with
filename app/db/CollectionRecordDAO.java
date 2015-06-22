@@ -22,6 +22,7 @@ import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -34,14 +35,13 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	public CollectionRecord getById(ObjectId id) {
-		Query<CollectionRecord> q = this.createQuery()
-				.field("_id").equal(id);
+		Query<CollectionRecord> q = this.createQuery().field("_id").equal(id);
 		return this.findOne(q);
 	}
 
-
 	/**
-	 * Retrieve records from sepcific collection
+	 * Retrieve records from specific collection
+	 *
 	 * @param colId
 	 * @return
 	 */
@@ -50,15 +50,16 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	/**
-	 * Retrieve records from sepcific collection by offset and count
-	 * @param colId, offset, count
+	 * Retrieve records from specific collection by offset and count
+	 *
+	 * @param colId
+	 *            , offset, count
 	 * @return
 	 */
-	public List<CollectionRecord> getByCollectionOffsetCount(ObjectId colId, int offset, int count) {
-		Query<CollectionRecord> q = this.createQuery()
-				.field("collectionId").equal(colId)
-				.offset(offset)
-				.limit(count);
+	public List<CollectionRecord> getByCollectionOffsetCount(ObjectId colId,
+			int offset, int count) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
@@ -66,16 +67,21 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	 * Retrieve the total amount of records within a collection
 	 */
 	public long getItemCount(ObjectId colId) {
-		Query<CollectionRecord> q = this.createQuery()
-				.field("collectionId").equal(colId);
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId);
 		return this.find(q).countAll();
 	}
-
 
 	public List<CollectionRecord> getBySource(String source,String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
 				//.field("source").equal(source)
 				.field("sourceId").equal(sourceId);
+		return this.find(q).asList();
+	}
+	
+	public List<CollectionRecord> getByUniqueId(ObjectId colId, String extId) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId).field("externalId").equal(extId);
 		return this.find(q).asList();
 	}
 
@@ -100,8 +106,25 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 	
 	public int deleteByCollection(ObjectId colId) {
-		Query<CollectionRecord> q = this.createQuery()
-				.field("collectionId").equal(colId);
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId);
 		return this.deleteByQuery(q).getN();
 	}
+
+	public void shiftRecordsToRight(ObjectId colId, int position) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId).field("position").greaterThanOrEq(position);
+		UpdateOperations<CollectionRecord> updateOps = this
+				.createUpdateOperations().inc("position");
+		this.update(q, updateOps);
+	}
+
+	public void shiftRecordsToLeft(ObjectId colId, int position) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId).field("position").greaterThan(position);
+		UpdateOperations<CollectionRecord> updateOps = this
+				.createUpdateOperations().dec("position");
+		this.update(q, updateOps);
+	}
+
 }
