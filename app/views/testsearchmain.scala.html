@@ -9,9 +9,12 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         
+        
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
-		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>   
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>  
+        
+		
 		     
 <style type="text/css">
 
@@ -123,20 +126,28 @@ function shorttext(text, size){
 	return text.substring(0,size)+"(...)";
 }
  
-function gothere(q, f, v){
- //alert(q+" "+f+" "+v);
-var json1 = JSON.stringify({
-					"searchTerm": q,
+function gothere(q){
+	
+ 	//alert(q+" "+f+" "+v);
+ 	
+	var json1 = JSON.stringify({
+					"searchTerm": q.searchTerm,
 					"page": "1",
 					"pageSize":"20",
-				    "filters": [{ "filterID": f, values: [v]}]
+					//"filters": q.filters
+				    //"filters": [{ "filterID": f, values: [v]}]
+					"filters": q.filters
 				});
-console.log( json1 );
-$.ajax({
+				
+	var json1 = JSON.stringify(q);
+	//var json1 = q;
+	alert(json1);
+	console.log( json1 );
+	$.ajax({
 				"url": "/api/testsearch",
 				"method": "POST",
 				"contentType": "application/json",
-				//"dataType": "json",
+				"dataType": "json",
 				"data": json1,
 
 				"success": function( data, textStatus, jQxhr ){
@@ -145,14 +156,21 @@ $.ajax({
         },
         "error": function( jqXhr, textStatus, errorThrown ){
             console.log( errorThrown );
-        }
-				});
- 
+            //alert("error: " +errorThrown);
 
- 	
+        }
+        
+        
+				});
 }
  
-</script>        
+ 
+
+ 
+ 
+</script>   
+
+ 
 
     </head>
     <body>

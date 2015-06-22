@@ -69,7 +69,7 @@ text-decoration: none;
 
 .withsearch.open .withsearch-form {
 	width: 80%;
-	height: 160px;
+	height: 100px;
 	-webkit-transform: translate3d(0,3em,0);
 	transform: translate3d(0,3em,0);
 }
@@ -281,8 +281,9 @@ input[type="search"] { /* reset normalize */
 
 	width: 2200px;
     display:table;
-   overflow-y: auto;   overflow-x: scroll;
+    overflow-y: auto;   overflow-x: scroll;
     margin: 0 auto;
+    padding-top:70px;
 
 }
 
@@ -293,7 +294,7 @@ input[type="search"] { /* reset normalize */
 .withsearch.open .withsearch-content {
 	opacity: 1;
 	height: auto;
-	overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
+	/*overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
 	pointer-events: auto;
 	-webkit-transition: opacity 0.3s 0.5s;
 	transition: opacity 0.3s 0.5s;
@@ -532,6 +533,7 @@ font-size: 15px;
     width: 100%;
     margin: 0 auto;
     font-weight:200;
+    padding-top:30px;
     color:rgba(0, 0, 0, 0.52);
 
 }
