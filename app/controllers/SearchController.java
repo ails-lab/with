@@ -116,6 +116,7 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
+				long start = System.currentTimeMillis();
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 
@@ -131,7 +132,7 @@ public class SearchController extends Controller {
 						finalResponses.addAll(responses);
 						// Logger.debug("Total time for all sources to respond: "
 						// + (System.currentTimeMillis()- initTime));
-
+						
 						SearchResponse r1 = new SearchResponse();
 						r1.responces = finalResponses;
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
@@ -155,10 +156,17 @@ public class SearchController extends Controller {
 	}
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
+		System.out.println(q);
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
-		// final long initTime = System.currentTimeMillis();
-		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
-				.getResults(cq);
+		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> 
+			{ 
+				long stime = System.currentTimeMillis();
+				SourceResponse res = src.getResults(cq);
+				stime = (System.currentTimeMillis()-stime)/1000;
+				Logger.info(res.source + " found " + res.count+" in "+stime+" seconds");
+				return res;
+			};
+			System.out.println(ListUtils.transform(ESpaceSources.getESources(), (x)-> x.getSourceName() ));
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
 				promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
@@ -197,6 +205,7 @@ public class SearchController extends Controller {
 	}
 
 	public static List<SourceResponse> search(CommonQuery q) {
+		System.out.println(q);
 		List<SourceResponse> result = ESpaceSources.fillResults(q);
 		return result;
 	}
