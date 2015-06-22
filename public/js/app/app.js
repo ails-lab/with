@@ -1,4 +1,4 @@
-define("app", ['knockout', 'facebook'], function (ko, FB) {
+define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	var self = this;
 	self.currentUser = {
@@ -56,10 +56,10 @@ define("app", ['knockout', 'facebook'], function (ko, FB) {
 				type: "GET",
 			})
 			.done(function (data, textStatus, jqXHR) {
-				console.log(data);
 				self.currentUser.favorites(data);
 			})
 			.fail(function (jqXHR, textStatus, errorThrown) {
+				$.smkAlert({text:'Error loading Favorites', type:'danger', time: 10});
 				console.log("Error loading favorites!");
 		});
 	};
@@ -78,7 +78,7 @@ define("app", ['knockout', 'facebook'], function (ko, FB) {
 					update(true);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					// TODO: Show notification for error
+					$.smkAlert({text:'An error has occured. Please try again.', type:'danger', time: 10});
 					console.log(errorThrown);
 				}
 			});
@@ -91,7 +91,7 @@ define("app", ['knockout', 'facebook'], function (ko, FB) {
 					update(false);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					// TODO: Show notification for error;
+					$.smkAlert({text:'An error has occured. Please try again.', type:'danger', time: 10});
 					console.log(errorThrown);
 				}
 			});
