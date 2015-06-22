@@ -17,8 +17,8 @@
 	
 			<div class="row" id="hsection">
 				<div id="vsection" class="col-md-7">
-					@helper.inputText(qform("searchTerm"))
-					@helper.inputText(qform("termToExclude"))		
+					@helper.inputText(qform("searchTerm"), 'id -> "searchT")
+					@helper.inputText(qform("termToExclude"), 'id -> "excludeT")		
 				</div>
 				<div id="vsection" class="col-md-3">
 					@inputNumber(qform("page"), '_default -> "2" )
@@ -31,6 +31,7 @@
 	
 		<div class="row" id="hsection">
 	 		 <div id="nav" class="col-md-3">
+	 		 
 		 			<!--
 		 			<div class="col-sm-12" id="hsection">
 							@for(p <- filters) {
@@ -67,6 +68,20 @@
 					 </div>
 					 
 					 //-->
+					 
+					<div class="row">
+						<button class="btn btn-default" id="filterSearch">
+							Search
+							<script>
+								$("#filterSearch").click(function() {
+									//var where = $("#searchT").val();
+									//var without = $("#excludeT").val();
+									gothere(x);
+								});
+							</script>
+						</button>
+					</div>
+					 
 					<div class="col-sm-12" id="hsection">
 						@for(p <- filters) {
 						<div class="form-group row">
@@ -74,18 +89,78 @@
   								Select @p.filterName:
   							</label>
   							
-  							<select multiple class="form-control" id="filter-name">
+  							<select multiple name=@p.filterName class="form-control">
   								@for(pp <- p.suggestedValues.slice(0,14)) {
-	    							<option>
+	    							<option filter=@p.filterName name="@pp.value">
 	    								@shorttext(pp.value,20) (@pp.count)
 	    							</option>
 	    						}
   							</select>
 						</div>
 						}
+						
 					</div>
 					
+					<script>
+						
+						//var x = "";
 					
+						var x;
+						
+						function remember() {
+							
+							var queryJ = new Object();
+							
+							var filters = []; //array
+							
+							$("select").each(function() {
+								
+								var thisfilter = $(this).attr('name');
+								
+								var filter = new Object();
+								
+								filter.filterID = thisfilter;
+								
+								var str = [];
+								
+								$( "select option:selected" ).each(function() {
+									
+									if($(this).attr('filter') == thisfilter){
+										str.push($( this ).attr('name'));
+									}
+	      						});
+								
+								filter.values = str;
+								
+								//alert(str.length);
+								
+								if(str.length != 0){
+									filters.push(filter);
+								}
+								//filters.push(JSON.stringify(filter));
+								
+							});
+    						// $( "div" ).text( str );
+							//x = JSON.stringify(filters);
+    						//alert(x);
+    						
+    						queryJ.searchTerm = "zeus"; //$("#searchT").val();
+    						queryJ.page = "1";
+    						queryJ.pageSize = "20";
+    						queryJ.filters = JSON.stringify(filters);
+    						x=queryJ;
+
+						}
+						
+						
+						
+						$("select").on("change", remember);
+
+						//$("#searchbutt").on("click", alert(x));
+						
+
+						
+					</script>    
 			</div>
 					 
 		 	
