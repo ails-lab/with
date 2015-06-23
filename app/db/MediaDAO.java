@@ -62,6 +62,7 @@ public class MediaDAO {
 			media.setHeight((int) gridfsDbFile.get("height"));
 			media.setWidth((int) gridfsDbFile.get("width"));
 			media.setDbId((ObjectId) gridfsDbFile.getId());
+			media.setExternalId((String) gridfsDbFile.get("externalId"));
 			media.setData(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 		} catch (IOException e) {
 			log.error(
@@ -127,13 +128,26 @@ public class MediaDAO {
 				mediaGridFsFile.put("type", media.getType());
 			if (media.hasOwner())
 				mediaGridFsFile.put("ownerId", media.getOwnerId());
-
+			if (media.hasExternalId())
+				mediaGridFsFile.put("externalId", media.getExternalId());
 			// save the file
 			mediaGridFsFile.save();
 			media.setDbId((ObjectId) mediaGridFsFile.getId());
 		} catch (Exception e) {
 			log.error("Cannot save Media document to GridFS", e);
 			throw e;
+		}
+	}
+
+	public Media getByExternalId(String externalId) {
+		GridFSDBFile media = null;
+		try {
+			BasicDBObject query = new BasicDBObject("externalId", externalId);
+			media = DB.getGridFs().findOne(query);
+			return gridFsDbFileToMediaObj(media);
+		} catch (Exception e) {
+			log.error("Problem in find file from GridFS " + externalId);
+			return null;
 		}
 	}
 

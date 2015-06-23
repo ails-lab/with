@@ -46,6 +46,8 @@ public class Media {
 
 	private boolean isPublic;
 
+	private String externalId;
+
 	private int width, height;
 
 	// IMAGE, VIDEO, AUDIO, TXT
@@ -62,7 +64,6 @@ public class Media {
 	private byte[] data;
 
 	private String filename;
-
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -170,5 +171,17 @@ public class Media {
 
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
+
+	public boolean hasExternalId() {
+		return getExternalId() != null;
 	}
 }

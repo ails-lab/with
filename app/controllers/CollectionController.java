@@ -16,7 +16,10 @@
 
 package controllers;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,13 +33,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
 
+import javax.imageio.ImageIO;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Media;
 import model.User;
 import model.User.Access;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -557,6 +564,13 @@ public class CollectionController extends Controller {
 				indexer.index();
 			} else
 				addContentToRecord(record.getDbId(), source, sourceId);
+			if (json.has("thumbnailUrl")) {
+				String thumbnailUrl = json.get("thumbnailUrl").asText();
+				String externalId = json.get("externalId").asText();
+				if (DB.getMediaDAO().getByExternalId(externalId) == null) {
+					cacheThumbnail(thumbnailUrl, externalId);
+				}
+			}
 			return status;
 		}
 
@@ -744,6 +758,36 @@ public class CollectionController extends Controller {
 
 	public static Result download(String id) {
 		return null;
+	}
+
+	public static void cacheThumbnail(String thumbnailUrl, String externalId) {
+		URL url;
+		try {
+			byte[] imageBytes = null;
+			url = new URL(thumbnailUrl);
+			URLConnection connection = (URLConnection) url.openConnection();
+			BufferedImage image = ImageIO.read(url);
+			String mimeType = connection.getHeaderField("content-type");
+			if (mimeType.contains("base64")) {
+				imageBytes = Base64.decodeBase64(imageBytes);
+				mimeType = mimeType.replace(";base64", "");
+			}
+			if (mimeType == null) {
+				mimeType = connection.getContentType();
+			}
+			imageBytes = IOUtils.toByteArray(connection.getInputStream());
+			Media media = new Media();
+			media.setType("IMAGE");
+			media.setMimeType(mimeType);
+			media.setHeight(image.getHeight());
+			media.setWidth(image.getWidth());
+			media.setData(imageBytes);
+			media.setExternalId(externalId);
+			DB.getMediaDAO().makePermanent(media);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public static Result addToFavorites() {
