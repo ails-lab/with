@@ -29,6 +29,9 @@ GET		 /collection/favorites					controllers.CollectionController.getFavorites()
 POST     /collection/liked			            controllers.CollectionController.addToFavorites()
 DELETE   /collection/unliked/:recId			    controllers.CollectionController.removeFromFavorites(recId)
 
+# Cache Controller
+GET		 /cache/byUrl							controllers.CacheController.getThumbnail(url)
+
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
 GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)

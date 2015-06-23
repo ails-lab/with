@@ -46,7 +46,7 @@ public class Media {
 
 	private boolean isPublic;
 
-	private String externalId;
+	private String externalUrl;
 
 	private int width, height;
 
@@ -173,15 +173,15 @@ public class Media {
 		this.filename = filename;
 	}
 
-	public String getExternalId() {
-		return externalId;
+	public String getExternalUrl() {
+		return externalUrl;
 	}
 
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
+	public void setExternalUrl(String externalUrl) {
+		this.externalUrl = externalUrl;
 	}
 
-	public boolean hasExternalId() {
-		return getExternalId() != null;
+	public boolean hasExternalUrl() {
+		return getExternalUrl() != null;
 	}
 }
