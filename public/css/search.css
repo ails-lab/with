@@ -3,7 +3,7 @@
 html, body {
 	padding-top: 20px;
 	height: 100%;
-	
+
 }
 
 body {
@@ -445,7 +445,7 @@ margin-bottom:15px;
 }
 
 div.columns figure img {
-	
+
     border-radius: 6px 6px 0 0;
    -webkit-border-radius: 6px 6px 0 0;
 	-moz-border-radius: 6px 6px 0 0;
@@ -464,8 +464,8 @@ div.columns figure figcaption{
    font-size:1.1em;
    word-wrap: break-word;
  	}
- 	
-div.sourceCredits{ 	
+
+div.sourceCredits{
   font-weight: bold;
   border-top: 1px solid rgb(231, 231, 231);
   -webkit-font-smoothing: antialiased;
@@ -474,20 +474,20 @@ div.sourceCredits{
   display: block;
   line-height: 14px;
   padding: 10px 14px;
- 
+
 }
 
-div.sourceCredits a{ 	
-	 color: rgb(119, 119, 119); 	
- 
+div.sourceCredits a{
+	 color: rgb(119, 119, 119);
+
 
 	}
 
 
-div.sourceCredits:hover{ 	
+div.sourceCredits:hover{
   background-color:#f1f1f1;
   cursor:pointer;
- 
+
 }
 
 
@@ -536,6 +536,26 @@ font-size: 15px;
     padding-top:30px;
     color:rgba(0, 0, 0, 0.52);
 
+}
+
+/* Starred Items */
+figure .star {
+	font-size: 20px;
+	display: none;
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 24px;
+}
+
+figure:hover .star {
+	color: #dddddd;
+	display: block;
+}
+
+figure .active, figure:hover .active {
+	color: #ec5a62;
+	display: block;
 }
 
 /*Media Queries*/

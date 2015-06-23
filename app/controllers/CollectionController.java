@@ -306,6 +306,7 @@ public class CollectionController extends Controller {
 		} else if (filterByEmail != null) {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
 		}
+		
 		if (userIds.isEmpty()) {
 			// return all public collections
 			if (ownerId == null) {
@@ -742,7 +743,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		ArrayNode recordsList = Json.newObject().arrayNode();
-
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {
 				recordsList.add(Json.toJson(e.getContent()));
@@ -753,7 +753,9 @@ public class CollectionController extends Controller {
 				recordsList.add(Json.toJson(e));
 			}
 		}
-		return ok(recordsList);
+		result.put("itemCount", collection.getItemCount());
+		result.put("records", recordsList);
+		return ok(result);
 	}
 
 	public static Result download(String id) {
