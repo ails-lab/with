@@ -35,7 +35,8 @@ var require = {
 		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else",
 		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest",
 		"inputtags"       			: "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
-		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min"
+		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
+		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter"	
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
