@@ -63,6 +63,9 @@ public class MediaDAO {
 			media.setWidth((int) gridfsDbFile.get("width"));
 			media.setDbId((ObjectId) gridfsDbFile.getId());
 			media.setExternalUrl((String) gridfsDbFile.get("externalUrl"));
+			media.setThumbnail((boolean) gridfsDbFile.get("thumbnail"));
+			media.setOriginal((boolean) gridfsDbFile.get("original"));
+			media.setAccessCount((int) gridfsDbFile.get("accessCount"));
 			media.setData(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 		} catch (IOException e) {
 			log.error(
@@ -130,6 +133,12 @@ public class MediaDAO {
 				mediaGridFsFile.put("ownerId", media.getOwnerId());
 			if (media.hasExternalUrl())
 				mediaGridFsFile.put("externalUrl", media.getExternalUrl());
+			if (media.hasExternalUrl())
+				mediaGridFsFile.put("thumbnail", media.isThumbnail());
+			if (media.hasExternalUrl())
+				mediaGridFsFile.put("original", media.isOriginal());
+			if (media.hasExternalUrl())
+				mediaGridFsFile.put("accessCount", media.getAccessCount());
 			// save the file
 			mediaGridFsFile.save();
 			media.setDbId((ObjectId) mediaGridFsFile.getId());
@@ -139,10 +148,15 @@ public class MediaDAO {
 		}
 	}
 
-	public Media getByExternalUrl(String externalUrl) {
+	public Media getByExternalUrl(String externalUrl, boolean thumbnail) {
 		GridFSDBFile media = null;
 		try {
 			BasicDBObject query = new BasicDBObject("externalUrl", externalUrl);
+			if (thumbnail) {
+				query.append("thumbnail", thumbnail);
+			} else {
+				query.append("original", true);
+			}
 			media = DB.getGridFs().findOne(query);
 			return gridFsDbFileToMediaObj(media);
 		} catch (Exception e) {

@@ -59,6 +59,12 @@ public class Media {
 	// how long in seconds
 	private float duration;
 
+	private boolean thumbnail;
+
+	private boolean original;
+
+	private int accessCount;
+
 	// the actual data .. GridFS
 	@JsonIgnore
 	private byte[] data;
@@ -183,5 +189,33 @@ public class Media {
 
 	public boolean hasExternalUrl() {
 		return getExternalUrl() != null;
+	}
+
+	public boolean isThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(boolean thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
+	public boolean isOriginal() {
+		return original;
+	}
+
+	public void setOriginal(boolean original) {
+		this.original = original;
+	}
+
+	public int getAccessCount() {
+		return accessCount;
+	}
+
+	public void setAccessCount(int accessCount) {
+		this.accessCount = accessCount;
+	}
+
+	public void incrAccessCount() {
+		this.accessCount++;
 	}
 }

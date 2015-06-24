@@ -38,7 +38,7 @@ public class CacheControllerTest {
 	public void testGetThumbnail() {
 		running(fakeApplication(), new Runnable() {
 			public void run() {
-				String url = "";
+				String url = "http://collections.tepapa.govt.nz/APICollection/media/204076/250";
 				Result result = route(fakeRequest(GET, "/cache/byUrl?url="
 						+ url));
 				assertThat(status(result)).isEqualTo(Status.OK);

@@ -30,7 +30,7 @@ POST     /collection/liked			            controllers.CollectionController.addToF
 DELETE   /collection/unliked/:recId			    controllers.CollectionController.removeFromFavorites(recId)
 
 # Cache Controller
-GET		 /cache/byUrl							controllers.CacheController.getThumbnail(url)
+GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()

@@ -39,22 +39,22 @@ public class CacheController extends Controller {
 
 	public static final ALogger log = Logger.of(CacheController.class);
 
-	public static Result getThumbnail(String thumbnailUrl) {
-		if (DB.getMediaDAO().getByExternalUrl(thumbnailUrl) != null) {
-			String thumbnailId = DB.getMediaDAO()
-					.getByExternalUrl(thumbnailUrl).getDbId().toString();
-			return MediaController.getMetadataOrFile(thumbnailId, true);
+	public static Result getImage(String externalUrl, boolean thumbnail) {
+		Media image = DB.getMediaDAO().getByExternalUrl(externalUrl, thumbnail);
+		if (image != null) {
+			String imageId = image.getDbId().toString();
+			return MediaController.getMetadataOrFile(imageId, true);
 		} else {
-			return cacheThumbnail(thumbnailUrl);
+			return cacheImage(externalUrl, thumbnail);
 		}
 	}
 
-	public static Result cacheThumbnail(String thumbnailUrl) {
+	public static Result cacheImage(String externalUrl, boolean thumbnail) {
 		URL url;
 		byte[] imageBytes = null;
 		URLConnection connection = null;
 		try {
-			url = new URL(thumbnailUrl);
+			url = new URL(externalUrl);
 			connection = (URLConnection) url.openConnection();
 			BufferedImage image = ImageIO.read(url);
 			String mimeType = connection.getHeaderField("content-type");
@@ -66,16 +66,38 @@ public class CacheController extends Controller {
 				mimeType = connection.getContentType();
 			}
 			imageBytes = IOUtils.toByteArray(connection.getInputStream());
+			int height = image.getHeight();
+			int width = image.getWidth();
 			Media media = new Media();
 			media.setType("IMAGE");
 			media.setMimeType(mimeType);
-			media.setHeight(image.getHeight());
-			media.setWidth(image.getWidth());
+			media.setHeight(height);
+			media.setWidth(width);
 			media.setData(imageBytes);
-			media.setExternalUrl(thumbnailUrl);
+			media.setExternalUrl(externalUrl);
+			media.setOriginal(true);
+			if (width < 212) {
+				media.setThumbnail(true);
+				DB.getMediaDAO().makePermanent(media);
+				return MediaController.getMetadataOrFile(media.getDbId()
+						.toString(), true);
+			}
+			// image is big
+			// store original and resize for thumbnail
+			media.setThumbnail(false);
+			Media fullImage = media;
+			DB.getMediaDAO().makePermanent(fullImage);
+			//TODO resize image and put new width, height and bytes to data
+			media.setThumbnail(true);
+			media.setOriginal(false);
 			DB.getMediaDAO().makePermanent(media);
-			return MediaController.getMetadataOrFile(
-					media.getDbId().toString(), true);
+			if (!thumbnail) {
+				return MediaController.getMetadataOrFile(fullImage.getDbId()
+						.toString(), true);
+			} else {
+				return MediaController.getMetadataOrFile(media.getDbId()
+						.toString(), true);
+			}
 		} catch (Exception e) {
 			log.error("Couldn't cache thumbnail:" + e.getMessage());
 			return internalServerError(Json.parse("{\"error\":\""
@@ -86,7 +108,8 @@ public class CacheController extends Controller {
 			} catch (IOException e) {
 				log.error("Couldn't close connection:" + e.getMessage());
 			}
-		}
+		
+		return TODO;}
 
 	}
 
