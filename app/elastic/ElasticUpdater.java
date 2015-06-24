@@ -188,6 +188,39 @@ public class ElasticUpdater {
 		return doc;
 	}
 
+	/*
+	 * Increment itemCount on collection type
+	 */
+	public void incItemCount() {
+		try {
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type_collection,
+						collection.getDbId().toString())
+				.setScript("ctx._source.itemCount++;"
+						 + "ctx._source.itemCount_all++", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection rights!", e);
+			}
+	}
+
+	/*
+	 * Decrement itemCount on collection type
+	 */
+	public void decItemCount() {
+		try {
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type_collection,
+						collection.getDbId().toString())
+				.setScript("ctx._source.itemCount--;"
+						 + "ctx._source.itemCount_all--", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection rights!", e);
+			}
+	}
 
 	/*
 	 * Update rights on a collection

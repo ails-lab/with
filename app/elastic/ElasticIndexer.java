@@ -172,7 +172,10 @@ public class ElasticIndexer {
 
 			while( recordIt.hasNext() ) {
 				Entry<String, JsonNode> entry = recordIt.next();
-				if( !entry.getKey().equals("content") &&
+				if( entry.getKey().equals("itemCount") ) {
+					doc.field(entry.getKey()+"_all", entry.getValue().asInt());
+					doc.field(entry.getKey(), entry.getValue().asInt());
+				} else if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("tags")    &&
 					!entry.getKey().equals("externalId")    &&
 					!entry.getKey().equals("collectionId")) {

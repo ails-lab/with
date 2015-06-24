@@ -80,4 +80,18 @@ public class ElasticEraser {
 			log.error("Cannot delete the specified merged record document", e);
 		}
 	}
+
+	public void deleteRecordEntryFromMerged() {
+		try {
+			Elastic.getTransportClient().prepareDelete(
+					Elastic.index,
+					Elastic.type_general,
+					record.getExternalId())
+				.setOperationThreaded(false)
+				.execute()
+				.actionGet();
+		} catch(ElasticsearchException e) {
+			log.error("Cannot delete the specified entry from merged record document", e);
+		}
+	}
 }
