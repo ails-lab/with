@@ -33,6 +33,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticEraser;
+import elastic.ElasticUpdater;
 
 public class RecordController extends Controller {
 	public static final ALogger log = Logger.of( RecordController.class);
@@ -87,14 +89,22 @@ public class RecordController extends Controller {
 		collection.getFirstEntries().remove(oldRecord);
 
 		if(format.equals("")) {
+			// update record tags
 			CollectionRecord newRecord = Json.fromJson(json, CollectionRecord.class);
 			collection.getFirstEntries().add(newRecord);
 			if( (DB.getCollectionRecordDAO().makePermanent(oldRecord) != null) &&
-				(DB.getCollectionDAO().makePermanent(collection) != null) )
+				(DB.getCollectionDAO().makePermanent(collection) != null) ) {
+
+				// update the record in the index
+				ElasticUpdater updater = new ElasticUpdater(oldRecord, newRecord);
+				updater.updateRecordTags();
+
 				result.put("message", "Record updated sucessfully!");
-			else
+			} else {
 				result.put("message", "Record not updated!");
+			}
 		} else {
+			// update only the specific format
 			// input json like { "XML-EDM": " [...xml...] " }
 			oldRecord.getContent().put(format, json.get(format).asText());
 			collection.getFirstEntries().add(oldRecord);
@@ -146,6 +156,12 @@ public class RecordController extends Controller {
 			}
 			if( (DB.getCollectionRecordDAO().makePermanent(record) != null) &&
 				(DB.getCollectionDAO().makePermanent(c) != null) ) {
+
+				//delete record from index
+				ElasticEraser eraser = new ElasticEraser(record);
+				eraser.deleteRecord();
+				//eraser.deleteRecordEntryFromMerged();
+
 				return ok(Json.toJson(record));
 			} else {
 				log.error("Cannot delete specific content from Collection item!");

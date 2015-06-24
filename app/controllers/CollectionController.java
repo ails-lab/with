@@ -56,7 +56,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
+import elastic.ElasticUpdater;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
@@ -141,6 +143,10 @@ public class CollectionController extends Controller {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
 			}
+
+			//delete collection from index
+			ElasticEraser eraser = new ElasticEraser(c);
+			eraser.deleteCollection();
 			result.put("message",
 					"Collection deleted succesfully from database");
 			return ok(result);
@@ -179,10 +185,10 @@ public class CollectionController extends Controller {
 				userIds);
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
-		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
+		ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
 		Collection newVersion;
 		try {
-			newVersion = updater.readValue(json);
+			newVersion = updator.readValue(json);
 
 			newVersion.setLastModified(new Date());
 
@@ -207,6 +213,11 @@ public class CollectionController extends Controller {
 				result.put("message", "Cannot save collection to database!");
 				return internalServerError(result);
 			}
+
+			// update collection index
+			ElasticUpdater updater = new ElasticUpdater(newVersion);
+			updater.updateCollectionMetadata();
+
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
 			c.put("access", maxAccess.toString());
 			User user = DB.getUserDAO().getById(newVersion.getOwnerId(),
@@ -247,7 +258,7 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
-		newCollection.setOwnerId(new ObjectId(userId));
+		//newCollection.setOwnerId(new ObjectId(userId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -263,10 +274,16 @@ public class CollectionController extends Controller {
 					"Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}
+
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
+
+		// index new collection
+		ElasticIndexer indexer = new ElasticIndexer(newCollection);
+		indexer.indexCollectionMetadata();
+
 		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
@@ -554,6 +571,8 @@ public class CollectionController extends Controller {
 					record.getContent().put(contentType, contentMetadata);
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
+
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
 			} else
@@ -575,8 +594,12 @@ public class CollectionController extends Controller {
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
-		} else
+		} else {
+			//update itemCount
+			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
+		}
 	}
 
 	private static Status addRecordToFirstEntries(CollectionRecord record,
@@ -601,8 +624,12 @@ public class CollectionController extends Controller {
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
-		} else
+		} else {
+			//update itemCount
+			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
+		}
 	}
 
 	private static void addContentToRecord(ObjectId recordId, String source,
@@ -620,6 +647,8 @@ public class CollectionController extends Controller {
 							data.getJsonContent());
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
+
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
 				return true;
@@ -676,6 +705,10 @@ public class CollectionController extends Controller {
 		collection.setLastModified(new Date());
 		collection.itemCountDec();
 		DB.getCollectionDAO().makePermanent(collection);
+
+		// decrement collection itemCount
+		ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+		itemCountUpdater.decItemCount();
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(
 				new ObjectId(recordId));
 		int position = 0;
@@ -687,6 +720,12 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
+
+		//delete record and merged_record from index
+		ElasticEraser eraser = new ElasticEraser(record);
+		eraser.deleteRecord();
+		//eraser.deleteRecordEntryFromMerged();
+
 		if (collection.isExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(
 					new ObjectId(collectionId), position);

@@ -182,6 +182,16 @@ public class CollectionDAO extends DAO<Collection> {
 	public int removeById(ObjectId id) {
 
 		Collection c = get(id);
+
+		/*User owner = c.retrieveOwner();
+		for (ObjectId colId : owner.getCollectionIds()) {
+			if (colId.equals(id)) {
+				owner.getCollectionIds().remove(colId);
+				DB.getUserDAO().makePermanent(owner);
+				break;
+			}
+		}*/
+
 		DB.getCollectionRecordDAO().deleteByCollection(id);
 		return makeTransient(c);
 	}
