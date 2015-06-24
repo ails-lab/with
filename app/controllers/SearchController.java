@@ -165,6 +165,15 @@ public class SearchController extends Controller {
 		// final long initTime = System.currentTimeMillis();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
 				.getResults(cq);
+		if (q.source != null && q.source.size() > 0) {
+			if (q.source.contains("Mint"))
+				q.mintSource = true;
+			if (q.source.contains("UpladedByUser"))
+				q.uploadedByUser = true;
+			q.source.remove("Mint");
+			q.source.remove("UploadedByUser");
+			q.source.add("With");
+		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
 				promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,

@@ -62,6 +62,8 @@ public class CommonQuery {
 	public String termToExclude;
 	public String user;
 	public List<String> source;
+	public boolean mintSource = false;
+	public boolean uploadedByUser = false;
 
 	public List<CommonFilter> filters;
 
