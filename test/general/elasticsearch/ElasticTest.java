@@ -51,12 +51,11 @@ public class ElasticTest {
 		CollectionRecord r1 = DB.getCollectionRecordDAO().get(new ObjectId("5570330344ae86da914cb469"));
 		r.setSource("MINT");
 		r.setIsPublic(true);
-		ElasticIndexer indexer = new ElasticIndexer( c, r1 );
-		ElasticUpdater updater = new ElasticUpdater( r1 );
+		ElasticIndexer indexer = new ElasticIndexer( c, r );
+		//ElasticUpdater updater = new ElasticUpdater( r1 );
 		Elastic.putMapping();
-		//indexer.index();
-		//.update();
-		
+		indexer.index();
+
 		/*CollectionRecord r2 = DB.getCollectionRecordDAO().get(new ObjectId("55350eede4b0cd1145214523"));
 		if( DB.getCollectionRecordDAO().countByUniqueId(r2.getExternalId()) > 1 ) {
 			ElasticUpdater updater = new ElasticUpdater( r2 );

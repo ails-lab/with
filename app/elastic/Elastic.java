@@ -70,7 +70,7 @@ public class Elastic {
 	public static String type_within        = getConf().getString("elasticsearch.index.type.within");
 	public static String mapping_general    = getConf().getString("elasticsearch.index.mapping.general");
 	public static String type_general       = getConf().getString("elasticsearch.index.type.general");
-	
+
 
 	private final static String host = getConf().getString("elasticsearch.host");
 	private final static int    port = getConf().getInt("elasticsearch.port");
@@ -184,11 +184,12 @@ public class Elastic {
 		} catch (InterruptedException e) {
 			log.error("Client or error on mappings", e);
 		} catch (ExecutionException e) {
-			log.error("Client or error on mappings", e);
+			log.error("Indice does not exist");
+			return false;
 		}
 
-		if( (mappings!=null) && (mappings.containsKey(index)) 
-				&& (mappings.get(index).containsKey(type_general) 
+		if( (mappings!=null) && (mappings.containsKey(index))
+				&& (mappings.get(index).containsKey(type_general)
 					|| mappings.get(index).containsKey(type_within)
 					|| mappings.get(index).containsKey(type_collection)) )
 			return true;
@@ -223,12 +224,12 @@ public class Elastic {
 		}
 		return null;
 	}
-	
+
 	public static void reindex() {
 		// hopefully delete index and reput it in place
 		getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
 		putMapping();
-		
+
 		Callback<Collection> callback = new Callback<Collection>() {
 		@Override
 			public void invoke(Collection c ) throws Throwable {
@@ -242,6 +243,6 @@ public class Elastic {
 			log.error( "ReIndexing problem", e );
 		}
 	}
-	
+
 }
 

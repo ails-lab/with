@@ -65,50 +65,12 @@ public class ElasticIndexer {
 		this.collection = c;
 		this.record = r;
 	}
-	
-	public IndexResponse indexCollectionMetadata() {
-		if( collection == null ) 
-			log.error("No collection specified!");
-		
-		Iterator<Entry<String, JsonNode>> colIt = Json.toJson(collection).fields();
-		XContentBuilder doc = null;
-		try {
-			doc = jsonBuilder().startObject();
-			
-			while( colIt.hasNext() ) {
-				Entry<String, JsonNode> entry = colIt.next();
-				if( entry.getKey().equals("rights") ) {
-					ArrayNode array = Json.newObject().arrayNode();
-					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
-						ObjectNode right = Json.newObject();
-						right.put("user", e.getKey().toString());
-						right.put("access", e.getValue().toString());
-						array.add(right);
-					}
-   					doc.rawField(entry.getKey(), array.toString().getBytes());
-				} else if( !entry.getKey().equals("firstEntries") &&
-						  !entry.getKey().equals("rights") &&	
-						  !entry.getKey().equals("dbId")) {
-					doc.field(entry.getKey()+"_all", entry.getValue().asText());
-					doc.field(entry.getKey(), entry.getValue().asText());
-				}
-			}
-		} catch(IOException e) {
-				log.error("Cannot create collection json document for indexing", e);
-		}
-		
-		IndexResponse response = Elastic.getTransportClient().prepareIndex(
-					Elastic.index,
-					Elastic.type_collection,
-					collection.getDbId().toString())
-				.setSource(doc)
-				.execute()
-				.actionGet();
-		return response;
-	}
 
+	/*
+	 * General method to index documents aacording to the object the class was initialized with
+	 */
 	public void index() {
-		if( collection != null && record != null ) {
+		if( (collection != null) && (record != null) ) {
 			indexCollectionMetadata();
 			indexForGeneralSearch();
 			indexForWithinSearch();
@@ -123,6 +85,181 @@ public class ElasticIndexer {
 		}
 	}
 
+	/*
+	 * Index a collection document excluding firstEntries
+	 */
+	public IndexResponse indexCollectionMetadata() {
+		if( collection == null )
+			log.error("No collection specified!");
+
+		Iterator<Entry<String, JsonNode>> colIt = Json.toJson(collection).fields();
+		XContentBuilder doc = null;
+		try {
+			doc = jsonBuilder().startObject();
+
+			while( colIt.hasNext() ) {
+				Entry<String, JsonNode> entry = colIt.next();
+				if( entry.getKey().equals("rights") ) {
+					ArrayNode array = Json.newObject().arrayNode();
+					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
+						ObjectNode right = Json.newObject();
+						right.put("user", e.getKey().toString());
+						right.put("access", e.getValue().toString());
+						array.add(right);
+					}
+   					doc.rawField(entry.getKey(), array.toString().getBytes());
+				} else if( !entry.getKey().equals("firstEntries") &&
+						  !entry.getKey().equals("rights") &&
+						  !entry.getKey().equals("dbId")) {
+					doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					doc.field(entry.getKey(), entry.getValue().asText());
+				}
+			}
+		} catch(IOException e) {
+				log.error("Cannot create collection json document for indexing", e);
+		}
+
+		IndexResponse response = Elastic.getTransportClient().prepareIndex(
+					Elastic.index,
+					Elastic.type_collection,
+					collection.getDbId().toString())
+				.setSource(doc)
+				.execute()
+				.actionGet();
+		return response;
+	}
+
+
+	/*
+	 * Index record documents as merged_record for general search
+	 */
+	public UpdateResponse indexForGeneralSearch() {
+		IndexRequest indexReq = new IndexRequest(
+				Elastic.index, Elastic.type_general)
+			.source(prepareMergedDocument());
+		if( record.getExternalId() == null )
+			record.setExternalId(record.getDbId().toString());
+		indexReq.id(record.getExternalId());
+		UpdateResponse resp = null;
+		try {
+		resp = Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.type_general)
+				.setId(record.getExternalId())
+			.addScriptParam("tags", record.getTags().toArray())
+			.addScriptParam("collectionId", record.getCollectionId().toString())
+			.setScript("for(String t: tags) {"
+					+ "if(!ctx._source.tags.contains(t))"
+					+ "ctx._source.tags.add(t)"
+					+ "}; "
+					+ "ctx._source.collections += collectionId", ScriptType.INLINE)
+			//.setScript("ctx._source.collections += collectionId", ScriptType.INLINE)
+			.setUpsert(indexReq)
+			.execute().actionGet();
+		} catch (ElasticsearchException  e) {
+			log.error("Cannot update document!", e);
+		}
+
+	return resp;
+	}
+
+
+	private XContentBuilder prepareMergedDocument() {
+		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
+		XContentBuilder doc = null;
+		try {
+			doc = jsonBuilder().startObject();
+
+			while( recordIt.hasNext() ) {
+				Entry<String, JsonNode> entry = recordIt.next();
+				if( !entry.getKey().equals("content") &&
+					!entry.getKey().equals("tags")    &&
+					!entry.getKey().equals("externalId")    &&
+					!entry.getKey().equals("collectionId")) {
+						doc.field(entry.getKey()+"_all", entry.getValue().asText());
+						doc.field(entry.getKey(), entry.getValue().asText());
+				}
+			}
+
+			//add collections array
+			ArrayNode collections = Json.newObject().arrayNode();
+			collections.add(record.getCollectionId().toString());
+			doc.rawField("collections", collections.toString().getBytes());
+
+			//add tags array
+			ArrayNode tags = Json.newObject().arrayNode();
+			for(String tag: record.getTags())
+				tags.add(tag);
+			doc.rawField("tags", tags.toString().getBytes());
+
+			doc.endObject();
+		} catch (IOException e) {
+			log.error("Cannot create json document for indexing", e);
+			return null;
+		}
+
+		try {
+			System.out.println(doc.string());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return doc;
+	}
+
+
+	/*
+	 * Index record documents excluding content for search within a collection
+	 */
+	public IndexResponse indexForWithinSearch() {
+		IndexResponse response = Elastic.getTransportClient().prepareIndex(
+						Elastic.index,
+						Elastic.type_within,
+						record.getDbId().toString())
+				.setSource(prepareRecordDocument())
+				.execute()
+				.actionGet();
+		return response;
+	}
+
+
+	private XContentBuilder prepareRecordDocument() {
+		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
+		XContentBuilder doc = null;
+		try {
+			doc = jsonBuilder().startObject();
+			while( recordIt.hasNext() ) {
+				Entry<String, JsonNode> entry = recordIt.next();
+				if( !entry.getKey().equals("content") &&
+					!entry.getKey().equals("dbId")) {
+						doc.field(entry.getKey()+"_all", entry.getValue().asText());
+						doc.field(entry.getKey(), entry.getValue().asText());
+				}
+			}
+
+			doc.endObject();
+		} catch (IOException e) {
+			log.error("Cannot create json document for indexing", e);
+			return null;
+		}
+
+		try {
+			System.out.println(doc.string());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return doc;
+	}
+
+	public void parseXmlIntoDoc( String xmlContent ) {
+
+	}
+
+	/*
+	 * Bulk operations
+	 */
 	public void indexCollection() {
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 											.getByCollection(collection.getDbId());
@@ -176,128 +313,5 @@ public class ElasticIndexer {
 				log.error("Error in Bulk operations", e);
 			}
 		}
-	}
-	
-	public UpdateResponse indexForGeneralSearch() {
-		IndexRequest indexReq = new IndexRequest(
-				Elastic.index, Elastic.type_general)
-			.source(prepareMergedDocument());
-		if( record.getExternalId() == null ) 
-			record.setExternalId(record.getDbId().toString());
-		indexReq.id(record.getExternalId());
-		UpdateResponse resp = null;
-		try {
-		resp = Elastic.getTransportClient().prepareUpdate()
-				.setIndex(Elastic.index)
-				.setType(Elastic.type_general)
-				.setId(record.getExternalId())
-			.addScriptParam("map", createEntryForRecord())
-			.setScript("ctx._source.collection_specific += map", ScriptType.INLINE)
-			.setUpsert(indexReq)
-			.execute().actionGet();
-		} catch (ElasticsearchException  e) {
-			log.error("Cannot update document!", e);
-		}
-	
-	return resp;
-	}
-
-	private   Map<String, Object> createEntryForRecord() {
-		Map<String, Object> doc = new HashMap<String, Object>();
-		doc.put("collection", record.getCollectionId().toString());
-		List<String> tags = new ArrayList<String>();
-		tags.addAll(record.getTags());
-		doc.put("tags", tags);
-		
-		return doc;
-	}
-	
-	private XContentBuilder prepareMergedDocument() {
-		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
-		XContentBuilder doc = null;
-		try {
-			doc = jsonBuilder().startObject();
-			
-			while( recordIt.hasNext() ) {
-				Entry<String, JsonNode> entry = recordIt.next();
-				if( !entry.getKey().equals("content") &&
-					!entry.getKey().equals("tags")    &&
-					!entry.getKey().equals("externalId")    &&
-					!entry.getKey().equals("collectionId")) {
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
-				}
-			}
-			
-			//add merged fields {collectionId, tags}
-			ArrayNode array = Json.newObject().arrayNode();
-			ObjectNode o = Json.newObject();
-			o.put("collection", record.getCollectionId().toString());
-			ArrayNode tags = Json.newObject().arrayNode();
-			for(String tag: record.getTags())
-				tags.add(tag);	
-			o.put("tags", tags);
-			array.add(o);
-			doc.rawField("collection_specific", array.toString().getBytes());
-			
-			doc.endObject();
-		} catch (IOException e) {
-			log.error("Cannot create json document for indexing", e);
-			return null;
-		}
-
-		try {
-			System.out.println(doc.string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return doc;
-	}
-	
-	public IndexResponse indexForWithinSearch() {
-		IndexResponse response = Elastic.getTransportClient().prepareIndex(
-						Elastic.index,
-						Elastic.type_within,
-						record.getDbId().toString())
-				.setSource(prepareRecordDocument())
-				.execute()
-				.actionGet();
-		return response;
-	}
-	
-
-	private XContentBuilder prepareRecordDocument() {
-		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
-		XContentBuilder doc = null;
-		try {
-			doc = jsonBuilder().startObject();
-			while( recordIt.hasNext() ) {
-				Entry<String, JsonNode> entry = recordIt.next();
-				if( !entry.getKey().equals("content") &&
-					!entry.getKey().equals("dbId")) {
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
-				}
-			}
-			
-			doc.endObject();
-		} catch (IOException e) {
-			log.error("Cannot create json document for indexing", e);
-			return null;
-		}
-
-		try {
-			System.out.println(doc.string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	
-		return doc;
-	}
-
-	public void parseXmlIntoDoc( String xmlContent ) {
-		
 	}
 }

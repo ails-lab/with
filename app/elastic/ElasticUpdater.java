@@ -29,10 +29,11 @@ import model.CollectionRecord;
 import model.User.Access;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.script.ScriptService.ScriptType;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -46,6 +47,7 @@ public class ElasticUpdater {
 
 	private Collection collection;
 	private CollectionRecord record;
+	private CollectionRecord oldRecord;
 	private String json;
 
 
@@ -53,7 +55,8 @@ public class ElasticUpdater {
 		this.collection = c;
 	}
 
-	public ElasticUpdater( CollectionRecord r ) {
+	public ElasticUpdater( CollectionRecord old, CollectionRecord r ) {
+		this.oldRecord = old;
 		this.record = r;
 	}
 
@@ -70,7 +73,7 @@ public class ElasticUpdater {
 	 * Re-indexes the record type, deletes entry from collection_specific field
 	 * of merged_record type and indexes a new merged_record type
 	 */
-	public UpdateResponse updateRecordMetadata() {
+	public void updateRecordTags() {
 		try {
 			 Elastic.getTransportClient().prepareUpdate(
 					Elastic.index,
@@ -81,9 +84,7 @@ public class ElasticUpdater {
 			 updateMergedDoc();
 		} catch (Exception e) {
 			log.error("Cannot update collection metadata!", e);
-			return null;
 		}
-		return null;
 	}
 
 	/*
@@ -102,13 +103,13 @@ public class ElasticUpdater {
 						doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
-			
+
 			doc.endObject();
 		} catch (IOException e) {
 			log.error("Cannot create json document for indexing", e);
 			return null;
 		}
-	
+
 		return doc;
 	}
 
@@ -116,35 +117,50 @@ public class ElasticUpdater {
 	 * Completes the whole update process of a merged document
 	 */
 	private void updateMergedDoc() {
-		SearchRequestBuilder resp = Elastic.getTransportClient().
-				prepareSearch(Elastic.index)
-				.setTypes(Elastic.type_within);
+		try {
+			Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.type_general)
+				.setId(record.getExternalId())
+			.addScriptParam("old_tags", oldRecord.getTags().toArray())
+			.addScriptParam("new_tags", record.getTags().toArray())
+			.setScript("for(String t: old_tags) {"
+					+ "if(ctx._source.tags.contains(t))"
+					+ "ctx._source.tags.remove(t)"
+					+ "}; "
+					+ "for(String t: new_tags) {"
+					+ "if(!ctx._source.tags.contains(t))"
+					+ "ctx._source.tags.add(t)"
+					+ "}; ", ScriptType.INLINE)
+			.execute().actionGet();
+		} catch (ElasticsearchException  e) {
+			log.error("Cannot update record document!", e);
+		}
 	}
 
-	
+
 	/*
 	 * Update collection metadata method. Does NOT updates rights
 	 */
-	public UpdateResponse updateCollectionMetadata() {
+	public void updateCollectionMetadata() {
 		try {
-			return Elastic.getTransportClient().prepareUpdate(
+			 Elastic.getTransportClient().prepareUpdate(
 					Elastic.index,
 					Elastic.type_collection,
 					collection.getDbId().toString())
-					.setSource(prepareEditedCollectionDoc())
-					.get();
+				.setSource(prepareEditedCollectionDoc())
+				.get();
 		} catch (Exception e) {
 			log.error("Cannot update collection metadata!", e);
-			return null;
 		}
 	}
-	
+
 	private XContentBuilder prepareEditedCollectionDoc() {
 		Iterator<Entry<String, JsonNode>> collectionIt = Json.toJson(collection).fields();
 		XContentBuilder doc = null;
 		try {
 			doc = jsonBuilder().startObject();
-			
+
 			while( collectionIt.hasNext() ) {
 				Entry<String, JsonNode> entry = collectionIt.next();
 				/*if( entry.getKey().equals("rights") ) {
@@ -158,9 +174,9 @@ public class ElasticUpdater {
    					doc.rawField(entry.getKey(), array.toString().getBytes());
 				} else */
 				if( !entry.getKey().equals("firstEntries") &&
-					!entry.getKey().equals("rights") &&	
+					!entry.getKey().equals("rights") &&
 					!entry.getKey().equals("dbId")) {
-					
+
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());
 				}
@@ -171,28 +187,27 @@ public class ElasticUpdater {
 		}
 		return doc;
 	}
-	
-	
+
+
 	/*
 	 * Update rights on a collection
 	 */
-	public UpdateResponse updateCollectionRights() {
+	public void updateCollectionRights() {
 		try {
-			return Elastic.getTransportClient().prepareUpdate(
+			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
 						Elastic.type_collection,
 						collection.getDbId().toString())
-					.setSource(prepareUpdateOnRights())
-					.execute().actionGet();		} catch (Exception e) {
+				.setSource(prepareUpdateOnRights())
+				.execute().actionGet();		} catch (Exception e) {
 			log.error("Cannot update collection rights!", e);
-			return null;
 		}
 	}
-	
+
 	private XContentBuilder prepareUpdateOnRights() {
 		XContentBuilder doc = null;
 		try {
-			
+
 			doc = jsonBuilder().startObject();
 			ArrayNode array = Json.newObject().arrayNode();
 			for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
@@ -202,23 +217,23 @@ public class ElasticUpdater {
 				array.add(right);
 			}
 			doc.rawField("rights", array.toString().getBytes());
-			doc.endObject();	
-						
+			doc.endObject();
+
 		} catch(IOException io) {
 			log.error("Cannot create document to update!", io);
 			return null;
 		}
-		
+
 		try {
 			System.out.println(doc.string());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 		return doc;
 	}
-	
+
 
 	/*
 	 * Bulk updates. Probably not going to be used
