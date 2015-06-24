@@ -1,11 +1,43 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app', 'selectize'], function(bootstrap, ko, template, KnockoutElse, app, selectize) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 
 	function Entry(entryData) {
 		var entry = ko.mapping.fromJS(entryData);
 		ko.mapping.fromJS(entryData, entry);
 		return entry;
 	}
-
+	
+	ko.bindingHandlers.autocompleteUsername = {
+	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+	    	  $(elem).devbridgeAutocomplete({
+			   		 minChars: 3,
+			   		 lookupLimit: 10,
+			   		 serviceUrl: "/user/listNames",
+			   		 paramName: "prefix",
+			   		 ajaxSettings: {
+			   			 dataType: "json"
+			   		 },
+			   		 transformResult: function(response) {
+			   			var result = [];
+			   			for (var i in response) {
+			   				result.push({"value": response[i]});
+			   			}
+			   			return {"suggestions": result};
+			   		 },
+			   		 orientation: "auto",
+			   		 onSelect: function (suggestion) {
+			   			 var funct = valueAccessor();
+			   			funct(suggestion.value);
+			   		}
+			 });
+	    	  $(elem).keypress(function (event) {
+	              if (event.which == 13) {
+	            	  //TODO: add check if email or username exists first
+	            	  valueAccessor()($(elem).val());
+	              }
+	          });
+	      }
+	 };
+	
 	function getCollectionsSharedWithMe() {
 		return $.ajax({
 			type        : "GET",
@@ -47,6 +79,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.isPublicToEdit = ko.observableArray([]);
         self.apiUrl = ko.observable("");
         self.rightsToShare = ko.observable(true);
+        self.username = ko.observable("");
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
 			//convert rights map to array
@@ -127,9 +160,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				localStorage.setItem('EditableCollections', JSON.stringify(collections));
 		};
 		
-		self.reoladRecordDeletion = function(collId, itemId) {
-			
-		};
 
 		deleteCollection = function(collectionId) {
 			$.ajax({
@@ -157,6 +187,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var collIndex = context.$index();
 			self.index(collIndex);
 			self.rightsToShare(self.myCollections()[collIndex].rights());
+			//$(".user-selection").devbridgeAutocomplete("hide");	
 			app.showPopup("share-collection");
 		}
 
@@ -183,87 +214,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			app.closePopup();
 		}
 		
-		self.shareCollection = function() {
-			
+		self.addToSharedWithUsers = function(username) {
+			alert(username);
+			$(".user-selection").after('<p> Added </p>');
 		}
-		
-		var REGEX_EMAIL = '([a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@' +
-        '(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)';
-		
-		$('#user-selection').selectize({
-		    persist: false,
-		    maxItems: null,
-		    valueField: 'user',
-		    labelField: 'user',
-		    searchField: ['username', 'email'],
-		    plugins: ['remove_button'],
-		    options: [
-		        {email: 'brian@thirdroute.com', username: 'Brian Reavis'},
-		        {email: 'nikola@tesla.com', username: 'Nikola Tesla'},
-		        {email: 'someone@gmail.com'}
-		    ],
-		    render: {
-		        item: function(item, escape) {
-		            return '<div>' +
-		                (item.username ? '<span class="name">' + escape(item.username) + '</span>' : '') +
-		                (item.email ? '<span class="email">' + escape(item.email) + '</span>' : '') +
-		            '</div>';
-		        },
-		        option: function(item, escape) {
-		            var label = item.username || item.email;
-		            var caption = item.username ? item.email : null;
-		            return '<div>' +
-		                '<span class="label">' + escape(label) + '</span>' +
-		                (caption ? '<span class="caption">' + escape(caption) + '</span>' : '') +
-		            '</div>';
-		        }
-		    },
-		    createFilter: function(input) {
-		        var match, regex;
-		        // email@address.com
-		        regex = new RegExp('^' + REGEX_EMAIL + '$', 'i');
-		        match = input.match(regex);
-		        if (match) return !this.options.hasOwnProperty(match[0]);
-
-		        // name <email@address.com>
-		        regex = new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i');
-		        match = input.match(regex);
-		        if (match) return !this.options.hasOwnProperty(match[2]);
-
-		        return false;
-		    },
-		    create: function(input) {
-		        if ((new RegExp('^' + REGEX_EMAIL + '$', 'i')).test(input)) {
-		            return {email: input};
-		        }
-		        var match = input.match(new RegExp('^([^<]*)\<' + REGEX_EMAIL + '\>$', 'i'));
-		        if (match) {
-		            return {
-		                email : match[2],
-		                username  : $.trim(match[1])
-		            };
-		        }
-		        alert('Invalid email address.');
-		        return false;
-		    }
-		});
-		
-		/*self.autoCompleteUsername = function() {
-			$.ajax({
-				"url": "/listNames",
-				"method": "GET",
-				"contentType": "application/json",
-				"data": JSON.stringify({title: self.titleToEdit(),
-						description: self.descriptionToEdit(),
-						isPublic: self.isPublicToEdit()
-					}),
-				success: function(result) {
-					
-				},
-				error: function(error) {
-					
-				}
-		}*/
 		
 		self.editCollection = function () {
 			var collIndex = self.index();
