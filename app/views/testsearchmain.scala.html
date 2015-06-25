@@ -7,57 +7,52 @@
         <title>@title</title>
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        
+        
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>  
         
+		
+		     
 <style type="text/css">
 
 #nav {
     line-height:30px;
     background-color:#eeeeee;
-    width:400px;
-    float:left;
-    padding:5px;	      
+    margin:5px;	      
 }
 #section {
     float:left;
-    padding:10px;
+    margin:10px;
 }
 #hsection {
-clear:both;
-	border-width: 1px; border-style: outset; border-color: blue;
-    padding:5px;
+	clear:both;
+    margin:5px;
 }
 
 #vsection {
-	float:left;
-    border-width: 1px; border-style: outset; border-color: blue;
-    padding:5px;
+    margin:5px;
 }
 
 #thumbframe {
-	line-height:30px;
     background-color:#eeeeee;
-    float:left;
-    border-width: 1px; border-style: outset; border-color: darkgray;
-    padding:5px;
-}
-#thumb {
-line-height:10px;
-    background-color:#eeeeee;
-    float:left;
-    height: 95%;
-    align-content: : center;
-    padding:5px;
-    width: 30%;
+    margin:5px;
     
 }
+
+#thumb {
+	line-height:10px;
+    background-color:#eeeeee;
+    align-content: : center;
+    margin:5px;  
+}
+
 #thinfo {
-    background-color: white;
-    float:left;
-    height: 95%;
-    width: 65%;
-    padding:5px;
+    background-color:#eeeeee;
+    margin:5px;
+    height:95%;
 }
 
 img{
@@ -66,42 +61,25 @@ img{
     border-width: 2px; border-style: outset; border-color: gray;
 }
 
-div.content_tab {
-    display:none;
-}
-.basictab{
-padding: 3px 0;
-margin-left: 0;
-font: bold 12px Verdana;
-border-bottom: 1px solid gray;
-list-style-type: none;
-text-align: left; /*set to left, center, or right to align the menu as desired*/
+
+
+
+
+#ttt{
+	overflow-x: scroll;
+	overflow-y:hidden;
+	white-space: nowrap;
+    width:auto;
+    height:50px;
+
 }
 
-.basictab li{
-display: inline;
-margin: 0;
-text-decoration: none;
-padding: 3px 7px;
-margin-right: 3px;
-border: 1px solid gray;
-border-bottom: none;
-background-color: #f6ffd5;
-color: #2d2b2b;
+
+
+#True-content{
+	display: none;
 }
 
-.basictab li:visited{
-color: #2d2b2b;
-}
-
-.basictab li:hover{
-background-color: #DBFF6C;
-color: black;
-}
-
-.basictab li:active{
-color: black;
-}
 
 
 .btn-2 {
@@ -112,71 +90,6 @@ color: black;
 }
 
 
-.type-2 li:hover .round {
-  background: none;
-}
-.type-2 li:hover .round i {
-  left: 70%;
-}
-
-
-
-.type-2 li {
-  text-decoration: none;
-  -moz-border-radius: 30px;
-  -webkit-border-radius: 30px;
-  border-radius: 30px;
-  padding: 5px 8px 5px 8px;
-  color: #fff;
-  
-  font-family: sans-serif;
-  font-weight: bold;
-  position: relative;
-  -moz-transition: all 0.3s;
-  -o-transition: all 0.3s;
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
-  display: inline-block;
-}
-.type-2 li span {
-  position: relative;
-  z-index: 3;
-}
-.type-2 li .round {
-  -moz-border-radius: 50%;
-  -webkit-border-radius: 50%;
-  border-radius: 50%;
-  width: 38px;
-  height: 38px;
-  position: absolute;
-  right: 3px;
-  top: 3px;
-  -moz-transition: all 0.3s ease-out;
-  -o-transition: all 0.3s ease-out;
-  -webkit-transition: all 0.3s ease-out;
-  transition: all 0.3s ease-out;
-  z-index: 2;
-}
-.type-2 li .round i {
-  position: absolute;
-  top: 50%;
-  margin-top: -6px;
-  left: 50%;
-  margin-left: -4px;
-  -moz-transition: all 0.3s;
-  -o-transition: all 0.3s;
-  -webkit-transition: all 0.3s;
-  transition: all 0.3s;
-}
-
-
-.basictab li.selected a{ /*selected tab effect*/
-position: relative;
-top: 1px;
-padding-top: 4px;
-background-color: #DBFF6C;
-color: black;
-}
 
 </style>
 <script type="text/javascript">
@@ -185,7 +98,8 @@ var namee;
 function change(namee){
 	//alert(namee);
 	console.log("select "+namee);
-document.getElementById("Display_content").innerHTML=document.getElementById(namee).innerHTML;
+	document.getElementById("Display_content").innerHTML=document.getElementById(namee).innerHTML;
+	//document.getElementById("True-content").style.visibility = "hidden";
  
 //optional Javascript code below - To change color of clicked tab
 var livetab, i;
@@ -212,20 +126,28 @@ function shorttext(text, size){
 	return text.substring(0,size)+"(...)";
 }
  
-function gothere(q, f, v){
- //alert(q+" "+f+" "+v);
-var json1 = JSON.stringify({
-					"searchTerm": q,
-					"page": "1",
-					"pageSize":"20",
-				    "filters": [{ "filterID": f, values: [v]}]
-				});
-console.log( json1 );
-$.ajax({
+function gothere(q){
+	
+ 	//alert(q+" "+f+" "+v);
+ 	
+	//var json1 = JSON.stringify({
+	//				"searchTerm": q.searchTerm,
+	//				"page": "1",
+	//				"pageSize":"20",
+					//"filters": q.filters
+				    //"filters": [{ "filterID": f, values: [v]}]
+//					"filters": q.filters
+	//			});
+		//		
+	var json1 = JSON.stringify(q);
+	//var json1 = q;
+	alert(json1);
+	console.log( json1 );
+	$.ajax({
 				"url": "/api/testsearch",
 				"method": "POST",
 				"contentType": "application/json",
-				//"dataType": "json",
+				"dataType": "json",
 				"data": json1,
 
 				"success": function( data, textStatus, jQxhr ){
@@ -234,14 +156,21 @@ $.ajax({
         },
         "error": function( jqXhr, textStatus, errorThrown ){
             console.log( errorThrown );
-        }
-				});
- 
+            //alert("error: " +errorThrown);
 
- 	
+        }
+        
+        
+				});
 }
  
-</script>        
+ 
+
+ 
+ 
+</script>   
+
+ 
 
     </head>
     <body>

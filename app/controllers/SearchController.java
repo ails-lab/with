@@ -32,9 +32,11 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
 import espace.core.CommonFilterLogic;
@@ -93,6 +95,11 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
+				if(	session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get(
+							"effectiveUserIds"));
+					q.setUser(userIds.get(0));
+				}
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
@@ -115,6 +122,12 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
+				if(	session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get(
+							"effectiveUserIds"));
+					q.setUser(userIds.get(0));
+				}
+				long start = System.currentTimeMillis();
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 
@@ -154,12 +167,22 @@ public class SearchController extends Controller {
 	}
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
+		System.out.println(q);
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 		// final long initTime = System.currentTimeMillis();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
 				.getResults(cq);
+		if ((q.source != null) && (q.source.size() > 0)) {
+			if (q.source.contains("Mint"))
+				q.mintSource = true;
+			if (q.source.contains("UpladedByUser"))
+				q.uploadedByUser = true;
+			q.source.remove("Mint");
+			q.source.remove("UploadedByUser");
+			q.source.add("With");
+		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			if (q.source == null || q.source.size() == 0 || q.source.contains(src.getSourceName())) {
+			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
 				promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
 						src, q));
 			}
@@ -196,6 +219,7 @@ public class SearchController extends Controller {
 	}
 
 	public static List<SourceResponse> search(CommonQuery q) {
+		System.out.println(q);
 		List<SourceResponse> result = ESpaceSources.fillResults(q);
 		return result;
 	}
@@ -206,18 +230,29 @@ public class SearchController extends Controller {
 
 	public static Result posttestsearch() {
 		// System.out.println("--------------------");
-		// System.out.println(userForm.bindFromRequest().toString());
+		 System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
-		if (q == null || q.searchTerm == null) {
+		if ((q == null) || (q.searchTerm == null)) {
 			q = new CommonQuery();
 			q.searchTerm = "zeus";
 		}
 		q.validate();
 		return buildresult(q);
+
+
+		//JsonNode json = request().body().asJson();
+		//
+		//CommonQuery q = json;
+		//ObjectNode result = Json.newObject();
+		//
+		//System.out.println(json);
+		//
+		//
+		//return ok(result);
 	}
 
 	private static Result buildresult(CommonQuery q) {
-		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
+//		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;

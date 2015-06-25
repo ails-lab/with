@@ -33,15 +33,14 @@ var require = {
 		"canvas-to-blob"            : "bower_modules/blueimp-canvas-to-blob/js/canvas-to-blob.min",
 		"jquery.fileupload"         : "bower_modules/jquery-file-upload/js/jquery.fileupload",
 		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else",
-		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest"
+		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest",
+		"inputtags"       			: "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
+		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
 		"bootstrap": { deps: ["jquery"] },
 		"facebook":  { exports: "FB" },
-		/*"komapping": {
-            deps: ['knockout'],
-            exports: 'komapping'
-        }*/
+		"smoke": { deps: ["jquery", "bootstrap"] }
 	}
 };

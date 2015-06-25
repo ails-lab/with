@@ -76,6 +76,13 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.PROVIDER_NAME;
 		return r;
 	}
+	
+	public static CommonFilterLogic dataproviderFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.DATAPROVIDER_ID;
+		r.data.filterName = CommonFilters.DATAPROVIDER_NAME;
+		return r;
+	}
 
 	public static CommonFilterLogic creatorFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();

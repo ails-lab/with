@@ -41,7 +41,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	/**
 	 * Retrieve records from specific collection
-	 * 
+	 *
 	 * @param colId
 	 * @return
 	 */
@@ -51,7 +51,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	/**
 	 * Retrieve records from specific collection by offset and count
-	 * 
+	 *
 	 * @param colId
 	 *            , offset, count
 	 * @return
@@ -72,16 +72,37 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
-	public List<CollectionRecord> getBySource(String source, String sourceId) {
-		Query<CollectionRecord> q = this.createQuery().field("source")
-				.equal(source).field("sourceId").equal(sourceId);
+	public List<CollectionRecord> getBySource(String source,String sourceId) {
+		Query<CollectionRecord> q = this.createQuery()
+				//.field("source").equal(source)
+				.field("sourceId").equal(sourceId);
+		return this.find(q).asList();
+	}
+	
+	public List<CollectionRecord> getByUniqueId(ObjectId colId, String extId) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId).field("externalId").equal(extId);
 		return this.find(q).asList();
 	}
 
+	public long countBySource(String sourceId) {
+		Query<CollectionRecord> q = this.createQuery()
+				//.field("source").equal(source)
+				.field("sourceId").equal(sourceId);
+		return this.find(q).countAll();
+	}
+		
 	public List<CollectionRecord> getByUniqueId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
-				.field("externalId:").equal(extId);
+				.field("externalId").equal(extId);
 		return this.find(q).asList();
+	}
+		
+	public long countByUniqueId(String extId) {
+		Query<CollectionRecord> q = this.createQuery()
+				//.field("source").equal(source)
+				.field("externalId").equal(extId);
+		return this.find(q).countAll();
 	}
 	
 	public int deleteByCollection(ObjectId colId) {
