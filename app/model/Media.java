@@ -218,4 +218,8 @@ public class Media {
 	public void incrAccessCount() {
 		this.accessCount++;
 	}
+
+	public boolean hasAccessCount() {
+		return getAccessCount() != 0;
+	}
 }

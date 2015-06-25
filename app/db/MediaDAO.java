@@ -133,12 +133,9 @@ public class MediaDAO {
 				mediaGridFsFile.put("ownerId", media.getOwnerId());
 			if (media.hasExternalUrl())
 				mediaGridFsFile.put("externalUrl", media.getExternalUrl());
-			if (media.hasExternalUrl())
-				mediaGridFsFile.put("thumbnail", media.isThumbnail());
-			if (media.hasExternalUrl())
-				mediaGridFsFile.put("original", media.isOriginal());
-			if (media.hasExternalUrl())
-				mediaGridFsFile.put("accessCount", media.getAccessCount());
+			mediaGridFsFile.put("thumbnail", media.isThumbnail());
+			mediaGridFsFile.put("original", media.isOriginal());
+			mediaGridFsFile.put("accessCount", media.getAccessCount());
 			// save the file
 			mediaGridFsFile.save();
 			media.setDbId((ObjectId) mediaGridFsFile.getId());
@@ -153,7 +150,7 @@ public class MediaDAO {
 		try {
 			BasicDBObject query = new BasicDBObject("externalUrl", externalUrl);
 			if (thumbnail) {
-				query.append("thumbnail", thumbnail);
+				query.append("thumbnail", true);
 			} else {
 				query.append("original", true);
 			}

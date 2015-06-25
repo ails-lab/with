@@ -16,7 +16,10 @@
 
 package controllers;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -42,6 +45,12 @@ public class CacheController extends Controller {
 	public static Result getImage(String externalUrl, boolean thumbnail) {
 		Media image = DB.getMediaDAO().getByExternalUrl(externalUrl, thumbnail);
 		if (image != null) {
+			image.incrAccessCount();
+			try {
+				DB.getMediaDAO().makePermanent(image);
+			} catch (Exception e) {
+				log.error(e.getMessage());
+			}
 			String imageId = image.getDbId().toString();
 			return MediaController.getMetadataOrFile(imageId, true);
 		} else {
@@ -87,17 +96,28 @@ public class CacheController extends Controller {
 			media.setThumbnail(false);
 			Media fullImage = media;
 			DB.getMediaDAO().makePermanent(fullImage);
-			//TODO resize image and put new width, height and bytes to data
+			// Resize image and put new width, height and bytes to data
+			Image ithumb = image.getScaledInstance(211, -1, Image.SCALE_SMOOTH);
+			// Create a buffered image with transparency
+			BufferedImage thumb = new BufferedImage(ithumb.getWidth(null),
+					ithumb.getHeight(null), image.getType());
+			// Draw the image on to the buffered image
+			Graphics2D bGr = thumb.createGraphics();
+			bGr.drawImage(ithumb, 0, 0, null);
+			bGr.dispose();
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			ImageIO.write(thumb, "jpg", baos);
+			baos.flush();
+			byte[] thumbByte = baos.toByteArray();
+			baos.close();
+			media.setDbId(null);
+			media.setData(thumbByte);
+			media.setWidth(thumb.getWidth());
+			media.setHeight(thumb.getHeight());
 			media.setThumbnail(true);
 			media.setOriginal(false);
 			DB.getMediaDAO().makePermanent(media);
-			if (!thumbnail) {
-				return MediaController.getMetadataOrFile(fullImage.getDbId()
-						.toString(), true);
-			} else {
-				return MediaController.getMetadataOrFile(media.getDbId()
-						.toString(), true);
-			}
+			return getImage(externalUrl, thumbnail);
 		} catch (Exception e) {
 			log.error("Couldn't cache thumbnail:" + e.getMessage());
 			return internalServerError(Json.parse("{\"error\":\""
@@ -108,8 +128,7 @@ public class CacheController extends Controller {
 			} catch (IOException e) {
 				log.error("Couldn't close connection:" + e.getMessage());
 			}
-		
-		return TODO;}
+		}
 
 	}
 
