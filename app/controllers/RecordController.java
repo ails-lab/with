@@ -160,7 +160,7 @@ public class RecordController extends Controller {
 				//delete record from index
 				ElasticEraser eraser = new ElasticEraser(record);
 				eraser.deleteRecord();
-				//eraser.deleteRecordEntryFromMerged();
+				eraser.deleteRecordEntryFromMerged();
 
 				return ok(Json.toJson(record));
 			} else {

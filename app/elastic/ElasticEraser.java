@@ -17,6 +17,7 @@
 package elastic;
 
 import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.script.ScriptService.ScriptType;
 
 import model.Collection;
 import model.CollectionRecord;
@@ -83,15 +84,20 @@ public class ElasticEraser {
 
 	public void deleteRecordEntryFromMerged() {
 		try {
-			Elastic.getTransportClient().prepareDelete(
-					Elastic.index,
-					Elastic.type_general,
-					record.getExternalId())
-				.setOperationThreaded(false)
-				.execute()
-				.actionGet();
-		} catch(ElasticsearchException e) {
-			log.error("Cannot delete the specified entry from merged record document", e);
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type_general,
+						record.getExternalId())
+				.addScriptParam("id", record.getCollectionId())
+				.addScriptParam("tags", record.getTags().toArray())
+				.setScript("for(String t: tags) {"
+					+ "if(ctx._source.tags.contains(t))"
+					+ "ctx._source.tags.remove(t)"
+					+ "}; "
+					+ "ctx._source.collections.remove(id);", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection rights!", e);
 		}
 	}
 }

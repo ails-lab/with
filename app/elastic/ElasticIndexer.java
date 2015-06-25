@@ -149,7 +149,7 @@ public class ElasticIndexer {
 			.addScriptParam("tags", record.getTags().toArray())
 			.addScriptParam("collectionId", record.getCollectionId().toString())
 			.setScript("for(String t: tags) {"
-					+ "if(!ctx._source.tags.contains(t))"
+					//+ "if(!ctx._source.tags.contains(t))"
 					+ "ctx._source.tags.add(t)"
 					+ "}; "
 					+ "ctx._source.collections += collectionId", ScriptType.INLINE)

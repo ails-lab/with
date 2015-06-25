@@ -122,6 +122,11 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
+				if(	session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get(
+							"effectiveUserIds"));
+					q.setUser(userIds.get(0));
+				}
 				long start = System.currentTimeMillis();
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish

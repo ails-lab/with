@@ -316,7 +316,7 @@ public class CollectionController extends Controller {
 		} else if (filterByEmail != null) {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
 		}
-		
+
 		if (userIds.isEmpty()) {
 			// return all public collections
 			if (ownerId == null) {
@@ -533,6 +533,10 @@ public class CollectionController extends Controller {
 			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
+			if(c.getIsPublic())
+				record.setIsPublic(true);
+			else
+				record.setIsPublic(false);
 
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
@@ -724,7 +728,7 @@ public class CollectionController extends Controller {
 		//delete record and merged_record from index
 		ElasticEraser eraser = new ElasticEraser(record);
 		eraser.deleteRecord();
-		//eraser.deleteRecordEntryFromMerged();
+		eraser.deleteRecordEntryFromMerged();
 
 		if (collection.isExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(
@@ -816,11 +820,15 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-		ObjectId userId = new ObjectId(userIds.get(0));
-		ObjectId fav = DB.getCollectionDAO()
-				.getByOwnerAndTitle(userId, "_favorites").getDbId();
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByCollection(fav);
+		List<CollectionRecord> records = null;
+		if( userIds.size() > 0 ) {
+			ObjectId userId = new ObjectId(userIds.get(0));
+			ObjectId fav = DB.getCollectionDAO()
+						 .getByOwnerAndTitle(userId, "_favorites").getDbId();
+			records = DB.getCollectionRecordDAO()
+					 .getByCollection(fav);
+		}
+
 		if (records == null) {
 			result.put("error", "Cannot retrieve records from database");
 			return internalServerError(result);

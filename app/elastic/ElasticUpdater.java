@@ -79,11 +79,11 @@ public class ElasticUpdater {
 					Elastic.index,
 					Elastic.type_within,
 					record.getDbId().toString())
-				.setSource(prepareRecordDoc())
+				.setDoc(prepareRecordDoc())
 				.get();
 			 updateMergedDoc();
 		} catch (Exception e) {
-			log.error("Cannot update collection metadata!", e);
+			log.error("Cannot update record tags!", e);
 		}
 	}
 
@@ -148,7 +148,7 @@ public class ElasticUpdater {
 					Elastic.index,
 					Elastic.type_collection,
 					collection.getDbId().toString())
-				.setSource(prepareEditedCollectionDoc())
+				.setDoc(prepareEditedCollectionDoc())
 				.get();
 		} catch (Exception e) {
 			log.error("Cannot update collection metadata!", e);
@@ -231,7 +231,7 @@ public class ElasticUpdater {
 						Elastic.index,
 						Elastic.type_collection,
 						collection.getDbId().toString())
-				.setSource(prepareUpdateOnRights())
+				.setDoc(prepareUpdateOnRights())
 				.execute().actionGet();		} catch (Exception e) {
 			log.error("Cannot update collection rights!", e);
 		}
