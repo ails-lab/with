@@ -74,7 +74,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -133,7 +133,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -196,7 +196,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -255,7 +255,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
