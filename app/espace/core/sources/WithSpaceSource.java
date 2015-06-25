@@ -57,7 +57,7 @@ public class WithSpaceSource extends ISpaceSource {
 		String term = q.getQuery();
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
-		
+
 		SearchOptions elasticoptions = null;
 		List<Collection> colFields = null;
 		if(q.user == null) {
@@ -70,14 +70,14 @@ public class WithSpaceSource extends ISpaceSource {
 			searcher.setType(Elastic.type_collection);
 			SearchResponse response = searcher.search(null, elasticoptions);
 			colFields = getCollectionMetadaFromHit(response.getHits());
-			
+
 		}
-		
+
 		searcher.setType(Elastic.type_general);
 		elasticoptions.setFilterType("OR");
-		elasticoptions.addFilter("collection_specific.collection", "no_collections_found");
+		elasticoptions.addFilter("collections", "no_collections_found");
 		for(Collection collection : colFields) {
-			elasticoptions.addFilter("collection_specific.collection", collection.getDbId().toString());
+			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}
 		SearchResponse resp = searcher.search(term, elasticoptions);
 		searcher.closeClient();
@@ -87,8 +87,8 @@ public class WithSpaceSource extends ISpaceSource {
 
 	private List<Collection> getCollectionMetadaFromHit(
 			SearchHits hits) {
-		
-		
+
+
 		List<Collection> colFields = new ArrayList<Collection>();
 		for(SearchHit hit: hits.getHits()) {
 			JsonNode json         = Json.parse(hit.getSourceAsString());

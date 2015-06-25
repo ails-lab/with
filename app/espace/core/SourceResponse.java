@@ -67,17 +67,20 @@ public class SourceResponse {
 		if(hit.type().equals(Elastic.type_general)) {
 			List<String> colIds = new ArrayList<String>();
 			List<String> tags   = new ArrayList<String>();
-			ArrayNode colArray = (ArrayNode)json.get("collection_specific");
-			for(JsonNode el: colArray) {
-				colIds.add(el.get("collection").asText());
-				for(JsonNode t: el.get("tags")) {
+			ArrayNode ids = (ArrayNode)json.get("collections");
+			ArrayNode allTags = (ArrayNode)json.get("tags");
+
+			for(JsonNode id: ids)
+				if(!colIds.contains(id.asText()))
+					colIds.add(id.asText());
+			for(JsonNode t: allTags)
+				if(!tags.contains(t.asText()))
 					tags.add(t.asText());
-				}
-			}
+
 			record.setCollections(colIds);
 			record.setAllTags(tags);
 		}
-		  
+
 		return record;
 	}
 
