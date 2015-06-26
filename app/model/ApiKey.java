@@ -105,6 +105,9 @@ public class ApiKey {
 	// API keys can have limited lifetime
 	private Date expires;
 
+	// api keys are nicely accessed by name, like "WITH" or "Workshop Athens"
+	private String name;
+	
 	
 	
 	// this will just monitor the pattern
@@ -255,6 +258,13 @@ public class ApiKey {
 	public void setIpPattern(String ipPattern) {
 		this.ipPattern = ipPattern;
 	}
-	
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 	
 }
