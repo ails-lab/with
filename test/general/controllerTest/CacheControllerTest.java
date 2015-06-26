@@ -38,9 +38,9 @@ public class CacheControllerTest {
 	public void testGetThumbnail() {
 		running(fakeApplication(), new Runnable() {
 			public void run() {
-				String url = "http://collections.tepapa.govt.nz/APICollection/media/204076/250";
-				Result result = route(fakeRequest(GET, "/cache/byUrl?url="
-						+ url));
+				String url = "http://cdn.wonderfulengineering.com/wp-content/uploads/2014/07/Beautiful-Wallpapers-14.jpg";
+				Result result = route(
+						fakeRequest(GET, "/cache/byUrl?url=" + url), HOUR);
 				assertThat(status(result)).isEqualTo(Status.OK);
 			}
 		});

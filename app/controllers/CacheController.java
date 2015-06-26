@@ -78,7 +78,7 @@ public class CacheController extends Controller {
 			int height = image.getHeight();
 			int width = image.getWidth();
 			Media media = new Media();
-			media.setType("IMAGE");
+			media.setType(Media.BaseType.IMAGE);
 			media.setMimeType(mimeType);
 			media.setHeight(height);
 			media.setWidth(width);

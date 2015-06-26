@@ -24,6 +24,7 @@ import model.Media;
 
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -32,7 +33,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
-import com.mongodb.gridfs.GridFSInputFile;
 
 public class MediaDAO {
 	public static final ALogger log = Logger.of(MediaDAO.class);
@@ -51,11 +51,14 @@ public class MediaDAO {
 		if (gridfsDbFile == null)
 			return null;
 
-		
 		// some things are not quite right, so we repair those
-		
+
 		try {
-			Media media = DB.getMorphia().getMapper().fromDBObject(Media.class, gridfsDbFile, null );
+			Media media = DB
+					.getMorphia()
+					.getMapper()
+					.fromDBObject(Media.class, gridfsDbFile,
+							new DefaultEntityCache());
 			media.setData(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
 			return media;
 		} catch (IOException e) {
@@ -100,22 +103,22 @@ public class MediaDAO {
 
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
-				
+
 			} else {
 				mediaGridFsFile = DB.getGridFs().createFile(media.getData());
 			}
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
-			// remove stuff we don't want on the media object 
+			// remove stuff we don't want on the media object
 			mediaDbObj.removeField("className");
 			mediaDbObj.removeField("data");
-			mediaDbObj.removeField( "_id");
-			
-			for( String k : mediaDbObj.keySet()) {
-				mediaGridFsFile.put( k, mediaDbObj.get(k));
+			mediaDbObj.removeField("_id");
+
+			for (String k : mediaDbObj.keySet()) {
+				mediaGridFsFile.put(k, mediaDbObj.get(k));
 			}
 			mediaGridFsFile.save();
 			media.setDbId((ObjectId) mediaGridFsFile.getId());
-		
+
 			// save the file
 		} catch (Exception e) {
 			log.error("Cannot save Media document to GridFS", e);
