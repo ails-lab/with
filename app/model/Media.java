@@ -36,6 +36,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Media {
 
+	public enum BaseType {
+		TEXT, IMAGE, AUDIO, VIDEO
+	}
+
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
@@ -44,14 +48,12 @@ public class Media {
 	// the owner
 	private ObjectId ownerId;
 
-	private boolean isPublic;
-
 	private String externalUrl;
 
 	private int width, height;
 
 	// IMAGE, VIDEO, AUDIO, TXT
-	private String type;
+	private BaseType type;
 
 	// more explicit media type
 	private String mimeType;
@@ -70,6 +72,8 @@ public class Media {
 	private byte[] data;
 
 	private String filename;
+
+	private Rights rights = new Rights();
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -103,11 +107,11 @@ public class Media {
 		return getHeight() != 0;
 	}
 
-	public String getType() {
+	public BaseType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(BaseType type) {
 		this.type = type;
 	}
 
@@ -163,14 +167,6 @@ public class Media {
 		this.ownerId = ownerId;
 	}
 
-	public boolean isPublic() {
-		return isPublic;
-	}
-
-	public void setPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	public String getFilename() {
 		return this.filename;
 	}
@@ -221,5 +217,13 @@ public class Media {
 
 	public boolean hasAccessCount() {
 		return getAccessCount() != 0;
+	}
+
+	public Rights getRights() {
+		return rights;
+	}
+
+	public void setRights(Rights rights) {
+		this.rights = rights;
 	}
 }
