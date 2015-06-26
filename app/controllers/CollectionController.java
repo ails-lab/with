@@ -579,8 +579,9 @@ public class CollectionController extends Controller {
 				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
-			} else
+			} else {
 				addContentToRecord(record.getDbId(), source, sourceId);
+			}
 			return status;
 		}
 

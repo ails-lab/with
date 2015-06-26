@@ -36,6 +36,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Media {
 
+	public enum BaseType {
+		TEXT, IMAGE, AUDIO, VIDEO
+	}
+
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
@@ -44,12 +48,12 @@ public class Media {
 	// the owner
 	private ObjectId ownerId;
 
-	private boolean isPublic;
+	private String externalUrl;
 
 	private int width, height;
 
 	// IMAGE, VIDEO, AUDIO, TXT
-	private String type;
+	private BaseType type;
 
 	// more explicit media type
 	private String mimeType;
@@ -57,12 +61,19 @@ public class Media {
 	// how long in seconds
 	private float duration;
 
+	private boolean thumbnail;
+
+	private boolean original;
+
+	private int accessCount;
+
 	// the actual data .. GridFS
 	@JsonIgnore
 	private byte[] data;
 
 	private String filename;
 
+	private Rights rights = new Rights();
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -96,11 +107,11 @@ public class Media {
 		return getHeight() != 0;
 	}
 
-	public String getType() {
+	public BaseType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(BaseType type) {
 		this.type = type;
 	}
 
@@ -156,19 +167,63 @@ public class Media {
 		this.ownerId = ownerId;
 	}
 
-	public boolean isPublic() {
-		return isPublic;
-	}
-
-	public void setPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	public String getFilename() {
 		return this.filename;
 	}
 
 	public void setFilename(String filename) {
 		this.filename = filename;
+	}
+
+	public String getExternalUrl() {
+		return externalUrl;
+	}
+
+	public void setExternalUrl(String externalUrl) {
+		this.externalUrl = externalUrl;
+	}
+
+	public boolean hasExternalUrl() {
+		return getExternalUrl() != null;
+	}
+
+	public boolean isThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(boolean thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
+	public boolean isOriginal() {
+		return original;
+	}
+
+	public void setOriginal(boolean original) {
+		this.original = original;
+	}
+
+	public int getAccessCount() {
+		return accessCount;
+	}
+
+	public void setAccessCount(int accessCount) {
+		this.accessCount = accessCount;
+	}
+
+	public void incrAccessCount() {
+		this.accessCount++;
+	}
+
+	public boolean hasAccessCount() {
+		return getAccessCount() != 0;
+	}
+
+	public Rights getRights() {
+		return rights;
+	}
+
+	public void setRights(Rights rights) {
+		this.rights = rights;
 	}
 }

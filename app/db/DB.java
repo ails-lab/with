@@ -90,6 +90,7 @@ public class DB {
 			 morphia = new Morphia();
 			//this method is not working, have to find why!!
 			//morphia.mapPackage("model");
+			 morphia.getMapper().getConverters().addConverter(new RightsConverter());
 		}
 		return morphia;
 	}
