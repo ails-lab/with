@@ -36,6 +36,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Media {
 
+	public enum BaseType {
+		TEXT, IMAGE, AUDIO, VIDEO
+	}
+	
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
@@ -44,14 +48,10 @@ public class Media {
 	// the owner
 	private ObjectId ownerId;
 
-	
-	// only public media can be URL accessed by everybody
-	private boolean isPublic;
-
 	private int width, height;
 
 	// IMAGE, VIDEO, AUDIO, TXT
-	private String type;
+	private BaseType type;
 
 	// more explicit media type
 	private String mimeType;
@@ -65,11 +65,6 @@ public class Media {
 
 	private String filename;
 
-	private String thumbnailOf;
-	private String keyframeOf;
-	
-	// a URL which this media is caching
-	private String cacheOf;
 	private Rights rights = new Rights();
 	
 	public ObjectId getDbId() {
@@ -104,11 +99,11 @@ public class Media {
 		return getHeight() != 0;
 	}
 
-	public String getType() {
+	public BaseType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(BaseType type) {
 		this.type = type;
 	}
 
@@ -164,44 +159,12 @@ public class Media {
 		this.ownerId = ownerId;
 	}
 
-	public boolean isPublic() {
-		return isPublic;
-	}
-
-	public void setPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	public String getFilename() {
 		return this.filename;
 	}
 
 	public void setFilename(String filename) {
 		this.filename = filename;
-	}
-
-	public String getThumbnailOf() {
-		return thumbnailOf;
-	}
-
-	public void setThumbnailOf(String thumbnailOf) {
-		this.thumbnailOf = thumbnailOf;
-	}
-
-	public String getKeyframeOf() {
-		return keyframeOf;
-	}
-
-	public void setKeyframeOf(String keyframeOf) {
-		this.keyframeOf = keyframeOf;
-	}
-
-	public String getCacheOf() {
-		return cacheOf;
-	}
-
-	public void setCacheOf(String cacheOf) {
-		this.cacheOf = cacheOf;
 	}
 
 	public Rights getRights() {
