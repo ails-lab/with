@@ -53,7 +53,7 @@ public class CollectionRecord {
 	private ObjectId dbId;
 
 	private String externalId;
-	
+
 	private boolean isPublic;
 
 	// which backend provided this entry
@@ -71,9 +71,9 @@ public class CollectionRecord {
 	@NotBlank
 	private String title;
 	private String description;
-	
+
 	private String creator;
-	
+
 	private String provider;
 
 	// the id in the source system
@@ -83,10 +83,10 @@ public class CollectionRecord {
 
 	// url to the provider web page for that record
 	private String isShownAt;
-	
+
 	// url to the (full resoultion) content - external on in the WITH db
 	private String isShownBy;
-	
+
 	private String type;
 
 	private String rights;
@@ -209,7 +209,7 @@ public class CollectionRecord {
 	public void setCreator(String creator) {
 		this.creator = creator;
 	}
-	
+
 	public String getProvider() {
 		return provider;
 	}
@@ -308,11 +308,11 @@ public class CollectionRecord {
 		return tags;
 	}
 
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
 
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 
