@@ -318,11 +318,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			} else {
 				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
 			}
-			
 
 			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId() + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
 			+ '<div class="sourceCredits">';
-			
+
 			if (self.access() == "WRITE" || self.access() == "OWN") {
 				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\')}}"></span>';
 			}
