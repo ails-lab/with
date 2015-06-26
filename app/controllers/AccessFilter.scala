@@ -81,7 +81,12 @@ class AccessFilter extends Filter {
       case _ => {
         rh.session.get("apikey") match {
           case Some(key) => access.apikey = key
-          case None => access.ip = rh.remoteAddress
+          case None => { 
+            rh.headers.get("X-apikey") match {
+              case Some(key) => access.apikey = key
+              case None =>  access.ip = rh.remoteAddress 
+            }
+          }
         }
       }
     }
@@ -169,5 +174,22 @@ object FilterUtils {
   def outsession(result: Result): Option[Map[String, String]] = {
     Cookies(result.header.headers.get(SET_COOKIE))
       .get(Session.COOKIE_NAME).map(_.value).map(Session.decode)
+  }
+  
+  def withAjaxScript:Result = {
+    val apikey = DB.getApiKeyDAO.getByName("WITH")
+    if( apikey != null ) {
+      val script = """
+$.ajaxSetup({
+    beforeSend: function(xhr) {
+        xhr.setRequestHeader('X-apikey', '%s');
+    }
+});
+""".replace("%s", apikey.getKeyString() );
+       play.api.mvc.Results.Ok( script ).as("application/javascript")      
+    } else {
+             play.api.mvc.Results.Ok( "" ).as("application/javascript")      
+
+    }
   }
 }
