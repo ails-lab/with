@@ -40,7 +40,7 @@ public class RecordController extends Controller {
 	public static final ALogger log = Logger.of( RecordController.class);
 
 	/**
-	 * Retrive a colleciton entry or just a specific format
+	 * Retrieve a collection entry or just a specific format
 	 * @param entryId
 	 * @param format
 	 * @return
