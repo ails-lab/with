@@ -140,15 +140,17 @@
 
 
 .closeButton {
-  position: absolute;
-  right: -7px;
-  top: -10px;
-  display: none;
-  z-index: 2;
-  font-size: 15px;
-  background-color:white;
-  cursor:pointer;
+  position: relative;
+  font-size: 14px;
+  background-color: none;
+  cursor: pointer;
+  float: right;
 }
+
+.closeButton:hover {
+  color:red;
+}
+
 
  .morecontent span {
 display: none;

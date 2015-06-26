@@ -37,7 +37,7 @@ public class RecordDAO {
 		// create and store
 		CollectionRecord recordLink = new CollectionRecord();
 		recordLink.setDescription("Testing CRUD for RecordLink");
-		recordLink.setRights("CC");
+		recordLink.setItemRights("CC");
 		recordLink.setSource(null);
 		recordLink.setSourceId("item_42");
 		recordLink.setSourceUrl("http://eur");
@@ -69,7 +69,7 @@ public class RecordDAO {
 	public CollectionRecord storeRecordLink() {
 			CollectionRecord record = new CollectionRecord();
 			record.setDescription("This is a test RecordLink");
-			record.setRights("CC");
+			record.setItemRights("CC");
 			record.setSource("Europeana");
 			record.setSourceId("item_42");
 			record.setSourceUrl("http://eur");

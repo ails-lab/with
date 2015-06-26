@@ -55,14 +55,15 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public EuropeanaSpaceSource() {
 		super();
 		
-		addDefaultWriter(CommonFilters.PROVIDER_ID, qfwriter("DATA_PROVIDER"));
+		addDefaultWriter(CommonFilters.PROVIDER_ID, qfwriter("PROVIDER"));
+		addDefaultWriter(CommonFilters.DATAPROVIDER_ID, qfwriter("DATA_PROVIDER"));
 		addDefaultWriter(CommonFilters.COUNTRY_ID, qfwriter("COUNTRY"));
 
 		addDefaultWriter(CommonFilters.YEAR_ID, qfwriter("YEAR"));
 
 		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("proxy_dc_creator"));
 		
-		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, qfwriter("proxy_dc_contributor"));
+//		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, qfwriter("proxy_dc_contributor"));
 
 		addDefaultWriter(CommonFilters.RIGHTS_ID, qfwriter("RIGHTS"));
 
@@ -96,7 +97,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		builder.addSearchParam("rows", "" + q.pageSize);
 		builder.addSearchParam("profile", "rich+facets");
-		builder.addSearchParam("facet", "proxy_dc_creator,proxy_dc_contributor,DEFAULT");
+//		builder.addSearchParam("facet", "proxy_dc_creator,proxy_dc_contributor,DEFAULT");
+		builder.addSearchParam("facet", "proxy_dc_creator,DEFAULT");
+//		builder.addSearchParam("f.proxy_dc_creator.facet.limit", "10");
 		// builder.addSearchParam("facet", "proxy_dc_creator");
 		return addfilters(q, builder).getHttp();
 	}
@@ -162,11 +165,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
+		CommonFilterLogic dataprovider = CommonFilterLogic.dataproviderFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
-		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
+//		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -211,6 +215,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						break;
 
 					case "DATA_PROVIDER":
+						countValue(dataprovider, label, false, count);
+						break;
+						
+					case "PROVIDER":
 						countValue(provider, label, false, count);
 						break;
 
@@ -221,9 +229,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					case "proxy_dc_creator":
 						countValue(creator, label, false, count);
 						break;
-					case "proxy_dc_contributor":
-						countValue(contributor, label, false, count);
-						break;
+//					case "proxy_dc_contributor":
+//						countValue(contributor, label, false, count);
+//						break;
 					case "COUNTRY":
 						countValue(country, label, false, count);
 						break;
@@ -241,8 +249,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			res.filtersLogic = new ArrayList<>();
 			res.filtersLogic.add(type);
 			res.filtersLogic.add(provider);
+			res.filtersLogic.add(dataprovider);
 			res.filtersLogic.add(creator);
-			res.filtersLogic.add(contributor);
+//			res.filtersLogic.add(contributor);
 			res.filtersLogic.add(rights);
 			res.filtersLogic.add(country);
 			res.filtersLogic.add(year);

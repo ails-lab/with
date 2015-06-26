@@ -5,12 +5,19 @@
 </button>
   
 <div class="modalfacets" id="searchfacets" data-bind="if: visiblePanel,visible:visiblePanel">
-<div>
+
+
+ <div class="facetsearchbox">
+    <div class="box">
+    <input class="facetinput" id="f_search" placeholder="Search" type="text" value=""/>
+   </div>
+   </div>
+ 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="#datasources" data-toggle="tab">Sources</a></li>
+  <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
   <!-- ko foreach: $parent.filters -->
   <!-- ko if: suggestedValues.length>0 -->
-  <li><a data-bind="attr:{href:'#'+filterID},text:filterName"  data-toggle="tab"></a></li>
+  <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
   <!-- /ko -->
   <!-- /ko -->
    
@@ -18,7 +25,7 @@
 
 <div id="myTabContent" class="tab-content">
   <div class="tab-pane active" id="datasources">
-     <ul class="thumbfilters">
+     <ul class="thumbfilters list">
      
      <li>
       <input type="checkbox" value="Europeana" data-bind="checked: $parent.sources, click: listClick"/>
@@ -57,8 +64,9 @@
   </div>
   
    <!-- ko foreach: $parent.filters -->
-   <div class="tab-pane" data-bind="attr:{id:filterID}">
-    <ul class="thumbfilters">
+   <div class="tab-pane fade" data-bind="attr:{id:filterID}">
+  
+    <ul class="thumbfilters list">
     <!-- ko if:suggestedValues.length>0 -->
     <!-- ko foreach: suggestedValues -->
    
@@ -75,6 +83,5 @@
   </div>
   
   
-</div>
 </div>
 </div>

@@ -14,18 +14,32 @@
  */
 
 
-package espace.core;
+package utils;
 
 import java.util.List;
 
-public class CommonFilter {
+import model.CollectionRecord;
 
-	public String filterID;
-	public List<String> values;
-	@Override
-	public String toString() {
-		return "CommonFilter [filterID=" + filterID + ", values=" + values + "]";
+public class ExtendedCollectionRecord extends CollectionRecord {
+
+	public List<String> collections;
+	public List<String> allTags;
+	
+	public List<String> getCollections() {
+		return collections;
 	}
-
+	
+	public void setCollections(List<String> collections) {
+		this.collections = collections;
+	}
+	
+	public List<String> getAllTags() {
+		return allTags;
+	}
+	
+	public void setAllTags(List<String> tags) {
+		this.allTags = tags;
+	}
+	
 	
 }

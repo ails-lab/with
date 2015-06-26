@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.Search;
 import model.User;
 
@@ -109,6 +108,13 @@ public class UserDAO extends DAO<User> {
 		List<Search> userSearches = user.getSearchHistory();
 		for (Search s : userSearches)
 			DB.getSearchDAO().makeTransient(s);
+
+		//delete user related collections
+		/*List<ObjectId> collectionIds = user.getCollectionIds();
+		for (ObjectId cid: collectionIds)
+			DB.getCollectionDAO().removeById(cid);
+*/
+
 		return this.makeTransient(user);
 	}
 }

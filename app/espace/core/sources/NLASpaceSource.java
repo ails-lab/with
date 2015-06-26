@@ -171,6 +171,7 @@ public class NLASpaceSource extends ISpaceSource {
 								"value", false);
 						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl",
 								false);
+
 						if (it.url.original != null)
 							it.externalId = it.url.original.get(0);
 						else

@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'imagesloaded', 'app'], function (bridget, ko, template, masonry, imagesLoaded, app) {
+define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'imagesloaded', 'app', 'smoke'], function (bridget, ko, template, masonry, imagesLoaded, app) {
 
 	$.bridget('masonry', masonry);
 	var transDuration = '0.4s';
@@ -7,9 +7,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		transDuration = 0;
 	}
 
-
 	ko.bindingHandlers.scroll = {
-
 		updating: true,
 
 		init: function (element, valueAccessor, allBindingsAccessor) {
@@ -62,7 +60,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			});
 		}
 	};
-
 
 	ko.showMoreLess = function (initialText) {
 
@@ -197,11 +194,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
-
-					$("#myModal").find("h4").html("An error occured");
-					$("#myModal").find("div.modal-body").html(errorThrown);
-
-					$("#myModal").modal('show');
+					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});
 		};
@@ -231,7 +224,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						self.revealItems(data);
+						console.log(data.itemCount);
+						self.revealItems(data.records);
 					},
 					"error": function (result) {
 						self.loading(false);
@@ -277,42 +271,29 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		};
 
 		self.removeRecord = function (e) {
-			$("#myModal").find("h4").html("Delete item");
-			$("#myModal").find("div.modal-body").html("Are you sure you want to proceed?");
-			var footer = $("#myModal").find("div.modal-footer");
-			if (footer.is(':empty')) {
-				$("#myModal").find("div.modal-footer").append('<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button><a class="btn btn-danger btn-ok">Delete</a>');
-			}
-			$("#myModal").modal('show');
-			$('.btn-danger').on('click', function (event) {
-				$("#myModal").find("div.modal-footer").html('');
-				$("#myModal").remove("div.modal-footer");
-
-				var jsondata = JSON.stringify({
-					recId: e
-				});
-				$.ajax({
-					url: '/collection/' + self.id() + '/removeRecord?recId=' + e,
-					type: 'DELETE',
-					contentType: "application/json",
-					data: jsondata,
-					success: function (data, textStatus, xhr) {
-						self.citems.remove(e);
-						if ($("#" + e)) {
-							$("#" + e).remove();
+			$.smkConfirm({text:'Are you sure you want to permanently remove this item?', accept: 'Delete', cancel: 'Cancel'}, function (ee) {
+				if (ee) {
+					$.ajax({
+						url: '/collection/' + self.id() + '/removeRecord?recId=' + e,
+						type: 'DELETE',
+						contentType: "application/json",
+						data: JSON.stringify(e),
+						success: function (data, textStatus, xhr) {
+							self.citems.remove(e);
+							if ($("#" + e)) {
+								$("#" + e).remove();
+							}
+							self.itemCount(self.itemCount() - 1);
+							$.smkAlert({text:'Item removed from the collection', type:'success'});
+							$container.masonry( 'layout');
+						},
+						error: function (xhr, textStatus, errorThrown) {
+							$.smkAlert({text:'An error has occured', type:'danger', time: 10});
 						}
-						self.itemCount(self.itemCount() - 1);
-						$("#myModal").find("h4").html("Done!");
-						$("#myModal").find("div.modal-body").html("Item removed from collection");
-						$("#myModal").modal('show');
-						$container.masonry( 'layout');
-					},
-					error: function (xhr, textStatus, errorThrown) {
-						$("#myModal").find("h4").html("An error occured");
-						$("#myModal").find("div.modal-body").html(errorThrown);
-						$("#myModal").modal('show');
-					}
-				});
+					});
+				} else {
+
+				}
 			});
 		};
 
@@ -337,11 +318,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			} else {
 				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
 			}
+
+			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId() + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
+			+ '<div class="sourceCredits">';
+
 			if (self.access() == "WRITE" || self.access() == "OWN") {
 				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\')}}"></span>';
 			}
-
-			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId() + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>' + '<div class="sourceCredits"><a href="' + record.view_url() + '" target="_new">' + record.sourceCredits() + '</a></figure>';
+			figure+='<a href="' + record.view_url() + '" target="_new">' + record.sourceCredits() + '</a></figure>';
 			return figure;
 		}
 
@@ -352,6 +336,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			}
 			return $(items);
 		}
+
+		self.uploadItem = function() {
+			app.showPopup('image-upload');
+		};
 
 		self.revealItems = function (data) {
 			var items = [];

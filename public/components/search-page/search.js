@@ -1,10 +1,9 @@
-define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], function(bridget,ko, template,masonry,imagesLoaded) {
+define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 'app'], function (bridget, ko, template, masonry, imagesLoaded, app) {
 
 	 $.bridget( 'masonry', masonry );
 	 var transDuration='0.4s';
 	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 	 if(isFirefox){transDuration=0;}
-	
 
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
@@ -34,6 +33,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.rights=ko.observable("");
 		self.url=ko.observable("");
 		self.externalId = ko.observable("");
+		self.isLiked = ko.computed(function () {
+			return app.isLiked(self.externalId());
+		});
 		//self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
@@ -72,7 +74,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			    default: return "";
 			 }
 			});
-		
+
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
 			distitle=self.title();
@@ -117,7 +119,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	function SearchModel(params) {
 		var self = this;
 
-	
+
 		var $container = $('#columns');
 		var $request;
 		self.filterselect=ko.observable(false);
@@ -155,8 +157,8 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			    itemSelector: '.masonryitem',
 			    gutter:15,isFitWidth: true,transitionDuration:transDuration
 			  });
-			
-			
+
+
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -166,7 +168,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 		self.reset = function() {
 			 if($request!==undefined)$request.abort();
-			
+
 			self.term("");
 			self.currentTerm = ko.observable("");
 			self.page(1);
@@ -176,14 +178,14 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.mixresults([]);
 			self.results([]);
 			self.searching(false);
-			
+
 			if ($container.data('masonry')){
 			 $container.masonry( 'remove', $container.find('.masonryitem') );
 			 }
 		}
 
 		self._search = function() {
-			
+
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 self.currentTerm($(".withsearch-input").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
@@ -203,7 +205,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 					self.previous(self.page()-1);
 					var moreitems=false;
                     var data=reply.responces;
-                   
+
                     var filters=reply.filters;
                     console.log(filters);
                     self.filters.removeAll();
@@ -236,9 +238,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						if(items.length>0){
 							 var $newitems=getItems(items);
 						     self.mixresults.push.apply(self.mixresults, items);
-						   
+
 						     self.masonryImagesReveal( $newitems,$container );
-						 	 
+
 							}
 						api_console="";
 						if(source=="Europeana"){
@@ -279,11 +281,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							self.results.push(srcCat);
 						}
 
-					}		
+					}
 
 					if(moreitems){
 						self.next(self.page()+1);
-						
+
 					}else{
 						self.next(-1);
 					}
@@ -297,7 +299,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
       self.filtersearch = function() {
     	  if($request!==undefined)$request.abort();
     	   self.filterselect(true);
-			
+
 			self.results.removeAll();
 			self.mixresults.removeAll();
 			self.page(1);
@@ -309,16 +311,16 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
 			}else{
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-				
+
 			}
-			
+
 			self._search();
-			
+
 		};
-		
+
 		self.search = function() {
 			if($request!==undefined)$request.abort();
-	    	   
+
 			self.results.removeAll();
 			self.mixresults.removeAll();
 			self.page(1);
@@ -330,9 +332,9 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
 			}else{
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-				
+
 			}
-			
+
 			self._search();
 			self.filterselect(false);
 			ko.dataFor(searchfacets).initFacets();
@@ -347,11 +349,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		}
 
         self.columnRecordSelect= function (e){
-			
+
 			itemShow(e);
 
 		}
-        
+
 
 		self.searchNext = function() {
 		if(self.next()>0){
@@ -414,25 +416,25 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 				return s;
 			 }
 	 });
-	  
+
 	  self.masonryImagesReveal = function( $items,$container ) {
 		  $items.hide();
 		  $container.append( $items );
 		  if (!($container.data('masonry'))){
-		  	   
+
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-				
+
 			}
 		  $items.imagesLoaded().progress( function( imgLoad, image ) {
-			  
+
 		    var $item = $( image.img ).parents(".masonryitem" );
 		    ko.applyBindings(self, $item[ 0 ] );
 		    $item.show();
 		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
-		    
+
 		  }).always(self.searching(false));
-		  
-		
+
+
 		};
 
 
@@ -452,7 +454,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
-				
+
 				withinput.blur();
 
 			}
@@ -486,13 +488,34 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
     		}
     	);
-        
-        
+
+		self.likeRecord = function (id) {
+			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
+				return record.externalId() === id;
+			});
+
+			app.likeItem(rec, function (status) {
+				if (status) {
+					$('#' + id).addClass('active');
+				} else {
+					$('#' + id).removeClass('active');
+				}
+			});
+		};
+
         function getItem(record) {
-        	  var figure='<figure class="masonryitem"><a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
-				+'<div class="sourceCredits"><a href="'+record.view_url()+'" target="_new">'+record.sourceCredits()+'</a></figure>';
-        	  return figure;
-        	}
+			var figure='<figure class="masonryitem">';
+			if (record.isLiked()) {
+				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+			} else {
+				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+			}
+
+			figure += '<a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
+			+'<div class="sourceCredits"><a href="'+record.view_url()+'" target="_new">'+record.sourceCredits()+'</a></figure>';
+
+			return figure;
+		}
 
           function getItems(data) {
         	  var items = '';
@@ -503,7 +526,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
         	  return $( items );
         	}
 
-          
+
 
   }
 

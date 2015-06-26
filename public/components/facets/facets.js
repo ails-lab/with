@@ -1,22 +1,6 @@
-define(['knockout', 'text!./facets.html','inputtags'], function(ko, template,tagsinput) {
+define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter'], function(bridget, ko, template,tagsinput,liveFilter) {
 	
 	
-	ko.bindingHandlers.dofacets = {
-
-			  updating: true,
-
-			  init: function(element, valueAccessor, allBindingsAccessor) {
-				  var self=this;
-				  
-				  
-			  },
-	 update: function(element, valueAccessor, allBindingsAccessor){
-		    var load = ko.utils.unwrapObservable(valueAccessor());
-		    var self = this;
-
-		  
-		  }
-    }
 
   function FacetsViewModel(params) {
 	 
@@ -41,7 +25,7 @@ define(['knockout', 'text!./facets.html','inputtags'], function(ko, template,tag
     	for(var i=0;i<selsources.length;i++){
     		var jsontoadd={itemValue: 'source_'+i,itemText:selsources[i]};
     	    $("#facet_tags").tagsinput('add',{ id: 'source_'+i, label: selsources[i] });
-    		//$("#facet_tags").tagsinput('add',selsources[i]);
+    		
     	}
     	var obj = {};
     	obj['sources']=selsources;
@@ -102,6 +86,7 @@ define(['knockout', 'text!./facets.html','inputtags'], function(ko, template,tag
     
     
     self.listClick=function(data, event){
+    	console.log(data);
     	if(event.target.checked){
     		//new filter added
     		var id=$(event.target).parents('div.active').attr('id');
@@ -167,8 +152,20 @@ define(['knockout', 'text!./facets.html','inputtags'], function(ko, template,tag
     
     self.initFacets();
     
+    self.listBind=function(e){
+    	var link = $(e.target);
+    	$('#f_search').val('');
+    	$('#'+e.filterID).liveFilter('#f_search', 'li', {
+    		  filterChildSelector: 'span'
+    		});
+    }
     
-    
+    self.sourceBind=function(e){
+    	$('#f_search').val('');
+    	$('#datasources').liveFilter('#f_search', 'li', {
+    		  filterChildSelector: 'span'
+    		});
+    }
     
   }
 

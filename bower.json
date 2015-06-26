@@ -23,7 +23,9 @@
     "knockout-else": "1.0.11",
     "jquery-ui": "~1.11.4",
     "knockout-mapping": "latest",
-    "bootstrap-tagsinput": "latest"
+    "bootstrap-tagsinput": "latest",
+    "smoke": "latest",
+    "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip"
   },
   "resolutions": {
     "knockout": "~3.2.0"
