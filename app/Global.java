@@ -41,7 +41,7 @@ public class Global extends GlobalSettings {
 	public void onStart( Application app ) {
 		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
 		Elastic.putMapping();
-		setTestApikey();
+		setupWithKey();
 		// read keys into the Manager
 		ActorSelection api = Akka.system().actorSelection("user/apiKeyManager");
 		api.tell( new ApiKeyManager.Reset(), ActorRef.noSender());
@@ -52,19 +52,16 @@ public class Global extends GlobalSettings {
 	    return new Class[] {AccessFilter.class, SessionFilter.class };
 	}
 
-	private void setTestApikey() {
-		if( DB.getConf().hasPath( "apikey.testAccessPattern")) {
-			String pattern = DB.getConf().getString( "apikey.testAccessPattern");
-			List<ApiKey> lk = DB.getApiKeyDAO().getByIpPattern(pattern);
-			if( lk.isEmpty() ) {
-				ApiKey k = new ApiKey();
-				// should cover localhost
-				k.setIpPattern(pattern);
-				k.addCall(0, ".*");
-				// store it
-				DB.getApiKeyDAO().save(k, WriteConcern.SAFE);
-			}
+	private void setupWithKey() {
+		ApiKey withKey = DB.getApiKeyDAO().getByName("WITH");
+		if( withKey == null ) {
+			ApiKey k = new ApiKey();
+			k.setName("WITH");
+			k.addCall(0, ".*" );
+			k.resetKey();
+			
+			// store it
+			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);			
 		}
-
 	}
 }
