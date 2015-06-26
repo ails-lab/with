@@ -75,16 +75,21 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
 		
+		/**
+		 * TODO check this 
+		 */
 		
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
 		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
 		
-	/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+
+		/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/zero/1.0/");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by/");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by-sa/");*/
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
 	
 		/*addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-sa/");
@@ -93,7 +98,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
 */
 		//pemission is not *creative*  
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
