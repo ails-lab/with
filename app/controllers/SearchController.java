@@ -169,7 +169,6 @@ public class SearchController extends Controller {
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
 		System.out.println(q);
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
-		// final long initTime = System.currentTimeMillis();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
 				.getResults(cq);
 		if ((q.source != null) && (q.source.size() > 0)) {
