@@ -29,8 +29,10 @@ import play.Logger;
 import play.Logger.ALogger;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
+import com.mongodb.gridfs.GridFSInputFile;
 
 public class MediaDAO {
 	public static final ALogger log = Logger.of(MediaDAO.class);
@@ -49,20 +51,23 @@ public class MediaDAO {
 		if (gridfsDbFile == null)
 			return null;
 
-		Media media = new Media();
-
+		
+		// some things are not quite right, so we repair those
+		
 		try {
-			// set metadata to media object
-			media.setType((String) gridfsDbFile.get("type"));
-			media.setMimeType((String) gridfsDbFile.get("mimeType"));
-			if (gridfsDbFile.keySet().contains("duration")) {
-				media.setDuration(new Double((double) gridfsDbFile
-						.get("duration")).floatValue());
-			}
-			media.setHeight((int) gridfsDbFile.get("height"));
-			media.setWidth((int) gridfsDbFile.get("width"));
-			media.setDbId((ObjectId) gridfsDbFile.getId());
+			Media media = DB.getMorphia().getMapper().fromDBObject(Media.class, gridfsDbFile, null );
 			media.setData(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
+			// set metadata to media object
+			//	media.setType( Media.BaseType.valueOf( gridfsDbFile.get("type").toString()));
+			//media.setMimeType((String) gridfsDbFile.get("mimeType"));
+			// if (gridfsDbFile.keySet().contains("duration")) {
+			//	media.setDuration(new Double((double) gridfsDbFile
+			//			.get("duration")).floatValue());
+			//}
+			// media.setHeight((int) gridfsDbFile.get("height"));
+			// media.setWidth((int) gridfsDbFile.get("width"));
+			// media.setDbId((ObjectId) gridfsDbFile.getId());
+			return media;
 		} catch (IOException e) {
 			log.error(
 					"Error transforming media file's InputStream to raw bytes",
@@ -70,8 +75,7 @@ public class MediaDAO {
 		} catch (Exception e) {
 			log.error("Error setting properties to Media object", e);
 		}
-
-		return media;
+		return null;
 	}
 
 	public Media findById(ObjectId dbId) {
@@ -106,31 +110,24 @@ public class MediaDAO {
 
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
+				
 			} else {
 				mediaGridFsFile = DB.getGridFs().createFile(media.getData());
 			}
 
-			if (mediaGridFsFile == null)
-				throw new Exception("Got a NULL mediaGridFsFile");
-
-			// set metadata
-
-			if (media.hasWidth())
-				mediaGridFsFile.put("width", media.getWidth());
-			if (media.hasHeight())
-				mediaGridFsFile.put("height", media.getHeight());
-			if (media.hasDuration())
-				mediaGridFsFile.put("duration", media.getDuration());
-			if (media.hasMimeType())
-				mediaGridFsFile.put("mimeType", media.getMimeType());
-			if (media.hasType())
-				mediaGridFsFile.put("type", media.getType());
-			if (media.hasOwner())
-				mediaGridFsFile.put("ownerId", media.getOwnerId());
-
-			// save the file
+			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
+			// remove stuff we don't want on the media object 
+			mediaDbObj.removeField("className");
+			mediaDbObj.removeField("data");
+			mediaDbObj.removeField( "_id");
+			
+			for( String k : mediaDbObj.keySet()) {
+				mediaGridFsFile.put( k, mediaDbObj.get(k));
+			}
 			mediaGridFsFile.save();
 			media.setDbId((ObjectId) mediaGridFsFile.getId());
+		
+			// save the file
 		} catch (Exception e) {
 			log.error("Cannot save Media document to GridFS", e);
 			throw e;
