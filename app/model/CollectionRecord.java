@@ -49,6 +49,8 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
+	private String externalId;
+	
 	private boolean isPublic;
 
 	// which backend provided this entry
@@ -76,9 +78,17 @@ public class CollectionRecord {
 	// a link to the record on its source
 	private String sourceUrl;
 
+	 //url to the provider web page for that record
+	private String isShownAt;
+	
+	//url to the (full resoultion) content - external on in the WITH db
+	private String isShownBy;
+	
 	private String type;
 
-	private String rights;
+	private String itemRights;
+
+	private ExhibitionRecord exhibition;
 
 	// collection specific stuff...
 
@@ -113,6 +123,14 @@ public class CollectionRecord {
 
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 
 	public String getSource() {
@@ -180,7 +198,7 @@ public class CollectionRecord {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	public String getCreator() {
 		return creator;
 	}
@@ -213,6 +231,22 @@ public class CollectionRecord {
 		this.sourceUrl = sourceUrl;
 	}
 
+	public String getIsShownAt() {
+		return isShownAt;
+	}
+
+	public void setIsShownAt(String isShownAt) {
+		this.isShownAt = isShownAt;
+	}
+
+	public String getIsShownBy() {
+		return isShownBy;
+	}
+
+	public void setIsShownBy(String isShownBy) {
+		this.isShownBy = isShownBy;
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -221,12 +255,12 @@ public class CollectionRecord {
 		this.type = type;
 	}
 
-	public String getRights() {
-		return rights;
+	public String getItemRights() {
+		return itemRights;
 	}
 
-	public void setRights(String rights) {
-		this.rights = rights;
+	public void setItemRights(String itemRights) {
+		this.itemRights = itemRights;
 	}
 
 	@JsonIgnore
@@ -271,11 +305,11 @@ public class CollectionRecord {
 		return tags;
 	}
 
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
 
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 

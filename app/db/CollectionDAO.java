@@ -19,7 +19,6 @@ package db;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.User;
 
 import org.bson.types.ObjectId;
@@ -172,19 +171,26 @@ public class CollectionDAO extends DAO<Collection> {
 		return findOne(q).retrieveOwner();
 	}
 
+	public List<Collection> getExhibitionsByOwner(ObjectId ownerId, int offset,
+			int count) {
+		Query<Collection> q = this.createQuery().field("isExhibition")
+				.equal(true).field("ownerId").equal(ownerId).offset(offset)
+				.limit(count);
+		return this.find(q).asList();
+	}
+
 	public int removeById(ObjectId id) {
 
 		Collection c = get(id);
 
-		User owner = c.retrieveOwner();
-		for (CollectionMetadata colMeta : owner.getCollectionMetadata()) {
-			if ((colMeta.getCollectionId() != null)
-					&& colMeta.getCollectionId().equals(id)) {
-				owner.getCollectionMetadata().remove(colMeta);
+		/*User owner = c.retrieveOwner();
+		for (ObjectId colId : owner.getCollectionIds()) {
+			if (colId.equals(id)) {
+				owner.getCollectionIds().remove(colId);
 				DB.getUserDAO().makePermanent(owner);
 				break;
 			}
-		}
+		}*/
 
 		DB.getCollectionRecordDAO().deleteByCollection(id);
 		return makeTransient(c);

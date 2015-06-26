@@ -17,7 +17,10 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import utils.ListUtils;
 
@@ -41,6 +44,7 @@ import espace.core.Utils.LongPair;
 
 public class DPLASpaceSource extends ISpaceSource {
 
+	public static String LABEL = "DPLA";
 	private String DPLAKey = "SECRET_KEY";
 
 	public String getHttpQuery(CommonQuery q) {
@@ -50,48 +54,43 @@ public class DPLASpaceSource extends ISpaceSource {
 		builder.addSearchParam("q", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
-		builder.addSearchParam("facets", "provider.name,sourceResource.type");
+		builder.addSearchParam("facets",
+				"provider.name,sourceResource.type,sourceResource.contributor,sourceResource.spatial.country");
 		return addfilters(q, builder).getHttp();
 	}
 
 	public DPLASpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.TYPE_ID,
-				new Function<String, Pair<String>>() {
-					@Override
-					public Pair<String> apply(String t) {
-						return new LongPair<String>("sourceResource.type", t);
-					}
-				});
-		addDefaultWriter(CommonFilters.CREATOR_ID,
-				new Function<String, Pair<String>>() {
-					@Override
-					public Pair<String> apply(String t) {
-						return new LongPair<String>("sourceResource.creator", t);
-					}
-				});
-		addDefaultWriter(CommonFilters.PROVIDER_ID,
-				new Function<String, Pair<String>>() {
-					@Override
-					public Pair<String> apply(String t) {
-						return new LongPair<String>("provider.name", t);
-					}
-				});
+		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
+		addDefaultWriter(CommonFilters.COUNTRY_ID, fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("sourceResource.creator"));
+		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, fwriter("sourceResource.contributor"));
+		addDefaultWriter(CommonFilters.PROVIDER_ID, fwriter("provider.name"));
+		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
 
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image",
-				new Pair<String>("sourceResource.type", "image"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image",
-				new LongPair<String>("sourceResource.type", "moving image"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound",
-				new Pair<String>("sourceResource.type", "sound"));
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text",
-				new Pair<String>("sourceResource.type", "text"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text");
 
 		// TODO: what to do with physical objects?
 	}
+	
+	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		Function<String, String> function =
+				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				return new Pair<String>(parameter, 
+						Utils.getORList(ListUtils.transform(t, 
+								function), false));
+			}
+		};
+	}
 
 	public String getSourceName() {
-		return "DPLA";
+		return LABEL;
 	}
 
 	public String getDPLAKey() {
@@ -112,6 +111,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic country = CommonFilterLogic.countryFilter();
+		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
 
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
@@ -151,21 +152,30 @@ public class DPLASpaceSource extends ISpaceSource {
 						+ Utils.readAttr(item, "id", false);
 				it.rights = Utils.readLangAttr(item.path("sourceResource"),
 						"rights", false);
+				it.externalId = it.url.original.get(0);
 
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 			}
 			res.items = a;
 			res.facets = response.path("facets");
-			res.filters = new ArrayList<>();
+			res.filtersLogic = new ArrayList<>();
 
 			readList(response.path("facets").path("provider.name"), provider);
 
 			readList(response.path("facets").path("sourceResource.type"), type);
 
-			res.filters = new ArrayList<>();
-			res.filters.add(type);
-			res.filters.add(provider);
-			res.filters.add(creator);
+			readList(response.path("facets").path("sourceResource.contributor"), contributor);
+
+			readList(response.path("facets").path("sourceResource.spatial.country"), country);
+
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
+			res.filtersLogic.add(provider);
+			res.filtersLogic.add(creator);
+			res.filtersLogic.add(country);
+
+			res.filtersLogic.add(contributor);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

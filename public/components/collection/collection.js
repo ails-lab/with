@@ -1,394 +1,368 @@
-define(['knockout', 'text!./collection.html','selectize', 'app','knockout-validation'], function(ko, template, selectize, app) {
+define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-validation'], function (ko, template, selectize, app) {
 
-	
 	ko.validation.init({
 		errorElementClass: 'has-error',
 		errorMessageClass: 'help-block',
-		
-		
 	});
-	
-	
 
 	var inject_binding = function (allBindings, key, value) {
-	    return {
-	        has: function (bindingKey) {
-	            return (bindingKey == key) || allBindings.has(bindingKey);
-	        },
-	        get: function (bindingKey) {
-	            var binding = allBindings.get(bindingKey);
-	            if (bindingKey == key) {
-	                binding = binding ? [].concat(binding, value) : value;
-	            }
-	            return binding;
-	        }
-	    };
-	}
+		return {
+			has: function (bindingKey) {
+				return (bindingKey == key) || allBindings.has(bindingKey);
+			},
+			get: function (bindingKey) {
+				var binding = allBindings.get(bindingKey);
+				if (bindingKey == key) {
+					binding = binding ? [].concat(binding, value) : value;
+				}
+				return binding;
+			}
+		};
+	};
 
 	ko.bindingHandlers.selectize = {
-	    init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-	        if (!allBindingsAccessor.has('optionsText'))
-	            allBindingsAccessor = inject_binding(allBindingsAccessor, 'optionsText', 'name');
-	        if (!allBindingsAccessor.has('optionsValue'))
-	            allBindingsAccessor = inject_binding(allBindingsAccessor, 'optionsValue', 'id');
-	        if (typeof allBindingsAccessor.get('optionsCaption') == 'undefined')
-	            allBindingsAccessor = inject_binding(allBindingsAccessor, 'optionsCaption', 'Choose...');
+		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+			if (!allBindingsAccessor.has('optionsText'))
+				allBindingsAccessor = inject_binding(allBindingsAccessor, 'optionsText', 'name');
+			if (!allBindingsAccessor.has('optionsValue'))
+				allBindingsAccessor = inject_binding(allBindingsAccessor, 'optionsValue', 'id');
+			if (typeof allBindingsAccessor.get('optionsCaption') == 'undefined')
+				allBindingsAccessor = inject_binding(allBindingsAccessor, 'optionsCaption', 'Choose...');
 
-	        ko.bindingHandlers.options.update(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+			ko.bindingHandlers.options.update(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
 
-	        var options = {
-	            valueField: allBindingsAccessor.get('optionsValue'),
-	            labelField: allBindingsAccessor.get('optionsText'),
-	            searchField: allBindingsAccessor.get('optionsText')
-	        }
+			var options = {
+				valueField: allBindingsAccessor.get('optionsValue'),
+				labelField: allBindingsAccessor.get('optionsText'),
+				searchField: allBindingsAccessor.get('optionsText')
+			};
 
-	        if (allBindingsAccessor.has('options')) {
-	            var passed_options = allBindingsAccessor.get('options')
-	            for (var attr_name in passed_options) {
-	                options[attr_name] = passed_options[attr_name];
-	            }
-	        }
+			if (allBindingsAccessor.has('options')) {
+				var passed_options = allBindingsAccessor.get('options')
+				for (var attr_name in passed_options) {
+					options[attr_name] = passed_options[attr_name];
+				}
+			}
 
-	        var $select = $(element).selectize(options)[0].selectize;
+			var $select = $(element).selectize(options)[0].selectize;
 
-	        if (typeof allBindingsAccessor.get('value') == 'function') {
-	            $select.addItem(allBindingsAccessor.get('value')());
-	            allBindingsAccessor.get('value').subscribe(function (new_val) {
-	                $select.addItem(new_val);
-	            })
-	        }
+			if (typeof allBindingsAccessor.get('value') == 'function') {
+				$select.addItem(allBindingsAccessor.get('value')());
+				allBindingsAccessor.get('value').subscribe(function (new_val) {
+					$select.addItem(new_val);
+				});
+			}
 
-	        if (typeof allBindingsAccessor.get('selectedOptions') == 'function') {
-	            allBindingsAccessor.get('selectedOptions').subscribe(function (new_val) {
-	                // Removing items which are not in new value
-	                var values = $select.getValue();
-	                var items_to_remove = [];
-	                for (var k in values) {
-	                    if (new_val.indexOf(values[k]) == -1) {
-	                        items_to_remove.push(values[k]);
-	                    }
-	                }
+			if (typeof allBindingsAccessor.get('selectedOptions') == 'function') {
+				allBindingsAccessor.get('selectedOptions').subscribe(function (new_val) {
+					// Removing items which are not in new value
+					var values = $select.getValue();
+					var items_to_remove = [];
+					for (var k in values) {
+						if (new_val.indexOf(values[k]) == -1) {
+							items_to_remove.push(values[k]);
+						}
+					}
 
-	                for (var k in items_to_remove) {
-	                    $select.removeItem(items_to_remove[k]);
-	                }
+					for (var k in items_to_remove) {
+						$select.removeItem(items_to_remove[k]);
+					}
 
-	                for (var k in new_val) {
-	                    $select.addItem(new_val[k]);
-	                }
+					for (var k in new_val) {
+						$select.addItem(new_val[k]);
+					}
+				});
+				var selected = allBindingsAccessor.get('selectedOptions')();
+				for (var k in selected) {
+					$select.addItem(selected[k]);
+				}
+			}
 
-	            });
-	            var selected = allBindingsAccessor.get('selectedOptions')();
-	            for (var k in selected) {
-	                $select.addItem(selected[k]);
-	            }
-	        }
+			if (typeof init_selectize == 'function') {
+				init_selectize($select);
+			}
 
+			if (typeof valueAccessor().subscribe == 'function') {
+				valueAccessor().subscribe(function (changes) {
+					// To avoid having duplicate keys, all delete operations will go first
+					var addedItems = new Array();
+					changes.forEach(function (change) {
+						switch (change.status) {
+						case 'added':
+							addedItems.push(change.value);
+							break;
+						case 'deleted':
+							var itemId = change.value[options.valueField];
+							if (itemId != null) $select.removeOption(itemId);
+						}
+					});
+					addedItems.forEach(function (item) {
+						$select.addOption(item);
+					});
 
-	        if (typeof init_selectize == 'function') {
-	            init_selectize($select);
-	        }
+				}, null, "arrayChange");
+			}
+		},
+		update: function (element, valueAccessor, allBindingsAccessor) {
 
-	        if (typeof valueAccessor().subscribe == 'function') {
-	            valueAccessor().subscribe(function (changes) {
-	                // To avoid having duplicate keys, all delete operations will go first
-	                var addedItems = new Array();
-	                changes.forEach(function (change) {
-	                    switch (change.status) {
-	                        case 'added':
-	                            addedItems.push(change.value);
-	                            break;
-	                        case 'deleted':
-	                            var itemId = change.value[options.valueField];
-	                            if (itemId != null) $select.removeOption(itemId);
-	                    }
-	                });
-	                addedItems.forEach(function (item) {
-	                    $select.addOption(item);
-	                });
+			if (allBindingsAccessor.has('object')) {
+				var optionsValue = allBindingsAccessor.get('optionsValue') || 'id';
+				var value_accessor = valueAccessor();
+				var selected_obj = $.grep(value_accessor(), function (i) {
+					if (typeof i[optionsValue] == 'function')
+						var id = i[optionsValue];
+					else
+						var id = i[optionsValue];
 
-	            }, null, "arrayChange");
-	        }
+					return id == allBindingsAccessor.get('value')();
+				})[0];
 
-	    },
-	    update: function (element, valueAccessor, allBindingsAccessor) {
+				if (selected_obj) {
+					allBindingsAccessor.get('object')(selected_obj);
+				}
+			}
+		}
+	};
 
-	        if (allBindingsAccessor.has('object')) {
-	            var optionsValue = allBindingsAccessor.get('optionsValue') || 'id';
-	            var value_accessor = valueAccessor();
-	            var selected_obj = $.grep(value_accessor(), function (i) {
-	                if (typeof i[optionsValue] == 'function')
-	                    var id = i[optionsValue]
-	                else
-	                    var id = i[optionsValue]
-	                return id == allBindingsAccessor.get('value')();
-	            })[0];
-
-	            if (selected_obj) {
-	                allBindingsAccessor.get('object')(selected_obj);
-	            }
-	        }
-	    }
-	}
-
-
-  function CollectionViewModel(params) {
-	  var self = this;
-	  self.route = params.route;
-	  self.templateName=ko.observable('collection_new');
-	  self.modal=ko.observable("3");
-	  self.record=ko.observable(false);
-	  self.collname=ko.observable('').extend({ required: true });
-	  self.selectedCollection=ko.observable('');
-	  self.description=ko.observable('');
-	  self.collectionlist = ko.observableArray([]);
-	  self.id=ko.observable(-1);
-	  self.ajaxConnections=0;
-	  self.selected_items2 = ko.observableArray([]);
-	  self.validationModel = ko.validatedObservable({
-			collname : self.collname
+	function CollectionViewModel(params) {
+		var self = this;
+		self.route = params.route;
+		self.templateName = ko.observable('collection_new');
+		self.modal = ko.observable("3");
+		self.record = ko.observable(false);
+		self.collname = ko.observable('').extend({
+			required: true
+		});
+		self.selectedCollection = ko.observable('');
+		self.description = ko.observable('');
+		self.collectionlist = ko.observableArray([]);
+		self.id = ko.observable(-1);
+		self.ajaxConnections = 0;
+		self.selected_items2 = ko.observableArray([]);
+		self.validationModel = ko.validatedObservable({
+			collname: self.collname
 		});
 
-	  
-	  self.findEditableCollections=function(){
-		  self.collectionlist([]);
-		  var collections = [];
-		  if (sessionStorage.getItem('EditableCollections') !== null) 
-			  collections = JSON.parse(sessionStorage.getItem("EditableCollections"));
-		  else if (localStorage.getItem('EditableCollections') !== null) 
-			  collections = JSON.parse(localStorage.getItem("EditableCollections"));
-		  var jsonData = {};
-		  for (var i=0; i<collections.length; i++) {
-		    //collections.forEach(function(collection) 
-			  var collection = collections[i];
-		        jsonData={"id":collection.dbId,"name":collection.title}
-		        self.collectionlist.push(jsonData);	      
-		  }
-		    //});
-	  };
-	  
-	  createNewCollection = function() {
-		  self.findEditableCollections();
-		  self.modal("2");
-		  self.templateName('collection_new');
-		  self.open();
+		self.findEditableCollections = function () {
+			self.collectionlist([]);
+			var collections = [];
+			if (sessionStorage.getItem('EditableCollections') !== null)
+				collections = JSON.parse(sessionStorage.getItem("EditableCollections"));
+			else if (localStorage.getItem('EditableCollections') !== null)
+				collections = JSON.parse(localStorage.getItem("EditableCollections"));
+			var jsonData = {};
+			for (var i = 0; i < collections.length; i++) {
+				//collections.forEach(function(collection)
+				var collection = collections[i];
+				jsonData = {
+					"id": collection.dbId,
+					"name": collection.title
+				}
+				self.collectionlist.push(jsonData);
+			}
+		};
 
-	  }
-	  
-	  collectionShow = function(record) {
-	    	self.record(record);
-	    	self.findEditableCollections();
-	        if(self.collectionlist().length==0){self.modal("2");self.templateName('collection_new');}
-	    	else{self.modal("3");self.templateName('additem');}
-	    	self.open();
-    }
+		createNewCollection = function () {
+			self.findEditableCollections();
+			self.modal("2");
+			self.templateName('collection_new');
+			self.open();
+		};
 
-	  self.open=function(){
-		  $('#modal-'+self.modal()).css('display', 'block');
-	      $('#modal-'+self.modal()).addClass('md-show');
-	  }
+		collectionShow = function (record) {
+			self.record(record);
+			self.findEditableCollections();
+			if (self.collectionlist().length == 0) {
+				self.modal("2");
+				self.templateName('collection_new');
+			} else {
+				self.modal("3");
+				self.templateName('additem');
+			}
+			self.open();
+		};
 
-	  self.close= function(){
-		  $('[id^="modal"]').removeClass('md-show').css('display', 'none');
-		  $("body").removeClass("modal-open");
-		  if (0 == self.ajaxConnections) {
-			    // this was the last Ajax connection, do the thing
-			  if($('#myModal').find('h4.modal-title').is(':empty')==false)
+		self.open = function () {
+			$('#modal-' + self.modal()).css('display', 'block');
+			$('#modal-' + self.modal()).addClass('md-show');
+		};
+
+		self.close = function () {
+			$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+			$("body").removeClass("modal-open");
+			if (0 === self.ajaxConnections) {
+				// this was the last Ajax connection, do the thing
+				if ($('#myModal').find('h4.modal-title').is(':empty') == false)
 					$("#myModal").modal('show');
 				self.reset();
-			  }
-	    }
+			}
+		};
 
-	  self.save=function(formElement){
-		  if (self.validationModel.isValid()) {
-			 
-			  var jsondata=JSON.stringify({
+		self.save = function (formElement) {
+			if (self.validationModel.isValid()) {
+
+				var jsondata = JSON.stringify({
 					ownerId: app.currentUser._id(),
 					title: self.collname(),
-					description:self.description(),
-					public: $("#publiccoll .active").data("value")
+					description: self.description(),
+					isPublic: $("#publiccoll .active").data("value")
 				});
-			  if(!self.record()){
-				  /*new collection with no item saved inside, changed for mycolllections page*/
-				  self.saveCollection(jsondata,null);}
-			  else{ 
-				 
-			  self.saveCollection(jsondata,self.addRecord);}
-			  self.close();
-			  
-			  
-		  }
-		  else{
-			  self.validationModel.errors.showAllMessages();
-		  }
-	   
-	  }
-	  
-	  self.saveCollection=function(jsondata,callback){
-		  $.ajax({
-			   "beforeSend": function(xhr) {
-				    self.ajaxConnections++;
-				  }, 
+				if (!self.record()) {
+					/*new collection with no item saved inside, changed for mycolllections page*/
+					self.saveCollection(jsondata, null);
+				} else {
+
+					self.saveCollection(jsondata, self.addRecord);
+				}
+				self.close();
+
+
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}
+		};
+
+		self.saveCollection = function (jsondata, callback) {
+			$.ajax({
+				"beforeSend": function (xhr) {
+					self.ajaxConnections++;
+				},
 				"url": "/collection/create",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
-				"success": function(data) {
+				"success": function (data) {
 					self.id(data.dbId);
 					self.selectedCollection(data.title);
 					var temp = [];
-					if(sessionStorage.getItem('EditableCollections')!=undefined){
-					   temp=JSON.parse(sessionStorage.getItem('EditableCollections'));
-					   temp.push(data);
-					   sessionStorage.setItem('EditableCollections', JSON.stringify(temp));  
-					}
-					else if(localStorage.getItem('EditableCollections')!=undefined){
-						temp=JSON.parse(localStorage.getItem('EditableCollections'));
+					if (sessionStorage.getItem('EditableCollections') != undefined) {
+						temp = JSON.parse(sessionStorage.getItem('EditableCollections'));
+						temp.push(data);
+						sessionStorage.setItem('EditableCollections', JSON.stringify(temp));
+					} else if (localStorage.getItem('EditableCollections') != undefined) {
+						temp = JSON.parse(localStorage.getItem('EditableCollections'));
 						temp.push(data);
 						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
-					$("#myModal").find("h4").html("Success!");
-					$("#myModal").find("div.modal-body").html("<p>Collection created.</p>");
-					$("#myModal").find("div.modal-footer").html();
-					self.collectionlist.push({"id":data.dbId,"name":data.title});
+
+					$.smkAlert({text:'Collection created"', type:'success'});
+
+					self.collectionlist.push({
+						"id": data.dbId,
+						"name": data.title
+					});
 					//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
-					if(self.route().request_=="mycollections"){
+					if (self.route().request_ == "mycollections") {
 						ko.contextFor(mycollections).$data.reloadCollection(data);
 					}
-					if(callback){
-					  callback(data.dbId);
-					 
+					if (callback) {
+						callback(data.dbId);
 					}
 					self.ajaxConnections--;
 					self.close();
 				},
-				
-				"error":function(result) {
+
+				"error": function (result) {
 					self.ajaxConnections--;
 					//var r = JSON.parse(result.responseText);
-					$("#myModal").find("div.modal-body").html(result.statusText);
-					$("#myModal").find("h4").html("An error occured.");
-					$("#myModal").find("div.modal-footer").html();
+					$.smkAlert({text:'An error occured', type:'danger', time: 10});
 					self.close();
+				}
+			});
+		};
 
-					 
-			     }});
-	  }
+		self.addToCollections = function () {
+			/*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
+			self.selected_items2().forEach(function (item) {
+				/* now find if item is one of collection ids*/
+				if ($.inArray(item, self.collectionlist().map(function (x) {
+						return x.id;
+					})) != -1) {
+					/* add item to collection with this id */
 
-	  
-	  self.addToCollections=function(){
-		  /*will contain ids of collection and names for new collections so check each element if it is an id or a title for new collection*/
-			 self.selected_items2().forEach(function (item) {
-			  /* now find if item is one of collection ids*/
-			  if ($.inArray(item, self.collectionlist().map(function(x) {
-				    return x.id;
-				})) != -1){
-				  /* add item to collection with this id */
-				  
-				  self.addRecord(item);
-				  
-			  }
-			  else{
-				  /*otherwise save this collection and then add the item */
-				  
-				  var jsondata=JSON.stringify({
+					self.addRecord(item);
+				} else {
+					/*otherwise save this collection and then add the item */
+
+					var jsondata = JSON.stringify({
 						ownerId: app.currentUser._id(),
 						title: item,
-						description:'',
+						description: '',
 						public: false
 					});
-				  self.saveCollection(jsondata,self.addRecord);
-				  
-			  }
-			  
-		     });
-		 
-		
-		  
-	  }
-	  
-	  self.addRecord=function(collid){
-		  var jsondata=JSON.stringify({
+					self.saveCollection(jsondata, self.addRecord);
+				}
+			});
+		};
+
+		self.addRecord = function (collid) {
+			var jsondata = JSON.stringify({
 				source: self.record().source(),
-				sourceId:self.record().recordId(),
+				sourceId: self.record().recordId(),
 				title: self.record().title(),
 				provider: self.record().provider(),
 				creator: self.record().creator(),
-				description:self.record().description(),
+				description: self.record().description(),
 				rights: self.record().rights(),
-				type:'',
-				thumbnailUrl:self.record().thumb(),
-				sourceUrl:self.record().view_url(),
-				collectionId: collid
-				
+				type: '',
+				thumbnailUrl: self.record().thumb(),
+				sourceUrl: self.record().view_url(),
+				collectionId: collid,
+				externalId: self.record().externalId()
 			});
-		  
-		  $.ajax({
-			  "beforeSend": function(xhr) {
-				    self.ajaxConnections++;
-				  }, 
-				"url": "/collection/"+collid+"/addRecord",
+
+			$.ajax({
+				"beforeSend": function (xhr) {
+					self.ajaxConnections++;
+				},
+				"url": "/collection/" + collid + "/addRecord",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
-				"success": function(data) {
+				"success": function (data) {
 					self.ajaxConnections--;
-					if(self.route().request_=="collectionview/"+collid){
-						 self.record().recordId(data.dbId);
-						 ko.contextFor(withcollection).$data.citems.push(self.record());
-						  ko.contextFor(withcollection).$data.citems.valueHasMutated();
-						  ko.contextFor(withcollection).$data.itemCount(ko.contextFor(collcolumns).$data.itemCount()+1);
-						  ko.contextFor(withcollection).$data.itemCount.valueHasMutated();  
-					  }
-					else if(self.route().request_=="mycollections"){
-						var obj=null;
+					if (self.route().request_ == "collectionview/" + collid) {
+						self.record().recordId(data.dbId);
+						ko.contextFor(withcollection).$data.loadNext();
+					} else if (self.route().request_ == "mycollections") {
+						var obj = null;
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 					}
-					$("#myModal").find("h4").html("Success!");
-					$("#myModal").find("div.modal-body").html("<p>Item added</p>");
-					$("#myModal").find("div.modal-footer").html();
+
+					$.smkAlert({text:'Item added!"', type:'success'});
 					self.close();
 				},
-				
-				"error":function(result) {
+
+				"error": function (result) {
 					self.ajaxConnections--;
-					$("#myModal").find("h4").html("An error occured");
-					$("#myModal").find("div.modal-body").html(result.statusText);
-					$("#myModal").find("div.modal-footer").html(); 
+					$.smkAlert({text:'An error occured', type:'danger', time: 10});
 					self.close();
-			     }});
-		  
-		  
-	  }
-	  
-	  self.reset = function() {
-		 
-		    self.collname('');
-		    self.description('');
-		    self.id(-1);
-		    self.record(false);
-		    self.validationModel.errors.showAllMessages(false);
-		    self.selected_items2([]);
-		   
-		 
-		    
-		}
+				}
+			});
+		};
 
-	  
-	  self.privateToggle=function(e,arg){
-		  $(arg.currentTarget).parent().find('.btn').toggleClass('active');
+		self.reset = function () {
+			self.collname('');
+			self.description('');
+			self.id(-1);
+			self.record(false);
+			self.validationModel.errors.showAllMessages(false);
+			self.selected_items2([]);
+		};
 
-		    if ($(arg.currentTarget).parent().find('.btn-primary').size()>0) {
-		    	$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
-		    }
+		self.privateToggle = function (e, arg) {
+			$(arg.currentTarget).parent().find('.btn').toggleClass('active');
 
+			if ($(arg.currentTarget).parent().find('.btn-primary').size() > 0) {
+				$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
+			}
 
-		    $(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
-	  }
+			$(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
+		};
+	}
 
-  }
-
-
-
-  return { viewModel: CollectionViewModel, template: template };
+	return {
+		viewModel: CollectionViewModel,
+		template: template
+	};
 });

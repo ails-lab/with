@@ -59,7 +59,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -75,7 +74,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -119,7 +118,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller **9** " + Math.random());
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -135,7 +133,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -183,7 +181,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -199,7 +196,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",
@@ -243,7 +240,6 @@ public class TestRecordController {
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
 		col.setTitle("Test_1 collection from Controller");
-		col.setCategory("Dance");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -259,7 +255,7 @@ public class TestRecordController {
 		record.setSourceId("123456");
 		record.setSourceUrl("http://www.youtube.com/");
 		record.setType("Music");
-		record.setRights("all");
+		record.setItemRights("all");
 
 		try {
 			record.getContent().put("XML-EDM",

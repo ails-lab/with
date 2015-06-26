@@ -1,14 +1,13 @@
-define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], function(bridget,ko, template,masonry,imagesLoaded) {
+define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 'app'], function (bridget, ko, template, masonry, imagesLoaded, app) {
 
 	 $.bridget( 'masonry', masonry );
-
-
-
-
+	 var transDuration='0.4s';
+	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
+	 if(isFirefox){transDuration=0;}
 
     ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	var $element = $(element);
-    	    $element.masonry( {itemSelector: '.masonryitem',isInitLayout: false,gutter:15,isFitWidth: true});
+    	    $element.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 
 		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 
@@ -25,7 +24,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
 		self.description=ko.observable(false);
-		self.thumb = ko.observable("//placehold.it/200x200");
+		self.thumb = ko.observable("");
 		self.fullres=ko.observable(false);
 		self.view_url=ko.observable(false);
 		self.source=ko.observable(false);
@@ -33,6 +32,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.provider=ko.observable("");
 		self.rights=ko.observable("");
 		self.url=ko.observable("");
+		self.externalId = ko.observable("");
+		self.isLiked = ko.computed(function () {
+			return app.isLiked(self.externalId());
+		});
 		//self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
@@ -48,12 +51,13 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.provider(data.provider);
 			self.rights(data.rights);
 			self.recordId(data.recordId);
+			self.externalId(data.externalId);
 		};
 
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source()) {
 			    case "DPLA":
-			    	return "dpla.eu";
+			    	return "dp.la";
 			    case "Europeana":
 			    	return "europeana.eu";
 			    case "NLA":
@@ -70,10 +74,10 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			    default: return "";
 			 }
 			});
-		
+
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
-			distitle='<b>'+self.title()+'</b>';
+			distitle=self.title();
 			if(self.creator()!==undefined && self.creator().length>0)
 				distitle+=", by "+self.creator();
 			if(self.provider()!==undefined && self.provider().length>0 && self.provider()!=self.creator())
@@ -115,6 +119,11 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 	function SearchModel(params) {
 		var self = this;
 
+
+		var $container = $('#columns');
+		var $request;
+		self.filterselect=ko.observable(false);
+		self.filterselection=ko.observableArray([]);
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
@@ -123,7 +132,6 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
-
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
@@ -136,6 +144,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.page = ko.observable(1);
 		self.pageSize=ko.observable(20);
 		self.next = ko.observable(-1);
+		self.filters=ko.observableArray([]);
 
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
@@ -144,18 +153,12 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
-			self.searching(true);
-			imagesLoaded( '#columns', function() {
-				  $('#columns').masonry( 'reloadItems' );
-	    		  $('#columns').masonry( 'layout' );
-	    		  $('#columns > figure').each(function () {
-
-	    			  $(this).animate({ opacity: 1 });
-	    		  	});
-	    		  self.searching(false);
+			$container.masonry({
+			    itemSelector: '.masonryitem',
+			    gutter:15,isFitWidth: true,transitionDuration:transDuration
+			  });
 
 
-	    		  });
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -164,6 +167,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		};
 
 		self.reset = function() {
+			 if($request!==undefined)$request.abort();
 
 			self.term("");
 			self.currentTerm = ko.observable("");
@@ -174,32 +178,38 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 			self.mixresults([]);
 			self.results([]);
 			self.searching(false);
+
+			if ($container.data('masonry')){
+			 $container.masonry( 'remove', $container.find('.masonryitem') );
+			 }
 		}
 
 		self._search = function() {
-			var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-			  
-		   if(self.page()==1 && (isFirefox || isSafari)){self.sourceview(true);$('.withsearch-content').css({'overflow-x': 'auto'});}
-			
+
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
+		 self.currentTerm($(".withsearch-input").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
-			$.ajax({
-				"url": "/api/search",
+			$request=$.ajax({
+				"url": "/api/advancedsearch",
 				"method": "post",
 				"contentType": "application/json",
 				"data": JSON.stringify({
 					searchTerm: self.currentTerm(),
 					page: self.page(),
 					pageSize:self.pageSize(),
-				    source:self.sources()
+				    source:self.sources(),
+				    filters:self.filterselection()
 				}),
-				"success": function(data) {
-
+				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
+                    var data=reply.responces;
 
+                    var filters=reply.filters;
+                    console.log(filters);
+                    self.filters.removeAll();
+                    self.filters().push.apply(self.filters(),filters);
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
@@ -220,13 +230,17 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 							creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
 							provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
 							rights: result.rights!==undefined && result.rights!==null && result.rights[0]!==undefined? result.rights[0].value : "",
-
+							externalId: result.externalId,
 							source: source
 						  });
 						 items.push(record);}
 						}
 						if(items.length>0){
-							self.mixresults.push.apply(self.mixresults, items);
+							 var $newitems=getItems(items);
+						     self.mixresults.push.apply(self.mixresults, items);
+
+						     self.masonryImagesReveal( $newitems,$container );
+
 							}
 						api_console="";
 						if(source=="Europeana"){
@@ -268,53 +282,78 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 						}
 
 					}
-					
-					
-				
-				if(self.sourceview()==false){	
-					imagesLoaded( '#columns', function() {
-							  $('#columns').masonry( 'reloadItems' );
-				    		  $('#columns').masonry( 'layout' );
-				    		  $('#columns > figure').each(function () {
-	
-				    			  $(this).animate({ opacity: 1 });
-				    		  	});
-				    		  
-				    		  self.searching(false);
-				    	});
-				}	
-				else{ self.searching(false);}
-					
 
-						if(moreitems){
-							self.next(self.page()+1);
-							
-						}else{
-							self.next(-1);
-						}
+					if(moreitems){
+						self.next(self.page()+1);
+
+					}else{
+						self.next(-1);
+					}
 				}
 			});
-			console.log(self.term());
+
 		 }
 		};
 
 
-		self.search = function() {
-			self.results([]);
-			self.mixresults([]);
+      self.filtersearch = function() {
+    	  if($request!==undefined)$request.abort();
+    	   self.filterselect(true);
+
+			self.results.removeAll();
+			self.mixresults.removeAll();
 			self.page(1);
 			self.next(1);
 			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
+			if ($container.data('masonry')){
+		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
+			}else{
+				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+
+			}
+
 			self._search();
+
+		};
+
+		self.search = function() {
+			if($request!==undefined)$request.abort();
+
+			self.results.removeAll();
+			self.mixresults.removeAll();
+			self.page(1);
+			self.next(1);
+			self.previous(0);
+			self.currentTerm(self.term());
+			self.searching(false);
+			if ($container.data('masonry')){
+		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
+			}else{
+				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+
+			}
+
+			self._search();
+			self.filterselect(false);
+			ko.dataFor(searchfacets).initFacets();
 		};
 
 		self.recordSelect= function (e){
-			console.log(e);
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.recordId() === e;
+				});
+			itemShow(selrecord);
+
+		}
+
+        self.columnRecordSelect= function (e){
+
 			itemShow(e);
 
 		}
+
 
 		self.searchNext = function() {
 		if(self.next()>0){
@@ -329,8 +368,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 		self.defaultSource=function(item){
 			item.thumb('images/no_image.jpg');
-
-	    }
+	     }
 
 	  var withsearch = $( '#withsearchid' );
 	  var selectedSources = ["YouTube", "Europeana"];
@@ -369,19 +407,36 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 		    	 for (var i in suggestions) {
 		    		 var category = suggestions[i].data.category;
 		    		 var s = $(".autocomplete-suggestion").get(i);
-		    		
 		    	 }
-		    	
 		     },
 			 formatResult: function(suggestion, currentValue) {
 				var s = '<strong>' + currentValue + '</strong>';
 				s    += suggestion.value.substring(currentValue.length);
 				s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
-
 				return s;
 			 }
-
 	 });
+
+	  self.masonryImagesReveal = function( $items,$container ) {
+		  $items.hide();
+		  $container.append( $items );
+		  if (!($container.data('masonry'))){
+
+				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+
+			}
+		  $items.imagesLoaded().progress( function( imgLoad, image ) {
+
+		    var $item = $( image.img ).parents(".masonryitem" );
+		    ko.applyBindings(self, $item[ 0 ] );
+		    $item.show();
+		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
+
+		  }).always(self.searching(false));
+
+
+		};
+
 
 	  ctrlClose =$("span.withsearch-close");
 	  isOpen = false;
@@ -399,6 +454,7 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
+
 				withinput.blur();
 
 			}
@@ -432,6 +488,44 @@ define(['bridget','knockout', 'text!./search.html','masonry','imagesloaded'], fu
 
     		}
     	);
+
+		self.likeRecord = function (id) {
+			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
+				return record.externalId() === id;
+			});
+
+			app.likeItem(rec, function (status) {
+				if (status) {
+					$('#' + id).addClass('active');
+				} else {
+					$('#' + id).removeClass('active');
+				}
+			});
+		};
+
+        function getItem(record) {
+			var figure='<figure class="masonryitem">';
+			if (record.isLiked()) {
+				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+			} else {
+				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+			}
+
+			figure += '<a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
+			+'<div class="sourceCredits"><a href="'+record.view_url()+'" target="_new">'+record.sourceCredits()+'</a></figure>';
+
+			return figure;
+		}
+
+          function getItems(data) {
+        	  var items = '';
+        	  for ( i in data) {
+        	    items += getItem(data[i]);
+        	  }
+        	  // return jQuery object
+        	  return $( items );
+        	}
+
 
 
   }

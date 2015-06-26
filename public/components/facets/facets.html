@@ -1,61 +1,87 @@
+<input id="facet_tags" type="text" data-role="tagsinput">
 <div class="facetfilters">
-<button class="btn btn-default" id="facetsbtn" data-bind="click: showfacets" >
-<i class="fa fa-bars  pull-left"></i> Filter
+<button class="btn btn-default" id="facetsbtn" data-bind="click: showfacets,disable:$parent.searching" ><span>
+<i class="fa fa-bars  pull-left"></i> Filter</span>
 </button>
   
-<div class="modalfacets" data-bind="if: visiblePanel">
+<div class="modalfacets" id="searchfacets" data-bind="if: visiblePanel,visible:visiblePanel">
+
+
+ <div class="facetsearchbox">
+    <div class="box">
+    <input class="facetinput" id="f_search" placeholder="Search" type="text" value=""/>
+   </div>
+   </div>
+ 
 <ul class="nav nav-tabs">
-  <li class="active"><a href="#datasources" data-toggle="tab">Sources</a></li>
-   <li><a href="#mediatype" data-toggle="tab">Media type</a></li>
-  <li><a href="#providers" data-toggle="tab">Providers</a></li>
+  <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
+  <!-- ko foreach: $parent.filters -->
+  <!-- ko if: suggestedValues.length>0 -->
+  <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
+  <!-- /ko -->
+  <!-- /ko -->
+   
 </ul>
 
 <div id="myTabContent" class="tab-content">
   <div class="tab-pane active" id="datasources">
-     <ul class="thumbfilters">
+     <ul class="thumbfilters list">
      
      <li>
-      <input type="checkbox" value="Europeana" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
-      <img src="images/logos/europeanalogo.png" style="width:100px">
+      <input type="checkbox" value="Europeana" data-bind="checked: $parent.sources, click: listClick"/>
+      <span>Europeana</span>
      
      </li>
        
        <li>
-      <input type="checkbox" value="DPLA" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
-      <img src="images/logos/dpla-logo.png" style="width:150px">
+      <input type="checkbox" value="DPLA" data-bind="checked: $parent.sources, click:listClick"/>
+       <span>DPLA</span>
       
      </li>
      <li>
-      <input type="checkbox" value="NLA" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
-      <img src="images/logos/nla.png" style="width:100px">
+      <input type="checkbox" value="NLA" data-bind="checked: $parent.sources, click:listClick"/>
+      <span>NLA</span>
       
      </li>
      <li>
-      <input type="checkbox" value="DigitalNZ"data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/>
-      <img src="images/logos/digitalnz1.png" style="width:100px">
+      <input type="checkbox" value="DigitalNZ" data-bind="checked: $parent.sources, click:listClick"/>
+      <span>DigitalNZ</span>
       
      </li>
      
      <li><span>
-      <input type="checkbox" value="YouTube" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/></span>
-      <img src="images/logos/youtube.png" style="width:100px">
+      <input type="checkbox" value="YouTube" data-bind="checked: $parent.sources, click: listClick"/></span>
+     <span>YouTube</span>
      
      </li>
     
     <li><span>
-      <input type="checkbox" value="Mint" data-bind="checked: $parent.sources, click: function(){$parent.search();return true;}"/></span>
-      <img src="images/logos/mint_logo.png" style="width:100px">
+      <input type="checkbox" value="Mint" data-bind="checked: $parent.sources, click: listClick"/></span>
+      <span>Mint</span>
      
      </li>
     </ul>
   </div>
-   <div class="tab-pane" id="mediatype">
-    <p>Under development </p>
+  
+   <!-- ko foreach: $parent.filters -->
+   <div class="tab-pane fade" data-bind="attr:{id:filterID}">
+  
+    <ul class="thumbfilters list">
+    <!-- ko if:suggestedValues.length>0 -->
+    <!-- ko foreach: suggestedValues -->
+   
+    <li data-bind="click:function(){$parents[1].listSelect($parents[0].filterID,value);}">
+      <span data-bind="text: value"></span>
+      
+     </li>
+     <!-- /ko -->
+     <!-- /ko -->
+    
+    </ul>
   </div>
-  <div class="tab-pane" id="providers">
-    <p>Under development </p>
+   <!-- /ko -->
   </div>
   
-</div>
+  
 </div>
 </div>

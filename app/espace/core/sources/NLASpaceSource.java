@@ -18,9 +18,12 @@ package espace.core.sources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
+import utils.ListUtils;
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,16 +52,26 @@ public class NLASpaceSource extends ISpaceSource {
 
 	public NLASpaceSource() {
 		super();
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Image",
-				"l-format","Photograph");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Video",
-				"l-format","Video");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Sound",
-				"l-format","Sound");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books",
-				"l-format","Books");
+		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("l-format"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, 
+				"Image","Photograph", "Poster, chart, other");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Video");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, 
+				"Sound","Sheet music");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books","Article");
 	}
 
+	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				return new Pair<String>(parameter, "%3A%22" + 
+						Utils.getORList(ListUtils.transform(t, 
+								function)) + "%22");
+			}
+		};
+	}
 	public String getHttpQuery(CommonQuery q) {
 //		String spacesFormatQuery = Utils.spacesFormatQuery(q.searchTerm, "%20");
 //		spacesFormatQuery = addfilters(q, spacesFormatQuery);
@@ -158,6 +171,12 @@ public class NLASpaceSource extends ISpaceSource {
 								"value", false);
 						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl",
 								false);
+
+						if (it.url.original != null)
+							it.externalId = it.url.original.get(0);
+						else
+							it.externalId=getSourceName() + "_" + it.id;
+						it.externalId = DigestUtils.md5Hex(it.externalId);
 						it.rights=null;
 
 						a.add(it);
@@ -193,8 +212,8 @@ public class NLASpaceSource extends ISpaceSource {
 			}
 
 			res.items = a;
-			res.filters = new ArrayList<>();
-			res.filters.add(type);
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
 			
 		
 			

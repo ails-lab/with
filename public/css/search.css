@@ -3,7 +3,7 @@
 html, body {
 	padding-top: 20px;
 	height: 100%;
-	
+
 }
 
 body {
@@ -69,7 +69,7 @@ text-decoration: none;
 
 .withsearch.open .withsearch-form {
 	width: 80%;
-	height: 160px;
+	height: 100px;
 	-webkit-transform: translate3d(0,3em,0);
 	transform: translate3d(0,3em,0);
 }
@@ -274,14 +274,16 @@ input[type="search"] { /* reset normalize */
 	background: #f1f1f1;
 	/*position: absolute;*/
 	opacity: 0;
+	overflow-y: hidden;
 }
 
 .scrollable{
 
 	width: 2200px;
     display:table;
-   overflow-y: auto;   overflow-x: scroll;
+    overflow-y: auto;   overflow-x: scroll;
     margin: 0 auto;
+    padding-top:70px;
 
 }
 
@@ -292,7 +294,7 @@ input[type="search"] { /* reset normalize */
 .withsearch.open .withsearch-content {
 	opacity: 1;
 	height: auto;
-	overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
+	/*overflow-y: visible; /* this breaks the transition of the children in FF: https://bugzilla.mozilla.org/show_bug.cgi?id=625289 */
 	pointer-events: auto;
 	-webkit-transition: opacity 0.3s 0.5s;
 	transition: opacity 0.3s 0.5s;
@@ -432,18 +434,18 @@ margin: 50px auto;
 
 
 div.columns figure {
-opacity:0;
+opacity:1;
 background: #FFF none repeat scroll 0% 0%;
 box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.22);
 border-radius: 6px;
 width: 211px;
 column-break-inside: avoid;
-opacity:0;
+cursor:pointer;
 margin-bottom:15px;
 }
 
 div.columns figure img {
-	
+
     border-radius: 6px 6px 0 0;
    -webkit-border-radius: 6px 6px 0 0;
 	-moz-border-radius: 6px 6px 0 0;
@@ -460,9 +462,10 @@ div.columns figure figcaption{
    padding:10px 10px 20px 10px;
    font-weight: 400;
    font-size:1.1em;
+   word-wrap: break-word;
  	}
- 	
-div.sourceCredits{ 	
+
+div.sourceCredits{
   font-weight: bold;
   border-top: 1px solid rgb(231, 231, 231);
   -webkit-font-smoothing: antialiased;
@@ -471,20 +474,20 @@ div.sourceCredits{
   display: block;
   line-height: 14px;
   padding: 10px 14px;
- 
+
 }
 
-div.sourceCredits a{ 	
-	 color: rgb(119, 119, 119); 	
- 
+div.sourceCredits a{
+	 color: rgb(119, 119, 119);
+
 
 	}
 
 
-div.sourceCredits:hover{ 	
+div.sourceCredits:hover{
   background-color:#f1f1f1;
   cursor:pointer;
- 
+
 }
 
 
@@ -530,8 +533,29 @@ font-size: 15px;
     width: 100%;
     margin: 0 auto;
     font-weight:200;
+    padding-top:30px;
     color:rgba(0, 0, 0, 0.52);
 
+}
+
+/* Starred Items */
+figure .star {
+	font-size: 20px;
+	display: none;
+	position: absolute;
+	top: 4px;
+	right: 4px;
+	width: 24px;
+}
+
+figure:hover .star {
+	color: #dddddd;
+	display: block;
+}
+
+figure .active, figure:hover .active {
+	color: #ec5a62;
+	display: block;
 }
 
 /*Media Queries*/

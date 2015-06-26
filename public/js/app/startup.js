@@ -35,11 +35,19 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }
 	});
+	ko.components.register('share-collection', {
+		viewModel: { instance: 'components/mycollections/mycollections' },
+		template: { require: 'text!components/mycollections/share-collection.html' }
+	});
+	ko.components.register('reset-password', { require: 'components/login-register-page/reset-password' });
+	ko.components.register('new-password', {
+		viewModel: { require: 'components/login-register-page/reset-password' },
+		template: { require: 'text!components/login-register-page/login-register.html' }
+	});
 	ko.components.register('image-upload', {
 		viewModel: { require: 'components/media-uploader/media-uploader' },
 		template: { require: 'text!components/media-uploader/image-upload.html' }
 	});
-
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });
 

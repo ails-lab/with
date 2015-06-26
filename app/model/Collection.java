@@ -17,10 +17,12 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.validation.constraints.NotNull;
 
@@ -32,12 +34,14 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
@@ -67,16 +71,21 @@ public class Collection {
 	private int itemCount;
 	private boolean isPublic;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date lastModified;
-	private String category;
+
+	private boolean isExhibition;
+	private ExhibitionCollection exhibition;
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
+	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 	private final Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
@@ -93,7 +102,7 @@ public class Collection {
 	 * 
 	 * @return
 	 */
-	public CollectionMetadata collectMetadata() {
+/*	public CollectionMetadata collectMetadata() {
 		CollectionMetadata cm = new CollectionMetadata();
 		cm.setCollectionId(this.dbId);
 		cm.setDescription(description);
@@ -101,7 +110,7 @@ public class Collection {
 		cm.setTitle(title);
 		return cm;
 	}
-
+*/
 	// Getter setters
 	public String getTitle() {
 		return title;
@@ -141,19 +150,10 @@ public class Collection {
 		if (this.ownerId == null) {
 			this.ownerId = ownerId;
 			rights.put(this.ownerId, Access.OWN);
-			// Create a new collection metadata for owner
-			User owner = DB.getUserDAO().get(ownerId);
-			owner.getCollectionMetadata().add(collectMetadata());
-			// Save the new owner
-			DB.getUserDAO().makePermanent(owner);
 			// Owner has changed
 		} else if (!this.ownerId.equals(ownerId)) {
 			// Remove rights for old owner
 			rights.remove(this.ownerId, Access.OWN);
-			User owner = DB.getUserDAO().get(this.ownerId);
-			owner.getCollectionMetadata().remove(collectMetadata());
-			DB.getUserDAO().makePermanent(owner);
-			// Set new Owner
 			this.ownerId = null;
 			setOwnerId(ownerId);
 		}
@@ -211,14 +211,6 @@ public class Collection {
 		this.lastModified = lastModified;
 	}
 
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
-	}
-
 	public int getItemCount() {
 		return itemCount;
 	}
@@ -237,6 +229,14 @@ public class Collection {
 
 	public Map<ObjectId, Access> getRights() {
 		return rights;
+	}
+
+	public boolean isExhibition() {
+		return isExhibition;
+	}
+
+	public void setExhibition(boolean isExhibition) {
+		this.isExhibition = isExhibition;
 	}
 
 }

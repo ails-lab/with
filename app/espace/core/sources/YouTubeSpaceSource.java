@@ -19,6 +19,7 @@ package espace.core.sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -119,6 +120,8 @@ public class YouTubeSpaceSource extends ISpaceSource {
 						+ it.id;
 				it.url.original = new ArrayList<String>();
 				it.url.original.add(it.url.fromSourceAPI);
+				it.externalId = it.url.fromSourceAPI;
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 			}
 			res.items = a;
