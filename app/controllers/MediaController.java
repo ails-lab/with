@@ -152,7 +152,8 @@ public class MediaController extends Controller {
 						med.setType(Media.BaseType.IMAGE);
 						DB.getMediaDAO().makePermanent(med);
 						ObjectNode singleRes = Json.newObject();
-						singleRes.put( fp.getFilename(), med.getDbId().toString());
+						singleRes.put("mediaId", med.getDbId().toString());
+						singleRes.put("filename", fp.getFilename());
 						allRes.add( singleRes );
 					} catch( Exception e ) {
 						ObjectNode singleRes = Json.newObject();
@@ -166,6 +167,7 @@ public class MediaController extends Controller {
 				final Map<String,String[]> req = request().body().asFormUrlEncoded();
 				if( req != null ) {
 					// this should be rare for file data
+					return badRequest("Not implemented");
 				} else {
 					final JsonNode jsonBody = request().body().asJson();
 					if( jsonBody != null ) {
@@ -177,6 +179,7 @@ public class MediaController extends Controller {
 						try {
 							Media med = new Media();
 							med.setData( request().body().asRaw().asBytes());
+							med.setOwnerId(new ObjectId(userIds.get(0)));
 							DB.getMediaDAO().makePermanent(med);
 							result.put( "Success", "Media object created!");
 							result.put( "mediaId", med.getDbId().toString());
@@ -189,6 +192,7 @@ public class MediaController extends Controller {
 			}
 		} else {
 			// metadata based media creation
+			return badRequest( "Media creation without file data not supported yet");
 		}
 		return ok( result );
 	}
