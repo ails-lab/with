@@ -14,6 +14,7 @@ POST     /api/testsearch            controllers.SearchController.posttestsearch(
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
 
 # Map static resources from the /public folder to the /assets URL path
+GET 	/assets/headers.js						controllers.FilterUtils.withAjaxScript
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
 
 # Collection Controller (tested except some methods)
