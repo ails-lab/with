@@ -60,6 +60,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		KnockoutElse.init([spec={}]);
 		var self = this;
 		//self.route = params.route;
+		self.showsExhibitions = params.showsExhibitions;
 		self.collections = [];
 		self.index = ko.observable(0);
 		self.collectionSet = "none";
@@ -95,6 +96,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
         self.myUsername = ko.observable(app.currentUser.username());
+        if (self.showsExhibitions) {
+			
+			var promise = app.getUserExhibitions();
+			$.when(promise).done(function(data) {
+				ko.mapping.fromJS(data, mapping, self.myCollections);
+			});
+			self.sharedCollections = ko.mapping.fromJS([], mapping);
+			//fix owner issue field missing in exhibitions @Maria
+		}
+		else {
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
 			//convert rights map to array
@@ -107,6 +118,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		$.when(promiseShared).done(function(data) {
 			ko.mapping.fromJS(convertToRightsMap(data), mapping, self.sharedCollections);
 		});
+		}
 		convertToRightsMap = function(data) {
 			$.each(data, function(j, c) {
 				var rightsArray = [];
@@ -128,7 +140,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			createNewCollection();
 		};
 		
-	    
+		self.createExhibition = function() {
+			
+			window.location = '#exhibition-edit';
+		};
+		
+		self.loadCollectionOrExhibition = function(record) {
+			
+			if (self.showsExhibitions) {
+				
+				window.location = '#exhibition-edit/'+ record.dbId();		
+			}
+			else {
+				window.location = 'index.html#collectionview/' + record.dbId();		
+			}
+		};
 		
 		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;

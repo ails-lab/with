@@ -3,8 +3,8 @@
 <div class="left"></div>  <!-- for scrolling the page when dragging item at left of page-->   
 <div class="outer"><!--
 --><div class="boxBasic boxItem" id="placeholder">            
-	    <div  class="placeholderD1" data-bind="text: galleryName" contenteditable=true></div>
-	    <div  class="placeholderD2" data-bind="text: gallerySubtitle" contenteditable=true ></div>
+	    <input  class="placeholderD1" data-bind="textInput: title, event: { blur: textfieldsLostFocus }" >
+	    <input  class="placeholderD2" data-bind="textInput: description, event: { blur: textfieldsLostFocus }">
 	</div><!-- 
 --><!-- ko template: { foreach: collectionItemsArray,
 			    beforeRemove: removeItem,
@@ -23,6 +23,9 @@
 		<div class="description d2" data-bind="text: description"> </div>
 		<div  class="EditButton" > 
 		    <div class="EditButtonText" data-bind="click: $parent.showPopUp"> EDIT </div>
+		</div>
+		<div id="loadingIcon">
+		    <i class="fa fa-spinner fa-pulse"></i>
 		</div>
 	    </div>
 	    <!--  ko if: $data.hasOwnProperty('additionalText')-->
@@ -70,8 +73,7 @@
 	    <div id="hoverTextArea">
 		<div  id="title" data-bind="text: currentItem().title"></div>
 		<div  id="creator" data-bind="text: currentItem().source"></div>
-		<div  id="provider" data-bind="text: currentItem().description"> </div>
-		<div  id="description">Space shuttle launch</div>
+		<div  id="description" data-bind="text: currentItem().description"> </div>
 	    </div>
     </div>
     <!-- /ko -->

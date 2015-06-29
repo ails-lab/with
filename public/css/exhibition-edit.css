@@ -112,15 +112,27 @@ exhibition {
 
 .placeholderD1 {
     
+    display: block;
     width: 100%;
-    font-size: 28px;
+    font-size: 32px;
     font-family: Oswald;
     text-align: center;
     margin-bottom: 40px;
     margin-top: 40px;
-    color: #303030;
+    border: none;
+    border-color: transparent;
     outline-color: #696969;
+    background-color:  inherit;
     cursor: text;
+}
+
+.placeholderD2 {
+    
+    display: block;
+    border: none;
+    font-size: 20px;
+    border-color: transparent;
+    background-color:  inherit;
 }
 
 .boxItem:hover:not(#placeholder) {
@@ -178,6 +190,30 @@ exhibition {
     font-family: Oswald;
     text-align: center;
     color: white;
+}
+
+#loadingIcon {
+    
+    position: absolute;
+    top:50%;
+    left:50%;
+    width:40px;
+    height:40px;
+    margin-left: -20px;
+    margin-top:  -20px;
+    font-size:35px;
+}
+
+#overlayDiv {
+    
+    position: absolute;
+    top:0;
+    left:0;
+    right:0;
+    left:0;
+    background-color: white;
+    z-index:10000;
+    opacity: 0.5;
 }
 
 .XButtonImage {

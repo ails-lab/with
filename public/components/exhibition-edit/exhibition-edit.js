@@ -17,30 +17,171 @@ function MyCollection(collectionData) {
 	}
 
 
+function createExhibition() {
+		return $.ajax({
+			type        : "POST",
+			url         : "/exhibition/create",
+			success     : function() {
+				
+				console.log('created sucessfully exhibition')
+			}
+			});
+	};
+	
+function getExhibition(id) {
+		return $.ajax({
+			type        : "GET",
+			url         : "/collection/" + id,
+			success     : function() {
+				
+				console.log('retreived sucessfully exhibition');
+			}
+			});
+	};	
+	
+function updateExhibition(exhibition ) {
+		var jsondata=JSON.stringify({
+			
+				title: exhibition.title(),
+				description:exhibition.description()				
+			});
+		
+		return $.ajax({
+			type        : "POST",
+			url         : "/collection/" + exhibition.dbId(),
+			data        : jsondata,
+			contentType: "application/json",
+			success     : function() {
+				
+				console.log('updated sucessfully exhibition');
+			}
+			});
+	};
+	
+function saveItemToExhibition (record, position, exhibitionId) {
+	
+		 console.log('index :' + position + 'record : '+ record);
+		  var jsondata=JSON.stringify({
+			
+				source: record.source,
+				sourceId:record.sourceId,
+				title: record.title,
+				description:record.description,
+				thumbnailUrl:record.thumbnailUrl,
+				sourceUrl:record.sourceUrl,
+				position: position
+				
+			});
+		  console.log('\n\n' + jsondata + '\n\n');
+		  return $.ajax({
+			  
+				"url": "/collection/"+ exhibitionId +"/addRecord",
+				"method": "post",
+				"contentType": "application/json",
+				"data": jsondata,
+				"success": function(data) {
+					
+					
+				
+				},
+				
+				"error":function(result) {
+					
+					
+			     }});
+		  
+		  
+	 }
+	 
+
+function deleteItemFromExhibition (exhibitionId, recordId) {
+	
+		  console.log('exhbitionId : ' + exhibitionId, 'recordId : ' + recordId);
+		  $.ajax({
+			  
+				"url": "/collection/"+ exhibitionId +"/removeRecord" + "?recId=" + recordId,
+				"method": "delete",
+				"success": function(data) {
+					
+					console.log('item successfully deleted');
+				},
+				"error":function(result) {
+					
+					
+			     }});
+		  
+		  
+	 }	  
+
+	
+
 var ExhibitionEditModel = function(params) {
     
     var self = this;
     self.route = params.route;	
-    self.galleryName     = ko.observable('Add Title');
-    self.gallerySubtitle = ko.observable("Add description"); 
-    self.collectionItemsArray = ko.observableArray([]);
-    
+    self.title       = ko.observable('');
+    self.description = ko.observable('');
+    self.dbId = ko.observable();
+    self.creationMode = !params.hasOwnProperty('id');
+    self.loadingExhibitionItems = false;
+    self.loadingInitialItemsCount = 0;
+    if (!self.creationMode) {
+	
+	self.dbId(params.id);	
+    }
+    self.userSavedItemsArray = ko.observableArray([]);//holds the selected collections items
+    self.collectionItemsArray = ko.observableArray([]);//holds the exhibitions items
     var collections = [];
     var promise = app.getUserCollections();
-    self.myCollections = ko.observableArray([]);
-    $.when(promise).done(function() {
-	if (sessionStorage.getItem('UserCollections') !== null) 
-		collections = JSON.parse(sessionStorage.getItem("UserCollections"));
-		if (localStorage.getItem('UserCollections') !== null) 
-		  collections = JSON.parse(localStorage.getItem("UserCollections"));
-		self.myCollections(ko.utils.arrayMap(collections, function(collectionData) {
-		    return new MyCollection(collectionData);
-	}));
+    self.myCollections = ko.observableArray([]); //holds all the collections
+    $.when(promise).done(function(data) { 
+		
+		self.myCollections(ko.utils.arrayMap(data, function(collectionData) {
+		
+			return new MyCollection(collectionData);
+		 }));
 		//then initialise select
-	$('.selectpicker').selectpicker();
+		$('.selectpicker').selectpicker();
     });
+    var mappingExhibition = {
+			'dbId': {
+				key: function(data) {
+		            return ko.utils.unwrapObservable(data.dbId);
+				}
+			},
+			'firstEntries': {
+			    key: function(options) {
+				return ko.utils.unwrapObservable(data.dbId);
+			   }
+			},
+			'copy': ["firstEntries"]
+		};
     
-    self.userSavedItemsArray = ko.observableArray([]);
+    if (self.creationMode) {
+    
+	var promiseCreateExhibtion = createExhibition();
+	    $.when(promiseCreateExhibtion).done(function(data) {
+	
+		console.log('this is the created exhibition data' + JSON.stringify(data));
+		ko.mapping.fromJS(data, mappingExhibition, self);
+		self.title('Add a Title');
+		self.description('Add a Description');
+		//TODO: @maria should change that
+		updateExhibition(self);
+	    });
+    }
+    else {
+	
+	self.loadingExhibitionItems = true;
+	 var promise = getExhibition(self.dbId());
+	$.when(promise).done(function(data) { 
+		
+		ko.mapping.fromJS(data, mappingExhibition, self);
+		self.loadingInitialItemsCount = self.firstEntries.length;
+		self.collectionItemsArray(self.firstEntries);
+		self.loadingExhibitionItems = true; 
+	});
+    }
     self.selectedCollection = ko.observable();
     self.currentItemSet = ko.observable(false);
     self.currentItem = ko.observable();
@@ -56,13 +197,17 @@ var ExhibitionEditModel = function(params) {
 	console.log(ko.toJSON(self));
 	console.log(self.myCollections());
     };
-	
+    self.textfieldsLostFocus = function () {
+    
+	updateExhibition(self);
+    }
 	
     self.xButtonClicked = function(item) {
         
         if ( self.collectionItemsArray.indexOf(item) > -1) {
             
             self.collectionItemsArray.remove(item);
+	    deleteItemFromExhibition(self.dbId(), item.dbId);
         }
         else {
             
@@ -82,7 +227,35 @@ var ExhibitionEditModel = function(params) {
         self.detailsEnabled(false);
 	$(event.target).parent().removeClass('box-Hover');
     }
-    self.showNewItem = function(elem) {  $(elem).hide().fadeIn(500);}
+    self.itemsLoaded = 0;
+    self.showNewItem = function(elem, index, record) {
+	
+					 $(elem).hide().fadeIn(500);
+					 if ( $(elem).hasClass('boxBasic boxItem') ) { //it gets called for all elements rendered with the foreach
+						
+	
+						if (!self.creationMode && self.itemsLoaded < self.loadingInitialItemsCount) {
+										
+							self.itemsLoaded++;
+							$(elem).find('#loadingIcon').fadeOut();
+							return;
+						}					
+						var promiseSaveItem = saveItemToExhibition(record, index, self.dbId());
+						$.when(promiseSaveItem).done(function(data) {
+			
+						       console.log('this is the created exhibition data' + JSON.stringify(data));
+						       console.log('newDBId' + data.dbId);
+						       //update the dbid
+						       record.dbId = data.dbId;
+						       $(elem).find('#loadingIcon').fadeOut();
+					       })
+						.fail(function(data){
+						
+						  console.log('request failed');
+						  $(elem).find('#loadingIcon').fadeOut();
+					       });
+					}
+    }
     self.removeItem = function(elem) {   $(elem).fadeOut(500);}
     
     self.showPopUp = function(data){
@@ -90,14 +263,13 @@ var ExhibitionEditModel = function(params) {
 	console.log('show popup');
 	editItem(data, 'PopUpVideoMode');
 	}	
-	
+
     //custom binding
     var _draggedItem;
-    var _bIsMoveOperation;
+    var _bIsMoveOperation = false;
     ko.bindingHandlers.drag = {
         init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
             var dragElement = $(element);
-            _bIsMoveOperation = valueAccessor().move;                    
             var dragOptions = {
                 start: function( event, ui ) {
                     
@@ -106,10 +278,12 @@ var ExhibitionEditModel = function(params) {
                     $('.bottom-box').removeClass("box-Hover");
                     console.log('dragging');
                     _draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
-                    _bIsMoveOperation = valueAccessor().move;
-                    console.log('isMoving' + _bIsMoveOperation); 
+                    _bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
+                    console.log('isMoving ' + _bIsMoveOperation); 
                     ui.helper.css({"z-index":500});
                     if (_bIsMoveOperation) {
+			
+			console.log('initial width' +  $(this).find('.itemImage').css('width'));
                         if (ui.helper.width() > 150 ) {
                         
                             var newAspectHeight = 150/ ui.helper.width() *  ui.helper.height();
@@ -127,12 +301,14 @@ var ExhibitionEditModel = function(params) {
                     _draggedItem = undefined;
                 }
             };
-            if (_bIsMoveOperation) {//to fix the scroll beyond end of gallery
-                dragOptions.appendTo = $('.left');
+            if (dragElement.hasClass('boxBasic boxItem')) {//if it is move operation
+                
+		dragOptions.appendTo = $('.left');
                 dragOptions.helper = function() {
                 
                         var $imageElementHelper = $(this).find('.itemImage').clone();
                         $imageElementHelper.css('margin', 0).css({'padding-top': 0});
+			
                         //to fix the scroll issues remove it from div
                         return $imageElementHelper;
                 }
@@ -183,9 +359,12 @@ var ExhibitionEditModel = function(params) {
                         }
                         dropElement.animate({width:"60px"},200);
                         dropElement.find('#droppable-Children').css({display:"none"});
-                        arrayCollection.splice(indexNewItem,0,newItem);
+			
+			arrayCollection.splice(indexNewItem,0,newItem);		
+			console.log('is move operation '+ _bIsMoveOperation);
                         if (_bIsMoveOperation) {
                             arrayCollection.remove(_draggedItem);
+			    deleteItemFromExhibition(self.dbId(), _draggedItem.dbId);
                         }
                         _draggedItem = undefined;
                     }
@@ -195,7 +374,6 @@ var ExhibitionEditModel = function(params) {
     };
     
 //----knockout solution----//
-
     
     //for the side scrolling  
       $('.left').droppable({
@@ -232,7 +410,7 @@ var ExhibitionEditModel = function(params) {
 	$(event.target).addClass('box-Hover');
      }
      //hide the nav bar
-     $('nav').slideUp(1000);
+     $('#bottomBar').fadeOut(500);
 };
  
 

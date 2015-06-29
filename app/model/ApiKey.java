@@ -33,9 +33,8 @@ import play.Logger.ALogger;
 
 /**
  * 
- * @author stabenau
- * An API key limits the calls a client can do. It can allow all.
- * It can give you automated login for the proxy user.
+ * @author stabenau An API key limits the calls a client can do. It can allow
+ *         all. It can give you automated login for the proxy user.
  * 
  * 
  */
@@ -45,12 +44,9 @@ public class ApiKey {
 
 	public static enum Response {
 		// INVALID_xxxx have to be checked somewhere else
-		INVALID_IP, EXPIRED_IP, INVALID_APIKEY, EXPIRED_APIKEY,
-		BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED,
-		ALLOWED
+		INVALID_IP, EXPIRED_IP, INVALID_APIKEY, EXPIRED_APIKEY, BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED, ALLOWED
 	}
 
-	
 	// a call limit is an api call that can be executed with this key
 	// for a limited number of times
 	// or with limited transfer volume
@@ -64,40 +60,40 @@ public class ApiKey {
 		// this shouldn't be stored in the db
 		@Transient
 		public Pattern pattern;
-		
+
 		// give back copies of this ...
 		public CallLimit clone() {
 			try {
 				CallLimit cl = (CallLimit) super.clone();
 				cl.pattern = null;
 				return cl;
-			} catch( CloneNotSupportedException ce) { 
+			} catch (CloneNotSupportedException ce) {
 				return null;
 			}
 		}
-		
+
 		public Pattern getPattern() {
-			if( pattern == null ) {
+			if (pattern == null) {
 				pattern = Pattern.compile(regexp);
 			}
 			return pattern;
 		}
 	}
-	
+
 	@Id
 	private ObjectId dbId;
 
 	// the random key string
 	private String keyString;
-	
+
 	// a pattern of IP numbers, if matched, this key applies
 	// usually just for counting
 	private String ipPattern;
-	
+
 	// optional, when a call comes with this key, it has the rights of
 	// this user (and others, if login is an allowed call)
 	private ObjectId proxyUserId;
-	
+
 	private ArrayList<CallLimit> callLimits = new ArrayList<CallLimit>();
 
 	private Date created;
@@ -105,108 +101,111 @@ public class ApiKey {
 	// API keys can have limited lifetime
 	private Date expires;
 
-	
-	
 	// this will just monitor the pattern
-	public CallLimit addCall( int position, String pattern ) {
-		return addCall( position, pattern, -1l, -1l );
+	public CallLimit addCall(int position, String pattern) {
+		return addCall(position, pattern, -1l, -1l);
 	}
-	
-	public CallLimit addCall( int position, String pattern, long counterLimit, long volumeLimit ) {
+
+	public CallLimit addCall(int position, String pattern, long counterLimit,
+			long volumeLimit) {
 		CallLimit cl = new CallLimit();
 		cl.counterLimit = counterLimit;
 		cl.volumeLimit = volumeLimit;
 		cl.regexp = pattern;
-		cl.pattern = Pattern.compile(pattern );
-		
+		cl.pattern = Pattern.compile(pattern);
+
 		callLimits.add(position, cl);
 		return cl;
 	}
-	
+
 	/**
 	 * Generates new keyString.
 	 */
 	public void resetKey() {
-		final char[] allChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
-		keyString ="";
+		final char[] allChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+				.toCharArray();
+		keyString = "";
 		Random r = new Random();
-		for( int i=0; i<30; i++ ) keyString += allChars[ r.nextInt(allChars.length)];
+		for (int i = 0; i < 30; i++)
+			keyString += allChars[r.nextInt(allChars.length)];
 	}
-	
+
 	/**
 	 * Return cloned list off the limits for this API key
+	 * 
 	 * @param call
 	 * @return
 	 */
-	public List<CallLimit> getLimits( ) {
+	public List<CallLimit> getLimits() {
 		List<CallLimit> res = new ArrayList<CallLimit>();
-		for( CallLimit cl: callLimits ) {
-			res.add( cl.clone());
+		for (CallLimit cl : callLimits) {
+			res.add(cl.clone());
 		}
 		return res;
 	}
-	
-	private CallLimit getLimit( String call ) {
-		for( CallLimit cl: callLimits ) {
-			if( cl.getPattern().matcher( call).matches()) return cl;
+
+	private CallLimit getLimit(String call) {
+		for (CallLimit cl : callLimits) {
+			if (cl.getPattern().matcher(call).matches())
 				return cl;
+			return cl;
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Checks if the API key allows for the call to happen and counts it
-	 * in.
+	 * Checks if the API key allows for the call to happen and counts it in.
+	 * 
 	 * @param call
 	 * @param volume
 	 * @return
 	 */
-	public Response check( String call, long volume ) {
-		if( expires != null ) {
-			if( new Date().after( expires )) {
-				if( StringUtils.isEmpty(ipPattern)) {
+	public Response check(String call, long volume) {
+		if (expires != null) {
+			if (new Date().after(expires)) {
+				if (StringUtils.isEmpty(ipPattern)) {
 					return Response.EXPIRED_APIKEY;
 				} else {
 					return Response.EXPIRED_IP;
 				}
 			}
 		}
-		
-		CallLimit cl = getLimit( call );
-		if( cl == null ) {
+
+		CallLimit cl = getLimit(call);
+		if (cl == null) {
 			return Response.BLOCKED_CALL;
 		}
 
 		Response res = null;
-		
+
 		// check the limits
-		if(( volume > 0) && ( cl.volumeLimit >= 0 ) &&
-				(cl.volume + volume > cl.volumeLimit)) {
+		if ((volume > 0) && (cl.volumeLimit >= 0)
+				&& (cl.volume + volume > cl.volumeLimit)) {
 			res = Response.VOLUME_LIMIT_REACHED;
 		}
-		if(( cl.counterLimit >= 0 ) && (cl.counter +1 > cl.counterLimit)) {
+		if ((cl.counterLimit >= 0) && (cl.counter + 1 > cl.counterLimit)) {
 			res = Response.COUNT_LIMIT_REACHED;
 		}
-		
-		if( res == null  ) {
+
+		if (res == null) {
 			cl.counter += 1;
 			cl.volume += volume;
 			return Response.ALLOWED;
 		} else {
 			return res;
 		}
- 	}
-	
+	}
+
 	/*
 	 * If you only know the volume after the call use this to update the counter
 	 */
-	public void updateVolume( String call, long volume ) {
+	public void updateVolume(String call, long volume) {
 		CallLimit cl = getLimit(call);
-		if( cl!=null) cl.volume+= volume;
+		if (cl != null)
+			cl.volume += volume;
 	}
-	
-	// getter setter section 
-	
+
+	// getter setter section
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -255,6 +254,5 @@ public class ApiKey {
 	public void setIpPattern(String ipPattern) {
 		this.ipPattern = ipPattern;
 	}
-	
-	
+
 }

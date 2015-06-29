@@ -173,6 +173,27 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			//var err = JSON.parse(request.responseText);
 		});
 	};
+	
+	self.getUserExhibitions = function() {
+		return $.ajax({
+			type        : "GET",
+			contentType : "application/json",
+			dataType    : "json",
+			url         : "/exhibition/list",
+			processData : false,
+			data        : "access=owned&offset=0&count=20"}).done(
+			function(data) {
+				// console.log("User collections " + JSON.stringify(data));
+				/*if (sessionStorage.getItem('User') !== null) 
+					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
+				  else if (localStorage.getItem('User') !== null) 
+					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
+				return data;
+			}).fail(function(request, status, error) {
+				//var err = JSON.parse(request.responseText);
+			}
+		);
+	};
 
 	self.isLiked = function (id) {
 		return self.currentUser.favorites.indexOf(id) < 0 ? false : true;
@@ -235,6 +256,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		logout: logout,
 		getUserCollections: getUserCollections,
 		getPublicCollections: getPublicCollections,
+		getUserExhibitions: getUserExhibitions,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,
 		likeItem: likeItem
