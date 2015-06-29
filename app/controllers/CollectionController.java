@@ -34,9 +34,11 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Media;
 import model.User;
 import model.User.Access;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -295,7 +297,7 @@ public class CollectionController extends Controller {
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
 	}
-
+	 
 	/**
 	 * list accessible collections
 	 */
@@ -401,6 +403,32 @@ public class CollectionController extends Controller {
 		}
 		return ok(result);
 	}
+	
+	public static Result listUsersWithRights(String collectionId) {
+		ArrayNode result = Json.newObject().arrayNode();
+		Collection collection = DB.getCollectionDAO()
+				.getById(new ObjectId(collectionId));
+		for (ObjectId userId: collection.getRights().keySet()) {
+			User user = DB.getUserDAO().getById(userId, null);
+			if (user != null) {
+				ObjectNode userJSON = Json.newObject();
+				userJSON.put("username", user.getUsername());
+				userJSON.put("firstName", user.getFirstName());
+				userJSON.put("lastName", user.getLastName());
+				String image = UserManager.getImageBase64(user);
+				Access accessRights= collection.getRights().get(userId);
+				((ObjectNode) userJSON).put("accessRights", accessRights.toString());
+				if (image != null) {
+					((ObjectNode) userJSON).put("image", image);
+				}
+				result.add(userJSON);
+			}
+			else {
+				return internalServerError("User with id " + userId + " cannot be retrieved from db");
+			}
+		}
+		return ok(result);	
+	 }
 
 	public static Result listShared(String filterByUser, String filterByUserId,
 			String filterByEmail, int offset, int count) {

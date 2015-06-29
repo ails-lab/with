@@ -89,7 +89,7 @@ public class CollectionRecord {
 
 	private String type;
 
-	private String rights;
+	private String itemRights;
 
 	private ExhibitionRecord exhibition;
 
@@ -171,7 +171,7 @@ public class CollectionRecord {
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
 	}
-
+	
 	/*
 	 * public String getThumbnailUrl() { return "/recordlink/" +
 	 * this.getDbId().toString() + "/thumbnail"; }
@@ -258,12 +258,12 @@ public class CollectionRecord {
 		this.type = type;
 	}
 
-	public String getRights() {
-		return rights;
+	public String getItemRights() {
+		return itemRights;
 	}
 
-	public void setRights(String rights) {
-		this.rights = rights;
+	public void setItemRights(String itemRights) {
+		this.itemRights = itemRights;
 	}
 
 	@JsonIgnore

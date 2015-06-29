@@ -55,6 +55,7 @@ public class CacheController extends Controller {
 		}
 	}
 
+	// TODO add more fields (like last access)
 	private static void updateCache(String externalUrl, boolean thumbnail) {
 		BiFunction<String, Boolean, Boolean> methodQuery = (String imageUrl,
 				Boolean thumb) -> {

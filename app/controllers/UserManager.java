@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +35,7 @@ import model.Collection;
 import model.Media;
 import model.User;
 import model.UserGroup;
+import model.User.Access;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -55,6 +58,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import espace.core.CommonQuery;
+import espace.core.ISpaceSource;
+import espace.core.SourceResponse;
 
 public class UserManager extends Controller {
 
@@ -67,29 +73,42 @@ public class UserManager extends Controller {
 			.configuration().getString("application.baseUrl");
 
 	/**
-	 * Free to call by anybody, so we don't give lots of info.
-	 *
-	 * @param email
-	 * @return
+	 * @param emailOrUsername
+	 * @return User and image
 	 */
-	public static Result findByEmail(String email) {
-		User u = DB.getUserDAO().getByEmail(email);
-		if (u != null) {
-			ObjectNode res = Json.newObject();
-			res.put("username", u.getUsername());
-			res.put("email", u.getEmail());
-			return ok(res);
-		} else {
-			return badRequest();
+	public static Result findByUsernameOrEmail(String emailOrUsername, String collectionId) {
+		Function<User, Status> getUserJson = (User u) -> 
+		{ 
+			ObjectNode userJSON = Json.newObject();
+			userJSON.put("username", u.getUsername());
+			userJSON.put("firstName", u.getFirstName());
+			userJSON.put("lastName", u.getLastName());
+			if (collectionId != null) {
+				Collection collection = DB.getCollectionDAO().getById(new ObjectId (collectionId));
+				if (collection != null) {
+					Access accessRights = collection.getRights().get(u.getDbId());
+					if (accessRights != null)
+						userJSON.put("accessRights", accessRights.toString());
+					else
+						userJSON.put("accessRights", Access.NONE.toString());
+				}
+			}
+			String image = UserManager.getImageBase64(u);
+			if (image != null) {
+				((ObjectNode) userJSON).put("image", image);
+			}
+			return ok(userJSON);
+		};
+		User user = DB.getUserDAO().getByEmail(emailOrUsername);
+		if (user != null) {
+			return getUserJson.apply(user);
 		}
-	}
-
-	public static Result findByUsername(String username) {
-		User u = DB.getUserDAO().getByUsername(username);
-		if (u != null) {
-			return ok();
-		} else {
-			return badRequest();
+		else {
+			user = DB.getUserDAO().getByUsername(emailOrUsername);
+			if (user != null) 
+				return getUserJson.apply(user);
+			else
+				return badRequest("The string you provided does not match an existing email or username");
 		}
 	}
 
@@ -467,17 +486,14 @@ public class UserManager extends Controller {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
-				if (user.getPhoto() != null) {
-					ObjectId photoId = user.getPhoto();
-					Media photo = DB.getMediaDAO().findById(photoId);
-					// convert to base64 format
-					String image = "data:" + photo.getMimeType() + ";base64,"
-							+ new String(Base64.encodeBase64(photo.getData()));
-					ObjectNode result = (ObjectNode) Json.parse(DB
-							.getJson(user));
+				ObjectNode result = (ObjectNode) Json.parse(DB
+						.getJson(user));
+				String image = getImageBase64(user);
+				if (image != null) {
 					result.put("image", image);
 					return ok(result);
-				} else {
+				}
+				else {
 					return ok(Json.parse(DB.getJson(user)));
 				}
 			} else {
@@ -588,6 +604,8 @@ public class UserManager extends Controller {
 						return badRequest(e.getMessage());
 					}
 				}
+				if (json.has("gender"))
+					user.setGender(json.get("gender").asText());
 				user.setFirstName(firstName);
 				user.setLastName(lastName);
 				if (json.has("about")) {
@@ -862,6 +880,18 @@ public class UserManager extends Controller {
 
 		return badRequest(result);
 
+	}
+	
+	public static String getImageBase64(User user) {
+		if (user.getPhoto() != null) {
+			ObjectId photoId = user.getPhoto();
+			Media photo = DB.getMediaDAO().findById(photoId);
+			// convert to base64 format
+			return "data:" + photo.getMimeType() + ";base64,"
+					+ new String(Base64.encodeBase64(photo.getData()));
+		}
+		else
+			return null;
 	}
 
 }
