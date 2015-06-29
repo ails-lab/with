@@ -16,14 +16,17 @@
 
 package model;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Entity;
@@ -50,7 +53,7 @@ public class CollectionRecord {
 	private ObjectId dbId;
 
 	private String externalId;
-	
+
 	private boolean isPublic;
 
 	// which backend provided this entry
@@ -68,9 +71,9 @@ public class CollectionRecord {
 	@NotBlank
 	private String title;
 	private String description;
-	
+
 	private String creator;
-	
+
 	private String provider;
 
 	// the id in the source system
@@ -78,12 +81,12 @@ public class CollectionRecord {
 	// a link to the record on its source
 	private String sourceUrl;
 
-	 //url to the provider web page for that record
+	// url to the provider web page for that record
 	private String isShownAt;
-	
-	//url to the (full resoultion) content - external on in the WITH db
+
+	// url to the (full resoultion) content - external on in the WITH db
 	private String isShownBy;
-	
+
 	private String type;
 
 	private String itemRights;
@@ -168,7 +171,7 @@ public class CollectionRecord {
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
 	}
-
+	
 	/*
 	 * public String getThumbnailUrl() { return "/recordlink/" +
 	 * this.getDbId().toString() + "/thumbnail"; }
@@ -206,7 +209,7 @@ public class CollectionRecord {
 	public void setCreator(String creator) {
 		this.creator = creator;
 	}
-	
+
 	public String getProvider() {
 		return provider;
 	}
@@ -315,9 +318,9 @@ public class CollectionRecord {
 
 	@Override
 	public boolean equals(Object record) {
-		if( (((CollectionRecord)record).getDbId() != null) &&
-				(this.dbId != null) )
-			return ((CollectionRecord)record).getDbId().equals(this.dbId);
+		if ((((CollectionRecord) record).getDbId() != null)
+				&& (this.dbId != null))
+			return ((CollectionRecord) record).getDbId().equals(this.dbId);
 		else
 			return false;
 	}

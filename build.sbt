@@ -28,6 +28,7 @@ libraryDependencies ++= Seq(
  // validate the token from the login on web browser
  // "com.google.api-client" % "google-api-client" % "1.19.1"
  "org.json" % "org.json" % "chargebee-1.0",
- "org.apache.commons" % "commons-email" % "1.3.3"
+ "org.apache.commons" % "commons-email" % "1.3.3",
+  "com.jayway.jsonpath" % "json-path" % "2.0.0"
 )
 

@@ -591,7 +591,7 @@ public class UserManager extends Controller {
 						mimeType = mimeType.replace(";base64", "");
 					}
 					Media media = new Media();
-					media.setType("IMAGE");
+					media.setType(Media.BaseType.valueOf( "IMAGE"));
 					media.setMimeType(mimeType);
 					media.setHeight(100);
 					media.setWidth(100);
