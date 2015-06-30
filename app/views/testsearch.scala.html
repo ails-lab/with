@@ -6,7 +6,7 @@
 
 @testsearchmain("Test search") {
 	
-	<div class="container">
+		<div class="container-fluid">
 		
 		@helper.form( action= routes.SearchController.posttestsearch() ){
 	
@@ -17,8 +17,7 @@
 	
 			<div class="row" id="hsection">
 				<div id="vsection" class="col-md-7">
-					@helper.inputText(qform("searchTerm"), 'id -> "searchT")
-					@helper.inputText(qform("termToExclude"), 'id -> "excludeT")		
+					@helper.inputText(qform("searchTerm"), 'id -> "searchT")	
 				</div>
 				<div id="vsection" class="col-md-3">
 					@inputNumber(qform("page"), '_default -> "2" )
@@ -27,13 +26,13 @@
 			</div>
 		}
 	
+
 	
-	
-		<div class="row" id="hsection">
+		<div class="row" >
 	 		 <div id="nav" class="col-md-3">
 	 		 
 		 			<!--
-		 			<div class="col-sm-12" id="hsection">
+		 			<div class="col-sm-12" >
 							@for(p <- filters) {
 								<div onClick="" class="row" >	
 									<label id="filter-name">
@@ -82,7 +81,7 @@
 						</button>
 					</div>
 					 
-					<div class="col-sm-12" id="hsection">
+					<div class="col-sm-12">
 						@for(p <- filters) {
 						<div class="form-group row">
   							<label for="filter-name">
@@ -198,21 +197,24 @@
 				  						
 				  						@if(p.items!=null){
 				  							@for(it <- p.items) {
-				  								<div id="thumbframe" class="col-md-12">
-				  									
-				  									<div  id="thinfo" class="col-md-8">
+				  								<div  class="col-md-12 thumbnail">
+				  									<div class="col-md-4 text-right">
+				  										<img alt="NO IMAGE" class="img-thumbnail" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> 
+				    								</div>
+				    								
+				  									<div class="col-md-8">
 				    									<b>Title: </b> 
 				    									<a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
 				 											@shorttext(it.title.get(0).value,40)
 				 										</a><br/>
-				    									
+				 										
+				 										<b>Data Provider: </b> 
+				    									@if(it.dataProvider!=null && it.dataProvider.size()>0) {@shorttext(it.dataProvider.get(0).value,100)} else {NA} <br/>
 				  										<b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
 				   									</div>
 				  									
 				  									
-				  									<div id="thumb" class="col-md-3">
-				  										<img alt="NO IMAGE" class="img-thumbnail" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> 
-				    								</div>
+				  									
 				    								
 				  								</div>
 				  							}
@@ -233,7 +235,7 @@
 		</div>
 		
 		
-	</div>	
+	</div>
 }
 
   

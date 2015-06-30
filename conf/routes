@@ -28,6 +28,7 @@ POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(
 GET		 /collection/favorites					controllers.CollectionController.getFavorites()
 POST     /collection/liked			            controllers.CollectionController.addToFavorites()
 DELETE   /collection/unliked/:recId			    controllers.CollectionController.removeFromFavorites(recId)
+GET		 /collection/favoriteCollection			controllers.CollectionController.getFavoriteCollection()
 
 # Cache Controller
 GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)

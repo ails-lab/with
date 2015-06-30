@@ -27,7 +27,7 @@ import espace.core.Utils.Pair;
 public class FilterValuesMap {
 
 	private HashMap<String, List<String>> specificvalues;
-//	private HashMap<String, List<Pair<String>>> queryTexts;
+	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
 	private HashMap<String, Function<List<String>, Pair<String>>> writters;
 
@@ -35,7 +35,7 @@ public class FilterValuesMap {
 		super();
 		specificvalues = new HashMap<String, List<String>>();
 		commonvalues = new HashMap<String, List<String>>();
-//		queryTexts = new HashMap<String, List<Pair<String>>>();
+		// queryTexts = new HashMap<String, List<Pair<String>>>();
 		writters = new HashMap<>();
 	}
 
@@ -46,7 +46,15 @@ public class FilterValuesMap {
 	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key, boolean addNew) {
 		List<T> res;
 		if (!map.containsKey(key)) {
+			// check regular expr;
 			res = new ArrayList<T>();
+			for (String kk : map.keySet()) {
+				if (key.matches(kk)) {
+					res = map.get(kk);
+					addNew = false; // for sure i am not adding a new value
+				}
+			}
+			// not found
 			if (addNew)
 				map.put(key, res);
 		} else {
@@ -64,7 +72,7 @@ public class FilterValuesMap {
 		for (String string : specificValue) {
 			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
 		}
-//		getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
+		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
 
 	public List<String> translateToCommon(String filterID, String specificValue) {
@@ -82,7 +90,7 @@ public class FilterValuesMap {
 	public List<String> translateToSpecific(String filterID, String... commonValue) {
 		return translateToSpecific(filterID, Arrays.asList(commonValue));
 	}
-	
+
 	public List<String> translateToSpecific(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
 			ArrayList<String> res = new ArrayList<String>();
