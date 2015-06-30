@@ -89,7 +89,7 @@ public class CollectionRecord {
 
 	private String type;
 
-	private String rights;
+	private String itemRights;
 
 	private ExhibitionRecord exhibition;
 
@@ -126,6 +126,14 @@ public class CollectionRecord {
 
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
+	}
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 
 	public String getSource() {
@@ -194,14 +202,6 @@ public class CollectionRecord {
 		this.description = description;
 	}
 
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
 	public String getCreator() {
 		return creator;
 	}
@@ -258,12 +258,12 @@ public class CollectionRecord {
 		this.type = type;
 	}
 
-	public String getRights() {
-		return rights;
+	public String getItemRights() {
+		return itemRights;
 	}
 
-	public void setRights(String rights) {
-		this.rights = rights;
+	public void setItemRights(String itemRights) {
+		this.itemRights = itemRights;
 	}
 
 	@JsonIgnore
@@ -308,11 +308,11 @@ public class CollectionRecord {
 		return tags;
 	}
 
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
 
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 

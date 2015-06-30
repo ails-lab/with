@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import org.elasticsearch.action.search.SearchResponse;
 
 import play.Logger;
+import elastic.Elastic;
 import elastic.ElasticSearcher;
 import espace.core.CommonQuery;
 import espace.core.ISpaceSource;
@@ -46,7 +47,7 @@ public class ElasticSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		ElasticSearcher searcher = new ElasticSearcher();
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_within);
 		String term = q.getQuery();
 		SearchResponse resp = searcher.search(term);
 		searcher.closeClient();

@@ -38,6 +38,7 @@ POST     /exhibition/create                     controllers.ExhibitionController
 GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
+GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
 GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)
 POST	 /collection/:id 						controllers.CollectionController.editCollection(id)
@@ -72,6 +73,7 @@ GET		/user/listNames			                controllers.UserManager.listNames(prefix:
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
+GET     /user/findByUsernameOrEmail				controllers.UserManager.findByUsernameOrEmail(emailOrUsername: String, collectionId ?= null)
 GET		/user/:id/photo			                controllers.UserManager.getUserPhoto(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)

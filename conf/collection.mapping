@@ -1,0 +1,48 @@
+{
+  "collection": {
+    "dynamic_templates": [
+    {
+        "template_1": {
+          "match": "itemCount",
+          "mapping": {
+            "type": "integer"
+          }
+        }
+      },
+      {
+        "template_2": {
+          "match": "itemCount_all",
+          "mapping": {
+            "type": "integer"
+          }
+        }
+      },
+      {
+        "template_3": {
+          "match": "rights",
+          "mapping": {
+            "type": "nested"
+          }
+        }
+      },
+      {
+        "template_4": {
+          "match": "*_all",
+          "mapping": {
+            "type": "string",
+            "index": "not_analyzed"
+          }
+        }
+      },
+      {
+        "template_5": {
+          "match": "^(?!.*_all$).*",
+          "mapping": {
+            "type": "string",
+            "index": "analyzed"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -153,6 +153,7 @@ public class DPLASpaceSource extends ISpaceSource {
 				it.rights = Utils.readLangAttr(item.path("sourceResource"),
 						"rights", false);
 				it.externalId = it.url.original.get(0);
+
 				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 			}

@@ -37,6 +37,7 @@ import utils.AccessManager.Action;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticUpdater;
 
 public class RightsController extends Controller {
 	public static final ALogger log = Logger.of(CollectionController.class);
@@ -55,7 +56,7 @@ public class RightsController extends Controller {
 	 * @param userId
 	 *            the Id of the user
 	 * @return OK or Error with JSON detailing the problem
-	 * 
+	 *
 	 */
 	public static Result setRights(String colId, String right, String username,
 			String email, String userId) {
@@ -96,6 +97,11 @@ public class RightsController extends Controller {
 			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
+
+		//update collection rights in index
+		ElasticUpdater updater = new ElasticUpdater(collection);
+		updater.updateCollectionRights();
+
 		return ok();
 	}
 

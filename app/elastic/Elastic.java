@@ -62,10 +62,15 @@ public class Elastic {
 	private static TransportClient transportClient;
 	private static BulkProcessor bulkProcessor;
 
-	public static String cluster = getConf().getString("elasticsearch.cluster");
-	public static String index   = getConf().getString("elasticsearch.index.name");
-	public static String type    = getConf().getString("elasticsearch.index.type");
-	public static String mapping = getConf().getString("elasticsearch.index.mapping");
+	public static String cluster 		    = getConf().getString("elasticsearch.cluster");
+	public static String index   		    = getConf().getString("elasticsearch.index.name");
+	public static String mapping_collection = getConf().getString("elasticsearch.index.mapping.collection");
+	public static String type_collection    = getConf().getString("elasticsearch.index.type.collection");
+	public static String mapping_within     = getConf().getString("elasticsearch.index.mapping.within");
+	public static String type_within        = getConf().getString("elasticsearch.index.type.within");
+	public static String mapping_general    = getConf().getString("elasticsearch.index.mapping.general");
+	public static String type_general       = getConf().getString("elasticsearch.index.type.general");
+
 
 	private final static String host = getConf().getString("elasticsearch.host");
 	private final static int    port = getConf().getInt("elasticsearch.port");
@@ -165,21 +170,28 @@ public class Elastic {
 		return bulkProcessor;
 	}
 
+	//have to check conditions on mapping Map whether a mapping exists or not
+	//have to be checked to the local computer
 	private static boolean hasMapping() {
 		GetMappingsResponse mapResp = null;
 		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> mappings = null;
 		try {
-			mapResp = Elastic.getTransportClient().admin().indices().getMappings(new GetMappingsRequest().indices(Elastic.index)).get();
+			mapResp = Elastic.getTransportClient().admin().indices()
+					.getMappings(new GetMappingsRequest().indices(Elastic.index)).get();
 			mappings = mapResp.getMappings();
 		} catch(ElasticsearchException ese) {
 			log.error("Client or error on mappings", ese);
 		} catch (InterruptedException e) {
 			log.error("Client or error on mappings", e);
 		} catch (ExecutionException e) {
-			log.error("Client or error on mappings", e);
+			log.error("Indice does not exist");
+			return false;
 		}
 
-		if( (mappings!=null) && mappings.containsKey(Elastic.index))
+		if( (mappings!=null) && (mappings.containsKey(index))
+				&& (mappings.get(index).containsKey(type_general)
+					|| mappings.get(index).containsKey(type_within)
+					|| mappings.get(index).containsKey(type_collection)) )
 			return true;
 		return false;
 
@@ -188,13 +200,19 @@ public class Elastic {
 	public static CreateIndexResponse putMapping() {
 		if(!hasMapping()) {
 			//getNodeClient().admin().indices().prepareDelete("with-mapping").execute().actionGet();
-			JsonNode mapping = null;
+			JsonNode general_mapping = null;
+			JsonNode within_mapping = null;
+			JsonNode collection_mapping = null;
 			CreateIndexRequestBuilder cireqb = null;
 			CreateIndexResponse ciresp = null;
 			try {
-				mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+Elastic.mapping))));
+				general_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_general))));
+				within_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_within))));
+				collection_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_collection))));
 				cireqb = Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index);
-				cireqb.addMapping(Elastic.type, mapping.toString());
+				cireqb.addMapping(type_general, general_mapping.toString());
+				cireqb.addMapping(type_within, within_mapping.toString());
+				cireqb.addMapping(type_collection, collection_mapping.toString());
 				ciresp = cireqb.execute().actionGet();
 			} catch(ElasticsearchException ese) {
 				log.error("Cannot put mapping!", ese);
@@ -206,12 +224,12 @@ public class Elastic {
 		}
 		return null;
 	}
-	
+
 	public static void reindex() {
 		// hopefully delete index and reput it in place
 		getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
 		putMapping();
-		
+
 		Callback<Collection> callback = new Callback<Collection>() {
 		@Override
 			public void invoke(Collection c ) throws Throwable {
@@ -225,6 +243,6 @@ public class Elastic {
 			log.error( "ReIndexing problem", e );
 		}
 	}
-	
+
 }
 

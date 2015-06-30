@@ -34,9 +34,11 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Media;
 import model.User;
 import model.User.Access;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -56,7 +58,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
+import elastic.ElasticUpdater;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
@@ -141,6 +145,10 @@ public class CollectionController extends Controller {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
 			}
+
+			//delete collection from index
+			ElasticEraser eraser = new ElasticEraser(c);
+			eraser.deleteCollection();
 			result.put("message",
 					"Collection deleted succesfully from database");
 			return ok(result);
@@ -179,10 +187,10 @@ public class CollectionController extends Controller {
 				userIds);
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
-		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
+		ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
 		Collection newVersion;
 		try {
-			newVersion = updater.readValue(json);
+			newVersion = updator.readValue(json);
 
 			newVersion.setLastModified(new Date());
 
@@ -207,6 +215,11 @@ public class CollectionController extends Controller {
 				result.put("message", "Cannot save collection to database!");
 				return internalServerError(result);
 			}
+
+			// update collection index
+			ElasticUpdater updater = new ElasticUpdater(newVersion);
+			updater.updateCollectionMetadata();
+
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
 			c.put("access", maxAccess.toString());
 			User user = DB.getUserDAO().getById(newVersion.getOwnerId(),
@@ -247,7 +260,7 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
-		newCollection.setOwnerId(new ObjectId(userId));
+		//newCollection.setOwnerId(new ObjectId(userId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -263,10 +276,16 @@ public class CollectionController extends Controller {
 					"Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}
+
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
+
+		// index new collection
+		ElasticIndexer indexer = new ElasticIndexer(newCollection);
+		indexer.indexCollectionMetadata();
+
 		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
@@ -278,7 +297,7 @@ public class CollectionController extends Controller {
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
 	}
-
+	 
 	/**
 	 * list accessible collections
 	 */
@@ -384,6 +403,32 @@ public class CollectionController extends Controller {
 		}
 		return ok(result);
 	}
+	
+	public static Result listUsersWithRights(String collectionId) {
+		ArrayNode result = Json.newObject().arrayNode();
+		Collection collection = DB.getCollectionDAO()
+				.getById(new ObjectId(collectionId));
+		for (ObjectId userId: collection.getRights().keySet()) {
+			User user = DB.getUserDAO().getById(userId, null);
+			if (user != null) {
+				ObjectNode userJSON = Json.newObject();
+				userJSON.put("username", user.getUsername());
+				userJSON.put("firstName", user.getFirstName());
+				userJSON.put("lastName", user.getLastName());
+				String image = UserManager.getImageBase64(user);
+				Access accessRights= collection.getRights().get(userId);
+				((ObjectNode) userJSON).put("accessRights", accessRights.toString());
+				if (image != null) {
+					((ObjectNode) userJSON).put("image", image);
+				}
+				result.add(userJSON);
+			}
+			else {
+				return internalServerError("User with id " + userId + " cannot be retrieved from db");
+			}
+		}
+		return ok(result);	
+	 }
 
 	public static Result listShared(String filterByUser, String filterByUserId,
 			String filterByEmail, int offset, int count) {
@@ -516,6 +561,10 @@ public class CollectionController extends Controller {
 			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
+			if(c.getIsPublic())
+				record.setIsPublic(true);
+			else
+				record.setIsPublic(false);
 
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
@@ -554,6 +603,8 @@ public class CollectionController extends Controller {
 					record.getContent().put(contentType, contentMetadata);
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
+
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
 			} else {
@@ -576,8 +627,12 @@ public class CollectionController extends Controller {
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
-		} else
+		} else {
+			//update itemCount
+			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
+		}
 	}
 
 	private static Status addRecordToFirstEntries(CollectionRecord record,
@@ -602,8 +657,12 @@ public class CollectionController extends Controller {
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
-		} else
+		} else {
+			//update itemCount
+			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
+		}
 	}
 
 	private static void addContentToRecord(ObjectId recordId, String source,
@@ -621,6 +680,8 @@ public class CollectionController extends Controller {
 							data.getJsonContent());
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
+
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
 				return true;
@@ -677,6 +738,10 @@ public class CollectionController extends Controller {
 		collection.setLastModified(new Date());
 		collection.itemCountDec();
 		DB.getCollectionDAO().makePermanent(collection);
+
+		// decrement collection itemCount
+		ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+		itemCountUpdater.decItemCount();
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(
 				new ObjectId(recordId));
 		int position = 0;
@@ -688,6 +753,12 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
+
+		//delete record and merged_record from index
+		ElasticEraser eraser = new ElasticEraser(record);
+		eraser.deleteRecord();
+		eraser.deleteRecordEntryFromMerged();
+
 		if (collection.isExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(
 					new ObjectId(collectionId), position);
@@ -778,11 +849,15 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-		ObjectId userId = new ObjectId(userIds.get(0));
-		ObjectId fav = DB.getCollectionDAO()
-				.getByOwnerAndTitle(userId, "_favorites").getDbId();
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByCollection(fav);
+		List<CollectionRecord> records = null;
+		if( userIds.size() > 0 ) {
+			ObjectId userId = new ObjectId(userIds.get(0));
+			ObjectId fav = DB.getCollectionDAO()
+						 .getByOwnerAndTitle(userId, "_favorites").getDbId();
+			records = DB.getCollectionRecordDAO()
+					 .getByCollection(fav);
+		}
+
 		if (records == null) {
 			result.put("error", "Cannot retrieve records from database");
 			return internalServerError(result);
