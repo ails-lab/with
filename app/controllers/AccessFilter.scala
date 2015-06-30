@@ -176,7 +176,7 @@ object FilterUtils {
       .get(Session.COOKIE_NAME).map(_.value).map(Session.decode)
   }
   
-  def withAjaxScript:Result = {
+  def withAjaxScript =  Action {
     val apikey = DB.getApiKeyDAO.getByName("WITH")
     if( apikey != null ) {
       val script = """
