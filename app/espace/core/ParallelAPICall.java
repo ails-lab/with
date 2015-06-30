@@ -42,6 +42,16 @@ public class ParallelAPICall {
 			 });
 		return p;
 	}
+	
+	public static <I, U, R> Promise<R> createPromise(final Function<I, R> methodQuery,
+			final I input) {
+		Promise<R> p = Promise.promise(new Function0<R>() {
+				public R apply() throws Throwable {
+					return methodQuery.apply(input);
+				}
+			 });
+		return p;
+	}
 
 	/**
 	 * @param responseCollectionMethod	method that combines the API results and returns them as a List<R>
