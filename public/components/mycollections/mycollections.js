@@ -455,6 +455,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$("#myModal").removeClass("modal-info");
 			})
 	    }
+	    $('#bottomBar').fadeIn(500);
 	    
 
 	}

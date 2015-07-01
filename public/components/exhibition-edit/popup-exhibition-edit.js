@@ -7,17 +7,19 @@ function ItemEditViewModel(params) {
           self.title = ko.observable('');
           self.placeholder = ko.observable('');
           self.popUpMode = '';
+          self.modeIsVideo = ko.observable(false);
           self.videoUrl = ko.observable('');
           self.thumbnailUrl = ko.observable('');
           self.videoAdded = ko.observable(false);
           self.textAdded = ko.observable(false);
+          self.textInput = ko.observable('');
           self.primaryButtonTitle = ko.observable('check');
-          self.cancelButtonTitle = ko.observable('cancel');
+          self.cancelButtonTitle  = ko.observable('cancel');
           self.exhibitionItem = {};
           
           editItem = function(exhibitionItem, editMode) {
           
-            console.log(exhibitionItem);
+            self.modeIsVideo(false);
             self.exhibitionItem = exhibitionItem;
             self.setUpPopUp(exhibitionItem, editMode);
             $('#myModal').modal('show');
@@ -25,9 +27,14 @@ function ItemEditViewModel(params) {
 
           self.setUpPopUp = function(exhibitionItem, popUpMode) {
                 
+            console.log(popUpMode); 
             self.popUpMode = popUpMode;
+            console.log('mode is video : ' + self.popUpMode === 'PopUpVideoMode');
             if (self.popUpMode === 'PopUpVideoMode') {
              
+                self.modeIsVideo(true);
+                self.videoUrl(exhibitionItem.videoUrl());
+                self.title('Add a youtube video');
                 self.title('Add a youtube video');
                 self.placeholder('Enter youtube video url'); 
                 if ( self.videoAdded() ) {
@@ -39,13 +46,24 @@ function ItemEditViewModel(params) {
                 else {
                     
                     self.cancelButtonTitle('cancel');
-                    self.primaryButtonTitle ('check');
+                    self.primaryButtonTitle ('embed');
                 } 
             }
             else {
                 
-                self.title('Add some text');
-                self.placeholder('enter your description');    
+                self.videoAdded(false);
+                self.title('Add text');
+                self.placeholder('');
+                self.textInput(exhibitionItem.additionalText());
+                self.primaryButtonTitle ('save');
+                if ( self.exhibitionItem.containsText()) {
+                
+                    self.cancelButtonTitle('delete');
+                }
+                else {
+                    
+                    self.cancelButtonTitle('cancel');
+                }
             }
           }
           
@@ -66,8 +84,12 @@ function ItemEditViewModel(params) {
           };
           
           //right button actions
-          self.checkPopUpVideoMode = function () {
+          self.embedPopUpVideoMode = function () {
             
+            if (self.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/) === null) {
+                
+                return;
+            }
             self.videoAdded(true);
             var youtube_video_id = self.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();
             var thumbnailPath = '//img.youtube.com/vi/'+youtube_video_id+'/0.jpg';
@@ -78,20 +100,42 @@ function ItemEditViewModel(params) {
           }
           self.savePopUpVideoMode = function () {
             
-           $('#myModal').modal('hide');
+           self.exhibitionItem.videoUrl(self.videoUrl());
+           self.exhibitionItem.containsVideo(true);
+            $('#myModal').modal('hide');
           }
           //left button actions
           self.cancelPopUpVideoMode = function () {
             
-             
              $('#myModal').modal('hide');
           }
           self.deletePopUpVideoMode = function () {
-            
-             self.videoUrl('');
-             self.videoAdded(false);
+           
+             self.exhibitionItem.videoUrl('');
+             self.exhibitionItem.containsVideo(false); 
              $('#myModal').modal('hide');
-          }          
+          }
+          
+          
+          self.savePopUpTextMode = function () {
+            
+           self.exhibitionItem.additionalText(self.textInput());
+           self.exhibitionItem.containsText(true);
+           $('#myModal').modal('hide');
+          }
+          //left button actions
+          self.cancelPopUpTextMode = function () {
+            
+             $('#myModal').modal('hide');
+          }
+          self.deletePopUpTextMode = function () {
+           
+             self.exhibitionItem.additionalText('');
+             self.exhibitionItem.containsText(false); 
+             $('#myModal').modal('hide');
+          }
+          
+          
   }
 
   return { viewModel: ItemEditViewModel, template: template };

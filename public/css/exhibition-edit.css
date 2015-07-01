@@ -68,6 +68,7 @@ exhibition {
 .VideoText {
     
     display:inline-block;
+    position: relative;
     vertical-align:top;
     overflow-y: auto;
     width: 150px;
@@ -81,12 +82,23 @@ exhibition {
     border-style: solid;
 }
 
+.VideoText:after {
+	content: ' ';
+	height: 0;
+	position: absolute;
+	width: 0;
+	border: 10px solid transparent;
+	border-top-color: #333;
+        top: 100%;
+	left: 10px;
+        z-index:100000;
+}
 
 .Text {
     
     white-space: pre-wrap;
+    padding-top: 10px;
 }
-
 
 .VideoImage {
     
@@ -192,6 +204,27 @@ exhibition {
     color: white;
 }
 
+.EditIcons {
+   
+   color: white; 
+}
+
+.EditOptions {
+    
+    display: none;
+    position: absolute;
+    top: 100%;
+    left:-2px;/* because of the border inclusion*/
+    right:-2px;
+    height: 40px;
+    background-color:#999999;
+    cursor: pointer;   
+}
+
+.boxItem:hover .EditOptions {
+    display: block;
+}
+
 #loadingIcon {
     
     position: absolute;
@@ -225,10 +258,6 @@ exhibition {
    height:20px;
    display: none;
    z-index:2;
-}
-
-.boxItem:hover .EditButton {
-    display: block;
 }
 
 .boxItem:hover .XButtonImage {

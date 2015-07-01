@@ -13,7 +13,7 @@ function MyCollection(collectionData) {
 		this.lastModified = ko.observable(collectionData.lastModified);
 		if (collectionData.category != null)
 			this.category = ko.observable(collectionData.category);
-		this.firstEntries = collectionData.firstEntries;
+		this.firstEntries = collectionData.firstEntries;		
 	}
 
 
@@ -258,12 +258,18 @@ var ExhibitionEditModel = function(params) {
     }
     self.removeItem = function(elem) {   $(elem).fadeOut(500);}
     
-    self.showPopUp = function(data){
+    self.showPopUpVideo = function(data){
     	
 	console.log('show popup');
 	editItem(data, 'PopUpVideoMode');
-	}	
+    }	
 
+    self.showPopUpText= function(data){
+    	
+	console.log('show popup');
+	editItem(data, 'PopUpTextMode');
+    }	
+    
     //custom binding
     var _draggedItem;
     var _bIsMoveOperation = false;
@@ -348,6 +354,11 @@ var ExhibitionEditModel = function(params) {
                         var indexNewItem =  ko.utils.unwrapObservable(valueAccessor().index);
                         //clone it
                         var newItem = JSON.parse(JSON.stringify(_draggedItem));
+			newItem.additionalText = ko.observable('');
+			newItem.containsText  = ko.observable(false);//add the observables here
+			newItem.containsVideo = ko.observable(false);
+			newItem.videoUrl = ko.observable('');
+			
                         var arrayCollection = self.collectionItemsArray;
                         //dont do anything if it is moved to its direct left or right dashed box
                         if (_bIsMoveOperation) {
