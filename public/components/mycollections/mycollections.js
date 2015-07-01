@@ -80,13 +80,20 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        }
 		    }
 		};
+		var usersMapping = {
+				'dbId': {
+					key: function(data) {
+			            return ko.utils.unwrapObservable(data.username);
+			        }
+				}
+		};
 		//TODO: Load more myCollections with scrolling
 		self.myCollections = ko.mapping.fromJS([], mapping);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
         self.isPublicToEdit = ko.observableArray([]);
         self.apiUrl = ko.observable("");
-        self.rightsToShare = ko.observableArray([]);
+        self.usersToShare = ko.mapping.fromJS([], {});
         self.myUsername = ko.observable(app.currentUser.username());
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
@@ -199,7 +206,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				contentType    : "application/json",
 				url         : "/collection/"+collection.dbId()+"/listUsers",
 				success		: function(result) {
-					self.rightsToShare(result);
+					//self.usersToShare(result);
+					ko.mapping.fromJS(result, self.usersMapping, self.usersToShare);
 					app.showPopup("share-collection");
 				}
 			});
@@ -213,13 +221,47 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				url         : "/user/findByUsernameOrEmail",
 				data: "emailOrUsername="+username+"&collectionId="+collId,
 				success		: function(result) {
-					var index = arrayFirstIndexOf(self.rightsToShare(), function(item) {
-						   return item.username === username;
+					alert(result);
+					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+						   return item.username() === username;
 					});
 					if (index < 0)
-						self.rightsToShare.push(result);
+						self.usersToShare.push(ko.mapping.fromJS(result));
 				}
 			});
+		}
+		
+		self.shareCollection = function(clickedRights) {
+			var currentRights = this.accessRights();
+			var username = this.username();
+			var collId = self.myCollections()[self.index()].dbId();
+			var newRights = currentRights;
+			if (currentRights != clickedRights) {
+				if (!(clickedRights == 'READ' && (currentRights == 'WRITE' || currentRights == 'OWN')))
+					newRights = clickedRights;
+				else
+					newRights = "NONE";
+			}
+			else if (currentRights == clickedRights) {
+					//revoke clickedRights (i.e. new rights are NONE or READ)
+				if (clickedRights == 'READ') 
+					newRights = 'NONE';
+				else 
+					newRights = 'READ';
+			}
+			if (newRights != currentRights) {
+				$.ajax({
+					"url": "/rights/"+collId+"/"+newRights+"?username="+username,
+					"method": "GET",
+					"contentType": "application/json",
+					success: function(result) {
+						var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+							   return item.username() === username;
+						});
+						self.usersToShare()[index].accessRights(newRights);
+					}
+				});	
+			}
 		}
 
 		self.openEditCollectionPopup = function(collection, event) {

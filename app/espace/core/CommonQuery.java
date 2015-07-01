@@ -87,7 +87,7 @@ public class CommonQuery {
 		this.searchTerm = query;
 	}
 
-	
+
 
 	@Override
 	public String toString() {

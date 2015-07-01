@@ -125,7 +125,8 @@ public class SearchController extends Controller {
 				if(	session().containsKey("effectiveUserIds")) {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get(
 							"effectiveUserIds"));
-					q.setUser(userIds.get(0));
+					if(!userIds.isEmpty())
+						q.setUser(userIds.get(0));
 				}
 				long start = System.currentTimeMillis();
 				Iterable<Promise<SourceResponse>> promises = callSources(q);

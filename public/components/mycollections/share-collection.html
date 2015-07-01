@@ -19,8 +19,8 @@
 				    </div>
 				</div>
 				<h5>Users with access to the collection</h5>
-				<!-- ko foreach: ko.contextFor(mycollections).$data.rightsToShare() -->
-				<!-- ko if: username != ko.contextFor(mycollections).$data.myUsername() -->
+				<!-- ko foreach: ko.contextFor(mycollections).$data.usersToShare() -->
+				<!-- ko if: username() != ko.contextFor(mycollections).$data.myUsername() -->
 				<div class="row">
 				 <div class="col-xs-12 col-sm-12 col-md-12 coll-footer" >
 				 <!-- ko if: $data.image -->
@@ -29,13 +29,16 @@
 				 <!-- ko else -->
 					<img src="images/user.png" class="img-circle img-thumbnail" id="profile-image"/>
 				 <!-- /ko -->
-				 <span  data-bind="text: username" style="padding-left:20px"></span>
-				 <span class="glyphicon glyphicon-eye-open" title="Read" id="read-icon"
-				 	data-bind="click: ko.contextFor(mycollections).$data.closePopup, style: {color: accessRights=='READ' ? 'blue' : 'grey'}"
+				 <span  data-bind="text: username()" style="padding-left:20px"></span>
+				 <span class="glyphicon glyphicon-eye-open" title="Read"
+				 	data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'READ'), style: {color: accessRights()!='NONE'? 'blue' : 'grey'}"
 				 	aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>	 
-				 <span class="glyphicon glyphicon-user" title="Collaborate" id="own-icon"
-				 	data-bind="click: ko.contextFor(mycollections).$data.closePopup, style: {color: (accessRights=='OWN' ||  accessRights=='WRITE') ? 'blue' : 'grey'}" 
+				 <span class="glyphicon glyphicon-user" title="Collaborate"
+				 	data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'WRITE'), style: {color: (accessRights()=='OWN' ||  accessRights()=='WRITE') ? 'blue' : 'grey'}" 
 				 	aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>
+				 <span class="glyphicon glyphicon-user" title="Collaborate"
+				 	data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'WRITE'), style: {color: (accessRights()=='OWN' ||  accessRights()=='WRITE') ? 'blue' : 'grey'}" 
+				 	aria-hidden="true" style="margin-left:-7px;cursor:pointer"></span>
 				 </div>				
 				 </div>
 				<!-- /ko -->
