@@ -43,7 +43,7 @@ import org.elasticsearch.search.sort.SortOrder;
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
 
-	private String name;
+	private final String name;
 	private String type;
 
 	private final Client client = null;
@@ -74,7 +74,7 @@ public class ElasticSearcher {
 		public void setCount(int count) {
 			this.count = count;
 		}
-		
+
 		public void setUser(String user) {
 			this.user = user;
 		}
@@ -144,9 +144,9 @@ public class ElasticSearcher {
 
 	public SearchResponse search(String terms, SearchOptions options){
 		if(terms == null) terms = "";
-		
+
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		
+
 		if(type.equals(Elastic.type_general)) {
 			/*
 			List<String> list = new ArrayList<String>();
@@ -156,24 +156,24 @@ public class ElasticSearcher {
 			//implementation with query_string query
 			QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
 			str.defaultOperator(Operator.OR);
-				
+
 			bool.must(str);
 		} else if(type.equals(Elastic.type_collection)) {
-			
+
 			MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
-			
+
 			BoolQueryBuilder user = QueryBuilders.boolQuery();
 			MatchQueryBuilder user_match = QueryBuilders.matchQuery("rights.user", options.user);
 			user.must(user_match);
 			//MatchQueryBuilder access_match = QueryBuilders.matchQuery("rights.access", "");
 			//user.must(access_match);
 			NestedQueryBuilder nested = QueryBuilders.nestedQuery("rights", user);
-			
+
 			bool.must(match_all);
 			bool.must(nested);
 		} else {
 		}
-		
+
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
 	}

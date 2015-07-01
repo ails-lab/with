@@ -47,6 +47,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
+import arq.update;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -186,6 +187,7 @@ public class CollectionController extends Controller {
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
+		boolean oldIsPublic = oldVersion.getIsPublic();
 		Collection newVersion;
 		try {
 			newVersion = updator.readValue(json);
@@ -208,15 +210,23 @@ public class CollectionController extends Controller {
 						"Title already exists! Please specify another title.");
 				return internalServerError(result);
 			}
+
+			// update collection on mongo
 			if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
 				log.error("Cannot save collection to database!");
 				result.put("message", "Cannot save collection to database!");
 				return internalServerError(result);
 			}
 
-			// update collection index
+			// update collection index and mongo records
 			ElasticUpdater updater = new ElasticUpdater(newVersion);
 			updater.updateCollectionMetadata();
+			if (oldIsPublic != newVersion.getIsPublic()) {
+				DB.getCollectionRecordDAO().setSpecificRecordField(
+						newVersion.getDbId(), "isPublic",
+						String.valueOf(newVersion.getIsPublic()));
+				updater.updateVisibility();
+			}
 
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
 			c.put("access", maxAccess.toString());
@@ -415,10 +425,9 @@ public class CollectionController extends Controller {
 				userJSON.put("lastName", user.getLastName());
 				String image = UserManager.getImageBase64(user);
 				Access accessRights = collection.getRights().get(userId);
-				((ObjectNode) userJSON).put("accessRights",
-						accessRights.toString());
+				userJSON.put("accessRights", accessRights.toString());
 				if (image != null) {
-					((ObjectNode) userJSON).put("image", image);
+					userJSON.put("image", image);
 				}
 				result.add(userJSON);
 			} else {

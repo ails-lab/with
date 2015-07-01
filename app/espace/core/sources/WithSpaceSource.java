@@ -73,12 +73,22 @@ public class WithSpaceSource extends ISpaceSource {
 
 		}
 
+		//search merged_record type
 		searcher.setType(Elastic.type_general);
 		elasticoptions.setFilterType("OR");
+		//which collections are available
 		elasticoptions.addFilter("collections", "no_collections_found");
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}
+		//which source are available
+		if(q.mintSource)
+			elasticoptions.addFilter("source", "mint");
+		if(q.uploadedByUser)
+			elasticoptions.addFilter("source", "uploadedByUser");
+		if(!q.mintSource && !q.uploadedByUser)
+			elasticoptions.addFilter("source", "no sources selected");
+
 		SearchResponse resp = searcher.search(term, elasticoptions);
 		searcher.closeClient();
 		return new SourceResponse(resp, getSourceName(), count);

@@ -269,6 +269,93 @@ public class ElasticUpdater {
 
 
 	/*
+	 * Update isPublic field
+	 */
+	public void updateVisibility() {
+
+		XContentBuilder doc = null;
+		try {
+			doc = jsonBuilder().startObject();
+			doc.field("isPublic", collection.getIsPublic());
+			doc.field("isPublic_all", collection.getIsPublic());
+			doc.endObject();
+		} catch(IOException io) {
+			log.error("Cannot create document to update!", io);
+		}
+
+		List<CollectionRecord> records = DB.getCollectionRecordDAO()
+				.getByCollection(collection.getDbId());
+
+		if( records.size() == 0 ) {
+			log.debug("No records within the collection to update!");
+		} else if( records.size() == 1 ) {
+					Elastic.getTransportClient().prepareUpdate(
+							Elastic.index,
+							Elastic.type_within,
+							records.get(0).getDbId().toString())
+						.setDoc(doc)
+						.get();
+					Elastic.getTransportClient().prepareUpdate(
+							Elastic.index,
+							Elastic.type_general,
+							records.get(0).getExternalId())
+						.setDoc(doc)
+						.get();
+		} else {
+
+				for(int i = 0; i<records.size(); i++) {
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							Elastic.type_within,
+							records.get(i).getDbId().toString())
+						.doc(doc));
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							Elastic.type_general,
+							records.get(i).getExternalId())
+						.doc(doc));
+				}
+				Elastic.getBulkProcessor().close();
+		}
+	}
+
+
+	/*
+	 * Increment itemCount on collection type
+	 */
+	public void incLikes() {
+		try {
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type_collection,
+						collection.getDbId().toString())
+				.setScript("ctx._source.likes++;"
+						 + "ctx._source.likes_all++", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection likes!", e);
+			}
+	}
+
+	/*
+	 * Decrement itemCount on collection type
+	 */
+	public void decLikes() {
+		try {
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type_collection,
+						collection.getDbId().toString())
+				.setScript("ctx._source.likes--;"
+						 + "ctx._source.likes_all--", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection likes!", e);
+			}
+	}
+
+
+	/*
 	 * Bulk updates. Probably not going to be used
 	 */
 	private void updateCollection() throws Exception {
