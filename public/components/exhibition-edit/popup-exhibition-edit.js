@@ -9,18 +9,19 @@ function ItemEditViewModel(params) {
           self.popUpMode = '';
           self.modeIsVideo = ko.observable(false);
           self.videoUrl = ko.observable('');
+          self.videoIsSet = ko.observable(false);
           self.thumbnailUrl = ko.observable('');
-          self.videoAdded = ko.observable(false);
-          self.textAdded = ko.observable(false);
           self.textInput = ko.observable('');
           self.primaryButtonTitle = ko.observable('check');
           self.cancelButtonTitle  = ko.observable('cancel');
           self.exhibitionItem = {};
+          self.exhibitionItemIsSet = ko.observable(false);
           
           editItem = function(exhibitionItem, editMode) {
           
-            self.modeIsVideo(false);
             self.exhibitionItem = exhibitionItem;
+            self.exhibitionItemIsSet(true);
+            self.videoIsSet(false);
             self.setUpPopUp(exhibitionItem, editMode);
             $('#myModal').modal('show');
           };
@@ -37,11 +38,12 @@ function ItemEditViewModel(params) {
                 self.title('Add a youtube video');
                 self.title('Add a youtube video');
                 self.placeholder('Enter youtube video url'); 
-                if ( self.videoAdded() ) {
+                if ( self.exhibitionItem.containsVideo() ) {
                 
+                    self.videoIsSet(true);
                     self.cancelButtonTitle('delete');
                     self.primaryButtonTitle ('save');
-                    //self.videoUrl(exhibitionItem.videoUrl);
+                    //self.videoUrl(exhibitionItem().videoUrl);
                 }
                 else {
                     
@@ -51,7 +53,7 @@ function ItemEditViewModel(params) {
             }
             else {
                 
-                self.videoAdded(false);
+                self.modeIsVideo(false);
                 self.title('Add text');
                 self.placeholder('');
                 self.textInput(exhibitionItem.additionalText());
@@ -90,7 +92,7 @@ function ItemEditViewModel(params) {
                 
                 return;
             }
-            self.videoAdded(true);
+            self.videoIsSet(true);
             var youtube_video_id = self.videoUrl().match(/youtube\.com.*(\?v=|\/embed\/)(.{11})/).pop();
             var thumbnailPath = '//img.youtube.com/vi/'+youtube_video_id+'/0.jpg';
             var embeddedVideoPath = 'https://www.youtube.com/embed/'+youtube_video_id;
@@ -100,8 +102,8 @@ function ItemEditViewModel(params) {
           }
           self.savePopUpVideoMode = function () {
             
-           self.exhibitionItem.videoUrl(self.videoUrl());
            self.exhibitionItem.containsVideo(true);
+           self.exhibitionItem.videoUrl(self.videoUrl());
             $('#myModal').modal('hide');
           }
           //left button actions
@@ -115,7 +117,6 @@ function ItemEditViewModel(params) {
              self.exhibitionItem.containsVideo(false); 
              $('#myModal').modal('hide');
           }
-          
           
           self.savePopUpTextMode = function () {
             
@@ -133,9 +134,7 @@ function ItemEditViewModel(params) {
              self.exhibitionItem.additionalText('');
              self.exhibitionItem.containsText(false); 
              $('#myModal').modal('hide');
-          }
-          
-          
+          }  
   }
 
   return { viewModel: ItemEditViewModel, template: template };

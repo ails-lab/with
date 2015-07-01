@@ -23,7 +23,6 @@ function createExhibition() {
 			url         : "/exhibition/create",
 			success     : function() {
 				
-				console.log('created sucessfully exhibition')
 			}
 			});
 	};
@@ -34,7 +33,6 @@ function getExhibition(id) {
 			url         : "/collection/" + id,
 			success     : function() {
 				
-				console.log('retreived sucessfully exhibition');
 			}
 			});
 	};	
@@ -53,14 +51,13 @@ function updateExhibition(exhibition ) {
 			contentType: "application/json",
 			success     : function() {
 				
-				console.log('updated sucessfully exhibition');
 			}
 			});
 	};
 	
 function saveItemToExhibition (record, position, exhibitionId) {
 	
-		 console.log('index :' + position + 'record : '+ record);
+		 console.log('save item to index :' + position + 'record : '+ record);
 		  var jsondata=JSON.stringify({
 			
 				source: record.source,
@@ -72,7 +69,6 @@ function saveItemToExhibition (record, position, exhibitionId) {
 				position: position
 				
 			});
-		  console.log('\n\n' + jsondata + '\n\n');
 		  return $.ajax({
 			  
 				"url": "/collection/"+ exhibitionId +"/addRecord",
@@ -96,14 +92,12 @@ function saveItemToExhibition (record, position, exhibitionId) {
 
 function deleteItemFromExhibition (exhibitionId, recordId) {
 	
-		  console.log('exhbitionId : ' + exhibitionId, 'recordId : ' + recordId);
 		  $.ajax({
 			  
 				"url": "/collection/"+ exhibitionId +"/removeRecord" + "?recId=" + recordId,
 				"method": "delete",
 				"success": function(data) {
 					
-					console.log('item successfully deleted');
 				},
 				"error":function(result) {
 					
@@ -162,7 +156,6 @@ var ExhibitionEditModel = function(params) {
 	var promiseCreateExhibtion = createExhibition();
 	    $.when(promiseCreateExhibtion).done(function(data) {
 	
-		console.log('this is the created exhibition data' + JSON.stringify(data));
 		ko.mapping.fromJS(data, mappingExhibition, self);
 		self.title('Add a Title');
 		self.description('Add a Description');
@@ -178,6 +171,13 @@ var ExhibitionEditModel = function(params) {
 		
 		ko.mapping.fromJS(data, mappingExhibition, self);
 		self.loadingInitialItemsCount = self.firstEntries.length;
+		self.firstEntries.map( function(record) { //fix for now till service gets implemented
+						
+			record.additionalText = ko.observable('');
+			record.containsText  = ko.observable(false);//add the observables here
+			record.containsVideo = ko.observable(false);
+			record.videoUrl = ko.observable('');			
+		});
 		self.collectionItemsArray(self.firstEntries);
 		self.loadingExhibitionItems = true; 
 	});
@@ -243,15 +243,18 @@ var ExhibitionEditModel = function(params) {
 						var promiseSaveItem = saveItemToExhibition(record, index, self.dbId());
 						$.when(promiseSaveItem).done(function(data) {
 			
-						       console.log('this is the created exhibition data' + JSON.stringify(data));
-						       console.log('newDBId' + data.dbId);
+							//now delete not to affect server order
+						       if (_bIsMoveOperation) {
+						       
+						           deleteItemFromExhibition(self.dbId(), record.dbId);
+						       }
+			
 						       //update the dbid
 						       record.dbId = data.dbId;
 						       $(elem).find('#loadingIcon').fadeOut();
 					       })
 						.fail(function(data){
 						
-						  console.log('request failed');
 						  $(elem).find('#loadingIcon').fadeOut();
 					       });
 					}
@@ -260,13 +263,11 @@ var ExhibitionEditModel = function(params) {
     
     self.showPopUpVideo = function(data){
     	
-	console.log('show popup');
 	editItem(data, 'PopUpVideoMode');
     }	
 
     self.showPopUpText= function(data){
     	
-	console.log('show popup');
 	editItem(data, 'PopUpTextMode');
     }	
     
@@ -282,14 +283,11 @@ var ExhibitionEditModel = function(params) {
                     
                     $('#outer-bottom').css({"overflow":'visible'});
                     $('.bottom-box').removeClass("box-Hover");
-                    console.log('dragging');
                     _draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
                     _bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
-                    console.log('isMoving ' + _bIsMoveOperation); 
                     ui.helper.css({"z-index":500});
                     if (_bIsMoveOperation) {
 			
-			console.log('initial width' +  $(this).find('.itemImage').css('width'));
                         if (ui.helper.width() > 150 ) {
                         
                             var newAspectHeight = 150/ ui.helper.width() *  ui.helper.height();
@@ -372,10 +370,8 @@ var ExhibitionEditModel = function(params) {
                         dropElement.find('#droppable-Children').css({display:"none"});
 			
 			arrayCollection.splice(indexNewItem,0,newItem);		
-			console.log('is move operation '+ _bIsMoveOperation);
                         if (_bIsMoveOperation) {
                             arrayCollection.remove(_draggedItem);
-			    deleteItemFromExhibition(self.dbId(), _draggedItem.dbId);
                         }
                         _draggedItem = undefined;
                     }

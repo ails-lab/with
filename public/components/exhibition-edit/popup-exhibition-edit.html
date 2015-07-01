@@ -9,18 +9,20 @@
       </div>
       <div class="modal-body">
 	    
+        <!--  ko if: exhibitionItemIsSet -->    
         <div class="embed-responsive embed-responsive-16by9">
-	<!--  ko if: modeIsVideo--> 
-	<input type="url" class="form-control" data-bind="textInput: videoUrl, attr: { placeholder: placeholder}">
-	<!-- /ko -->
-	<!--  ko ifnot: modeIsVideo--> 
-	<textarea class="form-control" rows="5" id="comment " data-bind="textInput: textInput, attr: { placeholder: placeholder}"></textarea>    
-	<!-- /ko -->    
-         <div class='separator'> </div>   
-        <!--  ko if: videoAdded-->
-	    <iframe class="embed-responsive-item" width="560" height="315" frameborder="0" allowfullscreen data-bind="attr:{src: videoUrl}"}"></iframe>
-	<!-- /ko -->
+	    <!--  ko if: modeIsVideo--> 
+	    <input type="url" class="form-control" data-bind="textInput: videoUrl, attr: { placeholder: placeholder}">
+	    <!-- /ko -->
+	    <!--  ko ifnot: modeIsVideo--> 
+	    <textarea class="form-control" rows="5" id="comment " data-bind="textInput: textInput, attr: { placeholder: placeholder}"></textarea>    
+	    <!-- /ko -->    
+	     <div class='separator'> </div>   
+	    <!--  ko if: videoIsSet() && modeIsVideo()-->
+		<iframe class="embed-responsive-item" width="560" height="315" frameborder="0" allowfullscreen data-bind="attr:{src: videoUrl}"}"></iframe>
+	    <!-- /ko -->
 	</div>
+      <!-- /ko -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal" data-bind="click: leftButtonTapped, text: cancelButtonTitle">Close</button>
