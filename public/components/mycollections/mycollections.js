@@ -94,6 +94,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.isPublicToEdit = ko.observableArray([]);
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
+        self.editedUsersToShare = ko.mapping.fromJS([], {});
         self.myUsername = ko.observable(app.currentUser.username());
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
@@ -221,7 +222,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				url         : "/user/findByUsernameOrEmail",
 				data: "emailOrUsername="+username+"&collectionId="+collId,
 				success		: function(result) {
-					alert(result);
 					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 						   return item.username() === username;
 					});
@@ -234,7 +234,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.shareCollection = function(clickedRights) {
 			var currentRights = this.accessRights();
 			var username = this.username();
-			var collId = self.myCollections()[self.index()].dbId();
 			var newRights = currentRights;
 			if (currentRights != clickedRights) {
 				if (!(clickedRights == 'READ' && (currentRights == 'WRITE' || currentRights == 'OWN')))
@@ -263,7 +262,24 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 			}
 		}
-
+		
+		
+		self.applyRightsChange = function() {
+			$.each(self.editedUsersToShare(), function(i, obj) {
+				var username = self.editedUsersToShare()[i].username();
+				var newRights = self.editedUsersToShare()[i].accessRights();
+				var collId = self.myCollections()[self.index()].dbId();
+				if (username != self.myUsername())
+					$.ajax({
+						"url": "/rights/"+collId+"/"+newRights+"?username="+username,
+						"method": "GET",
+						"contentType": "application/json",
+						success: function(result) {
+						}
+					});
+		    });
+			self.closePopup();
+		}
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
