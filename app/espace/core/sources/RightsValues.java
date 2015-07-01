@@ -28,5 +28,9 @@ public class RightsValues {
 	public static final String Permission = "Permission";
 	//You can use it with pemission
 	
+	public static final String Commercial_and_Modify = "Allowed for Commercial Use and Modify Adapt or Build upon";
 	
+	public static final String Modify = "Allowed to  Modify Adapt or Build upon";
+		
+	public static final String Commercial = "Allowed for Commercial Use";
 }

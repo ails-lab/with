@@ -79,12 +79,26 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		 * TODO check this 
 		 */
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
-		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
-		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
 
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
+		//use for commercial purposes,modify, adapt, or build upon 
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		
+		// public  = commercial and modify
+		
+		
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+		//use for commercial purposes,
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
+		
+		// commercial is use for commercial but not modify
+		//use for modify, adapt, or build upon 		
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
+		
+		//modify is 
+		
+		
 		/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/zero/1.0/");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by/");
