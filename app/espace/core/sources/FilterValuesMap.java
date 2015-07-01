@@ -29,7 +29,7 @@ public class FilterValuesMap {
 	private HashMap<String, List<String>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
-	private HashMap<String, Function<List<String>, Pair<String>>> writters;
+	private HashMap<String, Function<List<String>, List<Pair<String>>>> writters;
 
 	public FilterValuesMap() {
 		super();
@@ -111,16 +111,20 @@ public class FilterValuesMap {
 		if (commonValue != null) {
 			List<Pair<String>> res = new ArrayList<Pair<String>>();
 			List<String> values = translateToSpecific(filterID, commonValue);
-			Function<List<String>, Pair<String>> w = writters.get(filterID);
+			Function<List<String>, List<Pair<String>>> w = writters.get(filterID);
 			if (w != null)
-				res.add(w.apply(values));
+				res.addAll(w.apply(values));
 			return res;
 		}
 		return null;
 	}
 
-	public void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
+	public void addDefaultWriter(String filterId, Function<List<String>, List<Pair<String>>> function) {
 		writters.put(filterId, function);
+	}
+
+	public Boolean containsFilter(String filterID) {
+		return writters.containsKey(filterID);
 	}
 
 }

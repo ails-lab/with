@@ -17,11 +17,14 @@
 package espace.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
 import org.json.JSONObject;
+
+import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -85,8 +88,20 @@ public abstract class ISpaceSource {
 			type.addValue(t, count);
 
 	}
+	
+	public boolean checkFilters(CommonQuery q) {
+		if (q.filters == null || q.filters.size() == 0)
+			return true;
+		else{
+			return ListUtils.allof(q.filters,(CommonFilter f)->{return vmap.containsFilter(f.filterID);} );
+		}
+	}
 
 	protected void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
+		vmap.addDefaultWriter(filterId, (List<String> x)->{return Arrays.asList(function.apply(x));});
+	}
+	
+	protected void addDefaultComplexWriter(String filterId, Function<List<String>, List<Pair<String>>> function) {
 		vmap.addDefaultWriter(filterId, function);
 	}
 

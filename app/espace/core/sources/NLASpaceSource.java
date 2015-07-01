@@ -62,13 +62,14 @@ public class NLASpaceSource extends ISpaceSource {
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		
 		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter, "%3A%22" + 
+				return new Pair<String>(parameter,  
 						Utils.getORList(ListUtils.transform(t, 
-								function)) + "%22");
+								function),false));
 			}
 		};
 	}
@@ -85,7 +86,7 @@ public class NLASpaceSource extends ISpaceSource {
 						.parseInt(q.pageSize)));
 		builder.addSearchParam("encoding", "json");
 		builder.addSearchParam("reclevel", "full");
-		builder.addSearchParam("facet", "format");
+		builder.addSearchParam("facet", "format,year");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -109,7 +110,9 @@ public class NLASpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -201,6 +204,9 @@ public class NLASpaceSource extends ISpaceSource {
 							case "format":
 								countValue(type, label, count);
 								break;
+							case "year":
+								countValue(year, label, count);
+								break;
 							default:
 								break;
 							}
@@ -210,10 +216,11 @@ public class NLASpaceSource extends ISpaceSource {
 					
 				}
 			}
-
+		
 			res.items = a;
 			res.filtersLogic = new ArrayList<>();
 			res.filtersLogic.add(type);
+			res.filtersLogic.add(year);
 			
 		
 			
@@ -221,7 +228,7 @@ public class NLASpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}}
 
 		return res;
 	}

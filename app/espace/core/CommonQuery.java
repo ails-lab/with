@@ -57,6 +57,7 @@ public class CommonQuery {
 	}
 
 	public String page = "1";
+	public String facetsMode = FacetsModes.DEFAULT;
 	public String pageSize = "20";
 	public String searchTerm;
 	public String termToExclude;

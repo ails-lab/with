@@ -36,6 +36,7 @@ import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
+import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
@@ -59,7 +60,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.DATAPROVIDER_ID, qfwriter("DATA_PROVIDER"));
 		addDefaultWriter(CommonFilters.COUNTRY_ID, qfwriter("COUNTRY"));
 
-		addDefaultWriter(CommonFilters.YEAR_ID, qfwriter("YEAR"));
+		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 
 		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("proxy_dc_creator"));
 		
@@ -88,6 +89,20 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
+	
+	private Function<List<String>, Pair<String>> qfwriterYEAR() {
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				String val = t.get(0);
+				if (t.size()>1){
+					val = "%5B"+val + "%20TO%20"+t.get(1)+"%5D";
+				}
+				return new Pair<String>("qf", "YEAR%3A" +val);
+			}
+		};
+	}
+
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
@@ -96,11 +111,21 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
-		builder.addSearchParam("profile", "rich+facets");
-//		builder.addSearchParam("facet", "proxy_dc_creator,proxy_dc_contributor,DEFAULT");
-		builder.addSearchParam("facet", "proxy_dc_creator,DEFAULT");
-//		builder.addSearchParam("f.proxy_dc_creator.facet.limit", "10");
-		// builder.addSearchParam("facet", "proxy_dc_creator");
+		builder.addSearchParam("profile", "rich%20facets");
+		String facets = "DEFAULT";
+		if (q.facetsMode!=null){
+			switch (q.facetsMode) {
+			case FacetsModes.SOME:
+				facets = "proxy_dc_creator,"+facets;
+				break;
+			case FacetsModes.ALL:
+				facets = "proxy_dc_creator,proxy_dc_contributor,"+facets;
+				break;
+			default:
+				break;
+			}
+		}
+		builder.addSearchParam("facet", facets);
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -171,6 +196,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 //		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -258,7 +284,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}}
 		// protected void countValue(CommonFilterResponse type, String t) {
 		// type.addValue(vmap.translateToCommon(type.filterID, t));
 		// }

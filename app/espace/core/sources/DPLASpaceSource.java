@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -67,6 +68,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, fwriter("sourceResource.contributor"));
 		addDefaultWriter(CommonFilters.PROVIDER_ID, fwriter("provider.name"));
 		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
+		addDefaultComplexWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image");
@@ -76,6 +78,36 @@ public class DPLASpaceSource extends ISpaceSource {
 		// TODO: what to do with physical objects?
 	}
 	
+	private Function<List<String>, List<Pair<String>>> qfwriterYEAR() {
+		Function<String, String> function =
+				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		return new Function<List<String>, List<Pair<String>>>() {
+			@Override
+			public List<Pair<String>> apply(List<String> t) {
+				String start="", end="";
+				if (t.size()==1){
+					start = t.get(0)+"-01-01";
+					end = next(t.get(0))+"-01-01";
+				} else
+				if (t.size()>1){
+					start = t.get(0)+"-01-01";
+					end = next(t.get(1))+"-01-01";
+				}
+				
+				return Arrays.asList(
+						new Pair<String>("sourceResource.date.after", start),
+						new Pair<String>("sourceResource.date.before", end)
+						);
+				
+			}
+
+			private String next(String string) {
+				return ""+(Integer.parseInt(string)+1);
+			}
+		};
+	}
+
+
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		Function<String, String> function =
 				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
@@ -113,7 +145,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
-
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -181,7 +213,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		}
 		return res;
 	}
 
