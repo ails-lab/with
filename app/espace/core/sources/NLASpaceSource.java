@@ -79,7 +79,7 @@ public class NLASpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("http://api.trove.nla.gov.au/result");
 		builder.addSearchParam("key", Key);
 		builder.addSearchParam("zone", "picture,book,music,article");
-		builder.addSearchParam("q", q.searchTerm);
+		builder.addQuery("q", q.searchTerm);
 		// TODO term to exclude?
 		builder.addSearchParam("n", q.pageSize);
 		builder.addSearchParam("s", ""+((Integer.parseInt(q.page) - 1) * Integer

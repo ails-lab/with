@@ -94,7 +94,7 @@ private Function<List<String>, Pair<String>> qfwriterYEAR() {
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://api.digitalnz.org/v3/records.json");
 		builder.addSearchParam("api_key", Key);
-		builder.addSearchParam("text", q.searchTerm);
+		builder.addQuery("text", q.searchTerm);
 		builder.addSearchParam("page",q.page);
 		builder.addSearchParam("per_page",q.pageSize);
 		builder.addSearchParam("facets","year,creator,category,rights");

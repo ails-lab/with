@@ -107,7 +107,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", europeanaKey);
-		builder.addSearchParam("query", q.searchTerm);
+		builder.addQuery("query", q.searchTerm);
 		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
