@@ -20,6 +20,8 @@ import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.CommonFilter;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -55,6 +57,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -88,10 +91,12 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}}
 
 		return res;
 	}
+
+	
 
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();

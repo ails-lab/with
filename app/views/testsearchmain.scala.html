@@ -151,7 +151,7 @@ function gothere(q){
 				"data": json1,
 
 				"success": function( data, textStatus, jQxhr ){
-				document.clear();
+            document.documentElement.innerHTML='';
             document.write(data);
         },
         "error": function( jqXhr, textStatus, errorThrown ){

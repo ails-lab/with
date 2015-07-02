@@ -25,6 +25,7 @@ import espace.core.Utils.LongPair;
 public class QueryBuilder {
 
 	private String baseUrl;
+	private Pair<String> query;
 	private List<Pair<String>> parameters;
 
 	
@@ -41,8 +42,7 @@ public class QueryBuilder {
 	public String getHttp() {
 		String res = getBaseUrl();
 		Iterator<Pair<String>> it = parameters.iterator();
-		if (it.hasNext())
-		res+=("?"+it.next().getHttp());
+		res+=("?"+query.getHttp());
 		for (; it.hasNext();) {
 			res += "&" + it.next().getHttp();
 		}
@@ -72,5 +72,20 @@ public class QueryBuilder {
 		parameters.add(searchParam);
 		return this;
 	}
+	
+	public QueryBuilder addQuery(Pair<String> q) {
+		query = q;
+		return this;
+	}
+	
+	public QueryBuilder addQuery(String name, String value) {
+		return addQuery(new Pair<String>(name, value));
+	}
+	
+	public QueryBuilder addToQuery(String q) {
+		query.second+=q;
+		return this;
+	}
+	
 
 }

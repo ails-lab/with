@@ -135,11 +135,20 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.YEAR_NAME;
 		return r;
 	}
-
+	/**
+	 * TODO check this added for availability face of NLA 
+	 */
 	public static CommonFilterLogic contributorFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.CONTRIBUTOR_ID;
 		r.data.filterName = CommonFilters.CONTRIBUTOR_NAME;
+		return r;
+	}
+	
+	public static CommonFilterLogic availabilityFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.AVAILABILITY_ID;
+		r.data.filterName = CommonFilters.AVAILABILITY_NAME;
 		return r;
 	}
 }

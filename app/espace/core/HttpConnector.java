@@ -39,6 +39,7 @@ public class HttpConnector {
 			
 			Promise<JsonNode> jsonPromise = WS.url(url1).get().map(new Function<WSResponse, JsonNode>() {
 				public JsonNode apply(WSResponse response) {
+//					System.out.println(response.getBody());
 					JsonNode json = response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
 					Logger.debug("waited "+ftime+" sec for: " + url);
@@ -48,6 +49,7 @@ public class HttpConnector {
 			return jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
 			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
 
 			throw e;
 		}

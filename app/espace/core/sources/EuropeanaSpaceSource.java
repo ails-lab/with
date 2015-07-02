@@ -36,6 +36,7 @@ import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.EuropeanaQuery;
+import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
@@ -59,7 +60,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.DATAPROVIDER_ID, qfwriter("DATA_PROVIDER"));
 		addDefaultWriter(CommonFilters.COUNTRY_ID, qfwriter("COUNTRY"));
 
-		addDefaultWriter(CommonFilters.YEAR_ID, qfwriter("YEAR"));
+		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 
 		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("proxy_dc_creator"));
 		
@@ -74,6 +75,43 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
+		
+		/**
+		 * TODO check this 
+		 */
+		
+
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
+		//use for commercial purposes,modify, adapt, or build upon 
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		
+		// public  = commercial and modify
+		
+		
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+		//use for commercial purposes,
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
+		
+		// commercial is use for commercial but not modify
+		//use for modify, adapt, or build upon 		
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "^(?!.*(screative)).*$");
+		
+		/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/zero/1.0/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by-sa/");*/
+		
+	
+		/*addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-sa/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-nd/");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nd/");		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
+*/
+		//pemission is not *creative*  
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
@@ -88,19 +126,43 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
+	
+	private Function<List<String>, Pair<String>> qfwriterYEAR() {
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				String val = t.get(0);
+				if (t.size()>1){
+					val = "%5B"+val + "%20TO%20"+t.get(1)+"%5D";
+				}
+				return new Pair<String>("qf", "YEAR%3A" +val);
+			}
+		};
+	}
+
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", europeanaKey);
-		builder.addSearchParam("query", q.searchTerm);
+		builder.addQuery("query", q.searchTerm);
 		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
-		builder.addSearchParam("profile", "rich+facets");
-//		builder.addSearchParam("facet", "proxy_dc_creator,proxy_dc_contributor,DEFAULT");
-		builder.addSearchParam("facet", "proxy_dc_creator,DEFAULT");
-//		builder.addSearchParam("f.proxy_dc_creator.facet.limit", "10");
-		// builder.addSearchParam("facet", "proxy_dc_creator");
+		builder.addSearchParam("profile", "rich%20facets");
+		String facets = "DEFAULT";
+		if (q.facetsMode!=null){
+			switch (q.facetsMode) {
+			case FacetsModes.SOME:
+				facets = "proxy_dc_creator,"+facets;
+				break;
+			case FacetsModes.ALL:
+				facets = "proxy_dc_creator,proxy_dc_contributor,"+facets;
+				break;
+			default:
+				break;
+			}
+		}
+		builder.addSearchParam("facet", facets);
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -171,6 +233,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 //		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
@@ -258,7 +321,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}}
 		// protected void countValue(CommonFilterResponse type, String t) {
 		// type.addValue(vmap.translateToCommon(type.filterID, t));
 		// }

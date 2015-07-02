@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import espace.core.QueryModifier;
 import espace.core.Utils.Pair;
 
 public class FilterValuesMap {
@@ -29,7 +30,7 @@ public class FilterValuesMap {
 	private HashMap<String, List<String>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
-	private HashMap<String, Function<List<String>, Pair<String>>> writters;
+	private HashMap<String, Function<List<String>, QueryModifier>> writters;
 
 	public FilterValuesMap() {
 		super();
@@ -107,11 +108,11 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public List<Pair<String>> translateToQuery(String filterID, List<String> commonValue) {
+	public List<QueryModifier> translateToQuery(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
-			List<Pair<String>> res = new ArrayList<Pair<String>>();
+			List<QueryModifier> res = new ArrayList<>();
 			List<String> values = translateToSpecific(filterID, commonValue);
-			Function<List<String>, Pair<String>> w = writters.get(filterID);
+			Function<List<String>, QueryModifier> w = writters.get(filterID);
 			if (w != null)
 				res.add(w.apply(values));
 			return res;
@@ -119,8 +120,12 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
+	public void addDefaultWriter(String filterId, Function<List<String>, QueryModifier> function) {
 		writters.put(filterId, function);
+	}
+
+	public Boolean containsFilter(String filterID) {
+		return writters.containsKey(filterID);
 	}
 
 }
