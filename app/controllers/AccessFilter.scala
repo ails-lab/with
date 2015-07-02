@@ -33,6 +33,7 @@ import org.bson.types.ObjectId
 import scala.collection.JavaConversions._
 import play.api.http.HeaderNames._
 import scala.collection.mutable.ArrayBuffer
+import java.nio.charset.StandardCharsets
 
 /**
  * The AccessFilter should
@@ -68,6 +69,32 @@ class AccessFilter extends Filter {
     implicit val timeout = new Timeout(1000.milliseconds)
     val access = new ApiKeyManager.Access
 
+    def fromAuth( headers: Headers ): Option[String] = {
+      ( headers.get( "X-auth1"), headers.get( "X-auth2"), DB.getConf().getString("with.origin") ) match {
+        case (Some( time ), Some(auth), ref ) if ( ref != null ) => {
+            var timeI = time.toLong
+            // reconstruct the apikey, check time plausibility (later)
+            val timeV = ArrayBuffer[Byte]()
+            for( i <- 0 to 3 ) {
+              val timeByte = ( timeI & 255 ).byteValue()
+              timeV.add(timeByte)
+              timeI = timeI >> 8;
+            }
+            val apiVec = ArrayBuffer[Byte]()
+            val authBytes = auth.grouped(2).map( Integer.parseInt( _, 16 ).byteValue()).toVector
+            val refBytes = ref.getBytes(StandardCharsets.UTF_8)
+            for( i <- 0 until authBytes.length) {
+              apiVec.add(( timeV(i%4)^refBytes(i%refBytes.length)^authBytes(i)).byteValue())
+            }
+            // and now back to chars
+            val res = new String(apiVec.toArray, "UTF8" )
+            log.debug( res )
+            Some( res )
+        }
+        case _ => None
+      }
+    }
+    
     if (log.isDebugEnabled) {
       log.debug("PATH: " + rh.path)
       if (!rh.session.isEmpty) {
@@ -84,7 +111,12 @@ class AccessFilter extends Filter {
           case None => { 
             rh.headers.get("X-apikey") match {
               case Some(key) => access.apikey = key
-              case None =>  access.ip = rh.remoteAddress 
+              case None => {
+                fromAuth( rh.headers ) match {
+                  case Some(apikey) => access.apikey = apikey
+                  case None => access.ip = rh.remoteAddress 
+                }
+              }  
             }
           }
         }
@@ -179,13 +211,52 @@ object FilterUtils {
   def withAjaxScript =  Action {
     val apikey = DB.getApiKeyDAO.getByName("WITH")
     if( apikey != null ) {
+      val arr = apikey.getKeyString().getBytes("UTF8").map( _ -1 )
+      
       val script = """
+function sign( aut, ref) {
+  function ta( n ) {
+    var r = new Array();
+    for( var i=0; i< 4; i++ ) {
+      r.push( n%256);
+      n = n >> 8;
+    }
+    return r;
+  }
+  function reHex( n ) {
+    var res = "";
+    for( var i=0; i<n.length; i++ ) {
+           if( n[i] >15 ) { 
+             res += n[i].toString( 16 ).toUpperCase();
+           } else {
+             res += "0"+ n[i].toString( 16 ).toUpperCase();
+           }
+    }
+    return res;
+  }
+  console.log( ref );
+
+  var a2 = ta( aut );
+  var r = new Array();
+  var n = %s;
+  for( var i=0; i<n.length; i++ ) {
+     var ch = (n[i]+1)^(a2[i%4])^(ref.charCodeAt(i%ref.length)&255);
+     r.push( ch );
+  }
+  return reHex( r );
+} 
+
 $.ajaxSetup({
-    beforeSend: function(xhr) {
-        xhr.setRequestHeader('X-apikey', '%s');
+    beforeSend: function(xhr, obj) {
+        var utc = new Date().valueOf();
+        xhr.setRequestHeader('X-auth1', utc );
+        xhr.setRequestHeader('X-auth2', sign( utc,document.origin));
+        console.log( obj );
     }
 });
-""".replace("%s", apikey.getKeyString() );
+console.log( "Ajax modified" );
+
+""".replace("%s", "[" + arr.mkString( "," ) + "]" )
        play.api.mvc.Results.Ok( script ).as("application/javascript")      
     } else {
              play.api.mvc.Results.Ok( "" ).as("application/javascript")      
