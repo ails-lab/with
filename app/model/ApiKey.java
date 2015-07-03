@@ -108,6 +108,8 @@ public class ApiKey {
 	// api keys are nicely accessed by name, like "WITH" or "Workshop Athens"
 	private String name;
 	
+	// if the origin is set, requests from browsers have to have this origin
+	private String origin;
 	
 	
 	// this will just monitor the pattern
@@ -265,6 +267,14 @@ public class ApiKey {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(String origin) {
+		this.origin = origin;
 	}
 	
 }
