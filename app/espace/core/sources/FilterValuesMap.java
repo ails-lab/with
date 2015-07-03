@@ -81,6 +81,10 @@ public class FilterValuesMap {
 		if (specificValue != null) {
 			String matchexpr = getKey(filterID, specificValue);
 			List<String> v = new ArrayList<>();
+			if (filterID.equals(CommonFilters.RIGHTS_ID)){
+				System.out.println(commonvalues.keySet());
+			}
+			
 			for (String kk : commonvalues.keySet()) {
 				if (filterID.equals(CommonFilters.RIGHTS_ID)){
 					System.out.println("------------------------------------------------");
