@@ -109,6 +109,7 @@ public class ExhibitionController extends Controller {
 					.getExhibitionsByOwner(new ObjectId(userId), offset, count);
 			for (Collection exhibition : exhibitions) {
 				ObjectNode c = (ObjectNode) Json.toJson(exhibition);
+				c.put("access", Access.OWN.toString());
 				result.add(c);
 			}
 			return ok(result);
