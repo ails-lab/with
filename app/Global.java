@@ -59,7 +59,7 @@ public class Global extends GlobalSettings {
 			k.setName("WITH");
 			k.addCall(0, ".*" );
 			k.resetKey();
-			
+			k.setOrigin(DB.getConf().getString("with.origin"));
 			// store it
 			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);			
 		}
