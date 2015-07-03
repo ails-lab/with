@@ -59,9 +59,19 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.YEAR_ID,  qfwriterYEAR());
 		addDefaultWriter(CommonFilters.RIGHTS_ID,  fwriter("and[rights][]"));
 		
+		// TODO: rights_url shows the license in the search
+
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
+		
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "^(?!.*(screative)).*$");
+		
 	}
 	
 private Function<List<String>, Pair<String>> fwriter(String parameter) {
