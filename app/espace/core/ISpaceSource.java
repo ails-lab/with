@@ -17,11 +17,14 @@
 package espace.core;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
 import org.json.JSONObject;
+
+import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -85,9 +88,25 @@ public abstract class ISpaceSource {
 			type.addValue(t, count);
 
 	}
+	
+	public boolean checkFilters(CommonQuery q) {
+		if (q.filters == null || q.filters.size() == 0)
+			return true;
+		else{
+			return ListUtils.allof(q.filters,(CommonFilter f)->{return vmap.containsFilter(f.filterID);} );
+		}
+	}
+	
+	private Function<List<String>, QueryModifier> transformer(Function<List<String>, List<Pair<String>>> old){
+		return (List<String> pars)->{return new ParameterQueryModifier(old.apply(pars));};
+	}
 
 	protected void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
-		vmap.addDefaultWriter(filterId, function);
+		vmap.addDefaultWriter(filterId, transformer((List<String> x)->{return Arrays.asList(function.apply(x));}));
+	}
+	
+	protected void addDefaultComplexWriter(String filterId, Function<List<String>, List<Pair<String>>> function) {
+		vmap.addDefaultWriter(filterId, transformer(function));
 	}
 
 	protected void addMapping(String filterID, String commonValue, String... specificValue) {
@@ -110,7 +129,7 @@ public abstract class ISpaceSource {
 //		return vmap.translateToQuery(filterID, value);
 //	}
 	
-	protected List<Pair<String>> translateToQuery(String filterID, List<String> values) {
+	protected List<QueryModifier> translateToQuery(String filterID, List<String> values) {
 		return vmap.translateToQuery(filterID, values);
 	}
 
@@ -128,8 +147,9 @@ public abstract class ISpaceSource {
 	protected QueryBuilder addfilters(CommonQuery q, QueryBuilder builder) {
 		if (q.filters != null) {
 			for (CommonFilter filter : q.filters) {
-				for (Pair<String> param : translateToQuery(filter.filterID, filter.values)) {
-					builder.add(param);
+				for (QueryModifier param : translateToQuery(filter.filterID, filter.values)) {
+//					builder.add(param);
+					param.modify(builder);
 				}
 			}
 		}

@@ -9,6 +9,7 @@
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
         
+         <meta name="viewport" content="width=device-width, initial-scale=1">
         
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="@routes.Assets.at("javascripts/hello.js")" type="text/javascript"></script>
@@ -147,16 +148,16 @@ function gothere(q){
 				"url": "/api/testsearch",
 				"method": "POST",
 				"contentType": "application/json",
-				"dataType": "json",
 				"data": json1,
 
 				"success": function( data, textStatus, jQxhr ){
-				document.clear();
+            document.documentElement.innerHTML='';
             document.write(data);
         },
         "error": function( jqXhr, textStatus, errorThrown ){
+        alert(errorThrown);
             console.log( errorThrown );
-            //alert("error: " +errorThrown);
+            alert("error: " +errorThrown);
 
         }
         

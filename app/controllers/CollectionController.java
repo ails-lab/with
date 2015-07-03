@@ -34,11 +34,9 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
-import model.Media;
 import model.User;
 import model.User.Access;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -49,6 +47,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
+import arq.update;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -146,7 +145,7 @@ public class CollectionController extends Controller {
 				return badRequest(result);
 			}
 
-			//delete collection from index
+			// delete collection from index
 			ElasticEraser eraser = new ElasticEraser(c);
 			eraser.deleteCollection();
 			result.put("message",
@@ -188,6 +187,7 @@ public class CollectionController extends Controller {
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
 		ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
+		boolean oldIsPublic = oldVersion.getIsPublic();
 		Collection newVersion;
 		try {
 			newVersion = updator.readValue(json);
@@ -210,15 +210,23 @@ public class CollectionController extends Controller {
 						"Title already exists! Please specify another title.");
 				return internalServerError(result);
 			}
+
+			// update collection on mongo
 			if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
 				log.error("Cannot save collection to database!");
 				result.put("message", "Cannot save collection to database!");
 				return internalServerError(result);
 			}
 
-			// update collection index
+			// update collection index and mongo records
 			ElasticUpdater updater = new ElasticUpdater(newVersion);
 			updater.updateCollectionMetadata();
+			if (oldIsPublic != newVersion.getIsPublic()) {
+				DB.getCollectionRecordDAO().setSpecificRecordField(
+						newVersion.getDbId(), "isPublic",
+						String.valueOf(newVersion.getIsPublic()));
+				updater.updateVisibility();
+			}
 
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
 			c.put("access", maxAccess.toString());
@@ -260,7 +268,7 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
-		//newCollection.setOwnerId(new ObjectId(userId));
+		newCollection.setOwnerId(new ObjectId(userId));
 
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
@@ -297,7 +305,7 @@ public class CollectionController extends Controller {
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
 	}
-	 
+
 	/**
 	 * list accessible collections
 	 */
@@ -403,12 +411,12 @@ public class CollectionController extends Controller {
 		}
 		return ok(result);
 	}
-	
+
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
-		Collection collection = DB.getCollectionDAO()
-				.getById(new ObjectId(collectionId));
-		for (ObjectId userId: collection.getRights().keySet()) {
+		Collection collection = DB.getCollectionDAO().getById(
+				new ObjectId(collectionId));
+		for (ObjectId userId : collection.getRights().keySet()) {
 			User user = DB.getUserDAO().getById(userId, null);
 			if (user != null) {
 				ObjectNode userJSON = Json.newObject();
@@ -416,19 +424,19 @@ public class CollectionController extends Controller {
 				userJSON.put("firstName", user.getFirstName());
 				userJSON.put("lastName", user.getLastName());
 				String image = UserManager.getImageBase64(user);
-				Access accessRights= collection.getRights().get(userId);
-				((ObjectNode) userJSON).put("accessRights", accessRights.toString());
+				Access accessRights = collection.getRights().get(userId);
+				userJSON.put("accessRights", accessRights.toString());
 				if (image != null) {
-					((ObjectNode) userJSON).put("image", image);
+					userJSON.put("image", image);
 				}
 				result.add(userJSON);
-			}
-			else {
-				return internalServerError("User with id " + userId + " cannot be retrieved from db");
+			} else {
+				return internalServerError("User with id " + userId
+						+ " cannot be retrieved from db");
 			}
 		}
-		return ok(result);	
-	 }
+		return ok(result);
+	}
 
 	public static Result listShared(String filterByUser, String filterByUserId,
 			String filterByEmail, int offset, int count) {
@@ -561,7 +569,7 @@ public class CollectionController extends Controller {
 			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
-			if(c.getIsPublic())
+			if (c.getIsPublic())
 				record.setIsPublic(true);
 			else
 				record.setIsPublic(false);
@@ -628,7 +636,7 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
 		} else {
-			//update itemCount
+			// update itemCount
 			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
 			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
@@ -658,7 +666,7 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
 		} else {
-			//update itemCount
+			// update itemCount
 			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
 			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
@@ -754,7 +762,7 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 
-		//delete record and merged_record from index
+		// delete record and merged_record from index
 		ElasticEraser eraser = new ElasticEraser(record);
 		eraser.deleteRecord();
 		eraser.deleteRecordEntryFromMerged();
@@ -850,12 +858,11 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		List<CollectionRecord> records = null;
-		if( userIds.size() > 0 ) {
+		if (userIds.size() > 0) {
 			ObjectId userId = new ObjectId(userIds.get(0));
 			ObjectId fav = DB.getCollectionDAO()
-						 .getByOwnerAndTitle(userId, "_favorites").getDbId();
-			records = DB.getCollectionRecordDAO()
-					 .getByCollection(fav);
+					.getByOwnerAndTitle(userId, "_favorites").getDbId();
+			records = DB.getCollectionRecordDAO().getByCollection(fav);
 		}
 
 		if (records == null) {
@@ -867,6 +874,15 @@ public class CollectionController extends Controller {
 			recordsList.add(record.getExternalId());
 		}
 		return ok(recordsList);
+	}
+
+	public static Result getFavoriteCollection() {
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		ObjectId userId = new ObjectId(userIds.get(0));
+		String fav = DB.getCollectionDAO()
+				.getByOwnerAndTitle(userId, "_favorites").getDbId().toString();
+		return getCollection(fav);
 	}
 
 }

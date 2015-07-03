@@ -22,31 +22,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import espace.core.CommonFilters;
+import espace.core.QueryModifier;
 import espace.core.Utils.Pair;
 
 public class FilterValuesMap {
 
 	private HashMap<String, List<String>> specificvalues;
-//	private HashMap<String, List<Pair<String>>> queryTexts;
+	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<String>> commonvalues;
-	private HashMap<String, Function<List<String>, Pair<String>>> writters;
+	private HashMap<String, Function<List<String>, QueryModifier>> writters;
 
 	public FilterValuesMap() {
 		super();
 		specificvalues = new HashMap<String, List<String>>();
 		commonvalues = new HashMap<String, List<String>>();
-//		queryTexts = new HashMap<String, List<Pair<String>>>();
+		// queryTexts = new HashMap<String, List<Pair<String>>>();
 		writters = new HashMap<>();
 	}
 
 	private String getKey(String filterID, String value) {
-		return filterID + "/" + value;
+		return filterID + "-" + value;
 	}
 
 	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key, boolean addNew) {
 		List<T> res;
 		if (!map.containsKey(key)) {
+			// check regular expr;
 			res = new ArrayList<T>();
+			for (String kk : map.keySet()) {
+				if (key.matches(kk)) {
+					res = map.get(kk);
+					addNew = false; // for sure i am not adding a new value
+				}
+			}
+			// not found
 			if (addNew)
 				map.put(key, res);
 		} else {
@@ -64,13 +74,28 @@ public class FilterValuesMap {
 		for (String string : specificValue) {
 			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
 		}
-//		getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
+		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
 
 	public List<String> translateToCommon(String filterID, String specificValue) {
 		if (specificValue != null) {
-			String k = getKey(filterID, specificValue);
-			List<String> v = getOrset(commonvalues, k, false);
+			String matchexpr = getKey(filterID, specificValue);
+			List<String> v = new ArrayList<>();
+			for (String kk : commonvalues.keySet()) {
+				if (filterID.equals(CommonFilters.RIGHTS_ID)){
+					System.out.println("------------------------------------------------");
+					System.out.println(kk+" match? "+specificValue);
+				}
+				if (matchexpr.matches(kk)) {
+					// String k = getKey(filterID, specificValue);
+					List<String> orset = getOrset(commonvalues, kk, false);
+					if (filterID.equals(CommonFilters.RIGHTS_ID)){
+					System.out.println("MATCHED to "+orset);
+					}
+					v.addAll(orset);
+					return v;
+				}
+			}
 			if (v.isEmpty()) {
 				v.add(specificValue);
 			}
@@ -82,7 +107,7 @@ public class FilterValuesMap {
 	public List<String> translateToSpecific(String filterID, String... commonValue) {
 		return translateToSpecific(filterID, Arrays.asList(commonValue));
 	}
-	
+
 	public List<String> translateToSpecific(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
 			ArrayList<String> res = new ArrayList<String>();
@@ -99,11 +124,11 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public List<Pair<String>> translateToQuery(String filterID, List<String> commonValue) {
+	public List<QueryModifier> translateToQuery(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
-			List<Pair<String>> res = new ArrayList<Pair<String>>();
+			List<QueryModifier> res = new ArrayList<>();
 			List<String> values = translateToSpecific(filterID, commonValue);
-			Function<List<String>, Pair<String>> w = writters.get(filterID);
+			Function<List<String>, QueryModifier> w = writters.get(filterID);
 			if (w != null)
 				res.add(w.apply(values));
 			return res;
@@ -111,8 +136,12 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
+	public void addDefaultWriter(String filterId, Function<List<String>, QueryModifier> function) {
 		writters.put(filterId, function);
+	}
+
+	public Boolean containsFilter(String filterID) {
+		return writters.containsKey(filterID);
 	}
 
 }
