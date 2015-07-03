@@ -19,6 +19,7 @@ package db;
 import java.util.List;
 
 import model.CollectionRecord;
+import model.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -78,7 +79,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.field("sourceId").equal(sourceId);
 		return this.find(q).asList();
 	}
-	
+
 	public List<CollectionRecord> getByUniqueId(ObjectId colId, String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId).field("externalId").equal(extId);
@@ -91,20 +92,20 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.field("sourceId").equal(sourceId);
 		return this.find(q).countAll();
 	}
-		
+
 	public List<CollectionRecord> getByUniqueId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
 				.field("externalId").equal(extId);
 		return this.find(q).asList();
 	}
-		
+
 	public long countByUniqueId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
 				//.field("source").equal(source)
 				.field("externalId").equal(extId);
 		return this.find(q).countAll();
 	}
-	
+
 	public int deleteByCollection(ObjectId colId) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId);
@@ -124,6 +125,19 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.equal(colId).field("position").greaterThan(position);
 		UpdateOperations<CollectionRecord> updateOps = this
 				.createUpdateOperations().dec("position");
+		this.update(q, updateOps);
+	}
+
+	/**
+	 * This method is to update the 'public' field on all the records of a collection.
+	 * By default update method is invoked to all documents of a collection.
+	 *
+	 **/
+	public void setSpecificRecordField(ObjectId colId, String fieldName,
+			String value) {
+		Query<CollectionRecord> q = this.createQuery().field("collectionId").equal(colId);
+		UpdateOperations<CollectionRecord> updateOps = this.createUpdateOperations();
+		updateOps.set(fieldName, value);
 		this.update(q, updateOps);
 	}
 

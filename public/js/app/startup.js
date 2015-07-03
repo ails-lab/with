@@ -1,5 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'],
-		function($, ko, router, kom) {
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'], function ($, ko, router, kom) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
@@ -19,7 +18,8 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
-	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
+	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
+	ko.components.register('myfavorites', { require: 'components/myfavorites/myfavorites' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
 
