@@ -286,7 +286,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						break;
 
 					case "RIGHTS":
-						countValue(rights, label, false, count);
+						countValue(rights, label, count);
 						break;
 
 					case "proxy_dc_creator":
