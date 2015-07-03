@@ -506,9 +506,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
         function getItem(record) {
 			var figure='<figure class="masonryitem">';
 			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star active" id="' + record.externalId() + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			} else {
-				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star" id="' + record.externalId() + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			}
 
 			figure += '<a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
