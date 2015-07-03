@@ -69,29 +69,63 @@ class AccessFilter extends Filter {
     implicit val timeout = new Timeout(1000.milliseconds)
     val access = new ApiKeyManager.Access
 
-    def fromAuth( headers: Headers ): Option[String] = {
-      ( headers.get( "X-auth1"), headers.get( "X-auth2"), DB.getConf().getString("with.origin") ) match {
-        case (Some( time ), Some(auth), ref ) if ( ref != null ) => {
+    def findApikey( time:String, auth:String, origin:String, params:String ): String = {
+      log.debug( "Time: "+ time + " Auth:" + auth + " Origin:" + origin + " Params:" + params )
+    	val authBytes = auth.grouped(2).map( Integer.parseInt( _, 16 ).byteValue()).toVector
+      // we either process origin or params
+      val someBytes = if( !origin.isEmpty()) 
+          origin.getBytes(StandardCharsets.UTF_8)
+       else
+         params.getBytes(StandardCharsets.UTF_8)
+         
+      val apiVec = ArrayBuffer[Byte]()
+      val max = if( someBytes.length > authBytes.length) someBytes.length else authBytes.length
+      for( i <- 0 until max ) {
+        if( i < authBytes.length )
+          apiVec.add(( authBytes(i%authBytes.length) ^ someBytes(i%someBytes.length)).byteValue())
+        else {
+          apiVec(i%authBytes.length ) = ( apiVec(i%authBytes.length ) ^  someBytes(i%someBytes.length)).byteValue()
+          log.debug( "Unexpected ")
+        }
+      } 
+      
+      if(! time.isEmpty() ) {
+          // in case there is a timestamp we use this method
             var timeI = time.toLong
-            // reconstruct the apikey, check time plausibility (later)
             val timeV = ArrayBuffer[Byte]()
             for( i <- 0 to 3 ) {
               val timeByte = ( timeI & 255 ).byteValue()
               timeV.add(timeByte)
               timeI = timeI >> 8;
-            }
-            val apiVec = ArrayBuffer[Byte]()
-            val authBytes = auth.grouped(2).map( Integer.parseInt( _, 16 ).byteValue()).toVector
-            val refBytes = ref.getBytes(StandardCharsets.UTF_8)
+            }   
             for( i <- 0 until authBytes.length) {
-              apiVec.add(( timeV(i%4)^refBytes(i%refBytes.length)^authBytes(i)).byteValue())
+              apiVec(i) = (apiVec(i) ^ timeV(i%4)).byteValue()
             }
-            // and now back to chars
-            val res = new String(apiVec.toArray, "UTF8" )
-            log.debug( res )
-            Some( res )
+      } 
+        
+    	new String(apiVec.toArray, "UTF8" )
+    }
+       
+    def fromAuth( headers: Headers ): Option[String] = {
+      // build the origin from referer      
+      val origin = rh.headers.get( "Referer" ).flatMap( ".*://[^/]*".r.findFirstIn(_))
+      // the origin header we should evaluate when we have other webapps using WITH backend
+      //  val origin = rh.headers.get( "Origin" )
+      log.debug( "Origin: " + origin )
+      ( headers.get( "X-auth1"), headers.get( "X-auth2"), origin ) match {
+        case (Some( time ), Some(auth), Some( ref )) => {
+          // check the time is within the same minute ( ignore the hour/ god know what timezone they send )
+          Some( findApikey( time, auth, ref, "" ))
         }
-        case _ => None
+        case _ => { 
+            rh.getQueryString("Xauth2") match {
+              case Some( authParam ) => {
+                val strippedParams = "Xauth2=[0-9A-F]*".r.replaceFirstIn(rh.rawQueryString,"") 
+                Some( findApikey( "", authParam,"", strippedParams ))
+              }
+              case _ => None
+            }
+        }
       }
     }
     
@@ -212,9 +246,24 @@ object FilterUtils {
     val apikey = DB.getApiKeyDAO.getByName("WITH")
     if( apikey != null ) {
       val arr = apikey.getKeyString().getBytes("UTF8").map( _ -1 )
-      
       val script = """
-function sign( aut, ref) {
+function sign(c,f){function e(a){for(var c=[],b=0;4>b;b++)c.push(a%256),a>>=8;return c}for(var d=[],b=%s,g=Math.max(b.length,c.length),a=0;a<g;a++)a<b.length?d[a]=b[a%b.length]+1^c.charCodeAt(a%c.length)&255:d[a%b.length]^=c.charCodeAt(a%c.length)&255;if(void 0!=f)for(b=e(f),a=0;a<d.length;a++)d[a]^=b[a%4];return function(a){for(var c="",b=0;b<a.length;b++)c=15<a[b]?c+a[b].toString(16).toUpperCase():c+("0"+a[b].toString(16).toUpperCase());return c}(d)}
+$.ajaxSetup({beforeSend:function(c,f){var e=(new Date).valueOf();c.setRequestHeader("X-auth1",e);c.setRequestHeader("X-auth2",sign(document.origin,e))}});
+""".replace("%s", "[" + arr.mkString( "," ) + "]" )
+       play.api.mvc.Results.Ok( script ).as("application/javascript")      
+    } else {
+             play.api.mvc.Results.BadRequest( "Bad ApiKey" ).as("application/javascript")      
+    }
+  }
+}
+
+/**
+ -- output of www.jsobfuscate.com
+function sign(e,c){function f(a){for(var c=[],b=0;4>b;b++)c.push(a%256),a>>=8;return c}console.log(c);var d=[],b=%s,g=Math.max(b.length,c.length);console.log(b);console.log(c);for(var a=0;a<g;a++)a<b.length?d[a]=b[a%b.length]+1^c.charCodeAt(a%c.length)&255:d[a%b.length]^=c.charCodeAt(a%c.length)&255;if(void 0!=e)for(b=f(e),a=0;a<d.length;a++)d[a]^=b[a%4];return function(a){for(var c="",b=0;b<a.length;b++)c=15<a[b]?c+a[b].toString(16).toUpperCase():c+("0"+a[b].toString(16).toUpperCase());
+return c}(d)}$.ajaxSetup({beforeSend:function(e,c){var f=(new Date).valueOf();e.setRequestHeader("X-auth1",f);e.setRequestHeader("X-auth2",sign(f,document.origin));console.log(c)}});*/
+
+/**
+function sign( param, time ) {
   function ta( n ) {
     var r = new Array();
     for( var i=0; i< 4; i++ ) {
@@ -234,14 +283,24 @@ function sign( aut, ref) {
     }
     return res;
   }
-  console.log( ref );
 
-  var a2 = ta( aut );
   var r = new Array();
   var n = %s;
-  for( var i=0; i<n.length; i++ ) {
-     var ch = (n[i]+1)^(a2[i%4])^(ref.charCodeAt(i%ref.length)&255);
-     r.push( ch );
+  var max = Math.max( n.length, param.length )
+
+  for( var i=0; i<max; i++ ) {
+    if( i < n.length ) {   
+       r[i] = (n[i%n.length]+1)^(param.charCodeAt(i%param.length)&255);
+    } else {
+      r[i%n.length] = r[i%n.length] ^ (param.charCodeAt(i%param.length)&255)      
+    }
+  }
+
+  if( time != undefined ) {
+    var a2 = ta( time );
+    for( var i=0; i<r.length; i++ ) {
+       r[i] = r[i] ^ (a2[i%4]);
+    } 
   }
   return reHex( r );
 } 
@@ -250,17 +309,7 @@ $.ajaxSetup({
     beforeSend: function(xhr, obj) {
         var utc = new Date().valueOf();
         xhr.setRequestHeader('X-auth1', utc );
-        xhr.setRequestHeader('X-auth2', sign( utc,document.origin));
-        console.log( obj );
+        xhr.setRequestHeader('X-auth2', sign( document.origin, utc ));
     }
 });
-console.log( "Ajax modified" );
-
-""".replace("%s", "[" + arr.mkString( "," ) + "]" )
-       play.api.mvc.Results.Ok( script ).as("application/javascript")      
-    } else {
-             play.api.mvc.Results.Ok( "" ).as("application/javascript")      
-
-    }
-  }
-}
+*/
