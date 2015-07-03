@@ -275,11 +275,12 @@ input[type="search"] { /* reset normalize */
 	/*position: absolute;*/
 	opacity: 0;
 	overflow-y: hidden;
+	overflow-x: hidden;
 }
 
 .scrollable{
 
-	width: 2200px;
+	max-width: 2200px;
     display:table;
     overflow-y: auto;   overflow-x: scroll;
     margin: 0 auto;

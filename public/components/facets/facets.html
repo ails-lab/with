@@ -15,6 +15,7 @@
  
 <ul class="nav nav-tabs">
   <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
+  
   <!-- ko foreach: $parent.filters -->
   <!-- ko if: suggestedValues.length>0 -->
   <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
@@ -49,13 +50,13 @@
       
      </li>
      
-     <li><span>
+     <li>
       <input type="checkbox" value="YouTube" data-bind="checked: $parent.sources, click: listClick"/></span>
      <span>YouTube</span>
      
      </li>
     
-    <li><span>
+    <li>
       <input type="checkbox" value="Mint" data-bind="checked: $parent.sources, click: listClick"/></span>
       <span>Mint</span>
      
@@ -65,9 +66,11 @@
   
    <!-- ko foreach: $parent.filters -->
    <div class="tab-pane fade" data-bind="attr:{id:filterID}">
-  
+    <!-- ko if:(filterID!="year" &&  suggestedValues.length>0) -->
     <ul class="thumbfilters list">
-    <!-- ko if:suggestedValues.length>0 -->
+   
+    
+   
     <!-- ko foreach: suggestedValues -->
    
     <li data-bind="click:function(){$parents[1].listSelect($parents[0].filterID,value);}">
@@ -75,9 +78,25 @@
       
      </li>
      <!-- /ko -->
+      </ul>
+     <!-- /ko -->
+     
+     <!-- ko if:(filterID=="year" &&  suggestedValues.length>0) -->
+     
+        <ul class="list chart">
+         <!-- ko foreach:$parent.yaxis -->
+		    <li data-bind="attr:{'title': $data},click:function(){$parents[1].listSelect($parents[0].filterID,$data);}">
+		    <span class="label" data-bind="text:$parents[1].yaxislabels()[$index()]"></span>
+		    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()] }"></span><span class="number" data-bind="text: $parents[1].numvalues()[$index()]"></span></li>
+		   
+		  <!-- /ko -->  
+		</ul>
      <!-- /ko -->
     
-    </ul>
+   
+    
+    
+   
   </div>
    <!-- /ko -->
   </div>

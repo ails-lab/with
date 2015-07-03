@@ -33,7 +33,7 @@
 .modalfacets{
 /* border: 2px solid #fcfcfc;*/
  
-  width: 370px;
+  width: 470px;
   border: 1px solid #d2d2d2;
   background-clip: padding-box;
   background-color: transparent;
@@ -93,7 +93,8 @@
   background-color: #fff;
   padding: 10px 0px 3px 3px;
   overflow-y: auto;
-  height: 360px;
+  min-height:360px;
+  max-height: 460px;
   border-radius: 4px;
 }
 
@@ -271,3 +272,54 @@ ul.thumbfilters li:hover {
   -webkit-appearance: none;
 
 }
+
+.chart li {
+  display: block;
+  height: 23px;
+  margin-top: 3px;
+  left: 0;
+  position: relative;
+  cursor:pointer;
+}
+
+
+.chart li .label{
+  color:black;
+  float: left;
+   margin-left: -3em;
+}
+
+/*.chart li:hover {
+  display: block;
+  color: white;
+  background-color:black;
+  content: attr(title);
+  position: absolute;
+}
+*/
+
+.chart li:before{
+	content:none;
+}
+
+
+.chart li .number {
+  color: black;
+  font-size: 13px;
+  font-weight: bold;
+  padding-left: 5px;
+  position: absolute;
+  top: -2px;
+  margin-left: 10%;
+}
+
+.chart li .bar {
+  min-width: 0.5%;
+  left: 2.2em;
+  position: absolute;
+  cursor:pointer;
+}
+
+.chart li title{
+	left:-20%;
+	}
