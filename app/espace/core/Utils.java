@@ -47,6 +47,24 @@ public class Utils {
 		return q1;
 	}
 
+	public static String replaceQuotes(String text){
+		String[] temp = text.split("\"");
+		text = "";
+		int b = 1;
+		
+		for(String s:temp){
+			text = text + s;
+			if(b!=temp.length){text=text+"%22";}
+			b++;
+		}
+		
+		//NOTE: THESE WON'T WORK for some reason
+		//url.replace("\"", "\\\"");
+		//String.join("%20", temp);
+		
+		return text;
+	}
+	
 	public static String readAttr(JsonNode json, String string, boolean force) throws Exception {
 		return readAttr(json, string, force, null);
 	}

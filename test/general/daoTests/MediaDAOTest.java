@@ -23,10 +23,14 @@ import java.io.FileInputStream;
 import java.net.URL;
 
 import model.Media;
+import model.Rights;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.junit.Test;
+
+import com.sun.media.jfxmedia.MediaError;
 
 import db.DB;
 
@@ -51,11 +55,15 @@ public class MediaDAOTest {
 		}
 
 		thumb.setData(rawbytes);
-		thumb.setType("IMAGE");
+		thumb.setType(Media.BaseType.IMAGE);
 		thumb.setMimeType("image/jpeg");
 		thumb.setHeight(599);
 		thumb.setWidth(755);
 
+		thumb.getRights().setPublic( true );
+		thumb.getRights().put( new ObjectId() ,Rights.Access.OWN);
+		thumb.getRights().put( new ObjectId() ,Rights.Access.WRITE);
+		
 		DB.getMediaDAO().makePermanent(thumb);
 		//test succesful storage
 		assertThat(thumb.getDbId()).isNotNull()
@@ -67,7 +75,7 @@ public class MediaDAOTest {
 		.overridingErrorMessage("Test media not found after store.");
 
 		//check is gone
-		DB.getMediaDAO().makeTransient(a);
+		// DB.getMediaDAO().makeTransient(a);
 		Media b = DB.getMediaDAO().findById(thumb.getDbId());
 		assertThat( b )
 		.overridingErrorMessage("User not deleted!")
@@ -93,7 +101,7 @@ public class MediaDAOTest {
 
 
 			image.setData(rawbytes);
-			image.setType("IMAGE");
+			image.setType(Media.BaseType.IMAGE);
 			image.setMimeType("image/jpeg");
 			image.setHeight(599);
 			image.setWidth(755);

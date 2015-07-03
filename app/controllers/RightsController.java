@@ -37,6 +37,7 @@ import utils.AccessManager.Action;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticUpdater;
 
 public class RightsController extends Controller {
 	public static final ALogger log = Logger.of(CollectionController.class);
@@ -55,7 +56,7 @@ public class RightsController extends Controller {
 	 * @param userId
 	 *            the Id of the user
 	 * @return OK or Error with JSON detailing the problem
-	 * 
+	 *
 	 */
 	public static Result setRights(String colId, String right, String username,
 			String email, String userId) {
@@ -71,7 +72,7 @@ public class RightsController extends Controller {
 		}
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
-		if (!AccessManager.checkAccess(collection.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.DELETE)) {
 			result.put("error",
 					"Sorry! You do not own this collection so you cannot set rights. "
@@ -90,13 +91,21 @@ public class RightsController extends Controller {
 			result.put("error", "Must specify user to give rights");
 			return badRequest(result);
 		}
-		rightsMap.put(new ObjectId(userId), Access.valueOf(right));
-		collection.getRights().get(0).putAll(rightsMap);
+		if (right == "NONE")
+			collection.getRights().remove(userId);
+		else
+			rightsMap.put(new ObjectId(userId), Access.valueOf(right));
+		collection.getRights().putAll(rightsMap);
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
-		return ok();
+
+		//update collection rights in index
+		ElasticUpdater updater = new ElasticUpdater(collection);
+		//updater.updateCollectionRights();
+		result.put("message", "OK");
+		return ok(result);
 	}
 
 }

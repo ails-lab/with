@@ -17,8 +17,11 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 import utils.ListUtils;
 
@@ -49,7 +52,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
 		builder.addSearchParam("api_key", DPLAKey);
-		builder.addSearchParam("q", q.searchTerm);
+		builder.addQuery("q", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
 		builder.addSearchParam("facets",
@@ -65,7 +68,25 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, fwriter("sourceResource.contributor"));
 		addDefaultWriter(CommonFilters.PROVIDER_ID, fwriter("provider.name"));
 		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
+		addDefaultComplexWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 
+		/**
+		 * TODO check this 
+		 */
+		
+		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("sourceResource.rights"));
+		
+ 
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "^(?!.*(screative)).*$");
+
+
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound");
@@ -74,6 +95,36 @@ public class DPLASpaceSource extends ISpaceSource {
 		// TODO: what to do with physical objects?
 	}
 	
+	private Function<List<String>, List<Pair<String>>> qfwriterYEAR() {
+		Function<String, String> function =
+				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		return new Function<List<String>, List<Pair<String>>>() {
+			@Override
+			public List<Pair<String>> apply(List<String> t) {
+				String start="", end="";
+				if (t.size()==1){
+					start = t.get(0)+"-01-01";
+					end = next(t.get(0))+"-01-01";
+				} else
+				if (t.size()>1){
+					start = t.get(0)+"-01-01";
+					end = next(t.get(1))+"-01-01";
+				}
+				
+				return Arrays.asList(
+						new Pair<String>("sourceResource.date.after", start),
+						new Pair<String>("sourceResource.date.before", end)
+						);
+				
+			}
+
+			private String next(String string) {
+				return ""+(Integer.parseInt(string)+1);
+			}
+		};
+	}
+
+
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		Function<String, String> function =
 				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
@@ -111,7 +162,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
-
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -150,7 +201,9 @@ public class DPLASpaceSource extends ISpaceSource {
 						+ Utils.readAttr(item, "id", false);
 				it.rights = Utils.readLangAttr(item.path("sourceResource"),
 						"rights", false);
+				it.externalId = it.url.original.get(0);
 
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 			}
 			res.items = a;
@@ -177,7 +230,7 @@ public class DPLASpaceSource extends ISpaceSource {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		}
 		return res;
 	}
 

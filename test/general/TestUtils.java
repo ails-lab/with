@@ -37,8 +37,8 @@ public class TestUtils {
 	public static String randomString() {
 		char[] text = new char[50];
 		for (int i = 0; i < 50; i++)
-			text[i] = "abcdefghijklmnopqrstuvwxyz".charAt(r
-					.nextInt(25));
+			text[i] = "a1b2cde3fgh4ijk5lm6no7pq8rs9tu0vwxyz".charAt(r
+					.nextInt(35));
 		return text.toString();
 	}
 

@@ -18,6 +18,7 @@ package espace.core;
 
 import org.w3c.dom.Document;
 
+import espace.core.Utils;
 import play.Logger;
 import play.libs.F.Function;
 import play.libs.F.Promise;
@@ -33,16 +34,22 @@ public class HttpConnector {
 	public static JsonNode getURLContent(String url) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
-
-			Promise<JsonNode> jsonPromise = WS.url(url).get().map(new Function<WSResponse, JsonNode>() {
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<JsonNode> jsonPromise = WS.url(url1).get().map(new Function<WSResponse, JsonNode>() {
 				public JsonNode apply(WSResponse response) {
+//					System.out.println(response.getBody());
 					JsonNode json = response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
 					return json;
 				}
 			});
 			return jsonPromise.get(TIMEOUT_CONNECTION);
 		} catch (Exception e) {
 			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
 
 			throw e;
 		}

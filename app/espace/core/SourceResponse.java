@@ -26,8 +26,12 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 
 import play.libs.Json;
+import utils.ExtendedCollectionRecord;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+
+import elastic.Elastic;
 
 public class SourceResponse {
 
@@ -57,9 +61,26 @@ public class SourceResponse {
 		this.items = items;
 	}
 
-	private CollectionRecord hitToRecord(SearchHit hit) {
+	private ExtendedCollectionRecord hitToRecord(SearchHit hit) {
 		JsonNode json = Json.parse(hit.getSourceAsString());
-		CollectionRecord record = Json.fromJson(json, CollectionRecord.class);
+		ExtendedCollectionRecord record =  Json.fromJson(json, ExtendedCollectionRecord.class);
+		if(hit.type().equals(Elastic.type_general)) {
+			List<String> colIds = new ArrayList<String>();
+			List<String> tags   = new ArrayList<String>();
+			ArrayNode ids = (ArrayNode)json.get("collections");
+			ArrayNode allTags = (ArrayNode)json.get("tags");
+
+			for(JsonNode id: ids)
+				if(!colIds.contains(id.asText()))
+					colIds.add(id.asText());
+			for(JsonNode t: allTags)
+				if(!tags.contains(t.asText()))
+					tags.add(t.asText());
+
+			record.setCollections(colIds);
+			record.setAllTags(tags);
+		}
+
 		return record;
 	}
 
@@ -93,6 +114,7 @@ public class SourceResponse {
 		public MyURL url;
 		public List<String> fullresolution;
 		public List<Lang> rights;
+		public String externalId;
 	}
 
 	public String query;

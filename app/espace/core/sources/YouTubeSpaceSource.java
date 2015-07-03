@@ -19,6 +19,7 @@ package espace.core.sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -86,51 +88,60 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		try {
-			response = HttpConnector.getURLContent(httpQuery);
-			// System.out.println(httpQuery);
-			// System.out.println(response.toString());
-			JsonNode docs = response.path("items");
-			res.totalCount = Utils.readIntAttr(response.path("pageInfo"),
-					"totalResults", true);
-			res.count = docs.size();
-			res.startIndex = 0;
-			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+		
+		if (q.filters==null || q.filters.size()==0 ||
+				(q.filters.size()==1 && 
+				q.filters.get(0).filterID.equals(CommonFilters.TYPE_ID) &&
+				q.filters.get(0).values.contains(TypeValues.VIDEO)
+				)){
+			try {
+				response = HttpConnector.getURLContent(httpQuery);
+				// System.out.println(httpQuery);
+				// System.out.println(response.toString());
+				JsonNode docs = response.path("items");
+				res.totalCount = Utils.readIntAttr(response.path("pageInfo"),
+						"totalResults", true);
+				res.count = docs.size();
+				res.startIndex = 0;
+				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
-			for (JsonNode item : docs) {
-				ItemsResponse it = new ItemsResponse();
-				it.id = Utils.readAttr(item.path("id"), "videoId", true);
-				it.thumb = Utils
-						.readArrayAttr(item.path("snippet").path("thumbnails")
-								.path("default"), "url", false);
-				it.fullresolution = Utils.readArrayAttr(item.path("snippet")
-						.path("thumbnails").path("high"), "url", false);
-				it.title = Utils.readLangAttr(item.path("snippet"), "title",
-						false);
-				it.description = Utils.readLangAttr(item.path("snippet"),
-						"description", false);
-				it.creator = null;// Utils.readLangAttr(item.path("sourceResource"),
-									// "creator", false);
-				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("snippet"),
-						"channelTitle", false);
-				it.url = new MyURL();
-				it.url.fromSourceAPI = "https://www.youtube.com/watch?v="
-						+ it.id;
-				it.url.original = new ArrayList<String>();
-				it.url.original.add(it.url.fromSourceAPI);
-				a.add(it);
+				for (JsonNode item : docs) {
+					ItemsResponse it = new ItemsResponse();
+					it.id = Utils.readAttr(item.path("id"), "videoId", true);
+					it.thumb = Utils
+							.readArrayAttr(item.path("snippet").path("thumbnails")
+									.path("default"), "url", false);
+					it.fullresolution = Utils.readArrayAttr(item.path("snippet")
+							.path("thumbnails").path("high"), "url", false);
+					it.title = Utils.readLangAttr(item.path("snippet"), "title",
+							false);
+					it.description = Utils.readLangAttr(item.path("snippet"),
+							"description", false);
+					it.creator = null;// Utils.readLangAttr(item.path("sourceResource"),
+										// "creator", false);
+					it.year = null;
+					it.dataProvider = Utils.readLangAttr(item.path("snippet"),
+							"channelTitle", false);
+					it.url = new MyURL();
+					it.url.fromSourceAPI = "https://www.youtube.com/watch?v="
+							+ it.id;
+					it.url.original = new ArrayList<String>();
+					it.url.original.add(it.url.fromSourceAPI);
+					it.externalId = it.url.fromSourceAPI;
+					it.externalId = DigestUtils.md5Hex(it.externalId);
+					a.add(it);
+				}
+				res.items = a;
+				// res.facets = response.path("facets");
+
+				savePageDetails(q.searchTerm, q.page, q.pageSize,
+						response.path("nextPageToken").asText());
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			res.items = a;
-			// res.facets = response.path("facets");
-
-			savePageDetails(q.searchTerm, q.page, q.pageSize,
-					response.path("nextPageToken").asText());
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} 
 
 		return res;
 	}

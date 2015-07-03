@@ -52,10 +52,11 @@ import com.google.gson.JsonParser;
 
 import controllers.UserManager;
 import db.DB;
+import elastic.ElasticIndexer;
 
 public class TestCollectionController {
 
-	//@Test
+	@Test
 	public void testGetCollection() {
 
 		User user1 = new User();
@@ -116,7 +117,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	@Test
 	public void testDeleteCollection() {
 
 		User user1 = new User();
@@ -160,7 +161,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	@Test
 	public void testEditCollection() {
 
 		User user = new User();
@@ -205,7 +206,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	@Test
 	public void testCreateCollection() {
 
 		User user = new User();
@@ -301,7 +302,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	@Test
 	public void testListFirstUserCollectionRecords() {
 
 		CollectionRecord record = new CollectionRecord();
@@ -359,7 +360,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	 @Test
 	public void testListCollectionRecords() {
 
 		User user = new User();
@@ -421,7 +422,7 @@ public class TestCollectionController {
 		});
 	}
 
-	// @Test
+	 @Test
 	public void testAddRecordToCollection() {
 
 		User user = new User();
@@ -435,17 +436,18 @@ public class TestCollectionController {
 				+ TestUtils.randomString());
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
-		col.setIsPublic(false);
+		col.setIsPublic(true);
 		col.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col);
+		ElasticIndexer indexer = new ElasticIndexer(col);
+		indexer.indexCollectionMetadata();
 
 		Collection col1 = new Collection();
 		col1.setDescription("Collection from Controller");
-		col1.setTitle("Test_2 collection from Controller "
-				+ TestUtils.randomString());
+		col1.setTitle("ItemCount");
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
-		col1.setIsPublic(false);
+		col1.setIsPublic(true);
 		col1.setOwnerId(user);
 		DB.getCollectionDAO().makePermanent(col1);
 
@@ -462,7 +464,9 @@ public class TestCollectionController {
 				}
 				json = (ObjectNode) Json.parse(recordJson);
 				Result result = route(fakeRequest("POST",
-						"/collection/" + col.getDbId() + "/addRecord")
+						"/collection/" + "558a9e9ce4b06b7b0cbebd02" + "/addRecord")
+						.withSession("effectiveUserIds", "558a9e9ce4b06b7b0cbebd01")
+						.withSession("user", "558a9e9ce4b06b7b0cbebd01")
 						.withJsonBody(json));
 
 				JsonParser parser = new JsonParser();

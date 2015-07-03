@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
 import utils.ListUtils;
@@ -61,13 +62,14 @@ public class NLASpaceSource extends ISpaceSource {
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		
 		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter, "%3A%22" + 
+				return new Pair<String>(parameter,  
 						Utils.getORList(ListUtils.transform(t, 
-								function)) + "%22");
+								function),false));
 			}
 		};
 	}
@@ -77,14 +79,14 @@ public class NLASpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("http://api.trove.nla.gov.au/result");
 		builder.addSearchParam("key", Key);
 		builder.addSearchParam("zone", "picture,book,music,article");
-		builder.addSearchParam("q", q.searchTerm);
+		builder.addQuery("q", q.searchTerm);
 		// TODO term to exclude?
 		builder.addSearchParam("n", q.pageSize);
 		builder.addSearchParam("s", ""+((Integer.parseInt(q.page) - 1) * Integer
 						.parseInt(q.pageSize)));
 		builder.addSearchParam("encoding", "json");
 		builder.addSearchParam("reclevel", "full");
-		builder.addSearchParam("facet", "format");
+		builder.addSearchParam("facet", "format,year");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -108,7 +110,9 @@ public class NLASpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
@@ -170,6 +174,12 @@ public class NLASpaceSource extends ISpaceSource {
 								"value", false);
 						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl",
 								false);
+
+						if (it.url.original != null)
+							it.externalId = it.url.original.get(0);
+						else
+							it.externalId=getSourceName() + "_" + it.id;
+						it.externalId = DigestUtils.md5Hex(it.externalId);
 						it.rights=null;
 
 						a.add(it);
@@ -194,6 +204,9 @@ public class NLASpaceSource extends ISpaceSource {
 							case "format":
 								countValue(type, label, count);
 								break;
+							case "year":
+								countValue(year, label, count);
+								break;
 							default:
 								break;
 							}
@@ -203,10 +216,11 @@ public class NLASpaceSource extends ISpaceSource {
 					
 				}
 			}
-
+		
 			res.items = a;
 			res.filtersLogic = new ArrayList<>();
 			res.filtersLogic.add(type);
+			res.filtersLogic.add(year);
 			
 		
 			
@@ -214,7 +228,7 @@ public class NLASpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}}
 
 		return res;
 	}

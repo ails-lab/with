@@ -22,8 +22,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
+import utils.ListUtils;
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,9 +41,8 @@ import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.SourceResponse.ItemsResponse;
 import espace.core.SourceResponse.MyURL;
-import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.Utils.LongPair;
+import espace.core.Utils;
 
 public class DigitalNZSpaceSource extends ISpaceSource {
 
@@ -53,41 +54,47 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	public DigitalNZSpaceSource() {
 		super();
+		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("and[category][]"));
+		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("and[creator][]"));
+		addDefaultWriter(CommonFilters.YEAR_ID,  qfwriterYEAR());
+		addDefaultWriter(CommonFilters.RIGHTS_ID,  fwriter("and[rights][]"));
 		
-//		addDefaultWriter(CommonFilters.CREATOR_ID, new Function<String, Pair<String>>() {
-//			@Override
-//			public Pair<String> apply(String t) {
-//				return new Pair<String>("and[creator][]",t);
-//			}
-//		});
-//		
-//		addDefaultWriter(CommonFilters.YEAR_ID, new Function<String, Pair<String>>() {
-//			@Override
-//			public Pair<String> apply(String t) {
-//				return new Pair<String>("and[year][]",t);
-//			}
-//		});
-//		
-//		addDefaultWriter(CommonFilters.RIGHTS_ID, new Function<String, Pair<String>>() {
-//			@Override
-//			public Pair<String> apply(String t) {
-//				return new Pair<String>("and[rights][]",t);
-//			}
-//		});
-		
-//		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images",
-//				new Pair<String>("and[category][]","Images"));
-//		// addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Other");
-//		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio",
-//				new Pair<String>("and[category][]","Audio"));
-//		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books",
-//				new Pair<String>("and[category][]","Books"));
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
 	}
+	
+private Function<List<String>, Pair<String>> fwriter(String parameter) {
+		
+		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				return new Pair<String>(parameter,  
+						Utils.getORList(ListUtils.transform(t, 
+								function),false));
+			}
+		};
+	}
+
+private Function<List<String>, Pair<String>> qfwriterYEAR() {
+	return new Function<List<String>, Pair<String>>() {
+		@Override
+		public Pair<String> apply(List<String> t) {
+			String val = t.get(0);
+			if (t.size()>1){
+				val = t.get(1);
+			}
+			return new Pair<String>("i[year][]", "["+t.get(0)+" TO "+val+"]");
+		}
+	};
+}
+
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://api.digitalnz.org/v3/records.json");
 		builder.addSearchParam("api_key", Key);
-		builder.addSearchParam("text", q.searchTerm);
+		builder.addQuery("text", q.searchTerm);
 		builder.addSearchParam("page",q.page);
 		builder.addSearchParam("per_page",q.pageSize);
 		builder.addSearchParam("facets","year,creator,category,rights");
@@ -118,6 +125,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 
+		if (checkFilters(q)){
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 
@@ -161,7 +169,12 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				it.url.fromSourceAPI = "http://www.digitalnz.org/records/"
 						+ it.id;
 				it.rights = Utils.readLangAttr(item, "rights_url", false);
-
+				it.externalId = it.fullresolution.get(0);
+				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
+					it.externalId = it.url.original.get(0);
+				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
+					it.externalId=getSourceName() + "_" + it.id;
+				it.externalId = DigestUtils.md5Hex(it.externalId);
 				a.add(it);
 
 			}
@@ -184,7 +197,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}}
 
 		return res;
 	}

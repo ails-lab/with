@@ -16,17 +16,9 @@
 
 package elastic;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import model.CollectionRecord;
-
-import org.apache.lucene.search.Sort;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -35,12 +27,14 @@ import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder.Type;
+import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.index.query.QueryStringQueryBuilder;
+import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -50,7 +44,7 @@ public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
 
 	private final String name;
-	private final String type;
+	private String type;
 
 	private final Client client = null;
 	public static final int DEFAULT_COUNT = 10;
@@ -63,6 +57,7 @@ public class ElasticSearcher {
 		public int count = DEFAULT_COUNT;
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
+		public String user;
 
 		public SearchOptions() {
 		}
@@ -78,6 +73,10 @@ public class ElasticSearcher {
 
 		public void setCount(int count) {
 			this.count = count;
+		}
+
+		public void setUser(String user) {
+			this.user = user;
 		}
 
 		public void addFilter(String key, String value) {
@@ -104,9 +103,9 @@ public class ElasticSearcher {
 		}
 	}
 
-	public ElasticSearcher() {
+	public ElasticSearcher(String type) {
 		this.name = Elastic.index;
-		this.type = Elastic.type;
+		this.type = type;
 	}
 
 	public SearchResponse execute(QueryBuilder query) {
@@ -146,24 +145,35 @@ public class ElasticSearcher {
 	public SearchResponse search(String terms, SearchOptions options){
 		if(terms == null) terms = "";
 
-		List<String> list = new ArrayList<String>();
-		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
-		while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
-
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		for(String term: list) {
-			term = term.replace("\"", "");
-			if(term.equals("mint")) {
-				MatchQueryBuilder mintQuery = QueryBuilders.matchQuery("source", term);
-				//MatchQueryBuilder mintQuery_all = QueryBuilders.matchQuery("source_all", term);
-				if(term.indexOf(" ") >= 0) mintQuery.type(Type.PHRASE);
-				bool.should(mintQuery);
-			} else {
-				MatchQueryBuilder query = QueryBuilders.matchQuery("_all", term);
-				if(term.indexOf(" ") >= 0) query.type(Type.PHRASE);
-				bool.must(query);
-			}
+
+		if(type.equals(Elastic.type_general)) {
+			/*
+			List<String> list = new ArrayList<String>();
+			Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
+			while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
+			 */
+			//implementation with query_string query
+			QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
+			str.defaultOperator(Operator.OR);
+
+			bool.must(str);
+		} else if(type.equals(Elastic.type_collection)) {
+
+			MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
+
+			BoolQueryBuilder user = QueryBuilders.boolQuery();
+			MatchQueryBuilder user_match = QueryBuilders.matchQuery("rights.user", options.user);
+			user.must(user_match);
+			//MatchQueryBuilder access_match = QueryBuilders.matchQuery("rights.access", "");
+			//user.must(access_match);
+			NestedQueryBuilder nested = QueryBuilders.nestedQuery("rights", user);
+
+			bool.must(match_all);
+			bool.must(nested);
+		} else {
 		}
+
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
 	}
@@ -206,16 +216,16 @@ public class ElasticSearcher {
 		return Elastic.getTransportClient();
 	}
 
-	private SearchRequestBuilder getSearchRequestBuilder() {
+	private SearchRequestBuilder getSearchRequestBuilder(String type) {
 		return this.getClient()
 		.prepareSearch(this.name)
-		.setTypes(this.type)
+		.setTypes(type)
 		.setSearchType(SearchType.QUERY_THEN_FETCH);
 	}
 
 	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options) {
 
-		SearchRequestBuilder search = this.getSearchRequestBuilder()
+		SearchRequestBuilder search = this.getSearchRequestBuilder(type)
 		.setFrom(options.offset)
 		.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		.setSize(options.count);
@@ -253,14 +263,9 @@ public class ElasticSearcher {
 	}
 
 	private FilterBuilder filter(String key, String value) {
-//		System.out.println("FILTER BUILDER: " + key + " - " + value);
-		try {
-			//return this.filter(key, Facets.getInstance().getField(key), Facets.getInstance().getNested(key), value);
-			throw new IOException("Not implemented filters, facets");
-		} catch (IOException e) {
-			e.printStackTrace();
-			return this.filter(key, null, null, value);
-		}
+		System.out.println("FILTER BUILDER: " + key + " - " + value);
+		FilterBuilder filter = FilterBuilders.termFilter(key, value);
+		return filter;
 	}
 
 	private FilterBuilder filter(String key, String fieldName, String nestedField, String value) {
@@ -269,14 +274,8 @@ public class ElasticSearcher {
 		return nested;
 	}
 
-	public static List<CollectionRecord> extractRecordsFromResponseHits(SearchResponse response){
-    	ArrayList<CollectionRecord> result = new ArrayList<CollectionRecord>();
-//    	play.Logger.debug("extract records");
-    	for(SearchHit hit: response.getHits().getHits()) {
-    		//result.add(JSONUtils.hitToRecord(hit));
-    	}
-
-    	return result;
-    }
+	public void setType(String type) {
+		this.type = type;
+	}
 
 }

@@ -57,10 +57,14 @@ public class CommonQuery {
 	}
 
 	public String page = "1";
+	public String facetsMode = FacetsModes.DEFAULT;
 	public String pageSize = "20";
 	public String searchTerm;
 	public String termToExclude;
+	public String user;
 	public List<String> source;
+	public boolean mintSource = false;
+	public boolean uploadedByUser = false;
 
 	public List<CommonFilter> filters;
 
@@ -83,7 +87,7 @@ public class CommonQuery {
 		this.searchTerm = query;
 	}
 
-	
+
 
 	@Override
 	public String toString() {
@@ -101,4 +105,11 @@ public class CommonQuery {
 		}
 	}
 
+	public void setUser(String user) {
+		this.user = user;
+	}
+
+	public String getUser() {
+		return user;
+	}
 }

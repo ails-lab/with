@@ -27,7 +27,7 @@ import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.sources.ElasticSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.EuropeanaSpaceSource;
-import espace.core.sources.MintSpaceSource;
+import espace.core.sources.WithSpaceSource;
 import espace.core.sources.NLASpaceSource;
 import espace.core.sources.YouTubeSpaceSource;
 
@@ -44,7 +44,7 @@ public class ESpaceSources {
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
 		esources.add(new ElasticSource());
-		esources.add(new MintSpaceSource());
+		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 
@@ -62,7 +62,7 @@ public class ESpaceSources {
 		sourcesMap.put(s.getSourceName(), s);
 		s = new YouTubeSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
-		s = new MintSpaceSource();
+		s = new WithSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		return sourcesMap;
 	}

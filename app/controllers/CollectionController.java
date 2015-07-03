@@ -47,6 +47,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
+import arq.update;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -56,7 +57,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
+import elastic.ElasticUpdater;
 import espace.core.ISpaceSource;
 import espace.core.ParallelAPICall;
 import espace.core.RecordJSONMetadata;
@@ -82,8 +85,8 @@ public class CollectionController extends Controller {
 				return internalServerError(result);
 			}
 
-			if (!AccessManager.checkAccess(c.getRights().get(0), userIds,
-					Action.READ) && !c.getIsPublic()) {
+			if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ)
+					&& !c.getIsPublic()) {
 				result.put("error",
 						"User does not have read-access for the collection");
 				return forbidden(result);
@@ -96,9 +99,7 @@ public class CollectionController extends Controller {
 			return internalServerError();
 		}
 		Access maxAccess;
-
-		if ((maxAccess = AccessManager.getMaxAccess(c.getRights().get(0),
-				userIds)) == Access.NONE) {
+		if ((maxAccess = AccessManager.getMaxAccess(c.getRights(), userIds)) == Access.NONE) {
 			maxAccess = Access.READ;
 		}
 
@@ -133,7 +134,7 @@ public class CollectionController extends Controller {
 				"effectiveUserIds"));
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(id));
-			if (!AccessManager.checkAccess(c.getRights().get(0), userIds,
+			if (!AccessManager.checkAccess(c.getRights(), userIds,
 					Action.DELETE)) {
 				result.put("error",
 						"User does not have permission to delete the collection");
@@ -143,6 +144,10 @@ public class CollectionController extends Controller {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
 			}
+
+			// delete collection from index
+			ElasticEraser eraser = new ElasticEraser(c);
+			eraser.deleteCollection();
 			result.put("message",
 					"Collection deleted succesfully from database");
 			return ok(result);
@@ -171,20 +176,21 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
-		if (!AccessManager.checkAccess(oldVersion.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds,
 				Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
 		}
-		Access maxAccess = AccessManager.getMaxAccess(oldVersion.getRights()
-				.get(0), userIds);
+		Access maxAccess = AccessManager.getMaxAccess(oldVersion.getRights(),
+				userIds);
 		String oldTitle = oldVersion.getTitle();
 		ObjectMapper objectMapper = new ObjectMapper();
-		ObjectReader updater = objectMapper.readerForUpdating(oldVersion);
+		ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
+		boolean oldIsPublic = oldVersion.getIsPublic();
 		Collection newVersion;
 		try {
-			newVersion = updater.readValue(json);
+			newVersion = updator.readValue(json);
 
 			newVersion.setLastModified(new Date());
 
@@ -204,11 +210,24 @@ public class CollectionController extends Controller {
 						"Title already exists! Please specify another title.");
 				return internalServerError(result);
 			}
+
+			// update collection on mongo
 			if (DB.getCollectionDAO().makePermanent(newVersion) == null) {
 				log.error("Cannot save collection to database!");
 				result.put("message", "Cannot save collection to database!");
 				return internalServerError(result);
 			}
+
+			// update collection index and mongo records
+			ElasticUpdater updater = new ElasticUpdater(newVersion);
+			updater.updateCollectionMetadata();
+			if (oldIsPublic != newVersion.getIsPublic()) {
+				DB.getCollectionRecordDAO().setSpecificRecordField(
+						newVersion.getDbId(), "isPublic",
+						String.valueOf(newVersion.getIsPublic()));
+				updater.updateVisibility();
+			}
+
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
 			c.put("access", maxAccess.toString());
 			User user = DB.getUserDAO().getById(newVersion.getOwnerId(),
@@ -265,10 +284,16 @@ public class CollectionController extends Controller {
 					"Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}
+
 		if (DB.getCollectionDAO().makePermanent(newCollection) == null) {
 			result.put("message", "Cannot save Collection to database");
 			return internalServerError(result);
 		}
+
+		// index new collection
+		ElasticIndexer indexer = new ElasticIndexer(newCollection);
+		indexer.indexCollectionMetadata();
+
 		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
@@ -301,6 +326,7 @@ public class CollectionController extends Controller {
 		} else if (filterByEmail != null) {
 			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
 		}
+
 		if (userIds.isEmpty()) {
 			// return all public collections
 			if (ownerId == null) {
@@ -369,8 +395,8 @@ public class CollectionController extends Controller {
 		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(collection
-					.getRights().get(0), userIds);
+			Access maxAccess = AccessManager.getMaxAccess(
+					collection.getRights(), userIds);
 			if (collection.getTitle().equals("_favorites")) {
 				continue;
 			}
@@ -382,6 +408,32 @@ public class CollectionController extends Controller {
 					new ArrayList<String>(Arrays.asList("username")));
 			c.put("owner", user.getUsername());
 			result.add(c);
+		}
+		return ok(result);
+	}
+
+	public static Result listUsersWithRights(String collectionId) {
+		ArrayNode result = Json.newObject().arrayNode();
+		Collection collection = DB.getCollectionDAO().getById(
+				new ObjectId(collectionId));
+		for (ObjectId userId : collection.getRights().keySet()) {
+			User user = DB.getUserDAO().getById(userId, null);
+			if (user != null) {
+				ObjectNode userJSON = Json.newObject();
+				userJSON.put("username", user.getUsername());
+				userJSON.put("firstName", user.getFirstName());
+				userJSON.put("lastName", user.getLastName());
+				String image = UserManager.getImageBase64(user);
+				Access accessRights = collection.getRights().get(userId);
+				userJSON.put("accessRights", accessRights.toString());
+				if (image != null) {
+					userJSON.put("image", image);
+				}
+				result.add(userJSON);
+			} else {
+				return internalServerError("User with id " + userId
+						+ " cannot be retrieved from db");
+			}
 		}
 		return ok(result);
 	}
@@ -424,8 +476,8 @@ public class CollectionController extends Controller {
 		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(collection
-					.getRights().get(0),
+			Access maxAccess = AccessManager.getMaxAccess(
+					collection.getRights(),
 					new ArrayList<String>(Arrays.asList(userId)));
 			if (maxAccess.equals(Access.NONE)) {
 				maxAccess = Access.READ;
@@ -500,8 +552,7 @@ public class CollectionController extends Controller {
 
 		Collection c = DB.getCollectionDAO()
 				.getById(new ObjectId(collectionId));
-		if (!AccessManager.checkAccess(c.getRights().get(0), userIds,
-				Action.EDIT)) {
+		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
@@ -518,6 +569,10 @@ public class CollectionController extends Controller {
 			return addRecordToFirstEntries(record, result, collectionId);
 		} else {
 			record = Json.fromJson(json, CollectionRecord.class);
+			if (c.getIsPublic())
+				record.setIsPublic(true);
+			else
+				record.setIsPublic(false);
 
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
@@ -556,10 +611,13 @@ public class CollectionController extends Controller {
 					record.getContent().put(contentType, contentMetadata);
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
+
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
-			} else
+			} else {
 				addContentToRecord(record.getDbId(), source, sourceId);
+			}
 			return status;
 		}
 
@@ -577,8 +635,12 @@ public class CollectionController extends Controller {
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
-		} else
+		} else {
+			// update itemCount
+			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
+		}
 	}
 
 	private static Status addRecordToFirstEntries(CollectionRecord record,
@@ -603,8 +665,12 @@ public class CollectionController extends Controller {
 		if (record.getDbId() == null) {
 			result.put("message", "Cannot save RecordLink to database!");
 			return internalServerError(result);
-		} else
+		} else {
+			// update itemCount
+			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
+		}
 	}
 
 	private static void addContentToRecord(ObjectId recordId, String source,
@@ -622,6 +688,8 @@ public class CollectionController extends Controller {
 							data.getJsonContent());
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
+
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
 				return true;
@@ -651,14 +719,22 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 
-		// Remove record from collection.firstEntries
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
-		if (!AccessManager.checkAccess(collection.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
+		}
+		try {
+			if (DB.getCollectionRecordDAO().getById(new ObjectId(recordId)) == null) {
+				result.put("error", "Wrong recordId");
+				return internalServerError(result);
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 		List<CollectionRecord> records = collection.getFirstEntries();
 		for (CollectionRecord r : records) {
@@ -670,6 +746,10 @@ public class CollectionController extends Controller {
 		collection.setLastModified(new Date());
 		collection.itemCountDec();
 		DB.getCollectionDAO().makePermanent(collection);
+
+		// decrement collection itemCount
+		ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+		itemCountUpdater.decItemCount();
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(
 				new ObjectId(recordId));
 		int position = 0;
@@ -681,6 +761,12 @@ public class CollectionController extends Controller {
 			result.put("message", "Cannot delete CollectionEntry!");
 			return internalServerError(result);
 		}
+
+		// delete record and merged_record from index
+		ElasticEraser eraser = new ElasticEraser(record);
+		eraser.deleteRecord();
+		eraser.deleteRecordEntryFromMerged();
+
 		if (collection.isExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(
 					new ObjectId(collectionId), position);
@@ -708,7 +794,7 @@ public class CollectionController extends Controller {
 		}
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-		if (!AccessManager.checkAccess(collection.getRights().get(0), userIds,
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.READ) && (!collection.getIsPublic())) {
 			result.put("error",
 					"User does not have read-access to the collection");
@@ -723,7 +809,6 @@ public class CollectionController extends Controller {
 			return internalServerError(result);
 		}
 		ArrayNode recordsList = Json.newObject().arrayNode();
-
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {
 				recordsList.add(Json.toJson(e.getContent()));
@@ -734,7 +819,9 @@ public class CollectionController extends Controller {
 				recordsList.add(Json.toJson(e));
 			}
 		}
-		return ok(recordsList);
+		result.put("itemCount", collection.getItemCount());
+		result.put("records", recordsList);
+		return ok(result);
 	}
 
 	public static Result download(String id) {
@@ -751,14 +838,18 @@ public class CollectionController extends Controller {
 		return addRecordToCollection(fav);
 	}
 
-	public static Result removeFromFavorites(String recordId) {
+	// delete with external id
+	public static Result removeFromFavorites(String externalId) {
 
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		ObjectId userId = new ObjectId(userIds.get(0));
-		String fav = DB.getCollectionDAO()
-				.getByOwnerAndTitle(userId, "_favorites").getDbId().toString();
-		return removeRecordFromCollection(fav, recordId, -1);
+		ObjectId fav = DB.getCollectionDAO()
+				.getByOwnerAndTitle(userId, "_favorites").getDbId();
+		List<CollectionRecord> record = DB.getCollectionRecordDAO()
+				.getByUniqueId(fav, externalId);
+		String recordId = record.get(0).getDbId().toString();
+		return removeRecordFromCollection(fav.toString(), recordId, -1);
 	}
 
 	public static Result getFavorites() {
@@ -766,11 +857,13 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-		ObjectId userId = new ObjectId(userIds.get(0));
-		ObjectId fav = DB.getCollectionDAO()
-				.getByOwnerAndTitle(userId, "_favorites").getDbId();
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByCollection(fav);
+		List<CollectionRecord> records = null;
+		if (userIds.size() > 0) {
+			ObjectId userId = new ObjectId(userIds.get(0));
+			ObjectId fav = DB.getCollectionDAO()
+					.getByOwnerAndTitle(userId, "_favorites").getDbId();
+			records = DB.getCollectionRecordDAO().getByCollection(fav);
+		}
 
 		if (records == null) {
 			result.put("error", "Cannot retrieve records from database");
@@ -778,9 +871,18 @@ public class CollectionController extends Controller {
 		}
 		ArrayNode recordsList = Json.newObject().arrayNode();
 		for (CollectionRecord record : records) {
-			recordsList.add(record.getDbId().toString());
+			recordsList.add(record.getExternalId());
 		}
 		return ok(recordsList);
+	}
+
+	public static Result getFavoriteCollection() {
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		ObjectId userId = new ObjectId(userIds.get(0));
+		String fav = DB.getCollectionDAO()
+				.getByOwnerAndTitle(userId, "_favorites").getDbId().toString();
+		return getCollection(fav);
 	}
 
 }
