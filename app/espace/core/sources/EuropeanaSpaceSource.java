@@ -132,9 +132,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				String val = t.get(0);
+				String val = "%22"+t.get(0)+"%22";
 				if (t.size()>1){
-					val = "%5B"+val + "%20TO%20"+t.get(1)+"%5D";
+					val = "%5B"+val + "%20TO%20%22"+t.get(1)+"%22%5D";
 				}
 				return new Pair<String>("qf", "YEAR%3A" +val);
 			}
