@@ -37,7 +37,7 @@ var require = {
 		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest",
 		"inputtags"       			: "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
 		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
-		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter"	
+		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter",	
 		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
 		"autoscroll"		    	: "js/aautoscroll.2.4",
 		"bootstrap-select"       	: "bower_modules/bootstrap-select/dist/js/bootstrap-select.min"
