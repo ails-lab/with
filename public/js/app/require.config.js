@@ -36,12 +36,14 @@ var require = {
 		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest",
 		"inputtags"       			: "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
 		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
-		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter"	
+		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter",
+		"header"                    : "headers"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
 		"bootstrap": { deps: ["jquery"] },
 		"facebook":  { exports: "FB" },
-		"smoke": { deps: ["jquery", "bootstrap"] }
+		"smoke": { deps: ["jquery", "bootstrap"] },
+		"header": { deps: ['jquery'] }
 	}
 };

@@ -1,4 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'],
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'],
 		function($, ko, router, kom) {
 
 	// Knockout AMD Helpers Initialization
