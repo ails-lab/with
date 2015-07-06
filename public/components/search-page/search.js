@@ -178,13 +178,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.mixresults([]);
 			self.results([]);
 			self.searching(false);
-
+			ko.dataFor(searchfacets).initFacets();
 			if ($container.data('masonry')){
 			 $container.masonry( 'remove', $container.find('.masonryitem') );
 			 }
 		}
 
-		self._search = function() {
+		self._search = function(facetinit,facetrecacl) {
 
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 self.currentTerm($(".withsearch-input").val());
@@ -207,9 +207,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
                     var data=reply.responces;
 
                     var filters=reply.filters;
-                    console.log(filters);
+                    if(facetinit || facetrecacl){
                     self.filters.removeAll();
-                    self.filters().push.apply(self.filters(),filters);
+                    self.filters().push.apply(self.filters(),filters);}
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
@@ -289,6 +289,18 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 					}else{
 						self.next(-1);
 					}
+				},
+				"complete":function(reply){
+					console.log("request completed");
+					console.log(reply);
+					if(self.results().length == 0)
+					  self.searching(false);
+					if(facetinit)
+					  ko.dataFor(searchfacets).initFacets();
+					else if(facetrecacl){
+						ko.dataFor(searchfacets).recalcFacets();
+					}
+					
 				}
 			});
 
@@ -314,7 +326,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 			}
 
-			self._search();
+			self._search(false,true);
+			
+			
 
 		};
 
@@ -334,10 +348,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 
 			}
-
-			self._search();
 			self.filterselect(false);
-			ko.dataFor(searchfacets).initFacets();
+			
+			self._search(true,false);
+			
 		};
 
 		self.recordSelect= function (e){
@@ -358,12 +372,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.searchNext = function() {
 		if(self.next()>0){
 			self.page(self.next());
-			self._search();}
+			self._search(false,false);}
 		};
 
 		self.searchPrevious = function() {
 			self.page(self.previous());
-			self._search();
+			self._search(false,false);
 		};
 
 		self.defaultSource=function(item){
@@ -506,9 +520,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
         function getItem(record) {
 			var figure='<figure class="masonryitem">';
 			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star active" id="' + record.externalId() + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			} else {
-				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star" id="' + record.externalId() + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			}
 
 			figure += '<a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'

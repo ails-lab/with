@@ -37,6 +37,7 @@ var require = {
 		"inputtags"       			: "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
 		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
 		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter",
+		"barchart"					: "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
 		"header"                    : "headers"
 	},
 	shim: {

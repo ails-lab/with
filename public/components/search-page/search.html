@@ -3,7 +3,7 @@
 		<form class="withsearch-form">
 			<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
 			<div class="line">&nbsp;</div>
-			<button class="withsearch-submit" type="submit" data-bind="click: search">Search</button>
+			<button class="withsearch-submit" type="submit" data-bind="click: function() { search(true,false); }">Search</button>
 			<button class="withsearch-view" data-bind="click: toggleSourceview, enable: searching()==false" title="Change view...">
 				<span class="glyphicon glyphicon-th" data-bind="visible: !sourceview()"></span>
 				<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview"></span>
@@ -12,14 +12,17 @@
 
 				<div id="withsearch-content" class="withsearch-content">
 					 
-					<!-- ko if: noResults -->
-						<p>Your search did not return results. Please try again.</p>
-					<!-- /ko -->
 					
 					
 
 					
 					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
+					
+					<!-- ko if: noResults -->
+					<div class="withsearch-content-masonry">
+						<p>Your search did not return results. Please try again.</p></div>
+					<!-- /ko -->
+					
 					
 					<!-- ko if: results().length > 0 -->
 					 <div class="scrollable" data-bind="visible: sourceview()==true">
