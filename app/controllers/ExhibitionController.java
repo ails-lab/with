@@ -25,7 +25,6 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
-import model.CollectionRecord;
 import model.User;
 import model.User.Access;
 
@@ -36,9 +35,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
-import utils.AccessManager.Action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -62,7 +59,7 @@ public class ExhibitionController extends Controller {
 		newExhibition.setCreated(new Date());
 		newExhibition.setLastModified(new Date());
 		newExhibition.setOwnerId(new ObjectId(userId));
-		newExhibition.setExhibition(true);
+		newExhibition.setIsExhibition(true);
 		newExhibition.setTitle(getAvailableTitle(owner));
 		newExhibition.setDescription("Description");
 
@@ -86,7 +83,6 @@ public class ExhibitionController extends Controller {
 		c.put("owner", user.getUsername());
 		return ok(c);
 	}
-
 
 	/* Find a unique dummy title for the user exhibition */
 	private static String getAvailableTitle(User user) {

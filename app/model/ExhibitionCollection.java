@@ -20,10 +20,6 @@ public class ExhibitionCollection {
 
 	private String intro;
 
-	public ExhibitionCollection(String intro) {
-		this.intro = intro;
-	}
-
 	public String getIntro() {
 		return intro;
 	}

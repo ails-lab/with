@@ -16,17 +16,14 @@
 
 package model;
 
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Entity;
@@ -90,7 +87,7 @@ public class CollectionRecord {
 	private String type;
 
 	private String itemRights;
-
+	
 	private ExhibitionRecord exhibition;
 
 	// collection specific stuff...
@@ -314,6 +311,14 @@ public class CollectionRecord {
 
 	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
+	}
+
+	public ExhibitionRecord getExhibition() {
+		return exhibition;
+	}
+
+	public void setExhibition(ExhibitionRecord exhibition) {
+		this.exhibition = exhibition;
 	}
 
 	@Override
