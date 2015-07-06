@@ -18,6 +18,8 @@ package espace.core.sources;
 
 import java.util.ArrayList;
 
+import play.libs.Json;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonFilter;
@@ -46,6 +48,18 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 						* Integer.parseInt(q.pageSize) + 1);
 	}
 
+	private String getJSONQuery(CommonQuery q){
+		String res = "";
+		FashionSearch fq = new FashionSearch();
+		fq.setTerm(q.searchTerm);
+		fq.setCount(Integer.parseInt(q.pageSize));
+		fq.setOffset(((Integer.parseInt(q.page) - 1)
+				* Integer.parseInt(q.pageSize) + 1));
+		res = Json.toJson(fq).toString();
+		return res ;
+	}
+
+	
 	public String getSourceName() {
 		return "EFashion";
 	}

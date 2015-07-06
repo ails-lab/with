@@ -28,12 +28,14 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.AdditionalQueryModifier;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
+import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
@@ -52,7 +54,9 @@ public class NLASpaceSource extends ISpaceSource {
 
 	public NLASpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("l-format"));
+		addDefaultQueryModifier(CommonFilters.TYPE_ID, qfwriter("l-format"));
+		addDefaultQueryModifier(CommonFilters.YEAR_ID,qfwriterYEAR());
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, 
 				"Image","Photograph", "Poster, chart, other");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Video");
@@ -60,8 +64,35 @@ public class NLASpaceSource extends ISpaceSource {
 				"Sound","Sheet music");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books","Article");
 	}
-
-	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+	
+	private Function<List<String>, QueryModifier> qfwriterYEAR() {
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				String a = t.get(0), b = a;
+				
+				if (t.size()>1){
+					b = t.get(1);
+				}
+				return new AdditionalQueryModifier("%20date:%5B"+a+"%20TO%20"+b+"%5D");
+			}
+		};
+	}
+	
+	private Function<List<String>, QueryModifier> qfwriter(String parameter) {
+		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				return new AdditionalQueryModifier(parameter+ ":%5B" 
+						+Utils.getORList(ListUtils.transform(t, 
+								function),false)+"%5D");
+			}
+		};
+	}
+	
+	
+private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		
 		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
 		return new Function<List<String>, Pair<String>>() {

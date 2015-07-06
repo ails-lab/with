@@ -108,6 +108,11 @@ public abstract class ISpaceSource {
 	protected void addDefaultComplexWriter(String filterId, Function<List<String>, List<Pair<String>>> function) {
 		vmap.addDefaultWriter(filterId, transformer(function));
 	}
+	
+	protected void addDefaultQueryModifier(String filterId, Function<List<String>, QueryModifier> function) {
+		vmap.addDefaultWriter(filterId, function);
+	}
+
 
 	protected void addMapping(String filterID, String commonValue, String... specificValue) {
 		vmap.addMap(filterID, commonValue, specificValue);
