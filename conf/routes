@@ -82,6 +82,8 @@ GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()
+POST	/user/apikey							controllers.UserManager.apikey()
+
 
 # trigger reindex (for development / admin )
 

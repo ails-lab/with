@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
 import play.Logger.ALogger;
+import akka.actor.ActorPath;
 import akka.actor.UntypedActor;
 import db.DB;
 /**
@@ -180,6 +181,9 @@ public class ApiKeyManager extends UntypedActor  {
 		// create apikey and return the secret
 		// create apikey for ip-pattern
 		
+		System.out.println("created!: "+create.toString());
+
+		
 		// create calls on apikey structures
 		if( StringUtils.isEmpty(create.dbId )) {
 			ApiKey newKey = new ApiKey();
@@ -195,17 +199,24 @@ public class ApiKeyManager extends UntypedActor  {
 			// find by dbId
 			ApiKey key =getByDbId(create.dbId);
 			
+			//for(String s:apiKeys.keySet()){
+			//	System.out.println(s + " : " + apiKeys.get(s));
+			//}
+			
 			key.addCall(0, create.call, create.counterLimit, create.volumeLimit);
 		}
+		
 	}
 	
 	@Override
 	public void onReceive(Object msg) throws Exception {
 		// TODO Auto-generated method stub
+		System.out.println("1");
 		if( msg instanceof Access ) {
 			Access access = (Access) msg;
 			onApiAccess( access );
 		} else if( msg instanceof Create ) {
+			System.out.println("2");
 			Create ac = (Create) msg;
 			onApiCreate( ac );
 		} else if( msg instanceof Store ) {
