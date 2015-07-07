@@ -52,7 +52,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	self.loadFavorites = function () {
 		$.ajax({
-				url: "http://localhost:9000/collection/favorites",
+				url: "/collection/favorites",
 				type: "GET",
 			})
 			.done(function (data, textStatus, jqXHR) {
