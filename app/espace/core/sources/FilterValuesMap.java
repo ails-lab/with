@@ -81,21 +81,21 @@ public class FilterValuesMap {
 		if (specificValue != null) {
 			String matchexpr = getKey(filterID, specificValue);
 			List<String> v = new ArrayList<>();
-			if (filterID.equals(CommonFilters.RIGHTS_ID)){
-				System.out.println(commonvalues.keySet());
-			}
+//			if (filterID.equals(CommonFilters.RIGHTS_ID)){
+//				System.out.println(commonvalues.keySet());
+//			}
 			
 			for (String kk : commonvalues.keySet()) {
-				if (filterID.equals(CommonFilters.RIGHTS_ID)){
-					System.out.println("------------------------------------------------");
-					System.out.println(kk+" match? "+specificValue);
-				}
+//				if (filterID.equals(CommonFilters.RIGHTS_ID)){
+//					System.out.println("------------------------------------------------");
+//					System.out.println(kk+" match? "+specificValue);
+//				}
 				if (matchexpr.matches(kk)) {
 					// String k = getKey(filterID, specificValue);
 					List<String> orset = getOrset(commonvalues, kk, false);
-					if (filterID.equals(CommonFilters.RIGHTS_ID)){
-					System.out.println("MATCHED to "+orset);
-					}
+//					if (filterID.equals(CommonFilters.RIGHTS_ID)){
+//					System.out.println("MATCHED to "+orset);
+//					}
 					v.addAll(orset);
 					return v;
 				}

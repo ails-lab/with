@@ -58,6 +58,7 @@ public class HttpConnector {
 	public static JsonNode getPOSTURLContent(String url, String json) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
+			Logger.debug("with data: " + json);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			

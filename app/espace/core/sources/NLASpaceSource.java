@@ -54,7 +54,7 @@ public class NLASpaceSource extends ISpaceSource {
 
 	public NLASpaceSource() {
 		super();
-		addDefaultQueryModifier(CommonFilters.TYPE_ID, qfwriter("l-format"));
+		addDefaultQueryModifier(CommonFilters.TYPE_ID, qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR_ID,qfwriterYEAR());
 		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, 
@@ -84,9 +84,9 @@ public class NLASpaceSource extends ISpaceSource {
 		return new Function<List<String>, QueryModifier>() {
 			@Override
 			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier(parameter+ ":%5B" 
+				return new AdditionalQueryModifier("%20"+parameter+ ":%28" 
 						+Utils.getORList(ListUtils.transform(t, 
-								function),false)+"%5D");
+								function),false)+"%29");
 			}
 		};
 	}
@@ -166,7 +166,6 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 					// System.out.println(aa.size());
 
 					for (JsonNode item : aa) {
-						// System.out.println(item.toString());
 
 						List<String> v = Utils.readArrayAttr(item, "type",
 								false);
@@ -215,17 +214,11 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 
 						a.add(it);
 						
-						 
-
-						
-
-						
-						
-						
 					}
-					JsonNode facet = o.path("facets").path("facet");
+					for (JsonNode facet : o.path("facets").path("facet"))
 					{
-//						System.out.println(">>>"+facet.toString());
+						if (!o.path("name").asText().equals("people")) {
+//						System.out.println(">>>"+facet.path("term").toString());
 						for (JsonNode jsonNode : facet.path("term")) {
 							String label = jsonNode.path("search").asText();
 							int count = jsonNode.path("count").asInt();
@@ -241,6 +234,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 							default:
 								break;
 							}
+						}
 						}
 					}
 					

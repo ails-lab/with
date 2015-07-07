@@ -45,6 +45,10 @@ public abstract class ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		return "";
 	};
+	
+	public QueryBuilder getBuilder(CommonQuery q){
+		return new QueryBuilder();
+	}
 
 	public abstract SourceResponse getResults(CommonQuery q);
 
