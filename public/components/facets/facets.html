@@ -87,8 +87,8 @@
          <!-- ko foreach:$parent.yaxis -->
 		    <li data-bind="attr:{'title': $data},click:function(){$parents[1].listSelect($parents[0].filterID,$data);}">
 		    <span class="label" data-bind="text:$parents[1].yaxislabels()[$index()]"></span>
-		    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()] }"></span><span class="number" data-bind="text: $parents[1].numvalues()[$index()]"></span></li>
-		   
+		    
+		    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()]}"></span><span class="number" data-bind="text: $parents[1].numvalues()[$index()]"></span></li>
 		  <!-- /ko -->  
 		</ul>
      <!-- /ko -->

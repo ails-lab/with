@@ -3,10 +3,10 @@
 		<form class="withsearch-form">
 			<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
 			<div class="line">&nbsp;</div>
-			<button class="withsearch-submit" type="submit" data-bind="click: function() { search(true,false); }">Search</button>
+			<button class="withsearch-submit" type="submit" data-bind="click: function() { search(true,true); }">Search</button>
 			<button class="withsearch-view" data-bind="click: toggleSourceview, enable: searching()==false" title="Change view...">
 				<span class="glyphicon glyphicon-th" data-bind="visible: !sourceview()"></span>
-				<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview"></span>
+				<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview()"></span>
 			</button>
 		</form>
 
@@ -35,12 +35,11 @@
 					</h2>
 
 					 <!-- ko foreach: items -->
-					 <!-- ko if: thumb -->
+					 
 					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
 							<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
 								<span><!-- ko text: title --><!-- /ko --></span>
 						</a>
-						<!-- /ko -->
 					   <!-- /ko -->
 					</div>
 					<!-- /ko -->
