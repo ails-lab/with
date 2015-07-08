@@ -32,12 +32,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   			funct(suggestion.value);
 			   		}*/
 			 });
-	    	  $(elem).keypress(function (event) {
+	    	  /*$(elem).keypress(function (event) {
 	              if (event.which == 13) {
 	            	  //TODO: add check if email or username exists first
 	            	  valueAccessor()($(elem).val());
 	              }
-	          });
+	          });*/
 	      }
 	 };
 
@@ -94,7 +94,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.isPublicToEdit = ko.observableArray([]);
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
-        self.editedUsersToShare = ko.mapping.fromJS([], {});
+        //self.editedUsersToShare = ko.mapping.fromJS([], {});
         self.myUsername = ko.observable(app.currentUser.username());
         var promise = app.getUserCollections();
 		$.when(promise).done(function(data) {
@@ -213,8 +213,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-
-		self.addToSharedWithUsers = function(username) {
+		
+		self.addToSharedWithUsers = function(clickedRights) {
+			var username = $("#usernameOrEmail").val();
 			var collId = self.myCollections()[self.index()].dbId();
 			$.ajax({
 				method      : "GET",
@@ -225,8 +226,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 						   return item.username() === username;
 					});
-					if (index < 0)
+					if (index < 0) {
 						self.usersToShare.push(ko.mapping.fromJS(result));
+						self.shareCollection();
+					}
 				}
 			});
 		}
@@ -234,6 +237,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.shareCollection = function(clickedRights) {
 			var currentRights = this.accessRights();
 			var username = this.username();
+		}
+		
+		/*
+		self.shareCollection = function(username, currentRights) {
+>>>>>>> Sharing colleciton v2 under development.
 			var newRights = currentRights;
 			if (currentRights != clickedRights) {
 				if (!(clickedRights == 'READ' && (currentRights == 'WRITE' || currentRights == 'OWN')))
@@ -262,9 +270,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 			}
 		}
+		*/
 		
-		
-		self.applyRightsChange = function() {
+		/*
+		 * self.applyRightsChange = function() {
 			$.each(self.editedUsersToShare(), function(i, obj) {
 				var username = self.editedUsersToShare()[i].username();
 				var newRights = self.editedUsersToShare()[i].accessRights();
@@ -280,6 +289,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    });
 			self.closePopup();
 		}
+		*/
+		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
