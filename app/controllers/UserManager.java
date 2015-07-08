@@ -698,25 +698,38 @@ public class UserManager extends Controller {
 
 	}
 	
-	public static Result apikey() {
 	
-		System.out.println("WTF");
-
-		
+	
+	
+	public static Result apikey(String email) {
+	
 		//String userId = session().get("user");
 		
-		User u = DB.getUserDAO().getByEmail("karonissz@gmail.com");
-		String userId = u.getDbId().toString();
-		if (userId == null)
-			return badRequest();
+		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+				
+		if (email == null) {
+			error.put("email", "Email is empty");
+			result.put("error", error);
+			//return badRequest(result);
+		}
 		
-		System.out.println(userId);
+		User u = DB.getUserDAO().getByEmail(email);
+
+		if (u == null) {
+			result.put("email", "Email not linked to account");
+		} else {
+			result.put("email", "Email account found");
+			String userId = u.getDbId().toString(); //tohexstring?
+
+		}
 		
+				
         final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
         
-        
         Create create = new Create();
-        create.dbId = userId;
+        //create.dbId = userId;
+        create.dbId = "";
         create.call = "";
         create.ip = "";
         create.counterLimit = -1l;
@@ -727,8 +740,7 @@ public class UserManager extends Controller {
         
     	Future<Object> future = Patterns.ask(testActor, create, timeout);
     	
-    	
-    	String s = "nope";
+    	String s = "";
 		try {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
@@ -742,14 +754,13 @@ public class UserManager extends Controller {
         
        /// testActor.tell(create, ActorRef.noSender());
 		 
-		ObjectNode result = Json.newObject();
-
-    	
-		result.put("Done", s);
-        
-		ObjectNode error = (ObjectNode) Json.newObject();
+		if (s == "") {
+			error.put("API Key", "Could not create API key");
+			result.put("error", error);
+			return internalServerError(result);
+		} 
 		
-		
+		result.put("API Key", "Succesfully created key: "+s);
 		return ok(result);
 	}
 	

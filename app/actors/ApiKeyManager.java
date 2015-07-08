@@ -181,9 +181,6 @@ public class ApiKeyManager extends UntypedActor  {
 		// create apikey and return the secret
 		// create apikey for ip-pattern
 		
-		System.out.println("created!: "+create.toString());
-
-		
 		// create calls on apikey structures
 		if( StringUtils.isEmpty(create.dbId )) {
 			ApiKey newKey = new ApiKey();
@@ -194,6 +191,7 @@ public class ApiKeyManager extends UntypedActor  {
 				newKey.setIpPattern(create.ip);
 				ipPatterns.add( newKey );
 			}
+			System.out.println("here?");
 			answer( newKey.getDbId().toString());
 		} else {			
 			// find by dbId
@@ -211,12 +209,10 @@ public class ApiKeyManager extends UntypedActor  {
 	@Override
 	public void onReceive(Object msg) throws Exception {
 		// TODO Auto-generated method stub
-		System.out.println("1");
 		if( msg instanceof Access ) {
 			Access access = (Access) msg;
 			onApiAccess( access );
 		} else if( msg instanceof Create ) {
-			System.out.println("2");
 			Create ac = (Create) msg;
 			onApiCreate( ac );
 		} else if( msg instanceof Store ) {
