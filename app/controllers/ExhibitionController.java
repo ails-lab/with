@@ -87,7 +87,7 @@ public class ExhibitionController extends Controller {
 	/* Find a unique dummy title for the user exhibition */
 	private static String getAvailableTitle(User user) {
 		int exhibitionNum = user.getExhibitionsCreated();
-		return "Exhibition" + exhibitionNum;
+		return "DummyTitle" + exhibitionNum;
 	}
 
 	public static Result listMyExhibitions(int offset, int count) {
