@@ -121,6 +121,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
 		    	var sortedyears=filtered.slice().sort(self.sortFunction);
 		    	
 		    	var index=0;
+		    	var newaxis=[];
 		    		for(j=1;j<resultaxis.length;j++){
 		    			var val=resultaxis[j];
 		    			var count=0;
@@ -128,7 +129,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
 		    			for(i=index;i<sortedyears.length;i++){
 		    				if(sortedyears[i].value<val){
 		    					count+=sortedyears[i].count;
-		    					index=i;
+		    					index=i+1;
 		    				}
 		    				else{break;}
 		    			}

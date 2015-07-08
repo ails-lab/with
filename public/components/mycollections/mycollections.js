@@ -5,7 +5,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		ko.mapping.fromJS(entryData, entry);
 		return entry;
 	}
-	
+
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 	    	  $(elem).devbridgeAutocomplete({
@@ -30,7 +30,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 /*onSelect: function (suggestion) {
 			   			 var funct = valueAccessor();
 			   			funct(suggestion.value);
-			   		}*/	   		
+			   		}*/
 			 });
 	    	  $(elem).keypress(function (event) {
 	              if (event.which == 13) {
@@ -40,7 +40,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	          });
 	      }
 	 };
-	
+
 	function getCollectionsSharedWithMe() {
 		return $.ajax({
 			type        : "GET",
@@ -55,7 +55,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					console.log(JSON.parse(request.responseText));
 		});
 	};
-	
+
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
 		var self = this;
@@ -117,7 +117,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 			return data;
 		}
-		
+
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
 			var collectionTitle = collection.title();
@@ -127,9 +127,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.createCollection = function() {
 			createNewCollection();
 		};
-		
-	    
-		
+
+
+
 		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
@@ -165,7 +165,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			else
 				return [];
 		}
-		
+
 	    //Storage needs to be updated, because collection.js gets user collections from there
 		self.saveCollectionsToStorage = function(collections) {
 			if (sessionStorage.getItem('EditableCollections') != null)
@@ -173,7 +173,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			if (localStorage.getItem('EditableCollections') != null)
 				localStorage.setItem('EditableCollections', JSON.stringify(collections));
 		};
-		
+
 
 		deleteCollection = function(collectionId) {
 			$.ajax({
@@ -200,7 +200,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			//$(".user-selection").devbridgeAutocomplete("hide");	
+			//$(".user-selection").devbridgeAutocomplete("hide");
 			$.ajax({
 				method     : "GET",
 				contentType    : "application/json",
@@ -212,7 +212,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-		
+
 		self.addToSharedWithUsers = function(username) {
 			var collId = self.myCollections()[self.index()].dbId();
 			$.ajax({
@@ -230,7 +230,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-		
+
 		self.shareCollection = function(clickedRights) {
 			var currentRights = this.accessRights();
 			var username = this.username();
@@ -244,9 +244,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 			else if (currentRights == clickedRights) {
 					//revoke clickedRights (i.e. new rights are NONE or READ)
-				if (clickedRights == 'READ') 
+				if (clickedRights == 'READ')
 					newRights = 'NONE';
-				else 
+				else
 					newRights = 'READ';
 			}
 			if (newRights != currentRights) {
@@ -260,7 +260,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						});
 						self.usersToShare()[index].accessRights(newRights);
 					}
-				});	
+				});
 			}
 		}
 
@@ -286,9 +286,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.closePopup = function() {
 			app.closePopup();
 		}
-		
 
-		
+
+
 		self.editCollection = function () {
 			var collIndex = self.index();
 			var collId=-1;
@@ -332,9 +332,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$("#myModal").find("div.modal-body").html("The collection cannot be edited");
 				$("#myModal").modal('show');
 			}
-			self.closeEditPopup();
+			self.closePopup();
 		};
-		
+
 		self.updateCollectionData = function(collectionSet, collIndex) {
 			collectionSet[collIndex].title(self.titleToEdit());
 			collectionSet[collIndex].description(self.descriptionToEdit());
@@ -347,7 +347,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    else
 		    	self.isPublicToEdit(true);
 		}
-	
+
 
 		self.reloadRecord = function(dbId, recordDataString) {
 			var recordData = JSON.parse(recordDataString);
@@ -362,7 +362,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				self.updateCollectionFirstEntries(self.sharedCollections(), collIndex, recordObservable);
 			}
 		};
-		
+
 		self.updateCollectionFirstEntries = function(collectionSet, collIndex, recordObservable) {
 			var newItemCount = collectionSet[collIndex].itemCount() + 1;
 			collectionSet[collIndex].itemCount(newItemCount);
@@ -383,7 +383,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			editables.unshift({title: newCollection.title, dbId:newCollection.dbId});
 			self.saveCollectionsToStorage(editables);
 		}
-		
+
 		self.checkCollectionSet = function(dbId) {
 			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
 				   return item.dbId() === dbId;
@@ -429,7 +429,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$("#myModal").removeClass("modal-info");
 			})
 	    }
-	    
+
 
 	}
 

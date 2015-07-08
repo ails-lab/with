@@ -127,7 +127,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([ "Europeana","DPLA","YouTube","DigitalNZ","NLA","Mint"]);
+		self.sources= ko.observableArray([ "Europeana", "EFashion","DPLA","YouTube","DigitalNZ","NLA","Mint"]);
 		self.mixresults=ko.observableArray([]);
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
@@ -185,7 +185,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		}
 
 		self._search = function(facetinit,facetrecacl) {
-
+         if(facetinit){self.filterselection.removeAll();}
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 self.currentTerm($(".withsearch-input").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
@@ -220,12 +220,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						for(var j in data[i].items){
 						 var result = data[i].items[j];
 
-						 if(result !=null && result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
+						 if(result !=null ){
+							 //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
 						 var record = new Record({
 							recordId: result.recordId || result.id,
-							thumb: result.thumb[0],
+							thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
 							fullres: result.fullresolution,
-							title: result.title[0].value,
+							title: result.title!=null && result.title[0]!=null? result.title[0].value:"",
 							view_url: result.url.fromSourceAPI,
 							creator: result.creator!==undefined && result.creator!==null && result.creator[0]!==undefined? result.creator[0].value : "",
 							provider: result.dataProvider!=undefined && result.dataProvider!==null && result.dataProvider[0]!==undefined? result.dataProvider[0].value : "",
@@ -268,11 +269,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 							if(inCat.source==srcCat.source){
 								found=true;
 								inCat.append(srcCat.items);
-								self.results.replace(self.results()[k],new SourceCategory({
+								self.results.splice(k,1,new SourceCategory({
 									source:inCat.source,
 									items:inCat.items,
 									consoleurl:inCat.consoleurl
-								}));
+								}))
 								break;
 							}
 
@@ -291,10 +292,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 					}
 				},
 				"complete":function(reply){
-					console.log("request completed");
-					console.log(reply);
-					if(self.results().length == 0)
-					  self.searching(false);
+					 self.searching(false);
+					
 					if(facetinit)
 					  ko.dataFor(searchfacets).initFacets();
 					else if(facetrecacl){
@@ -332,7 +331,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 		};
 
-		self.search = function() {
+		self.search = function(facetinit,facetrecacl) {
 			if($request!==undefined)$request.abort();
 
 			self.results.removeAll();
@@ -350,7 +349,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			}
 			self.filterselect(false);
 			
-			self._search(true,false);
+			self._search(facetinit,facetrecacl);
 			
 		};
 
@@ -446,8 +445,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		    $item.show();
 		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
 
-		  }).always(self.searching(false));
-
+		  });/*.always(
+				  self.searching(false)
+				  );
+         */
 
 		};
 

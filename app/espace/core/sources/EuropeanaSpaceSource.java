@@ -83,8 +83,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*(nd).*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*(nc).*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*(?!.*creative).*(?!.*nc).*(nd).*");
-		
+
 
 	}
 

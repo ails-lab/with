@@ -89,8 +89,8 @@ public class UserManager extends Controller {
 	 * @return User and image
 	 */
 	public static Result findByUsernameOrEmail(String emailOrUsername, String collectionId) {
-		Function<User, Status> getUserJson = (User u) -> 
-		{ 
+		Function<User, Status> getUserJson = (User u) ->
+		{
 			ObjectNode userJSON = Json.newObject();
 			userJSON.put("username", u.getUsername());
 			userJSON.put("firstName", u.getFirstName());
@@ -117,7 +117,7 @@ public class UserManager extends Controller {
 		}
 		else {
 			user = DB.getUserDAO().getByUsername(emailOrUsername);
-			if (user != null) 
+			if (user != null)
 				return getUserJson.apply(user);
 			else
 				return badRequest("The string you provided does not match an existing email or username");
@@ -226,7 +226,7 @@ public class UserManager extends Controller {
 		} else {
 			username = json.get("username").asText();
 			if (DB.getUserDAO().getByUsername(username) != null) {
-				error.put("usernposeUsernameame", "Username Already in Use");
+				error.put("username", "Username Already in Use");
 				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);
 
@@ -643,7 +643,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * This is just a skeleton until design issues are solved
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -769,11 +769,11 @@ public class UserManager extends Controller {
 	/**
 	 * Checks email/username validity, checks if user has registered with
 	 * Facebook or Google.
-	 * 
+	 *
 	 * Sends user an email with a url.
-	 * 
+	 *
 	 * The url has a token, to be parsed by changePassword().
-	 * 
+	 *
 	 * @param emailOrUserName
 	 * @return OK status
 	 */
@@ -897,9 +897,9 @@ public class UserManager extends Controller {
 	
 	/***
 	 * Parses token from the URL sent in the resetPassword() email.
-	 * 
+	 *
 	 * Changes stored password.
-	 * 
+	 *
 	 * @return OK and user data
 	 ***/
 
@@ -980,7 +980,7 @@ public class UserManager extends Controller {
 		return badRequest(result);
 
 	}
-	
+
 	public static String getImageBase64(User user) {
 		if (user.getPhoto() != null) {
 			ObjectId photoId = user.getPhoto();
