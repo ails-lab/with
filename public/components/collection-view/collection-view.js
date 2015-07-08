@@ -279,13 +279,18 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 						contentType: "application/json",
 						data: JSON.stringify(e),
 						success: function (data, textStatus, xhr) {
+							//find item index to see if it is first item
+							var index=ko.utils.arrayIndexOf(self.citems(),e);
+							console.log("index:"+index);
+							
 							self.citems.remove(e);
 							if ($("#" + e)) {
-								$("#" + e).remove();
+								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
+							
 							self.itemCount(self.itemCount() - 1);
 							$.smkAlert({text:'Item removed from the collection', type:'success'});
-							$container.masonry( 'layout');
+							
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							$.smkAlert({text:'An error has occured', type:'danger', time: 10});
@@ -311,7 +316,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			});
 		};
 
-		function getItem(record) {
+		function getItem(record,index) {
 			var figure = '<figure class="masonryitem" id="' + record.recordId() + '">';
 			if (record.isLiked()) {
 				figure += '<span class="star active" id="' + record.externalId() + '">';
@@ -329,7 +334,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			+ '<div class="sourceCredits">';
 
 			if (self.access() == "WRITE" || self.access() == "OWN") {
-				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\')}}"></span>';
+				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\','+index+')}}"></span>';
 			}
 			figure+='<a href="' + record.view_url() + '" target="_new">' + record.sourceCredits() + '</a></figure>';
 			return figure;
