@@ -47,7 +47,7 @@ DELETE   /collection/:id	                    controllers.CollectionController.de
 # Record Controller (tested)
 GET 	/record/findInCollections				controllers.RecordController.findInCollections(source: String ?="", sourceId: String ?="", annot: Boolean ?=false)
 GET		/record/:id								controllers.RecordController.getRecord(id, format: String ?="XML-EDM")
-POST 	/record/:id								controllers.RecordController.updateRecord(id, format: String ?="XML-EDM")
+PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= null)
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
