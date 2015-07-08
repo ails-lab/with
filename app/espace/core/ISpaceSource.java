@@ -45,6 +45,10 @@ public abstract class ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		return "";
 	};
+	
+	public QueryBuilder getBuilder(CommonQuery q){
+		return new QueryBuilder();
+	}
 
 	public abstract SourceResponse getResults(CommonQuery q);
 
@@ -108,6 +112,11 @@ public abstract class ISpaceSource {
 	protected void addDefaultComplexWriter(String filterId, Function<List<String>, List<Pair<String>>> function) {
 		vmap.addDefaultWriter(filterId, transformer(function));
 	}
+	
+	protected void addDefaultQueryModifier(String filterId, Function<List<String>, QueryModifier> function) {
+		vmap.addDefaultWriter(filterId, function);
+	}
+
 
 	protected void addMapping(String filterID, String commonValue, String... specificValue) {
 		vmap.addMap(filterID, commonValue, specificValue);

@@ -17,14 +17,23 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.function.Function;
+
+import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonFilter;
+import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
+import espace.core.QueryBuilder;
+import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
@@ -33,19 +42,57 @@ import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
+	
+	public EuropeanaFashionSpaceSource() {
+		super();
 
-	public String getHttpQuery(CommonQuery q) {
-		return "http://www.europeanafashion.eu/api/search/"
-				+ Utils.spacesPlusFormatQuery(q.searchTerm == null ? "*"
-						: q.searchTerm)
-				+ "/"
-				+ q.pageSize
-				+ "/"
-				+ ""
-				+ ((Integer.parseInt(q.page) - 1)
-						* Integer.parseInt(q.pageSize) + 1);
+		Function<List<String>, QueryModifier> f = (List<String> args) -> {
+			return new QueryModifier() {
+				@Override
+				public QueryBuilder modify(QueryBuilder builder) {
+					FashionSearch fs = (FashionSearch) builder.getData();
+					for (String string : args) {
+						Filter ft = new Filter();
+						ft.setType("objectType");
+						ft.setId("219");
+						ft.setValue("http://thesaurus.europeanafashion.eu/thesaurus/10460");
+						ft.setTerm(string);
+						fs.getFilters().add(ft);
+					}
+					return builder;
+				}
+			};
+		};
+		//		addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
+		addDefaultQueryModifier(CommonFilters.TYPE_ID, f );
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "photograph");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "artwork");
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
+			
 	}
 
+//	public String getHttpQuery(CommonQuery q) {
+//		addfilters(q, builder)
+//		return "http://www.europeanafashion.eu/api/search/";
+//	}
+	
+	@Override
+	public QueryBuilder getBuilder(CommonQuery q) {
+		QueryBuilder builder = super.getBuilder(q);
+		builder.setBaseUrl("http://www.europeanafashion.eu/api/search/");
+		FashionSearch fq = new FashionSearch();
+		fq.setTerm(q.searchTerm);
+		fq.setCount(Integer.parseInt(q.pageSize));
+		fq.setOffset(((Integer.parseInt(q.page) - 1)
+				* Integer.parseInt(q.pageSize)));
+		builder.setData(fq);
+		addfilters(q, builder);
+		return builder;
+	}
+
+	
 	public String getSourceName() {
 		return "EFashion";
 	}
@@ -54,12 +101,13 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
-		String httpQuery = getHttpQuery(q);
-		res.query = httpQuery;
+//		String httpQuery = getHttpQuery(q);
+		QueryBuilder builder = getBuilder(q);
+		res.query = builder.getHttp();
 		JsonNode response;
 		if (checkFilters(q)){
 		try {
-			response = HttpConnector.getURLContent(httpQuery);
+			response = HttpConnector.getPOSTURLContent(res.query, Json.toJson(builder.getData()).toString());
 			// System.out.println(response.toString());
 			JsonNode docs = response.path("results");
 			res.totalCount = Utils.readIntAttr(response, "total", true);
@@ -87,13 +135,31 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 				a.add(it);
 			}
 			res.items = a;
-			res.facets = response.path("facets");
+			
+			CommonFilterLogic type = CommonFilterLogic.typeFilter();
+			
+			JsonNode o = response.path("facets");
+			readList(o.path("objectType"), type);
+
+
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}}
 
 		return res;
+	}
+	
+	private void readList(JsonNode json, CommonFilterLogic filter) {
+		 for (JsonNode node : json.path("terms")) {
+			String label = node.path("term").asText();
+			int count = node.path("count").asInt();
+			String id = node.path("uri").asText();
+			countValue(filter, label, count);
+		}
 	}
 
 	
