@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,8 +33,8 @@ import javax.net.ssl.HttpsURLConnection;
 import model.Collection;
 import model.Media;
 import model.User;
-import model.UserGroup;
 import model.User.Access;
+import model.UserGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -58,9 +57,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import espace.core.CommonQuery;
-import espace.core.ISpaceSource;
-import espace.core.SourceResponse;
 
 public class UserManager extends Controller {
 
@@ -76,17 +72,19 @@ public class UserManager extends Controller {
 	 * @param emailOrUsername
 	 * @return User and image
 	 */
-	public static Result findByUsernameOrEmail(String emailOrUsername, String collectionId) {
-		Function<User, Status> getUserJson = (User u) ->
-		{
+	public static Result findByUsernameOrEmail(String emailOrUsername,
+			String collectionId) {
+		Function<User, Status> getUserJson = (User u) -> {
 			ObjectNode userJSON = Json.newObject();
 			userJSON.put("username", u.getUsername());
 			userJSON.put("firstName", u.getFirstName());
 			userJSON.put("lastName", u.getLastName());
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(new ObjectId (collectionId));
+				Collection collection = DB.getCollectionDAO().getById(
+						new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getRights().get(u.getDbId());
+					Access accessRights = collection.getRights().get(
+							u.getDbId());
 					if (accessRights != null)
 						userJSON.put("accessRights", accessRights.toString());
 					else
@@ -102,8 +100,7 @@ public class UserManager extends Controller {
 		User user = DB.getUserDAO().getByEmail(emailOrUsername);
 		if (user != null) {
 			return getUserJson.apply(user);
-		}
-		else {
+		} else {
 			user = DB.getUserDAO().getByUsername(emailOrUsername);
 			if (user != null)
 				return getUserJson.apply(user);
@@ -260,6 +257,7 @@ public class UserManager extends Controller {
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
 		result.remove("md5Password");
+		result.put("favoritesId", fav.getDbId().toString());
 		return ok(result);
 
 	}
@@ -486,15 +484,16 @@ public class UserManager extends Controller {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
-				ObjectNode result = (ObjectNode) Json.parse(DB
-						.getJson(user));
+				ObjectNode result = (ObjectNode) Json.parse(DB.getJson(user));
+				result.put("favoritesId", DB.getCollectionDAO()
+						.getByOwnerAndTitle(new ObjectId(id), "_favorites")
+						.getDbId().toString());
 				String image = getImageBase64(user);
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);
-				}
-				else {
-					return ok(Json.parse(DB.getJson(user)));
+				} else {
+					return ok(result);
 				}
 			} else {
 				return badRequest(Json
@@ -591,7 +590,7 @@ public class UserManager extends Controller {
 						mimeType = mimeType.replace(";base64", "");
 					}
 					Media media = new Media();
-					media.setType(Media.BaseType.valueOf( "IMAGE"));
+					media.setType(Media.BaseType.valueOf("IMAGE"));
 					media.setMimeType(mimeType);
 					media.setHeight(100);
 					media.setWidth(100);
@@ -889,8 +888,7 @@ public class UserManager extends Controller {
 			// convert to base64 format
 			return "data:" + photo.getMimeType() + ";base64,"
 					+ new String(Base64.encodeBase64(photo.getData()));
-		}
-		else
+		} else
 			return null;
 	}
 
