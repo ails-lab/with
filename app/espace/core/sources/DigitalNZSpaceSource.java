@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -109,6 +110,10 @@ private Function<List<String>, Pair<String>> qfwriterYEAR() {
 		builder.addSearchParam("per_page",q.pageSize);
 		builder.addSearchParam("facets","year,creator,category,rights");
 		return addfilters(q, builder).getHttp();
+	}
+	
+	public List<CommonQuery> splitFilters(CommonQuery q) {
+		return q.splitFilters();
 	}
 
 	public String getSourceName() {

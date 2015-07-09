@@ -51,6 +51,7 @@ import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
+import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.EuropeanaSpaceSource;
 
 public class SearchController extends Controller {
@@ -183,8 +184,11 @@ public class SearchController extends Controller {
 		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
-				promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
-						src, q));
+				List<CommonQuery> list = src.splitFilters(q);
+				for (CommonQuery commonQuery : list) {
+					promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
+							src, commonQuery));
+				}
 			}
 		}
 		return promises;
@@ -252,7 +256,7 @@ public class SearchController extends Controller {
 	}
 
 	private static Result buildresult(CommonQuery q) {
-		q.source	 = Arrays.asList(EuropeanaSpaceSource.LABEL);
+		q.source	 = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;
