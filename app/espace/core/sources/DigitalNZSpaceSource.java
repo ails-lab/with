@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -67,10 +68,10 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
 		
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "^(?!.*(screative)).*$");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*(nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*(nc).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
 		
 	}
 	
@@ -109,6 +110,10 @@ private Function<List<String>, Pair<String>> qfwriterYEAR() {
 		builder.addSearchParam("per_page",q.pageSize);
 		builder.addSearchParam("facets","year,creator,category,rights");
 		return addfilters(q, builder).getHttp();
+	}
+	
+	public List<CommonQuery> splitFilters(CommonQuery q) {
+		return q.splitFilters();
 	}
 
 	public String getSourceName() {
