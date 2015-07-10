@@ -63,7 +63,7 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 
 		self.loadFavorites = function () {
 			$.ajax({
-				"url": "/collection/555c974de4b0acf00e9c2829",
+				"url": "/collection/favoriteCollection",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
@@ -74,23 +74,6 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});
-		};
-
-		self.filterBy = function (filter) {
-			if (filter === '*') {
-				console.log("Show all");
-				$("#collcolumns").isotope({
-					filter: '*'
-				});
-			} else {
-				console.log("Filter by: " + filter);
-				$("#collcolumns").isotope({
-					filter: function () {
-						var name = $(this).find('.displayTitle').text();
-						return name.match( filter );
-					}
-				});
-			}
 		};
 
 		self.revealItems = function (data) {
@@ -183,32 +166,6 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 			}
 		};
 	}
-
-	function tryRegisterEvent(imgLoad, event, handler) {
-		if (handler === undefined) return;
-		imgLoad.on(event, handler);
-	}
-
-	function tryRegisterEvents(imgLoad, event, bindings) {
-		for (var i = 0; i < events.length; ++i) {
-			var ev = events[i];
-			tryRegisterEvent(imgLoad, ev, bindings[ev]);
-			console.log("Registering event: " + ev);
-		}
-	}
-
-	ko.bindingHandlers.imagesLoaded = {
-		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-			if (imagesLoaded === undefined) {
-				console.log('imagesLoaded is not defined!');
-			}
-
-			var bindings = ko.utils.unwrapObservable(valueAccessor());
-			var imgLoad = imagesLoaded(element);
-			tryRegisterEvents(imgLoad, ['always', 'done', 'fail', 'progress'], bindings);
-		},
-		update: function () {}
-	};
 
 	ko.bindingHandlers.scroll = {
 		updating: true,
