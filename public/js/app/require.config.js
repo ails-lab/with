@@ -34,11 +34,12 @@ var require = {
 		"jquery.fileupload"         : "bower_modules/jquery-file-upload/js/jquery.fileupload",
 		"knockout-else"             : "bower_modules/knockout-else/dist/knockout-else",
 		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest",
-		"inputtags"       			: "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
+		"inputtags"                 : "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
 		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
-		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter",
-		"barchart"					: "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
-		"header"                    : "headers"
+		"liveFilter"                : "bower_modules/liveFilter/jquery.liveFilter",
+		"barchart"                  : "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
+		"header"                    : "headers",
+		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
