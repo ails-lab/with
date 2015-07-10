@@ -148,44 +148,44 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	// return null;
 	// }
 
-	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
-		if (q.europeanaAPI != null) {
-			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
-			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
-			if (q.europeanaAPI.facets != null) {
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
-			}
-			if (q.europeanaAPI.refinement != null) {
-				if (q.europeanaAPI.refinement.refinementTerms != null) {
-					for (String t : q.europeanaAPI.refinement.refinementTerms) {
-						eq.addSearch(t);
-					}
-				}
-				if (q.europeanaAPI.refinement.spatialParams != null) {
-
-					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
-								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
-					}
-					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
-								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
-					}
-				}
-			}
-			if (q.europeanaAPI.reusability != null) {
-				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
-			}
-		}
-	}
+//	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
+//		if (q.europeanaAPI != null) {
+//			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
+//			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
+//			if (q.europeanaAPI.facets != null) {
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
+//			}
+//			if (q.europeanaAPI.refinement != null) {
+//				if (q.europeanaAPI.refinement.refinementTerms != null) {
+//					for (String t : q.europeanaAPI.refinement.refinementTerms) {
+//						eq.addSearch(t);
+//					}
+//				}
+//				if (q.europeanaAPI.refinement.spatialParams != null) {
+//
+//					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
+//						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
+//								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
+//								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
+//					}
+//					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
+//						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
+//								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
+//								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
+//					}
+//				}
+//			}
+//			if (q.europeanaAPI.reusability != null) {
+//				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
+//			}
+//		}
+//	}
 
 	public String getSourceName() {
 		return LABEL;
