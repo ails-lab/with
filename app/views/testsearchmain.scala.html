@@ -94,8 +94,21 @@ img{
 
 </style>
 <script type="text/javascript">
- 
+//var jsoninfo;
 var namee;
+
+
+
+function JsonInfoModel() {
+    var self = this;
+
+    // Editable data
+    self.jsoninfo = ko.observable(null);
+}
+
+ko.applyBindings(new JsonInfoModel());
+
+
 function change(namee){
 	//alert(namee);
 	console.log("select "+namee);
@@ -152,7 +165,7 @@ function gothere(q){
 
 				"success": function( data, textStatus, jQxhr ){
             document.documentElement.innerHTML='';
-            document.write(data);
+            jsoninfo(data);
         },
         "error": function( jqXhr, textStatus, errorThrown ){
         alert(errorThrown);

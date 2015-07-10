@@ -1,0 +1,93 @@
+<div class="container-fluid" class="withsearch">
+	<div class="row">
+		<div class="col-lg-12 ">
+<br/><br/><br/><br/><br/>
+<div class="col-sm-12" >
+
+
+			<input data-bind="value: q.searchTerm" placeholder="Search..."/>
+			<div class="line">&nbsp;</div>
+			<button class="withsearch-submit" data-bind="click: function() { search(); }">Search</button>
+			
+		
+
+</div>
+
+<div class="row" >
+<div class="col-sm-3" data-bind="foreach: filters">
+
+<div class="col-sm-12" data-bind="visible : suggestedValues.length >0" >
+<h3 data-bind="text: filterName" ></h3>
+
+<div class="row" >
+<select multiple  class="form-control" 
+data-bind="options: suggestedValues,
+                       optionsText: function(item) {
+                       return item.value + ' (' + item.count + ')'
+                   },
+                   optionsValue: function(item) {
+                       	return item.value
+                       }
+						"
+
+>
+
+  		
+	    						
+	    						
+</select>
+
+</div>
+
+</div>
+
+
+</div>
+<div class="col-sm-9" >
+
+									<div id="@p.source" data-bind="foreach: responses">
+										<div class="row">
+				  							<div class="row"><b>Source: </b> <spam data-bind="text: source"/>  <br/></div>
+				  							<div class="row"><b>Count: </b> <spam data-bind="text: count"/>  <br/></div>
+				  							<div class="row"><b>Query: </b> <a data-bind="attr: { href:query}, text: query"></a>  <br/></div>
+				  						</div>
+				  						
+				  						<div class="row" data-bind="foreach: items">
+				  						
+								
+											<div  class="col-md-4 thumbnail">
+				  									<div class="col-md-4 text-right">
+				  										<img alt="NO IMAGE" class="img-thumbnail" data-bind="attr: { src: thumb[0]}" /> 
+				    								</div>
+				    								
+				  									<div class="col-md-8">
+				    									<div class="row">
+				    									<b>Title: </b> 
+				    									<a data-bind="attr: {href: url.original[0]}, text: title[0].value">
+				    									 </a><br/>  
+				    									 
+				    									 </div>
+				    									 										
+				 										<div class="row">
+				 										<b>Data Provider: </b>  <spam data-bind="text: dataProvider[0].value"/>
+				 										</div><div class="row">
+				 										<b>Description: </b>  <spam data-bind="text: description[0].value"/>
+				 										</div>
+				    							  </div>
+										
+										</div>
+				  						
+				  						
+				  						</div>
+									</div>
+								
+
+
+</div>
+</div>
+
+
+
+			</div>
+		</div>
+	</div>
