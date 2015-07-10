@@ -279,13 +279,18 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 						contentType: "application/json",
 						data: JSON.stringify(e),
 						success: function (data, textStatus, xhr) {
+							//find item index to see if it is first item
+							var index=ko.utils.arrayIndexOf(self.citems(),e);
+							console.log("index:"+index);
+							
 							self.citems.remove(e);
 							if ($("#" + e)) {
-								$("#" + e).remove();
+								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
+							
 							self.itemCount(self.itemCount() - 1);
 							$.smkAlert({text:'Item removed from the collection', type:'success'});
-							$container.masonry( 'layout');
+							
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							$.smkAlert({text:'An error has occured', type:'danger', time: 10});
@@ -311,19 +316,25 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			});
 		};
 
-		function getItem(record) {
+		function getItem(record,index) {
 			var figure = '<figure class="masonryitem" id="' + record.recordId() + '">';
 			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star active" id="' + record.externalId() + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			} else {
-				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star" id="' + record.externalId() + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			}
 
 			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId() + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
 			+ '<div class="sourceCredits">';
 
 			if (self.access() == "WRITE" || self.access() == "OWN") {
-				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\')}}"></span>';
+				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\','+index+')}}"></span>';
 			}
 			figure+='<a href="' + record.view_url() + '" target="_new">' + record.sourceCredits() + '</a></figure>';
 			return figure;

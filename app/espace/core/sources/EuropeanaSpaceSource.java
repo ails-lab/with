@@ -75,43 +75,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
-		
+			
 		/**
 		 * TODO check this 
 		 */
-		
+			
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*(nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*(nc).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
 
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
-		//use for commercial purposes,modify, adapt, or build upon 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
-		
-		// public  = commercial and modify
-		
-		
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
-		//use for commercial purposes,
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
-		
-		// commercial is use for commercial but not modify
-		//use for modify, adapt, or build upon 		
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
-		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "^(?!.*(screative)).*$");
-		
-		/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/zero/1.0/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by-sa/");*/
-		
-	
-		/*addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-sa/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-nd/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nd/");		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
-*/
-		//pemission is not *creative*  
+
+
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
@@ -131,9 +106,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				String val = t.get(0);
+				String val = "%22"+t.get(0)+"%22";
 				if (t.size()>1){
-					val = "%5B"+val + "%20TO%20"+t.get(1)+"%5D";
+					val = "%5B"+val + "%20TO%20%22"+t.get(1)+"%22%5D";
 				}
 				return new Pair<String>("qf", "YEAR%3A" +val);
 			}
@@ -175,44 +150,44 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	// return null;
 	// }
 
-	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
-		if (q.europeanaAPI != null) {
-			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
-			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
-			if (q.europeanaAPI.facets != null) {
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
-			}
-			if (q.europeanaAPI.refinement != null) {
-				if (q.europeanaAPI.refinement.refinementTerms != null) {
-					for (String t : q.europeanaAPI.refinement.refinementTerms) {
-						eq.addSearch(t);
-					}
-				}
-				if (q.europeanaAPI.refinement.spatialParams != null) {
-
-					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
-								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
-					}
-					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
-								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
-					}
-				}
-			}
-			if (q.europeanaAPI.reusability != null) {
-				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
-			}
-		}
-	}
+//	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
+//		if (q.europeanaAPI != null) {
+//			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
+//			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
+//			if (q.europeanaAPI.facets != null) {
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
+//			}
+//			if (q.europeanaAPI.refinement != null) {
+//				if (q.europeanaAPI.refinement.refinementTerms != null) {
+//					for (String t : q.europeanaAPI.refinement.refinementTerms) {
+//						eq.addSearch(t);
+//					}
+//				}
+//				if (q.europeanaAPI.refinement.spatialParams != null) {
+//
+//					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
+//						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
+//								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
+//								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
+//					}
+//					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
+//						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
+//								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
+//								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
+//					}
+//				}
+//			}
+//			if (q.europeanaAPI.reusability != null) {
+//				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
+//			}
+//		}
+//	}
 
 	public String getSourceName() {
 		return LABEL;
@@ -286,7 +261,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						break;
 
 					case "RIGHTS":
-						countValue(rights, label, false, count);
+						countValue(rights, label, count);
 						break;
 
 					case "proxy_dc_creator":

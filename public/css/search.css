@@ -275,11 +275,12 @@ input[type="search"] { /* reset normalize */
 	/*position: absolute;*/
 	opacity: 0;
 	overflow-y: hidden;
+	overflow-x: hidden;
 }
 
 .scrollable{
 
-	width: 2200px;
+	max-width: 2200px;
     display:table;
     overflow-y: auto;   overflow-x: scroll;
     margin: 0 auto;
@@ -543,14 +544,18 @@ figure .star {
 	font-size: 20px;
 	display: none;
 	position: absolute;
-	top: 4px;
+	top: 0px;
 	right: 4px;
-	width: 24px;
+	width: 36px;
 }
 
 figure:hover .star {
 	color: #dddddd;
 	display: block;
+}
+
+.star .fa-inverse {
+	color: #ec5a62;
 }
 
 figure .active, figure:hover .active {

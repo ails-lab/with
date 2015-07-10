@@ -144,7 +144,6 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 				 allBindings, viewModel, bindingContext);
 
 			if (method === 'init') {
-				console.log("Initializing");
 				$(element).isotope({
 					itemSelector: '.masonry-item',
 					transitionDuration: transDuration,
@@ -154,9 +153,6 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 						isFitWidth: true
 					}
 				});
-
-				// var options = allBindings.get('isotopeOptions') || {};
-				// $(element).isotope(options);
 
 				ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 					$(element).isotope("destroy");

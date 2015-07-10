@@ -41,4 +41,11 @@ public class ApiKeyDAO extends DAO<ApiKey> {
 					.equal( ipPattern );
 		return find( q ).asList();
 	}
+
+	public ApiKey getByName( String name ) {
+		Query<ApiKey> q = createQuery()
+					.field( "name")
+					.equal( name );
+		return find( q ).get();
+	}
 }

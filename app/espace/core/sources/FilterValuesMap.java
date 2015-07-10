@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import espace.core.CommonFilters;
 import espace.core.QueryModifier;
 import espace.core.Utils.Pair;
 
@@ -41,7 +42,7 @@ public class FilterValuesMap {
 	}
 
 	private String getKey(String filterID, String value) {
-		return filterID + "/" + value;
+		return filterID + "-" + value;
 	}
 
 	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key, boolean addNew) {
@@ -78,8 +79,29 @@ public class FilterValuesMap {
 
 	public List<String> translateToCommon(String filterID, String specificValue) {
 		if (specificValue != null) {
-			String k = getKey(filterID, specificValue);
-			List<String> v = getOrset(commonvalues, k, false);
+			String matchexpr = getKey(filterID, specificValue);
+			List<String> v = new ArrayList<>();
+
+//			if (filterID.equals(CommonFilters.RIGHTS_ID)){
+//				System.out.println(commonvalues.keySet());
+//			}
+			
+			for (String kk : commonvalues.keySet()) {
+//				if (filterID.equals(CommonFilters.RIGHTS_ID)){
+//					System.out.println("------------------------------------------------");
+//					System.out.println(kk+" match? "+specificValue);
+//				}
+				if (matchexpr.matches(kk)) {
+					// String k = getKey(filterID, specificValue);
+					List<String> orset = getOrset(commonvalues, kk, false);
+//					if (filterID.equals(CommonFilters.RIGHTS_ID)){
+//					System.out.println("MATCHED to "+orset);
+//					}
+
+					v.addAll(orset);
+					return v;
+				}
+			}
 			if (v.isEmpty()) {
 				v.add(specificValue);
 			}

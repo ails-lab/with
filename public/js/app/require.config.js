@@ -37,12 +37,15 @@ var require = {
 		"inputtags"                 : "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
 		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
 		"liveFilter"                : "bower_modules/liveFilter/jquery.liveFilter",
+		"barchart"                  : "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
+		"header"                    : "headers",
 		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
 		"bootstrap": { deps: ["jquery"] },
 		"facebook":  { exports: "FB" },
-		"smoke": { deps: ["jquery", "bootstrap"] }
+		"smoke": { deps: ["jquery", "bootstrap"] },
+		"header": { deps: ['jquery'] }
 	}
 };

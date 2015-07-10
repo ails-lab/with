@@ -25,8 +25,9 @@
     "knockout-mapping": "latest",
     "bootstrap-tagsinput": "latest",
     "smoke": "latest",
-    "isotope": "latest",
-    "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip"
+    "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip",
+    "horizontal-chart":"https://github.com/eriku/horizontal-chart/archive/master.zip",
+    "isotope": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"
