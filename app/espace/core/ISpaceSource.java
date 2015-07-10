@@ -165,4 +165,8 @@ public abstract class ISpaceSource {
 		return builder;
 	}
 
+	public List<CommonQuery> splitFilters(CommonQuery q) {
+		return Arrays.asList(q);
+	}
+
 }

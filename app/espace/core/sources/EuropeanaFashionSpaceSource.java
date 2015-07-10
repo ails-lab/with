@@ -43,30 +43,23 @@ import espace.core.Utils;
 
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
 	
+	public static final String LABEL = "EFashion";
+
+
+
 	public EuropeanaFashionSpaceSource() {
 		super();
 
-		Function<List<String>, QueryModifier> f = (List<String> args) -> {
-			return new QueryModifier() {
-				@Override
-				public QueryBuilder modify(QueryBuilder builder) {
-					FashionSearch fs = (FashionSearch) builder.getData();
-					for (String string : args) {
-						Filter ft = new Filter();
-						ft.setType("objectType");
-						ft.setId("219");
-						ft.setValue("http://thesaurus.europeanafashion.eu/thesaurus/10460");
-						ft.setTerm(string);
-						fs.getFilters().add(ft);
-					}
-					return builder;
-				}
-			};
-		};
 		//		addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
-		addDefaultQueryModifier(CommonFilters.TYPE_ID, f );
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "photograph");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "artwork");
+//		addDefaultQueryModifier(CommonFilters.TYPE_ID, getFunction("219", "objectType"));
+		addDefaultQueryModifier(CommonFilters.DATAPROVIDER_ID, getFunction("302", "dataProviders"));
+		
+		
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10303"));
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10460"));
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10518"));
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10462"));
+//		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "artwork");
 //		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 //		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 //		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
@@ -77,6 +70,31 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 //		addfilters(q, builder)
 //		return "http://www.europeanafashion.eu/api/search/";
 //	}
+	
+	private String getURI(String ID) {
+		return "http://thesaurus.europeanafashion.eu/thesaurus/"+ID;
+	}
+
+	public Function<List<String>, QueryModifier> getFunction(String ID, String type){
+		Function<List<String>, QueryModifier> fprov = (List<String> args) -> {
+			return new QueryModifier() {
+				@Override
+				public QueryBuilder modify(QueryBuilder builder) {
+					FashionSearch fs = (FashionSearch) builder.getData();
+					for (String string : args) {
+						Filter ft = new Filter();
+						ft.setType(type);
+						ft.setId(ID);
+						ft.setValue(string);
+						ft.setTerm(string);
+						fs.getFilters().add(ft);
+					}
+					return builder;
+				}
+			};
+		};
+		return fprov;
+	}
 	
 	@Override
 	public QueryBuilder getBuilder(CommonQuery q) {
@@ -94,7 +112,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
 	
 	public String getSourceName() {
-		return "EFashion";
+		return LABEL;
 	}
 
 	@Override
@@ -136,14 +154,14 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 			}
 			res.items = a;
 			
-			CommonFilterLogic type = CommonFilterLogic.typeFilter();
+			CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
 			
 			JsonNode o = response.path("facets");
-			readList(o.path("objectType"), type);
+			readList(o.path("dataProviders"), dataProvider);
 
 
 			res.filtersLogic = new ArrayList<>();
-			res.filtersLogic.add(type);
+			res.filtersLogic.add(dataProvider);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -16,45 +16,11 @@
 
 package espace.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommonQuery {
-
-	public static class CoordinateRange {
-		public String startPoint;
-		public String endPoint;
-	}
-
-	public static class SpatialParams {
-		public CoordinateRange latitude;
-		public CoordinateRange longitude;
-	}
-
-	public static class Refinement {
-		public List<String> refinementTerms;
-		public SpatialParams spatialParams;
-	}
-
-	public static class Facets {
-		public List<String> TYPE;
-		public List<String> LANGUAGE;
-		public List<String> YEAR;
-		public List<String> COUNTRY;
-		public List<String> RIGHTS;
-		public List<String> PROVIDER;
-		public List<String> UGC;
-
-	}
-
-	public static class EuropeanaAPI {
-		public String who;
-		public String where;
-		public Facets facets;
-		public Refinement refinement;
-		public List<String> reusability;
-
-	}
+public class CommonQuery implements Cloneable{
 
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
@@ -67,9 +33,7 @@ public class CommonQuery {
 	public boolean uploadedByUser = false;
 
 	public List<CommonFilter> filters;
-
-	public EuropeanaAPI europeanaAPI;
-
+	
 	public CommonQuery(String generalQueryBody) {
 		super();
 		this.searchTerm = generalQueryBody;
@@ -87,7 +51,40 @@ public class CommonQuery {
 		this.searchTerm = query;
 	}
 
+	public List<CommonQuery> splitFilters(){
+		if (filters==null || filters.size()==0)
+			return Arrays.asList(this);
+		else
+			return splitFilters(0,new ArrayList<>(), new ArrayList<CommonQuery>());
+	}
 
+
+	private List<CommonQuery> splitFilters(int i, 
+			ArrayList<CommonFilter> arrayList, 
+			ArrayList<CommonQuery> result) {
+		if (i==filters.size()){
+			CommonQuery clone;
+			try {
+				
+				clone = (CommonQuery) clone();
+				clone.filters = (List<CommonFilter>) arrayList.clone();
+				result.add(clone);
+				
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		if (i<filters.size()){
+			for (CommonFilter f : filters.get(i).splitValues()) {
+				arrayList.add(f);
+				splitFilters(i+1,arrayList,result);
+				arrayList.remove(f);
+			}
+		}
+		return result;
+	}
 
 	@Override
 	public String toString() {
@@ -111,5 +108,10 @@ public class CommonQuery {
 
 	public String getUser() {
 		return user;
+	}
+	
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
 	}
 }
