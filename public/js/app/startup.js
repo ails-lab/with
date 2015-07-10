@@ -22,6 +22,8 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
+	ko.components.register('api-docu', { require: 'components/api-documentation/api-documentation' });
+
 
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
