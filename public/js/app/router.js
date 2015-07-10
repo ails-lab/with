@@ -23,6 +23,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } },
 			{ url: 'reset/{token}', params: { page: 'new-password', title: 'Reset Password' } },
 			{ url: 'testsearch', params: { page: 'testsearch', title: 'testsearch' } }
+			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } }
 		]
 	});
 

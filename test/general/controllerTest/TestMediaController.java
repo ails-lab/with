@@ -318,7 +318,7 @@ public class TestMediaController {
 				response = hc.execute( aFile );
 				String jsonResponse = EntityUtils.toString(
 						response.getEntity(), "UTF8");
-				String id = JsonPath.parse( jsonResponse ).read( "$['results'][0]['testImage001.jpg']"); 
+				String id = JsonPath.parse( jsonResponse ).read( "$['results'][0]['mediaId']"); 
 				aFile.releaseConnection();
 				
 				assertThat( id ).isNotEmpty();
@@ -330,7 +330,7 @@ public class TestMediaController {
 				// maybe remove the media again
 				HttpDelete del = new HttpDelete( "http://localhost:3333/media/"+id);
 				response = hc.execute(del);
-				assertThat( response.getStatusLine().getStatusCode() ).equals( 200 );
+				assertThat( response.getStatusLine().getStatusCode() ).isEqualTo( 200 );
 				
 			} catch( Exception e ) {
 				Assert.fail( e.toString() );
