@@ -189,21 +189,25 @@ public class MediaController extends Controller {
 								byte[] thumbByte = baos.toByteArray();
 								baos.close();
 								Media thumbMedia = new Media();
-								thumbMedia = med;
+								thumbMedia.setMimeType(med.getMimeType());
+								thumbMedia.setFilename(med.getFilename());
+								thumbMedia.setOwnerId(med.getOwnerId());
+								med.setType(med.getType());
 								thumbMedia.setData(thumbByte);
 								thumbMedia.setWidth(thumb.getWidth());
 								thumbMedia.setHeight(thumb.getHeight());
 								thumbMedia.setThumbnail(true);
 								thumbMedia.setOriginal(false);
 								DB.getMediaDAO().makePermanent(thumbMedia);
-								singleRes.put(fp.getFilename() + "_thumb",
-										thumbMedia.getDbId().toString());
+								singleRes.put("thumbnailUrl", "/media/"
+										+ thumbMedia.getDbId().toString());
 							}
 						}
 						med.setData(FileUtils.readFileToByteArray(fp.getFile()));
+						med.setDbId(null);
 						DB.getMediaDAO().makePermanent(med);
-						singleRes.put(fp.getFilename(), med.getDbId()
-								.toString());
+						singleRes.put("isShownBy", "/media/"
+								+ med.getDbId().toString());
 						allRes.add(singleRes);
 					} catch (Exception e) {
 						ObjectNode singleRes = Json.newObject();
