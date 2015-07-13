@@ -15,11 +15,13 @@
 				        <div class="value">
 						 	<input id="usernameOrEmail" class="user-selection" type="search" data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.addToSharedWithUsers"/>
 						 	<span class="glyphicon glyphicon-eye-open" title="Read"
-				 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
+				 				data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')"
+				 				aria-hidden="true" style="padding-left:20px;cursor:pointer">
 				 			</span>
 				 			<span class="glyphicon glyphicon-user" title="Collaborate"
-				 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')" 
-				 	aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>
+				 				data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')" 
+				 				aria-hidden="true" style="padding-left:20px;cursor:pointer">
+				 			</span>
 						 </div>
 				      </div>
 				    </div>
@@ -32,13 +34,15 @@
 					<div class="col-md-3">
 						 <div class="col-xs-12 col-sm-12 col-md-12 coll-footer" >
 						 <!-- ko if: $data.image -->
-							<img class="img-circle img-thumbnail" data-bind="attr: { src: image}, 		
-							style: {border: accessRights()=='READ'? '5px solid blue' : '5px solid red'},
-							click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'WRITE')"/>
+						 <figure id="user-image">
+							<img class="img-circle img-thumbnail "  data-bind="attr: { src: image}, 		
+							style: {border: accessRights()=='READ'? '5px solid blue' : '5px solid red'}
+							"/>
+							</figure>
 						 <!-- /ko -->
 						 <!-- ko else -->
-							<img src="images/user.png" class="img-circle img-thumbnail" id="profile-image
-							style: {border: accessRights()=='READ'? '5px solid blue' : '5px solid red'}"/>
+							<img src="images/user.png" class="img-circle img-thumbnail" id="user-image"
+							data-bind = "style: {border: accessRights()=='READ'? '5px solid blue' : '5px solid red'}"/>
 						 <!-- /ko -->	
 						 </div>	
 						 <span data-bind="text: username()"></span>

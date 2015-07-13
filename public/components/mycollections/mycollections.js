@@ -223,20 +223,30 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				url         : "/user/findByUsernameOrEmail",
 				data: "emailOrUsername="+username+"&collectionId="+collId,
 				success		: function(result) {
-					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
-						   return item.username() === username;
-					});
-					if (index < 0) {
-						self.usersToShare.push(ko.mapping.fromJS(result));
-						self.shareCollection();
-					}
+					self.shareCollection(clickedRights, result, collId);
 				}
 			});
 		}
 
-		self.shareCollection = function(clickedRights) {
-			var currentRights = this.accessRights();
-			var username = this.username();
+		self.shareCollection = function(clickedRights, userData, collId) {
+			var username = userData.username;
+			var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+				   return item.username() === username;
+			});
+			if (index < 0) {
+				var currentRights = userData.accessRights;
+				$.ajax({
+					"url": "/rights/"+collId+"/"+clickedRights+"?username="+username,
+					"method": "GET",
+					"contentType": "application/json",
+					success: function(result) {
+						self.usersToShare.push(ko.mapping.fromJS(userData));
+						$("#user-image").mouseover(function() {
+							  $("#user-image").append("");
+						});
+					}
+				});
+			}
 		}
 		
 		/*
