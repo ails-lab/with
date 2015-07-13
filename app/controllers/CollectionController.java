@@ -576,6 +576,8 @@ public class CollectionController extends Controller {
 
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
+			//get totalLikes
+			record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(record.getExternalId()));
 			record.setCollectionId(new ObjectId(collectionId));
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
@@ -599,6 +601,10 @@ public class CollectionController extends Controller {
 						position);
 			} else {
 				DB.getCollectionRecordDAO().makePermanent(record);
+				if(c.getTitle().equals("_favorites")) {
+					DB.getCollectionRecordDAO().incrementLikes(record.getExternalId());
+					record = DB.getCollectionRecordDAO().get(record.getDbId());
+				}
 				// record in first entries does not contain the content metadata
 				status = addRecordToFirstEntries(record, result, collectionId);
 			}
@@ -612,11 +618,22 @@ public class CollectionController extends Controller {
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
 
-				// index record and merged_record
+				// index record and merged_record and inrement likes
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
+				//increment likes if collection title is _favourites
+				if(c.getTitle().equals("_favorites") &&
+					(record.getTotalLikes() > 0)) {
+					ElasticUpdater updater = new ElasticUpdater(null, record);
+					updater.incLikes();
+				}
 			} else {
 				addContentToRecord(record.getDbId(), source, sourceId);
+				//increment likes if collection title is _favourites
+				if(c.getTitle().equals("_favorites")) {
+					ElasticUpdater updater = new ElasticUpdater(null, record);
+					updater.incLikes();
+				}
 			}
 			return status;
 		}
@@ -755,6 +772,12 @@ public class CollectionController extends Controller {
 		int position = 0;
 		if (collection.isExhibition()) {
 			position = record.getPosition();
+		}
+		//decrement likes from records
+		if(collection.getTitle().equals("_favorites")) {
+			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
+			ElasticUpdater updater = new ElasticUpdater(null, record);
+			updater.decLikes();
 		}
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
