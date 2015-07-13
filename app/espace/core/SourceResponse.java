@@ -27,6 +27,7 @@ import org.elasticsearch.search.SearchHit;
 
 import play.libs.Json;
 import utils.ExtendedCollectionRecord;
+import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -126,4 +127,16 @@ public class SourceResponse {
 	public JsonNode facets;
 	public List<CommonFilterResponse> filters;
 	public List<CommonFilterLogic> filtersLogic;
+	
+	public SourceResponse merge(SourceResponse r2) {
+		SourceResponse res = new SourceResponse();
+		res.source = r2.source;
+		res.count = count + r2.count;
+		res.items = new ArrayList<>();
+		res.items.addAll(items);
+		res.items.addAll(r2.items);
+		res.filtersLogic = filtersLogic;
+		FiltersHelper.merge(res.filtersLogic, r2.filtersLogic);
+		res.filters = ListUtils.transform(res.filtersLogic, (CommonFilterLogic x)->{ return x.export(); });
+	}
 }
