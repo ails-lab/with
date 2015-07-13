@@ -15,6 +15,11 @@ function ApiDocuModel(params) {
 		this.route = params.route;
 	}
 
+	
+
+
+	
+
 
 	return { viewModel: ApiDocuModel, template: template };
 	
