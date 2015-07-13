@@ -348,6 +348,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			return $(items);
 		}
 
+		self.uploadItem = function() {
+			app.showPopup('image-upload');
+		};
+
 		self.revealItems = function (data) {
 			var items = [];
 			for (var i in data) {

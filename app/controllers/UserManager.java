@@ -70,6 +70,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
+import elastic.ElasticIndexer;
+
 public class UserManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserManager.class);
@@ -105,7 +107,7 @@ public class UserManager extends Controller {
 			}
 			String image = UserManager.getImageBase64(u);
 			if (image != null) {
-				((ObjectNode) userJSON).put("image", image);
+				userJSON.put("image", image);
 			}
 			return ok(userJSON);
 		};
@@ -266,6 +268,8 @@ public class UserManager extends Controller {
 		fav.setOwnerId(user.getDbId());
 		fav.setTitle("_favorites");
 		DB.getCollectionDAO().makePermanent(fav);
+		ElasticIndexer indexer = new ElasticIndexer(fav);
+		indexer.indexCollectionMetadata();
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
 		result.remove("md5Password");
@@ -780,7 +784,7 @@ public class UserManager extends Controller {
 	public static Result resetPassword(String emailOrUserName) {
 
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 		User u = null;
 		String md5 = "";
 
@@ -926,10 +930,10 @@ public class UserManager extends Controller {
 			try {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
 				long timestamp = input.get("timestamp").asLong();
-				if (new Date().getTime() < (timestamp + TOKENTIMEOUT * 360 * 24 /*
+				if (new Date().getTime() < (timestamp + (TOKENTIMEOUT * 360 * 24 /*
 																				 * 24
 																				 * hours
-																				 */)) {
+																				 */))) {
 					result.put("message", "Token is valid");
 					return ok(result);
 				} else {
@@ -952,10 +956,10 @@ public class UserManager extends Controller {
 				JsonNode input = Json.parse(Crypto.decryptAES(token));
 				String userId = input.get("user").asText();
 				long timestamp = input.get("timestamp").asLong();
-				if (new Date().getTime() < (timestamp + TOKENTIMEOUT * 360 * 24 /*
+				if (new Date().getTime() < (timestamp + (TOKENTIMEOUT * 360 * 24 /*
 																				 * 24
 																				 * hours
-																				 */)) {
+																				 */))) {
 					u = DB.getUserDAO().get(new ObjectId(userId));
 					if (u != null) {
 						u.setPassword(newPassword);

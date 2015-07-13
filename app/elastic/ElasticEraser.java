@@ -88,7 +88,7 @@ public class ElasticEraser {
 						Elastic.index,
 						Elastic.type_general,
 						record.getExternalId())
-				.addScriptParam("id", record.getCollectionId())
+				.addScriptParam("id", record.getCollectionId().toString())
 				.addScriptParam("tags", record.getTags().toArray())
 				.setScript("for(String t: tags) {"
 					+ "if(ctx._source.tags.contains(t))"
@@ -97,7 +97,7 @@ public class ElasticEraser {
 					+ "ctx._source.collections.remove(id);", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {
-			log.error("Cannot update collection rights!", e);
+			log.error("Cannot delete entries from merged record!", e);
 		}
 	}
 }

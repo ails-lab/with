@@ -1,0 +1,45 @@
+<div class="modal-dialog imageUploadPopup">
+	<div class="modal-content text-left">
+		<div class="modal-header">
+			<button type="button" class="close" data-bind="click: close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<h4>Upload Image</h4>
+		</div>
+		<div class="modal-body row">
+			<form id="image-upload">
+				<div class="form-group">
+					<div class="row">
+						<div class="col-sm-2 col-ms-12 col-xs-12 text-center">
+							<div data-bind="if: imageURL" id="uploaded-image">
+								<img class="img-thumbnail" data-bind="attr: { src: imageURL }" />
+							</div>
+							<div data-bind="ifnot: imageURL" id="uploaded-image">
+								<img src="images/no_image.jpg" class="img-thumbnail" />
+							</div>
+
+							<br />
+							<div class="btn btn-default btn-browse">
+								Browse <input type="file" id="imageupload" name="image" />
+							</div>
+						</div>
+					</div>
+
+					<div class="progress" id="progress" style="height: 10px; margin-top: 20px;">
+						<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+					</div>
+				</div>
+				<div class="form-group" data-bind="validationElement: title">
+					<label for="itemTitle">Title</label>
+					<input type="text" class="form-control" placeholder="Title" id="itemTitle" data-bind="value: title, valueUpdate: 'afterkeypress', hasFocus: true;">
+				</div>
+				<div class="form-group">
+					<label for="itemDescription">Description</label>
+					<textarea rows="4" class="form-control" placeholder="Description..." id="itemDescription" data-bind="value: description"></textarea>
+				</div>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default" data-bind="click: close">Close</button>
+			<button type="button" class="btn btn-primary" data-bind="click: uploadImage">Save</button>
+		</div>
+	</div>
+</div>
