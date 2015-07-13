@@ -18,6 +18,7 @@ package db;
 
 import java.util.List;
 
+import model.Collection;
 import model.CollectionRecord;
 import model.User;
 
@@ -86,6 +87,16 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).asList();
 	}
 
+	public int getTotalLikes(String extId) {
+		Query<CollectionRecord> q = this.createQuery().field("externalId").equal(extId)
+				.limit(1);
+		List<CollectionRecord> list = this.find(q).asList();
+		if( list.size() > 0)
+			return list.get(0).getTotalLikes();
+		else
+			return 0;
+	}
+
 	public long countBySource(String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
 				//.field("source").equal(source)
@@ -141,4 +152,27 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		this.update(q, updateOps);
 	}
 
+	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
+		List<CollectionRecord> mergedRecord = getByUniqueId(extId);
+		for(CollectionRecord mr: mergedRecord) {
+			if(mr.getIsPublic() && !mr.getDbId().toString().equals(dbId.toString()))
+				return true;
+		}
+		return false;
+	}
+
+
+	public void incrementLikes(String externalId) {
+		Query<CollectionRecord> q = this.createQuery().field("externalId").equal(externalId);
+		UpdateOperations<CollectionRecord> updateOps = this.createUpdateOperations();
+		updateOps.inc("totalLikes");
+		this.update(q, updateOps);
+	}
+
+	public void decrementLikes(String externalId) {
+		Query<CollectionRecord> q = this.createQuery().field("externalId").equal(externalId);
+		UpdateOperations<CollectionRecord> updateOps = this.createUpdateOperations();
+		updateOps.dec("totalLikes");
+		this.update(q, updateOps);
+	}
 }

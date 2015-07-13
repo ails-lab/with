@@ -58,13 +58,11 @@ public class WithSpaceSource extends ISpaceSource {
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
 
-		SearchOptions elasticoptions = null;
-		List<Collection> colFields = null;
-		if(q.user == null) {
-			elasticoptions = new SearchOptions(offset, count);
-			elasticoptions.addFilter("isPublic", "true");
-			colFields = new ArrayList<Collection>();
-		} else {
+		SearchOptions elasticoptions = new SearchOptions(offset, count);
+		List<Collection> colFields = new ArrayList<Collection>();
+		elasticoptions.addFilter("isPublic", "true");
+
+		if(q.user != null) {
 			elasticoptions = new SearchOptions();
 			elasticoptions.setUser(q.getUser());
 			searcher.setType(Elastic.type_collection);
@@ -75,19 +73,18 @@ public class WithSpaceSource extends ISpaceSource {
 
 		//search merged_record type
 		searcher.setType(Elastic.type_general);
-		elasticoptions.setFilterType("OR");
+		//elasticoptions.setFilterType("OR");
 		//which collections are available
-		elasticoptions.addFilter("collections", "no_collections_found");
+		//elasticoptions.addFilter("collections", "no_collections_found");
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}
 		//which source are available
+		elasticoptions.addFilter("source", "no sources selected");
 		if(q.mintSource)
 			elasticoptions.addFilter("source", "mint");
 		if(q.uploadedByUser)
 			elasticoptions.addFilter("source", "uploadedByUser");
-		if(!q.mintSource && !q.uploadedByUser)
-			elasticoptions.addFilter("source", "no sources selected");
 
 		SearchResponse resp = searcher.search(term, elasticoptions);
 		searcher.closeClient();
