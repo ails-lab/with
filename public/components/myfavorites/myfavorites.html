@@ -8,8 +8,7 @@
 						<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src: cachedThumbnail }" />
 					</a>
 					<figcaption data-bind="html: displayTitle" class="displayTitle"></figcaption>
-					<div class="sourceCredits">
-
+					<div class="sourceCredits" data-bind="visible: sourceCredits().length > 0">
 						<a data-bind="attr: { href: sourceUrl }, text: sourceCredits" target="_new"></a>
 					</div>
 				</figure>

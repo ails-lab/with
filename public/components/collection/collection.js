@@ -245,7 +245,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
 
-					$.smkAlert({text:'Collection created"', type:'success'});
+					$.smkAlert({text:'Collection created', type:'success'});
 
 					self.collectionlist.push({
 						"id": data.dbId,
@@ -329,7 +329,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 					}
 
-					$.smkAlert({text:'Item added!"', type:'success'});
+					$.smkAlert({text:'Item added!', type:'success'});
 					self.close();
 				},
 

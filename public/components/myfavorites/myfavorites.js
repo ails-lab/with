@@ -12,16 +12,29 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 			var vm = ko.mapping.fromJS(options.data);
 
 			vm.cachedThumbnail = ko.pureComputed(function() {
-				return '/cache/byUrl?url=' + encodeURIComponent(vm.thumbnailUrl());
+				if (vm.thumbnailUrl().indexOf('/') === 0) {
+					return vm.thumbnailUrl();
+				} else {
+					return '/cache/byUrl?url=' + encodeURIComponent(vm.thumbnailUrl());
+				}
 			});
 
 			vm.displayTitle = ko.pureComputed(function() {
 				var distitle = "";
 				distitle = '<b>' + vm.title() + '</b>';
-				if (vm.creator !== undefined && vm.creator().length > 0)
+				if (vm.creator !== undefined && vm.creator().length > 0) {
 					distitle += ", by " + vm.creator();
-				if (vm.provider !== undefined && vm.provider().length > 0 && vm.provider() != vm.creator())
-					distitle += ", " + vm.provider();
+
+					if (vm.provider !== undefined && vm.provider().length > 0 && vm.provider() != vm.creator()) {
+						distitle += ", " + vm.provider();
+					}
+				}
+				else {
+					if (vm.provider !== undefined && vm.provider().length > 0) {
+						distitle += ", " + vm.provider();
+					}
+				}
+
 				return distitle;
 			});
 
@@ -51,6 +64,7 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 			});
 
 			vm.isLoaded = ko.observable(false);
+			if (vm.sourceUrl === undefined) { vm.sourceUrl = ko.observable(); } // Uploaded items have no source url
 
 			return vm;
 		}

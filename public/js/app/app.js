@@ -223,8 +223,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	});
 
-	showPopup = function (name) {
+	showPopup = function (name, params) {
 		popupName(name);
+		if (params !== undefined) {
+			popupParams(params);
+		}
 		$('#popup').modal('show');
 	};
 
@@ -232,6 +235,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	closePopup = function () {
 		$('#popup').modal('hide');
 		popupName("empty");
+		popupParams("{}");
 	};
 
 	// Check if user information already exist in session
