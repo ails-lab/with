@@ -213,11 +213,17 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
-			$container.masonry({
-			    itemSelector: '.masonryitem',
-			    gutter:15,isFitWidth: true,transitionDuration:transDuration
-			  });
-			 $container.masonry( 'layout' );
+			$container.imagesLoaded(function () {
+				
+    			
+    				$container.masonry({
+					    itemSelector: '.masonryitem',
+					    gutter:15,isFitWidth: true
+					  });
+    				$container.masonry( 'layout' );
+				
+			});
+			
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -502,6 +508,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
 				withinput.blur();
+				self.dispose();
 
 			}
 			else {
@@ -549,6 +556,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 	
   }
+	
+	
+	SearchModel.prototype.dispose = function() {
+		console.log("dispose function called");
+		
+	}
 
   return { viewModel: SearchModel, template: template };
 });
