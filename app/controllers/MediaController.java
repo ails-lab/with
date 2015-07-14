@@ -208,6 +208,7 @@ public class MediaController extends Controller {
 						DB.getMediaDAO().makePermanent(med);
 						singleRes.put("isShownBy", "/media/"
 								+ med.getDbId().toString());
+						singleRes.put("externalId", med.getDbId().toString());
 						allRes.add(singleRes);
 					} catch (Exception e) {
 						ObjectNode singleRes = Json.newObject();
