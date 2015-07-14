@@ -4,16 +4,76 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 	 var transDuration='0.4s';
 	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 	 if(isFirefox){transDuration=0;}
+	 var $container = $('#columns');
+	 
+	 
+	
 
-    ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    	var $element = $(element);
-    	    $element.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
+	 ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+	    	var $element = $(element);
+	    	    $element.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 
-		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+			    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 
-		        $element.masonry("destroy");
-		    });
+			        $element.masonry("destroy");
+			    });
 
+	    }
+	    };
+	 
+
+    ko.bindingHandlers.foreachmasonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+    	 return ko.bindingHandlers.foreach.init(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
+
+    },
+    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+ 
+        var $el = $(element);
+        var value = ko.utils.unwrapObservable(valueAccessor());
+         
+        var key = "masonry_added";
+      
+        var newValue = function () {
+            return {
+                data: value,
+                afterAdd: function (ele, index, data) {
+                    if (ko.utils.domData.get(element, key)) {
+                    	
+                    	if (ele.nodeType === 1) { // Element type
+                    		//$(ele).css('opacity','0');
+                    		$(ele).hide();
+                    		
+                    		
+                    		$(element).imagesLoaded(function () {
+        						
+                    			if (!($(element).data('masonry'))){
+        							$(element).masonry({
+        							    itemSelector: '.masonryitem',
+        							    gutter:15,isFitWidth: true,transitionDuration:transDuration
+        							  });
+        						}
+                    			$(element).masonry('appended', $(ele)).masonry( 'layout');
+        						$(ele).fadeIn();
+        						
+        					});
+        				}
+                    	
+                    	
+                   }
+                }
+            };
+        };
+ 
+      
+        
+        ko.bindingHandlers.foreach.update(element, newValue, allBindingsAccessor, viewModel, bindingContext);
+
+        //if we have not previously marked this as initialized and there are currently items in the array, then cache on the element that it has been initialized
+       if (!ko.utils.domData.get(element, key) && value.length) {
+            ko.utils.domData.set(element, key, true);
+        }
+
+        return { controlsDescendantBindings: true };
     }
     };
 
@@ -21,41 +81,41 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 	function Record(data) {
 		var self = this;
-		self.recordId = ko.observable("");
-		self.title = ko.observable(false);
-		self.description=ko.observable(false);
-		self.thumb = ko.observable("");
-		self.fullres=ko.observable(false);
-		self.view_url=ko.observable(false);
-		self.source=ko.observable(false);
-		self.creator=ko.observable("");
-		self.provider=ko.observable("");
-		self.rights=ko.observable("");
-		self.url=ko.observable("");
-		self.externalId = ko.observable("");
+	    self.recordId = "";
+		self.title = "";
+		self.description="";
+		self.thumb = "";
+		self.fullres="";
+		self.view_url="";
+		self.source="";
+		self.creator="";
+		self.provider="";
+		self.rights="";
+		self.url="";
+		self.externalId = "";
 		self.isLiked = ko.computed(function () {
-			return app.isLiked(self.externalId());
+			return app.isLiked(self.externalId);
 		});
-		//self.id=ko.observable("");
 		self.load = function(data) {
 			if(data.title==undefined){
-				self.title("No title");
-			}else{self.title(data.title);}
-			self.url("#item/"+data.recordId);
-			self.view_url(data.view_url);
-			self.thumb(data.thumb);
-			self.fullres(data.fullres);
-			self.description(data.description);
-			self.source(data.source);
-			self.creator(data.creator);
-			self.provider(data.provider);
-			self.rights(data.rights);
-			self.recordId(data.recordId);
-			self.externalId(data.externalId);
+				self.title="No title";
+			}else{self.title=data.title;}
+			self.url="#item/"+data.recordId;
+			self.view_url=data.view_url;
+			self.thumb=data.thumb;
+			//self.imageThumb(data.thumb);
+			self.fullres=data.fullres;
+			self.description=data.description;
+			self.source=data.source;
+			self.creator=data.creator;
+			self.provider=data.provider;
+			self.rights=data.rights;
+			self.recordId=data.recordId;
+			self.externalId=data.externalId;
 		};
 
 		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source()) {
+			 switch(self.source) {
 			    case "DPLA":
 			    	return "dp.la";
 			    case "Europeana":
@@ -77,11 +137,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
-			distitle=self.title();
-			if(self.creator()!==undefined && self.creator().length>0)
-				distitle+=", by "+self.creator();
-			if(self.provider()!==undefined && self.provider().length>0 && self.provider()!=self.creator())
-				distitle+=", "+self.provider();
+			distitle=self.title;
+			if(self.creator!==undefined && self.creator.length>0)
+				distitle+=", by "+self.creator;
+			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
+				distitle+=", "+self.provider;
 			return distitle;
 		});
 
@@ -118,20 +178,20 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 	function SearchModel(params) {
 		var self = this;
-
-
-		var $container = $('#columns');
 		var $request;
 		self.filterselect=ko.observable(false);
 		self.filterselection=ko.observableArray([]);
+		
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([ "Europeana", "EFashion","DPLA","YouTube","DigitalNZ","NLA","Mint"]);
+		self.sources= ko.observableArray([ "Europeana","DPLA","YouTube","DigitalNZ","NLA","Mint"]);
 		self.mixresults=ko.observableArray([]);
+		
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
+
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
@@ -144,8 +204,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.page = ko.observable(1);
 		self.pageSize=ko.observable(20);
 		self.next = ko.observable(-1);
-		self.filters=ko.observableArray([]);
-
+	    self.filters=ko.observableArray([]);
+	
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
@@ -157,8 +217,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			    itemSelector: '.masonryitem',
 			    gutter:15,isFitWidth: true,transitionDuration:transDuration
 			  });
-
-
+			 $container.masonry( 'layout' );
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -167,8 +226,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		};
 
 		self.reset = function() {
-			 if($request!==undefined)$request.abort();
-
+			if($request!==undefined)$request.abort();
 			self.term("");
 			self.currentTerm = ko.observable("");
 			self.page(1);
@@ -202,14 +260,16 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				    filters:self.filterselection()
 				}),
 				"success": function(reply) {
+
 					self.previous(self.page()-1);
 					var moreitems=false;
                     var data=reply.responces;
-
-                    var filters=reply.filters;
+					
+					var filters=reply.filters;
                     if(facetinit || facetrecacl){
                     self.filters.removeAll();
                     self.filters().push.apply(self.filters(),filters);}
+				
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
@@ -221,7 +281,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						 var result = data[i].items[j];
 
 						 if(result !=null ){
-							 //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
 						 var record = new Record({
 							recordId: result.recordId || result.id,
 							thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
@@ -234,15 +293,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 							externalId: result.externalId,
 							source: source
 						  });
-						 items.push(record);}
+						  items.push(record);
+						 
+						  self.mixresults.push(record);
+						 }
 						}
-						if(items.length>0){
-							 var $newitems=getItems(items);
-						     self.mixresults.push.apply(self.mixresults, items);
-
-						     self.masonryImagesReveal( $newitems,$container );
-
-							}
+						
 						api_console="";
 						if(source=="Europeana"){
 							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
@@ -283,13 +339,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						}
 
 					}
-
-					if(moreitems){
-						self.next(self.page()+1);
-
-					}else{
-						self.next(-1);
-					}
+			    if(moreitems){
+							self.next(self.page()+1);
+						}else{
+							self.next(-1);
+						}
 				},
 				"complete":function(reply){
 					 self.searching(false);
@@ -307,7 +361,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		};
 
 
-      self.filtersearch = function() {
+		 self.filtersearch = function() {
     	  if($request!==undefined)$request.abort();
     	   self.filterselect(true);
 
@@ -354,10 +408,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		};
 
 		self.recordSelect= function (e){
-			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
-				   return record.recordId() === e;
-				});
-			itemShow(selrecord);
+			
+			itemShow(e);
 
 		}
 
@@ -378,10 +430,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.page(self.previous());
 			self._search(false,false);
 		};
-
 		self.defaultSource=function(item){
-			item.thumb('images/no_image.jpg');
-	     }
+			item.thumb='//placehold.it/300?text=image+missing';
+
+	    }
 
 	  var withsearch = $( '#withsearchid' );
 	  var selectedSources = ["YouTube", "Europeana"];
@@ -420,38 +472,19 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		    	 for (var i in suggestions) {
 		    		 var category = suggestions[i].data.category;
 		    		 var s = $(".autocomplete-suggestion").get(i);
+		    		
 		    	 }
+		    	
 		     },
 			 formatResult: function(suggestion, currentValue) {
 				var s = '<strong>' + currentValue + '</strong>';
 				s    += suggestion.value.substring(currentValue.length);
 				s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
+
 				return s;
 			 }
+
 	 });
-
-	  self.masonryImagesReveal = function( $items,$container ) {
-		  $items.hide();
-		  $container.append( $items );
-		  if (!($container.data('masonry'))){
-
-				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-
-			}
-		  $items.imagesLoaded().progress( function( imgLoad, image ) {
-
-		    var $item = $( image.img ).parents(".masonryitem" );
-		    ko.applyBindings(self, $item[ 0 ] );
-		    $item.show();
-		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
-
-		  });/*.always(
-				  self.searching(false)
-				  );
-         */
-
-		};
-
 
 	  ctrlClose =$("span.withsearch-close");
 	  isOpen = false;
@@ -463,13 +496,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			if( isOpen ) {
 				$('[id^="modal"]').removeClass('md-show').css('display', 'none');
 		    	$("#myModal").modal('hide');
-		    	$("#myModal").find("h4").html("");
 		    	$("body").removeClass("modal-open");
 
 
 				$("body").removeClass("noscroll");
 				withsearch.removeClass("open");
-
 				withinput.blur();
 
 			}
@@ -504,10 +535,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
     		}
     	);
 
-		self.likeRecord = function (id) {
-			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.externalId() === id;
-			});
+       self.likeRecord = function (rec) {
+		
 
 			app.likeItem(rec, function (status) {
 				if (status) {
@@ -518,37 +547,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			});
 		};
 
-        function getItem(record) {
-			var figure='<figure class="masonryitem">';
-			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '">';
-				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
-				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
-				figure += '</span></span>';
-			} else {
-				figure += '<span class="star" id="' + record.externalId() + '">';
-				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
-				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
-				figure += '</span></span>';
-			}
-
-			figure += '<a data-bind="event: { click: function() { recordSelect(\''+record.recordId()+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb()+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
-			+'<div class="sourceCredits"><a href="'+record.view_url()+'" target="_new">'+record.sourceCredits()+'</a></figure>';
-
-			return figure;
-		}
-
-          function getItems(data) {
-        	  var items = '';
-        	  for ( i in data) {
-        	    items += getItem(data[i]);
-        	  }
-        	  // return jQuery object
-        	  return $( items );
-        	}
-
-
-
+	
   }
 
   return { viewModel: SearchModel, template: template };
