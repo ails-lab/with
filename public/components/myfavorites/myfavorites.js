@@ -1,4 +1,4 @@
-define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'app', 'isotope', 'isotope', 'imagesloaded', 'bridget', 'smoke'], function (bootstrap, ko, template, KnockoutElse, app, Isotope, imagesLoaded) {
+define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'app', 'isotope', 'imagesloaded', 'bridget', 'smoke'], function (bootstrap, ko, template, KnockoutElse, app, Isotope, imagesLoaded) {
 
 	$.bridget('isotope', Isotope);
 	var transDuration = '0.4s';
@@ -110,7 +110,7 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 				self.loading(true);
 				var offset = self.items().length;
 				$.ajax({
-					"url": "/collection/555c974de4b0acf00e9c2829/list?count=20&start=" + offset,
+					"url": "/collection/favoriteCollection/list?count=20&start=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
