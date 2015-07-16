@@ -63,7 +63,6 @@ public class WithSpaceSource extends ISpaceSource {
 		elasticoptions.addFilter("isPublic", "true");
 
 		if(q.user != null) {
-			elasticoptions = new SearchOptions();
 			elasticoptions.setUser(q.getUser());
 			searcher.setType(Elastic.type_collection);
 			SearchResponse response = searcher.search(null, elasticoptions);

@@ -108,6 +108,8 @@ public class ElasticIndexer {
 						array.add(right);
 					}
    					doc.rawField(entry.getKey(), array.toString().getBytes());
+				} else if( entry.getKey().equals("itemCount") ) {
+					doc.field(entry.getKey(), entry.getValue().asInt());
 				} else if( !entry.getKey().equals("firstEntries") &&
 						  !entry.getKey().equals("rights") &&
 						  !entry.getKey().equals("dbId")) {
