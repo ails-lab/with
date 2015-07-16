@@ -237,13 +237,26 @@ public class ElasticSearcher {
 		else filterBuilder = FilterBuilders.andFilter();
 
 		if(options.filters.size() > 0) {
+			OrFilterBuilder accessibles = FilterBuilders.orFilter();
+			OrFilterBuilder sources 	= FilterBuilders.orFilter();
+			OrFilterBuilder others 		= FilterBuilders.orFilter();
 			for(String key: options.filters.keySet()) {
 				for(String value: options.filters.get(key)) {
-					if(options.filterType == FILTER_OR) ((OrFilterBuilder) filterBuilder).add(this.filter(key, value));
-					else ((AndFilterBuilder) filterBuilder).add(this.filter(key, value));
+					if(key.equals("isPublic") || key.equals("collections")) {
+						accessibles.add(this.filter(key, value));
+					} else if(key.equals("source")) {
+						sources.add(this.filter(key, value));
+					} else {
+						others.add(this.filter(key, value));
+					}
 				}
 			}
-
+			if(options.filterType == FILTER_OR) {
+				((OrFilterBuilder) filterBuilder).add(accessibles).add(sources).add(others);
+			}
+			else {
+				((AndFilterBuilder) filterBuilder).add(accessibles).add(sources).add(others);
+			}
 			QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
 			search.setQuery(filtered);
 		} else {
