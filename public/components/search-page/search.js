@@ -5,9 +5,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
 	 if(isFirefox){transDuration=0;}
 	 var $container = $('#columns');
-	 
-	 
-	
+
+
+
 
 	 ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 	    	var $element = $(element);
@@ -20,32 +20,32 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 	    }
 	    };
-	 
+
 
     ko.bindingHandlers.foreachmasonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
     	 return ko.bindingHandlers.foreach.init(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext);
 
     },
     update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
- 
+
         var $el = $(element);
         var value = ko.utils.unwrapObservable(valueAccessor());
-         
+
         var key = "masonry_added";
-      
+
         var newValue = function () {
             return {
                 data: value,
                 afterAdd: function (ele, index, data) {
                     if (ko.utils.domData.get(element, key)) {
-                    	
+
                     	if (ele.nodeType === 1) { // Element type
                     		//$(ele).css('opacity','0');
                     		$(ele).hide();
-                    		
-                    		
+
+
                     		$(element).imagesLoaded(function () {
-        						
+
                     			if (!($(element).data('masonry'))){
         							$(element).masonry({
         							    itemSelector: '.masonryitem',
@@ -54,18 +54,18 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
         						}
                     			$(element).masonry('appended', $(ele)).masonry( 'layout');
         						$(ele).fadeIn();
-        						
+
         					});
         				}
-                    	
-                    	
+
+
                    }
                 }
             };
         };
- 
-      
-        
+
+
+
         ko.bindingHandlers.foreach.update(element, newValue, allBindingsAccessor, viewModel, bindingContext);
 
         //if we have not previously marked this as initialized and there are currently items in the array, then cache on the element that it has been initialized
@@ -93,7 +93,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.rights="";
 		self.url="";
 		self.externalId = "";
-		self.isLiked = ko.computed(function () {
+		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
 		self.load = function(data) {
@@ -181,13 +181,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		var $request;
 		self.filterselect=ko.observable(false);
 		self.filterselection=ko.observableArray([]);
-		
+
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
 		self.sources= ko.observableArray([ "Europeana","DPLA","YouTube","DigitalNZ","NLA","Mint"]);
 		self.mixresults=ko.observableArray([]);
-		
+
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
@@ -205,7 +205,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.pageSize=ko.observable(20);
 		self.next = ko.observable(-1);
 	    self.filters=ko.observableArray([]);
-	
+
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
@@ -214,16 +214,16 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
 			$container.imagesLoaded(function () {
-				
-    			
+
+
     				$container.masonry({
 					    itemSelector: '.masonryitem',
 					    gutter:15,isFitWidth: true
 					  });
     				$container.masonry( 'layout' );
-				
+
 			});
-			
+
 		  }
 		else{
 			$('.withsearch-content').css({'overflow-x': 'auto'});
@@ -270,12 +270,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 					self.previous(self.page()-1);
 					var moreitems=false;
                     var data=reply.responces;
-					
+
 					var filters=reply.filters;
                     if(facetinit || facetrecacl){
                     self.filters.removeAll();
                     self.filters().push.apply(self.filters(),filters);}
-				
+
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
@@ -300,11 +300,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 							source: source
 						  });
 						  items.push(record);
-						 
+
 						  self.mixresults.push(record);
 						 }
 						}
-						
+
 						api_console="";
 						if(source=="Europeana"){
 							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
@@ -353,13 +353,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				},
 				"complete":function(reply){
 					 self.searching(false);
-					
+
 					if(facetinit)
 					  ko.dataFor(searchfacets).initFacets();
 					else if(facetrecacl){
 						ko.dataFor(searchfacets).recalcFacets();
 					}
-					
+
 				}
 			});
 
@@ -386,8 +386,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			}
 
 			self._search(false,true);
-			
-			
+
+
 
 		};
 
@@ -408,13 +408,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 			}
 			self.filterselect(false);
-			
+
 			self._search(facetinit,facetrecacl);
-			
+
 		};
 
 		self.recordSelect= function (e){
-			
+
 			itemShow(e);
 
 		}
@@ -478,9 +478,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		    	 for (var i in suggestions) {
 		    		 var category = suggestions[i].data.category;
 		    		 var s = $(".autocomplete-suggestion").get(i);
-		    		
+
 		    	 }
-		    	
+
 		     },
 			 formatResult: function(suggestion, currentValue) {
 				var s = '<strong>' + currentValue + '</strong>';
@@ -543,24 +543,22 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
     	);
 
        self.likeRecord = function (rec) {
-		
-
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$('#' + id).addClass('active');
+					// $('#' + id).addClass('active');
 				} else {
-					$('#' + id).removeClass('active');
+					// $('#' + id).removeClass('active');
 				}
 			});
 		};
 
-	
+
   }
-	
-	
+
+
 	SearchModel.prototype.dispose = function() {
 		console.log("dispose function called");
-		
+
 	}
 
   return { viewModel: SearchModel, template: template };
