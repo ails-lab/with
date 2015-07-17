@@ -60,8 +60,8 @@ DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null, email: String ?=null, userId: String ?=null)
 
 # Media Controller
-POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= false)
-GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=false)
+POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)
+GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 

@@ -58,9 +58,8 @@ public class WithSpaceSource extends ISpaceSource {
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
 
-		SearchOptions elasticoptions = new SearchOptions(offset, count);
+		SearchOptions elasticoptions = null;
 		List<Collection> colFields = new ArrayList<Collection>();
-		elasticoptions.addFilter("isPublic", "true");
 
 		if(q.user != null) {
 			elasticoptions = new SearchOptions();
@@ -70,6 +69,8 @@ public class WithSpaceSource extends ISpaceSource {
 			colFields = getCollectionMetadaFromHit(response.getHits());
 
 		}
+		elasticoptions = new SearchOptions(offset, count);
+		elasticoptions.addFilter("isPublic", "true");
 
 		//search merged_record type
 		searcher.setType(Elastic.type_general);

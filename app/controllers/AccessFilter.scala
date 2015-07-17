@@ -247,9 +247,8 @@ object FilterUtils {
     if( apikey != null ) {
       val arr = apikey.getKeyString().getBytes("UTF8").map( _ -1 )
       val script = """
-function sign(c,f){function e(a){for(var c=[],b=0;4>b;b++)c.push(a%256),a>>=8;return c}for(var d=[],b=%s,g=Math.max(b.length,c.length),a=0;a<g;a++)a<b.length?d[a]=b[a%b.length]+1^c.charCodeAt(a%c.length)&255:d[a%b.length]^=c.charCodeAt(a%c.length)&255;if(void 0!=f)for(b=e(f),a=0;a<d.length;a++)d[a]^=b[a%4];return function(a){for(var c="",b=0;b<a.length;b++)c=15<a[b]?c+a[b].toString(16).toUpperCase():c+("0"+a[b].toString(16).toUpperCase());return c}(d)}
-$.ajaxSetup({beforeSend:function(c,f){var e=(new Date).valueOf();c.setRequestHeader("X-auth1",e);c.setRequestHeader("X-auth2",sign(document.location.origin,e))}});
-""".replace("%s", "[" + arr.mkString( "," ) + "]" )
+function sign(c,f){function e(a){for(var c=[],b=0;4>b;b++)c.push(a%256),a>>>=8;return c}for(var d=[],b=%s,g=Math.max(b.length,c.length),a=0;a<g;a++)a<b.length?d[a]=b[a%b.length]+1^c.charCodeAt(a%c.length)&255:d[a%b.length]^=c.charCodeAt(a%c.length)&255;if(void 0!=f)for(b=e(f),a=0;a<d.length;a++)d[a]^=b[a%4];return function(a){for(var c="",b=0;b<a.length;b++)c=15<a[b]?c+a[b].toString(16).toUpperCase():c+("0"+a[b].toString(16).toUpperCase());return c}(d)}
+$.ajaxSetup({beforeSend:function(c,f){var e=(new Date).valueOf();c.setRequestHeader("X-auth1",e);c.setRequestHeader("X-auth2",sign(document.location.origin,e))}});""".replace("%s", "[" + arr.mkString( "," ) + "]" )
        play.api.mvc.Results.Ok( script ).as("application/javascript")      
     } else {
              play.api.mvc.Results.BadRequest( "Bad ApiKey" ).as("application/javascript")      
@@ -258,17 +257,12 @@ $.ajaxSetup({beforeSend:function(c,f){var e=(new Date).valueOf();c.setRequestHea
 }
 
 /**
- -- output of www.jsobfuscate.com
-function sign(e,c){function f(a){for(var c=[],b=0;4>b;b++)c.push(a%256),a>>=8;return c}console.log(c);var d=[],b=%s,g=Math.max(b.length,c.length);console.log(b);console.log(c);for(var a=0;a<g;a++)a<b.length?d[a]=b[a%b.length]+1^c.charCodeAt(a%c.length)&255:d[a%b.length]^=c.charCodeAt(a%c.length)&255;if(void 0!=e)for(b=f(e),a=0;a<d.length;a++)d[a]^=b[a%4];return function(a){for(var c="",b=0;b<a.length;b++)c=15<a[b]?c+a[b].toString(16).toUpperCase():c+("0"+a[b].toString(16).toUpperCase());
-return c}(d)}$.ajaxSetup({beforeSend:function(e,c){var f=(new Date).valueOf();e.setRequestHeader("X-auth1",f);e.setRequestHeader("X-auth2",sign(f,document.location.origin));console.log(c)}});*/
-
-/**
 function sign( param, time ) {
   function ta( n ) {
     var r = new Array();
     for( var i=0; i< 4; i++ ) {
       r.push( n%256);
-      n = n >> 8;
+      n = n >>> 8;
     }
     return r;
   }

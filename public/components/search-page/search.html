@@ -1,67 +1,64 @@
-
 <div id="withsearchid" class="withsearch" data-bind="event: { scroll: scrolled }">
-		<form class="withsearch-form">
-			<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
-			<div class="line">&nbsp;</div>
-			<button class="withsearch-submit" type="submit" data-bind="click: function() { search(true,true); }">Search</button>
-			<button class="withsearch-view" data-bind="click: toggleSourceview, enable: searching()==false" title="Change view...">
-				<span class="glyphicon glyphicon-th" data-bind="visible: !sourceview()"></span>
-				<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview()"></span>
-			</button>
-		</form>
+	<form class="withsearch-form">
+		<input class="withsearch-input" type="search" data-bind="value: term" placeholder="Search..."/>
+		<div class="line">&nbsp;</div>
+		<button class="withsearch-submit" type="submit" data-bind="click: function() { search(true, true); }">Search</button>
+		<button class="withsearch-view" data-bind="click: toggleSourceview, enable: searching() == false" title="Change view...">
+		<span class="glyphicon glyphicon-th" data-bind="visible: !sourceview()"></span>
+		<span class="glyphicon glyphicon-th-list" data-bind="visible: sourceview()"></span>
+		</button>
+	</form>
 
-				<div id="withsearch-content" class="withsearch-content">
-					 
-					
-					
-
-					
-					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
-					
-					<!-- ko if: noResults -->
-					<div class="withsearch-content-masonry">
-						<p>Your search did not return results. Please try again.</p></div>
-					<!-- /ko -->
-					
-					
-					<!-- ko if: results().length > 0 -->
-					 <div class="scrollable" data-bind="visible: sourceview()==true">
-					 
-				    <!-- ko foreach: results -->
-					<div class="dummy-column">
-					<h2>
-					 <!-- ko text: source --><!-- /ko -->
-					 <span class="withsearch-console"><a data-bind="attr: { href:consoleurl}" target="_blank"><i class="fa fa-external-link fa-1" title="API console"></i></a></span>
-					</h2>
-
-					 <!-- ko foreach: items -->
-					 
-					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
-							<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
-								<span><!-- ko text: title --><!-- /ko --></span>
-						</a>
-					   <!-- /ko -->
-					</div>
-					<!-- /ko -->
-					</div>
-					<!-- /ko -->
-					
-
-					 <div class="withsearch-content-masonry" data-bind="visible: sourceview()==false">
-					 
-						  <div id="columns" class="columns" data-bind="masonry,visible:mixresults().length>0"></div>
-						  
-	             	</div>
-					
-
-				 <div id="more" data-bind='visible: searching' >
-				   <i class="fa fa-spinner fa-pulse"></i>
-				</div>
-				</div>
-
-				<span class="withsearch-close"></span>
+	<div id="withsearch-content" class="withsearch-content">
+		<facets id="search-facets" data-bind="visible: filterselect() == true || results().length > 0" params="name:'search-filters', params: {}"></facets>
+		<!-- ko if: noResults -->
+		<div class="withsearch-content-masonry">
+			<p>Your search did not return results. Please try again.</p>
+		</div>
+		<!-- /ko -->
+		<!-- ko if: results().length > 0 -->
+		<div class="scrollable" data-bind="visible: sourceview() == true">
+			<!-- ko foreach: results -->
+			<div class="dummy-column">
+				<h2>
+					<!-- ko text: source --><!-- /ko -->
+					<span class="withsearch-console"><a data-bind="attr: { href:consoleurl }" target="_blank"><i class="fa fa-external-link fa-1" title="API console"></i></a></span>
+				</h2>
+				<!-- ko foreach: items -->
+				<a class="dummy-media-object" data-bind="event: { click: $parents[1].recordSelect }">
+					<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
+					<span><!-- ko text: title --><!-- /ko --></span>
+				</a>
+				<!-- /ko -->
 			</div>
+			<!-- /ko -->
+		</div>
+		<!-- /ko -->
+		<!-- ko if: mixresults().length > 0 && !sourceview()-->
+		<div class="withsearch-content-masonry">
+			<div id="columns" class="columns" data-bind="visible: mixresults().length > 0, foreachmasonry: mixresults, masonry">
+				<figure class="masonryitem">
+					<span class="star" data-bind="css: { active: isLiked }, visible: isLogged">
+						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</span>
+					<a data-bind="event: { click: $parent.recordSelect }, attr: { href: url }"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a>
+					<figcaption data-bind="text: displayTitle"></figcaption>
+					<div class="sourceCredits"><a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
+				</figure>
+			</div>
+		</div>
+		<!-- /ko -->
 
-			<div class="overlay"></div>
-			<item-view params="route: route"></item-view>
+		<div id="more" data-bind='visible: searching'>
+			<i class="fa fa-spinner fa-pulse"></i>
+		</div>
+	</div>
 
+	<span class="withsearch-close"></span>
+</div>
+
+<div class="overlay"></div>
+
+<item-view params="route: route"></item-view>

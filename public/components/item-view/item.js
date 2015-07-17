@@ -154,7 +154,6 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.collect = function (item) {
-
 			if (!isLogged()) {
 				showLoginPopup(self.record());
 			} else {

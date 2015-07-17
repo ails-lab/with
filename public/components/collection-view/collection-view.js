@@ -282,15 +282,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 							//find item index to see if it is first item
 							var index=ko.utils.arrayIndexOf(self.citems(),e);
 							console.log("index:"+index);
-							
+
 							self.citems.remove(e);
 							if ($("#" + e)) {
 								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
-							
+
 							self.itemCount(self.itemCount() - 1);
 							$.smkAlert({text:'Item removed from the collection', type:'success'});
-							
+
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							$.smkAlert({text:'An error has occured', type:'danger', time: 10});
@@ -349,7 +349,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		}
 
 		self.uploadItem = function() {
-			app.showPopup('image-upload');
+			app.showPopup('image-upload', { collectionId: self.id() });
 		};
 
 		self.revealItems = function (data) {

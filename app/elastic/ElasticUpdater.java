@@ -188,8 +188,7 @@ public class ElasticUpdater {
 						Elastic.index,
 						Elastic.type_collection,
 						collection.getDbId().toString())
-				.setScript("ctx._source.itemCount++;"
-						 + "ctx._source.itemCount_all++;", ScriptType.INLINE)
+				.setScript("ctx._source.itemCount++;", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {
 			log.error("Cannot increase itemCount!", e);
@@ -298,7 +297,6 @@ public class ElasticUpdater {
 						.setDoc(doc)
 						.get();
 		} else {
-
 				for(int i = 0; i<records.size(); i++) {
 					Elastic.getBulkProcessor().add(new UpdateRequest(
 							Elastic.index,

@@ -13,6 +13,10 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 		});
 		self.description = ko.observable().extend();
 		self.imageURL = ko.observable();
+		self.isShownBy = ko.observable();
+		self.thumbnailUrl = ko.observable();
+		self.collectionId = ko.observable(params.collectionId);
+		self.externalId = ko.observable();
 
 		$('#imageupload').fileupload({
 			type: "POST",
@@ -30,6 +34,9 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 					};
 					reader.readAsDataURL(data.files[0]);
 				}
+				self.isShownBy(data.result.results[0].isShownBy);
+				self.thumbnailUrl(data.result.results[0].thumbnailUrl);
+				self.externalId(data.result.results[0].externalId);
 			},
 			error: function (e, data) {
 				console.log(e);
@@ -43,7 +50,29 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 		};
 
 		self.uploadImage = function () {
-			console.log("Adding to the collection!");
+			var data = {
+				source: 'UploadedByUser',
+				title: self.title(),
+				description: self.description(),
+				provider: app.currentUser.username(),
+				type: 'IMAGE',
+				thumbnailUrl: self.thumbnailUrl(),
+				isShownBy: self.isShownBy(),
+				externalId: self.externalId()
+			};
+			$.ajax({
+				url: '/collection/' + self.collectionId() + '/addRecord',
+				method: 'POST',
+				data: JSON.stringify(data),
+				contentType: 'application/json',
+				success: function (data) {
+					self.close();
+					$.smkAlert({text: 'Item added to the collection', type: 'success'});
+				},
+				error: function (result) {
+					$.smkAlert({text: 'Error adding the item to the collection!', type:'danger', time: 10});
+				}
+			});
 		};
 
 		self.resizePhoto = function (src, width, height) {

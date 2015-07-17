@@ -67,21 +67,41 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	};
 
 	likeItem = function (record, update) {
-		var id = record.externalId();
-		var data = {
-			source: record.source(),
-			sourceId: record.recordId(),
-			title: record.title(),
-			provider: record.provider(),
-			creator: record.creator(),
-			description: record.description(),
-			rights: record.rights(),
-			type: '',
-			thumbnailUrl: record.thumb(),
-			sourceUrl: record.view_url(),
-			collectionId: self.currentUser.favoritesId(),
-			externalId: record.externalId()
-		};
+		var id, data;
+		if (ko.isObservable(record.externalId)) {
+			id = record.externalId();
+			data = {
+				source: record.source(),
+				sourceId: record.recordId(),
+				title: record.title(),
+				provider: record.provider(),
+				creator: record.creator(),
+				description: record.description(),
+				rights: record.rights(),
+				type: '',
+				thumbnailUrl: record.thumb(),
+				sourceUrl: record.view_url(),
+				collectionId: self.currentUser.favoritesId(),
+				externalId: record.externalId()
+			};
+		}
+		else {
+			id = record.externalId;
+			data = {
+				source: record.source,
+				sourceId: record.recordId,
+				title: record.title,
+				provider: record.provider,
+				creator: record.creator,
+				description: record.description,
+				rights: record.rights,
+				type: '',
+				thumbnailUrl: record.thumb,
+				sourceUrl: record.view_url,
+				collectionId: self.currentUser.favoritesId,
+				externalId: record.externalId
+			};
+		}
 
 		if (!self.isLiked(id)) {	// Like
 			$.ajax({
@@ -223,8 +243,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	});
 
-	showPopup = function (name) {
+	showPopup = function (name, params) {
 		popupName(name);
+		if (params !== undefined) {
+			popupParams(params);
+		}
 		$('#popup').modal('show');
 	};
 
@@ -232,6 +255,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	closePopup = function () {
 		$('#popup').modal('hide');
 		popupName("empty");
+		popupParams("{}");
 	};
 
 	// Check if user information already exist in session
