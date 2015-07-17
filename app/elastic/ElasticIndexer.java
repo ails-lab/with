@@ -20,10 +20,8 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import model.Collection;
 import model.CollectionRecord;
@@ -237,8 +235,10 @@ public class ElasticIndexer {
 			doc = jsonBuilder().startObject();
 			while( recordIt.hasNext() ) {
 				Entry<String, JsonNode> entry = recordIt.next();
-				if( !entry.getKey().equals("content") &&
-					!entry.getKey().equals("dbId")) {
+				if(	entry.getKey().equals("totalLikes") ) {
+						doc.field(entry.getKey(), entry.getValue().asInt());
+				} else if( !entry.getKey().equals("content") &&
+							!entry.getKey().equals("dbId")) {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());
 				}
