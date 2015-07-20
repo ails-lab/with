@@ -1,7 +1,7 @@
 
 var swaggerUi = new SwaggerUi({
   url:"http://localhost:9000/script.json",
-	spec: {
+  spec : {
 	    "swagger": "2.0",
 	    "info": {
 	        "version": "v1",
@@ -14,7 +14,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "Search"
 	                ],
-	                "description": "General search in external resources and the WITH database.",
+	                "summary": "General search in external resources and the WITH database.",
 	                "parameters": [
 	                    {
 	                        "in": "body",
@@ -88,6 +88,10 @@ var swaggerUi = new SwaggerUi({
 	                        "type": "string"
 	                    }
 	                ],
+	                "summary": "Show a collection",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK",
@@ -103,7 +107,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "Collection"
 	                ],
-	                "description": "Creates a new collection.",
+	                "summary": "Create a new collection.",
 	                "parameters": [
 	                    {
 	                        "in": "body",
@@ -157,6 +161,10 @@ var swaggerUi = new SwaggerUi({
 	            ],
 	            "post": {
 	                "description": "Adds a record to a collection, creating a new record that containts the specified metadata.",
+	                "summary": "Add a record",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "parameters": [
 	                    {
 	                        "in": "body",
@@ -188,6 +196,10 @@ var swaggerUi = new SwaggerUi({
 	            ],
 	            "delete": {
 	                "description": "Removes a record from a collection",
+	                "summary": "Remove a record",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "parameters": [
 	                    {
 	                        "name": "recordId",
@@ -214,6 +226,10 @@ var swaggerUi = new SwaggerUi({
 	            ],
 	            "get": {
 	                "description": "Retrieves all records from a collection.",
+	                "summary": "Retrieve all records",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "parameters": [
 	                    {
 	                        "name": "start",
@@ -254,7 +270,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            ],
 	            "get": {
-	                "description": "Retrieves collection metadata.",
+	                "summary": "Retrieves collection metadata.",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK",
@@ -265,7 +284,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            },
 	            "post": {
-	                "description": "Updates collection metadata.",
+	                "summary": "Updates collection metadata.",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "parameters": [
 	                    {
 	                        "in": "body",
@@ -297,7 +319,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            },
 	            "delete": {
-	                "description": "Deletes the collection.",
+	                "summary": "Deletes the collection.",
+	                "tags": [
+	                    "Collection"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK",
@@ -318,7 +343,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            ],
 	            "get": {
-	                "description": "Retrieves a record.",
+	                "summary": "Retrieves a record.",
+	                "tags": [
+	                    "Record"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK",
@@ -329,7 +357,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            },
 	            "post": {
-	                "description": "Updates a record.",
+	                "summary": "Updates a record.",
+	                "tags": [
+	                    "Record"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK",
@@ -340,7 +371,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            },
 	            "delete": {
-	                "description": "Removes a record.",
+	                "summary": "Removes a record.",
+	                "tags": [
+	                    "Record"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK",
@@ -367,6 +401,10 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            ],
 	            "post": {
+	                "summary": "Set rights",
+	                "tags": [
+	                    "Rights"
+	                ],
 	                "parameters": [
 	                    {
 	                        "name": "username",
@@ -400,6 +438,7 @@ var swaggerUi = new SwaggerUi({
 	                    "User"
 	                ],
 	                "description": "Creates a new user and stores at the database.",
+	                "summary": "Create new user",
 	                "produces": [
 	                    "application/json",
 	                    "application/xml"
@@ -464,6 +503,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
+	                "summary": "User login",
 	                "parameters": [
 	                    {
 	                        "in": "body",
@@ -499,6 +539,7 @@ var swaggerUi = new SwaggerUi({
 	        "/user/logout": {
 	            "get": {
 	                "description": "Browser cookie is removed (all session information is kept in cookie, nothing is stored on server).",
+	                "summary": "logout user",
 	                "tags": [
 	                    "User"
 	                ],
@@ -514,7 +555,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
-	                "description": "Checks email availability.",
+	                "summary": "Checks email availability.",
 	                "parameters": [
 	                    {
 	                        "name": "email",
@@ -543,7 +584,7 @@ var swaggerUi = new SwaggerUi({
 	                }
 	            ],
 	            "get": {
-	                "description": "Returns the complete user entry.",
+	                "summary": "Returns the complete user entry.",
 	                "tags": [
 	                    "User"
 	                ],
@@ -560,7 +601,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
-	                "description": "Updates user entry.",
+	                "summary": "Updates user entry.",
 	                "parameters": [
 	                    {
 	                        "in": "body",
@@ -585,7 +626,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
-	                "description": "Deletes the user.",
+	                "summary": "Deletes the user.",
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -606,6 +647,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
+	                "summary": "Reset password email.",
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -618,6 +660,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
+	                "summary": "Change password.",
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -638,6 +681,7 @@ var swaggerUi = new SwaggerUi({
 	                "tags": [
 	                    "User"
 	                ],
+	                "summary": "Get an API key.",
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
