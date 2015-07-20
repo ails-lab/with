@@ -129,8 +129,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			createNewCollection();
 		};
 
-
-
+		
 		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
@@ -214,6 +213,24 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		}
 		
+		self.showRightsIcons = function(userData) {
+			var accessRights = userData.accessRights();
+			var username = userData.username();
+			var collId = self.myCollections()[self.index()].dbId();
+			alert($("#figure"+username).html());
+			$("#figure"+username).append('<span class="glyphicon glyphicon-trash" title="Remove all rights"' +
+				 	'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"",' + collId + ')"' +
+				 	'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');
+			if (accessRights == "READ")
+				$("#figure"+username).append('<span class="glyphicon glyphicon-eye-open" title="Read"'+
+				 	'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"READ",' + collId + ')"' +
+				 	'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');
+		}
+		
+		self.hideRightsIcons = function(username) {
+			$("#figure"+username).append();
+		}
+		
 		self.addToSharedWithUsers = function(clickedRights) {
 			var username = $("#usernameOrEmail").val();
 			var collId = self.myCollections()[self.index()].dbId();
@@ -223,30 +240,34 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				url         : "/user/findByUsernameOrEmail",
 				data: "emailOrUsername="+username+"&collectionId="+collId,
 				success		: function(result) {
-					self.shareCollection(clickedRights, result, collId);
+					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+						   return item.username() === username;
+					});
+					if (index < 0) {
+						self.shareCollection(result, clickedRights, collId);
+					}
 				}
 			});
 		}
 
-		self.shareCollection = function(clickedRights, userData, collId) {
+		self.shareCollection = function(userData, clickedRights, collId) {
+			alert("!" + JSON.stringify(userData));
 			var username = userData.username;
 			var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
-			if (index < 0) {
-				var currentRights = userData.accessRights;
-				$.ajax({
-					"url": "/rights/"+collId+"/"+clickedRights+"?username="+username,
-					"method": "GET",
-					"contentType": "application/json",
-					success: function(result) {
+			var currentRights = userData.accessRights;
+			$.ajax({
+				"url": "/rights/"+collId+"/"+clickedRights+"?username="+username,
+				"method": "GET",
+				"contentType": "application/json",
+				success: function(result) {
+					if (index < 0) 
 						self.usersToShare.push(ko.mapping.fromJS(userData));
-						$("#user-image").mouseover(function() {
-							  $("#user-image").append("");
-						});
-					}
-				});
-			}
+					else
+						self.usersToShare()[index].accessRights(clickedRights);
+				}
+			});
 		}
 		
 		/*
