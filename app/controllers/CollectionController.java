@@ -745,6 +745,7 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		try {
+			// here problem when try to delete a duplicated record in a collection
 			if (DB.getCollectionRecordDAO().getById(new ObjectId(recordId)) == null) {
 				result.put("error", "Wrong recordId");
 				return internalServerError(result);
