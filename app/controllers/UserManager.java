@@ -38,6 +38,7 @@ import model.UserGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -69,7 +70,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-
 import elastic.ElasticIndexer;
 
 public class UserManager extends Controller {
@@ -705,33 +705,57 @@ public class UserManager extends Controller {
 	
 	
 	public static Result apikey(String email) {
-	
-		//String userId = session().get("user");
+		
+		// need to limit calls like this and reset password to 3 times per day maximum!
 		
 		ObjectNode result = Json.newObject();
 		ObjectNode error = (ObjectNode) Json.newObject();
-				
-		if (email == null) {
-			error.put("email", "Email is empty");
-			result.put("error", error);
-			//return badRequest(result);
-		}
-		
-		User u = DB.getUserDAO().getByEmail(email);
 
-		if (u == null) {
-			result.put("email", "Email not linked to account");
+        Create create = new Create();
+		
+		String userId = session().get("user");
+		// hexString!
+		
+		User u;
+		
+		if(userId==null){
+			if (StringUtils.isEmpty(email)) {
+				error.put("email", "Email is empty. Either log in or provide an email.");
+				result.put("error", error);
+				return badRequest(result);
+			} else {
+				
+				u = DB.getUserDAO().getByEmail(email);
+				
+				
+				create.email = email;
+				
+				if (u == null) {
+					result.put("email", "Email not linked to account, an email has been sent.");
+
+				} else {
+					
+					result.put("email", "Registered user's email found, an email has been sent.");
+					userId = u.getDbId().toHexString();
+					create.proxyUserId = new ObjectId(userId);
+				}				
+			}
 		} else {
-			result.put("email", "Email account found");
-			String userId = u.getDbId().toString(); //tohexstring?
-
+			result.put("email", "An email has been sent to your email address.");
+			
+			create.proxyUserId = new ObjectId(userId);
+			
+			u = DB.getUserDAO().get(create.proxyUserId);
+			
+			create.email = u.getEmail();
+			
 		}
 		
-				
+		// what if they already have an API key??
+		
+		
         final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
         
-        Create create = new Create();
-        //create.dbId = userId;
         create.dbId = "";
         create.call = "";
         create.ip = "";
@@ -751,19 +775,54 @@ public class UserManager extends Controller {
 			e.printStackTrace();
 		}
         
-       // Patterns.ask(testActor, create,  new Timeout (10l, TimeUnit) );
-        
-        //Await.ready(Future, arg1)
-        
-       /// testActor.tell(create, ActorRef.noSender());
-		 
 		if (s == "") {
 			error.put("API Key", "Could not create API key");
 			result.put("error", error);
+			result.remove("email");
 			return internalServerError(result);
+		}
+		
+		result.put("API Key", "Succesfully created a new API key: "+s);
+		
+		String newLine = System.getProperty("line.separator");
+		
+		// String url = APPLICATION_URL;
+		String url = "http://localhost:9000/assets/developers.html";
+		
+		String fn = "";
+		String ln = "";
+		
+		if (u!=null){
+			fn = ": " + u.getFirstName();
+			ln = " " +u.getLastName();
 		} 
 		
-		result.put("API Key", "Succesfully created key: "+s);
+		
+		String message = "Dear user"
+				+ fn
+				+ ln
+				+ ","
+				+ newLine
+				+ newLine
+				+ "We received a request for a new API key. Your new API key is : " + newLine
+				+ newLine + s
+				// token URL here
+				+ newLine + newLine 
+				+ "You can use this key to make calls to the WITH API. "
+				+ "To check out the WITH API documentation follow this link : " + newLine
+				+ newLine + url
+				+ newLine + newLine 
+				+ "Sincerely yours," + newLine
+				+ "The WITH team.";
+		
+		try {
+			sendEmail(u, email, message, "WITH API key");
+		} catch (EmailException e) {
+			error.put("email", "Could not send email - Email server error");
+			result.put("error", error);
+			return badRequest(result); // maybe change type?
+		}
+		
 		return ok(result);
 	}
 	
@@ -852,7 +911,7 @@ public class UserManager extends Controller {
 					+ newLine + newLine + "Sincerely yours," + newLine
 					+ "The WITH team.";
 			
-			sendEmail(u, msg, subject);
+			sendEmail(u, "", msg, subject);
 		} catch (EmailException e) {
 			error.put("email", "Email server error");
 			result.put("error", error);
@@ -876,7 +935,7 @@ public class UserManager extends Controller {
 	 * @param email
 	 * @throws EmailException
 	 */
-	public static void sendEmail(User u, String message, String subject) throws EmailException {
+	public static void sendEmail(User u, String mailAdress, String message, String subject) throws EmailException {
 		Email email = new SimpleEmail();
 		email.setSmtpPort(587);
 		email.setHostName("smtp.gmail.com");
@@ -888,8 +947,13 @@ public class UserManager extends Controller {
 		email.setSSLOnConnect(false);
 		email.setFrom("karonissz@gmail.com", "kostas"); //check if this can be whatever
 		email.setSubject(subject);
+		
+		if(u==null){
+			email.addTo(mailAdress);
 
-		email.addTo(u.getEmail());
+		} else {
+			email.addTo(u.getEmail());
+		}
 
 		email.setMsg(message);
 

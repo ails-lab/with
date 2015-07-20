@@ -98,6 +98,10 @@ public class ApiKey {
 	// this user (and others, if login is an allowed call)
 	private ObjectId proxyUserId;
 	
+	// optional, an email account associated with this API key
+	private String email;
+	
+
 	private ArrayList<CallLimit> callLimits = new ArrayList<CallLimit>();
 
 	private Date created;
@@ -235,6 +239,14 @@ public class ApiKey {
 
 	public void setProxyUserId(ObjectId proxyUserId) {
 		this.proxyUserId = proxyUserId;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	public Date getCreated() {
