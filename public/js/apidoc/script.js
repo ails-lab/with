@@ -1,6 +1,6 @@
 
 var swaggerUi = new SwaggerUi({
-  url:"http://petstore.swagger.io/v2/swagger.json",
+  url:"http://localhost:9000/script.json",
 	spec: {
 	    "swagger": "2.0",
 	    "info": {
@@ -11,112 +11,191 @@ var swaggerUi = new SwaggerUi({
 	    "paths": {
 	        "/api/search": {
 	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                "tags": [
+	                    "Search"
+	                ],
+	                "description": "General search in external resources and the WITH database.",
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "Search parameters.",
+	                        "schema": {
+	                            "properties": {
+	                                "searchTerm": {
+	                                    "type": "string"
+	                                },
+	                                "page": {
+	                                    "type": "integer"
+	                                },
+	                                "pageSize": {
+	                                    "type": "integer"
+	                                },
+	                                "source": {
+	                                    "type": "string"
+	                                }
+	                            }
+	                        }
 	                    }
-	                }
-	            }
-	        },
-	        "/api/advancedsearch": {
-	            "post": {
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/api/testsearch": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            },
-	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/api/autocompleteExt": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/assets/headers.js": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/assets/*file": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/collection/list": {
 	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                "parameters": [
+	                    {
+	                        "name": "offset",
+	                        "in": "query",
+	                        "description": "offset",
+	                        "type": "integer"
+	                    },
+	                    {
+	                        "name": "count",
+	                        "in": "query",
+	                        "description": "count (default 10)",
+	                        "type": "integer"
+	                    },
+	                    {
+	                        "name": "access",
+	                        "in": "query",
+	                        "description": "access (default is owned)",
+	                        "type": "string"
+	                    },
+	                    {
+	                        "name": "filterByUser",
+	                        "in": "query",
+	                        "description": "Owned by this user (username)",
+	                        "type": "string"
+	                    },
+	                    {
+	                        "name": "filterByUserId",
+	                        "in": "query",
+	                        "description": "Owned by this user (user ID)",
+	                        "type": "string"
+	                    },
+	                    {
+	                        "name": "filterByUserEmail",
+	                        "in": "query",
+	                        "description": "Owned by this user (user email)",
+	                        "type": "string"
 	                    }
-	                }
-	            }
-	        },
-	        "/collection/listShared": {
-	            "get": {
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Collection"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/collection/create": {
 	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                "tags": [
+	                    "Collection"
+	                ],
+	                "description": "Creates a new collection.",
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "Collection metadata.",
+	                        "required": false,
+	                        "schema": {
+	                            "required": [
+	                                "ownerId",
+	                                "title",
+	                                "isPublic"
+	                            ],
+	                            "properties": {
+	                                "ownerId": {
+	                                    "type": "string"
+	                                },
+	                                "title": {
+	                                    "type": "string"
+	                                },
+	                                "description": {
+	                                    "type": "string"
+	                                },
+	                                "isPublic": {
+	                                    "type": "boolean"
+	                                },
+	                                "rights": {
+	                                    "type": "string"
+	                                }
+	                            }
+	                        }
 	                    }
-	                }
-	            }
-	        },
-	        "/collection/listByUser": {
-	            "post": {
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Collection"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/collection/{id}/addRecord": {
+	            "parameters": [
+	                {
+	                    "name": "id",
+	                    "in": "path",
+	                    "description": "id",
+	                    "type": "string"
+	                }
+	            ],
 	            "post": {
+	                "description": "Adds a record to a collection, creating a new record that containts the specified metadata.",
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "Record json.",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/collection/{id}/removeRecord": {
+	            "parameters": [
+	                {
+	                    "name": "id",
+	                    "in": "path",
+	                    "description": "collection Id",
+	                    "type": "string"
+	                }
+	            ],
 	            "delete": {
+	                "description": "Removes a record from a collection",
+	                "parameters": [
+	                    {
+	                        "name": "recordId",
+	                        "in": "query",
+	                        "description": "ID of record to be removed.",
+	                        "type": "string"
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -125,220 +204,189 @@ var swaggerUi = new SwaggerUi({
 	            }
 	        },
 	        "/collection/{id}/list": {
+	            "parameters": [
+	                {
+	                    "name": "id",
+	                    "in": "path",
+	                    "description": "id",
+	                    "type": "string"
+	                }
+	            ],
 	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                "description": "Retrieves all records from a collection.",
+	                "parameters": [
+	                    {
+	                        "name": "start",
+	                        "in": "query",
+	                        "description": "offset",
+	                        "type": "integer"
+	                    },
+	                    {
+	                        "name": "count",
+	                        "in": "query",
+	                        "description": "count (default 10)",
+	                        "type": "integer"
+	                    },
+	                    {
+	                        "name": "format",
+	                        "in": "query",
+	                        "description": "One of the following JSON_UNKNOWN, JSONLD_UNKNOWN,XML_UNKNOWN,JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ,XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+	                        "type": "string"
 	                    }
-	                }
-	            }
-	        },
-	        "/collection/{id}/edit": {
-	            "post": {
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/collection/favorites": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/collection/liked": {
-	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/collection/unliked/{recId}": {
-	            "delete": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/collection/favoriteCollection": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/cache/byUrl": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/exhibition/create": {
-	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/exhibition/list": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/collection/{id}/listUsers": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/collectiion/{id}/download": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/collection/{id}": {
+	            "parameters": [
+	                {
+	                    "name": "id",
+	                    "in": "path",
+	                    "description": "id",
+	                    "type": "string"
+	                }
+	            ],
 	            "get": {
+	                "description": "Retrieves collection metadata.",
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Collection"
+	                        }
 	                    }
 	                }
 	            },
 	            "post": {
+	                "description": "Updates collection metadata.",
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "New collection metadata.",
+	                        "required": false,
+	                        "schema": {
+	                            "properties": {
+	                                "title": {
+	                                    "type": "string"
+	                                },
+	                                "isPublic": {
+	                                    "type": "boolean"
+	                                },
+	                                "description": {
+	                                    "type": "string"
+	                                }
+	                            }
+	                        }
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Collection"
+	                        }
 	                    }
 	                }
 	            },
 	            "delete": {
+	                "description": "Deletes the collection.",
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/record/findInColletions": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Collection"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/record/{id}": {
+	            "parameters": [
+	                {
+	                    "name": "id",
+	                    "in": "path",
+	                    "description": "The id of the record",
+	                    "type": "string"
+	                }
+	            ],
 	            "get": {
+	                "description": "Retrieves a record.",
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
 	                    }
 	                }
 	            },
 	            "post": {
+	                "description": "Updates a record.",
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
 	                    }
 	                }
 	            },
 	            "delete": {
+	                "description": "Removes a record.",
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/group/create": {
-	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/group/{id}": {
-	            "delete": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/rights/list": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/Record"
+	                        }
 	                    }
 	                }
 	            }
 	        },
 	        "/rights/{colId}/{right}": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
+	            "parameters": [
+	                {
+	                    "name": "colId",
+	                    "in": "path",
+	                    "description": "Internal Id of the object you wish to share (or unshare)",
+	                    "type": "string"
+	                },
+	                {
+	                    "name": "right",
+	                    "in": "path",
+	                    "description": "none (withdraw previously given right), read, write, own",
+	                    "type": "string"
 	                }
-	            }
-	        },
-	        "/media/create": {
+	            ],
 	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                "parameters": [
+	                    {
+	                        "name": "username",
+	                        "in": "query",
+	                        "description": "username of user to give rights to (or take away from)",
+	                        "type": "string"
+	                    },
+	                    {
+	                        "name": "email",
+	                        "in": "query",
+	                        "description": "another way of specifying the user",
+	                        "type": "string"
+	                    },
+	                    {
+	                        "name": "userId",
+	                        "in": "query",
+	                        "description": "another way of specifying the user",
+	                        "type": "string"
 	                    }
-	                }
-	            }
-	        },
-	        "/media/{id}": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            },
-	            "post": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            },
-	            "delete": {
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -348,33 +396,112 @@ var swaggerUi = new SwaggerUi({
 	        },
 	        "/user/register": {
 	            "post": {
+	                "tags": [
+	                    "User"
+	                ],
+	                "description": "Creates a new user and stores at the database.",
+	                "produces": [
+	                    "application/json",
+	                    "application/xml"
+	                ],
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "Contains JSON of the user to create.",
+	                        "required": false,
+	                        "schema": {
+	                            "properties": {
+	                                "firstName": {
+	                                    "type": "string"
+	                                },
+	                                "lastName": {
+	                                    "type": "string"
+	                                },
+	                                "username": {
+	                                    "type": "string"
+	                                },
+	                                "email": {
+	                                    "type": "string"
+	                                },
+	                                "password": {
+	                                    "type": "string"
+	                                },
+	                                "gender": {
+	                                    "type": "string"
+	                                },
+	                                "facebookId": {
+	                                    "type": "string"
+	                                },
+	                                "googleID": {
+	                                    "type": "string"
+	                                },
+	                                "about": {
+	                                    "type": "string"
+	                                },
+	                                "location": {
+	                                    "type": "string"
+	                                }
+	                            }
+	                        }
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/User"
+	                        }
+	                    },
+	                    "400": {
+	                        "description": "Bad Request"
 	                    }
 	                }
 	            }
 	        },
 	        "/user/login": {
 	            "post": {
+	                "tags": [
+	                    "User"
+	                ],
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "Email or username and password.",
+	                        "required": true,
+	                        "schema": {
+	                            "type": "object",
+	                            "properties": {
+	                                "email": {
+	                                    "type": "string"
+	                                },
+	                                "password": {
+	                                    "type": "string"
+	                                }
+	                            }
+	                        }
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK status, login cookie, user metadata JSON including userID.",
+	                        "schema": {
+	                            "$ref": "#/definitions/User"
+	                        }
+	                    },
+	                    "400": {
+	                        "description": "Error status, problem description JSON."
 	                    }
 	                }
 	            }
 	        },
 	        "/user/logout": {
 	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/user/listNames": {
-	            "get": {
+	                "description": "Browser cookie is removed (all session information is kept in cookie, nothing is stored on server).",
+	                "tags": [
+	                    "User"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -384,74 +511,81 @@ var swaggerUi = new SwaggerUi({
 	        },
 	        "/user/emailAvailable": {
 	            "get": {
+	                "tags": [
+	                    "User"
+	                ],
+	                "description": "Checks email availability.",
+	                "parameters": [
+	                    {
+	                        "name": "email",
+	                        "in": "query",
+	                        "description": "User email.",
+	                        "type": "string"
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
+	                    },
+	                    "400": {
+	                        "description": "Not available"
 	                    }
 	                }
 	            }
 	        },
-	        "/user/token": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
+	        "/user/{userId}": {
+	            "parameters": [
+	                {
+	                    "name": "userId",
+	                    "in": "path",
+	                    "description": "Internal ID of a user.",
+	                    "type": "string"
 	                }
-	            }
-	        },
-	        "/user/loginWithToken": {
+	            ],
 	            "get": {
+	                "description": "Returns the complete user entry.",
+	                "tags": [
+	                    "User"
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/user/findByUsernameOrEmail": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/user/{id}/photo": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/user/{id}": {
-	            "get": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/User"
+	                        }
 	                    }
 	                }
 	            },
 	            "put": {
+	                "tags": [
+	                    "User"
+	                ],
+	                "description": "Updates user entry.",
+	                "parameters": [
+	                    {
+	                        "in": "body",
+	                        "name": "body",
+	                        "description": "User entry.",
+	                        "required": true,
+	                        "schema": {
+	                            "$ref": "#/definitions/User"
+	                        }
+	                    }
+	                ],
 	                "responses": {
 	                    "200": {
-	                        "description": "OK"
+	                        "description": "OK",
+	                        "schema": {
+	                            "$ref": "#/definitions/User"
+	                        }
 	                    }
 	                }
 	            },
 	            "delete": {
-	                "responses": {
-	                    "200": {
-	                        "description": "OK"
-	                    }
-	                }
-	            }
-	        },
-	        "/user/addToGroup/{id}": {
-	            "get": {
+	                "tags": [
+	                    "User"
+	                ],
+	                "description": "Deletes the user.",
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -460,7 +594,18 @@ var swaggerUi = new SwaggerUi({
 	            }
 	        },
 	        "/user/resetPassword/{emailOrUserName}": {
+	            "parameters": [
+	                {
+	                    "name": "emailOrUserName",
+	                    "in": "path",
+	                    "description": "Username or email",
+	                    "type": "string"
+	                }
+	            ],
 	            "get": {
+	                "tags": [
+	                    "User"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -470,6 +615,9 @@ var swaggerUi = new SwaggerUi({
 	        },
 	        "/user/changePassword": {
 	            "post": {
+	                "tags": [
+	                    "User"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
@@ -478,11 +626,153 @@ var swaggerUi = new SwaggerUi({
 	            }
 	        },
 	        "/user/apikey/{email}": {
+	            "parameters": [
+	                {
+	                    "name": "email",
+	                    "in": "path",
+	                    "description": "e-mail",
+	                    "type": "string"
+	                }
+	            ],
 	            "post": {
+	                "tags": [
+	                    "User"
+	                ],
 	                "responses": {
 	                    "200": {
 	                        "description": "OK"
 	                    }
+	                }
+	            }
+	        }
+	    },
+	    "definitions": {
+	        "User": {
+	            "type": "object",
+	            "required": [
+	                "firstName",
+	                "lastName",
+	                "username",
+	                "email",
+	                "password",
+	                "about",
+	                "location"
+	            ],
+	            "properties": {
+	                "firstName": {
+	                    "type": "string"
+	                },
+	                "lastName": {
+	                    "type": "string"
+	                },
+	                "username": {
+	                    "type": "string"
+	                },
+	                "email": {
+	                    "type": "string"
+	                },
+	                "password": {
+	                    "type": "string"
+	                },
+	                "gender": {
+	                    "type": "string"
+	                },
+	                "facebookId": {
+	                    "type": "string"
+	                },
+	                "googleID": {
+	                    "type": "string"
+	                },
+	                "about": {
+	                    "type": "string"
+	                },
+	                "location": {
+	                    "type": "string"
+	                },
+	                "userId": {
+	                    "type": "string"
+	                }
+	            }
+	        },
+	        "Collection": {
+	            "type": "object",
+	            "properties": {
+	                "id": {
+	                    "type": "object",
+	                    "properties": {
+	                        "value": {
+	                            "type": "string"
+	                        }
+	                    }
+	                },
+	                "ownerId": {
+	                    "type": "object",
+	                    "properties": {
+	                        "value": {
+	                            "type": "string"
+	                        }
+	                    }
+	                },
+	                "className": {
+	                    "type": "string"
+	                },
+	                "title": {
+	                    "type": "string"
+	                },
+	                "description": {
+	                    "type": "string"
+	                },
+	                "itemCount": {
+	                    "type": "integer"
+	                },
+	                "isPublic": {
+	                    "type": "boolean"
+	                },
+	                "rights": {
+	                    "type": "object",
+	                    "properties": {
+	                        "value": {
+	                            "type": "string"
+	                        }
+	                    }
+	                }
+	            }
+	        },
+	        "Record": {
+	            "type": "object",
+	            "properties": {
+	                "id": {
+	                    "type": "string"
+	                },
+	                "thumb": {
+	                    "type": "string"
+	                },
+	                "fullResolution": {
+	                    "type": "string"
+	                },
+	                "title": {
+	                    "type": "string"
+	                },
+	                "creator": {
+	                    "type": "string"
+	                },
+	                "year": {
+	                    "type": "integer"
+	                },
+	                "dataProvider": {
+	                    "type": "string"
+	                },
+	                "url.original": {
+	                    "type": "string"
+	                },
+	                "url.fromSourceAPI": {
+	                    "type": "string"
+	                },
+	                "rights": {
+	                    "type": "string"
+	                },
+	                "externalId": {
+	                    "type": "string"
 	                }
 	            }
 	        }
