@@ -277,7 +277,7 @@ public class SearchController extends Controller {
 	}
 
 	private static Result buildresult(CommonQuery q) {
-		q.source	 = Arrays.asList(DigitalNZSpaceSource.LABEL);
+//		q.source	 = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;
