@@ -45,22 +45,49 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		}
 	};
 
-	ko.bindingHandlers.masonrycoll = {
-		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-			var $element = $(element);
-			$element.masonry({
-				itemSelector: '.masonryitem',
-				gutter: 15,
-				isFitWidth: true,
-				transitionDuration: transDuration
-			});
+	
+	 ko.bindingHandlers.masonrycoll = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+	    	var $element = $(element);
+	    	    $element.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 
-			ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-				$element.masonry("destroy");
-			});
-		}
-	};
+			    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
 
+			        $element.masonry("destroy");
+			    });
+
+	    },
+	    update: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+	    	
+	    	var $element = $(element),
+	    	list = ko.utils.unwrapObservable(allBindingsAccessor().foreach)
+	    	var items = [];
+	    	var key = "masonry_add";
+	        
+			for (var i in list) {
+				if (!ko.utils.domData.get(document.getElementById(list[i].recordId), key)) {
+				items.push(document.getElementById(list[i].recordId));}
+			}
+			$items=$( items );
+			
+	    	$items.hide();
+	    	
+	    	$items.imagesLoaded().progress(function (imgLoad, image) {
+				var $item = $(image.img).parents(".masonryitem");
+				
+				$element.masonry('appended', $item).masonry('layout');
+				$item.show();
+				if (!ko.utils.domData.get($item[0], key)) {
+			           ko.utils.domData.set($item[0], key, true);
+			       }
+			}).always(function () {
+				viewModel.loading(false);
+			});
+	    	
+	      }
+	    };
+
+
+  
 	ko.showMoreLess = function (initialText) {
 
 		var observable = ko.observable(initialText);
@@ -82,75 +109,74 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 	};
 
 	function Record(data) {
+		
 		var self = this;
-
-		self.recordId = ko.observable("");
-		self.title = ko.observable(false);
-		self.description = ko.observable(false);
-		self.thumb = ko.observable(false);
-		self.fullres = ko.observable(false);
-		self.view_url = ko.observable(false);
-		self.source = ko.observable(false);
-		self.creator = ko.observable("");
-		self.provider = ko.observable("");
-		self.url = ko.observable("");
-		self.rights = ko.observable("");
-		self.externalId = ko.observable("");
-		self.isLiked = ko.computed(function () {
-			return app.isLiked(self.externalId());
+	    self.recordId = "";
+		self.title = "";
+		self.description="";
+		self.thumb = "";
+		self.fullres="";
+		self.view_url="";
+		self.source="";
+		self.creator="";
+		self.provider="";
+		self.rights="";
+		self.url="";
+		self.externalId = "";
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
 		});
-
-		self.load = function (data) {
-			if (data.title === undefined) {
-				self.title("No title");
-			} else {
-				self.title(data.title);
-			}
-			self.url("#item/" + data.id);
-			self.view_url(data.view_url);
-			self.thumb(data.thumb);
-			self.fullres(data.fullres);
-			self.description(data.description);
-			self.source(data.source);
-			self.creator(data.creator);
-			self.provider(data.provider);
-			self.recordId(data.id);
-			self.rights(data.rights);
-			self.externalId(data.externalId);
+		self.load = function(data) {
+			if(data.title==undefined){
+				self.title="No title";
+			}else{self.title=data.title;}
+			self.url="#item/"+data.id;
+			self.view_url=data.view_url;
+			self.thumb=data.thumb;
+			self.fullres=data.fullres;
+			self.description=data.description;
+			self.source=data.source;
+			self.creator=data.creator;
+			self.provider=data.provider;
+			self.rights=data.rights;
+			self.recordId=data.id;
+			self.externalId=data.externalId;
 		};
 
-		self.sourceCredits = ko.pureComputed(function () {
-			switch (self.source()) {
-			case "DPLA":
-				return "dp.la";
-			case "Europeana":
-				return "europeana.eu";
-			case "NLA":
-				return "nla.gov.au";
-			case "DigitalNZ":
-				return "digitalnz.org";
-			case "EFashion":
-				return "europeanafashion.eu";
-			case "YouTube":
-				return "youtube.com";
-			case "Mint":
-				return "mint";
-			default:
-				return "";
-			}
-		});
+		self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source) {
+			    case "DPLA":
+			    	return "dp.la";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": {
+			    	return "youtube.com";
+			    }
+			    case "Mint":
+			    	return "mint";
+			    default: return "";
+			 }
+			});
 
-		self.displayTitle = ko.pureComputed(function () {
-			var distitle = "";
-			distitle = '<b>' + self.title() + '</b>';
-			if (self.creator() !== undefined && self.creator().length > 0)
-				distitle += ", by " + self.creator();
-			if (self.provider() !== undefined && self.provider().length > 0 && self.provider() != self.creator())
-				distitle += ", " + self.provider();
+		self.displayTitle = ko.pureComputed(function() {
+			var distitle="";
+			distitle=self.title;
+			if(self.creator!==undefined && self.creator.length>0)
+				distitle+=", by "+self.creator;
+			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
+				distitle+=", "+self.provider;
 			return distitle;
 		});
 
-		if (data !== undefined) self.load(data);
+		if(data != undefined) self.load(data);
+		
+		
 	}
 
 	function CViewModel(params) {
@@ -178,7 +204,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		self.loadCollection = function (id) {
 			self.loading(true);
 			self.citems([]);
-			$container.empty();
+			//$container.empty();
 			$.ajax({
 				"url": "/collection/" + self.id(),
 				"method": "get",
@@ -195,7 +221,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
+				},
+				complete:function(reply){
+					 self.loading(false);
+
+					
 				}
+					
 			});
 		};
 
@@ -224,10 +256,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.itemCount);
 						self.revealItems(data.records);
 					},
 					"error": function (result) {
+						self.loading(false);
+					},
+					"complete": function (result) {
 						self.loading(false);
 					}
 				});
@@ -260,10 +294,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		};
 
 		self.recordSelect = function (e) {
-			var selrecord = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.recordId() === e;
-			});
-			itemShow(selrecord);
+			
+			itemShow(e);
 		};
 
 		self.addCollectionRecord = function (e) {
@@ -279,10 +311,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 						contentType: "application/json",
 						data: JSON.stringify(e),
 						success: function (data, textStatus, xhr) {
-							//find item index to see if it is first item
-							var index=ko.utils.arrayIndexOf(self.citems(),e);
-							console.log("index:"+index);
-
+							
 							self.citems.remove(e);
 							if ($("#" + e)) {
 								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
@@ -294,6 +323,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							$.smkAlert({text:'An error has occured', type:'danger', time: 10});
+						},
+						complete:function(reply){
+							 self.loading(false);
+							
 						}
 					});
 				} else {
@@ -302,52 +335,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			});
 		};
 
-		self.likeRecord = function (id) {
-			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.externalId() === id;
-			});
-
-			app.likeItem(rec, function (status) {
-				if (status) {
-					$('#' + id).addClass('active');
-				} else {
-					$('#' + id).removeClass('active');
-				}
-			});
-		};
-
-		function getItem(record,index) {
-			var figure = '<figure class="masonryitem" id="' + record.recordId() + '">';
-			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '">';
-				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
-				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
-				figure += '</span></span>';
-			} else {
-				figure += '<span class="star" id="' + record.externalId() + '">';
-				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }">';
-				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
-				figure += '</span></span>';
-			}
-
-			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId() + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
-			+ '<div class="sourceCredits">';
-
-			if (self.access() == "WRITE" || self.access() == "OWN") {
-				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\','+index+')}}"></span>';
-			}
-			figure+='<a href="' + record.view_url() + '" target="_new">' + record.sourceCredits() + '</a></figure>';
-			return figure;
-		}
-
-		function getItems(data) {
-			var items = '';
-			for (var i in data) {
-				items += getItem(data[i]);
-			}
-			return $(items);
-		}
-
+				
+		 self.likeRecord = function (rec) {
+				app.likeItem(rec, function (status) {
+					if (status) {
+						// $('#' + id).addClass('active');
+					} else {
+						// $('#' + id).removeClass('active');
+					}
+				});
+			};
+		
 		self.uploadItem = function() {
 			app.showPopup('image-upload', { collectionId: self.id() });
 		};
@@ -369,10 +367,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				});
 				items.push(record);
 			}
-			self.citems.push.apply(self.citems, items);
-			var $newitems = getItems(items);
-
-			self.masonryImagesReveal($newitems, $container);
+			
+		self.citems.push.apply(self.citems, items);
+	
 		};
 	}
 
