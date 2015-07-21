@@ -3,9 +3,23 @@
 		<span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> <span data-bind="visible: itemCount() > -1  " style="text-transform:lowercase">&nbsp;&nbsp;(<!-- ko text:itemCount --><!-- /ko -->  items)</span></h2> </span>
 		<div data-bind="visible: owner().length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:owner --><!-- /ko --></a></i></div>
 		<span data-bind="text:desc.display"></span><span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
-		<button type="button" class="btn btn-primary" data-bind="click: uploadItem" style="margin-top: 10px;"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true" style="vertical-align: top;"></span> Upload</button>
+		<button type="button" class="btn btn-primary" data-bind="click: uploadItem, visible: isLogged" style="margin-top: 10px;"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true" style="vertical-align: top;"></span> Upload</button>
 		<div class="withsearch-content-masonry">
-			<div id="collcolumns" class="columns" data-bind="masonrycoll">
+		  <div id="collcolumns" class="columns" data-bind="visible: citems().length > 0, foreach: citems, masonrycoll">
+			<figure class="masonryitem" data-bind="attr: {id: recordId}">
+					<span class="star" data-bind="css: { active: isLiked }, visible: isLogged">
+						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</span>
+					<a data-bind="event: { click: $parent.recordSelect }, attr: { href: url }"><img onError="this.src='images/no_image.jpg" data-bind="attr: { src:thumb, alt: title }"/></a>
+					<figcaption data-bind="text: displayTitle"></figcaption>
+					<div class="sourceCredits">
+					<!-- ko:if self.access() == "WRITE" || self.access() == "OWN" -->
+					    <span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
+					<!-- /ko -->
+					<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
+				</figure>
 			</div>
 		</div>
 	</div>

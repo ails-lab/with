@@ -84,16 +84,19 @@ public class ElasticEraser {
 
 	public void deleteRecordEntryFromMerged() {
 		try {
+			if(record.getExternalId() == null)
+				record.setExternalId(record.getDbId().toString());
+
 			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
 						Elastic.type_general,
 						record.getExternalId())
-				.addScriptParam("id", record.getCollectionId().toString())
 				.addScriptParam("tags", record.getTags().toArray())
+				.addScriptParam("id", record.getCollectionId().toString())
 				.setScript("for(String t: tags) {"
-					+ "if(ctx._source.tags.contains(t))"
+					+ "if(ctx._source.tags.contains(t)){"
 					+ "ctx._source.tags.remove(t)"
-					+ "}; "
+					+ "}}; "
 					+ "ctx._source.collections.remove(id);", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {

@@ -29,6 +29,7 @@ libraryDependencies ++= Seq(
  // "com.google.api-client" % "google-api-client" % "1.19.1"
  "org.json" % "org.json" % "chargebee-1.0",
  "org.apache.commons" % "commons-email" % "1.3.3",
-  "com.jayway.jsonpath" % "json-path" % "2.0.0"
+ "com.jayway.jsonpath" % "json-path" % "2.0.0",
+ "junit" % "junit" % "4.11"
 )
 

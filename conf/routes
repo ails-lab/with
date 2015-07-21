@@ -33,6 +33,7 @@ GET		 /collection/favoriteCollection			controllers.CollectionController.getFavor
 
 # Cache Controller
 GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)
+DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
@@ -60,8 +61,8 @@ DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null, email: String ?=null, userId: String ?=null)
 
 # Media Controller
-POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= false)
-GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=false)
+POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)
+GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
@@ -82,6 +83,8 @@ GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()
+GET		/user/apikey/create						controllers.UserManager.apikey(email: String)
+
 
 # trigger reindex (for development / admin )
 
