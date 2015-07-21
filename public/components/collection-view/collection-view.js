@@ -268,31 +268,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			}
 		};
 
-		self.masonryImagesReveal = function ($items, $container) {
-			$items.hide();
-			$container.append($items);
-			if (!($container.data('masonry'))) {
-
-				$container.masonry({
-					itemSelector: '.masonryitem',
-					gutter: 15,
-					isFitWidth: true,
-					transitionDuration: transDuration
-				});
-			}
-
-			$items.imagesLoaded().progress(function (imgLoad, image) {
-				counter++;
-				var $item = $(image.img).parents(".masonryitem");
-				ko.applyBindings(self, $item[0]);
-				$item.show();
-				$container.masonry('appended', $item, true).masonry('layout', $item);
-
-			}).always(function () {
-				self.loading(false);
-			});
-		};
-
+		
 		self.recordSelect = function (e) {
 			
 			itemShow(e);
