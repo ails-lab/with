@@ -33,6 +33,7 @@ GET		 /collection/favoriteCollection			controllers.CollectionController.getFavor
 
 # Cache Controller
 GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)
+DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
@@ -82,6 +83,8 @@ GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()
+POST	/user/apikey/:email						controllers.UserManager.apikey(email: String)
+
 
 # trigger reindex (for development / admin )
 

@@ -719,7 +719,11 @@ public class CollectionController extends Controller {
 				return false;
 			}
 		};
+
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
+		// index record and merged_record
+		ElasticIndexer indexer = new ElasticIndexer(record);
+		indexer.index();
 		String sourceClassName = "espace.core.sources." + source
 				+ "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
@@ -745,6 +749,7 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		try {
+			// here problem when try to delete a duplicated record in a collection
 			if (DB.getCollectionRecordDAO().getById(new ObjectId(recordId)) == null) {
 				result.put("error", "Wrong recordId");
 				return internalServerError(result);

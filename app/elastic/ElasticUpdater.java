@@ -73,6 +73,9 @@ public class ElasticUpdater {
 	 * Re-indexes the record type, deletes entry from collection_specific field
 	 * of merged_record type and indexes a new merged_record type
 	 */
+	/**
+	 * Not fully functional
+	 */
 	public void updateRecordTags() {
 		try {
 			 Elastic.getTransportClient().prepareUpdate(
@@ -204,8 +207,7 @@ public class ElasticUpdater {
 						Elastic.index,
 						Elastic.type_collection,
 						collection.getDbId().toString())
-				.setScript("ctx._source.itemCount--;"
-						 + "ctx._source.itemCount_all--", ScriptType.INLINE)
+				.setScript("ctx._source.itemCount--;", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {
 			log.error("Cannot decrement itemCount!", e);
@@ -306,7 +308,7 @@ public class ElasticUpdater {
 					if(!collection.getIsPublic() &&
 						DB.getCollectionRecordDAO()
 						.checkMergedRecordVisibility(records.get(i).getExternalId(), records.get(i).getDbId()))
-						return;
+						continue;
 
 					Elastic.getBulkProcessor().add(new UpdateRequest(
 							Elastic.index,
@@ -320,14 +322,17 @@ public class ElasticUpdater {
 
 
 	/*
-	 * Increment itemCount on collection type
+	 * Increment totalLikes on collection type
+	 */
+	/**
+	 * Not fully functional
 	 */
 	public void incLikes() {
 		incLikesToRecords();
 	}
 
 	/*
-	 * Decrement itemCount on collection type
+	 * Decrement totalLikes on collection type
 	 */
 	public void decLikes() {
 		try {

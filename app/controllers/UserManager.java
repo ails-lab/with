@@ -46,11 +46,23 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
+import scala.Unit;
+import scala.concurrent.Await;
+import scala.concurrent.Future;
+import scala.concurrent.duration.Duration;
+import actors.ApiKeyManager;
+import actors.ApiKeyManager.Create;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.UntypedActor;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -688,6 +700,74 @@ public class UserManager extends Controller {
 		return internalServerError(result);
 
 	}
+	
+	
+	
+	
+	public static Result apikey(String email) {
+	
+		//String userId = session().get("user");
+		
+		ObjectNode result = Json.newObject();
+		ObjectNode error = (ObjectNode) Json.newObject();
+				
+		if (email == null) {
+			error.put("email", "Email is empty");
+			result.put("error", error);
+			//return badRequest(result);
+		}
+		
+		User u = DB.getUserDAO().getByEmail(email);
+
+		if (u == null) {
+			result.put("email", "Email not linked to account");
+		} else {
+			result.put("email", "Email account found");
+			String userId = u.getDbId().toString(); //tohexstring?
+
+		}
+		
+				
+        final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
+        
+        Create create = new Create();
+        //create.dbId = userId;
+        create.dbId = "";
+        create.call = "";
+        create.ip = "";
+        create.counterLimit = -1l;
+        create.volumeLimit = -1l;
+        //create.position = 1;
+        
+        Timeout timeout = new Timeout(Duration.create(5, "seconds"));
+        
+    	Future<Object> future = Patterns.ask(testActor, create, timeout);
+    	
+    	String s = "";
+		try {
+			s = (String) Await.result(future, timeout.duration());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+       // Patterns.ask(testActor, create,  new Timeout (10l, TimeUnit) );
+        
+        //Await.ready(Future, arg1)
+        
+       /// testActor.tell(create, ActorRef.noSender());
+		 
+		if (s == "") {
+			error.put("API Key", "Could not create API key");
+			result.put("error", error);
+			return internalServerError(result);
+		} 
+		
+		result.put("API Key", "Succesfully created key: "+s);
+		return ok(result);
+	}
+	
+	
 
 	/**
 	 * Checks email/username validity, checks if user has registered with
@@ -751,25 +831,14 @@ public class UserManager extends Controller {
 		String newLine = System.getProperty("line.separator");
 
 		// more complex email are schemes available - want to discuss first
-		Email email = new SimpleEmail();
+		
 
 		// I use this account for some other sites as well but we can use it for
 		// testing
 		try {
-			email.setSmtpPort(587);
-			email.setHostName("smtp.gmail.com");
-			email.setDebug(false);
-			// email.setBounceAddress("karonissz@gmail.com");
-			email.setAuthenticator(new DefaultAuthenticator(
-					"karonissz@gmail.com", "12345678kostas"));
-			email.setStartTLSEnabled(true);
-			email.setSSLOnConnect(false);
-			email.setFrom("karonissz@gmail.com", "kostas");
-			email.setSubject("WITH password reset");
-
-			email.addTo(u.getEmail());
-
-			email.setMsg("Dear user: "
+			String subject = "WITH password reset";
+			
+			String msg = "Dear user: "
 					+ u.getFirstName()
 					+ " "
 					+ u.getLastName()
@@ -781,9 +850,9 @@ public class UserManager extends Controller {
 					+ newLine + resetURL + "/" + enc
 					// token URL here
 					+ newLine + newLine + "Sincerely yours," + newLine
-					+ "The WITH team.");
-
-			email.send();
+					+ "The WITH team.";
+			
+			sendEmail(u, msg, subject);
 		} catch (EmailException e) {
 			error.put("email", "Email server error");
 			result.put("error", error);
@@ -799,6 +868,36 @@ public class UserManager extends Controller {
 
 	}
 
+	/**
+	 * @param u
+	 * @param enc
+	 * @param resetURL
+	 * @param newLine
+	 * @param email
+	 * @throws EmailException
+	 */
+	public static void sendEmail(User u, String message, String subject) throws EmailException {
+		Email email = new SimpleEmail();
+		email.setSmtpPort(587);
+		email.setHostName("smtp.gmail.com");
+		email.setDebug(false);
+		// email.setBounceAddress("karonissz@gmail.com");
+		email.setAuthenticator(new DefaultAuthenticator(
+				"karonissz@gmail.com", "12345678kostas"));
+		email.setStartTLSEnabled(true);
+		email.setSSLOnConnect(false);
+		email.setFrom("karonissz@gmail.com", "kostas"); //check if this can be whatever
+		email.setSubject(subject);
+
+		email.addTo(u.getEmail());
+
+		email.setMsg(message);
+
+		email.send();
+	}
+
+	
+	
 	/***
 	 * Parses token from the URL sent in the resetPassword() email.
 	 *

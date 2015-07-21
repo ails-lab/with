@@ -143,4 +143,14 @@ public class CacheController extends Controller {
 		};
 		ParallelAPICall.createPromise(methodQuery, externalUrl);
 	}
+
+	public static Result clearCache() {
+		try {
+			DB.getMediaDAO().deleteCached();
+			return ok("Cache cleared");
+		} catch (Exception e) {
+			log.error("Couldn't clear cache:" + e.getMessage());
+			return internalServerError(e.getMessage());
+		}
+	}
 }

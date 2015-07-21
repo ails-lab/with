@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import play.Logger;
 import play.Logger.ALogger;
+import akka.actor.ActorPath;
 import akka.actor.UntypedActor;
 import db.DB;
 /**
@@ -190,13 +191,19 @@ public class ApiKeyManager extends UntypedActor  {
 				newKey.setIpPattern(create.ip);
 				ipPatterns.add( newKey );
 			}
+			System.out.println("here?");
 			answer( newKey.getDbId().toString());
 		} else {			
 			// find by dbId
 			ApiKey key =getByDbId(create.dbId);
 			
+			//for(String s:apiKeys.keySet()){
+			//	System.out.println(s + " : " + apiKeys.get(s));
+			//}
+			
 			key.addCall(0, create.call, create.counterLimit, create.volumeLimit);
 		}
+		
 	}
 	
 	@Override
