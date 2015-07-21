@@ -33,6 +33,7 @@ GET		 /collection/favoriteCollection			controllers.CollectionController.getFavor
 
 # Cache Controller
 GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)
+DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
