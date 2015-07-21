@@ -110,7 +110,7 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 				self.loading(true);
 				var offset = self.items().length;
 				$.ajax({
-					"url": "/collection/favoriteCollection/list?count=20&start=" + offset,
+					"url": "/collection/" + app.currentUser.favoritesId() + "/list?count=20&start=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
