@@ -719,7 +719,11 @@ public class CollectionController extends Controller {
 				return false;
 			}
 		};
+
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
+		// index record and merged_record
+		ElasticIndexer indexer = new ElasticIndexer(record);
+		indexer.index();
 		String sourceClassName = "espace.core.sources." + source
 				+ "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
