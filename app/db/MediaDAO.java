@@ -172,4 +172,15 @@ public class MediaDAO {
 		}
 	}
 
+	public void deleteCached() {
+		try {
+			BasicDBObject query = new BasicDBObject();
+			query.containsField("externalUrl");
+			DB.getGridFs().remove(query);
+		} catch (Exception e) {
+			log.error("Cannot delete files from GridFS", e);
+			throw e;
+		}
+	}
+
 }
