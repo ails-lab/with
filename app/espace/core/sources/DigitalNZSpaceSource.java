@@ -68,15 +68,33 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
 		
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*(nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*(nc).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
+
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*");
 		
-		/*addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");*/
+		//CC BY,CC BY-SA ,CC BY-ND
+		//"http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/,"http://creativecommons.org/licenses/by-nd/"
 		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*");
+		
+		//CC BY,CC BY-SA ,CC BY-NC
+		//"http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/","http://creativecommons.org/licenses/by-nc/"
+		
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.AttributionAlone, ".*(creative).*(by).*");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.AttributionNoncommercial, ".*(creative).*(by-nc).*");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.AttributionShareAlike, ".*(creative).*(by-sa).*");
+
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.AttributionNoDerivatives, ".*(creative).*(by-nd).*");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.AttributionNoncommercialShareAlike, ".*(creative).*(by-nc-sa).*");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.AttributionNoncommercialNoDerivatives, ".*(creative).*(by-nc-nd).*");
+
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/");
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
 	}
 	
 private Function<List<String>, Pair<String>> fwriter(String parameter) {
