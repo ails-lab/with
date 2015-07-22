@@ -20,12 +20,12 @@ function requestToken( doWithToken, withBase ) {
 	 }
 	 
 	 
+	 window.addEventListener( "message", receiveToken, false );
 	 // send request for token every second
 	 var regPostRequest = setInterval( function() {
 		 withWindow.postMessage( "requestToken","*");		 
 	 }, 1000 );
 	 
-	 window.addEventListener( "message", receiveToken, false );
 
 	 
 	 // on timeout remove the event listener and if nothing was sent yet
