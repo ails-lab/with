@@ -33,7 +33,8 @@ public class RightsValues {
 		
 	public static final String Creative_Commercial = "use for commercial purposes";
 	
-	
+	public static final String Open = "Open";
+
 	public static final String AttributionAlone = "Attribution alone";
 	
 	public static final String AttributionNoncommercial = "Attribution + Noncommercial";
