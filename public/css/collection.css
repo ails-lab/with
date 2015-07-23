@@ -161,6 +161,24 @@ display: none;
     cursor: pointer;
 }
 
-.userΙmage:hover {
-	background-color: yellow;
+.userΙmage {
+	position: relative;
+}
+
+.rightsDeleteIcon {
+	position: absolute;
+	top: 5px;
+    left: 45px; 
+    padding: 5px;
+}
+
+.rightsIcon {
+	position: absolute;
+	top: 0px;
+    left: 60px; 
+    padding: 10px;
+}
+
+.username {
+	padding: 5px;
 }

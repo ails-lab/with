@@ -32,20 +32,23 @@
 				<!-- ko foreach: ko.contextFor(mycollections).$data.usersToShare() -->
 				<!-- ko if: username() != ko.contextFor(mycollections).$data.myUsername() -->
 					<div class="col-md-3">
-						 <div class="col-xs-12 col-sm-12 col-md-12 coll-footer" >
-						 <figure data-bind="attr: {id: 'figure'+username()}, event: { mouseover: ko.contextFor(mycollections).$data.showRightsIcons.bind($data), 
-						 	mouseout: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data)}">
+						 <div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer" data-bind="attr: {id: 'image_' + userId()},
+						 event: { mouseenter: ko.contextFor(mycollections).$data.showRightsIcons.bind($data), 
+						 	mouseleave: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data)}">
 						 	<!-- ko if: $data.image --> 
-							<img class="img-circle img-thumbnail "  data-bind="attr: { src: image}, 		
+							<img class="img-circle img-thumbnail "  data-bind="attr: {src: image},
 							style: {border: accessRights()=='READ'? '3px solid blue' : '3px solid red'}"/>
 							<!-- /ko -->
 						    <!-- ko else -->
-							<img src="images/user.png" class="img-circle img-thumbnail" id="user-image"
+							<img src="images/user.png" class="img-circle img-thumbnail" 
 							data-bind = "style: {border: accessRights()=='READ'? '3px solid blue' : '3px solid red'}"/>
 						    <!-- /ko -->	
-						</figure>	 
+						    <span class="rightsDeleteIcon glyphicon glyphicon-trash" title="Remove all rights" 
+								data-bind="attr: {id: 'trashIcon_'+userId()}, click: ko.contextFor(mycollections).$data.testa" aria-hidden="true" 
+								style="padding-left:20px;cursor:pointer;visibility:hidden">
+							</span>
 						 </div>	
-						 <span data-bind="text: username()"></span>
+						 <span class="username" data-bind="text: username()"></span>
 					</div>
 				<!-- /ko -->
 				<!-- /ko -->

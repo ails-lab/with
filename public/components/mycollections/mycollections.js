@@ -215,20 +215,28 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		self.showRightsIcons = function(userData) {
 			var accessRights = userData.accessRights();
-			var username = userData.username();
+			var userId = userData.userId();
 			var collId = self.myCollections()[self.index()].dbId();
-			alert($("#figure"+username).html());
-			$("#figure"+username).append('<span class="glyphicon glyphicon-trash" title="Remove all rights"' +
-				 	'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"",' + collId + ')"' +
-				 	'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');
-			if (accessRights == "READ")
-				$("#figure"+username).append('<span class="glyphicon glyphicon-eye-open" title="Read"'+
+			$("#trashIcon_"+userId).show();
+			/*$("#"+userId).append('<span class="rightsDeleteIcon glyphicon glyphicon-trash" title="Remove all rights"' +
+				 	//'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"",' + collId + ')"' +
+				'data-bind="click: ko.contextFor(mycollections).$data.testa"' +
+				'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');*/
+			/*if (accessRights == "WRITE")
+				$("#"+userId).append('<span class="rightsIcon glyphicon glyphicon-eye-open" title="Read"'+
 				 	'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"READ",' + collId + ')"' +
 				 	'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');
+			if (accessRights == "READ")
+				$("#"+userId).append('<span class="rightsIcon glyphicon glyphicon-user" title="Write"'+
+					 //'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"READ",' + collId + ')"' +
+				'data-bind="click: ko.contextFor(mycollections).$data.test.bind($data)"' +	 
+				'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');*/
 		}
 		
+		
 		self.hideRightsIcons = function(username) {
-			$("#figure"+username).append();
+			$("#trashIcon_"+userId).hide();
+			$(".rightsIcon").remove();
 		}
 		
 		self.addToSharedWithUsers = function(clickedRights) {
@@ -251,7 +259,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.shareCollection = function(userData, clickedRights, collId) {
-			alert("!" + JSON.stringify(userData));
+			alert("!!!!");
 			var username = userData.username;
 			var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
