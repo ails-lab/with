@@ -90,6 +90,7 @@ public class UserManager extends Controller {
 			String collectionId) {
 		Function<User, Status> getUserJson = (User u) -> {
 			ObjectNode userJSON = Json.newObject();
+			userJSON.put("userId", u.getDbId().toString());
 			userJSON.put("username", u.getUsername());
 			userJSON.put("firstName", u.getFirstName());
 			userJSON.put("lastName", u.getLastName());
@@ -1049,8 +1050,10 @@ public class UserManager extends Controller {
 			ObjectId photoId = user.getPhoto();
 			Media photo = DB.getMediaDAO().findById(photoId);
 			// convert to base64 format
-			return "data:" + photo.getMimeType() + ";base64,"
+			if (photo != null)
+				return "data:" + photo.getMimeType() + ";base64,"
 					+ new String(Base64.encodeBase64(photo.getData()));
+			else return null;
 		} else
 			return null;
 	}
