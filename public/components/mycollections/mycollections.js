@@ -217,12 +217,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var accessRights = userData.accessRights();
 			var userId = userData.userId();
 			var collId = self.myCollections()[self.index()].dbId();
+			$("#image_"+userId).css("opacity", "0.5");
 			$("#rightsIcons_"+userId).show();
 		}
 		
 		
 		self.hideRightsIcons = function(userId) {
 			$("#rightsIcons_"+userId).hide();
+			$("#image_"+userId).css("opacity", "1");
 		}
 		
 		self.changeRights = function(clickedRights) {
@@ -271,58 +273,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-		
-		/*
-		self.shareCollection = function(username, currentRights) {
->>>>>>> Sharing colleciton v2 under development.
-			var newRights = currentRights;
-			if (currentRights != clickedRights) {
-				if (!(clickedRights == 'READ' && (currentRights == 'WRITE' || currentRights == 'OWN')))
-					newRights = clickedRights;
-				else
-					newRights = "NONE";
-			}
-			else if (currentRights == clickedRights) {
-					//revoke clickedRights (i.e. new rights are NONE or READ)
-				if (clickedRights == 'READ')
-					newRights = 'NONE';
-				else
-					newRights = 'READ';
-			}
-			if (newRights != currentRights) {
-				$.ajax({
-					"url": "/rights/"+collId+"/"+newRights+"?username="+username,
-					"method": "GET",
-					"contentType": "application/json",
-					success: function(result) {
-						var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
-							   return item.username() === username;
-						});
-						self.usersToShare()[index].accessRights(newRights);
-					}
-				});
-			}
-		}
-		*/
-		
-		/*
-		 * self.applyRightsChange = function() {
-			$.each(self.editedUsersToShare(), function(i, obj) {
-				var username = self.editedUsersToShare()[i].username();
-				var newRights = self.editedUsersToShare()[i].accessRights();
-				var collId = self.myCollections()[self.index()].dbId();
-				if (username != self.myUsername())
-					$.ajax({
-						"url": "/rights/"+collId+"/"+newRights+"?username="+username,
-						"method": "GET",
-						"contentType": "application/json",
-						success: function(result) {
-						}
-					});
-		    });
-			self.closePopup();
-		}
-		*/
 		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);

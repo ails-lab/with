@@ -167,7 +167,14 @@ display: none;
 
 .rightsIcon {
 	position: absolute;
-	top: 0px;
-    left: 60px; 
-    padding: 10px;
+	top: 25px;
+    left: 35px; 
+    padding: 0px;
+    opacity: 1;
+}
+
+.userPhoto {
+	max-width: 70px;
+	max-height: 70px;
+    margin-bottom: 3px;
 }
