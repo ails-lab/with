@@ -341,6 +341,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					rights: result.rights,
 					externalId: result.externalId
 				});
+				console.log(record.thumb);
 				items.push(record);
 			}
 			

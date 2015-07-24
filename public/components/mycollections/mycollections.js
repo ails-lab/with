@@ -217,31 +217,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var accessRights = userData.accessRights();
 			var userId = userData.userId();
 			var collId = self.myCollections()[self.index()].dbId();
-			$("#trashIcon_"+userId).show();
-			/*$("#"+userId).append('<span class="rightsDeleteIcon glyphicon glyphicon-trash" title="Remove all rights"' +
-				 	//'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"",' + collId + ')"' +
-				'data-bind="click: ko.contextFor(mycollections).$data.testa"' +
-				'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');*/
-			/*if (accessRights == "WRITE")
-				$("#"+userId).append('<span class="rightsIcon glyphicon glyphicon-eye-open" title="Read"'+
-				 	'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"READ",' + collId + ')"' +
-				 	'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');
-			if (accessRights == "READ")
-				$("#"+userId).append('<span class="rightsIcon glyphicon glyphicon-user" title="Write"'+
-					 //'data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data,' + '"READ",' + collId + ')"' +
-				'data-bind="click: ko.contextFor(mycollections).$data.test.bind($data)"' +	 
-				'aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>');*/
+			$("#rightsIcons_"+userId).show();
 		}
 		
 		
-		self.hideRightsIcons = function(username) {
-			$("#trashIcon_"+userId).hide();
-			$(".rightsIcon").remove();
+		self.hideRightsIcons = function(userId) {
+			$("#rightsIcons_"+userId).hide();
+		}
+		
+		self.changeRights = function(clickedRights) {
+			self.shareCollection(ko.toJS(this), clickedRights);
 		}
 		
 		self.addToSharedWithUsers = function(clickedRights) {
-			var username = $("#usernameOrEmail").val();
 			var collId = self.myCollections()[self.index()].dbId();
+			var username = $("#usernameOrEmail").val();
 			$.ajax({
 				method      : "GET",
 				contentType    : "application/json",
@@ -252,26 +242,30 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						   return item.username() === username;
 					});
 					if (index < 0) {
-						self.shareCollection(result, clickedRights, collId);
+						self.shareCollection(result, clickedRights);
 					}
+				},
+				error      : function(result) {
+					$.smkAlert({text:'There is no such username or email', type:'danger', time: 10});
 				}
 			});
 		}
 
-		self.shareCollection = function(userData, clickedRights, collId) {
-			alert("!!!!");
+		self.shareCollection = function(userData, clickedRights) {
+			var collId = self.myCollections()[self.index()].dbId();
 			var username = userData.username;
 			var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
-			var currentRights = userData.accessRights;
 			$.ajax({
 				"url": "/rights/"+collId+"/"+clickedRights+"?username="+username,
 				"method": "GET",
 				"contentType": "application/json",
 				success: function(result) {
-					if (index < 0) 
+					if (index < 0) {
+						userData.accessRights = clickedRights;
 						self.usersToShare.push(ko.mapping.fromJS(userData));
+					}
 					else
 						self.usersToShare()[index].accessRights(clickedRights);
 				}
