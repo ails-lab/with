@@ -89,7 +89,7 @@ public class FilterValuesMap {
 			for (String kk : commonvalues.keySet()) {
 //				if (filterID.equals(CommonFilters.RIGHTS_ID)){
 //					System.out.println("------------------------------------------------");
-//					System.out.println(kk+" match? "+specificValue);
+//					System.out.println(kk+" match? "+matchexpr);
 //				}
 				if (matchexpr.matches(kk)) {
 					// String k = getKey(filterID, specificValue);

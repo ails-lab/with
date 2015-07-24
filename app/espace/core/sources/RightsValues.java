@@ -29,16 +29,16 @@ public class RightsValues {
 	//You can use it with pemission
 	
 
-	public static final String Creative_Modify = "modify, adapt, or build upon";
+	public static final String Creative_Modify = "Modify";
 		
-	public static final String Creative_Commercial = "use for commercial purposes";
+	public static final String Creative_Commercial = "Comercial";
 	
 	
 	public static final String Creative_Commercial_Modify = "use for commercial purposes modify, adapt, or build upon";
 	
-	public static final String Creative_Not_Commercial = "not use for commercial purposes";
+	public static final String Creative_Not_Commercial = "NOT Comercial";
 
-	public static final String Creative_Not_Modify = "not modify, adapt, or build upon";
+	public static final String Creative_Not_Modify = "NOT Modify";
 	
 	
 	public static final String Creative_Not_Commercial_Modify = "not modify, adapt, or build upon, not for commercial purposes";
@@ -46,6 +46,15 @@ public class RightsValues {
 	public static final String Creative_SA = "share alike";
 	
 	public static final String Creative_BY = "use by attribution";
+
+	public static final String Creative = "CREATIVE";
+
+	public static final String RRPA = "Rights Reserved - Paid Access";
+
+	public static final String RRRA = "Rights Reserved - Restricted Access";
+	
+	public static final String RRFA = "Rights Reserved - Free Access";
+	public static final String UNKNOWN = "UNKNOWN";
 	
 	
 
