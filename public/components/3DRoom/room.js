@@ -78,10 +78,7 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 				Gallery.settings = $.extend( true, {}, defaults, settings );
 				// preload images
 				$itemsContainer.imagesLoaded(function(){
-						
-							buildRoom($items,$itemsContainer) ;
-						
-			         
+					buildRoom($items,$itemsContainer) ;
 				});
 				
 
@@ -200,25 +197,27 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 				},
 				// displays the items of a wall on a container $wallElem
 				renderWall : function( $wallElem ) {
-					
+					var deferred = $.Deferred();
 					var $wallElem = $wallElem || this.$mainWall,
 						wallH = $wallElem.height(),
 						wallmargins = 150,
 						wall = this.walls[ this.currentWall ],
 						totalLeft = 0, lastItemW = 0,
 						wallMarginLeft = 0, sumWidths = 0;
-
 					for( var i = 0; i < wall.itemsCount; ++i ) {
-
-						var $item = wall.$items.eq( i );
 						
-						 $item.appendTo( $wallElem ).find("img").one("load", function() {
-						    	console.log($(this).attr('src'));
-						    
-							  var itemH = $item.height();
-							   console.log("item height:"+itemH+" wallheight:"+wallH);
-							   console.log($wallElem);
-								var figcaptionH = $item.find( 'figcaption' ).outerHeight( true );
+						  var $item = wall.$items.eq( i );
+						
+						  $item.css('visibility','hidden');
+						  $item.appendTo( $wallElem );
+						  
+					
+					};
+					var i=0;
+					 $wallElem.imagesLoaded().progress( function( imgLoad, image ) {
+						    var $item = $( image.img ).parents("figure" );
+						    var itemH = $item.height();
+							 	var figcaptionH = $item.find( 'figcaption' ).outerHeight( true );
 
 								if( itemH > wallH - wallmargins ) {
 									$item.find('img').height( wallH - wallmargins - figcaptionH );
@@ -243,19 +242,22 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 								lastItemW = itemW;
 
 								$item.css( { left : totalLeft } );
+								$item.css('visibility','visible');
 								wall.widths[i] = itemW;
-						     }).each(function() {
-								  if(this.complete) $(this).load();
-								  
-							});
-						
-						
+								++i;
+						    
+						  }).always(function(){
+							 // update wall element's width
+							  
+								var wallWidth = wallMarginLeft === 0 ? winsize.width : Math.ceil( wallMarginLeft + ( wall.itemsCount - 1 ) * Gallery.settings.margin + sumWidths + winsize.width / 2 - lastItemW / 2 );
+								$wallElem.css( 'width', wallWidth );
+								$wallElem.find( 'div.gr-floor' ).css( 'width', wallWidth );
+								deferred.resolve();
 
-					};
+						  });
 
-					// update wall element's width
-					var wallWidth = wallMarginLeft === 0 ? winsize.width : Math.ceil( wallMarginLeft + ( wall.itemsCount - 1 ) * Gallery.settings.margin + sumWidths + winsize.width / 2 - lastItemW / 2 );
-					$wallElem.css( 'width', wallWidth ).find( 'div.gr-floor' ).css( 'width', wallWidth );
+					return deferred.promise();
+					
 					
 				},
 				changeWall : function( dir ) {
@@ -286,94 +288,103 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 					var auxfloor = this.$auxWall.find( 'div.gr-floor' );
 
 					// add next wall's items to $auxWall
-					this.renderWall( this.$auxWall );
-
-					var auxWallWidth = this.$auxWall.width(),
-						auxWallInitialTranslationVal = dir === 'next' ? winsize.width : auxWallWidth * -1 + ( auxWallWidth - winsize.width ) * 1,
-						auxWallInitialAngle = dir === 'next' ? -90 : 90,
-						auxWallTransform = support.transforms3d ?
-							'translate3d(' + auxWallInitialTranslationVal + 'px,0px,0px) rotate3d(0,1,0,' + auxWallInitialAngle + 'deg)' :
-							'translate(' + auxWallInitialTranslationVal + 'px)';
 					
-					this.$auxWall.css( {
-						transform : auxWallTransform,
-						transformOrigin : dir === 'next' ? '0% 50%' : '100% 50%'
-					} );
 
-					// change aux wall's width to windows width and reorganize items accordingly:
-					this.$auxWall.data( 'width', auxWallWidth ).css( 'width', winsize.width );
-					auxfloor.css( 'width', winsize.width );
-
-					if(dir === 'prev') {
-						this.walls[ this.currentWall ].$items.css( 'left', '-=' + ( auxWallWidth - winsize.width ) );
-						var bgpos = ( ( auxWallWidth - winsize.width ) * -1 ) + 'px 0px';
-						this.$auxWall.css( 'background-position', bgpos );
-						auxfloor.css( 'background-position', bgpos );
-					}
-
-					setTimeout( $.proxy( function() {
+					this.$auxWall.css('visibility','hidden');
+					var promise = this.renderWall( this.$auxWall );
+					
+					promise.then($.proxy( function() {  
+							var auxWallWidth = this.$auxWall.width(),
+							auxWallInitialTranslationVal = dir === 'next' ? winsize.width : auxWallWidth * -1 + ( auxWallWidth - winsize.width ) * 1,
+							auxWallInitialAngle = dir === 'next' ? -90 : 90,
+							auxWallTransform = support.transforms3d ?
+								'translate3d(' + auxWallInitialTranslationVal + 'px,0px,0px) rotate3d(0,1,0,' + auxWallInitialAngle + 'deg)' :
+								'translate(' + auxWallInitialTranslationVal + 'px)';
 						
-						var translationVal = this.$mainWall.data( 'translationVal' ) || 0,
-							mainWallFinalTranslationVal = dir === 'next' ? - winsize.width : (translationVal - winsize.width) * -1,
-							mainWallFinalAngle = dir === 'next' ? 90 : -90,
-							mainWallFinalTransform = support.transforms3d ?
-								'translate3d(' + mainWallFinalTranslationVal + 'px,0px,0px) rotate3d(0,1,0,' + mainWallFinalAngle + 'deg)' :
-								'translate(' + mainWallFinalTranslationVal + 'px)';
-
-							auxWallFinalTranslationVal = dir === 'next' ? 0 : 0,
-							auxWallFinalAngle = 0,
-							auxWallFinalTransform = support.transforms3d ?
-								'translate3d(' + auxWallFinalTranslationVal + 'px,0px,0px) rotate3d(0,1,0,' + auxWallFinalAngle + 'deg)' :
-								'translate(' + auxWallFinalTranslationVal + 'px)';
-
-						this.$mainWall.css( 'transform', mainWallFinalTransform );
+							this.$auxWall.css( {
+								transform : auxWallTransform,
+								transformOrigin : dir === 'next' ? '0% 50%' : '100% 50%'
+							} );
+			
+							// change aux wall's width to windows width and reorganize items accordingly:
 						
-						this.$auxWall.css( {
-							transition : this.transitionSettings,
-							transform : auxWallFinalTransform
-						} ).on( transEndEventName, $.proxy( function() {
+							this.$auxWall.data( 'width', auxWallWidth ).css( 'width', winsize.width );
 							
-							// set original width
-							this.$auxWall.off( transEndEventName ).css( 'width', this.$auxWall.data( 'width' ) );
-							auxfloor.css( 'width', this.$auxWall.data( 'width' ) );
-
-							if( dir === 'prev' ) {
-								
-								// reset transform value and reorganize items accordingly
-								this.$auxWall.css( {
-									transition : 'none',
-									transform : 'translateX(' + ( ( auxWallWidth - winsize.width ) * -1 ) + 'px)',
-									backgroundPosition : '0px 0px'
-								} );
-
-								var wall = this.walls[ this.currentWall ],
-									$lastItem = wall.$items.eq( wall.itemsCount - 1 );
-								
-								// reorganize items accordingly
-								wall.$items.css( 'left', '+=' + ( auxWallWidth - winsize.width ) );
-								auxfloor.css( 'background-position', '0px 0px' );
-
-								// set transition again
-								this.$auxWall.css( 'transition', this.transitionSettings );
-
-								var translationVal = $lastItem.length > 0 ? - ( $lastItem.position().left + $lastItem.width() / 2 - winsize.width / 2 ) : 0;
-								this.$auxWall.data( 'translationVal', translationVal );
-
+							auxfloor.css( 'width', winsize.width );
+			
+							if(dir === 'prev') {
+								this.walls[ this.currentWall ].$items.css( 'left', '-=' + ( auxWallWidth - winsize.width ) );
+								var bgpos = ( ( auxWallWidth - winsize.width ) * -1 ) + 'px 0px';
+								this.$auxWall.css( 'background-position', bgpos );
+								auxfloor.css( 'background-position', bgpos );
 							}
-
-							this.switchWalls();
-							this.walking = false;
-
-						}, this ) );
-
-					}, this ), 25 );
+							
+							
+							setTimeout( $.proxy( function() {
+								
+								
+								var translationVal = this.$mainWall.data( 'translationVal' ) || 0,
+									mainWallFinalTranslationVal = dir === 'next' ? - winsize.width : (translationVal - winsize.width) * -1,
+									mainWallFinalAngle = dir === 'next' ? 90 : -90,
+									mainWallFinalTransform = support.transforms3d ?
+										'translate3d(' + mainWallFinalTranslationVal + 'px,0px,0px) rotate3d(0,1,0,' + mainWallFinalAngle + 'deg)' :
+										'translate(' + mainWallFinalTranslationVal + 'px)';
+		
+									auxWallFinalTranslationVal = dir === 'next' ? 0 : 0,
+									auxWallFinalAngle = 0,
+									auxWallFinalTransform = support.transforms3d ?
+										'translate3d(' + auxWallFinalTranslationVal + 'px,0px,0px) rotate3d(0,1,0,' + auxWallFinalAngle + 'deg)' :
+										'translate(' + auxWallFinalTranslationVal + 'px)';
+		
+								this.$mainWall.css( 'transform', mainWallFinalTransform );
+								
+								this.$auxWall.css( {
+									transition : this.transitionSettings,
+									transform : auxWallFinalTransform
+								} ).on( transEndEventName, $.proxy( function() {
+									
+									// set original width
+									this.$auxWall.off( transEndEventName ).css( 'width', this.$auxWall.data( 'width' ) );
+									auxfloor.css( 'width', this.$auxWall.data( 'width' ) );
+		
+									if( dir === 'prev' ) {
+										
+										// reset transform value and reorganize items accordingly
+										this.$auxWall.css( {
+											transition : 'none',
+											transform : 'translateX(' + ( ( auxWallWidth - winsize.width ) * -1 ) + 'px)',
+											backgroundPosition : '0px 0px'
+										} );
+		
+										var wall = this.walls[ this.currentWall ],
+											$lastItem = wall.$items.eq( wall.itemsCount - 1 );
+										
+										// reorganize items accordingly
+										wall.$items.css( 'left', '+=' + ( auxWallWidth - winsize.width ) );
+										auxfloor.css( 'background-position', '0px 0px' );
+		
+										// set transition again
+										this.$auxWall.css( 'transition', this.transitionSettings );
+		
+										var translationVal = $lastItem.length > 0 ? - ( $lastItem.position().left + $lastItem.width() / 2 - winsize.width / 2 ) : 0;
+										this.$auxWall.data( 'translationVal', translationVal );
+		
+									}
+		
+									this.switchWalls();
+									this.walking = false;
+		
+								}, this ) );
+		
+							}, this ), 25 );
+			        }, this ));
 
 				},
 				switchWalls : function() {
-
+					
 					this.$mainWall.remove();
 					this.$mainWall = this.$auxWall.addClass( 'gr-wall-main' ).removeClass( 'gr-wall-other' );
-
+					
 				},
 				navigate : function( dir ) {
 
