@@ -19,7 +19,7 @@ package espace.core.sources;
 public class RightsValues {
 
 	//open
-	public static final String Public = "Public";
+	public static final String Public = "Attribution alone";
 	//You can use it with attribution
 	
 	public static final String Restricted = "Restricted";
@@ -28,11 +28,25 @@ public class RightsValues {
 	public static final String Permission = "Permission";
 	//You can use it with pemission
 	
-	public static final String Creative_Commercial_and_Modify = "Creative license, allowed for commercial use and to modify, adapt or build upon";
-	
-	public static final String Creative_Modify = "Creative license, allowed to  modify/ adapt or Build upon";
+
+	public static final String Creative_Modify = "modify, adapt, or build upon";
 		
-	public static final String Creative_Commercial = "Creative license, allowed for commercial Use";
+	public static final String Creative_Commercial = "use for commercial purposes";
 	
-	public static final String Creative = "Creative license";
+	
+	public static final String Creative_Commercial_Modify = "use for commercial purposes modify, adapt, or build upon";
+	
+	public static final String Creative_Not_Commercial = "not use for commercial purposes";
+
+	public static final String Creative_Not_Modify = "not modify, adapt, or build upon";
+	
+	
+	public static final String Creative_Not_Commercial_Modify = "not modify, adapt, or build upon, not for commercial purposes";
+	
+	public static final String Creative_SA = "share alike";
+	
+	public static final String Creative_BY = "use by attribution";
+	
+	
+
 }

@@ -79,16 +79,19 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		/**
 		 * TODO check this 
 		 */
+				
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial_Modify, ".*(creative)(.*(nc-nd)).*");
 		
-		/*
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*(nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*(nc).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");*/
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*(creative)(.*nc).*");
+				
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*(creative)(.*nd).*");
+		
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
+		//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_BY, ".*(creative)(.*by).*");		
+		//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_SA, ".*(creative)(.*sa).*");				
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_Modify, ".*(creative)(?!.*(nc-nd)).*");
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*");
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*");
 
 	}
 
