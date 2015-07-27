@@ -142,8 +142,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	private Function<List<String>, QueryModifier> qrightwriter() {
 		Function<String, String> function = (String s) -> {
-			s = s.replace("(?!.*nc)", "* NOT *nc");
-			s = s.replace("(?!.*nd)", "* NOT *nd");
+			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
+			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
 			return "RIGHTS%3A%28"+s.replace(".", "")+"%29";
 		};
 		return new Function<List<String>, QueryModifier>() {
