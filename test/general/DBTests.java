@@ -26,10 +26,12 @@ import java.util.Date;
 import java.util.List;
 
 import model.Collection;
+import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
+import play.libs.F.Callback;
 import db.DB;
 
 /**
@@ -77,6 +79,25 @@ public class DBTests {
 					+ userId.toString());
 
 		}
+	}
 
+	@Test
+	public void cleanRecords() throws Exception {
+		List<ObjectId> existingCollections = DB.getCollectionDAO().findIds();
+		List<ObjectId> collections = new ArrayList<ObjectId>();
+		Callback<CollectionRecord> callback = new Callback<CollectionRecord>() {
+			@Override
+			public void invoke(CollectionRecord record) throws Throwable {
+				collections.add(record.getCollectionId());
+			}
+		};
+		DB.getCollectionRecordDAO().onAll(callback, false);
+		collections.removeAll(existingCollections);
+		if (collections.size() > 0) {
+			int removed = DB.getCollectionRecordDAO().removeAll("collectionId",
+					"in", collections);
+			System.out.println("Successfully removed " + removed
+					+ " items from database");
+		}
 	}
 }
