@@ -160,3 +160,14 @@ display: none;
     color: blue;
     cursor: pointer;
 }
+
+.userΙmage {
+	position: relative;
+}
+
+.rightsIcon {
+	position: absolute;
+	top: 0px;
+    left: 60px; 
+    padding: 10px;
+}

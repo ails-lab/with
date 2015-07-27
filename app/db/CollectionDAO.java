@@ -42,8 +42,25 @@ public class CollectionDAO extends DAO<Collection> {
 		return find(colQuery).asList();
 	}
 
-	public Collection getByTitle(String title) {
-		return this.findOne("title", title);
+	public List<Collection> getCollectionsByIds(List<ObjectId> ids,
+			List<String> retrievedFields) {
+		Query<Collection> colQuery = this.createQuery().field("_id")
+				.hasAnyOf(ids);
+		if (retrievedFields != null)
+			for (int i = 0; i < retrievedFields.size(); i++)
+				colQuery.retrievedFields(true, retrievedFields.get(i));
+		return this.find(colQuery).asList();
+
+	}
+
+	public List<Collection> getByTitle(String title) {
+		Query<Collection> q = this.createQuery().field("title")
+				.equal("_favorites");
+		return this.find(q).asList();
+	}
+
+	public List<ObjectId> getIdsByTitle(String title) {
+		return this.findIds("title", title);
 	}
 
 	public List<Collection> getAll(int offset, int count) {
@@ -60,6 +77,15 @@ public class CollectionDAO extends DAO<Collection> {
 	public Collection getById(ObjectId id) {
 		Query<Collection> q = this.createQuery().field("_id").equal(id);
 		return findOne(q);
+	}
+
+	public Collection getById(ObjectId id, List<String> retrievedFields) {
+		Query<Collection> q = this.createQuery().field("_id").equal(id);
+		if (retrievedFields != null)
+			for (int i = 0; i < retrievedFields.size(); i++)
+				q.retrievedFields(true, retrievedFields.get(i));
+		return this.findOne(q);
+
 	}
 
 	public List<Collection> getByOwner(ObjectId id) {
@@ -183,14 +209,12 @@ public class CollectionDAO extends DAO<Collection> {
 
 		Collection c = get(id);
 
-		/*User owner = c.retrieveOwner();
-		for (ObjectId colId : owner.getCollectionIds()) {
-			if (colId.equals(id)) {
-				owner.getCollectionIds().remove(colId);
-				DB.getUserDAO().makePermanent(owner);
-				break;
-			}
-		}*/
+		/*
+		 * User owner = c.retrieveOwner(); for (ObjectId colId :
+		 * owner.getCollectionIds()) { if (colId.equals(id)) {
+		 * owner.getCollectionIds().remove(colId);
+		 * DB.getUserDAO().makePermanent(owner); break; } }
+		 */
 
 		DB.getCollectionRecordDAO().deleteByCollection(id);
 		return makeTransient(c);

@@ -1,8 +1,93 @@
-define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], function(ko, template, app,imagesLoaded,Modernizr) {
+define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr','smoke'], function(ko, template, app,imagesLoaded,Modernizr) {
 
-	/*define(['Modernizr'],function(Modernizr) {
-	    'use strict';});*/
+	function debounce(func, wait, immediate) {
+		var timeout;
+		return function() {
+			var context = this, args = arguments;
+			var later = function() {
+				timeout = null;
+				if (!immediate) func.apply(context, args);
+			};
+			var callNow = immediate && !timeout;
+			clearTimeout(timeout);
+			timeout = setTimeout(later, wait);
+			if (callNow) func.apply(context, args);
+		};
+	};	
 	
+	
+	
+function Record(data) {
+		
+		var self = this;
+	    self.recordId = "";
+		self.title = "";
+		self.description="";
+		self.thumb = "";
+		self.fullres="";
+		self.view_url="";
+		self.source="";
+		self.creator="";
+		self.provider="";
+		self.rights="";
+		self.url="";
+		self.externalId = "";
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
+		});
+		self.load = function(data) {
+			if(data.title==undefined){
+				self.title="No title";
+			}else{self.title=data.title;}
+			self.url="#item/"+data.id;
+			self.view_url=data.view_url;
+			self.thumb=data.thumb;
+			self.fullres=data.fullres;
+			self.description=data.description;
+			self.source=data.source;
+			self.creator=data.creator;
+			self.provider=data.provider;
+			self.rights=data.rights;
+			self.recordId=data.id;
+			self.externalId=data.externalId;
+		};
+
+		self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source) {
+			    case "DPLA":
+			    	return "dp.la";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": {
+			    	return "youtube.com";
+			    }
+			    case "Mint":
+			    	return "mint";
+			    default: return "";
+			 }
+			});
+
+		self.displayTitle = ko.pureComputed(function() {
+			var distitle="";
+			distitle=self.title;
+			if(self.creator!==undefined && self.creator.length>0)
+				distitle+=", by "+self.creator;
+			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
+				distitle+=", "+self.provider;
+			return distitle;
+		});
+
+		if(data != undefined) self.load(data);
+		
+		
+	}
+
 	
 	function RoomModel(params) {
 		
@@ -40,7 +125,7 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 			threshold: 250
 		};
 		
-		
+		var $gallery = $( '#gr-gallery' );
 		var Gallery = (function() {
 			
 			var $gallery = $( '#gr-gallery' ),
@@ -74,60 +159,92 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 				transformName = transformNames[ Modernizr.prefixed( 'transform' ) ];
 
 			function init( settings ) {
-				
+				var $gallery = $( '#gr-gallery' ),
+				$itemsContainer = $gallery.children( 'div.gr-main' ).hide(),
+				$items = $itemsContainer.find( 'figure' ),
+				$window = $( window ),
+				winsize = getWindowSize(),
+
+				defaults = {
+					speed : 800,
+					easing : 'ease-in-out',
+					margin : 400
+				},
+				// css transitions and 3d transforms support
+				support = { transitions : Modernizr.csstransitions, transforms3d : Modernizr.csstransforms3d },
+				transEndEventNames = {
+					'WebkitTransition' : 'webkitTransitionEnd',
+					'MozTransition' : 'transitionend',
+					'OTransition' : 'oTransitionEnd',
+					'msTransition' : 'MSTransitionEnd',
+					'transition' : 'transitionend'
+				},
+				transformNames = {
+					'WebkitTransform' : '-webkit-transform',
+					'MozTransform' : '-moz-transform',
+					'OTransform' : '-o-transform',
+					'msTransform' : '-ms-transform',
+					'transform' : 'transform'
+				},
+				transEndEventName = transEndEventNames[ Modernizr.prefixed( 'transition' ) ] + '.cbpFWSlider',
+				transformName = transformNames[ Modernizr.prefixed( 'transform' ) ];
+
 				Gallery.settings = $.extend( true, {}, defaults, settings );
 				// preload images
-				$itemsContainer.imagesLoaded(function(){
-					buildRoom($items,$itemsContainer) ;
+				$( '#gr-gallery' ).children( 'div.gr-main' ).imagesLoaded(function(){
+					buildRoom($items,$itemsContainer,$gallery) ;
 				});
 				
 
 			}
 
-			function buildRoom($items,$itemsContainer) {
+			function buildRoom($items,$itemsContainer,$gallery) {
 				// create room with 4 walls
-				Gallery.room = new Room( $items,$itemsContainer );
+				Gallery.room = new Room( $items,$itemsContainer,$gallery );
 				// now show first wall (show elements of first wall)
+				
 				Gallery.room.renderWall();
 				
 				initEvents();
 				
 			}
 
-			function Room( $items,$itemsContainer ) {
+			function Room( $items,$itemsContainer,$gallery ) {
+				var self=this;
 
-				this.$items=$items;
-				this.$itemsContainer=$itemsContainer;
-				this.$el = $( '<div class="gr-room"><div class="gr-wall-main"><div class="gr-floor"></div></div></div>' ).insertAfter( $itemsContainer );
+				self.$items=$items;
+				self.$gallery=$gallery;
+				self.$itemsContainer=$itemsContainer;
+				self.$el = $( '<div class="gr-room"><div class="gr-wall-main"><div class="gr-floor"></div></div></div>' ).insertAfter( $itemsContainer );
 				// todo: check the real perspective value for widths > x
 				// the problem here is that if the wall's width (window width) is too large, and the perspective value is too small. 
 				// We will see the background in a certain poitn of time when the wall is rotating (at least in firefox)
 				// we need to adjust the value of the perspective according to the value of the current window's width
 				if( winsize.width > 1300 ) {
-					this.$el.css( 'perspective', 1700 );
+					self.$el.css( 'perspective', 1700 );
 				}
-				this.transitionSettings = transformName + ' ' + Gallery.settings.speed + 'ms ' + Gallery.settings.easing;
+				self.transitionSettings = transformName + ' ' + Gallery.settings.speed + 'ms ' + Gallery.settings.easing;
 				// element representing the wall
-				this.$mainWall = this.$el.find( 'div.gr-wall-main' ).css( 'transition', this.transitionSettings );
+				self.$mainWall = this.$el.find( 'div.gr-wall-main' ).css( 'transition', this.transitionSettings );
 				// 4 walls (or 1 if no support for 3dtransforms)
-				this.walls = [];
+				self.walls = [];
 				// current rendered wall
-				this.currentWall = 0; // 0,1,2,3
+				self.currentWall = 0; // 0,1,2,3
 				// current item being shown
-				this.currentItem = 0;
+				self.currentItem = 0;
 				// total number of items
-				this.totalItems = $items.length;
+				self.totalItems = $items.length;
 				// is walking
-				this.walking = false;
-				this.caption = -1;
-				this.create();
+				self.walking = false;
+				self.caption = -1;
+				self.create($gallery,$items);
 
 			}
 
 			Room.prototype = {
 
-				create : function() {
-
+				create : function($gallery,$items) {
+                   $gallery=$gallery;
 					// check on settings.layout
 					this.layout = typeof Gallery.settings.layout != 'undefined' && Gallery.settings.layout instanceof Array && support.transforms3d ? Gallery.settings.layout : this.getLayoutSettings();
 					
@@ -198,6 +315,7 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 				// displays the items of a wall on a container $wallElem
 				renderWall : function( $wallElem ) {
 					var deferred = $.Deferred();
+					
 					var $wallElem = $wallElem || this.$mainWall,
 						wallH = $wallElem.height(),
 						wallmargins = 150,
@@ -207,7 +325,6 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 					for( var i = 0; i < wall.itemsCount; ++i ) {
 						
 						  var $item = wall.$items.eq( i );
-						
 						  $item.css('visibility','hidden');
 						  $item.appendTo( $wallElem );
 						  
@@ -588,13 +705,90 @@ define(['knockout', 'text!./room.html', 'app','imagesloaded','Modernizr'], funct
 		})();
 		
 		//get exhibition items
+		//get collection id until exhibitions are fixed
+		self.route = params.route;
+		self.templateName = ko.observable('room1');
+		self.id = ko.observable(params.id);
+		self.citems=ko.observableArray([]);
+		self.collname = ko.observable('');
+		self.access = ko.observable("READ");
+		self.id = ko.observable(params.id);
+		self.owner = ko.observable('');
+		self.ownerId = ko.observable(-1);
+		self.itemCount = ko.observable(0);
+		self.citems = ko.observableArray([]);
+
+		self.description = ko.observable('');
+		self.selectedRecord = ko.observable(false);
+
+		self.loading = ko.observable(false);
+	
+		self.loadCollection = function () {
+			self.citems([]);
+			//$container.empty();
+			$.ajax({
+				"url": "/collection/" + self.id(),
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (data) {
+					self.collname(data.title);
+					self.description(data.description);
+					self.owner(data.owner);
+					self.ownerId(data.ownerId);
+					self.itemCount(data.itemCount);
+					self.fillItems(data.firstEntries);
+					
+					
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					$.smkAlert({text:'Error oading collection with id:'+self.id(), type:'danger', permanent: true});
+					self.loading(false);
+				},
+				complete:function(reply){
+					 self.loading(false);
+
+					
+				}
+					
+			});
+		};
+		self.once=ko.observable(true);
+		self.fillItems = function (data) {
+			var items = [];
+			for (i=0; i<data.length && i<10;i++) {
+				
+				var result = data[i];
+				var record = new Record({
+					id: result.dbId,
+					thumb: result.thumbnailUrl,
+					title: result.title,
+					view_url: result.sourceUrl,
+					creator: result.creator,
+					provider: result.provider,
+					source: result.source,
+					rights: result.rights,
+					externalId: result.externalId
+				});
+				items.push(record);
+			}
+			
+		self.citems.push.apply(self.citems, items);
+	
+		};
+		
 		self.init=function(){
-			Gallery.init( {
-				layout : [3,2,3,2]
-			} );
+			if(self.once()==true){
+				setTimeout(function(){Gallery.init( {
+					layout : [3,2,3,2]
+				} );
+				
+				},1000);
+				self.once(false);}
 			
 		}
-		self.init();
+		
+		self.loadCollection();
+		
 	}
 	
 	return {viewModel: RoomModel, template: template};

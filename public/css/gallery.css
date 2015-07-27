@@ -33,7 +33,7 @@ a {
 }
 
 .gallerycontainer > h1 {
-	z-index: 9999;
+	z-index: 1;
 	font-weight: 400;
 	padding: 50px 20px;
 }

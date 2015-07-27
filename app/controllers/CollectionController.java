@@ -420,6 +420,7 @@ public class CollectionController extends Controller {
 			User user = DB.getUserDAO().getById(userId, null);
 			if (user != null) {
 				ObjectNode userJSON = Json.newObject();
+				userJSON.put("userId", user.getDbId().toString());
 				userJSON.put("username", user.getUsername());
 				userJSON.put("firstName", user.getFirstName());
 				userJSON.put("lastName", user.getLastName());
