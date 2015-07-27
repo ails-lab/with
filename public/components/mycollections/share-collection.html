@@ -63,11 +63,11 @@
 								</button>
 							</div>
 							<!-- ko if: $data.image -->
-								<img class="img-circle img-thumbnail userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
+								<img class="img-circle img-thumbnail img-responsive userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
 								style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
 							<!-- /ko -->
 						    <!-- ko else -->
-								<img src="images/user.png" class="img-circle img-thumbnail userPhoto" 
+								<img src="images/user.png" class="img-circle img-thumbnail img-responsive userPhoto" 
 								data-bind = "attr: {id: 'image_' + userId()}, style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
 						    <!-- /ko -->
 						 </div>	
