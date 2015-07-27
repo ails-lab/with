@@ -213,13 +213,11 @@ public class ApiKeyManager extends UntypedActor  {
 			
 			// this commented out line gives a null pointer exception
 			// the constructor does not create a DbId!!
-			// is the key stored in the db anyway?
-			
 			
 			//answer( newKey.getDbId().toString());
 			//System.out.println("should not be null: " + newKey.getDbId());
-
 			
+			DB.getApiKeyDAO().save(newKey);
 			
 			answer( newKey.getKeyString());
 		} else {			

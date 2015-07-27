@@ -20,6 +20,7 @@ import java.util.List;
 
 import model.ApiKey;
 
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
 import play.Logger;
@@ -48,4 +49,19 @@ public class ApiKeyDAO extends DAO<ApiKey> {
 					.equal( name );
 		return find( q ).get();
 	}
+	
+	public ApiKey getByEmail( String email ) {
+		Query<ApiKey> q = createQuery()
+					.field( "email")
+					.equal( email );
+		return find( q ).get();
+	}
+	
+	public ApiKey getByUserId( ObjectId userID ) {
+		Query<ApiKey> q = createQuery()
+					.field( "proxyUserId")
+					.equal( userID );
+		return find( q ).get();
+	}
+	
 }

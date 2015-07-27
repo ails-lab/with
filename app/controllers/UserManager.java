@@ -30,6 +30,7 @@ import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
 
+import model.ApiKey;
 import model.Collection;
 import model.Media;
 import model.User;
@@ -751,7 +752,19 @@ public class UserManager extends Controller {
 			
 		}
 		
-		// what if they already have an API key??
+		
+		
+		//Discuss our policy when this happens.
+		
+		ApiKey withKey = DB.getApiKeyDAO().getByEmail(create.email);
+				
+		if(withKey!=null){
+			result.remove("email");
+			result.put("API Key", "This email or user account already has an API Key.");
+			result.put("Key", withKey.getKeyString());
+			return badRequest(result);
+		}
+		
 		
 		
         final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
