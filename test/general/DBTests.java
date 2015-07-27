@@ -56,24 +56,25 @@ public class DBTests {
 	}
 
 	@Test
-	public void createFavorites() {
-		List<ObjectId> favoritesId = DB.getCollectionDAO().getIdsByTitle(
-				"_favorites");
-		List<Collection> collections = DB.getCollectionDAO()
-				.getCollectionsByIds(favoritesId,
-						new ArrayList<String>(Arrays.asList("ownerId")));
-		List<ObjectId> usersWithFav = new ArrayList<ObjectId>();
-		for (Collection col : collections) {
-			usersWithFav.add(col.getOwnerId());
-		}
+	public void createFavorites() throws Exception {
 		List<ObjectId> users = DB.getUserDAO().findIds();
+		List<ObjectId> usersWithFav = new ArrayList<ObjectId>();
+		Callback<Collection> callback = new Callback<Collection>() {
+			@Override
+			public void invoke(Collection collection) throws Throwable {
+				if (collection.getTitle().equals("_favorites")) {
+					usersWithFav.add(collection.getOwnerId());
+				}
+			}
+		};
+		DB.getCollectionDAO().onAll(callback, false);
 		users.removeAll(usersWithFav);
-		Collection favCollection = new Collection();
-		favCollection.setTitle("_favorites");
+		Collection favCollection;
 		for (ObjectId userId : users) {
+			favCollection = new Collection();
+			favCollection.setTitle("_favorites");
 			favCollection.setCreated(new Date());
 			favCollection.setOwnerId(userId);
-			favCollection.setDbId(null);
 			DB.getCollectionDAO().makePermanent(favCollection);
 			System.out.println("Successfully created favorites for userId "
 					+ userId.toString());
