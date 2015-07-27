@@ -39,7 +39,7 @@
 					<div class="col-md-3">					
 						 <div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer" data-bind="
 						 event: { mouseenter: ko.contextFor(mycollections).$data.showRightsIcons.bind($data), 
-						 	mouseleave: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data, userId())}">	
+						 mouseleave: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data, userId())}">	
 							<div class="btn-group rightsIcon" role="group" style="display:none" data-bind="attr: {id: 'rightsIcons_'+userId()}">
 							   <button type="button" class="btn btn-info btn-xs">   
 							    <span class="glyphicon glyphicon-trash" title="Remove rights" 
@@ -63,7 +63,7 @@
 								</button>
 							</div>
 							<!-- ko if: $data.image -->
-								<img class="img-circle img-thumbnail img-responsive userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
+								<img class="img-circle img-thumbnail userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
 								style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
 							<!-- /ko -->
 						    <!-- ko else -->

@@ -217,16 +217,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var accessRights = userData.accessRights();
 			var userId = userData.userId();
 			var collId = self.myCollections()[self.index()].dbId();
-			//$("#image_"+userId).css("opacity", "0.5");
-			$("#image_"+userId).stop().fadeTo("fast", 0.4);
 			$("#rightsIcons_"+userId).show();
+			$("#image_"+userId).css("opacity", "0.5");
 		}
 		
 		
 		self.hideRightsIcons = function(userId) {
 			$("#rightsIcons_"+userId).hide();
-			$("#image_"+userId).stop().fadeTo("fast", 1);
-			//$("#image_"+userId).css("opacity", "1");
+			$("#image_"+userId).css("opacity", "1");
 		}
 		
 		self.changeRights = function(clickedRights) {
