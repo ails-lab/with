@@ -63,5 +63,17 @@ public class Global extends GlobalSettings {
 			// store it
 			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);			
 		}
+		
+		ApiKey mintKey = DB.getApiKeyDAO().getByName( "Mint" );
+		if( mintKey == null ) {
+			ApiKey k = new ApiKey();
+			k.setName("Mint");
+			k.addCall(0, ".*" );
+			
+			// guinness ... so that mint can contact this server
+			k.setIpPattern("147\\.102\\.11\\.71");
+			// store it
+			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);
+		}
 	}
 }

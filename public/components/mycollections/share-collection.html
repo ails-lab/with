@@ -6,49 +6,82 @@
 		</div>
 		<div class="modal-body row">
 			<form> <!-- data-bind="submit: ko.contextFor(mycollections).$data.shareCollection">-->
-			    <h5>Share or collaborate</h5>
+
+			    <!-- <h5>Share or collaborate</h5> -->
 				<div class="col-md-12">				  
-				  <div class="form-group">
+				  <div class="form-group form-inline">
 				    <div class="spec">
-				      <div class="itemlabel">Username or Email
-				      </div>
-				        <div class="value">
-						 	<input class="user-selection" type="search" data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.addToSharedWithUsers"/>
-						 </div>
-				      </div>
+				    <label for="firstName">Select user</label>
+						<input type="search" class="form-control" id="usernameOrEmail" placeholder="Username or email"
+						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.addToSharedWithUsers"/>
+						 <span style="padding-left:10px;">
+							 <button type="button" class="btn btn-info btn-xs" 
+							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
+							 	<span class="glyphicon glyphicon-eye-open" title="Share"
+					 				aria-hidden="true" style="cursor:pointer">
+					 			</span>
+					 		</button>
+					 		<button type="button" class="btn btn-info btn-xs" data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
+					 			<span class="glyphicon glyphicon-user" title="Collaborate"
+					 				aria-hidden="true" style="cursor:pointer">
+					 			</span>
+							 </button>
+				      	</span>
+				    	</div>
 				    </div>
 				</div>
 				<h5>Users with access to the collection</h5>
+				<div class="container-fluid">
+				<div class="row text-center">
 				<!-- ko foreach: ko.contextFor(mycollections).$data.usersToShare() -->
-				<!-- ko if: username() != ko.contextFor(mycollections).$data.myUsername() -->
-				<div class="row">
-				 <div class="col-xs-12 col-sm-12 col-md-12 coll-footer" >
-				 <!-- ko if: $data.image -->
-					<img class="img-circle img-thumbnail" data-bind="attr: { src: image }" id="profile-image" />				
-				 <!-- /ko -->
-				 <!-- ko else -->
-					<img src="images/user.png" class="img-circle img-thumbnail" id="profile-image"/>
-				 <!-- /ko -->
-				 <span  data-bind="text: username()" style="padding-left:20px"></span>
-				 <span class="glyphicon glyphicon-eye-open" title="Read"
-				 	data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'READ'), style: {color: accessRights()!='NONE'? 'blue' : 'grey'}"
-				 	aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>	 
-				 <span class="glyphicon glyphicon-user" title="Collaborate"
-				 	data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'WRITE'), style: {color: (accessRights()=='OWN' ||  accessRights()=='WRITE') ? 'blue' : 'grey'}" 
-				 	aria-hidden="true" style="padding-left:20px;cursor:pointer"></span>
-				 <span class="glyphicon glyphicon-user" title="Collaborate"
-				 	data-bind="click: ko.contextFor(mycollections).$data.shareCollection.bind($data, 'WRITE'), style: {color: (accessRights()=='OWN' ||  accessRights()=='WRITE') ? 'blue' : 'grey'}" 
-				 	aria-hidden="true" style="margin-left:-7px;cursor:pointer"></span>
-				 </div>				
-				 </div>
+				<!-- ko if: username() != ko.contextFor(mycollections).$data.myUsername()-->
+				<!-- ko if: accessRights() != 'NONE' -->
+					<div class="col-md-3">					
+						 <div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer" data-bind="
+						 event: { mouseenter: ko.contextFor(mycollections).$data.showRightsIcons.bind($data), 
+						 mouseleave: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data, userId())}">	
+							<div class="btn-group rightsIcon" role="group" style="display:none" data-bind="attr: {id: 'rightsIcons_'+userId()}">
+							   <button type="button" class="btn btn-info btn-xs">   
+							    <span class="glyphicon glyphicon-trash" title="Remove rights" 
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'NONE')" 
+									style="cursor:pointer">
+								</span>
+								</button>
+								<button type="button" class="btn btn-info btn-xs">   
+								<!-- ko if: accessRights() == 'READ' -->
+								<span class="glyphicon glyphicon-user" title="Write" 
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')" 
+									style="cursor:pointer;color:blue">
+								</span>
+								<!-- /ko -->
+								<!-- ko if: accessRights() == 'WRITE' -->
+								<span class="glyphicon glyphicon-eye-open" title="Read" 
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ'), " 
+									style="cursor:pointer;color:blue">
+								</span>
+								<!-- /ko -->
+								</button>
+							</div>
+							<!-- ko if: $data.image -->
+								<img class="img-circle img-thumbnail userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
+								style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
+							<!-- /ko -->
+						    <!-- ko else -->
+								<img src="images/user.png" class="img-circle img-thumbnail img-responsive userPhoto" 
+								data-bind = "attr: {id: 'image_' + userId()}, style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
+						    <!-- /ko -->
+						 </div>	
+						 <span data-bind="text: username()"></span>
+					</div>
+				<!--  /ko -->
 				<!-- /ko -->
 				<!-- /ko -->
+				</div>
+				</div>
 			</form>
 		</div>
 		<div class="modal-footer">
-			<button type="button" class="btn btn-default" data-bind="click: ko.contextFor(mycollections).$data.closePopup">Cancel</button>
-			<!-- <button type="submit" class="btn btn-primary">Apply</button> -->
-			<button type="button" class="btn btn-primary" data-bind="click: ko.contextFor(mycollections).$data.shareCollection">Apply</button>
+			<button type="button" class="btn btn-default" data-bind="click: ko.contextFor(mycollections).$data.closePopup">Close</button>
 		</div>
 	</div>
 </div>

@@ -701,42 +701,42 @@ public class UserManager extends Controller {
 		return internalServerError(result);
 
 	}
-	
-	
-	
-	
+
 	public static Result apikey(String email) {
-		
-		// need to limit calls like this and reset password to 3 times per day maximum!
-		
+
+		// need to limit calls like this and reset password to 3 times per day
+		// maximum!
+
 		ObjectNode result = Json.newObject();
 		ObjectNode error = (ObjectNode) Json.newObject();
 
-        Create create = new Create();
-		
+		Create create = new Create();
+
 		String userId = session().get("user");
 		// hexString!
-		
+
 		User u;
-		
-		if(userId==null){
+
+		if (userId == null) {
 			if (StringUtils.isEmpty(email)) {
-				error.put("email", "Email is empty. Either log in or provide an email.");
+				error.put("email",
+						"Email is empty. Either log in or provide an email.");
 				result.put("error", error);
 				return badRequest(result);
 			} else {
-				
+
 				u = DB.getUserDAO().getByEmail(email);
-				
-				
+
 				create.email = email;
-				
+
 				if (u == null) {
-					result.put("email", "Email not linked to account, an email has been sent.");
+					result.put("email",
+							"Email not linked to account, an email has been sent.");
 
 				} else {
-					
-					result.put("email", "Registered user's email found, an email has been sent.");
+
+					result.put("email",
+							"Registered user's email found, an email has been sent.");
 					userId = u.getDbId().toHexString();
 					create.proxyUserId = new ObjectId(userId);
 				}				
@@ -749,7 +749,7 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().get(create.proxyUserId);
 			
 			create.email = u.getEmail();
-			
+
 		}
 		
 		
@@ -787,47 +787,46 @@ public class UserManager extends Controller {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
+
 		if (s == "") {
 			error.put("API Key", "Could not create API key");
 			result.put("error", error);
 			result.remove("email");
 			return internalServerError(result);
 		}
-		
-		result.put("API Key", "Succesfully created a new API key: "+s);
-		
+
+		result.put("API Key", "Succesfully created a new API key: " + s);
+
 		String newLine = System.getProperty("line.separator");
-		
+
 		// String url = APPLICATION_URL;
 		String url = "http://localhost:9000/assets/developers.html";
-		
+
 		String fn = "";
 		String ln = "";
-		
-		if (u!=null){
+
+		if (u != null) {
 			fn = ": " + u.getFirstName();
-			ln = " " +u.getLastName();
-		} 
-		
-		
+			ln = " " + u.getLastName();
+		}
+
 		String message = "Dear user"
 				+ fn
 				+ ln
 				+ ","
 				+ newLine
 				+ newLine
-				+ "We received a request for a new API key. Your new API key is : " + newLine
-				+ newLine + s
+				+ "We received a request for a new API key. Your new API key is : "
+				+ newLine
+				+ newLine
+				+ s
 				// token URL here
-				+ newLine + newLine 
+				+ newLine + newLine
 				+ "You can use this key to make calls to the WITH API. "
-				+ "To check out the WITH API documentation follow this link : " + newLine
-				+ newLine + url
-				+ newLine + newLine 
-				+ "Sincerely yours," + newLine
-				+ "The WITH team.";
-		
+				+ "To check out the WITH API documentation follow this link : "
+				+ newLine + newLine + url + newLine + newLine
+				+ "Sincerely yours," + newLine + "The WITH team.";
+
 		try {
 			sendEmail(u, email, message, "WITH API key");
 		} catch (EmailException e) {
@@ -835,11 +834,9 @@ public class UserManager extends Controller {
 			result.put("error", error);
 			return badRequest(result); // maybe change type?
 		}
-		
+
 		return ok(result);
 	}
-	
-	
 
 	/**
 	 * Checks email/username validity, checks if user has registered with
@@ -903,13 +900,12 @@ public class UserManager extends Controller {
 		String newLine = System.getProperty("line.separator");
 
 		// more complex email are schemes available - want to discuss first
-		
 
 		// I use this account for some other sites as well but we can use it for
 		// testing
 		try {
 			String subject = "WITH password reset";
-			
+
 			String msg = "Dear user: "
 					+ u.getFirstName()
 					+ " "
@@ -923,7 +919,7 @@ public class UserManager extends Controller {
 					// token URL here
 					+ newLine + newLine + "Sincerely yours," + newLine
 					+ "The WITH team.";
-			
+
 			sendEmail(u, "", msg, subject);
 		} catch (EmailException e) {
 			error.put("email", "Email server error");
@@ -948,20 +944,22 @@ public class UserManager extends Controller {
 	 * @param email
 	 * @throws EmailException
 	 */
-	public static void sendEmail(User u, String mailAdress, String message, String subject) throws EmailException {
+	public static void sendEmail(User u, String mailAdress, String message,
+			String subject) throws EmailException {
 		Email email = new SimpleEmail();
 		email.setSmtpPort(587);
 		email.setHostName("smtp.gmail.com");
 		email.setDebug(false);
 		// email.setBounceAddress("karonissz@gmail.com");
-		email.setAuthenticator(new DefaultAuthenticator(
-				"karonissz@gmail.com", "12345678kostas"));
+		email.setAuthenticator(new DefaultAuthenticator("karonissz@gmail.com",
+				"12345678kostas"));
 		email.setStartTLSEnabled(true);
 		email.setSSLOnConnect(false);
-		email.setFrom("karonissz@gmail.com", "kostas"); //check if this can be whatever
+		email.setFrom("karonissz@gmail.com", "kostas"); // check if this can be
+														// whatever
 		email.setSubject(subject);
-		
-		if(u==null){
+
+		if (u == null) {
 			email.addTo(mailAdress);
 
 		} else {
@@ -973,8 +971,6 @@ public class UserManager extends Controller {
 		email.send();
 	}
 
-	
-	
 	/***
 	 * Parses token from the URL sent in the resetPassword() email.
 	 *

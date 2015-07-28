@@ -39,13 +39,18 @@ var require = {
 		"liveFilter"                : "bower_modules/liveFilter/jquery.liveFilter",
 		"barchart"                  : "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
 		"header"                    : "headers",
-		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd"
+		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd",
+		"Modernizr"					: "bower_modules/modernizr/modernizr"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
 		"bootstrap": { deps: ["jquery"] },
 		"facebook":  { exports: "FB" },
 		"smoke": { deps: ["jquery", "bootstrap"] },
-		"header": { deps: ['jquery'] }
+		"header": { deps: ['jquery'] },
+		'Modernizr': {
+            exports: 'Modernizr'
+        }
 	}
+	
 };

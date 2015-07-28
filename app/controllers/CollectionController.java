@@ -47,7 +47,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
-import arq.update;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -140,6 +139,7 @@ public class CollectionController extends Controller {
 						"User does not have permission to delete the collection");
 				return forbidden(result);
 			}
+			DB.getCollectionRecordDAO().removeAll("collectionId", "=", new ObjectId(id));
 			if (DB.getCollectionDAO().removeById(new ObjectId(id)) != 1) {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
@@ -420,6 +420,7 @@ public class CollectionController extends Controller {
 			User user = DB.getUserDAO().getById(userId, null);
 			if (user != null) {
 				ObjectNode userJSON = Json.newObject();
+				userJSON.put("userId", user.getDbId().toString());
 				userJSON.put("username", user.getUsername());
 				userJSON.put("firstName", user.getFirstName());
 				userJSON.put("lastName", user.getLastName());

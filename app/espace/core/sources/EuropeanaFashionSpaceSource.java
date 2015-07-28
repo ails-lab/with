@@ -71,6 +71,10 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 //		return "http://www.europeanafashion.eu/api/search/";
 //	}
 	
+	public List<CommonQuery> splitFilters(CommonQuery q) {
+		return q.splitFilters();
+	}
+	
 	private String getURI(String ID) {
 		return "http://thesaurus.europeanafashion.eu/thesaurus/"+ID;
 	}
