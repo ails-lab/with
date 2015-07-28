@@ -115,6 +115,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			self.externalId=data.externalId;
 		};
 
+		self.cachedThumbnail = ko.pureComputed(function() {
+			if (self.thumb.indexOf('/') === 0) {
+				return self.thumb;
+			} else {
+				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
+				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+			}
+		});
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source) {
 			    case "DPLA":
