@@ -67,19 +67,22 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial_Modify, ".*(creative)(.*(nc-nd)).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*creative(?!.*nc).*");
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*creative(?!.*nd).*");
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*(creative)(.*nc).*");
-				
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*(creative)(.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
+				".*non-commercial.*");
+       
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*rr-f.*");
+        
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*unknown.*");
+        
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 		
-
-		//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_BY, ".*(creative)(.*by).*");		
-		//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_SA, ".*(creative)(.*sa).*");				
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_Modify, ".*(creative)(?!.*(nc-nd)).*");
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*");
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*");
-
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
 
 	
 	}
