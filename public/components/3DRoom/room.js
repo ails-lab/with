@@ -192,15 +192,15 @@ function Record(data) {
 				Gallery.settings = $.extend( true, {}, defaults, settings );
 				// preload images
 				$( '#gr-gallery' ).children( 'div.gr-main' ).imagesLoaded(function(){
-					buildRoom($items,$itemsContainer,$gallery) ;
+					buildRoom($items,$itemsContainer) ;
 				});
 				
 
 			}
 
-			function buildRoom($items,$itemsContainer,$gallery) {
+			function buildRoom($items,$itemsContainer) {
 				// create room with 4 walls
-				Gallery.room = new Room( $items,$itemsContainer,$gallery );
+				Gallery.room = new Room( $items,$itemsContainer);
 				// now show first wall (show elements of first wall)
 				
 				Gallery.room.renderWall();
@@ -209,11 +209,10 @@ function Record(data) {
 				
 			}
 
-			function Room( $items,$itemsContainer,$gallery ) {
+			function Room( $items,$itemsContainer ) {
 				var self=this;
 
 				self.$items=$items;
-				self.$gallery=$gallery;
 				self.$itemsContainer=$itemsContainer;
 				self.$el = $( '<div class="gr-room"><div class="gr-wall-main"><div class="gr-floor"></div></div></div>' ).insertAfter( $itemsContainer );
 				// todo: check the real perspective value for widths > x
@@ -237,14 +236,15 @@ function Record(data) {
 				// is walking
 				self.walking = false;
 				self.caption = -1;
-				self.create($gallery,$items);
+				self.create($items);
 
 			}
 
 			Room.prototype = {
 
-				create : function($gallery,$items) {
-                   $gallery=$gallery;
+				create : function($items) {
+					var $gallery = $( '#gr-gallery' );
+					
 					// check on settings.layout
 					this.layout = typeof Gallery.settings.layout != 'undefined' && Gallery.settings.layout instanceof Array && support.transforms3d ? Gallery.settings.layout : this.getLayoutSettings();
 					
@@ -731,7 +731,7 @@ function Record(data) {
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
-					self.collname(data.title);
+					self.collname(data.title.toUpperCase());
 					self.description(data.description);
 					self.owner(data.owner);
 					self.ownerId(data.ownerId);
