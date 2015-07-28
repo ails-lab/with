@@ -41,7 +41,7 @@ var require = {
 		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
 		"autoscroll"		    	: "js/aautoscroll.2.4",
 		"bootstrap-select"       	: "bower_modules/bootstrap-select/dist/js/bootstrap-select.min",
-		"jquery.lazyload"           : "bower_modules/jquery.lazyload/jquery.lazyload",
+		"jquery.lazyload"           : "bower_modules/jquery.lazyload/jquery.lazyload"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

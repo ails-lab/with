@@ -38,6 +38,7 @@ exhibition {
     background-color: #F2F2F2;
     padding-top: 100px;
     padding-bottom: 100px;
+    visibility: hidden;
 }
 
 .boxBasic{
