@@ -55,7 +55,7 @@ public class DBTests {
 		colDAO.storeCollection();
 	}
 
-	@Test
+	//@Test
 	public void createFavorites() throws Exception {
 		List<ObjectId> users = DB.getUserDAO().findIds();
 		List<ObjectId> usersWithFav = new ArrayList<ObjectId>();
@@ -82,7 +82,7 @@ public class DBTests {
 		}
 	}
 
-	@Test
+	//@Test
 	public void cleanRecords() throws Exception {
 		List<ObjectId> existingCollections = DB.getCollectionDAO().findIds();
 		List<ObjectId> collections = new ArrayList<ObjectId>();
@@ -99,6 +99,16 @@ public class DBTests {
 					"in", collections);
 			System.out.println("Successfully removed " + removed
 					+ " items from database");
+		}
+	}
+	
+	@Test
+	public void clearCache() {
+		try {
+			DB.getMediaDAO().deleteCached();
+			System.out.println("Cache cleared");
+		} catch (Exception e) {
+			System.out.println("Couldn't clear cache:" + e.getMessage());
 		}
 	}
 }
