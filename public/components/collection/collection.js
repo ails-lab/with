@@ -226,6 +226,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
+					 var utc = new Date().valueOf();
+				        xhr.setRequestHeader('X-auth1', utc );
+				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
 				},
 				"url": "/collection/create",
 				"method": "post",
@@ -314,6 +317,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
+					 var utc = new Date().valueOf();
+				        xhr.setRequestHeader('X-auth1', utc );
+				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
 				},
 				"url": "/collection/" + collid + "/addRecord",
 				"method": "post",
