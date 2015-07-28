@@ -160,12 +160,17 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
             self.loadingExhibitionItems = true;
             var promise = getExhibition(self.dbId());
             $.when(promise).done(function (data) {
-
+                //alert(JSON.stringify(data));
                 $('.outer').css("visibility", "visible");
                 ko.mapping.fromJS(data, mappingExhibition, self);
+                if (self.title().indexOf('Dummy') !== -1) {
+                    self.title('');
+                }
+                if (self.description().indexOf('Description') !== -1) {
+                    self.description('');
+                }
                 self.loadingInitialItemsCount = self.firstEntries.length;
                 self.firstEntries.map(function (record) { //fix for now till service gets implemented
-
                     record.additionalText = ko.observable('');
                     record.videoUrl = ko.observable('');
                     record.containsVideo = ko.observable(false);
@@ -247,10 +252,9 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
                     //update the dbid
                     record.dbId = data.dbId;
                     $(elem).find('#loadingIcon').fadeOut();
-                })
-                    .fail(function (data) {
+                }).fail(function (data) {
                         $(elem).find('#loadingIcon').fadeOut();
-                    });
+                });
             }
         }
         self.removeItem = function (elem) {

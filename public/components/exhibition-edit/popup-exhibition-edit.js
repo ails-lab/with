@@ -39,6 +39,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
         self.cancelButtonTitle = ko.observable('cancel');
         self.exhibitionItem = {};
         self.exhibitionItemIsSet = ko.observable(false);
+        self.isUpdating = ko.observable(false);
 
         editItem = function (exhibitionItem, editMode) {
             //alert(JSON.stringify(exhibitionItem));
@@ -112,7 +113,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
         }
 
         self.savePopUpVideoMode = function () {
-            $('#myModal').modal('hide');
+            self.isUpdating(true);
             var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl());
             $.when(promise).done(function (data) {
                 self.exhibitionItem.containsVideo(true);
@@ -120,6 +121,9 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
             }).fail(function (data) {
 
                 alert('video insertion failed');
+            }).always(function (data) {
+                self.isUpdating(false);
+                $('#myModal').modal('hide');
             });
         }
 
@@ -129,27 +133,31 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
         }
 
         self.deletePopUpVideoMode = function () {
-            $('#myModal').modal('hide');
+            self.isUpdating(true);
             var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), '');
             $.when(promise).done(function (data) {
                 self.exhibitionItem.containsVideo(false);
                 self.exhibitionItem.videoUrl('');
             }).fail(function (data) {
-
                 alert('deletion failed');
+            }).always(function (data) {
+                self.isUpdating(false);
+                $('#myModal').modal('hide');
             });
         }
 
         //right button actions Text
         self.savePopUpTextMode = function () {
-            $('#myModal').modal('hide');
             var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl());
+            self.isUpdating(true);
             $.when(promise).done(function (data) {
                 self.exhibitionItem.additionalText(self.textInput());
                 self.exhibitionItem.containsText(true);
             }).fail(function (data) {
-
                 alert('text insertion failed');
+            }).always(function (data) {
+                self.isUpdating(false);
+                $('#myModal').modal('hide');
             });
         }
 
@@ -159,14 +167,16 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
         }
 
         self.deletePopUpTextMode = function () {
-            $('#myModal').modal('hide');
+            self.isUpdating(true);
             var promise = updateRecord(self.exhibitionItem.dbId, '', self.videoUrl());
             $.when(promise).done(function (data) {
                 self.exhibitionItem.additionalText('');
                 self.exhibitionItem.containsText(false);
             }).fail(function (data) {
-
                 alert('deletion failed');
+            }).always(function (data) {
+                self.isUpdating(false);
+                $('#myModal').modal('hide');
             });
         }
     }
