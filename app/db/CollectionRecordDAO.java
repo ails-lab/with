@@ -18,9 +18,7 @@ package db;
 
 import java.util.List;
 
-import model.Collection;
 import model.CollectionRecord;
-import model.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;

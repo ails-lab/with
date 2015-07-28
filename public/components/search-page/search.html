@@ -43,7 +43,7 @@
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
-					<a data-bind="event: { click: $parent.recordSelect }, attr: { href: url }"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:thumb, alt: title }"/></a>
+					<a data-bind="event: { click: $parent.recordSelect }, attr: { href: url }"><img data-bind="event: { error: $parent.defaultSource }, attr: { src:cachedThumbnail(), alt: title }"/></a>
 					<figcaption data-bind="text: displayTitle"></figcaption>
 					<div class="sourceCredits"><a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
 				</figure>

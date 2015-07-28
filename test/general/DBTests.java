@@ -26,10 +26,12 @@ import java.util.Date;
 import java.util.List;
 
 import model.Collection;
+import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
+import play.libs.F.Callback;
 import db.DB;
 
 /**
@@ -53,30 +55,60 @@ public class DBTests {
 		colDAO.storeCollection();
 	}
 
-	@Test
-	public void createFavorites() {
-		List<ObjectId> favoritesId = DB.getCollectionDAO().getIdsByTitle(
-				"_favorites");
-		List<Collection> collections = DB.getCollectionDAO()
-				.getCollectionsByIds(favoritesId,
-						new ArrayList<String>(Arrays.asList("ownerId")));
-		List<ObjectId> usersWithFav = new ArrayList<ObjectId>();
-		for (Collection col : collections) {
-			usersWithFav.add(col.getOwnerId());
-		}
+	//@Test
+	public void createFavorites() throws Exception {
 		List<ObjectId> users = DB.getUserDAO().findIds();
+		List<ObjectId> usersWithFav = new ArrayList<ObjectId>();
+		Callback<Collection> callback = new Callback<Collection>() {
+			@Override
+			public void invoke(Collection collection) throws Throwable {
+				if (collection.getTitle().equals("_favorites")) {
+					usersWithFav.add(collection.getOwnerId());
+				}
+			}
+		};
+		DB.getCollectionDAO().onAll(callback, false);
 		users.removeAll(usersWithFav);
-		Collection favCollection = new Collection();
-		favCollection.setTitle("_favorites");
+		Collection favCollection;
 		for (ObjectId userId : users) {
+			favCollection = new Collection();
+			favCollection.setTitle("_favorites");
 			favCollection.setCreated(new Date());
 			favCollection.setOwnerId(userId);
-			favCollection.setDbId(null);
 			DB.getCollectionDAO().makePermanent(favCollection);
 			System.out.println("Successfully created favorites for userId "
 					+ userId.toString());
 
 		}
+	}
 
+	//@Test
+	public void cleanRecords() throws Exception {
+		List<ObjectId> existingCollections = DB.getCollectionDAO().findIds();
+		List<ObjectId> collections = new ArrayList<ObjectId>();
+		Callback<CollectionRecord> callback = new Callback<CollectionRecord>() {
+			@Override
+			public void invoke(CollectionRecord record) throws Throwable {
+				collections.add(record.getCollectionId());
+			}
+		};
+		DB.getCollectionRecordDAO().onAll(callback, false);
+		collections.removeAll(existingCollections);
+		if (collections.size() > 0) {
+			int removed = DB.getCollectionRecordDAO().removeAll("collectionId",
+					"in", collections);
+			System.out.println("Successfully removed " + removed
+					+ " items from database");
+		}
+	}
+	
+	@Test
+	public void clearCache() {
+		try {
+			DB.getMediaDAO().deleteCached();
+			System.out.println("Cache cleared");
+		} catch (Exception e) {
+			System.out.println("Couldn't clear cache:" + e.getMessage());
+		}
 	}
 }
