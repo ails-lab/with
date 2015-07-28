@@ -25,7 +25,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'apidoc', params: { page: 'api-docu', title: 'API Documentation' } },
 			{ url: 'testsearch', params: { page: 'testsearch', title: 'testsearch' } },
 			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } },
-			{ url: 'gallery/{id}',     params: { page: '3DRoom',    title: 'Gallery View' } }
+			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } }
 		]
 	});
 

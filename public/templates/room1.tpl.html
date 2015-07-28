@@ -2,7 +2,7 @@
 		<div class="gallerycontainer" id="gallery">	
 			
 			<h1>3D Gallery: <!-- ko text:$parent.collname --><!-- /ko --> </h1>
-		<div id="gr-gallery" class="gr-gallery">
+		<div id="gr-gallery" data-bind="css: {'gr-gallery' : $parent.skin!='2', 'gr-gallery2': $parent.skin=='2'}">
 				<div class="gr-main" style="display:none">
 				<!--ko foreach: $data-->
 					<figure>

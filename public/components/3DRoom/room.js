@@ -160,11 +160,12 @@ function Record(data) {
 
 			function init( settings ) {
 				var $gallery = $( '#gr-gallery' ),
-				$itemsContainer = $gallery.children( 'div.gr-main' ).hide(),
+				$itemsContainer = $gallery.children( 'div.gr-main').hide(),
 				$items = $itemsContainer.find( 'figure' ),
 				$window = $( window ),
 				winsize = getWindowSize(),
 
+				
 				defaults = {
 					speed : 800,
 					easing : 'ease-in-out',
@@ -192,15 +193,15 @@ function Record(data) {
 				Gallery.settings = $.extend( true, {}, defaults, settings );
 				// preload images
 				$( '#gr-gallery' ).children( 'div.gr-main' ).imagesLoaded(function(){
-					buildRoom($items,$itemsContainer) ;
+					buildRoom($items,$itemsContainer,self.skin) ;
 				});
 				
 
 			}
 
-			function buildRoom($items,$itemsContainer) {
+			function buildRoom($items,$itemsContainer,skin) {
 				// create room with 4 walls
-				Gallery.room = new Room( $items,$itemsContainer);
+				Gallery.room = new Room( $items,$itemsContainer,skin);
 				// now show first wall (show elements of first wall)
 				
 				Gallery.room.renderWall();
@@ -209,12 +210,13 @@ function Record(data) {
 				
 			}
 
-			function Room( $items,$itemsContainer ) {
+			function Room( $items,$itemsContainer,skin ) {
 				var self=this;
-
+				console.log(skin);
+				self.skin=skin;
 				self.$items=$items;
 				self.$itemsContainer=$itemsContainer;
-				self.$el = $( '<div class="gr-room"><div class="gr-wall-main"><div class="gr-floor"></div></div></div>' ).insertAfter( $itemsContainer );
+				self.$el = $( '<div class="gr-room'+self.skin+'"><div class="gr-wall-main'+self.skin+'"><div class="gr-floor'+self.skin+'"></div></div></div>' ).insertAfter( $itemsContainer );
 				// todo: check the real perspective value for widths > x
 				// the problem here is that if the wall's width (window width) is too large, and the perspective value is too small. 
 				// We will see the background in a certain poitn of time when the wall is rotating (at least in firefox)
@@ -224,7 +226,7 @@ function Record(data) {
 				}
 				self.transitionSettings = transformName + ' ' + Gallery.settings.speed + 'ms ' + Gallery.settings.easing;
 				// element representing the wall
-				self.$mainWall = this.$el.find( 'div.gr-wall-main' ).css( 'transition', this.transitionSettings );
+				self.$mainWall = this.$el.find( 'div.gr-wall-main'+self.skin ).css( 'transition', this.transitionSettings );
 				// 4 walls (or 1 if no support for 3dtransforms)
 				self.walls = [];
 				// current rendered wall
@@ -316,6 +318,7 @@ function Record(data) {
 				renderWall : function( $wallElem ) {
 					var deferred = $.Deferred();
 					
+					
 					var $wallElem = $wallElem || this.$mainWall,
 						wallH = $wallElem.height(),
 						wallmargins = 150,
@@ -368,7 +371,7 @@ function Record(data) {
 							  
 								var wallWidth = wallMarginLeft === 0 ? winsize.width : Math.ceil( wallMarginLeft + ( wall.itemsCount - 1 ) * Gallery.settings.margin + sumWidths + winsize.width / 2 - lastItemW / 2 );
 								$wallElem.css( 'width', wallWidth );
-								$wallElem.find( 'div.gr-floor' ).css( 'width', wallWidth );
+								$wallElem.find( 'div.gr-floor'+self.skin ).css( 'width', wallWidth );
 								deferred.resolve();
 
 						  });
@@ -392,7 +395,7 @@ function Record(data) {
 					this.walls[ this.lastWall ].$items.css( 'left','+=' + this.$mainWall.data( 'translationVal' ) );
 
 					// update floor
-					this.$mainWall.find( 'div.gr-floor' ).css( {
+					this.$mainWall.find( 'div.gr-floor'+self.skin ).css( {
 						width : winsize.width,
 						backgroundPosition : this.$mainWall.data( 'translationVal' ) + 'px 0px'
 					} );
@@ -401,8 +404,8 @@ function Record(data) {
 					this.$mainWall.css('transition', this.transitionSettings );
 
 					// the incoming wall..
-					this.$auxWall = $( '<div class="gr-wall-other"><div class="gr-floor"></div></div>' ).insertAfter( this.$mainWall );
-					var auxfloor = this.$auxWall.find( 'div.gr-floor' );
+					this.$auxWall = $( '<div class="gr-wall-other'+self.skin+'"><div class="gr-floor'+self.skin+'"></div></div>' ).insertAfter( this.$mainWall );
+					var auxfloor = this.$auxWall.find( 'div.gr-floor'+self.skin );
 
 					// add next wall's items to $auxWall
 					
@@ -419,6 +422,7 @@ function Record(data) {
 								'translate(' + auxWallInitialTranslationVal + 'px)';
 						
 							this.$auxWall.css( {
+								visibility: 'visible',
 								transform : auxWallTransform,
 								transformOrigin : dir === 'next' ? '0% 50%' : '100% 50%'
 							} );
@@ -500,7 +504,7 @@ function Record(data) {
 				switchWalls : function() {
 					
 					this.$mainWall.remove();
-					this.$mainWall = this.$auxWall.addClass( 'gr-wall-main' ).removeClass( 'gr-wall-other' );
+					this.$mainWall = this.$auxWall.addClass( 'gr-wall-main'+self.skin ).removeClass( 'gr-wall-other'+self.skin );
 					
 				},
 				navigate : function( dir ) {
@@ -690,7 +694,7 @@ function Record(data) {
 					
 					winsize = getWindowSize();
 					Gallery.room.destroy();
-					buildRoom($items,$itemsContainer);
+					buildRoom($items,$itemsContainer,self.skin);
 				} );
 			}
 
@@ -707,7 +711,6 @@ function Record(data) {
 		//get exhibition items
 		//get collection id until exhibitions are fixed
 		self.route = params.route;
-		self.templateName = ko.observable('room1');
 		self.id = ko.observable(params.id);
 		self.citems=ko.observableArray([]);
 		self.collname = ko.observable('');
@@ -778,6 +781,9 @@ function Record(data) {
 		
 		self.init=function(){
 			if(self.once()==true){
+				if(self.skin!="2"){
+					self.skin="";
+					}
 				setTimeout(function(){Gallery.init( {
 					layout : [3,2,3,2]
 				} );
@@ -786,6 +792,18 @@ function Record(data) {
 				self.once(false);}
 			
 		}
+		
+		
+		self.urlParam = function(name){
+		    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+		    if (results==null){
+		       return '';
+		    }
+		    else{
+		       return results[1] || 0;
+		    }
+		}
+		self.skin= params.skin;
 		
 		self.loadCollection();
 		

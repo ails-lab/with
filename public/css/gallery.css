@@ -42,10 +42,11 @@ a {
 	position: fixed;
 	  -webkit-backface-visibility: hidden;
 	  left: 0;
-	  color: #121111;
-	  padding: 20px;
-	  font-size: 20px;
-	  word-spacing: 0px;
+	 color: rgba(0, 0, 0, 0.71);
+    padding: 20px;
+    font-size: 20px;
+    word-spacing: 0px;
+    font-weight: 600;
 }
 
 .gallerycontainer > h1 a {
@@ -274,4 +275,153 @@ a {
 
 .gr-caption > div a:hover {
 	color: #d80066;
+}
+
+
+.js .gr-gallery2 {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.gr-room2 {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 85%;
+	text-align: center;
+	-webkit-perspective: 1200px;
+	-moz-perspective: 1200px;
+	perspective: 1200px;
+	background-image: url(http://localhost:9000/assets/images/gallery/damask.jpg);
+}
+
+.gr-wall-main2,
+.gr-wall-other2 {
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	transform-style: preserve-3d;
+	background: #810606 url(../images/gallery/damask.jpg) 0px 0px;
+}
+
+.gr-wall-main2 {
+	left: 0;
+}
+
+.gr-floor2 {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	height: 30%;
+	width: 100%;
+	background-image:  url(../images/gallery/floor2.jpg);
+	background-repeat: repeat-x;
+	
+	
+}
+
+.gr-gallery2 figure {
+	position: absolute;
+	-webkit-transform-style: preserve-3d;
+}
+
+.no-js .gr-gallery2 figure {
+	display: inline-block;
+	position: relative;
+	margin: 20px;
+}
+
+.gr-gallery2 figure::before {
+	content: '';
+	position: absolute;
+	width: 180%;
+	height: 150%;
+	top: -45%;
+	left: -40%;
+	background: -webkit-radial-gradient(center, ellipse cover, rgba(255,255,255,0.4) 23%, rgba(255,255,255,0) 66%);
+	pointer-events: none;
+	opacity: 0.5;
+}
+
+.gr-gallery2 figure div,
+.gr-gallery2 figure img,
+.gr-gallery2 figcaption {
+	-webkit-box-sizing: content-box;
+	-moz-box-sizing: content-box;
+	box-sizing: content-box;
+}
+
+.gr-gallery2 figure div {
+	position: relative;
+}
+
+.gr-gallery2 figure img {
+	display: block;
+	margin: 0 auto;
+	border-style: solid;
+	border-width: 24px;
+	border-color: transparent;
+	-moz-border-image: url(../images/gallery/frame.jpg) 69 74 69 64 fill repeat;
+	-webkit-border-image: url(../images/gallery/frame.jpg) 69 69 70 66 repeat;
+	-o-border-image: url(../images/gallery/frame.jpg) 69 69 70 66 repeat;
+	border-image: url(../images/gallery/frame.jpg) 69 69 70 66 fill repeat;
+}
+
+.gr-gallery2 figcaption {
+	width: 80px;
+	display: block;
+	font-size: 5px;
+	background: #661414;
+	color: #fff;
+	padding: 10px;
+	margin-top: 20px;
+	position: relative;
+	text-align: left;
+	cursor: -webkit-zoom-in; 
+	cursor: -moz-zoom-in;
+}
+
+.gr-gallery2 figcaption h2 span {
+	display: inline-block;
+	margin: 0 2px;
+	font-size:0.3em;
+}
+
+.gr-gallery2 figcaption div {
+	display: none;
+}
+
+.gr-gallery2 nav {
+	position: absolute;
+	width: 300px;
+	height: 38px;
+	bottom: 7%;
+	left: 50%;
+	margin-left: -150px;
+	z-index: 0;
+	cursor: pointer;
+}
+
+.gr-gallery2 nav span {
+	width: 90px;
+	height: 100%;
+	background: url(../images/gallery/steps.png);
+	float: left;
+	text-indent: -100%;
+	overflow: hidden;
+	opacity: 0.6;
+}
+
+.gr-gallery2 nav span:hover {
+	opacity: 1;
+}
+
+.gr-gallery2 nav span.gr-next {
+	background-position: top right;
+	float: right;
 }
