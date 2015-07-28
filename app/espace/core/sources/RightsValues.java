@@ -49,6 +49,9 @@ public class RightsValues {
 
 	public static final String Creative = "CREATIVE";
 
+
+	public static final String RR = "Rights Reserved";
+
 	public static final String RRPA = "Rights Reserved - Paid Access";
 
 	public static final String RRRA = "Rights Reserved - Restricted Access";
