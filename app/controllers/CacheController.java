@@ -19,20 +19,22 @@ package controllers;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
 import model.Media;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 
 import play.Logger;
 import play.Logger.ALogger;
-import play.libs.ws.WS;
 import play.mvc.Controller;
 import play.mvc.Result;
 import db.DB;
@@ -85,65 +87,69 @@ public class CacheController extends Controller {
 	}
 
 	private static void cacheImage(String externalUrl) {
-		WS.url(externalUrl)
-				.get()
-				.map(response -> {
-					try {
-						byte[] imageBytes = response.asByteArray();
-						String mimeType = response.getHeader("content-type");
-						BufferedImage image = ImageIO
-								.read(new ByteArrayInputStream(imageBytes));
-						if (mimeType.contains("base64")) {
-							imageBytes = Base64.decodeBase64(imageBytes);
-							mimeType = mimeType.replace(";base64", "");
-						}
-						int height = image.getHeight();
-						int width = image.getWidth();
-						Media media = new Media();
-						media.setType(Media.BaseType.IMAGE);
-						media.setMimeType(mimeType);
-						media.setHeight(height);
-						media.setWidth(width);
-						media.setData(imageBytes);
-						media.setExternalUrl(externalUrl);
-						media.setOriginal(true);
-						if (width < 212) {
-							media.setThumbnail(true);
-							DB.getMediaDAO().makePermanent(media);
-							return true;
-						}
-						// image is big
-						// store original and resize for thumbnail
-						media.setThumbnail(false);
-						Media fullImage = media;
-						DB.getMediaDAO().makePermanent(fullImage);
-						// Resize image and put new width, height and bytes
-						// to data
-						Image ithumb = image.getScaledInstance(211, -1,
-								Image.SCALE_SMOOTH);
-						// Create a buffered image with transparency
-						BufferedImage thumb = new BufferedImage(ithumb
-								.getWidth(null), ithumb.getHeight(null), image
-								.getType());
-						// Draw the image on to the buffered image
-						Graphics2D bGr = thumb.createGraphics();
-						bGr.drawImage(ithumb, 0, 0, null);
-						bGr.dispose();
-						byte[] thumbByte = getImageBytes(thumb);
-						media.setDbId(null);
-						media.setData(thumbByte);
-						media.setWidth(thumb.getWidth());
-						media.setHeight(thumb.getHeight());
-						media.setThumbnail(true);
-						media.setOriginal(false);
-						DB.getMediaDAO().makePermanent(media);
-						return true;
-					} catch (Exception e) {
-						log.error("Couldn't cache image:" + e.getMessage());
-						return false;
-					}
-				});
-
+		Function<String, Boolean> methodQuery = (String imageUrl) -> {
+			URL url;
+			byte[] imageBytes = null;
+			URLConnection connection = null;
+			try {
+				url = new URL(externalUrl);
+				BufferedImage image = ImageIO.read(url);
+				imageBytes = getImageBytes(image);
+				connection = (URLConnection) url.openConnection();
+				connection.setReadTimeout(4000);
+				String mimeType = connection.getHeaderField("content-type");
+				if (mimeType.contains("base64")) {
+					imageBytes = Base64.decodeBase64(imageBytes);
+					mimeType = mimeType.replace(";base64", "");
+				}
+				if (mimeType == null) {
+					mimeType = connection.getContentType();
+				}
+				int height = image.getHeight();
+				int width = image.getWidth();
+				Media media = new Media();
+				media.setType(Media.BaseType.IMAGE);
+				media.setMimeType(mimeType);
+				media.setHeight(height);
+				media.setWidth(width);
+				media.setData(imageBytes);
+				media.setExternalUrl(externalUrl);
+				media.setOriginal(true);
+				if (width < 212) {
+					media.setThumbnail(true);
+					DB.getMediaDAO().makePermanent(media);
+					return true;
+				}
+				// image is big
+				// store original and resize for thumbnail
+				media.setThumbnail(false);
+				Media fullImage = media;
+				DB.getMediaDAO().makePermanent(fullImage);
+				// Resize image and put new width, height and bytes to data
+				Image ithumb = image.getScaledInstance(211, -1,
+						Image.SCALE_SMOOTH);
+				// Create a buffered image with transparency
+				BufferedImage thumb = new BufferedImage(ithumb.getWidth(null),
+						ithumb.getHeight(null), image.getType());
+				// Draw the image on to the buffered image
+				Graphics2D bGr = thumb.createGraphics();
+				bGr.drawImage(ithumb, 0, 0, null);
+				bGr.dispose();
+				byte[] thumbByte = getImageBytes(thumb);
+				media.setDbId(null);
+				media.setData(thumbByte);
+				media.setWidth(thumb.getWidth());
+				media.setHeight(thumb.getHeight());
+				media.setThumbnail(true);
+				media.setOriginal(false);
+				DB.getMediaDAO().makePermanent(media);
+				return true;
+			} catch (Exception e) {
+				log.error("Couldn't cache thumbnail:" + e.getMessage());
+				return false;
+			}
+		};
+		ParallelAPICall.createPromise(methodQuery, externalUrl);
 	}
 
 	public static Result clearCache() {
