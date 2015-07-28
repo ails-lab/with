@@ -31,6 +31,10 @@ body {
 	font-height: normal;
 }
 
+.espace .site-logo {
+	max-width: 100px;
+}
+
 .eucaption {
 	color: #757575;
 	font-size: 12px;
