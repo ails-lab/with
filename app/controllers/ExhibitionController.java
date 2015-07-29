@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticIndexer;
 
 public class ExhibitionController extends Controller {
 
@@ -74,6 +75,11 @@ public class ExhibitionController extends Controller {
 			result.put("error", "Cannot save Exhibition to database");
 			return internalServerError(result);
 		}
+
+		// index new exhibition
+		ElasticIndexer indexer = new ElasticIndexer(newExhibition);
+		indexer.indexCollectionMetadata();
+
 		owner.addExhibitionsCreated();
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newExhibition);
