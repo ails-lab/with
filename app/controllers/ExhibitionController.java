@@ -25,7 +25,6 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
-import model.CollectionRecord;
 import model.User;
 import model.User.Access;
 
@@ -36,13 +35,12 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
-import utils.AccessManager.Action;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticIndexer;
 
 public class ExhibitionController extends Controller {
 
@@ -62,7 +60,7 @@ public class ExhibitionController extends Controller {
 		newExhibition.setCreated(new Date());
 		newExhibition.setLastModified(new Date());
 		newExhibition.setOwnerId(new ObjectId(userId));
-		newExhibition.setExhibition(true);
+		newExhibition.setIsExhibition(true);
 		newExhibition.setTitle(getAvailableTitle(owner));
 		newExhibition.setDescription("Description");
 
@@ -77,6 +75,11 @@ public class ExhibitionController extends Controller {
 			result.put("error", "Cannot save Exhibition to database");
 			return internalServerError(result);
 		}
+
+		// index new exhibition
+		ElasticIndexer indexer = new ElasticIndexer(newExhibition);
+		indexer.indexCollectionMetadata();
+
 		owner.addExhibitionsCreated();
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newExhibition);
@@ -87,11 +90,10 @@ public class ExhibitionController extends Controller {
 		return ok(c);
 	}
 
-
 	/* Find a unique dummy title for the user exhibition */
 	private static String getAvailableTitle(User user) {
 		int exhibitionNum = user.getExhibitionsCreated();
-		return "Exhibition" + exhibitionNum;
+		return "DummyTitle" + exhibitionNum;
 	}
 
 	public static Result listMyExhibitions(int offset, int count) {
@@ -109,6 +111,7 @@ public class ExhibitionController extends Controller {
 					.getExhibitionsByOwner(new ObjectId(userId), offset, count);
 			for (Collection exhibition : exhibitions) {
 				ObjectNode c = (ObjectNode) Json.toJson(exhibition);
+				c.put("access", Access.OWN.toString());
 				result.add(c);
 			}
 			return ok(result);

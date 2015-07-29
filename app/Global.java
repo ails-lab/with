@@ -26,8 +26,8 @@ import actors.ApiKeyManager;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-import controllers.AccessFilter;
-import controllers.SessionFilter;
+//import controllers.AccessFilter;
+//import controllers.SessionFilter;
 import com.mongodb.WriteConcern;
 
 import db.DB;
@@ -42,12 +42,13 @@ public class Global extends GlobalSettings {
 		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
 		Elastic.putMapping();
 		setupWithKey();
+
 		// read keys into the Manager
 		ActorSelection api = Akka.system().actorSelection("user/apiKeyManager");
 		api.tell( new ApiKeyManager.Reset(), ActorRef.noSender());
 	}
 
-	@Override
+	//@Override
 	public <T extends EssentialFilter> Class<T>[] filters() {
 	    return new Class[] {AccessFilter.class, SessionFilter.class };
 	}
@@ -61,15 +62,15 @@ public class Global extends GlobalSettings {
 			k.resetKey();
 			k.setOrigin(DB.getConf().getString("with.origin"));
 			// store it
-			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);			
+			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);
 		}
-		
+
 		ApiKey mintKey = DB.getApiKeyDAO().getByName( "Mint" );
 		if( mintKey == null ) {
 			ApiKey k = new ApiKey();
 			k.setName("Mint");
 			k.addCall(0, ".*" );
-			
+
 			// guinness ... so that mint can contact this server
 			k.setIpPattern("147\\.102\\.11\\.71");
 			// store it

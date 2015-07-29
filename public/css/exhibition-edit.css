@@ -1,0 +1,486 @@
+/*html {
+    height: 100%;
+    background-color: black;
+}
+
+body {
+  
+  height:100%;
+  background-color: pink;
+  margin-bottom: 120px;
+  position: relative;
+}*/
+
+.outer {
+    position: absolute;
+    top: 0;
+    bottom: 110px;
+    left: 0;
+    right: 0;
+    border-width: 2px;
+    /*border-color: pink;*/
+    white-space: nowrap;
+    display: inline-block;
+    overflow: scroll;
+    overflow-y: hidden;
+    background-color: #F2F2F2;
+    padding-top: 100px;
+    padding-bottom: 100px;
+    visibility: hidden;
+}
+
+.boxBasic {
+    min-height: 150px;
+    display: inline-block;
+    height: 100%;
+    position: relative;
+    vertical-align: top;
+    background-color: #FAFAFA;
+}
+
+.boxItem {
+    position: relative;
+    /*min-width: 300px;*/
+    border-width: 2px;
+    border-color: #FAFAFA;
+    border-style: solid;
+    background-color: #FAFAFA;
+}
+
+.ImageDescription {
+
+    display: inline-block;
+    height: 100%;
+    /*background-color: yellow;*/
+}
+
+.VideoText {
+
+    display: inline-block;
+    position: relative;
+    vertical-align: top;
+    overflow-y: auto;
+    width: 150px;
+    max-height: 60%;
+    margin-top: 20px; /* to align with image*/
+    margin-left: 20px;
+    margin-right: 20px;
+    padding: 10px;
+    border-width: 1px;
+    border-color: #D2D2D2;
+    border-style: solid;
+}
+
+.Text {
+
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    padding-top: 10px;
+}
+
+.VideoImage {
+
+    display: block;
+    width: 100%;
+}
+
+#placeholder {
+    width: 580px;
+}
+
+.placeholderD2 {
+
+    width: 100%;
+    font-size: 14px;
+    font-family: Arial;
+    text-align: center;
+    margin-top: 30px;
+    color: #696969;
+    outline-color: #696969;
+    cursor: text;
+}
+
+.placeholderD1 {
+
+    display: block;
+    width: 100%;
+    font-size: 32px;
+    font-family: Oswald;
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: 40px;
+    border: none;
+    border-color: transparent;
+    outline-color: #696969;
+    background-color: inherit;
+    cursor: text;
+}
+
+.placeholderD2 {
+
+    display: block;
+    border: none;
+    font-size: 20px;
+    border-color: transparent;
+    background-color: inherit;
+}
+
+.boxItem:hover:not(#placeholder) {
+    border-color: #999999;
+}
+
+.itemImage {
+
+    display: inline-block;
+    height: 60%;
+    margin: auto;
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    /*background-color:  pink;*/
+}
+
+.description {
+    max-width: 270px;
+    margin-left: 30px;
+    border-width: 2px;
+    border-color: yellow;
+    font-family: "Helvetica Neue";
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #696969;
+    /*background-color:  blue;*/
+}
+
+.d1 {
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-size: 14px;
+}
+
+.EditButton {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -2px; /* because of the border inclusion*/
+    right: -2px;
+    height: 40px;
+    background-color: #999999;
+    cursor: pointer;
+}
+
+.EditButtonText {
+    position: absolute;
+    top: 25%;
+    bottom: 25%;
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    font-family: Oswald;
+    text-align: center;
+    color: white;
+}
+
+.EditIcons {
+
+    color: white;
+}
+
+.EditOptions {
+
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: -2px; /* because of the border inclusion*/
+    right: -2px;
+    height: 40px;
+    background-color: #999999;
+    cursor: pointer;
+}
+
+.boxItem:hover .EditOptions {
+    display: block;
+}
+
+#loadingIcon {
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 40px;
+    height: 40px;
+    margin-left: -20px;
+    margin-top: -20px;
+    font-size: 35px;
+}
+
+#overlayDiv {
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    left: 0;
+    background-color: white;
+    z-index: 10000;
+    opacity: 0.5;
+}
+
+.XButtonImage {
+
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    display: none;
+    z-index: 2;
+}
+
+.boxItem:hover .XButtonImage {
+    display: block;
+    z-index: 500;
+}
+
+.dashed-box {
+
+    position: relative;
+    width: 60px;
+    border-width: 2px;
+    border-color: #D2D2D2;
+    border-style: dashed;
+    background-color: #FAFAFA;
+    vertical-align: top;
+}
+
+/* bottom bar */
+
+.bottom {
+    position: fixed;
+    width: 100%;
+    height: 110px;
+    bottom: 0;
+    left: 0;
+    background-color: #FFFFFF;
+    z-index: 1;
+    overflow: visible;
+}
+
+#outer-bottom {
+    display: inline-block;
+    position: absolute;
+    right: 0;
+    left: 300px;
+    height: 100%;
+    white-space: nowrap;
+    overflow: scroll;
+    overflow-y: hidden;
+}
+
+.stop-scrolling {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.bottom-box {
+    display: inline-block;
+    position: relative;
+    margin-top: 17px;
+    margin-bottom: 17px;
+    margin-left: 15px;
+    background-color: white;
+    border: solid;
+    border-width: 3px;
+    border-color: white;
+    overflow: visible;
+}
+
+/* with class box hover instead of :hover to solve issue with drag*/
+.bottom-box.box-Hover {
+
+    border-color: #D2D2D2;
+}
+
+.bottom-box img:not(.XButtonImage) {
+    display: block;
+    height: 70px;
+}
+
+.bottom-box.box-Hover .XButtonImage {
+    display: block;
+}
+
+.bottom-left {
+    display: inline-block;
+    height: 80px;
+    width: 240px;
+    vertical-align: top;
+    margin-left: 40px;
+    margin-right: 5px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+
+.bottom-left div {
+    margin-bottom: 3px;
+    margin-top: 3px;
+    color: #696969;
+    font-size: 12px;
+    font-family: Arial;
+}
+
+.bottom-left #clear {
+    font-size: 11px;
+}
+
+#CollectionSelect {
+    display: block;
+    height: 30px;
+
+}
+
+.verticalLine {
+    height: 80px;
+    display: inline-block;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    border-left: thick solid #D2D2D2;
+    border-width: 1px;
+}
+
+.drop-hover {
+
+    border-color: blue;
+}
+
+#droppable-Children {
+
+    display: none;
+}
+
+#hoverDetails {
+    position: fixed;
+    width: 400px;
+    height: 120px;
+    bottom: 95px;
+    left: 300px;
+    background-color: white;
+    z-index: 3;
+}
+
+#hoverDetails img {
+    max-width: 150px;
+    max-height: 100%;
+    display: inline-block;
+    /* fix the alignment here*/
+    vertical-align: top;
+    padding-top: 5px;
+    padding-left: 5px;
+    padding-bottom: 5px;
+}
+
+#hoverDetails:after {
+    box-shadow: 5px 0 5px -5px inset;
+    content: " ";
+    height: 100%;
+    position: absolute;
+    right: -5px;
+    width: 5px;
+}
+
+#hoverTextArea {
+
+    position: absolute;
+    display: inline-block;
+    left: 150px;
+    width: 250px;
+    height: 100%;
+    padding: 10px;
+    vertical-align: top;
+}
+
+#hoverTextArea #title {
+
+    font-size: 12px;
+    font-family: Arial;
+    font-weight: bold;
+}
+
+#hoverTextArea #creator {
+
+    font-size: 10px;
+    font-family: Arial;
+}
+
+#hoverTextArea #provider {
+
+    font-size: 10px;
+    font-family: Arial;
+}
+
+#hoverTextArea #description {
+
+    font-size: 10px;
+    font-family: Arial;
+    padding-top: 5px;
+}
+
+.droppable-placeholder-top {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    display: block;
+    text-align: center;
+    color: blue;
+}
+
+.droppable-placeholder-bottom {
+
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    display: block;
+    text-align: center;
+    color: blue;
+}
+
+.left {
+    width: 40px;
+    position: fixed;
+    height: 100%;
+    z-index: 10;
+}
+
+.right {
+    width: 40px;
+    right: 0;
+    position: fixed;
+    height: 100%;
+    z-index: 10;
+}
+
+/* Edit popup   */
+
+.separator {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
+}

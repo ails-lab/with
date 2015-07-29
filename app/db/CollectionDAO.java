@@ -79,13 +79,15 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getByOwner(ObjectId ownerId, int offset, int count) {
 		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).offset(offset).limit(count);
+				.equal(ownerId).field("isExhibition").equal(false)
+				.offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
 	public List<Collection> getByReadAccess(ObjectId userId, int offset,
 			int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().field("isExhibition")
+				.equal(false).offset(offset).limit(count);
 		Criteria[] critiria = {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("OWN"),
@@ -100,7 +102,8 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getByWriteAccess(ObjectId userId, int offset,
 			int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().field("isExhibition")
+				.equal(false).offset(offset).limit(count);
 		Criteria[] critiria = {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("OWN"),
@@ -113,7 +116,8 @@ public class CollectionDAO extends DAO<Collection> {
 	public List<Collection> getByReadAccessFiltered(ObjectId userId,
 			ObjectId ownerId, int offset, int count) {
 		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).offset(offset).limit(count);
+				.equal(ownerId).field("isExhibition").equal(false)
+				.offset(offset).limit(count);
 		Criteria[] critiria = {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("OWN"),
@@ -129,7 +133,8 @@ public class CollectionDAO extends DAO<Collection> {
 	public List<Collection> getByWriteAccessFiltered(ObjectId userId,
 			ObjectId ownerId, int offset, int count) {
 		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).offset(offset).limit(count);
+				.equal(ownerId).field("isExhibition").equal(false)
+				.offset(offset).limit(count);
 		Criteria[] critiria = {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("OWN"),
@@ -142,7 +147,8 @@ public class CollectionDAO extends DAO<Collection> {
 	public List<Collection> getSharedFiltered(ObjectId userId,
 			ObjectId ownerId, int offset, int count) {
 		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).offset(offset).limit(count);
+				.equal(ownerId).field("isExhibition").equal(false)
+				.offset(offset).limit(count);
 		Criteria[] critiria = {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("WRITE"),
@@ -154,7 +160,8 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getShared(ObjectId userId, int offset, int count) {
 		Query<Collection> q = this.createQuery().field("ownerId")
-				.notEqual(userId).offset(offset).limit(count);
+				.notEqual(userId).field("isExhibition").equal(false)
+				.offset(offset).limit(count);
 		Criteria[] critiria = {
 				this.createQuery().criteria("rights." + userId.toHexString())
 						.equal("WRITE"),
@@ -167,12 +174,14 @@ public class CollectionDAO extends DAO<Collection> {
 	public List<Collection> getPublicFiltered(ObjectId ownerId, int offset,
 			int count) {
 		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
-				.field("ownerId").equal(ownerId).offset(offset).limit(count);
+				.field("isExhibition").equal(false).field("ownerId")
+				.equal(ownerId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
 	public List<Collection> getPublic(int offset, int count) {
-		Query<Collection> q = this.createQuery().field("isPublic").equal(true);
+		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
+				.field("isExhibition").equal(false);
 		return this.find(q).asList();
 	}
 

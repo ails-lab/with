@@ -137,7 +137,7 @@ public class ElasticUpdater {
 					+ "}; ", ScriptType.INLINE)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
-			log.error("Cannot update record document!", e);
+			log.error("Cannot update merged record document!", e);
 		}
 	}
 
