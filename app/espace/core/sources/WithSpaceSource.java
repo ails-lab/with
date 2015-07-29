@@ -89,7 +89,7 @@ public class WithSpaceSource extends ISpaceSource {
 
 		SearchResponse resp = searcher.search(term, elasticoptions);
 		searcher.closeClient();
-		return new SourceResponse(resp, getSourceName(), count);
+		return new SourceResponse(resp, count);
 	}
 
 
