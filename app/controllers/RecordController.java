@@ -16,7 +16,11 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
@@ -25,11 +29,17 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
+import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -37,10 +47,11 @@ import elastic.ElasticEraser;
 import elastic.ElasticUpdater;
 
 public class RecordController extends Controller {
-	public static final ALogger log = Logger.of( RecordController.class);
+	public static final ALogger log = Logger.of(RecordController.class);
 
 	/**
 	 * Retrieve a collection entry or just a specific format
+	 * 
 	 * @param entryId
 	 * @param format
 	 * @return
@@ -48,57 +59,87 @@ public class RecordController extends Controller {
 	public static Result getRecord(String entryId, String format) {
 		ObjectNode result = Json.newObject();
 
-		CollectionRecord record =
-				DB.getCollectionRecordDAO().get(new ObjectId(entryId));
+		CollectionRecord record = DB.getCollectionRecordDAO().get(
+				new ObjectId(entryId));
 
-		if(record == null) {
+		if (record == null) {
 			log.error("Cannot retrieve user modifications from database");
-			result.put("message", "Cannot retrieve user modifications from database");
+			result.put("message",
+					"Cannot retrieve user modifications from database");
 			return internalServerError(result);
 		}
 
-		if(!format.equals("") && record.getContent().containsKey(format)) {
+		if (!format.equals("") && record.getContent().containsKey(format)) {
 			return ok(Json.toJson(record.getContent().get(format)));
 		} else {
 			return ok(Json.toJson(record));
 		}
 
-
 	}
 
 	/**
 	 * Update a record. Needs to be implemented in a better way
+	 * 
 	 * @param colEntryId
 	 * @param format
 	 * @return
 	 */
 	public static Result updateRecord(String recordId, String format) {
+
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 
-		CollectionRecord oldRecord =
-				DB.getCollectionRecordDAO().get(new ObjectId(recordId));
-		if(oldRecord == null) {
+		if (json == null) {
+			result.put("message", "Invalid json!");
+			return badRequest(result);
+		}
+
+		CollectionRecord oldRecord = DB.getCollectionRecordDAO().get(
+				new ObjectId(recordId));
+		if (oldRecord == null) {
 			log.error("Cannot retrieve user modifications from database");
-			result.put("message", "Cannot retrieve user modifications from database");
+			result.put("message",
+					"Cannot retrieve user modifications from database");
 			return internalServerError(result);
 		}
 
-		Collection collection =
-				DB.getCollectionDAO().get(oldRecord.getCollectionId());
+		Collection collection = DB.getCollectionDAO().get(
+				oldRecord.getCollectionId());
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.EDIT)) {
+			result.put("error",
+					"User does not have permission to edit the collection");
+			return forbidden(result);
+		}
+		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectReader updator = objectMapper.readerForUpdating(oldRecord);
+		CollectionRecord newRecord;
 		collection.getFirstEntries().remove(oldRecord);
 
-		if(format.equals("")) {
+		if (format == null) {
 			// update record tags
-			CollectionRecord newRecord = Json.fromJson(json, CollectionRecord.class);
+			try {
+				newRecord = updator.readValue(json);
+			} catch (IOException e) {
+				return internalServerError(e.getMessage());
+			}
+			Set<ConstraintViolation<CollectionRecord>> violations = Validation
+					.getValidator().validate(newRecord);
+			for (ConstraintViolation<CollectionRecord> cv : violations) {
+				result.put("message",
+						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+			}
+
 			collection.getFirstEntries().add(newRecord);
-			if( (DB.getCollectionRecordDAO().makePermanent(oldRecord) != null) &&
-				(DB.getCollectionDAO().makePermanent(collection) != null) ) {
+			if ((DB.getCollectionRecordDAO().makePermanent(newRecord) != null)
+					&& (DB.getCollectionDAO().makePermanent(collection) != null)) {
 
 				// update the record in the index
-				ElasticUpdater updater = new ElasticUpdater(oldRecord, newRecord);
+				ElasticUpdater updater = new ElasticUpdater(oldRecord,
+						newRecord);
 				updater.updateRecordTags();
-
 				result.put("message", "Record updated sucessfully!");
 			} else {
 				result.put("message", "Record not updated!");
@@ -108,8 +149,8 @@ public class RecordController extends Controller {
 			// input json like { "XML-EDM": " [...xml...] " }
 			oldRecord.getContent().put(format, json.get(format).asText());
 			collection.getFirstEntries().add(oldRecord);
-			if( (DB.getCollectionRecordDAO().makePermanent(oldRecord) != null) &&
-				(DB.getCollectionDAO().makePermanent(collection) != null) )
+			if ((DB.getCollectionRecordDAO().makePermanent(oldRecord) != null)
+					&& (DB.getCollectionDAO().makePermanent(collection) != null))
 				result.put("message", "Record updated sucessfully!");
 			else
 				result.put("message", "Record not updated!");
@@ -120,6 +161,7 @@ public class RecordController extends Controller {
 
 	/**
 	 * Deletes a whole collection entry or just a format
+	 * 
 	 * @param entryId
 	 * @param format
 	 * @return
@@ -127,37 +169,39 @@ public class RecordController extends Controller {
 	public static Result deleteRecord(String recordId, String format) {
 		ObjectNode result = Json.newObject();
 
-		CollectionRecord record = DB.getCollectionRecordDAO().get(new ObjectId(recordId));
+		CollectionRecord record = DB.getCollectionRecordDAO().get(
+				new ObjectId(recordId));
 		Collection c = DB.getCollectionDAO().get(record.getCollectionId());
 
-		if(format.equals("")) {
-			//update firstEntries
-			if( c.getFirstEntries().contains(record))
+		if (format.equals("")) {
+			// update firstEntries
+			if (c.getFirstEntries().contains(record))
 				c.getFirstEntries().remove(record);
 			DB.getCollectionDAO().makePermanent(c);
 
-			if( DB.getCollectionRecordDAO().makeTransient(record) != 1 ) {
-				 log.error("Cannot delete Collection Entry from database!");
-				 result.put("message", "Cannot delete Collection Entry from database!");
-				 return internalServerError(result);
-			 } else {
-				 result.put("message", "Collection entry deleted successfully!");
-				 return ok(result);
-			 }
+			if (DB.getCollectionRecordDAO().makeTransient(record) != 1) {
+				log.error("Cannot delete Collection Entry from database!");
+				result.put("message",
+						"Cannot delete Collection Entry from database!");
+				return internalServerError(result);
+			} else {
+				result.put("message", "Collection entry deleted successfully!");
+				return ok(result);
+			}
 		} else {
-			//update firstEntries
-			if( c.getFirstEntries().contains(record))
+			// update firstEntries
+			if (c.getFirstEntries().contains(record))
 				c.getFirstEntries().remove(record);
 
-			if(record.getContent().containsKey(format)) {
+			if (record.getContent().containsKey(format)) {
 				record.getContent().remove(format);
-				//update firstEntries
+				// update firstEntries
 				c.getFirstEntries().add(record);
 			}
-			if( (DB.getCollectionRecordDAO().makePermanent(record) != null) &&
-				(DB.getCollectionDAO().makePermanent(c) != null) ) {
+			if ((DB.getCollectionRecordDAO().makePermanent(record) != null)
+					&& (DB.getCollectionDAO().makePermanent(c) != null)) {
 
-				//delete record from index
+				// delete record from index
 				ElasticEraser eraser = new ElasticEraser(record);
 				eraser.deleteRecord();
 				eraser.deleteRecordEntryFromMerged();
@@ -165,7 +209,8 @@ public class RecordController extends Controller {
 				return ok(Json.toJson(record));
 			} else {
 				log.error("Cannot delete specific content from Collection item!");
-				result.put("message", "Cannot delete specific content from Collection item!");
+				result.put("message",
+						"Cannot delete specific content from Collection item!");
 				return internalServerError(result);
 			}
 		}
@@ -178,13 +223,14 @@ public class RecordController extends Controller {
 	 * @param annotated
 	 * @return
 	 */
-	public static Result findInCollections(String source, String sourceId, boolean annotated) {
+	public static Result findInCollections(String source, String sourceId,
+			boolean annotated) {
 		ObjectNode result = Json.newObject();
 
-		List<CollectionRecord> records =
-				DB.getCollectionRecordDAO().getBySource(source, sourceId);
+		List<CollectionRecord> records = DB.getCollectionRecordDAO()
+				.getBySource(source, sourceId);
 
-		if(records != null)
+		if (records != null)
 			return ok(Json.toJson(records));
 
 		result.put("message", "Cannot retrieve entries from db");

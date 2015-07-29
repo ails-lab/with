@@ -17,12 +17,10 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.validation.constraints.NotNull;
 
@@ -50,7 +48,6 @@ import db.DB;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Collection {
-	private static final int EMBEDDED_CAP = 20;
 
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -78,6 +75,7 @@ public class Collection {
 	private Date lastModified;
 
 	private boolean isExhibition;
+
 	private ExhibitionCollection exhibition;
 
 	// fixed-size list of entries
@@ -102,15 +100,12 @@ public class Collection {
 	 * 
 	 * @return
 	 */
-/*	public CollectionMetadata collectMetadata() {
-		CollectionMetadata cm = new CollectionMetadata();
-		cm.setCollectionId(this.dbId);
-		cm.setDescription(description);
-		cm.setThumbnail(thumbnail);
-		cm.setTitle(title);
-		return cm;
-	}
-*/
+	/*
+	 * public CollectionMetadata collectMetadata() { CollectionMetadata cm = new
+	 * CollectionMetadata(); cm.setCollectionId(this.dbId);
+	 * cm.setDescription(description); cm.setThumbnail(thumbnail);
+	 * cm.setTitle(title); return cm; }
+	 */
 	// Getter setters
 	public String getTitle() {
 		return title;
@@ -235,8 +230,16 @@ public class Collection {
 		return isExhibition;
 	}
 
-	public void setExhibition(boolean isExhibition) {
+	public void setIsExhibition(boolean isExhibition) {
 		this.isExhibition = isExhibition;
+	}
+
+	public ExhibitionCollection getExhibition() {
+		return exhibition;
+	}
+
+	public void setExhibition(ExhibitionCollection exhibition) {
+		this.exhibition = exhibition;
 	}
 
 }
