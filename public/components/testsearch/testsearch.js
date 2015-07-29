@@ -25,7 +25,7 @@ define(['knockout', 'text!./testsearch.html'], function(ko, template) {
   	    		searchTerm : self.searchTerm(),
   	    		page : self.page(),
   	    		pageSize : self.pageSize(),
-  	    		source:["Europeana"]
+  	    		source:["Rijksmuseum"]
   	    	}
   	    }
   	}

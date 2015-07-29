@@ -67,16 +67,35 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
 		
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial,
+//				"");
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, 
+//				".*creative(?!.*nd).*");
 		
-	/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*(creative)(?!.*nc).*(nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*(creative)(?!.*nd).*(nc).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");*/
-		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "http://creativecommons.org/licenses/by-nc/","http://creativecommons.org/licenses/by-nc-sa/","http://creativecommons.org/licenses/by-nc-nd/","http://creativecommons.org/licenses/by-nd/","http://creativecommons.org/publicdomain/mark/1.0/","http://creativecommons.org/publicdomain/zero/1.0/","http://creativecommons.org/licenses/by/","http://creativecommons.org/licenses/by-sa/","http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
-		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, 
+				"http://creativecommons.org/licenses/by-nc/3.0/nz/",
+				"http://creativecommons.org/licenses/by-nc-sa/3.0/",
+				"This work is licensed under a Creative Commons Attribution-Noncommercial 3.0 New Zealand License");
+       
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, 
+				"No known copyright restrictions\nCopyright Expired",
+				"No known copyright restrictions");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, 
+				"All rights reserved");
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, 
+//				".*rr-f.*");
+//        
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, 
+//				".*unknown.*");
+//        
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, 
+//				".*creative.*nd.*");
+//		
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, 
+//				".*(creative).*");
+
+	
 	}
 	
 private Function<List<String>, Pair<String>> fwriter(String parameter) {

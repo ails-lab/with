@@ -16,6 +16,8 @@ GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(te
 # Map static resources from the /public folder to the /assets URL path
 GET 	/assets/headers.js						controllers.FilterUtils.withAjaxScript
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
+GET 	/custom/:customName/*file				controllers.CustomAssets.getFile( customName:String, file:String )
+
 
 # Collection Controller (tested except some methods)
 GET 	 /collection/list						controllers.CollectionController.list(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)

@@ -19,6 +19,19 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 				}
 			});
 
+			vm.cachedThumbnail = ko.pureComputed(function() {
+				
+				   if(vm.thumbnailUrl()){
+					if (vm.thumbnailUrl().indexOf('/') === 0) {
+						return self.thumb;
+					} else {
+						var newurl='url=' + encodeURIComponent(vm.thumbnailUrl())+'&';
+						return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+					}}
+				   else{
+					   return "images/no_image.jpg";
+				   }
+				});
 			vm.displayTitle = ko.pureComputed(function() {
 				var distitle = "";
 				distitle = '<b>' + vm.title() + '</b>';

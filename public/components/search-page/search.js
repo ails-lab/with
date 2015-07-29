@@ -114,6 +114,19 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.externalId=data.externalId;
 		};
 
+		self.cachedThumbnail = ko.pureComputed(function() {
+			
+			   if(self.thumb){
+				if (self.thumb.indexOf('/') === 0) {
+					return self.thumb;
+				} else {
+					var newurl='url=' + encodeURIComponent(self.thumb)+'&';
+					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+				}}
+			   else{
+				   return "images/no_image.jpg";
+			   }
+			});
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source) {
 			    case "DPLA":
@@ -185,7 +198,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([ "Europeana","DPLA","YouTube","DigitalNZ","NLA","Mint"]);
+		self.sources= ko.observableArray([ "Europeana", "EFashion","DPLA","YouTube","DigitalNZ","NLA","Mint", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray([]);
 
 		self.results = ko.observableArray([]);

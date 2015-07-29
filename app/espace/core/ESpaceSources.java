@@ -29,6 +29,7 @@ import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.sources.WithSpaceSource;
 import espace.core.sources.NLASpaceSource;
+import espace.core.sources.RijksmuseumSpaceSource;
 import espace.core.sources.YouTubeSpaceSource;
 
 public class ESpaceSources {
@@ -45,6 +46,7 @@ public class ESpaceSources {
 		esources.add(new YouTubeSpaceSource());
 		esources.add(new ElasticSource());
 		esources.add(new WithSpaceSource());
+		esources.add(new RijksmuseumSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 
