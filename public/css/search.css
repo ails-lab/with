@@ -285,7 +285,7 @@ input[type="search"] { /* reset normalize */
     padding-top:70px;
     width: auto;
     white-space:nowrap; 
-
+	text-align: center;
 }
 
 .withsearch-content p{
@@ -387,6 +387,7 @@ input[type="search"] { /* reset normalize */
 	color: rgba(0, 0, 0, 0.52);
 	word-wrap:break-word;
 	white-space: normal;
+	text-align: left;
 }
 
 .dummy-media-object:hover span {
