@@ -93,7 +93,10 @@ public class ApiKey {
 	// optional, when a call comes with this key, it has the rights of
 	// this user (and others, if login is an allowed call)
 	private ObjectId proxyUserId;
-
+	
+	// optional, an email account associated with this API key
+	private String email;
+	
 	private ArrayList<CallLimit> callLimits = new ArrayList<CallLimit>();
 
 	private Date created;
@@ -101,6 +104,12 @@ public class ApiKey {
 	// API keys can have limited lifetime
 	private Date expires;
 
+	// api keys are nicely accessed by name, like "WITH" or "Workshop Athens"
+	private String name;
+	
+	// if the origin is set, requests from browsers have to have this origin
+	private String origin;
+	
 	// this will just monitor the pattern
 	public CallLimit addCall(int position, String pattern) {
 		return addCall(position, pattern, -1l, -1l);
@@ -231,6 +240,14 @@ public class ApiKey {
 		this.proxyUserId = proxyUserId;
 	}
 
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
 	public Date getCreated() {
 		return created;
 	}
@@ -253,6 +270,22 @@ public class ApiKey {
 
 	public void setIpPattern(String ipPattern) {
 		this.ipPattern = ipPattern;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(String origin) {
+		this.origin = origin;
 	}
 
 }

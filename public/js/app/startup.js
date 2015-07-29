@@ -1,5 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers'],
-		function($, ko, router, kom) {
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'], function ($, ko, router, kom) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
@@ -19,11 +18,16 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('register-page', { require: 'components/login-register-page/login-register' });
 	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
-	ko.components.register('mycollections', {require: 'components/mycollections/mycollections' });
+	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
+	ko.components.register('myfavorites', { require: 'components/myfavorites/myfavorites' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
+	ko.components.register('3DRoom', { require: 'components/3DRoom/room' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
 	ko.components.register('exhibition-edit', { require: 'components/exhibition-edit/exhibition-edit' });
 	ko.components.register('popup-exhibition-edit', { require: 'components/exhibition-edit/popup-exhibition-edit' });
+	ko.components.register('api-docu', { require: 'components/api-documentation/api-documentation' });
+	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
+
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
@@ -45,14 +49,18 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		viewModel: { require: 'components/login-register-page/reset-password' },
 		template: { require: 'text!components/login-register-page/login-register.html' }
 	});
-
+	ko.components.register('image-upload', {
+		viewModel: { require: 'components/media-uploader/media-uploader' },
+		template: { require: 'text!components/media-uploader/image-upload.html' }
+	});
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 	popupName = ko.observable('empty');
+	popupParams = ko.observable({});
 
 
 	// Start the application
-	ko.applyBindings({ route: router.currentRoute, popupName: popupName });
+	ko.applyBindings({ route: router.currentRoute, popupName: popupName, popupParams: popupParams });
 });

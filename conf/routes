@@ -14,7 +14,10 @@ POST     /api/testsearch            controllers.SearchController.posttestsearch(
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
 
 # Map static resources from the /public folder to the /assets URL path
+GET 	/assets/headers.js						controllers.FilterUtils.withAjaxScript
 GET     /assets/*file               			controllers.Assets.at(path="/public", file)
+GET 	/custom/:customName/*file				controllers.CustomAssets.getFile( customName:String, file:String )
+
 
 # Collection Controller (tested except some methods)
 GET 	 /collection/list						controllers.CollectionController.list(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
@@ -32,6 +35,7 @@ GET		 /collection/favoriteCollection			controllers.CollectionController.getFavor
 
 # Cache Controller
 GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)
+DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
@@ -59,9 +63,9 @@ DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null, email: String ?=null, userId: String ?=null)
 
 # Media Controller
-POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= false)
-GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=false) 
-POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false) 
+POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)
+GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
+POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 
 # User Manager Controller
@@ -81,6 +85,8 @@ GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()
+GET		/user/apikey/create						controllers.UserManager.apikey(email: String)
+
 
 # trigger reindex (for development / admin )
 

@@ -226,6 +226,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
+					 var utc = new Date().valueOf();
+				        xhr.setRequestHeader('X-auth1', utc );
+				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
 				},
 				"url": "/collection/create",
 				"method": "post",
@@ -245,7 +248,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						localStorage.setItem('EditableCollections', JSON.stringify(temp));
 					}
 
-					$.smkAlert({text:'Collection created"', type:'success'});
+					$.smkAlert({text:'Collection created', type:'success'});
 
 					self.collectionlist.push({
 						"id": data.dbId,
@@ -314,6 +317,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
+					 var utc = new Date().valueOf();
+				        xhr.setRequestHeader('X-auth1', utc );
+				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
 				},
 				"url": "/collection/" + collid + "/addRecord",
 				"method": "post",
@@ -329,7 +335,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 					}
 
-					$.smkAlert({text:'Item added!"', type:'success'});
+					$.smkAlert({text:'Item added!', type:'success'});
 					self.close();
 				},
 

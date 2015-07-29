@@ -1,0 +1,20 @@
+<div id="myFavorites" class="container-fluid">
+
+	<div id="withcollection">
+		<div class="withsearch-content-masonry">
+			<div id="collcolumns" class="columns" data-bind="isotope: items">
+				<figure class="masonry-item" data-bind="visible: isLoaded()">
+					<a data-bind="event: { click: function() { recordSelect('recordId()') } }">
+						<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src: cachedThumbnail }" />
+					</a>
+					<figcaption data-bind="html: displayTitle" class="displayTitle"></figcaption>
+					<div class="sourceCredits" data-bind="visible: sourceCredits().length > 0">
+						<a data-bind="attr: { href: sourceUrl }, text: sourceCredits" target="_new"></a>
+					</div>
+				</figure>
+			</div>
+		</div>
+	</div>
+
+	<div id="more" data-bind="visible: loading, scroll: items(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+</div>

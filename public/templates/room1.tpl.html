@@ -1,0 +1,21 @@
+
+		<div class="gallerycontainer" id="gallery">	
+			
+			<h1>3D Gallery: <!-- ko text:$parent.collname --><!-- /ko --> </h1>
+		<div id="gr-gallery" data-bind="css: {'gr-gallery' : $parent.skin!='2', 'gr-gallery2': $parent.skin=='2'}">
+				<div class="gr-main" style="display:none">
+				<!--ko foreach: $data-->
+					<figure>
+						<div>
+							<img data-bind="attr: { src:thumb, alt: title }" />
+						</div>
+						<figcaption>
+							<h2><span data-bind="text: title"></span></h2>
+							<div><p data-bind="text:displayTitle"></p>
+							<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
+						</figcaption>
+					</figure>
+				<!-- /ko -->	
+				</div>				
+			</div>
+		</div>

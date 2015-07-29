@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -59,9 +60,42 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.YEAR_ID,  qfwriterYEAR());
 		addDefaultWriter(CommonFilters.RIGHTS_ID,  fwriter("and[rights][]"));
 		
+		// TODO: rights_url shows the license in the search
+
+		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
+		
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial,
+//				"");
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, 
+//				".*creative(?!.*nd).*");
+		
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, 
+				"http://creativecommons.org/licenses/by-nc/3.0/nz/",
+				"http://creativecommons.org/licenses/by-nc-sa/3.0/",
+				"This work is licensed under a Creative Commons Attribution-Noncommercial 3.0 New Zealand License");
+       
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, 
+				"No known copyright restrictions\nCopyright Expired",
+				"No known copyright restrictions");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, 
+				"All rights reserved");
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, 
+//				".*rr-f.*");
+//        
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, 
+//				".*unknown.*");
+//        
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, 
+//				".*creative.*nd.*");
+//		
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, 
+//				".*(creative).*");
+
+	
 	}
 	
 private Function<List<String>, Pair<String>> fwriter(String parameter) {
@@ -99,6 +133,10 @@ private Function<List<String>, Pair<String>> qfwriterYEAR() {
 		builder.addSearchParam("per_page",q.pageSize);
 		builder.addSearchParam("facets","year,creator,category,rights");
 		return addfilters(q, builder).getHttp();
+	}
+	
+	public List<CommonQuery> splitFilters(CommonQuery q) {
+		return q.splitFilters();
 	}
 
 	public String getSourceName() {

@@ -91,11 +91,13 @@ public class RightsController extends Controller {
 			result.put("error", "Must specify user to give rights");
 			return badRequest(result);
 		}
-		if (right == "NONE")
-			collection.getRights().remove(userId);
-		else
+		if (right.equals("NONE")) {
+			collection.getRights().remove(new ObjectId(userId));
+		}
+		else {
 			rightsMap.put(new ObjectId(userId), Access.valueOf(right));
-		collection.getRights().putAll(rightsMap);
+			collection.getRights().putAll(rightsMap);
+		}
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("message", "Cannot store collection to database!");
 			return internalServerError(result);
@@ -103,7 +105,7 @@ public class RightsController extends Controller {
 
 		//update collection rights in index
 		ElasticUpdater updater = new ElasticUpdater(collection);
-		//updater.updateCollectionRights();
+		updater.updateCollectionRights();
 		result.put("message", "OK");
 		return ok(result);
 	}

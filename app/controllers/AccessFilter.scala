@@ -33,6 +33,7 @@ import org.bson.types.ObjectId
 import scala.collection.JavaConversions._
 import play.api.http.HeaderNames._
 import scala.collection.mutable.ArrayBuffer
+import java.nio.charset.StandardCharsets
 
 /**
  * The AccessFilter should
@@ -68,6 +69,66 @@ class AccessFilter extends Filter {
     implicit val timeout = new Timeout(1000.milliseconds)
     val access = new ApiKeyManager.Access
 
+    def findApikey( time:String, auth:String, origin:String, params:String ): String = {
+      log.debug( "Time: "+ time + " Auth:" + auth + " Origin:" + origin + " Params:" + params )
+    	val authBytes = auth.grouped(2).map( Integer.parseInt( _, 16 ).byteValue()).toVector
+      // we either process origin or params
+      val someBytes = if( !origin.isEmpty()) 
+          origin.getBytes(StandardCharsets.UTF_8)
+       else
+         params.getBytes(StandardCharsets.UTF_8)
+         
+      val apiVec = ArrayBuffer[Byte]()
+      val max = if( someBytes.length > authBytes.length) someBytes.length else authBytes.length
+      for( i <- 0 until max ) {
+        if( i < authBytes.length )
+          apiVec.add(( authBytes(i%authBytes.length) ^ someBytes(i%someBytes.length)).byteValue())
+        else {
+          apiVec(i%authBytes.length ) = ( apiVec(i%authBytes.length ) ^  someBytes(i%someBytes.length)).byteValue()
+          log.debug( "Unexpected ")
+        }
+      } 
+      
+      if(! time.isEmpty() ) {
+          // in case there is a timestamp we use this method
+            var timeI = time.toLong
+            val timeV = ArrayBuffer[Byte]()
+            for( i <- 0 to 3 ) {
+              val timeByte = ( timeI & 255 ).byteValue()
+              timeV.add(timeByte)
+              timeI = timeI >> 8;
+            }   
+            for( i <- 0 until authBytes.length) {
+              apiVec(i) = (apiVec(i) ^ timeV(i%4)).byteValue()
+            }
+      } 
+        
+    	new String(apiVec.toArray, "UTF8" )
+    }
+       
+    def fromAuth( headers: Headers ): Option[String] = {
+      // build the origin from referer      
+      val origin = rh.headers.get( "Referer" ).flatMap( ".*://[^/]*".r.findFirstIn(_))
+      // the origin header we should evaluate when we have other webapps using WITH backend
+      //  val origin = rh.headers.get( "Origin" )
+      log.debug( "Origin: " + origin )
+      ( headers.get( "X-auth1"), headers.get( "X-auth2"), origin ) match {
+        case (Some( time ), Some(auth), Some( ref )) => {
+          // check the time is within the same minute ( ignore the hour/ god know what timezone they send )
+          Some( findApikey( time, auth, ref, "" ))
+        }
+        case _ => { 
+            rh.getQueryString("Xauth2") match {
+              case Some( authParam ) => {
+                val strippedParams = "Xauth2=[0-9A-F]*".r.replaceFirstIn(rh.rawQueryString,"") 
+                Some( findApikey( "", authParam,"", strippedParams ))
+              }
+              case _ => None
+            }
+        }
+      }
+    }
+    
     if (log.isDebugEnabled) {
       log.debug("PATH: " + rh.path)
       if (!rh.session.isEmpty) {
@@ -81,7 +142,17 @@ class AccessFilter extends Filter {
       case _ => {
         rh.session.get("apikey") match {
           case Some(key) => access.apikey = key
-          case None => access.ip = rh.remoteAddress
+          case None => { 
+            rh.headers.get("X-apikey") match {
+              case Some(key) => access.apikey = key
+              case None => {
+                fromAuth( rh.headers ) match {
+                  case Some(apikey) => access.apikey = apikey
+                  case None => access.ip = rh.remoteAddress 
+                }
+              }  
+            }
+          }
         }
       }
     }
@@ -170,4 +241,69 @@ object FilterUtils {
     Cookies(result.header.headers.get(SET_COOKIE))
       .get(Session.COOKIE_NAME).map(_.value).map(Session.decode)
   }
+  
+  def withAjaxScript =  Action {
+    val apikey = DB.getApiKeyDAO.getByName("WITH")
+    if( apikey != null ) {
+      val arr = apikey.getKeyString().getBytes("UTF8").map( _ -1 )
+      val script = """
+function sign(c,f){function e(a){for(var c=[],b=0;4>b;b++)c.push(a%256),a>>>=8;return c}for(var d=[],b=%s,g=Math.max(b.length,c.length),a=0;a<g;a++)a<b.length?d[a]=b[a%b.length]+1^c.charCodeAt(a%c.length)&255:d[a%b.length]^=c.charCodeAt(a%c.length)&255;if(void 0!=f)for(b=e(f),a=0;a<d.length;a++)d[a]^=b[a%4];return function(a){for(var c="",b=0;b<a.length;b++)c=15<a[b]?c+a[b].toString(16).toUpperCase():c+("0"+a[b].toString(16).toUpperCase());return c}(d)}
+$.ajaxSetup({beforeSend:function(c,f){var e=(new Date).valueOf();c.setRequestHeader("X-auth1",e);c.setRequestHeader("X-auth2",sign(document.location.origin,e))}});""".replace("%s", "[" + arr.mkString( "," ) + "]" )
+       play.api.mvc.Results.Ok( script ).as("application/javascript")      
+    } else {
+             play.api.mvc.Results.BadRequest( "Bad ApiKey" ).as("application/javascript")      
+    }
+  }
 }
+
+/**
+function sign( param, time ) {
+  function ta( n ) {
+    var r = new Array();
+    for( var i=0; i< 4; i++ ) {
+      r.push( n%256);
+      n = n >>> 8;
+    }
+    return r;
+  }
+  function reHex( n ) {
+    var res = "";
+    for( var i=0; i<n.length; i++ ) {
+           if( n[i] >15 ) { 
+             res += n[i].toString( 16 ).toUpperCase();
+           } else {
+             res += "0"+ n[i].toString( 16 ).toUpperCase();
+           }
+    }
+    return res;
+  }
+
+  var r = new Array();
+  var n = %s;
+  var max = Math.max( n.length, param.length )
+
+  for( var i=0; i<max; i++ ) {
+    if( i < n.length ) {   
+       r[i] = (n[i%n.length]+1)^(param.charCodeAt(i%param.length)&255);
+    } else {
+      r[i%n.length] = r[i%n.length] ^ (param.charCodeAt(i%param.length)&255)      
+    }
+  }
+
+  if( time != undefined ) {
+    var a2 = ta( time );
+    for( var i=0; i<r.length; i++ ) {
+       r[i] = r[i] ^ (a2[i%4]);
+    } 
+  }
+  return reHex( r );
+} 
+
+$.ajaxSetup({
+    beforeSend: function(xhr, obj) {
+        var utc = new Date().valueOf();
+        xhr.setRequestHeader('X-auth1', utc );
+        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
+    }
+});
+*/

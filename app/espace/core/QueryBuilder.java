@@ -27,6 +27,7 @@ public class QueryBuilder {
 	private String baseUrl;
 	private Pair<String> query;
 	private List<Pair<String>> parameters;
+	private Object data;
 
 	
 	public QueryBuilder(String baseUrl) {
@@ -42,6 +43,7 @@ public class QueryBuilder {
 	public String getHttp() {
 		String res = getBaseUrl();
 		Iterator<Pair<String>> it = parameters.iterator();
+		if (query!=null)
 		res+=("?"+query.getHttp());
 		for (; it.hasNext();) {
 			res += "&" + it.next().getHttp();
@@ -85,6 +87,14 @@ public class QueryBuilder {
 	public QueryBuilder addToQuery(String q) {
 		query.second+=q;
 		return this;
+	}
+
+	public Object getData() {
+		return data;
+	}
+
+	public void setData(Object data) {
+		this.data = data;
 	}
 	
 

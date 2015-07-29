@@ -51,6 +51,7 @@ import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
+import espace.core.sources.EuropeanaFashionSpaceSource;
 import espace.core.sources.EuropeanaSpaceSource;
 
 public class SearchController extends Controller {
@@ -146,7 +147,6 @@ public class SearchController extends Controller {
 						// + (System.currentTimeMillis()- initTime));
 
 						SearchResponse r1 = new SearchResponse();
-						r1.responces = finalResponses;
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
 //							System.out.println(sourceResponse.filtersLogic);
@@ -155,9 +155,31 @@ public class SearchController extends Controller {
 						}
 
 						r1.filters = ListUtils.transform(merge, f);
-
+						r1.responces = mergeResponses(finalResponses);
+						
 						return ok(Json.toJson(r1));
 					}
+
+					private List<SourceResponse> mergeResponses(List<SourceResponse> finalResponses2) {
+						List<SourceResponse> res = new ArrayList<>();
+						for (SourceResponse r : finalResponses2) {
+							boolean merged = false;
+							for (SourceResponse r2 : res) {
+								if (r2.source.equals(r.source)){
+									// merge these 2 and replace r.
+									res.remove(r2);
+									res.add(r.merge(r2));
+									merged = true;
+									break;
+								}
+							}
+							if (!merged){
+								res.add(r);
+							}
+						}
+						return res ;
+					}
+
 				});
 
 			} catch (Exception e) {
@@ -183,8 +205,11 @@ public class SearchController extends Controller {
 		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
-				promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
-						src, q));
+				List<CommonQuery> list = src.splitFilters(q);
+				for (CommonQuery commonQuery : list) {
+					promises.add(ParallelAPICall.<ISpaceSource, CommonQuery, SourceResponse> createPromise(methodQuery,
+							src, commonQuery));
+				}
 			}
 		}
 		return promises;
@@ -252,7 +277,7 @@ public class SearchController extends Controller {
 	}
 
 	private static Result buildresult(CommonQuery q) {
-//		q.source	 = Arrays.asList(DPLASpaceSource.LABEL);
+//		q.source	 = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;

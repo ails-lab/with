@@ -15,6 +15,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
 		"favorites": ko.observableArray(),
+		"favoritesId": ko.observable()
 	};
 	isLogged = ko.observable(false);
 
@@ -31,6 +32,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
+		self.currentUser.favoritesId(data.favoritesId);
 
 		self.loadFavorites();
 
@@ -52,7 +54,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	self.loadFavorites = function () {
 		$.ajax({
-				url: "http://localhost:9000/collection/favorites",
+				url: "/collection/favorites",
 				type: "GET",
 			})
 			.done(function (data, textStatus, jqXHR) {
@@ -65,13 +67,47 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	};
 
 	likeItem = function (record, update) {
-		var id = record.externalId();
+		var id, data;
+		if (ko.isObservable(record.externalId)) {
+			id = record.externalId();
+			data = {
+				source: record.source(),
+				sourceId: record.recordId(),
+				title: record.title(),
+				provider: record.provider(),
+				creator: record.creator(),
+				description: record.description(),
+				rights: record.rights(),
+				type: '',
+				thumbnailUrl: record.thumb(),
+				sourceUrl: record.view_url(),
+				collectionId: self.currentUser.favoritesId(),
+				externalId: record.externalId()
+			};
+		}
+		else {
+			id = record.externalId;
+			data = {
+				source: record.source,
+				sourceId: record.recordId,
+				title: record.title,
+				provider: record.provider,
+				creator: record.creator,
+				description: record.description,
+				rights: record.rights,
+				type: '',
+				thumbnailUrl: record.thumb,
+				sourceUrl: record.view_url,
+				collectionId: self.currentUser.favoritesId,
+				externalId: record.externalId
+			};
+		}
 
 		if (!self.isLiked(id)) {	// Like
 			$.ajax({
 				type: "POST",
 				url: "/collection/liked",
-				data: ko.toJSON(record),
+				data: JSON.stringify(data), //ko.toJSON(record),
 				contentType: "application/json",
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.push(id);
@@ -228,8 +264,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	});
 
-	showPopup = function (name) {
+	showPopup = function (name, params) {
 		popupName(name);
+		if (params !== undefined) {
+			popupParams(params);
+		}
 		$('#popup').modal('show');
 	};
 
@@ -237,6 +276,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	closePopup = function () {
 		$('#popup').modal('hide');
 		popupName("empty");
+		popupParams("{}");
 	};
 
 	// Check if user information already exist in session

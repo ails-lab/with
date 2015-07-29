@@ -881,3 +881,7 @@ div#publiccolumns figure figcaption {
   display: block;
   text-shadow: 1px 1px 0 black, 1px -1px 0 black, -1px 1px 0 black, -1px -1px 0 black;
 }
+
+.galleries{
+	height: 400px;display:block;width:700px;overflow: hidden;padding-top:10px;
+}

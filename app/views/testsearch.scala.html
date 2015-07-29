@@ -30,43 +30,7 @@
 	
 		<div class="row" >
 	 		 <div id="nav" class="col-md-3">
-	 		 
-		 			<!--
-		 			<div class="col-sm-12" >
-							@for(p <- filters) {
-								<div onClick="" class="row" >	
-									<label id="filter-name">
-										@p.filterName
-									</label>		
-										
-									 
-									<ul class="list-group">
-										@for(pp <- p.suggestedValues.slice(0,14)) {
-											
-											//<li class="li1 btn btn-2" onClick="gothere('zeus', '@p.filterID', '@pp.value')" >
-		  									//	@shorttext(pp.value,20) (@pp.count)
-											//</li>
-											
-										
-											 <li class="list-group-item">
-											    //checkboxes dont work with onClick i think, we need to check out the functionality 
-  												<label><input type="checkbox" value="" onClick="gothere('zeus', '@p.filterID', '@pp.value')">
-		  											@shorttext(pp.value,20) (@pp.count)
-  												</label>
-											</li>
-											
-											 
-										}
-									</ul>
-									
-									
-									
-									 	
-								</div>
-							}
-					 </div>
-					 
-					 //-->
+	 		
 					 
 					<div class="row">
 						<button class="btn btn-default" id="filterSearch">
@@ -80,25 +44,23 @@
 							</script>
 						</button>
 					</div>
+					
+					
+					
 					 
-					<div class="col-sm-12">
-						@for(p <- filters) {
+					<div class="col-sm-12" data-bind="foreach: jsoninfo.filters">
 						<div class="form-group row">
   							<label for="filter-name">
-  								Select @p.filterName:
+  								Select <spam data-bind="text: filterName"></spam>:
   							</label>
   							
-  							<select multiple name=@p.filterName id=@p.filterID class="form-control">
-  								@for(pp <- p.suggestedValues.slice(0,14)) {
-	    							<option filter=@p.filterName filterID=@p.filterID name="@pp.value">
-	    								@shorttext(pp.value,20) (@pp.count)
-	    							</option>
-	    						}
-  							</select>
+  							
 						</div>
-						}
 						
 					</div>
+					
+					
+					
 					
 					<script>
 						

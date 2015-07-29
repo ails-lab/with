@@ -29,6 +29,7 @@ import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import espace.core.AdditionalQueryModifier;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
@@ -40,6 +41,7 @@ import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
+import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
@@ -62,11 +64,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 
-		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("proxy_dc_creator"));
+		addDefaultWriter(CommonFilters.CREATOR_ID,qfwriter("CREATOR"));
 		
 //		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, qfwriter("proxy_dc_contributor"));
 
-		addDefaultWriter(CommonFilters.RIGHTS_ID, qfwriter("RIGHTS"));
+		addDefaultQueryModifier(CommonFilters.RIGHTS_ID, qrightwriter());
+		
 
 		addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 
@@ -75,43 +78,40 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
-		
+			
 		/**
 		 * TODO check this 
 		 */
+				
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial_Modify, ".*(creative)(.*(nc-nd)).*");
+////		
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*(creative)(.*nc).*");
+////				
+//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*(creative)(.*nd).*");
 		
 
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, ".*(http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/).*");
-		//use for commercial purposes,modify, adapt, or build upon 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial_and_Modify, ".*(creative)(?!.*nc)(?!.*nd).*");
+		//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_BY, ".*(creative)(.*by).*");		
+		//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_SA, ".*(creative)(.*sa).*");				
+		//ok
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial_Modify, ".*(creative)(?!.*(nc|nd)).*");
+		//ok RIGHTS:*creative* AND NOT RIGHTS:*nc* AND NOT RIGHTS:*nd*
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*creative(?!.*nc).*");
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*creative(?!.*nd).*");
 		
-		// public  = commercial and modify
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
+				".*non-commercial.*");
+       
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*rr-f.*");
+        
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*unknown.*");
+        
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 		
-		
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, ".*(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
-		//use for commercial purposes,
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*(creative)(?!.*nc).*");
-		
-		// commercial is use for commercial but not modify
-		//use for modify, adapt, or build upon 		
-		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, ".*!(http://creativecommons.org/licenses/by-nc/ | http://creativecommons.org/licenses/by-nc-sa/ | http://creativecommons.org/licenses/by-nc-nd/ | http://creativecommons.org/licenses/by-nd/ | http://creativecommons.org/publicdomain/mark/1.0/ | http://creativecommons.org/publicdomain/zero/1.0/ | http://creativecommons.org/licenses/by/ | http://creativecommons.org/licenses/by-sa/| http://www.europeana.eu/rights/out-of-copyright-non-commercial/).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*(creative)(?!.*nd).*");
-		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Permission, "^(?!.*(screative)).*$");
-		
-		/*	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/mark/1.0/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/publicdomain/zero/1.0/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "http://creativecommons.org/licenses/by-sa/");*/
-		
-	
-		/*addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-sa/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nc-nd/");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://creativecommons.org/licenses/by-nd/");		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Restricted, "http://www.europeana.eu/rights/out-of-copyright-non-commercial/");
-*/
-		//pemission is not *creative*  
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
+
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
@@ -131,15 +131,29 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				String val = t.get(0);
+				String val = "%22"+t.get(0)+"%22";
 				if (t.size()>1){
-					val = "%5B"+val + "%20TO%20"+t.get(1)+"%5D";
+					val = "%5B"+val + "%20TO%20%22"+t.get(1)+"%22%5D";
 				}
 				return new Pair<String>("qf", "YEAR%3A" +val);
 			}
 		};
 	}
 
+	private Function<List<String>, QueryModifier> qrightwriter() {
+		Function<String, String> function = (String s) -> {
+			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
+			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
+			return "RIGHTS%3A%28"+s.replace(".", "")+"%29";
+		};
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				return new AdditionalQueryModifier(
+						 "%20"+Utils.getORList(ListUtils.transform(t, function), false) );
+			}
+		};
+	}
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
@@ -175,44 +189,44 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	// return null;
 	// }
 
-	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
-		if (q.europeanaAPI != null) {
-			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
-			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
-			if (q.europeanaAPI.facets != null) {
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
-				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
-			}
-			if (q.europeanaAPI.refinement != null) {
-				if (q.europeanaAPI.refinement.refinementTerms != null) {
-					for (String t : q.europeanaAPI.refinement.refinementTerms) {
-						eq.addSearch(t);
-					}
-				}
-				if (q.europeanaAPI.refinement.spatialParams != null) {
-
-					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
-								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
-					}
-					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
-						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
-								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
-								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
-					}
-				}
-			}
-			if (q.europeanaAPI.reusability != null) {
-				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
-			}
-		}
-	}
+//	private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
+//		if (q.europeanaAPI != null) {
+//			eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
+//			eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
+//			if (q.europeanaAPI.facets != null) {
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE, "LANGUAGE"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY, "COUNTRY"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS, "RIGHTS"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER, "PROVIDER"));
+//				eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
+//			}
+//			if (q.europeanaAPI.refinement != null) {
+//				if (q.europeanaAPI.refinement.refinementTerms != null) {
+//					for (String t : q.europeanaAPI.refinement.refinementTerms) {
+//						eq.addSearch(t);
+//					}
+//				}
+//				if (q.europeanaAPI.refinement.spatialParams != null) {
+//
+//					if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
+//						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
+//								+ q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
+//								+ q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
+//					}
+//					if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
+//						eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
+//								+ q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
+//								+ q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
+//					}
+//				}
+//			}
+//			if (q.europeanaAPI.reusability != null) {
+//				eq.addSearchParam("reusability", Utils.getORList(q.europeanaAPI.reusability));
+//			}
+//		}
+//	}
 
 	public String getSourceName() {
 		return LABEL;
@@ -237,6 +251,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		try {
 			response = HttpConnector.getURLContent(httpQuery);
 			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
+			System.out.println("europeana got "+res.totalCount);
 			res.count = Utils.readIntAttr(response, "itemsCount", true);
 			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 			if (response.path("success").asBoolean()) {
@@ -286,7 +301,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						break;
 
 					case "RIGHTS":
-						countValue(rights, label, false, count);
+						countValue(rights, label, count);
 						break;
 
 					case "proxy_dc_creator":

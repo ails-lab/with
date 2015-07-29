@@ -20,10 +20,8 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import model.Collection;
 import model.CollectionRecord;
@@ -108,6 +106,8 @@ public class ElasticIndexer {
 						array.add(right);
 					}
    					doc.rawField(entry.getKey(), array.toString().getBytes());
+				} else if( entry.getKey().equals("itemCount") ) {
+					doc.field(entry.getKey(), entry.getValue().asInt());
 				} else if( !entry.getKey().equals("firstEntries") &&
 						  !entry.getKey().equals("rights") &&
 						  !entry.getKey().equals("dbId")) {
@@ -148,11 +148,13 @@ public class ElasticIndexer {
 				.setId(record.getExternalId())
 			.addScriptParam("tags", record.getTags().toArray())
 			.addScriptParam("collectionId", record.getCollectionId().toString())
+			.addScriptParam("totalLikes", record.getTotalLikes())
 			.setScript("for(String t: tags) {"
 					//+ "if(!ctx._source.tags.contains(t))"
 					+ "ctx._source.tags.add(t)"
 					+ "}; "
-					+ "ctx._source.collections += collectionId", ScriptType.INLINE)
+					+ "ctx._source.collections += collectionId;"
+					+ "ctx._source.totalLikes = totalLikes", ScriptType.INLINE)
 			//.setScript("ctx._source.collections += collectionId", ScriptType.INLINE)
 			.setUpsert(indexReq)
 			.execute().actionGet();
@@ -172,8 +174,8 @@ public class ElasticIndexer {
 
 			while( recordIt.hasNext() ) {
 				Entry<String, JsonNode> entry = recordIt.next();
-				if( entry.getKey().equals("itemCount") ) {
-					doc.field(entry.getKey()+"_all", entry.getValue().asInt());
+				if( entry.getKey().equals("itemCount") ||
+					entry.getKey().equals("totalLikes")) {
 					doc.field(entry.getKey(), entry.getValue().asInt());
 				} else if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("tags")    &&
@@ -233,8 +235,10 @@ public class ElasticIndexer {
 			doc = jsonBuilder().startObject();
 			while( recordIt.hasNext() ) {
 				Entry<String, JsonNode> entry = recordIt.next();
-				if( !entry.getKey().equals("content") &&
-					!entry.getKey().equals("dbId")) {
+				if(	entry.getKey().equals("totalLikes") ) {
+						doc.field(entry.getKey(), entry.getValue().asInt());
+				} else if( !entry.getKey().equals("content") &&
+							!entry.getKey().equals("dbId")) {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());
 				}
@@ -301,7 +305,7 @@ public class ElasticIndexer {
 					.source(doc));
 					i++;
 				}
-				Elastic.getBulkProcessor().close();
+				Elastic.getBulkProcessor().flush();
 				i = 0;
 				for(XContentBuilder mdoc: mergedDocs) {
 					Elastic.getBulkProcessor().add(new IndexRequest(

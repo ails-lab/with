@@ -16,7 +16,7 @@
 
 package espace.core;
 
-public class AdditionalQueryModifier {
+public class AdditionalQueryModifier extends QueryModifier {
 	private String queryText;
 	
 	public AdditionalQueryModifier(String queryText) {

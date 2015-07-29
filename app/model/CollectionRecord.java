@@ -86,6 +86,8 @@ public class CollectionRecord {
 
 	private String type;
 
+	private int totalLikes;
+
 	private String itemRights;
 	
 	private ExhibitionRecord exhibition;
@@ -168,7 +170,7 @@ public class CollectionRecord {
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
 	}
-	
+
 	/*
 	 * public String getThumbnailUrl() { return "/recordlink/" +
 	 * this.getDbId().toString() + "/thumbnail"; }
@@ -253,6 +255,14 @@ public class CollectionRecord {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public int getTotalLikes() {
+		return totalLikes;
+	}
+
+	public void setTotalLikes(int totalLikes) {
+		this.totalLikes = totalLikes;
 	}
 
 	public String getItemRights() {

@@ -139,6 +139,7 @@ public class CollectionController extends Controller {
 						"User does not have permission to delete the collection");
 				return forbidden(result);
 			}
+			DB.getCollectionRecordDAO().removeAll("collectionId", "=", new ObjectId(id));
 			if (DB.getCollectionDAO().removeById(new ObjectId(id)) != 1) {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
@@ -147,6 +148,8 @@ public class CollectionController extends Controller {
 			// delete collection from index
 			ElasticEraser eraser = new ElasticEraser(c);
 			eraser.deleteCollection();
+			eraser.deleteAllCollectionRecords();
+			eraser.deleteAllEntriesFromMerged();
 			result.put("message",
 					"Collection deleted succesfully from database");
 			return ok(result);
@@ -419,6 +422,7 @@ public class CollectionController extends Controller {
 			User user = DB.getUserDAO().getById(userId, null);
 			if (user != null) {
 				ObjectNode userJSON = Json.newObject();
+				userJSON.put("userId", user.getDbId().toString());
 				userJSON.put("username", user.getUsername());
 				userJSON.put("firstName", user.getFirstName());
 				userJSON.put("lastName", user.getLastName());
@@ -575,6 +579,8 @@ public class CollectionController extends Controller {
 
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
+			//get totalLikes
+			record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(record.getExternalId()));
 			record.setCollectionId(new ObjectId(collectionId));
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
@@ -598,6 +604,10 @@ public class CollectionController extends Controller {
 						position);
 			} else {
 				DB.getCollectionRecordDAO().makePermanent(record);
+				if(c.getTitle().equals("_favorites")) {
+					DB.getCollectionRecordDAO().incrementLikes(record.getExternalId());
+					record = DB.getCollectionRecordDAO().get(record.getDbId());
+				}
 				// record in first entries does not contain the content metadata
 				status = addRecordToFirstEntries(record, result, collectionId);
 			}
@@ -611,11 +621,31 @@ public class CollectionController extends Controller {
 				}
 				DB.getCollectionRecordDAO().makePermanent(record);
 
-				// index record and merged_record
+				// index record and merged_record and inrement likes
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
+				//increment likes if collection title is _favourites
+				if(c.getTitle().equals("_favorites") &&
+					(record.getTotalLikes() > 0)) {
+					ElasticUpdater updater = new ElasticUpdater(null, record);
+					updater.incLikes();
+				}
 			} else {
-				addContentToRecord(record.getDbId(), source, sourceId);
+				List<CollectionRecord> storedRecords;
+				if((json.get("externalId") != null) &&
+					((storedRecords =  DB.getCollectionRecordDAO().getByUniqueId(json.get("externalId").asText())) != null) ) {
+					for(Entry<String , String> e: storedRecords.get(storedRecords.size()-1).getContent().entrySet()) {
+						record.getContent().put(e.getKey(), e.getValue());
+					}
+					DB.getCollectionRecordDAO().makePermanent(record);
+				} else {
+					addContentToRecord(record.getDbId(), source, sourceId);
+				}
+				//increment likes if collection title is _favourites
+				if(c.getTitle().equals("_favorites")) {
+					ElasticUpdater updater = new ElasticUpdater(null, record);
+					updater.incLikes();
+				}
 			}
 			return status;
 		}
@@ -701,7 +731,11 @@ public class CollectionController extends Controller {
 				return false;
 			}
 		};
+
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
+		// index record and merged_record
+		ElasticIndexer indexer = new ElasticIndexer(record);
+		indexer.index();
 		String sourceClassName = "espace.core.sources." + source
 				+ "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
@@ -727,6 +761,7 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		try {
+			// here problem when try to delete a duplicated record in a collection
 			if (DB.getCollectionRecordDAO().getById(new ObjectId(recordId)) == null) {
 				result.put("error", "Wrong recordId");
 				return internalServerError(result);
@@ -754,6 +789,12 @@ public class CollectionController extends Controller {
 		int position = 0;
 		if (collection.isExhibition()) {
 			position = record.getPosition();
+		}
+		//decrement likes from records
+		if(collection.getTitle().equals("_favorites")) {
+			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
+			ElasticUpdater updater = new ElasticUpdater(null, record);
+			updater.decLikes();
 		}
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {

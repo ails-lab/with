@@ -275,16 +275,17 @@ input[type="search"] { /* reset normalize */
 	/*position: absolute;*/
 	opacity: 0;
 	overflow-y: hidden;
+	overflow-x: hidden;
 }
 
 .scrollable{
 
-	width: 2200px;
-    display:table;
-    overflow-y: auto;   overflow-x: scroll;
+	overflow-y: hidden;   overflow-x: scroll;
     margin: 0 auto;
     padding-top:70px;
-
+    width: auto;
+    white-space:nowrap; 
+	text-align: center;
 }
 
 .withsearch-content p{
@@ -304,12 +305,13 @@ input[type="search"] { /* reset normalize */
 	margin-left:3em;
 	width: 300px;
 	padding: 0 0 6em;
-	float: left;
 	opacity: 0;
+	display: inline-block;
 	-webkit-transform: translate3d(0,100px,0);
 	transform: translateY(100px);
 	-webkit-transition: -webkit-transform 0.5s, opacity 0.5s;
 	transition: transform 0.5s, opacity 0.5s;
+	vertical-align:top;
 }
 
 .withsearch.open .dummy-column:first-child {
@@ -384,6 +386,8 @@ input[type="search"] { /* reset normalize */
 	width: calc(100% - 70px);
 	color: rgba(0, 0, 0, 0.52);
 	word-wrap:break-word;
+	white-space: normal;
+	text-align: left;
 }
 
 .dummy-media-object:hover span {
@@ -434,7 +438,7 @@ margin: 50px auto;
 
 
 div.columns figure {
-opacity:1;
+
 background: #FFF none repeat scroll 0% 0%;
 box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.22);
 border-radius: 6px;
@@ -543,14 +547,18 @@ figure .star {
 	font-size: 20px;
 	display: none;
 	position: absolute;
-	top: 4px;
+	top: 0px;
 	right: 4px;
-	width: 24px;
+	width: 36px;
 }
 
 figure:hover .star {
 	color: #dddddd;
 	display: block;
+}
+
+.star .fa-inverse {
+	color: #ec5a62;
 }
 
 figure .active, figure:hover .active {

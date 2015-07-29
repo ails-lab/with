@@ -16,8 +16,14 @@
 
 package controllers;
 
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import model.Media;
 
@@ -95,7 +101,8 @@ public class MediaController extends Controller {
 				if (json.has("mimeType"))
 					newMedia.setMimeType(json.get("mimeType").asText());
 				if (json.has("type"))
-					newMedia.setType(Media.BaseType.valueOf( json.get("type").asText()));
+					newMedia.setType(Media.BaseType.valueOf(json.get("type")
+							.asText()));
 
 				DB.getMediaDAO().makePermanent(newMedia);
 			} catch (Exception e) {
@@ -126,63 +133,116 @@ public class MediaController extends Controller {
 	}
 
 	/**
-	 * Allow media create with two different methods, by first supplying metadata or a file
-	 * File data can arrive in different ways. Whole body is file content, form based file upload, or
-	 * json field with encoded file data.
+	 * Allow media create with two different methods, by first supplying
+	 * metadata or a file File data can arrive in different ways. Whole body is
+	 * file content, form based file upload, or json field with encoded file
+	 * data.
+	 * 
 	 * @param fileData
 	 * @return
 	 */
-	public static Result createMedia( boolean fileData ) {
+	public static Result createMedia(boolean fileData) {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
-		if( userIds.isEmpty() ) return forbidden(); 
-		if( fileData ) {
-			final Http.MultipartFormData multipartBody = request().body().asMultipartFormData();
-			if( multipartBody != null ) {
+		if (userIds.isEmpty())
+			return forbidden();
+		if (fileData) {
+			final Http.MultipartFormData multipartBody = request().body()
+					.asMultipartFormData();
+			if (multipartBody != null) {
 				ArrayNode allRes = result.arrayNode();
-				for( FilePart fp: multipartBody.getFiles() ) {
+				for (FilePart fp : multipartBody.getFiles()) {
 					try {
+						ObjectNode singleRes = Json.newObject();
 						// lets start by making binary objects for every part
 						Media med = new Media();
-						med.setMimeType( fp.getContentType());
+						med.setMimeType(fp.getContentType());
 						med.setFilename(fp.getFilename());
 						med.setOwnerId(new ObjectId(userIds.get(0)));
-						med.setData(FileUtils.readFileToByteArray( fp.getFile()));
-						med.setType(Media.BaseType.IMAGE);
+						if (med.getMimeType().toLowerCase().contains("image")) {
+							med.setType(Media.BaseType.IMAGE);
+							BufferedImage image = ImageIO.read(fp.getFile());
+							int height = image.getHeight();
+							int width = image.getWidth();
+							med.setHeight(height);
+							med.setWidth(width);
+							med.setOriginal(true);
+							if (width < 212) {
+								med.setThumbnail(true);
+							} else {
+								// Resize image and put new width, height and
+								// bytes to data
+								Image ithumb = image.getScaledInstance(211, -1,
+										Image.SCALE_SMOOTH);
+								// Create a buffered image with transparency
+								BufferedImage thumb = new BufferedImage(
+										ithumb.getWidth(null),
+										ithumb.getHeight(null), image.getType());
+								// Draw the image on to the buffered image
+								Graphics2D bGr = thumb.createGraphics();
+								bGr.drawImage(ithumb, 0, 0, null);
+								bGr.dispose();
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								ImageIO.write(thumb, "jpg", baos);
+								baos.flush();
+								byte[] thumbByte = baos.toByteArray();
+								baos.close();
+								Media thumbMedia = new Media();
+								thumbMedia.setMimeType(med.getMimeType());
+								thumbMedia.setFilename(med.getFilename());
+								thumbMedia.setOwnerId(med.getOwnerId());
+								med.setType(med.getType());
+								thumbMedia.setData(thumbByte);
+								thumbMedia.setWidth(thumb.getWidth());
+								thumbMedia.setHeight(thumb.getHeight());
+								thumbMedia.setThumbnail(true);
+								thumbMedia.setOriginal(false);
+								DB.getMediaDAO().makePermanent(thumbMedia);
+								singleRes.put("thumbnailUrl", "/media/"
+										+ thumbMedia.getDbId().toString());
+							}
+						}
+						med.setData(FileUtils.readFileToByteArray(fp.getFile()));
+						med.setDbId(null);
 						DB.getMediaDAO().makePermanent(med);
+						singleRes.put("isShownBy", "/media/"
+								+ med.getDbId().toString());
+						singleRes.put("externalId", med.getDbId().toString());
+						allRes.add(singleRes);
+					} catch (Exception e) {
 						ObjectNode singleRes = Json.newObject();
-						singleRes.put( fp.getFilename(), med.getDbId().toString());
-						allRes.add( singleRes );
-					} catch( Exception e ) {
-						ObjectNode singleRes = Json.newObject();
-						singleRes.put( "error", "Couldn't create from file " + fp.getFilename());
-						allRes.add( singleRes );	
-						log.error( "Media create error", e );
+						singleRes.put("error", "Couldn't create from file "
+								+ fp.getFilename());
+						allRes.add(singleRes);
+						log.error("Media create error", e);
 					}
 				}
-				result.put( "results", allRes );
+				result.put("results", allRes);
 			} else {
-				final Map<String,String[]> req = request().body().asFormUrlEncoded();
-				if( req != null ) {
+				final Map<String, String[]> req = request().body()
+						.asFormUrlEncoded();
+				if (req != null) {
 					// this should be rare for file data
 				} else {
 					final JsonNode jsonBody = request().body().asJson();
-					if( jsonBody != null ) {
-						// we extract the media and maybe some metadata from the json body
-						
+					if (jsonBody != null) {
+						// we extract the media and maybe some metadata from the
+						// json body
+
 					} else {
 						// raw body to file upload
-						// problem, there is absolutely no metadata, so don't know what to put in the Media Object
+						// problem, there is absolutely no metadata, so don't
+						// know what to put in the Media Object
 						try {
 							Media med = new Media();
-							med.setData( request().body().asRaw().asBytes());
+							med.setData(request().body().asRaw().asBytes());
 							DB.getMediaDAO().makePermanent(med);
-							result.put( "Success", "Media object created!");
-							result.put( "mediaId", med.getDbId().toString());
-						} catch( Exception e ) {
-							result.put( "error", "Couldn't create Media object" );
-							log.error( "Media create error", e );
+							result.put("Success", "Media object created!");
+							result.put("mediaId", med.getDbId().toString());
+						} catch (Exception e) {
+							result.put("error", "Couldn't create Media object");
+							log.error("Media create error", e);
 						}
 					}
 				}
@@ -190,6 +250,6 @@ public class MediaController extends Controller {
 		} else {
 			// metadata based media creation
 		}
-		return ok( result );
+		return ok(result);
 	}
 }

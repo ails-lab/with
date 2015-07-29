@@ -24,9 +24,11 @@ import java.util.List;
 import model.ApiKey;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import akka.actor.ActorPath;
 import akka.actor.UntypedActor;
 import db.DB;
 /**
@@ -59,6 +61,15 @@ public class ApiKeyManager extends UntypedActor  {
 		public String dbId;
 		
 		public String ip;
+		
+		// the following two are optional
+		// an email doesn't need to be a registered user's email
+		
+		// ObjectId contains the associated user's id
+		public ObjectId proxyUserId;
+		
+		// email contains the associated email
+		public String email;
 		
 		// if call is empty, it will create a new apikey
 		// either with ip or if that is empty with a new secret
@@ -190,13 +201,34 @@ public class ApiKeyManager extends UntypedActor  {
 				newKey.setIpPattern(create.ip);
 				ipPatterns.add( newKey );
 			}
-			answer( newKey.getDbId().toString());
+
+			if(!StringUtils.isEmpty(create.email)){
+				newKey.setEmail(create.email);
+			}
+			
+			if(create.proxyUserId!=null){
+				newKey.setProxyUserId(create.proxyUserId);
+			}
+			
+			
+			// this commented out line gives a null pointer exception
+			// the constructor does not create a DbId!!
+			// is the key stored in the db anyway?
+			
+			
+			//answer( newKey.getDbId().toString());
+			//System.out.println("should not be null: " + newKey.getDbId());
+
+			
+			
+			answer( newKey.getKeyString());
 		} else {			
 			// find by dbId
 			ApiKey key =getByDbId(create.dbId);
 			
 			key.addCall(0, create.call, create.counterLimit, create.volumeLimit);
 		}
+		
 	}
 	
 	@Override

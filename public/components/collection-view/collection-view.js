@@ -28,7 +28,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 
 			if (load) {
 				$(window).on("scroll.ko.scrollHandler", function () {
-					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+					if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
 						if (self.updating) {
 							loadFunc();
 							self.updating = false;
@@ -83,74 +83,84 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 
 	function Record(data) {
 		var self = this;
-
-		self.recordId = ko.observable("");
-		self.title = ko.observable(false);
-		self.description = ko.observable(false);
-		self.thumb = ko.observable(false);
-		self.fullres = ko.observable(false);
-		self.view_url = ko.observable(false);
-		self.source = ko.observable(false);
-		self.creator = ko.observable("");
-		self.provider = ko.observable("");
-		self.url = ko.observable("");
-		self.rights = ko.observable("");
-		self.externalId = ko.observable("");
-		self.isLiked = ko.computed(function () {
-			return app.isLiked(self.externalId());
+	    self.recordId = "";
+		self.title = "";
+		self.description="";
+		self.thumb = "";
+		self.fullres="";
+		self.view_url="";
+		self.source="";
+		self.creator="";
+		self.provider="";
+		self.rights="";
+		self.url="";
+		self.externalId = "";
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
 		});
-
-		self.load = function (data) {
-			if (data.title === undefined) {
-				self.title("No title");
-			} else {
-				self.title(data.title);
-			}
-			self.url("#item/" + data.id);
-			self.view_url(data.view_url);
-			self.thumb(data.thumb);
-			self.fullres(data.fullres);
-			self.description(data.description);
-			self.source(data.source);
-			self.creator(data.creator);
-			self.provider(data.provider);
-			self.recordId(data.id);
-			self.rights(data.rights);
-			self.externalId(data.externalId);
+		self.load = function(data) {
+			if(data.title==undefined){
+				self.title="No title";
+			}else{self.title=data.title;}
+			self.url="#item/"+data.id;
+			self.view_url=data.view_url;
+			self.thumb=data.thumb;
+			self.fullres=data.fullres;
+			self.description=data.description;
+			self.source=data.source;
+			self.creator=data.creator;
+			self.provider=data.provider;
+			self.rights=data.rights;
+			self.recordId=data.id;
+			self.externalId=data.externalId;
 		};
 
-		self.sourceCredits = ko.pureComputed(function () {
-			switch (self.source()) {
-			case "DPLA":
-				return "dp.la";
-			case "Europeana":
-				return "europeana.eu";
-			case "NLA":
-				return "nla.gov.au";
-			case "DigitalNZ":
-				return "digitalnz.org";
-			case "EFashion":
-				return "europeanafashion.eu";
-			case "YouTube":
-				return "youtube.com";
-			case "Mint":
-				return "mint";
-			default:
-				return "";
-			}
+		self.cachedThumbnail = ko.pureComputed(function() {
+			
+		   if(self.thumb){
+			if (self.thumb.indexOf('/') === 0) {
+				return self.thumb;
+			} else {
+				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
+				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+			}}
+		   else{
+			   return "images/no_image.jpg";
+		   }
 		});
+		self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source) {
+			    case "DPLA":
+			    	return "dp.la";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": {
+			    	return "youtube.com";
+			    }
+			    case "Mint":
+			    	return "mint";
+			    default: return "";
+			 }
+			});
 
-		self.displayTitle = ko.pureComputed(function () {
-			var distitle = "";
-			distitle = '<b>' + self.title() + '</b>';
-			if (self.creator() !== undefined && self.creator().length > 0)
-				distitle += ", by " + self.creator();
-			if (self.provider() !== undefined && self.provider().length > 0 && self.provider() != self.creator())
-				distitle += ", " + self.provider();
+		self.displayTitle = ko.pureComputed(function() {
+			var distitle="";
+			distitle=self.title;
+			if(self.creator!==undefined && self.creator.length>0)
+				distitle+=", by "+self.creator;
+			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
+				distitle+=", "+self.provider;
 			return distitle;
 		});
 
-		if (data !== undefined) self.load(data);
+		if(data != undefined) self.load(data);
+		
 	}
 
 	function CViewModel(params) {
@@ -220,12 +230,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				self.loading(true);
 				var offset = self.citems().length;
 				$.ajax({
-					"url": "/collection/" + self.id() + "/list?count=20&start=" + offset,
+					"url": "/collection/" + self.id() + "/list?count=40&start=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
 						console.log(data.itemCount);
 						self.revealItems(data.records);
+						self.loading(false);
 					},
 					"error": function (result) {
 						self.loading(false);
@@ -248,6 +259,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			}
 
 			$items.imagesLoaded().progress(function (imgLoad, image) {
+				self.loading(true);
 				counter++;
 				var $item = $(image.img).parents(".masonryitem");
 				ko.applyBindings(self, $item[0]);
@@ -261,7 +273,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 
 		self.recordSelect = function (e) {
 			var selrecord = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.recordId() === e;
+				return record.recordId === e;
 			});
 			itemShow(selrecord);
 		};
@@ -279,13 +291,18 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 						contentType: "application/json",
 						data: JSON.stringify(e),
 						success: function (data, textStatus, xhr) {
+							//find item index to see if it is first item
+							var index=ko.utils.arrayIndexOf(self.citems(),e);
+							console.log("index:"+index);
+
 							self.citems.remove(e);
 							if ($("#" + e)) {
-								$("#" + e).remove();
+								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
+
 							self.itemCount(self.itemCount() - 1);
 							$.smkAlert({text:'Item removed from the collection', type:'success'});
-							$container.masonry( 'layout');
+
 						},
 						error: function (xhr, textStatus, errorThrown) {
 							$.smkAlert({text:'An error has occured', type:'danger', time: 10});
@@ -299,7 +316,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 
 		self.likeRecord = function (id) {
 			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.externalId() === id;
+				return record.externalId === id;
 			});
 
 			app.likeItem(rec, function (status) {
@@ -311,21 +328,27 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			});
 		};
 
-		function getItem(record) {
-			var figure = '<figure class="masonryitem" id="' + record.recordId() + '">';
+		function getItem(record,index) {
+			var figure = '<figure class="masonryitem" id="' + record.recordId + '">';
 			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star active" id="' + record.externalId + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			} else {
-				figure += '<span class="star" id="' + record.externalId() + '"><span class="glyphicon glyphicon-heart" data-bind="event: { click: function() { likeRecord(\'' + record.externalId() + '\'); } }"></span></span>';
+				figure += '<span class="star" id="' + record.externalId + '">';
+				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId + '\'); } }">';
+				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
+				figure += '</span></span>';
 			}
 
-			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId() + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
+			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.cachedThumbnail() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
 			+ '<div class="sourceCredits">';
 
 			if (self.access() == "WRITE" || self.access() == "OWN") {
-				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId() + '\')}}"></span>';
+				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId + '\','+index+')}}"></span>';
 			}
-			figure+='<a href="' + record.view_url() + '" target="_new">' + record.sourceCredits() + '</a></figure>';
+			figure+='<a href="' + record.view_url + '" target="_new">' + record.sourceCredits() + '</a></figure>';
 			return figure;
 		}
 
@@ -336,6 +359,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			}
 			return $(items);
 		}
+
+		self.uploadItem = function() {
+			app.showPopup('image-upload', { collectionId: self.id() });
+		};
 
 		self.revealItems = function (data) {
 			var items = [];

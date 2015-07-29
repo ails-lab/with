@@ -73,6 +73,9 @@ public class ElasticUpdater {
 	 * Re-indexes the record type, deletes entry from collection_specific field
 	 * of merged_record type and indexes a new merged_record type
 	 */
+	/**
+	 * Not fully functional
+	 */
 	public void updateRecordTags() {
 		try {
 			 Elastic.getTransportClient().prepareUpdate(
@@ -163,22 +166,13 @@ public class ElasticUpdater {
 
 			while( collectionIt.hasNext() ) {
 				Entry<String, JsonNode> entry = collectionIt.next();
-				/*if( entry.getKey().equals("rights") ) {
-					ArrayNode array = Json.newObject().arrayNode();
-					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
-						ObjectNode right = Json.newObject();
-						right.put("user", e.getKey().toString());
-						right.put("access", e.getValue().toString());
-						array.add(right);
-					}
-   					doc.rawField(entry.getKey(), array.toString().getBytes());
-				} else */
-				if( !entry.getKey().equals("firstEntries") &&
-					!entry.getKey().equals("rights") &&
-					!entry.getKey().equals("dbId")) {
-
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
+				if( entry.getKey().equals("itemCount") ) {
+					doc.field(entry.getKey(), entry.getValue().asInt());
+				} else if( !entry.getKey().equals("firstEntries") &&
+							!entry.getKey().equals("rights") &&
+							!entry.getKey().equals("dbId")) {
+					doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
 		} catch(IOException io) {
@@ -197,11 +191,10 @@ public class ElasticUpdater {
 						Elastic.index,
 						Elastic.type_collection,
 						collection.getDbId().toString())
-				.setScript("ctx._source.itemCount++;"
-						 + "ctx._source.itemCount_all++", ScriptType.INLINE)
+				.setScript("ctx._source.itemCount++;", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {
-			log.error("Cannot update collection rights!", e);
+			log.error("Cannot increase itemCount!", e);
 			}
 	}
 
@@ -214,11 +207,10 @@ public class ElasticUpdater {
 						Elastic.index,
 						Elastic.type_collection,
 						collection.getDbId().toString())
-				.setScript("ctx._source.itemCount--;"
-						 + "ctx._source.itemCount_all--", ScriptType.INLINE)
+				.setScript("ctx._source.itemCount--;", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {
-			log.error("Cannot update collection rights!", e);
+			log.error("Cannot decrement itemCount!", e);
 			}
 	}
 
@@ -295,11 +287,110 @@ public class ElasticUpdater {
 							records.get(0).getDbId().toString())
 						.setDoc(doc)
 						.get();
-					Elastic.getTransportClient().prepareUpdate(
+					if(!collection.getIsPublic() &&
+						DB.getCollectionRecordDAO()
+						.checkMergedRecordVisibility(records.get(0).getExternalId(), records.get(0).getDbId()))
+						return;
+
+						Elastic.getTransportClient().prepareUpdate(
 							Elastic.index,
 							Elastic.type_general,
 							records.get(0).getExternalId())
 						.setDoc(doc)
+						.get();
+		} else {
+				for(int i = 0; i<records.size(); i++) {
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							Elastic.type_within,
+							records.get(i).getDbId().toString())
+						.doc(doc));
+					if(!collection.getIsPublic() &&
+						DB.getCollectionRecordDAO()
+						.checkMergedRecordVisibility(records.get(i).getExternalId(), records.get(i).getDbId()))
+						continue;
+
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							Elastic.type_general,
+							records.get(i).getExternalId())
+						.doc(doc));
+				}
+				Elastic.getBulkProcessor().flush();
+		}
+	}
+
+
+	/*
+	 * Increment totalLikes on collection type
+	 */
+	/**
+	 * Not fully functional
+	 */
+	public void incLikes() {
+		incLikesToRecords();
+	}
+
+	/*
+	 * Decrement totalLikes on collection type
+	 */
+	public void decLikes() {
+		try {
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type_general,
+						record.getExternalId())
+				.setScript("ctx._source.totalLikes--;", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection likes!", e);
+			}
+		decLikesToRecords();
+	}
+
+	/*
+	 * Increment likes on records with same externalId
+	 */
+	public void incLikesToRecords() {
+
+		List<CollectionRecord> records = DB.getCollectionRecordDAO()
+				.getByUniqueId(record.getExternalId());
+
+		if( records.size() < 2 ) {
+			log.debug("No records within the collection to update!");
+		} else {
+				for(int i = 0; i<records.size(); i++) {
+					if(!records.get(i).getDbId().equals(record.getDbId())) {
+						Elastic.getBulkProcessor().add(new UpdateRequest(
+								Elastic.index,
+								Elastic.type_within,
+								records.get(i).getDbId().toString())
+							.script("ctx._source.totalLikes++;"
+									+ "ctx._source.totalLikes_all++;"));
+					}
+				}
+				Elastic.getBulkProcessor().flush();
+		}
+	}
+
+
+	/*
+	 * Decrement likes on records with same externalId
+	 */
+	public void decLikesToRecords() {
+
+		List<CollectionRecord> records = DB.getCollectionRecordDAO()
+				.getByUniqueId(record.getExternalId());
+
+		if( records.size() == 0 ) {
+			log.debug("No records within the collection to update!");
+		} else if( records.size() == 1 ) {
+					Elastic.getTransportClient().prepareUpdate(
+							Elastic.index,
+							Elastic.type_within,
+							records.get(0).getDbId().toString())
+						.setScript("ctx._source.totalLikes--;"
+								+ "ctx._source.totalLikes_all--;", ScriptType.INLINE)
 						.get();
 		} else {
 
@@ -308,50 +399,11 @@ public class ElasticUpdater {
 							Elastic.index,
 							Elastic.type_within,
 							records.get(i).getDbId().toString())
-						.doc(doc));
-					Elastic.getBulkProcessor().add(new UpdateRequest(
-							Elastic.index,
-							Elastic.type_general,
-							records.get(i).getExternalId())
-						.doc(doc));
+						.script("ctx._source.totalLikes--;"
+								+ "ctx._source.totalLikes_all--;"));
 				}
-				Elastic.getBulkProcessor().close();
+				Elastic.getBulkProcessor().flush();
 		}
-	}
-
-
-	/*
-	 * Increment itemCount on collection type
-	 */
-	public void incLikes() {
-		try {
-			Elastic.getTransportClient().prepareUpdate(
-						Elastic.index,
-						Elastic.type_collection,
-						collection.getDbId().toString())
-				.setScript("ctx._source.likes++;"
-						 + "ctx._source.likes_all++", ScriptType.INLINE)
-				.execute().actionGet();
-			} catch (Exception e) {
-			log.error("Cannot update collection likes!", e);
-			}
-	}
-
-	/*
-	 * Decrement itemCount on collection type
-	 */
-	public void decLikes() {
-		try {
-			Elastic.getTransportClient().prepareUpdate(
-						Elastic.index,
-						Elastic.type_collection,
-						collection.getDbId().toString())
-				.setScript("ctx._source.likes--;"
-						 + "ctx._source.likes_all--", ScriptType.INLINE)
-				.execute().actionGet();
-			} catch (Exception e) {
-			log.error("Cannot update collection likes!", e);
-			}
 	}
 
 

@@ -160,3 +160,22 @@ display: none;
     color: blue;
     cursor: pointer;
 }
+
+.userΙmage {
+	position: relative;
+}
+
+.rightsIcon {
+	position: absolute;
+	top: 25px;
+    left: 35px; 
+    padding: 0px;
+    z-index:99;
+}
+
+.userPhoto {
+	max-width: 70px;
+	max-height: 70px;
+    margin-bottom: 3px;
+    z-index: 1;
+}

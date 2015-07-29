@@ -27,7 +27,10 @@
     "smoke": "latest",
     "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip",
     "bootstrap-select": "1.6.5",
-    "jquery.lazyload": "~1.9.5"
+    "jquery.lazyload": "~1.9.5",
+    "horizontal-chart":"https://github.com/eriku/horizontal-chart/archive/master.zip",
+    "isotope": "latest",
+    "modernizr":"latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"
