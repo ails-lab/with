@@ -29,9 +29,9 @@ public class RightsValues {
 	//You can use it with pemission
 	
 
-	public static final String Creative_Modify = "Modify";
+	public static final String Modify = "Modify";
 		
-	public static final String Creative_Commercial = "Comercial";
+	public static final String Commercial = "Comercial";
 	
 	
 	public static final String Creative_Commercial_Modify = "use for commercial purposes modify, adapt, or build upon";
