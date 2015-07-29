@@ -29,11 +29,8 @@ import model.User;
 
 import org.junit.Test;
 
-import play.libs.Json;
 import play.mvc.Result;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;

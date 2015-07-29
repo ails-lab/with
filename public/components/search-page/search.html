@@ -26,7 +26,7 @@
 				</h2>
 				<!-- ko foreach: items -->
 				<a class="dummy-media-object" data-bind="event: { click: $parents[1].recordSelect }">
-					<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:thumb, alt: title }"/>
+					<img data-bind="event: { error: $parents[1].defaultSource }, attr: { src:cachedThumbnail(), alt: title }"/>
 					<span><!-- ko text: title --><!-- /ko --></span>
 				</a>
 				<!-- /ko -->

@@ -148,6 +148,8 @@ public class CollectionController extends Controller {
 			// delete collection from index
 			ElasticEraser eraser = new ElasticEraser(c);
 			eraser.deleteCollection();
+			eraser.deleteAllCollectionRecords();
+			eraser.deleteAllEntriesFromMerged();
 			result.put("message",
 					"Collection deleted succesfully from database");
 			return ok(result);
@@ -629,7 +631,16 @@ public class CollectionController extends Controller {
 					updater.incLikes();
 				}
 			} else {
-				addContentToRecord(record.getDbId(), source, sourceId);
+				List<CollectionRecord> storedRecords;
+				if((json.get("externalId") != null) &&
+					((storedRecords =  DB.getCollectionRecordDAO().getByUniqueId(json.get("externalId").asText())) != null) ) {
+					for(Entry<String , String> e: storedRecords.get(storedRecords.size()-1).getContent().entrySet()) {
+						record.getContent().put(e.getKey(), e.getValue());
+					}
+					DB.getCollectionRecordDAO().makePermanent(record);
+				} else {
+					addContentToRecord(record.getDbId(), source, sourceId);
+				}
 				//increment likes if collection title is _favourites
 				if(c.getTitle().equals("_favorites")) {
 					ElasticUpdater updater = new ElasticUpdater(null, record);

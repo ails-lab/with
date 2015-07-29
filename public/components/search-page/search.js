@@ -139,11 +139,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			    	return "digitalnz.org";
 			    case "EFashion":
 			    	return "europeanafashion.eu";
-			    case "YouTube": {
+			    case "YouTube": 
 			    	return "youtube.com";
-			    }
 			    case "Mint":
 			    	return "mint";
+			    case "Rijksmuseum":
+					return "www.rijksmuseum.nl";
 			    default: return "";
 			 }
 			});
@@ -198,7 +199,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([ "Europeana", "EFashion","DPLA","YouTube","DigitalNZ","NLA","Mint", "Rijksmuseum"]);
+		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Mint", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray([]);
 
 		self.results = ko.observableArray([]);

@@ -61,6 +61,11 @@
       <span>Mint</span>
      
      </li>
+      <li>
+      <input type="checkbox" value="Rijksmuseum" data-bind="checked: $parent.sources, click: listClick"/></span>
+      <span>Rijksmuseum</span>
+     
+     </li>
     </ul>
   </div>
   
@@ -88,7 +93,7 @@
 		    <li data-bind="attr:{'title': $data},click:function(){$parents[1].listSelect($parents[0].filterID,$data);}">
 		    <span class="label" data-bind="text:$parents[1].yaxislabels()[$index()]"></span>
 		    
-		    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()]}"></span><span class="number" data-bind="text: $parents[1].numvalues()[$index()]"></span></li>
+		    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()]}"></span></li>
 		  <!-- /ko -->  
 		</ul>
      <!-- /ko -->

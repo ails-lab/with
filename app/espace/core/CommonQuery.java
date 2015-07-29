@@ -33,7 +33,7 @@ public class CommonQuery implements Cloneable{
 	public boolean uploadedByUser = false;
 
 	public List<CommonFilter> filters;
-	
+
 	public CommonQuery(String generalQueryBody) {
 		super();
 		this.searchTerm = generalQueryBody;
@@ -52,29 +52,29 @@ public class CommonQuery implements Cloneable{
 	}
 
 	public List<CommonQuery> splitFilters(){
-		if (filters==null || filters.size()==0)
+		if ((filters==null) || (filters.size()==0))
 			return Arrays.asList(this);
 		else
 			return splitFilters(0,new ArrayList<>(), new ArrayList<CommonQuery>());
 	}
 
 
-	private List<CommonQuery> splitFilters(int i, 
-			ArrayList<CommonFilter> arrayList, 
+	private List<CommonQuery> splitFilters(int i,
+			ArrayList<CommonFilter> arrayList,
 			ArrayList<CommonQuery> result) {
 		if (i==filters.size()){
 			CommonQuery clone;
 			try {
-				
+
 				clone = (CommonQuery) clone();
 				clone.filters = (List<CommonFilter>) arrayList.clone();
 				result.add(clone);
-				
+
 			} catch (CloneNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
 		if (i<filters.size()){
 			for (CommonFilter f : filters.get(i).splitValues()) {
@@ -85,6 +85,7 @@ public class CommonQuery implements Cloneable{
 		}
 		return result;
 	}
+
 
 	@Override
 	public String toString() {
@@ -109,7 +110,7 @@ public class CommonQuery implements Cloneable{
 	public String getUser() {
 		return user;
 	}
-	
+
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();

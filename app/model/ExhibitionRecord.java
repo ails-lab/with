@@ -22,12 +22,6 @@ public class ExhibitionRecord {
 	private String audioUrl;
 	private String videoUrl;
 
-	public ExhibitionRecord(String annotation, String audioUrl, String videoUrl) {
-		this.annotation = annotation;
-		this.audioUrl = audioUrl;
-		this.videoUrl = videoUrl;
-	}
-
 	public String getAnnotation() {
 		return annotation;
 	}

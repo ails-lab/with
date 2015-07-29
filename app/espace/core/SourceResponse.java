@@ -39,13 +39,16 @@ public class SourceResponse {
 	public SourceResponse() {
 	}
 
-	public SourceResponse(SearchResponse resp, String source, int offset) {
+	public SourceResponse(SearchResponse resp, int offset) {
 		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
 		this.totalCount = (int) resp.getHits().getTotalHits();
-		this.source = source;
 		for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(hitToRecord(hit));
 		}
+		if(elasticrecords.size() > 0)
+			this.source = elasticrecords.get(0).getSource();
+		else
+			this.source = "Mint";
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
 		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
