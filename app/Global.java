@@ -26,8 +26,8 @@ import actors.ApiKeyManager;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
-//import controllers.AccessFilter;
-//import controllers.SessionFilter;
+import controllers.AccessFilter;
+import controllers.SessionFilter;
 import com.mongodb.WriteConcern;
 
 import db.DB;
