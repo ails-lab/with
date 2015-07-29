@@ -36,7 +36,6 @@ import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -131,8 +130,9 @@ public class RecordController extends Controller {
 				result.put("message",
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 			}
-
-			collection.getFirstEntries().add(newRecord);
+			System.out.println(newRecord.getPosition());
+			collection.getFirstEntries()
+					.add(newRecord.getPosition(), newRecord);
 			if ((DB.getCollectionRecordDAO().makePermanent(newRecord) != null)
 					&& (DB.getCollectionDAO().makePermanent(collection) != null)) {
 
