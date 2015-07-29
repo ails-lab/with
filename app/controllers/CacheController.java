@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.function.BiFunction;
@@ -75,6 +76,16 @@ public class CacheController extends Controller {
 		ParallelAPICall.createPromise(methodQuery, externalUrl, thumbnail);
 	}
 
+	private static byte[] getImageBytes(BufferedImage image) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(image, "jpg", baos);
+		baos.flush();
+		byte[] bytes = baos.toByteArray();
+		baos.close();
+		return bytes;
+
+	}
+
 	private static void cacheImage(String externalUrl) {
 		Function<String, Boolean> methodQuery = (String imageUrl) -> {
 			URL url;
@@ -82,8 +93,10 @@ public class CacheController extends Controller {
 			URLConnection connection = null;
 			try {
 				url = new URL(externalUrl);
-				connection = (URLConnection) url.openConnection();
 				BufferedImage image = ImageIO.read(url);
+				imageBytes = getImageBytes(image);
+				connection = (URLConnection) url.openConnection();
+				connection.setReadTimeout(4000);
 				String mimeType = connection.getHeaderField("content-type");
 				if (mimeType.contains("base64")) {
 					imageBytes = Base64.decodeBase64(imageBytes);
@@ -92,7 +105,6 @@ public class CacheController extends Controller {
 				if (mimeType == null) {
 					mimeType = connection.getContentType();
 				}
-				imageBytes = IOUtils.toByteArray(connection.getInputStream());
 				int height = image.getHeight();
 				int width = image.getWidth();
 				Media media = new Media();
@@ -123,11 +135,7 @@ public class CacheController extends Controller {
 				Graphics2D bGr = thumb.createGraphics();
 				bGr.drawImage(ithumb, 0, 0, null);
 				bGr.dispose();
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ImageIO.write(thumb, "jpg", baos);
-				baos.flush();
-				byte[] thumbByte = baos.toByteArray();
-				baos.close();
+				byte[] thumbByte = getImageBytes(thumb);
 				media.setDbId(null);
 				media.setData(thumbByte);
 				media.setWidth(thumb.getWidth());

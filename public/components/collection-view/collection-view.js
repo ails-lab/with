@@ -116,12 +116,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		};
 
 		self.cachedThumbnail = ko.pureComputed(function() {
+			
+		   if(self.thumb){
 			if (self.thumb.indexOf('/') === 0) {
 				return self.thumb;
 			} else {
 				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
 				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-			}
+			}}
+		   else{
+			   return "images/no_image.jpg";
+		   }
 		});
 		self.sourceCredits = ko.pureComputed(function() {
 			 switch(self.source) {
@@ -231,6 +236,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					"success": function (data) {
 						console.log(data.itemCount);
 						self.revealItems(data.records);
+						self.loading(false);
 					},
 					"error": function (result) {
 						self.loading(false);
@@ -253,6 +259,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			}
 
 			$items.imagesLoaded().progress(function (imgLoad, image) {
+				self.loading(true);
 				counter++;
 				var $item = $(image.img).parents(".masonryitem");
 				ko.applyBindings(self, $item[0]);
@@ -335,7 +342,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				figure += '</span></span>';
 			}
 
-			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.thumb + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
+			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.cachedThumbnail() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
 			+ '<div class="sourceCredits">';
 
 			if (self.access() == "WRITE" || self.access() == "OWN") {
