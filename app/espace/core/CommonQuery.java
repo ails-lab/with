@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommonQuery implements Cloneable{
+import espace.core.sources.DigitalNZSpaceSource;
+
+public class CommonQuery implements Cloneable {
 
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
@@ -33,7 +35,7 @@ public class CommonQuery implements Cloneable{
 	public boolean uploadedByUser = false;
 
 	public List<CommonFilter> filters;
-	
+
 	public CommonQuery(String generalQueryBody) {
 		super();
 		this.searchTerm = generalQueryBody;
@@ -51,35 +53,33 @@ public class CommonQuery implements Cloneable{
 		this.searchTerm = query;
 	}
 
-	public List<CommonQuery> splitFilters(){
-		if (filters==null || filters.size()==0)
+	public List<CommonQuery> splitFilters(ISpaceSource src) {
+		if (filters == null || filters.size() == 0)
 			return Arrays.asList(this);
 		else
-			return splitFilters(0,new ArrayList<>(), new ArrayList<CommonQuery>());
+			return splitFilters(0, new ArrayList<>(), new ArrayList<CommonQuery>(), src);
 	}
 
-
-	private List<CommonQuery> splitFilters(int i, 
-			ArrayList<CommonFilter> arrayList, 
-			ArrayList<CommonQuery> result) {
-		if (i==filters.size()){
+	private List<CommonQuery> splitFilters(int i, ArrayList<CommonFilter> arrayList, ArrayList<CommonQuery> result,
+			ISpaceSource src) {
+		if (i == filters.size()) {
 			CommonQuery clone;
 			try {
-				
+
 				clone = (CommonQuery) clone();
 				clone.filters = (List<CommonFilter>) arrayList.clone();
 				result.add(clone);
-				
+
 			} catch (CloneNotSupportedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
+
 		}
-		if (i<filters.size()){
-			for (CommonFilter f : filters.get(i).splitValues()) {
+		if (i < filters.size()) {
+			for (CommonFilter f : filters.get(i).splitValues(src)) {
 				arrayList.add(f);
-				splitFilters(i+1,arrayList,result);
+				splitFilters(i + 1, arrayList, result, src);
 				arrayList.remove(f);
 			}
 		}
@@ -88,9 +88,8 @@ public class CommonQuery implements Cloneable{
 
 	@Override
 	public String toString() {
-		return "CommonQuery [searchTerm=" + searchTerm + ", page=" + page
-				+ ", pageSize=" + pageSize + ", source=" + source
-				+ ", filters=" + filters + "]";
+		return "CommonQuery [searchTerm=" + searchTerm + ", page=" + page + ", pageSize=" + pageSize + ", source="
+				+ source + ", filters=" + filters + "]";
 	}
 
 	public void validate() {
@@ -109,7 +108,7 @@ public class CommonQuery implements Cloneable{
 	public String getUser() {
 		return user;
 	}
-	
+
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();

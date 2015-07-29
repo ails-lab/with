@@ -24,29 +24,35 @@ public class CommonFilter implements Cloneable {
 
 	public String filterID;
 	public List<String> values;
+
 	@Override
 	public String toString() {
 		return "CommonFilter [filterID=" + filterID + ", values=" + values + "]";
 	}
-	public List<CommonFilter> splitValues() {
+
+	public List<CommonFilter> splitValues(ISpaceSource src) {
 		ArrayList<CommonFilter> res = new ArrayList<>();
+
 		for (String v : values) {
-			try {
-				CommonFilter c = (CommonFilter) super.clone();
-				c.values = Arrays.asList(v);
-				res.add(c);
-			} catch (CloneNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			List<String> vvalues = src.translateToSpecific(filterID, v);
+			for (String vv : vvalues) {
+
+				try {
+					CommonFilter c = (CommonFilter) super.clone();
+					c.values = Arrays.asList(vv);
+					res.add(c);
+				} catch (CloneNotSupportedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return res;
 	}
-	
+
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
 
-	
 }

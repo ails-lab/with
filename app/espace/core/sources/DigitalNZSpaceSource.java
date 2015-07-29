@@ -57,86 +57,81 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		super();
 		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("and[category][]"));
 		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("and[creator][]"));
-		addDefaultWriter(CommonFilters.YEAR_ID,  qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS_ID,  fwriter("and[rights][]"));
-		
+		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
+		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("and[rights][]"));
+
 		// TODO: rights_url shows the license in the search
 
-		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
-		
-//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial,
-//				"");
+
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial,
+		// "");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, 
-//				".*creative(?!.*nd).*");
-		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, 
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify,
+		// ".*creative(?!.*nd).*");
+
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial,
 				"http://creativecommons.org/licenses/by-nc/3.0/nz/",
 				"http://creativecommons.org/licenses/by-nc-sa/3.0/",
 				"This work is licensed under a Creative Commons Attribution-Noncommercial 3.0 New Zealand License");
-       
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, 
-				"No known copyright restrictions\nCopyright Expired",
-				"No known copyright restrictions");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, 
-				"All rights reserved");
-//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, 
-//				".*rr-f.*");
-//        
-//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, 
-//				".*unknown.*");
-//        
-//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, 
-//				".*creative.*nd.*");
-//		
-//		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, 
-//				".*(creative).*");
 
-	
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "No known copyright restrictions\nCopyright Expired",
+				"No known copyright restrictions");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, "All rights reserved");
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA,
+		// ".*rr-f.*");
+		//
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA,
+		// ".*unknown.*");
+		//
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify,
+		// ".*creative.*nd.*");
+		//
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative,
+		// ".*(creative).*");
+
 	}
-	
-private Function<List<String>, Pair<String>> fwriter(String parameter) {
-		
-		Function<String, String> function = (String s)->{return Utils.spacesFormatQuery(s, "%20");};
+
+	private Function<List<String>, Pair<String>> fwriter(String parameter) {
+
+		Function<String, String> function = (String s) -> {
+			return Utils.spacesFormatQuery(s, "%20");
+		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter,  
-						Utils.getORList(ListUtils.transform(t, 
-								function),false));
+				return new Pair<String>(parameter, Utils.getORList(ListUtils.transform(t, function), false));
 			}
 		};
 	}
 
-private Function<List<String>, Pair<String>> qfwriterYEAR() {
-	return new Function<List<String>, Pair<String>>() {
-		@Override
-		public Pair<String> apply(List<String> t) {
-			String val = t.get(0);
-			if (t.size()>1){
-				val = t.get(1);
+	private Function<List<String>, Pair<String>> qfwriterYEAR() {
+		return new Function<List<String>, Pair<String>>() {
+			@Override
+			public Pair<String> apply(List<String> t) {
+				String val = t.get(0);
+				if (t.size() > 1) {
+					val = t.get(1);
+				}
+				return new Pair<String>("i[year][]", "[" + t.get(0) + " TO " + val + "]");
 			}
-			return new Pair<String>("i[year][]", "["+t.get(0)+" TO "+val+"]");
-		}
-	};
-}
-
+		};
+	}
 
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("http://api.digitalnz.org/v3/records.json");
 		builder.addSearchParam("api_key", Key);
 		builder.addQuery("text", q.searchTerm);
-		builder.addSearchParam("page",q.page);
-		builder.addSearchParam("per_page",q.pageSize);
-		builder.addSearchParam("facets","year,creator,category,rights");
+		builder.addSearchParam("page", q.page);
+		builder.addSearchParam("per_page", q.pageSize);
+		builder.addSearchParam("facets", "year,creator,category,rights");
 		return addfilters(q, builder).getHttp();
 	}
-	
+
 	public List<CommonQuery> splitFilters(CommonQuery q) {
-		return q.splitFilters();
+		return q.splitFilters(this);
 	}
 
 	public String getSourceName() {
@@ -163,110 +158,102 @@ private Function<List<String>, Pair<String>> qfwriterYEAR() {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 
-		if (checkFilters(q)){
-		try {
-			response = HttpConnector.getURLContent(httpQuery);
+		if (checkFilters(q)) {
+			try {
+				response = HttpConnector.getURLContent(httpQuery);
 
-			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
-			JsonNode o = response.path("search");
-			// System.out.print(o.path("name").asText() + " ");
+				JsonNode o = response.path("search");
+				// System.out.print(o.path("name").asText() + " ");
 
-			res.totalCount = Utils.readIntAttr(o, "result_count", true);
-			res.startIndex = (Utils.readIntAttr(o, "page", true) - 1)
-					* res.count;
+				res.totalCount = Utils.readIntAttr(o, "result_count", true);
+				res.startIndex = (Utils.readIntAttr(o, "page", true) - 1) * res.count;
 
-			JsonNode aa = o.path("results");
+				JsonNode aa = o.path("results");
 
-			for (JsonNode item : aa) {
-				// System.out.println(item.toString());
+				for (JsonNode item : aa) {
+					// System.out.println(item.toString());
 
-				List<String> v = Utils.readArrayAttr(item, "category", false);
-				// System.out.println("add " + v);
-				for (String string : v) {
-					countValue(type, string);
+					List<String> v = Utils.readArrayAttr(item, "category", false);
+					// System.out.println("add " + v);
+					for (String string : v) {
+						countValue(type, string);
+					}
+					ItemsResponse it = new ItemsResponse();
+					it.id = Utils.readAttr(item, "id", true);
+					it.title = Utils.readLangAttr(item, "title", false);
+					it.creator = Utils.readLangAttr(item, "creator", false);
+					it.description = Utils.readLangAttr(item, "description", false);
+
+					it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
+					// TODO not present
+					it.fullresolution = Utils.readArrayAttr(item, "large_thumbnail_url", false);
+					// TODO read date and take year?
+					it.year = null; // Utils.readArrayAttr(item, "issued",
+									// true);
+					// TODO use author?
+					it.dataProvider = null;// Utils.readLangAttr(item,
+											// "contributor", false);
+					it.url = new MyURL();
+					it.url.original = Utils.readArrayAttr(item, "landing_url", false);
+					it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
+					it.rights = Utils.readLangAttr(item, "rights_url", false);
+					it.externalId = it.fullresolution.get(0);
+					if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
+						it.externalId = it.url.original.get(0);
+					if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
+						it.externalId = getSourceName() + "_" + it.id;
+					it.externalId = DigestUtils.md5Hex(it.externalId);
+					a.add(it);
+
 				}
-				ItemsResponse it = new ItemsResponse();
-				it.id = Utils.readAttr(item, "id", true);
-				it.title = Utils.readLangAttr(item, "title", false);
-				it.creator = Utils.readLangAttr(item, "creator", false);
-				it.description = Utils.readLangAttr(item, "description", false);
+				res.count = a.size();
 
-				it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
-				// TODO not present
-				it.fullresolution = Utils.readArrayAttr(item,
-						"large_thumbnail_url", false);
-				// TODO read date and take year?
-				it.year = null; // Utils.readArrayAttr(item, "issued", true);
-				// TODO use author?
-				it.dataProvider = null;// Utils.readLangAttr(item,
-										// "contributor", false);
-				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "landing_url",
-						false);
-				it.url.fromSourceAPI = "http://www.digitalnz.org/records/"
-						+ it.id;
-				it.rights = Utils.readLangAttr(item, "rights_url", false);
-				it.externalId = it.fullresolution.get(0);
-				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
-					it.externalId = it.url.original.get(0);
-				if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
-					it.externalId=getSourceName() + "_" + it.id;
-				it.externalId = DigestUtils.md5Hex(it.externalId);
-				a.add(it);
+				res.items = a;
 
+				readList(o.path("facets").path("category"), type);
+				readList(o.path("facets").path("rights"), rights);
+				readList(o.path("facets").path("year"), year);
+
+				readList(o.path("facets").path("creator"), creator);
+
+				res.filtersLogic = new ArrayList<>();
+				res.filtersLogic.add(type);
+				res.filtersLogic.add(creator);
+				res.filtersLogic.add(rights);
+				res.filtersLogic.add(year);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			res.count = a.size();
-
-			res.items = a;
-			
-
-			readList(o.path("facets").path("category"), type);
-			readList(o.path("facets").path("rights"), rights);
-			readList(o.path("facets").path("year"), year);
-
-			readList(o.path("facets").path("creator"), creator);
-
-			res.filtersLogic = new ArrayList<>();
-			res.filtersLogic.add(type);
-			res.filtersLogic.add(creator);
-			res.filtersLogic.add(rights);
-			res.filtersLogic.add(year);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}}
+		}
 
 		return res;
 	}
 
 	private void readList(JsonNode json, CommonFilterLogic filter) {
-//		 System.out.println("************************\n"+json.toString());
-		 for (Iterator<Entry<String, JsonNode>> iterator = json.fields(); iterator.hasNext();) {
+		// System.out.println("************************\n"+json.toString());
+		for (Iterator<Entry<String, JsonNode>> iterator = json.fields(); iterator.hasNext();) {
 			Entry<String, JsonNode> v = iterator.next();
 			String label = v.getKey();
 			int count = v.getValue().asInt();
 			countValue(filter, label, v.getValue().asInt());
-//			System.out.println(label+"   "+count);
+			// System.out.println(label+" "+count);
 		}
 	}
-	
-	
+
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
 			response = HttpConnector
-					.getURLContent("http://api.digitalnz.org/v3/records/"
-							+ recordId + ".json?api_key=" + Key);
+					.getURLContent("http://api.digitalnz.org/v3/records/" + recordId + ".json?api_key=" + Key);
 			JsonNode record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record
-					.toString()));
+			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record.toString()));
 			Document xmlResponse = HttpConnector
-					.getURLContentAsXML("http://api.digitalnz.org/v3/records/"
-							+ recordId + ".xml?api_key=" + Key);
-			jsonMetadata.add(new RecordJSONMetadata(Format.XML_DNZ, Serializer
-					.serializeXML(xmlResponse)));
+					.getURLContentAsXML("http://api.digitalnz.org/v3/records/" + recordId + ".xml?api_key=" + Key);
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML_DNZ, Serializer.serializeXML(xmlResponse)));
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;
