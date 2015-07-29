@@ -139,11 +139,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			    	return "digitalnz.org";
 			    case "EFashion":
 			    	return "europeanafashion.eu";
-			    case "YouTube": {
+			    case "YouTube": 
 			    	return "youtube.com";
-			    }
 			    case "Mint":
 			    	return "mint";
+			    case "Rijksmuseum":
+					return "www.rijksmuseum.nl";
 			    default: return "";
 			 }
 			});

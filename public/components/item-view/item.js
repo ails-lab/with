@@ -93,7 +93,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			case "Mint":
 				return "images/logos/mint_logo.png";
 			case "Rijksmuseum":
-				return "images/logos/Rijksmuseum.png"
+				return "images/logos/Rijksmuseum.png";
 			default:
 				return "";
 			}
