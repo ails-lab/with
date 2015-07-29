@@ -702,7 +702,7 @@ public class UserManager extends Controller {
 
 	}
 
-	public static Result apikey(String email) {
+	public static Result apikey() {
 
 		// need to limit calls like this and reset password to 3 times per day
 		// maximum!
@@ -717,36 +717,8 @@ public class UserManager extends Controller {
 
 		User u;
 
-		boolean wasLoggedIn = false;
 		
-		if (userId == null) {
-			if (StringUtils.isEmpty(email)) {
-				error.put("email",
-						"Email is empty. Either log in or provide an email.");
-				result.put("error", error);
-				return badRequest(result);
-			} else {
-
-				u = DB.getUserDAO().getByEmail(email);
-
-				create.email = email;
-
-				if (u == null) {
-					result.put("email",
-							"Email not linked to account, an email has been sent.");
-
-				} else {
-
-					result.put("email",
-							"Registered user's email found, an email has been sent.");
-					userId = u.getDbId().toHexString();
-					create.proxyUserId = new ObjectId(userId);
-				}				
-			}
-			
-		} else {
-			
-			wasLoggedIn = true;
+		if (userId != null) {
 			
 			result.put("email", "An email has been sent to the email address you have registered with.");
 			
@@ -756,32 +728,34 @@ public class UserManager extends Controller {
 			
 			create.email = u.getEmail();
 
+			
+		} else {
+			
+			error.put("error", "You need to log in before an API key can be issued.");
+			
+			result.put("error", error);
+			
+			return badRequest(result);
+
 		}
 		
 		
 		
-		//Discuss our policy when this happens. ( ask what email to provide! )
+		//Discuss our policy when this happens. ( Resend? How many times? )
 		
 		ApiKey withKey = DB.getApiKeyDAO().getByEmail(create.email);
 				
 		if(withKey!=null){
+			
 			result.remove("email");
+		
+			error.put("error", "Your user account already has already been issued an API key. "
+					+ "To request a new one, send an email to: withdev@image.ece.ntua.gr.");
+							
+			//result.put("Key", withKey.getKeyString());
 			
+			result.put("error", error);
 			
-			if(wasLoggedIn){
-				
-				result.put("APIKey", "Your user account already has an API key. To request a new one, send an email to: . "
-						+ "If you want an API key for a different email address, provide it and press \"Send\".");
-				
-				
-			} else {
-				result.put("APIKey", "The email you provided already has an API key. To request a new one, send an email to: ");
-			}
-			
-			result.put("Key", withKey.getKeyString());
-			
-			System.out.println(result);
-
 			return badRequest(result);
 		} 
 		
@@ -801,6 +775,7 @@ public class UserManager extends Controller {
     	Future<Object> future = Patterns.ask(testActor, create, timeout);
     	
     	String s = "";
+    	
 		try {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
@@ -809,14 +784,14 @@ public class UserManager extends Controller {
 		}
 
 		if (s == "") {
-			error.put("APIKey", "Could not create API key");
+			error.put("error", "Could not create API key.");
 			result.put("error", error);
 			result.remove("email");
 			return internalServerError(result);
 		}
 
-		result.put("APIKey", "Succesfully created a new API key: " + s);
-
+		//result.put("APIKey", "Succesfully created a new API key: " + s);
+		
 		String newLine = System.getProperty("line.separator");
 
 		// String url = APPLICATION_URL;
@@ -847,13 +822,13 @@ public class UserManager extends Controller {
 				+ newLine + newLine + url + newLine + newLine
 				+ "Sincerely yours," + newLine + "The WITH team.";
 
-		try {
-			sendEmail(u, email, message, "WITH API key");
-		} catch (EmailException e) {
-			error.put("email", "Could not send email - Email server error");
-			result.put("error", error);
-			return badRequest(result); // maybe change type?
-		}
+		//try {
+		//	sendEmail(u, create.email, message, "WITH API key");
+		//} catch (EmailException e) {
+		//	error.put("error", "Could not send email - Email server error");
+		//	result.put("error", error);
+		//	return badRequest(result); // maybe change type?
+		//}
 
 		return ok(result);
 	}

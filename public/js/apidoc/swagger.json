@@ -12,10 +12,12 @@
                     "Search"
                 ],
                 "summary": "General search in external resources and the WITH database.",
+                "description": "Body contains search parameters, response is a JSON array of records that match the search term. Boolean search supports use of AND, OR and NOT operators. Terms seperated without an operator (using a space) are treated as an AND. Use of quotes will perform exact term or phrase searches. For example, ```\"Olympian Zeus\"``` will search for the exact phrase, whereas ```Olympian Zeus``` will equate to ```Olympian AND Zeus```. For more search options use advanced search (coming soon).",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
+                        "required": true,
                         "description": "Search parameters.",
                         "schema": {
                             "type": "object",
@@ -40,7 +42,20 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Record"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Record"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Bad request",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -52,19 +67,19 @@
                     {
                         "name": "offset",
                         "in": "query",
-                        "description": "offset",
+                        "description": "Offset",
                         "type": "integer"
                     },
                     {
                         "name": "count",
                         "in": "query",
-                        "description": "count (default 10)",
+                        "description": "Count (default 10)",
                         "type": "integer"
                     },
                     {
                         "name": "access",
                         "in": "query",
-                        "description": "access (default is owned)",
+                        "description": "Type of access (read, write, owned - default is owned)",
                         "type": "string"
                     },
                     {
@@ -86,7 +101,8 @@
                         "type": "string"
                     }
                 ],
-                "summary": "Show a collection",
+                "summary": "Get a list of collections.",
+                "description": "Using the parameter filters, you can get the collections associated with a specific user.",
                 "tags": [
                     "Collection"
                 ],
@@ -94,7 +110,10 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Collection"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Collection"
+                            }
                         }
                     }
                 }
@@ -106,11 +125,12 @@
                     "Collection"
                 ],
                 "summary": "Create a new collection.",
+                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required.",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "Collection metadata.",
+                        "description": "Collection metadata",
                         "required": true,
                         "schema": {
                             "type": "object",
@@ -145,6 +165,26 @@
                         "schema": {
                             "$ref": "#/definitions/Collection"
                         }
+                    },
+                    "403": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -154,21 +194,22 @@
                 {
                     "name": "collectionId",
                     "in": "path",
-                    "description": "collection id",
+                    "description": "Id of the collection or exhibition",
                     "type": "string"
                 }
             ],
             "post": {
-                "description": "Adds a record to a collection, creating a new record that containts the specified metadata.",
-                "summary": "Add a record",
+                "description": "Adds a record to the specified collection, creating a new record that containts the specified metadata. Note that calls to this path can also be used for exhibitions.",
+                "summary": "Add a record to a collection.",
                 "tags": [
-                    "Collection"
+                    "Collection",
+                    "Exhibition"
                 ],
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "Record json.",
+                        "description": "Record JSON schema",
                         "schema": {
                             "$ref": "#/definitions/Record"
                         }
@@ -180,6 +221,9 @@
                         "schema": {
                             "$ref": "#/definitions/Record"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -189,43 +233,50 @@
                 {
                     "name": "collectionId",
                     "in": "path",
-                    "description": "collection Id",
+                    "description": "Id of the collection or exhibition from which to remove the record",
                     "type": "string"
                 }
             ],
             "delete": {
-                "description": "Removes a record from a collection",
-                "summary": "Remove a record",
+                "description": "Removes the specified record from a specified collection. Note that calls to this path can also be used for exhibitions.",
+                "summary": "Remove a record from a collection",
                 "tags": [
-                    "Collection"
+                    "Collection",
+                    "Exhibition"
                 ],
                 "parameters": [
                     {
                         "name": "recordId",
                         "in": "query",
-                        "description": "ID of record to be removed.",
+                        "description": "Id of record to be removed",
                         "type": "string"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
         },
-        "/collection/{id}/list": {
+        "/collection/{collectionId}/list": {
             "parameters": [
                 {
-                    "name": "id",
+                    "name": "collectionId",
                     "in": "path",
-                    "description": "id",
+                    "description": "Id of the collection",
                     "type": "string"
                 }
             ],
             "get": {
-                "description": "Retrieves all records from a collection.",
-                "summary": "Retrieve all records",
+                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. The format parameter defines the format of this array.",
+                "summary": "Retrieve all records in a collection.",
                 "tags": [
                     "Collection"
                 ],
@@ -245,7 +296,7 @@
                     {
                         "name": "format",
                         "in": "query",
-                        "description": "One of the following JSON_UNKNOWN, JSONLD_UNKNOWN,XML_UNKNOWN,JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ,XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+                        "description": "One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
                         "type": "string"
                     }
                 ],
@@ -255,6 +306,12 @@
                         "schema": {
                             "$ref": "#/definitions/Record"
                         }
+                    },
+                    "403": {
+                        "description": "Forbiden"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
@@ -270,8 +327,10 @@
             ],
             "get": {
                 "summary": "Retrieves collection metadata.",
+                "description": "Returns the metadata of the collection specified in path. Note that calls to this path can also be used for exhibitions.",
                 "tags": [
-                    "Collection"
+                    "Collection",
+                    "Exhibition"
                 ],
                 "responses": {
                     "200": {
@@ -281,23 +340,25 @@
                         }
                     },
                     "403": {
-                        "description": "No read-access"
+                        "description": "Forbidden (No read-access)"
                     },
                     "500": {
-                        "description": "Database error"
+                        "description": "Internal Server Error(Database error)"
                     }
                 }
             },
             "post": {
                 "summary": "Updates collection metadata.",
+                "description": "Use this call to change the stored metadata of a collection. Note that calls to this path can also be used for exhibitions.",
                 "tags": [
-                    "Collection"
+                    "Collection",
+                    "Exhibition"
                 ],
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "New collection metadata.",
+                        "description": "New collection/exhibtion metadata.",
                         "required": false,
                         "schema": {
                             "type": "object",
@@ -326,17 +387,19 @@
                         "description": "Wrong JSON fields"
                     },
                     "403": {
-                        "description": "No write-access"
+                        "description": "Forbidden (No read-access)"
                     },
                     "500": {
-                        "description": "Database error"
+                        "description": "Internal Server Error (Database Error)"
                     }
                 }
             },
             "delete": {
                 "summary": "Deletes the collection.",
+                "description": "Removes a collection from the database. Records that were created ?Note that calls to this path can also be used for exhibitions.",
                 "tags": [
-                    "Collection"
+                    "Collection",
+                    "Exhibition"
                 ],
                 "responses": {
                     "200": {
@@ -354,17 +417,19 @@
                 }
             }
         },
-        "/record/{id}": {
+        "/record/{recordId}": {
             "parameters": [
                 {
-                    "name": "id",
+                    "name": "recordId",
                     "in": "path",
+                    "required": true,
                     "description": "The id of the record",
                     "type": "string"
                 }
             ],
             "get": {
                 "summary": "Retrieves a record.",
+                "description": "Retrieve a JSON with the metadata of the record specified in the path.",
                 "tags": [
                     "Record"
                 ],
@@ -374,11 +439,25 @@
                         "schema": {
                             "$ref": "#/definitions/Record"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             },
             "post": {
                 "summary": "Updates a record.",
+                "description": "Update the metadata of an existing record, specified by its id in the path.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "A JSON with the updated metadata",
+                        "schema": {
+                            "$ref": "#/definitions/Record"
+                        }
+                    }
+                ],
                 "tags": [
                     "Record"
                 ],
@@ -388,11 +467,15 @@
                         "schema": {
                             "$ref": "#/definitions/Record"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             },
             "delete": {
                 "summary": "Removes a record.",
+                "description": "Remove the record specified in the path from the database.",
                 "tags": [
                     "Record"
                 ],
@@ -402,29 +485,36 @@
                         "schema": {
                             "$ref": "#/definitions/Record"
                         }
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }
         },
-        "/rights/{colId}/{right}": {
+        "/rights/{collectionId}/{right}": {
             "parameters": [
                 {
-                    "name": "colId",
+                    "name": "collectionId",
                     "in": "path",
-                    "description": "Internal Id of the object you wish to share (or unshare)",
+                    "required": true,
+                    "description": "Internal Id of the collection whose rights you wish to change",
                     "type": "string"
                 },
                 {
                     "name": "right",
                     "in": "path",
-                    "description": "none (withdraw previously given right), read, write, own",
+                    "required": true,
+                    "description": "\"none\" (withdraws previously given rights), \"read\", \"write\", \"own\"",
                     "type": "string"
                 }
             ],
             "post": {
                 "summary": "Set rights",
+                "description": "Changes access rights (read, write, own) of a specified user for a specifed collection. Only the owner of a collection can use this call. One of username, email or userId need to be provided.",
                 "tags": [
-                    "Rights"
+                    "Rights",
+                    "Collection"
                 ],
                 "parameters": [
                     {
@@ -449,6 +539,12 @@
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "403": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Interal Server Error"
                     }
                 }
             }
@@ -458,7 +554,18 @@
                 "tags": [
                     "Exhibition"
                 ],
-                "description": "Create a new exhibition with dummy title",
+                "summary": "Create a new exhibition.",
+                "description": "Creates a new exhibition with a unique dummy title that can be changed later. You can make a POST call to ```/collection/{collectionId}``` to edit an exhibition.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Contains metadata about the exhibition",
+                        "schema": {
+                            "$ref": "#/definitions/Exhibition"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -480,17 +587,18 @@
                 "tags": [
                     "Exhibition"
                 ],
-                "summary": "Get all user exhibitons",
+                "summary": "Get all user exhibitons.",
+                "description": "Returns an array of exhibition JSON objects, of all exhibitions owned by the currently logged in user. See ```/user/login```.",
                 "parameters": [
                     {
                         "name": "offset",
-                        "description": "offset (default is 0)",
+                        "description": "Offset (default is 0)",
                         "in": "query",
                         "type": "integer"
                     },
                     {
                         "name": "count",
-                        "description": "number of results (default is 10)",
+                        "description": "Number of results (default is 10)",
                         "in": "query",
                         "type": "integer"
                     }
@@ -505,8 +613,8 @@
                             }
                         }
                     },
-                    "500": {
-                        "description": "Database Error"
+                    "403": {
+                        "description": "Forbidden"
                     }
                 }
             }
@@ -517,7 +625,7 @@
                     "User"
                 ],
                 "description": "Creates a new user and stores at the database.",
-                "summary": "Create new user",
+                "summary": "Create new user.",
                 "produces": [
                     "application/json",
                     "application/xml"
@@ -526,8 +634,8 @@
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "Contains JSON of the user to create.",
-                        "required": false,
+                        "description": "Contains JSON of the user to create",
+                        "required": true,
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -583,12 +691,13 @@
                 "tags": [
                     "User"
                 ],
-                "summary": "User login",
+                "summary": "User login.",
+                "description": "Log an user in (create a browser cookie). Some API calls do not take the user as a parameter and you need to be logged in first.",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "Email or username and password.",
+                        "description": "Email or username and password",
                         "required": true,
                         "schema": {
                             "type": "object",
@@ -618,8 +727,8 @@
         },
         "/user/logout": {
             "get": {
-                "description": "Browser cookie is removed (all session information is kept in cookie, nothing is stored on server).",
-                "summary": "logout user",
+                "description": "Browser cookie is removed, user i logged out (all session information is kept in cookie, nothing is stored on server).",
+                "summary": "User logout.",
                 "tags": [
                     "User"
                 ],
@@ -635,12 +744,14 @@
                 "tags": [
                     "User"
                 ],
-                "summary": "Checks email availability.",
+                "summary": "Check email availability.",
+                "description": "Used when registering a new user, checks if there has been another user with the same email already stored in the database.",
                 "parameters": [
                     {
                         "name": "email",
                         "in": "query",
-                        "description": "User email.",
+                        "description": "Proposed email address",
+                        "required": true,
                         "type": "string"
                     }
                 ],
@@ -659,12 +770,14 @@
                 {
                     "name": "userId",
                     "in": "path",
-                    "description": "Internal ID of a user.",
+                    "description": "Internal ID of a user",
+                    "required": true,
                     "type": "string"
                 }
             ],
             "get": {
-                "summary": "Returns the complete user entry.",
+                "summary": "Get user details.",
+                "description": "Returns the complete entry of a user specified by the id provided in the path.",
                 "tags": [
                     "User"
                 ],
@@ -681,12 +794,13 @@
                 "tags": [
                     "User"
                 ],
-                "summary": "Updates user entry.",
+                "summary": "Update an user entry.",
+                "description": "Updates the stored info of the user specified by the id provided in the path.",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "User entry.",
+                        "description": "New user entry",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/User"
@@ -707,6 +821,7 @@
                     "User"
                 ],
                 "summary": "Deletes the user.",
+                "description": "Removes a user from the database.",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -728,6 +843,7 @@
                     "User"
                 ],
                 "summary": "Reset password email.",
+                "description": "Sends an email to the user provided in the path. The email contains a link to a webpage where the user can provide a new password.",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -735,36 +851,31 @@
                 }
             }
         },
-        "/user/changePassword": {
+        "/user/apikey/create": {
             "post": {
                 "tags": [
                     "User"
                 ],
-                "summary": "Change password.",
-                "responses": {
-                    "200": {
-                        "description": "OK"
+                "parameters": [
+                    {
+                        "name": "email",
+                        "in": "query",
+                        "description": "An email",
+                        "required": false,
+                        "type": "string"
                     }
-                }
-            }
-        },
-        "/user/apikey/{email}": {
-            "parameters": [
-                {
-                    "name": "email",
-                    "in": "path",
-                    "description": "e-mail",
-                    "type": "string"
-                }
-            ],
-            "post": {
-                "tags": [
-                    "User"
                 ],
                 "summary": "Get an API key.",
+                "description": "If a user is logged in, automatically sends an API key to the stored email address. Alternatively, sends an email to the email address provided as a parameter. If both are true, only the provided email address will be used.",
                 "responses": {
                     "200": {
                         "description": "OK"
+                    },
+                    "403": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
                     }
                 }
             }

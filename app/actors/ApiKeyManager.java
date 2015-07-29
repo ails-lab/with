@@ -194,14 +194,7 @@ public class ApiKeyManager extends UntypedActor  {
 		// create calls on apikey structures
 		if( StringUtils.isEmpty(create.dbId )) {
 			ApiKey newKey = new ApiKey();
-			if( StringUtils.isEmpty(create.ip)) {
-				newKey.resetKey();
-				apiKeys.put( newKey.getKeyString(), newKey);
-			} else {
-				newKey.setIpPattern(create.ip);
-				ipPatterns.add( newKey );
-			}
-
+			
 			if(!StringUtils.isEmpty(create.email)){
 				newKey.setEmail(create.email);
 			}
@@ -210,14 +203,18 @@ public class ApiKeyManager extends UntypedActor  {
 				newKey.setProxyUserId(create.proxyUserId);
 			}
 			
-			
-			// this commented out line gives a null pointer exception
-			// the constructor does not create a DbId!!
+			if( StringUtils.isEmpty(create.ip)) {
+				newKey.resetKey();
+				apiKeys.put( newKey.getKeyString(), newKey);
+			} else {
+				newKey.setIpPattern(create.ip);
+				ipPatterns.add( newKey );
+			}
+
+			writeKeysToDb();
 			
 			//answer( newKey.getDbId().toString());
 			//System.out.println("should not be null: " + newKey.getDbId());
-			
-			DB.getApiKeyDAO().save(newKey);
 			
 			answer( newKey.getKeyString());
 		} else {			
