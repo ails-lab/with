@@ -294,7 +294,7 @@ a {
 	-webkit-perspective: 1200px;
 	-moz-perspective: 1200px;
 	perspective: 1200px;
-	background-image: url(http://localhost:9000/assets/images/gallery/damask.jpg);
+	background: #810606 url(../images/gallery/damask.jpg) 0px 0px;
 }
 
 .gr-wall-main2,
