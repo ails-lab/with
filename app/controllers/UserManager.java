@@ -717,6 +717,8 @@ public class UserManager extends Controller {
 
 		User u;
 
+		boolean wasLoggedIn = false;
+		
 		if (userId == null) {
 			if (StringUtils.isEmpty(email)) {
 				error.put("email",
@@ -741,8 +743,12 @@ public class UserManager extends Controller {
 					create.proxyUserId = new ObjectId(userId);
 				}				
 			}
+			
 		} else {
-			result.put("email", "An email has been sent to your email address.");
+			
+			wasLoggedIn = true;
+			
+			result.put("email", "An email has been sent to the email address you have registered with.");
 			
 			create.proxyUserId = new ObjectId(userId);
 			
@@ -754,16 +760,30 @@ public class UserManager extends Controller {
 		
 		
 		
-		//Discuss our policy when this happens.
+		//Discuss our policy when this happens. ( ask what email to provide! )
 		
 		ApiKey withKey = DB.getApiKeyDAO().getByEmail(create.email);
 				
 		if(withKey!=null){
 			result.remove("email");
-			result.put("API Key", "This email or user account already has an API Key.");
+			
+			
+			if(wasLoggedIn){
+				
+				result.put("APIKey", "Your user account already has an API key. To request a new one, send an email to: . "
+						+ "If you want an API key for a different email address, provide it and press \"Send\".");
+				
+				
+			} else {
+				result.put("APIKey", "The email you provided already has an API key. To request a new one, send an email to: ");
+			}
+			
 			result.put("Key", withKey.getKeyString());
+			
+			System.out.println(result);
+
 			return badRequest(result);
-		}
+		} 
 		
 		
 		
@@ -789,13 +809,13 @@ public class UserManager extends Controller {
 		}
 
 		if (s == "") {
-			error.put("API Key", "Could not create API key");
+			error.put("APIKey", "Could not create API key");
 			result.put("error", error);
 			result.remove("email");
 			return internalServerError(result);
 		}
 
-		result.put("API Key", "Succesfully created a new API key: " + s);
+		result.put("APIKey", "Succesfully created a new API key: " + s);
 
 		String newLine = System.getProperty("line.separator");
 

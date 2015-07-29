@@ -3,7 +3,11 @@ info:
   version: v1
   title: WITH API
   description: |
-    Test WITH API documentation!
+    Welcome to the WITH API documentation! 
+    We are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:
+    ```
+    http://WITH.com
+    ```
 paths:
   /api/search:
     post:
@@ -15,6 +19,7 @@ paths:
           name: body
           description: Search parameters.
           schema:
+            type: object
             properties:
               searchTerm:
                 type: string
@@ -73,8 +78,9 @@ paths:
         - in: body
           name: body
           description: Collection metadata.
-          required: false
+          required: true
           schema:
+            type: object
             required:
               - ownerId
               - title
@@ -194,6 +200,7 @@ paths:
           description: New collection metadata.
           required: false
           schema:
+            type: object
             properties:
               title:
                 type: string
@@ -344,6 +351,7 @@ paths:
           description: Contains JSON of the user to create.
           required: false
           schema:
+            type: object
             properties:
               firstName:
                 type: string
@@ -594,27 +602,27 @@ definitions:
     required:
       - title
     properties:
-      id:
+      dbId:
+        type: string
+      externalId:
+        type: string
+      isPublic:
+        type: boolean
+      source:
         type: string
       thumbnailUrl:
-        type: string
-      fullResolution:
         type: string
       title:
         type: string
       creator:
         type: string
-      year:
-        type: integer
-      dataProvider:
+      description:
         type: string
-      url.original:
+      provider:
         type: string
-      url.fromSourceAPI:
+      sourceId:
         type: string
-      rights:
-        type: string
-      externalId:
+      sourceUrl:
         type: string
       exhibition:
         type: object
@@ -625,4 +633,3 @@ definitions:
             type: string
           videoUrl:
             type: string
-

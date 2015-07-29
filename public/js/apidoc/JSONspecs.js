@@ -1,9 +1,30 @@
+
+
+
+function getSpecs() {
+
+
+	var jsonSpec = 
+
+
+/////////////////////////////////////////////////////////
+//
+//		PASTE JSON FROM SWAGGER EDITOR
+//			HERE :
+//
+////////////////////////////////////////////////////////
+
+
+
+
+
+
 {
     "swagger": "2.0",
     "info": {
         "version": "v1",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://WITH.com\n```\n"
+        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes.\n You can read the full log here:\n```\nhttp://WITH.com\n```\n"
     },
     "paths": {
         "/api/search": {
@@ -974,3 +995,97 @@
         }
     }
 }
+
+
+
+
+
+
+
+
+///////////////////////////////////
+
+
+
+///////////////////////////////////
+;
+
+return jsonSpec;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+function getAPIkeyButt(){
+	
+	$.ajax({
+		type    : "get",
+		url     : "/user/apikey/create",
+		data	: {email:null},
+		success : function(data) {
+			// Show message that an email was sent
+			$("#myModal").find("h4").html("API key requested!");
+			$("#myModal").find("#popupText").html("<p>An email was automatically sent to the address you" +
+					" have registered with. If you want an API key for a different email, provide it and press \"Send\".</p>");
+			$("#myModal").modal('show');
+		},
+		error   : function(request, status, error) {
+			//do nothing
+		}
+	});
+
+	//alert("here?");
+    return false;
+
+}
+
+
+
+
+
+
+
+
+function apiKeyClick(){
+	
+	var value = $(".form-control").val();
+	
+	//alert(value);
+	$.ajax({
+		type    : "get",
+		url     : "/user/apikey/create",
+		data	: {'email':value},
+		success : function(data) {
+			// Show message that an email was sent
+			$("#myModal").find("h4").html("API key requested!");
+			$("#myModal").find("#popupText").html("<p>An email was successfuly sent. Follow the instructions to create a new password</p>");
+			$("#myModal").modal('show');
+		},
+		error   : function(request, status, error) {
+			//var err = JSON.parse(request.responseText, function(k,v){
+			//	alert(k);
+			//	alert(v);
+			//			});
+
+			var err = JSON.parse(request.responseText);
+			$("#myModal").find("h4").html("Couldn't send email");
+			$("#myModal").find("#popupText").html("<p>" + err.APIKey + "</p>");
+			$("#myModal").modal('show');
+
+		}
+	});
+
+	//alert("here?");
+    return false;
+
+}
+
+

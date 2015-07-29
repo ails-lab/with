@@ -13,8 +13,8 @@
 <!--  link href='bower_modules/bootstrap/dist/css/bootstrap.css' rel='stylesheet' type='text/css'/>  -->
 
 
-<!--  script src='bower_modules/bootstrap/dist/js/bootstrap.js' type='text/javascript'></script>  -->
-<script src='js/apidoc/swagger-ui/lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+<script src='js/apidoc/bootstrap.min.js' type='text/javascript'></script>
+<script src='js/apidoc/jquery.min.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/jquery.slideto.min.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/jquery.wiggle.min.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
@@ -25,7 +25,20 @@
 <script src='js/apidoc/swagger-ui/lib/highlight.7.3.pack.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/marked.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/swagger-oauth.js' type='text/javascript'></script>
-<script src="js/apidoc/script.js"></script>
+<script src="js/apidoc/JSONspecs.js"></script>
+
+<script>
+
+	var swaggerUi = new SwaggerUi({
+  		url:"http://WITH.com",
+  		spec : getSpecs(),
+  		dom_id:"swagger-ui-container"
+	});
+
+	swaggerUi.load();
+
+</script>
+
 
 <body>
 <div class="container">
