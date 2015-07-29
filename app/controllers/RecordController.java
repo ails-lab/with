@@ -130,7 +130,6 @@ public class RecordController extends Controller {
 				result.put("message",
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 			}
-			System.out.println(newRecord.getPosition());
 			collection.getFirstEntries()
 					.add(newRecord.getPosition(), newRecord);
 			if ((DB.getCollectionRecordDAO().makePermanent(newRecord) != null)
