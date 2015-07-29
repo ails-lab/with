@@ -75,9 +75,9 @@ public class DPLASpaceSource extends ISpaceSource {
 		 */
 		
 		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
 		
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
 				".*non-commercial.*");

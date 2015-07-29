@@ -58,7 +58,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("and[category][]"));
 		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("and[creator][]"));
 		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("and[rights][]"));
+		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("and[usage][]"));
 
 		// TODO: rights_url shows the license in the search
 
@@ -72,25 +72,24 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify,
 		// ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial,
-				"http://creativecommons.org/licenses/by-nc/3.0/nz/",
-				"http://creativecommons.org/licenses/by-nc-sa/3.0/",
-				"This work is licensed under a Creative Commons Attribution-Noncommercial 3.0 New Zealand License");
+		// addMapping(CommonFilters.RIGHTS_ID,
+		// RightsValues.Creative_Not_Commercial,
+		// "http://creativecommons.org/licenses/by-nc/3.0/nz/",
+		// "http://creativecommons.org/licenses/by-nc-sa/3.0/",
+		// "This work is licensed under a Creative Commons
+		// Attribution-Noncommercial 3.0 New Zealand License");
+		//
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "No known
+		// copyright restrictions\nCopyright Expired",
+		// "No known copyright restrictions");
+		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, "All rights
+		// reserved");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "No known copyright restrictions\nCopyright Expired",
-				"No known copyright restrictions");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "Share");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, "Modify");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, "Use commercially");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "Unknown");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, "All rights reserved");
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA,
-		// ".*rr-f.*");
-		//
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA,
-		// ".*unknown.*");
-		//
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify,
-		// ".*creative.*nd.*");
-		//
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative,
-		// ".*(creative).*");
 
 	}
 
@@ -126,7 +125,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		builder.addQuery("text", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("per_page", q.pageSize);
-		builder.addSearchParam("facets", "year,creator,category,rights");
+		builder.addSearchParam("facets", "year,creator,category,usage");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -213,7 +212,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				res.items = a;
 
 				readList(o.path("facets").path("category"), type);
-				readList(o.path("facets").path("rights"), rights);
+				readList(o.path("facets").path("usage"), rights);
 				readList(o.path("facets").path("year"), year);
 
 				readList(o.path("facets").path("creator"), creator);
