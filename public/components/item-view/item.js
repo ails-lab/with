@@ -15,6 +15,19 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.url = ko.observable("");
 		self.id = ko.observable("");
 		self.externalId = ko.observable("");
+		self.cachedThumbnail = ko.pureComputed(function() {
+			
+			   if(self.thumb()){
+				if (self.thumb().indexOf('/') === 0) {
+					return self.thumb();
+				} else {
+					var newurl='url=' + encodeURIComponent(self.thumb())+'&';
+					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+				}}
+			   else{
+				   return "images/no_image.jpg";
+			   }
+			});
 		self.load = function (data) {
 			if (data.title == undefined) {
 				self.title("No title");
@@ -32,10 +45,10 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 
-			if (data.fullres !== undefined && data.fullres != null && data.fullres[0].length > 0 && data.fullres != "null") {
+			if (data.source!="Rijksmuseum" && data.fullres !== undefined && data.fullres != null && data.fullres[0].length > 0 && data.fullres != "null") {
 				self.fullres(data.fullres[0]);
 			} else {
-				self.fullres(data.thumb);
+				self.fullres(self.cachedThumbnail());
 			}
 
 			if (data.description == undefined) {
@@ -58,6 +71,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
 			self.externalId(data.externalId);
 			self.source(data.source);
+			
 		};
 
 		self.sourceImage = ko.pureComputed(function () {
@@ -78,6 +92,8 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 				}
 			case "Mint":
 				return "images/logos/mint_logo.png";
+			case "Rijksmuseum":
+				return "images/logos/Rijksmuseum.png"
 			default:
 				return "";
 			}
@@ -150,7 +166,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.changeSource = function (item) {
-			item.record().fullres(item.record().thumb());
+			item.record().fullres(item.record().cachedThumbnail());
 		};
 
 		self.collect = function (item) {
