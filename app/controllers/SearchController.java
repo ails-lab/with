@@ -207,6 +207,7 @@ public class SearchController extends Controller {
 				q.uploadedByUser = true;
 			q.source.remove("Mint");
 			q.source.remove("UploadedByUser");
+			// q.source.remove("With");
 			q.source.add("With");
 		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
