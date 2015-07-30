@@ -163,6 +163,10 @@ public class MediaDAO {
 		return media;
 	}
 
+	public int countAll(BasicDBObject query) {
+		return DB.getGridFs().find(query).size();
+	}
+
 	public void makeTransient(Media media) {
 		try {
 			DB.getGridFs().remove(media.getDbId());
