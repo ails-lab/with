@@ -21,7 +21,6 @@ import general.daoTests.SearchAndSearchResultDAOTest;
 import general.daoTests.UserDAOTest;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +31,9 @@ import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import play.libs.F.Callback;
+
+import com.mongodb.BasicDBObject;
+
 import db.DB;
 
 /**
@@ -55,7 +57,7 @@ public class DBTests {
 		colDAO.storeCollection();
 	}
 
-	//@Test
+	// @Test
 	public void createFavorites() throws Exception {
 		List<ObjectId> users = DB.getUserDAO().findIds();
 		List<ObjectId> usersWithFav = new ArrayList<ObjectId>();
@@ -82,7 +84,7 @@ public class DBTests {
 		}
 	}
 
-	//@Test
+	// @Test
 	public void cleanRecords() throws Exception {
 		List<ObjectId> existingCollections = DB.getCollectionDAO().findIds();
 		List<ObjectId> collections = new ArrayList<ObjectId>();
@@ -101,8 +103,8 @@ public class DBTests {
 					+ " items from database");
 		}
 	}
-	
-	@Test
+
+	// @Test
 	public void clearCache() {
 		try {
 			DB.getMediaDAO().deleteCached();
@@ -110,5 +112,16 @@ public class DBTests {
 		} catch (Exception e) {
 			System.out.println("Couldn't clear cache:" + e.getMessage());
 		}
+	}
+
+	@Test
+	public void cacheStatistics() {
+		BasicDBObject query = new BasicDBObject();
+		query.containsField("externalId");
+		int cached = DB.getMediaDAO().countAll(query);
+		System.out.println("Cached items: " + cached);
+		query.append("thumbnail", true);
+		int thumbs = DB.getMediaDAO().countAll(query);
+		System.out.println("Thumbnails: " + thumbs);
 	}
 }
