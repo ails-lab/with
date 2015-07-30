@@ -38,4 +38,8 @@ object CustomAssets extends Controller {
     		  Assets.at( "/public", path )
       }
   }
+   
+   def redirect( customName:String ) = Action { 
+     Redirect( "/custom/"+customName+"/index.html")
+   }
 }
