@@ -77,7 +77,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
-
+		
+		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
+		
+		
 		/**
 		 * TODO check this
 		 */
@@ -116,8 +119,19 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
+	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
 
+	}
+	private Function<List<String>, QueryModifier> qreusabilitywriter() {
+		Function<String, String> function = (String s) -> {
+			return "&REUSABILITY%3A" + s;
+		};
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
+			}
+		};	
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
@@ -255,6 +269,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+		CommonFilterLogic reusability = CommonFilterLogic.reusabilityFilter();
+
 		// CommonFilterLogic contributor =
 		// CommonFilterLogic.contributorFilter();
 		if (checkFilters(q)) {
@@ -326,6 +342,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						case "YEAR":
 							countValue(year, label, false, count);
 							break;
+						
+						case "REUSABILITY":
+							countValue(reusability, label, false, count);
+							break;
 
 						default:
 							break;
@@ -342,6 +362,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.filtersLogic.add(rights);
 				res.filtersLogic.add(country);
 				res.filtersLogic.add(year);
+				res.filtersLogic.add(reusability);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

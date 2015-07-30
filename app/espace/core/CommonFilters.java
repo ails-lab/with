@@ -37,4 +37,7 @@ public class CommonFilters {
 
 	public static final String AVAILABILITY_ID = "availability";
 	public static final String AVAILABILITY_NAME = "Availability";
+	
+	public static final String REUSABILITY_ID = "reusability";
+	public static final String REUSABILITY_NAME = "Reusability";
 }
