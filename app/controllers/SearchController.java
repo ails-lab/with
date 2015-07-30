@@ -96,9 +96,8 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
-				if(	session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get(
-							"effectiveUserIds"));
+				if (session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 					q.setUser(userIds.get(0));
 				}
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
@@ -106,7 +105,7 @@ public class SearchController extends Controller {
 				return ParallelAPICall.<SourceResponse> combineResponses(r -> {
 					Logger.info(r.source + " found " + r.count);
 					return true;
-				}, promises);
+				} , promises);
 			} catch (Exception e) {
 				e.printStackTrace();
 				return Promise.pure((Result) badRequest(e.getMessage()));
@@ -123,10 +122,9 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
-				if(	session().containsKey("effectiveUserIds")) {
-					List<String> userIds = AccessManager.effectiveUserIds(session().get(
-							"effectiveUserIds"));
-					if(!userIds.isEmpty())
+				if (session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+					if (!userIds.isEmpty())
 						q.setUser(userIds.get(0));
 				}
 				long start = System.currentTimeMillis();
@@ -143,20 +141,21 @@ public class SearchController extends Controller {
 
 					public Result apply(Collection<SourceResponse> responses) {
 						finalResponses.addAll(responses);
-						// Logger.debug("Total time for all sources to respond: "
+						// Logger.debug("Total time for all sources to respond:
+						// "
 						// + (System.currentTimeMillis()- initTime));
 
 						SearchResponse r1 = new SearchResponse();
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-//							System.out.println(sourceResponse.filtersLogic);
+							// System.out.println(sourceResponse.filtersLogic);
 							FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 							sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
 						}
 
 						r1.filters = ListUtils.transform(merge, f);
 						r1.responces = mergeResponses(finalResponses);
-						
+
 						return ok(Json.toJson(r1));
 					}
 
@@ -165,7 +164,7 @@ public class SearchController extends Controller {
 						for (SourceResponse r : finalResponses2) {
 							boolean merged = false;
 							for (SourceResponse r2 : res) {
-								if (r2.source.equals(r.source)){
+								if (r2.source.equals(r.source)) {
 									// merge these 2 and replace r.
 									res.remove(r2);
 									res.add(r.merge(r2));
@@ -173,11 +172,11 @@ public class SearchController extends Controller {
 									break;
 								}
 							}
-							if (!merged){
+							if (!merged) {
 								res.add(r);
 							}
 						}
-						return res ;
+						return res;
 					}
 
 				});
@@ -187,6 +186,13 @@ public class SearchController extends Controller {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+
+	public static List<String> getTheSources() {
+		Function<ISpaceSource, String> function = (ISpaceSource x) -> {
+			return x.getSourceName();
+		};
+		return ListUtils.transform(ESpaceSources.getESources(), function);
 	}
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
@@ -201,6 +207,7 @@ public class SearchController extends Controller {
 				q.uploadedByUser = true;
 			q.source.remove("Mint");
 			q.source.remove("UploadedByUser");
+			// q.source.remove("With");
 			q.source.add("With");
 		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
@@ -255,7 +262,7 @@ public class SearchController extends Controller {
 
 	public static Result posttestsearch() {
 		// System.out.println("--------------------");
-		 System.out.println(userForm.bindFromRequest().toString());
+		System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if ((q == null) || (q.searchTerm == null)) {
 			q = new CommonQuery();
@@ -264,27 +271,26 @@ public class SearchController extends Controller {
 		q.validate();
 		return buildresult(q);
 
-
-		//JsonNode json = request().body().asJson();
+		// JsonNode json = request().body().asJson();
 		//
-		//CommonQuery q = json;
-		//ObjectNode result = Json.newObject();
+		// CommonQuery q = json;
+		// ObjectNode result = Json.newObject();
 		//
-		//System.out.println(json);
+		// System.out.println(json);
 		//
 		//
-		//return ok(result);
+		// return ok(result);
 	}
 
 	private static Result buildresult(CommonQuery q) {
-//		q.source	 = Arrays.asList(DigitalNZSpaceSource.LABEL);
+		// q.source = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
 		r1.responces = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
-//			 System.out.println(sourceResponse.source + " Filters: " +
-//			 sourceResponse.filters);
+			// System.out.println(sourceResponse.source + " Filters: " +
+			// sourceResponse.filters);
 			FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
