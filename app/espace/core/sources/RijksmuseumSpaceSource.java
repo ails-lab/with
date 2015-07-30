@@ -94,10 +94,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource{
 					it.url.original = it.fullresolution;
 					it.url.fromSourceAPI = "https://www.rijksmuseum.nl/en/search/objecten?ii="+it.id;
 //					it.rights = Utils.readLangAttr(item, "rights", false);
-//					it.externalId = it.fullresolution.get(0);
-//					if (it.externalId == null || it.externalId == "")
-//						it.externalId = it.url.original.get(0);
-//					it.externalId = DigestUtils.md5Hex(it.externalId);
+					it.externalId = it.fullresolution.get(0);
+					it.externalId = DigestUtils.md5Hex(it.externalId);
 					a.add(it);
 				}
 			res.items = a;
