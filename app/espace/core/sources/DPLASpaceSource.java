@@ -56,7 +56,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
 		builder.addSearchParam("facets",
-				"provider.name,sourceResource.type,sourceResource.contributor,sourceResource.spatial.country");
+				"provider.name,sourceResource.type,sourceResource.contributor,sourceResource.spatial.country,dataProvider");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -71,28 +71,27 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultComplexWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 
 		/**
-		 * TODO check this 
+		 * TODO check this
 		 */
-		
+
 		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("sourceResource.rights"));
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
-		
+
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
 				".*non-commercial.*");
-       
+
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*rr-f.*");
-        
+
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*unknown.*");
-        
+
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
-		
+
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
 
-		
 		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound");
@@ -100,46 +99,42 @@ public class DPLASpaceSource extends ISpaceSource {
 
 		// TODO: what to do with physical objects?
 	}
-	
+
 	private Function<List<String>, List<Pair<String>>> qfwriterYEAR() {
-		Function<String, String> function =
-				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		Function<String, String> function = (String s) -> {
+			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
+		};
 		return new Function<List<String>, List<Pair<String>>>() {
 			@Override
 			public List<Pair<String>> apply(List<String> t) {
-				String start="", end="";
-				if (t.size()==1){
-					start = t.get(0)+"-01-01";
-					end = next(t.get(0))+"-01-01";
-				} else
-				if (t.size()>1){
-					start = t.get(0)+"-01-01";
-					end = next(t.get(1))+"-01-01";
+				String start = "", end = "";
+				if (t.size() == 1) {
+					start = t.get(0) + "-01-01";
+					end = next(t.get(0)) + "-01-01";
+				} else if (t.size() > 1) {
+					start = t.get(0) + "-01-01";
+					end = next(t.get(1)) + "-01-01";
 				}
-				
-				return Arrays.asList(
-						new Pair<String>("sourceResource.date.after", start),
-						new Pair<String>("sourceResource.date.before", end)
-						);
-				
+
+				return Arrays.asList(new Pair<String>("sourceResource.date.after", start),
+						new Pair<String>("sourceResource.date.before", end));
+
 			}
 
 			private String next(String string) {
-				return ""+(Integer.parseInt(string)+1);
+				return "" + (Integer.parseInt(string) + 1);
 			}
 		};
 	}
 
-
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
-		Function<String, String> function =
-				(String s)->{return "%22"+Utils.spacesFormatQuery(s, "%20")+"%22";};
+		Function<String, String> function = (String s) -> {
+			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
+		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
 			public Pair<String> apply(List<String> t) {
-				return new Pair<String>(parameter, 
-						Utils.getORList(ListUtils.transform(t, 
-								function), false));
+				return new Pair<String>(parameter, Utils.getORList(ListUtils.transform(t, function), false));
 			}
 		};
 	}
@@ -165,77 +160,75 @@ public class DPLASpaceSource extends ISpaceSource {
 		JsonNode response;
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
+		CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
-		if (checkFilters(q)){
-		try {
-			response = HttpConnector.getURLContent(httpQuery);
-			// System.out.println(response.toString());
-			JsonNode docs = response.path("docs");
-			res.totalCount = Utils.readIntAttr(response, "count", true);
-			res.count = docs.size();
-			res.startIndex = Utils.readIntAttr(response, "start", true);
-			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+		if (checkFilters(q)) {
+			try {
+				response = HttpConnector.getURLContent(httpQuery);
+				// System.out.println(response.toString());
+				JsonNode docs = response.path("docs");
+				res.totalCount = Utils.readIntAttr(response, "count", true);
+				res.count = docs.size();
+				res.startIndex = Utils.readIntAttr(response, "start", true);
+				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
 
-			for (JsonNode item : docs) {
+				for (JsonNode item : docs) {
 
-				// String t = Utils.readAttr(item.path("sourceResource"),
-				// "type", false);
-				// countValue(type, t);
+					// String t = Utils.readAttr(item.path("sourceResource"),
+					// "type", false);
+					// countValue(type, t);
 
-				ItemsResponse it = new ItemsResponse();
-				it.id = Utils.readAttr(item, "id", true);
-				it.thumb = Utils.readArrayAttr(item, "object", false);
-				it.fullresolution = null;
-				it.title = Utils.readLangAttr(item.path("sourceResource"),
-						"title", false);
-				it.description = Utils.readLangAttr(
-						item.path("sourceResource"), "description", false);
-				it.creator = Utils.readLangAttr(item.path("sourceResource"),
-						"creator", false);
-				countValue(creator,
-						ListUtils.transform(it.creator, (Lang s) -> {
-							return s.value;
-						}));
-				it.year = null;
-				it.dataProvider = Utils.readLangAttr(item.path("provider"),
-						"name", false);
-				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-				it.url.fromSourceAPI = "http://dp.la/item/"
-						+ Utils.readAttr(item, "id", false);
-				it.rights = Utils.readLangAttr(item.path("sourceResource"),
-						"rights", false);
-				it.externalId = it.url.original.get(0);
+					ItemsResponse it = new ItemsResponse();
+					it.id = Utils.readAttr(item, "id", true);
+					it.thumb = Utils.readArrayAttr(item, "object", false);
+					it.fullresolution = null;
+					it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
+					it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
+					it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
+					countValue(creator, ListUtils.transform(it.creator, (Lang s) -> {
+						return s.value;
+					}));
+					it.year = null;
+					it.dataProvider = Utils.readLangAttr(item.path("dataProvider"), "name", false);
+					it.provider = Utils.readLangAttr(item.path("provider"), "name", false);
+					it.url = new MyURL();
+					it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
+					it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
+					it.rights = Utils.readLangAttr(item.path("sourceResource"), "rights", false);
+					it.externalId = it.url.original.get(0);
 
-				it.externalId = DigestUtils.md5Hex(it.externalId);
-				a.add(it);
+					it.externalId = DigestUtils.md5Hex(it.externalId);
+					a.add(it);
+				}
+				res.items = a;
+				res.facets = response.path("facets");
+				res.filtersLogic = new ArrayList<>();
+
+				readList(response.path("facets").path("provider.name"), provider);
+
+				readList(response.path("facets").path("dataProvider"), dataProvider);
+
+				readList(response.path("facets").path("sourceResource.type"), type);
+
+				readList(response.path("facets").path("sourceResource.contributor"), contributor);
+
+				readList(response.path("facets").path("sourceResource.spatial.country"), country);
+
+				res.filtersLogic = new ArrayList<>();
+				res.filtersLogic.add(type);
+				res.filtersLogic.add(provider);
+				res.filtersLogic.add(dataProvider);
+				res.filtersLogic.add(creator);
+				res.filtersLogic.add(country);
+
+				res.filtersLogic.add(contributor);
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			res.items = a;
-			res.facets = response.path("facets");
-			res.filtersLogic = new ArrayList<>();
-
-			readList(response.path("facets").path("provider.name"), provider);
-
-			readList(response.path("facets").path("sourceResource.type"), type);
-
-			readList(response.path("facets").path("sourceResource.contributor"), contributor);
-
-			readList(response.path("facets").path("sourceResource.spatial.country"), country);
-
-			res.filtersLogic = new ArrayList<>();
-			res.filtersLogic.add(type);
-			res.filtersLogic.add(provider);
-			res.filtersLogic.add(creator);
-			res.filtersLogic.add(country);
-
-			res.filtersLogic.add(contributor);
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		}
 		return res;
 	}
@@ -253,13 +246,10 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector
-					.getURLContent("http://api.dp.la/v2/items?id=" + recordId
-							+ "&api_key=" + DPLAKey);
+			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
 			JsonNode record = response.get("docs").get(0);
 			if (record != null)
-				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA,
-						record.toString()));
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();
