@@ -18,7 +18,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.cachedThumbnail = ko.pureComputed(function() {
 			
 			   if(self.thumb()){
-				if (self.thumb().indexOf('/') === 0) {
+				if (self.thumb().indexOf('//') === 0) {
 					return self.thumb();
 				} else {
 					var newurl='url=' + encodeURIComponent(self.thumb())+'&';
