@@ -80,7 +80,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		
 		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
 		
-		
+		addDefaultWriter(CommonFilters.RIGHTS2_ID, qfwriter("RIGHTS"));
+
 		/**
 		 * TODO check this
 		 */
@@ -113,7 +114,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	//	addMapping(CommonFilters.RIGHTS_ID,RightsValues.Creative,".*(creative)(.*(by|sa)).*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr[-].*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr-.*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, ".*unknown.*");
 
 		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
@@ -271,6 +272,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 		CommonFilterLogic reusability = CommonFilterLogic.reusabilityFilter();
+		CommonFilterLogic rights2 = CommonFilterLogic.rights2Filter();
 
 		// CommonFilterLogic contributor =
 		// CommonFilterLogic.contributorFilter();
@@ -329,6 +331,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						case "RIGHTS":
 							countValue(rights, label, count);
 							break;
+							
+						case "RIGHTS2":
+							countValue(rights2, label, count);
+							break;
 
 						case "proxy_dc_creator":
 							countValue(creator, label, false, count);
@@ -364,6 +370,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.filtersLogic.add(country);
 				res.filtersLogic.add(year);
 				res.filtersLogic.add(reusability);
+				res.filtersLogic.add(rights2);
+
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
