@@ -226,7 +226,7 @@ public class Collection {
 		return rights;
 	}
 
-	public boolean isExhibition() {
+	public boolean getIsExhibition() {
 		return isExhibition;
 	}
 

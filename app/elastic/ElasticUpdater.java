@@ -102,8 +102,14 @@ public class ElasticUpdater {
 				Entry<String, JsonNode> entry = recordIt.next();
 				if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("dbId")) {
+					if (entry.getKey().equals("exhibitionRecord")) {
+						String introValue =  entry.getValue().get("annotation").asText();
+						doc.field("annotation_all", introValue);
+						doc.field("annotation", introValue);
+					} else {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());
+					}
 				}
 			}
 
@@ -355,11 +361,11 @@ public class ElasticUpdater {
 
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
 				.getByUniqueId(record.getExternalId());
-
-		if( records.size() < 2 ) {
+		if( records.size() < 1 ) {
 			log.debug("No records within the collection to update!");
 		} else {
 				for(int i = 0; i<records.size(); i++) {
+					System.out.println(records.get(i));
 					if(!records.get(i).getDbId().equals(record.getDbId())) {
 						Elastic.getBulkProcessor().add(new UpdateRequest(
 								Elastic.index,

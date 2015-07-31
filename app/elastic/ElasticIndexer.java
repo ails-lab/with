@@ -82,6 +82,11 @@ public class ElasticIndexer {
 			log.error("No records to index!");
 		}
 	}
+	
+	//TODO: create a generic indexMetadata method (for collections, collectionRecords etc)
+	//indexMetadata(Object model, List[String] fieldNamesToOmmit)
+	//check entry.getValue().isboolean, isTextual, isObject (or by using JsonNodeType) and put respective
+	//values into elastic fields (asBoolean etc, or iterate within Object, e.g. in case of exhibition type)
 
 	/*
 	 * Index a collection document excluding firstEntries
@@ -94,7 +99,6 @@ public class ElasticIndexer {
 		XContentBuilder doc = null;
 		try {
 			doc = jsonBuilder().startObject();
-
 			while( colIt.hasNext() ) {
 				Entry<String, JsonNode> entry = colIt.next();
 				if( entry.getKey().equals("rights") ) {
@@ -108,12 +112,22 @@ public class ElasticIndexer {
    					doc.rawField(entry.getKey(), array.toString().getBytes());
 				} else if( entry.getKey().equals("itemCount") ) {
 					doc.field(entry.getKey(), entry.getValue().asInt());
+				} else if (entry.getKey().equals("isExhibition")) {
+					doc.field(entry.getKey()+"_all", entry.getValue().asBoolean());
+					doc.field(entry.getKey(), entry.getValue().asBoolean());
 				} else if( !entry.getKey().equals("firstEntries") &&
 						  !entry.getKey().equals("rights") &&
-						  !entry.getKey().equals("dbId")) {
-					doc.field(entry.getKey()+"_all", entry.getValue().asText());
-					doc.field(entry.getKey(), entry.getValue().asText());
-				}
+						  !entry.getKey().equals("dbId")) {	
+					if (entry.getKey().equals("exhibition")) {
+						String introValue =  entry.getValue().get("intro").asText();
+						doc.field("intro_all", introValue);
+						doc.field("intro", introValue);
+					}
+					else {
+						doc.field(entry.getKey()+"_all", entry.getValue().asText());
+						doc.field(entry.getKey(), entry.getValue().asText());
+					}
+				} 
 			}
 		} catch(IOException e) {
 				log.error("Cannot create collection json document for indexing", e);
@@ -179,8 +193,10 @@ public class ElasticIndexer {
 					doc.field(entry.getKey(), entry.getValue().asInt());
 				} else if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("tags")    &&
+					
 					!entry.getKey().equals("externalId")    &&
-					!entry.getKey().equals("collectionId")) {
+					!entry.getKey().equals("collectionId") &&
+					!entry.getKey().equals("dbId")) {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());
 				}
@@ -237,7 +253,11 @@ public class ElasticIndexer {
 				Entry<String, JsonNode> entry = recordIt.next();
 				if(	entry.getKey().equals("totalLikes") ) {
 						doc.field(entry.getKey(), entry.getValue().asInt());
-				} else if( !entry.getKey().equals("content") &&
+				} else if (entry.getKey().equals("exhibitionRecord")) {
+					String introValue =  entry.getValue().get("annotation").asText();
+					doc.field("annotation_all", introValue);
+					doc.field("annotation", introValue);
+				}  else if( !entry.getKey().equals("content") &&
 							!entry.getKey().equals("dbId")) {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());

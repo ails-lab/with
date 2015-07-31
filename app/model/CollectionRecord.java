@@ -90,7 +90,7 @@ public class CollectionRecord {
 
 	private String itemRights;
 	
-	private ExhibitionRecord exhibition;
+	private ExhibitionRecord exhibitionRecord;
 
 	// collection specific stuff...
 
@@ -323,12 +323,12 @@ public class CollectionRecord {
 		this.isPublic = isPublic;
 	}
 
-	public ExhibitionRecord getExhibition() {
-		return exhibition;
+	public ExhibitionRecord getExhibitionRecord() {
+		return exhibitionRecord;
 	}
 
-	public void setExhibition(ExhibitionRecord exhibition) {
-		this.exhibition = exhibition;
+	public void setExhibitionReord(ExhibitionRecord exhibitionRecord) {
+		this.exhibitionRecord = exhibitionRecord;
 	}
 
 	@Override
