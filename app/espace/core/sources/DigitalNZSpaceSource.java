@@ -85,7 +85,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, "All rights
 		// reserved");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Public, "Share");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, "Share");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, "Modify");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, "Use commercially");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "Unknown");

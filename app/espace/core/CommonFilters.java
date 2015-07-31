@@ -25,7 +25,7 @@ public class CommonFilters {
 	public static final String CREATOR_ID = "creator";
 	public static final String CREATOR_NAME = "Creator";
 	public static final String RIGHTS_ID = "rights";
-	public static final String RIGHTS_NAME = "Rights";
+	public static final String RIGHTS_NAME = "Content License";
 	public static final String COUNTRY_ID = "country";
 	public static final String COUNTRY_NAME = "Country";
 	public static final String YEAR_NAME = "Year";

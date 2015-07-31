@@ -100,26 +100,27 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_SA,
 		// ".*(creative)(.*sa).*");
 		// ok
-		// addMapping(CommonFilters.RIGHTS_ID,
-		// RightsValues.Creative_Commercial_Modify,
-		// ".*(creative)(?!.*(nc|nd)).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nc* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",".*non-commercial.*");
+
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
+
+		
+		addMapping(CommonFilters.RIGHTS_ID,RightsValues.Creative,".*creative.*");
+	//	addMapping(CommonFilters.RIGHTS_ID,RightsValues.Creative,".*(creative)(.*(by|sa)).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr[-].*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
-				".*non-commercial.*");
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*rr-f.*");
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*unknown.*");
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 
 	//	addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
+		
+		
 
 	}
 	private Function<List<String>, QueryModifier> qreusabilitywriter() {
@@ -343,9 +344,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 							countValue(year, label, false, count);
 							break;
 						
-						case "REUSABILITY":
+						/*case "REUSABILITY":
 							countValue(reusability, label, false, count);
-							break;
+							break;*/
 
 						default:
 							break;
