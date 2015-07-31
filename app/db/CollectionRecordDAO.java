@@ -158,7 +158,6 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 				.equal(recId);
 		UpdateOperations<CollectionRecord> updateOps = this
 				.createUpdateOperations();
-		System.out.println(format+content);
 		updateOps.set("content."+format, content);
 		this.update(q, updateOps);
 
