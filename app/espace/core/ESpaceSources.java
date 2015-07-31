@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import play.Logger;
+import espace.core.sources.DDBSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.sources.ElasticSource;
@@ -47,6 +48,7 @@ public class ESpaceSources {
 		esources.add(new ElasticSource());
 		esources.add(new WithSpaceSource());
 		esources.add(new RijksmuseumSpaceSource());
+		esources.add(new DDBSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 

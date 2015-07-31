@@ -7,7 +7,7 @@
 		<div class="modal-body row">
 			<form> <!-- data-bind="submit: ko.contextFor(mycollections).$data.shareCollection">-->
 
-			    <!-- <h5>Share or collaborate</h5> -->
+			    <!-- <h5>Share or co-create</h5> -->
 				<div class="col-md-12">				  
 				  <div class="form-group form-inline">
 				    <div class="spec">
@@ -22,7 +22,7 @@
 					 			</span>
 					 		</button>
 					 		<button type="button" class="btn btn-info btn-xs" data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
-					 			<span class="glyphicon glyphicon-user" title="Collaborate"
+					 			<span class="glyphicon glyphicon-user" title="Co-create"
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
 							 </button>
@@ -49,13 +49,13 @@
 								</button>
 								<button type="button" class="btn btn-info btn-xs">   
 								<!-- ko if: accessRights() == 'READ' -->
-								<span class="glyphicon glyphicon-user" title="Write" 
+								<span class="glyphicon glyphicon-user" title="Co-create" 
 									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')" 
 									style="cursor:pointer;color:blue">
 								</span>
 								<!-- /ko -->
 								<!-- ko if: accessRights() == 'WRITE' -->
-								<span class="glyphicon glyphicon-eye-open" title="Read" 
+								<span class="glyphicon glyphicon-eye-open" title="Share" 
 									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ'), " 
 									style="cursor:pointer;color:blue">
 								</span>

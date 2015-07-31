@@ -594,7 +594,7 @@ public class CollectionController extends Controller {
 			Status status;
 			if (c.isExhibition()) {
 				if (!json.has("position")) {
-					result.put("error", "Must specify position os the record");
+					result.put("error", "Must specify position of the record");
 					return badRequest(result);
 				}
 				int position = json.get("position").asInt();

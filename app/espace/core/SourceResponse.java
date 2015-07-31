@@ -45,7 +45,7 @@ public class SourceResponse {
 		for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(hitToRecord(hit));
 		}
-		if(elasticrecords.size() > 0)
+		if (elasticrecords.size() > 0)
 			this.source = elasticrecords.get(0).getSource();
 		else
 			this.source = "Mint";
@@ -67,18 +67,18 @@ public class SourceResponse {
 
 	private ExtendedCollectionRecord hitToRecord(SearchHit hit) {
 		JsonNode json = Json.parse(hit.getSourceAsString());
-		ExtendedCollectionRecord record =  Json.fromJson(json, ExtendedCollectionRecord.class);
-		if(hit.type().equals(Elastic.type_general)) {
+		ExtendedCollectionRecord record = Json.fromJson(json, ExtendedCollectionRecord.class);
+		if (hit.type().equals(Elastic.type_general)) {
 			List<String> colIds = new ArrayList<String>();
-			List<String> tags   = new ArrayList<String>();
-			ArrayNode ids = (ArrayNode)json.get("collections");
-			ArrayNode allTags = (ArrayNode)json.get("tags");
+			List<String> tags = new ArrayList<String>();
+			ArrayNode ids = (ArrayNode) json.get("collections");
+			ArrayNode allTags = (ArrayNode) json.get("tags");
 
-			for(JsonNode id: ids)
-				if(!colIds.contains(id.asText()))
+			for (JsonNode id : ids)
+				if (!colIds.contains(id.asText()))
 					colIds.add(id.asText());
-			for(JsonNode t: allTags)
-				if(!tags.contains(t.asText()))
+			for (JsonNode t : allTags)
+				if (!tags.contains(t.asText()))
 					tags.add(t.asText());
 
 			record.setCollections(colIds);
@@ -115,6 +115,7 @@ public class SourceResponse {
 		public List<Lang> creator;
 		public List<String> year;
 		public List<Lang> dataProvider;
+		public List<Lang> provider;
 		public MyURL url;
 		public List<String> fullresolution;
 		public List<Lang> rights;
@@ -130,22 +131,24 @@ public class SourceResponse {
 	public JsonNode facets;
 	public List<CommonFilterResponse> filters;
 	public List<CommonFilterLogic> filtersLogic;
-	
+
 	public SourceResponse merge(SourceResponse r2) {
 		SourceResponse res = new SourceResponse();
 		res.source = r2.source;
 		res.query = query;
 		res.count = count + r2.count;
 		res.items = new ArrayList<>();
-		if (items!=null)
-		res.items.addAll(items);
-		if (r2.items!=null)
+		if (items != null)
+			res.items.addAll(items);
+		if (r2.items != null)
 			res.items.addAll(r2.items);
-		if (filtersLogic!=null && r2.filtersLogic!=null){
+		if (filtersLogic != null && r2.filtersLogic != null) {
 			res.filtersLogic = filtersLogic;
 			FiltersHelper.merge(res.filtersLogic, r2.filtersLogic);
-			res.filters = ListUtils.transform(res.filtersLogic, (CommonFilterLogic x)->{ return x.export(); });
-			
+			res.filters = ListUtils.transform(res.filtersLogic, (CommonFilterLogic x) -> {
+				return x.export();
+			});
+
 		}
 		return res;
 	}

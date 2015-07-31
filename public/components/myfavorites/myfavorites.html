@@ -4,7 +4,7 @@
 		<div class="withsearch-content-masonry">
 			<div id="collcolumns" class="columns" data-bind="isotope: items">
 				<figure class="masonry-item" data-bind="visible: isLoaded()">
-					<a data-bind="event: { click: function() { recordSelect('recordId()') } }">
+					<a data-bind="event: { click:  $parent.recordSelect}">
 						<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src: cachedThumbnail }" />
 					</a>
 					<figcaption data-bind="html: displayTitle" class="displayTitle"></figcaption>

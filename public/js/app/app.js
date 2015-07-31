@@ -59,6 +59,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
+				for(i in data){
+					if($("#"+data[i])){
+						$("#"+data[i]).addClass('active');
+					}
+				}
 			})
 			.fail(function (jqXHR, textStatus, errorThrown) {
 				$.smkAlert({text:'Error loading Favorites', type:'danger', time: 10});
@@ -102,7 +107,6 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 				externalId: record.externalId
 			};
 		}
-
 		if (!self.isLiked(id)) {	// Like
 			$.ajax({
 				type: "POST",
