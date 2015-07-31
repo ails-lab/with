@@ -308,11 +308,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				},
 				"complete":function(reply){
 					 self.searching(false);
-					
-					if(facetinit)
-					  ko.dataFor(searchfacets).initFacets();
-					else if(facetrecacl){
-						ko.dataFor(searchfacets).recalcFacets();
+					if(self.next()!=-1){
+						if(facetinit)
+						  ko.dataFor(searchfacets).initFacets();
+						else if(facetrecacl){
+							ko.dataFor(searchfacets).recalcFacets();
+						}
 					}
 					
 				}
