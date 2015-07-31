@@ -15,14 +15,12 @@ function getSpecs() {
 ////////////////////////////////////////////////////////
 
 
-
-
 	{
 		    "swagger": "2.0",
 		    "info": {
 		        "version": "v1",
 		        "title": "WITH API",
-		        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://coming.soon.com\n```\n"
+		        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://WITH.com\n```\n"
 		    },
 		    "paths": {
 		        "/api/search": {
@@ -121,7 +119,7 @@ function getSpecs() {
 		                    }
 		                ],
 		                "summary": "Get a list of collections.",
-		                "description": "Using the parameter filters, you can get the collections associated with a specific user.",
+		                "description": "Using the parameter filters, you can get the collections associated with a specific user. You only need to provide one user filter with each call. The access filter refers to the access rights you have to another user's collections. If users are not provided then all publicly available collections are returned.",
 		                "tags": [
 		                    "Collection"
 		                ],
@@ -134,6 +132,16 @@ function getSpecs() {
 		                                "$ref": "#/definitions/Collection"
 		                            }
 		                        }
+		                    },
+		                    "500": {
+		                        "description": "Internal Server Error",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -144,7 +152,7 @@ function getSpecs() {
 		                    "Collection"
 		                ],
 		                "summary": "Create a new collection.",
-		                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required.",
+		                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required. Note that calls to this path can also be used for exhibitions. At least one user must be logged in for the session and will be automatically retrieved. The owner of the collection will be the first user.",
 		                "parameters": [
 		                    {
 		                        "in": "body",
@@ -154,14 +162,10 @@ function getSpecs() {
 		                        "schema": {
 		                            "type": "object",
 		                            "required": [
-		                                "ownerId",
 		                                "title",
 		                                "isPublic"
 		                            ],
 		                            "properties": {
-		                                "ownerId": {
-		                                    "type": "string"
-		                                },
 		                                "title": {
 		                                    "type": "string"
 		                                },
@@ -173,6 +177,17 @@ function getSpecs() {
 		                                },
 		                                "rights": {
 		                                    "type": "string"
+		                                },
+		                                "isExhibition": {
+		                                    "type": "boolean"
+		                                },
+		                                "exhibition": {
+		                                    "type": "object",
+		                                    "properties": {
+		                                        "intro": {
+		                                            "type": "string"
+		                                        }
+		                                    }
 		                                }
 		                            }
 		                        }
@@ -185,11 +200,23 @@ function getSpecs() {
 		                            "$ref": "#/definitions/Collection"
 		                        }
 		                    },
-		                    "403": {
+		                    "400": {
 		                        "description": "Bad Request",
 		                        "schema": {
 		                            "properties": {
 		                                "error": {
+		                                    "description": "invalid json, constraint violations",
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "403": {
+		                        "description": "Forbidden",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "description": "cannot find user or unspecified",
 		                                    "type": "string"
 		                                }
 		                            }
@@ -200,6 +227,7 @@ function getSpecs() {
 		                        "schema": {
 		                            "properties": {
 		                                "error": {
+		                                    "description": "title already exists, cannot save to database",
 		                                    "type": "string"
 		                                }
 		                            }
@@ -218,7 +246,7 @@ function getSpecs() {
 		                }
 		            ],
 		            "post": {
-		                "description": "Adds a record to the specified collection, creating a new record that containts the specified metadata. Note that calls to this path can also be used for exhibitions.",
+		                "description": "Adds a record to the specified collection, creating a new record that containts the specified metadata. You will need to have write access or be the owner of the collection to add records to it. Note that calls to this path can also be used for exhibitions.",
 		                "summary": "Add a record to a collection.",
 		                "tags": [
 		                    "Collection",
@@ -230,7 +258,36 @@ function getSpecs() {
 		                        "name": "body",
 		                        "description": "Record JSON schema",
 		                        "schema": {
-		                            "$ref": "#/definitions/Record"
+		                            "type": "object",
+		                            "required": [
+		                                "ownerId",
+		                                "title",
+		                                "isPublic"
+		                            ],
+		                            "properties": {
+		                                "source": {
+		                                    "type": "string"
+		                                },
+		                                "sourceId": {
+		                                    "type": "string"
+		                                },
+		                                "title": {
+		                                    "type": "string"
+		                                },
+		                                "description": {
+		                                    "type": "string"
+		                                },
+		                                "thymbnailUrl": {
+		                                    "type": "string"
+		                                },
+		                                "sourceUrl": {
+		                                    "type": "string"
+		                                },
+		                                "position": {
+		                                    "type": "integer",
+		                                    "description": "Mandatory field for exhibitions! Default is 0."
+		                                }
+		                            }
 		                        }
 		                    }
 		                ],
@@ -241,8 +298,38 @@ function getSpecs() {
 		                            "$ref": "#/definitions/Record"
 		                        }
 		                    },
+		                    "400": {
+		                        "description": "Bad Request",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "description": "no position, constraint violation",
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "403": {
+		                        "description": "Forbidden",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "description": "no permission to edit collection",
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "description": "cannot save to database",
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -294,7 +381,7 @@ function getSpecs() {
 		                }
 		            ],
 		            "get": {
-		                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. The format parameter defines the format of this array.",
+		                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. The format parameter defines the serialization in the JSON field response.",
 		                "summary": "Retrieve all records in a collection.",
 		                "tags": [
 		                    "Collection"
@@ -581,7 +668,7 @@ function getSpecs() {
 		                        "name": "body",
 		                        "description": "Contains metadata about the exhibition",
 		                        "schema": {
-		                            "$ref": "#/definitions/Exhibition"
+		                            "$ref": "#/definitions/Collection"
 		                        }
 		                    }
 		                ],
@@ -589,7 +676,7 @@ function getSpecs() {
 		                    "200": {
 		                        "description": "OK",
 		                        "schema": {
-		                            "$ref": "#/definitions/Exhibition"
+		                            "$ref": "#/definitions/Collection"
 		                        }
 		                    },
 		                    "400": {
@@ -607,7 +694,7 @@ function getSpecs() {
 		                    "Exhibition"
 		                ],
 		                "summary": "Get all user exhibitons.",
-		                "description": "Returns an array of exhibition JSON objects, of all exhibitions owned by the currently logged in user. See ```/user/login```.",
+		                "description": "Returns an array of collection JSON objects, for all exhibitions owned by the currently logged in user. See ```/user/login```.",
 		                "parameters": [
 		                    {
 		                        "name": "offset",
@@ -628,7 +715,7 @@ function getSpecs() {
 		                        "schema": {
 		                            "type": "array",
 		                            "items": {
-		                                "$ref": "#/definitions/Exhibition"
+		                                "$ref": "#/definitions/Collection"
 		                            }
 		                        }
 		                    },
@@ -902,6 +989,7 @@ function getSpecs() {
 		    },
 		    "definitions": {
 		        "User": {
+		            "description": "Describes a registered user in the database.",
 		            "type": "object",
 		            "required": [
 		                "firstName",
@@ -949,50 +1037,7 @@ function getSpecs() {
 		            }
 		        },
 		        "Collection": {
-		            "type": "object",
-		            "properties": {
-		                "id": {
-		                    "type": "object",
-		                    "properties": {
-		                        "value": {
-		                            "type": "string"
-		                        }
-		                    }
-		                },
-		                "ownerId": {
-		                    "type": "object",
-		                    "properties": {
-		                        "value": {
-		                            "type": "string"
-		                        }
-		                    }
-		                },
-		                "className": {
-		                    "type": "string"
-		                },
-		                "title": {
-		                    "type": "string"
-		                },
-		                "description": {
-		                    "type": "string"
-		                },
-		                "itemCount": {
-		                    "type": "integer"
-		                },
-		                "isPublic": {
-		                    "type": "boolean"
-		                },
-		                "rights": {
-		                    "type": "object",
-		                    "properties": {
-		                        "value": {
-		                            "type": "string"
-		                        }
-		                    }
-		                }
-		            }
-		        },
-		        "Exhibition": {
+		            "description": "Collection metadata. The fields isExhibition and exhibition are only used in calls for exhibitions.",
 		            "type": "object",
 		            "properties": {
 		                "id": {
@@ -1048,9 +1093,11 @@ function getSpecs() {
 		            }
 		        },
 		        "Record": {
+		            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions.",
 		            "type": "object",
 		            "required": [
-		                "title"
+		                "title",
+		                "position"
 		            ],
 		            "properties": {
 		                "dbId": {
@@ -1099,14 +1146,15 @@ function getSpecs() {
 		                            "type": "string"
 		                        }
 		                    }
+		                },
+		                "position": {
+		                    "description": "default is 0",
+		                    "type": "integer"
 		                }
 		            }
 		        }
 		    }
 		}
-
-
-
 
 
 
