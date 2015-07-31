@@ -331,7 +331,8 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		self.filters()[0].filters.push(obj);
     	}
     	if(!exists){
-    	  self.setFilters();}
+    	  self.setFilters();
+    	  }
           	 
     }
     
@@ -406,7 +407,8 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
 		    	  
 		        result.push(Math.floor(val));
 		        val += stepSize;
-		        if(val > ub)
+		        
+		        if(val > ub || isNaN(val))
 		          break;
 		      }
 		     
