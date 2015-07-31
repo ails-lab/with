@@ -889,7 +889,7 @@ public class UserManager extends Controller {
 		String enc = encryptToken(u.getDbId().toString());
 
 		// String resetURL = APPLICATION_URL;
-		String resetURL = "http://localhost:9000/assets/index.html#reset";
+		String resetURL = "http://espace.with.image.ntua.gr/assets/index.html#reset";
 
 		// This will retrieve line separator dependent on OS.
 		String newLine = System.getProperty("line.separator");
