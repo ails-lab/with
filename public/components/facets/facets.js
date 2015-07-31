@@ -332,7 +332,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	}
     	if(!exists){
     	  self.setFilters();}
-          return; 	 
+          	 
     }
     
     

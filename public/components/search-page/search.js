@@ -150,9 +150,18 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.searching = ko.observable(false);
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
-	        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight - 300)) {
+	       /* if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight)) {
+	        	console.log("searching next");
 	        	self.searchNext();
-	        }
+	        }*/
+	        if($(elem).scrollTop()+ $(elem).innerHeight()>=$(elem)[0].scrollHeight){
+					self.searchNext();
+				}
+	        if ($(elem).scrollTop() > 100) {
+				$('.scroll-top-wrapper').addClass('show');
+			} else {
+				$('.scroll-top-wrapper').removeClass('show');
+			}
 	    },
 		self.currentTerm = ko.observable("");
 		self.previous = ko.observable(-1);
@@ -200,7 +209,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		}
 
 		self._search = function(facetinit,facetrecacl) {
-         if(facetinit){self.filterselection.removeAll();}
+		 if(facetinit){self.filterselection.removeAll();}
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 self.currentTerm($(".withsearch-input").val());
 		 if(self.searching()==false && self.currentTerm()!=""){
@@ -330,7 +339,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.results.removeAll();
 			self.mixresults.removeAll();
 			self.page(1);
-			self.next(1);
+			self.next(-1);
 			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
@@ -340,7 +349,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
 
 			}
-
 			self._search(false,true);
 			
 			
@@ -364,7 +372,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 			}
 			self.filterselect(false);
-			
 			self._search(facetinit,facetrecacl);
 			
 		};
@@ -519,6 +526,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
     		}
     	);
+        
+        self.goToTop= function () {
+        	if($request!==undefined)$request.abort();
+        	verticalOffset = typeof(verticalOffset) != 'undefined' ? verticalOffset : 0;
+        	element = $("#withsearchid");
+        	offset = element.offset();
+        	offsetTop = offset.top;
+        	element.animate({scrollTop: offsetTop}, 100, 'linear');
+        }
 
 		self.likeRecord = function (id) {
 			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
