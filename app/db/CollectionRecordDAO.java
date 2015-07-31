@@ -72,9 +72,9 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
-	public List<CollectionRecord> getBySource(String source,String sourceId) {
+	public List<CollectionRecord> getBySource(String source, String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
-				//.field("source").equal(source)
+		// .field("source").equal(source)
 				.field("sourceId").equal(sourceId);
 		return this.find(q).asList();
 	}
@@ -86,10 +86,10 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	public int getTotalLikes(String extId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId").equal(extId)
-				.limit(1);
+		Query<CollectionRecord> q = this.createQuery().field("externalId")
+				.equal(extId).limit(1);
 		List<CollectionRecord> list = this.find(q).asList();
-		if( list.size() > 0)
+		if (list.size() > 0)
 			return list.get(0).getTotalLikes();
 		else
 			return 0;
@@ -97,20 +97,20 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	public long countBySource(String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
-				//.field("source").equal(source)
+		// .field("source").equal(source)
 				.field("sourceId").equal(sourceId);
 		return this.find(q).countAll();
 	}
 
 	public List<CollectionRecord> getByUniqueId(String extId) {
-		Query<CollectionRecord> q = this.createQuery()
-				.field("externalId").equal(extId);
+		Query<CollectionRecord> q = this.createQuery().field("externalId")
+				.equal(extId);
 		return this.find(q).asList();
 	}
 
 	public long countByUniqueId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
-				//.field("source").equal(source)
+		// .field("source").equal(source)
 				.field("externalId").equal(extId);
 		return this.find(q).countAll();
 	}
@@ -138,38 +138,55 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	/**
-	 * This method is to update the 'public' field on all the records of a collection.
-	 * By default update method is invoked to all documents of a collection.
+	 * This method is to update the 'public' field on all the records of a
+	 * collection. By default update method is invoked to all documents of a
+	 * collection.
 	 *
 	 **/
 	public void setSpecificRecordField(ObjectId colId, String fieldName,
 			String value) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId").equal(colId);
-		UpdateOperations<CollectionRecord> updateOps = this.createUpdateOperations();
+		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+				.equal(colId);
+		UpdateOperations<CollectionRecord> updateOps = this
+				.createUpdateOperations();
 		updateOps.set(fieldName, value);
 		this.update(q, updateOps);
 	}
 
+	public void updateContent(ObjectId recId, String format, String content) {
+		Query<CollectionRecord> q = this.createQuery().field("_id")
+				.equal(recId);
+		UpdateOperations<CollectionRecord> updateOps = this
+				.createUpdateOperations();
+		System.out.println(format+content);
+		updateOps.set("content."+format, content);
+		this.update(q, updateOps);
+
+	}
+
 	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
 		List<CollectionRecord> mergedRecord = getByUniqueId(extId);
-		for(CollectionRecord mr: mergedRecord) {
-			if(mr.getIsPublic() && !mr.getDbId().equals(dbId))
+		for (CollectionRecord mr : mergedRecord) {
+			if (mr.getIsPublic() && !mr.getDbId().equals(dbId))
 				return true;
 		}
 		return false;
 	}
 
-
 	public void incrementLikes(String externalId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId").equal(externalId);
-		UpdateOperations<CollectionRecord> updateOps = this.createUpdateOperations();
+		Query<CollectionRecord> q = this.createQuery().field("externalId")
+				.equal(externalId);
+		UpdateOperations<CollectionRecord> updateOps = this
+				.createUpdateOperations();
 		updateOps.inc("totalLikes");
 		this.update(q, updateOps);
 	}
 
 	public void decrementLikes(String externalId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId").equal(externalId);
-		UpdateOperations<CollectionRecord> updateOps = this.createUpdateOperations();
+		Query<CollectionRecord> q = this.createQuery().field("externalId")
+				.equal(externalId);
+		UpdateOperations<CollectionRecord> updateOps = this
+				.createUpdateOperations();
 		updateOps.dec("totalLikes");
 		this.update(q, updateOps);
 	}
