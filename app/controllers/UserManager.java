@@ -795,7 +795,7 @@ public class UserManager extends Controller {
 		String newLine = System.getProperty("line.separator");
 
 		// String url = APPLICATION_URL;
-		String url = "http://localhost:9000/assets/developers.html";
+		String url = "http://espace.with.image.ntua.gr/assets/developers.html";
 
 		String fn = "";
 		String ln = "";
@@ -818,17 +818,17 @@ public class UserManager extends Controller {
 				// token URL here
 				+ newLine + newLine
 				+ "You can use this key to make calls to the WITH API. "
-				+ "To check out the WITH API documentation follow this link : "
+				+ "To return to the WITH API documentation follow this link : "
 				+ newLine + newLine + url + newLine + newLine
 				+ "Sincerely yours," + newLine + "The WITH team.";
 
-		//try {
-		//	sendEmail(u, create.email, message, "WITH API key");
-		//} catch (EmailException e) {
-		//	error.put("error", "Could not send email - Email server error");
-		//	result.put("error", error);
-		//	return badRequest(result); // maybe change type?
-		//}
+		try {
+			sendEmail(u, create.email, message, "WITH API key");
+		} catch (EmailException e) {
+			error.put("error", "Could not send email - Email server error");
+			result.put("error", error);
+			return badRequest(result); // maybe change type?
+		}
 
 		return ok(result);
 	}
