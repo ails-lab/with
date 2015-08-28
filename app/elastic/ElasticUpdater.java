@@ -395,8 +395,7 @@ public class ElasticUpdater {
 							Elastic.index,
 							Elastic.type_within,
 							records.get(0).getDbId().toString())
-						.setScript("ctx._source.totalLikes--;"
-								+ "ctx._source.totalLikes_all--;", ScriptType.INLINE)
+						.setScript("ctx._source.totalLikes--;", ScriptType.INLINE)
 						.get();
 		} else {
 

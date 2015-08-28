@@ -751,8 +751,7 @@ public class CollectionController extends Controller {
 	 */
 	// @With(UserLoggedIn.class)
 	public static Result removeRecordFromCollection(String collectionId,
-			String recordId, int version) {
-
+			String recordId) {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
@@ -800,7 +799,8 @@ public class CollectionController extends Controller {
 		if (collection.getTitle().equals("_favorites")) {
 			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
 			ElasticUpdater updater = new ElasticUpdater(null, record);
-			updater.decLikes();
+			System.out.println("Decremented in DB");
+			updater.decLikes(); 
 		}
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {
@@ -886,7 +886,6 @@ public class CollectionController extends Controller {
 
 	// delete with external id
 	public static Result removeFromFavorites(String externalId) {
-
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		ObjectId userId = new ObjectId(userIds.get(0));
@@ -895,7 +894,7 @@ public class CollectionController extends Controller {
 		List<CollectionRecord> record = DB.getCollectionRecordDAO()
 				.getByUniqueId(fav, externalId);
 		String recordId = record.get(0).getDbId().toString();
-		return removeRecordFromCollection(fav.toString(), recordId, -1);
+		return removeRecordFromCollection(fav.toString(), recordId);
 	}
 
 	public static Result getFavorites() {
