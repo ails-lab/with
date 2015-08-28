@@ -15,7 +15,7 @@
 				       <div class="value">
 				      <input type="text" 
 				      data-bind="{value: ko.contextFor(mycollections).$data.titleToEdit, 
-				      attr: {value: ko.contextFor(mycollections).$data.myCollections()[ko.contextFor(mycollections).$data.index()].title()}}" class="form-control input-sm xxs">
+				      attr: {value: ko.contextFor(mycollections).$data.titleToEdit}}" class="form-control input-sm xxs">
 				        </div>
 				      </div>
 				    </div>
@@ -43,7 +43,7 @@
 					      </div>
 					      <div class="value">
 					      <textarea data-bind="{value: ko.contextFor(mycollections).$data.descriptionToEdit, 
-					      attr: {value: ko.contextFor(mycollections).$data.myCollections()[ko.contextFor(mycollections).$data.index()].description()}" 
+					      attr: {value: ko.contextFor(mycollections).$data.descriptionToEdit}" 
 					      id="description" name="description" class="form-control input-sm xxs" ></textarea>
 					      </div>
 					    </div>
