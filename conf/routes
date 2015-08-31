@@ -28,7 +28,7 @@ GET 	 /collection/listShared					controllers.CollectionController.listShared(fil
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
-DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId, version: Integer ?=-1)
+DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
 GET		 /collection/favorites					controllers.CollectionController.getFavorites()
