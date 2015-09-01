@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.util.List;
+
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
@@ -25,6 +27,7 @@ import play.Logger.ALogger;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -35,23 +38,21 @@ import db.DB;
 public class GroupManager extends Controller {
 	public static final ALogger log = Logger.of(UserGroup.class);
 
-
 	public static Result createGroup() {
-		ArrayNode json = (ArrayNode) request().body().asJson();
+
 		ObjectNode result = Json.newObject();
-
-
+		String userId = AccessManager.effectiveUserIds(
+				session().get("effectiveUserIds")).get(0);
 		UserGroup newGroup = new UserGroup();
-		for(JsonNode gid: json)
-			newGroup.getParentGroups().add(new ObjectId(gid.asText()));
+		newGroup.setAdministrator(new ObjectId(userId));
+		newGroup.getUsers().add(new ObjectId(userId));
 		try {
 			DB.getUserGroupDAO().makePermanent(newGroup);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error("Cannot save group to database!", e);
 			result.put("message", "Cannot save group to database!");
 			return internalServerError(result);
 		}
-
 		return ok(Json.toJson(newGroup));
 	}
 
@@ -60,7 +61,7 @@ public class GroupManager extends Controller {
 
 		try {
 			DB.getUserGroupDAO().deleteById(new ObjectId(gid));
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error("Cannot delete group from database!", e);
 			result.put("message", "Cannot delete group from database!");
 			return internalServerError(result);

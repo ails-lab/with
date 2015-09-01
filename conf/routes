@@ -59,7 +59,7 @@ PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= 
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
-POST	/group/create							controllers.GroupManager.createGroup()
+PUT		/group/create							controllers.GroupManager.createGroup()
 DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 
 # Rights Controller
