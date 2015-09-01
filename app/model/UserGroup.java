@@ -35,6 +35,7 @@ public class UserGroup {
 	@Id
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
+	private ObjectId administrator;
 
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private final List<ObjectId> users = new ArrayList<ObjectId>();
@@ -49,6 +50,14 @@ public class UserGroup {
 
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
+	}
+
+	public ObjectId getAdministrator() {
+		return administrator;
+	}
+
+	public void setAdministrator(ObjectId administrator) {
+		this.administrator = administrator;
 	}
 
 	public List<ObjectId> getUsers() {
