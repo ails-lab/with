@@ -45,6 +45,8 @@ public class SourceResponse {
 		for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(hitToRecord(hit));
 		}
+		//source refers to the external APIs and the WITH db
+		//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 		if (elasticrecords.size() > 0)
 			this.source = elasticrecords.get(0).getSource();
 		else
@@ -54,6 +56,7 @@ public class SourceResponse {
 		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
 		for (CollectionRecord r : elasticrecords) {
 			ItemsResponse it = new ItemsResponse();
+			it.comesFrom = r.getSource();
 			it.title = Arrays.asList(new Lang(null, r.getTitle()));
 			it.description = Arrays.asList(new Lang(null, r.getDescription()));
 			it.id = r.getSourceId();
@@ -119,6 +122,7 @@ public class SourceResponse {
 		public MyURL url;
 		public List<String> fullresolution;
 		public List<Lang> rights;
+		public String comesFrom;
 		public String externalId;
 	}
 
