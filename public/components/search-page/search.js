@@ -249,7 +249,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						 var record = new Record({
 							recordId: result.recordId || result.id,
 							thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-							fullres: result.fullresolution!=null && result.fullresolution[0] != null ? result.fullresolution[0]:"",
+							fullres: result.fullresolution!=null ? result.fullresolution : "",
 							title: result.title!=null? result.title:"",
 							view_url: result.url.fromSourceAPI,
 							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
