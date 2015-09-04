@@ -200,16 +200,6 @@ public class SearchController extends Controller {
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
 				.getResults(cq);
-		if ((q.source != null) && (q.source.size() > 0)) {
-			if (q.source.contains("Mint"))
-				q.mintSource = true;
-			if (q.source.contains("UpladedByUser"))
-				q.uploadedByUser = true;
-			q.source.remove("Mint");
-			q.source.remove("UploadedByUser");
-			// q.source.remove("With");
-			q.source.add("With");
-		}
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
 				List<CommonQuery> list = src.splitFilters(q);

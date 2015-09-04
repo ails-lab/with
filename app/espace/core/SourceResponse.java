@@ -47,10 +47,7 @@ public class SourceResponse {
 		}
 		//source refers to the external APIs and the WITH db
 		//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
-		if (elasticrecords.size() > 0)
-			this.source = elasticrecords.get(0).getSource();
-		else
-			this.source = "Mint";
+		this.source = "WITHin";
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
 		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
@@ -145,7 +142,7 @@ public class SourceResponse {
 			res.items.addAll(items);
 		if (r2.items != null)
 			res.items.addAll(r2.items);
-		if (filtersLogic != null && r2.filtersLogic != null) {
+		if ((filtersLogic != null) && (r2.filtersLogic != null)) {
 			res.filtersLogic = filtersLogic;
 			FiltersHelper.merge(res.filtersLogic, r2.filtersLogic);
 			res.filters = ListUtils.transform(res.filtersLogic, (CommonFilterLogic x) -> {
