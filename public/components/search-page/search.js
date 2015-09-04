@@ -249,14 +249,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						 var record = new Record({
 							recordId: result.recordId || result.id,
 							thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-							fullres: result.fullresolution!=null ? result.fullresolution : "",
+							fullres: result.fullresolution,
 							title: result.title!=null? result.title:"",
 							view_url: result.url.fromSourceAPI,
 							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
 							provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
 							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 							externalId: result.externalId,
-							source: source
+							source: result.comesFrom!=null ? result.comesFrom : source
 						  });
 						 items.push(record);}
 						}
@@ -280,7 +280,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						else if(source=="DigitalNZ"){
 							api_console="http://api.digitalnz.org/"
 						}
-						else{api_console="http://www.europeanafashion.eu/api/search/"+self.term();}
+						else if (source=="EFashion"){
+							api_console="http://www.europeanafashion.eu/api/search/"+self.term();
+						}
+						else if (source=="Rijksmuseum") {
+							api_console="https://www.rijksmuseum.nl/en/api";
+						}
+						else
+							api_console="";
 						var srcCat=new SourceCategory({
 							source:source,
 							items:items,

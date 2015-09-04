@@ -31,7 +31,9 @@
 					<div class="dummy-column">
 					<h2>
 					 <!-- ko text: source --><!-- /ko -->
+					 <!-- ko if: consoleurl != "" -->
 					 <span class="withsearch-console"><a data-bind="attr: { href:consoleurl}" target="_blank"><i class="fa fa-external-link fa-1" title="API console"></i></a></span>
+					 <!-- /ko -->
 					</h2>
 
 					 <!-- ko foreach: items -->
