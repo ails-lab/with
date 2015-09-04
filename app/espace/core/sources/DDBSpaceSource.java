@@ -93,7 +93,7 @@ public class DDBSpaceSource extends ISpaceSource {
 					};
 					it.thumb = ListUtils.transform(readArrayAttr, f);
 					it.fullresolution = null;
-					it.title = Utils.readLangAttr(item, "title", false);
+					it.title = Utils.readAttr(item, "title", false);
 					// it.description = Utils.readLangAttr(item, "description",
 					// false);
 					// it.creator =

@@ -184,15 +184,15 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 								"thumbnail")), "value", false);
 						// TODO not present
 						it.fullresolution = null;
-						it.title = Utils.readLangAttr(item, "title", false);
-						it.description = Utils.readLangAttr(item, "abstract",
+						it.title = Utils.readAttr(item, "title", false);
+						it.description = Utils.readAttr(item, "abstract",
 								false);
 						it.year = Utils.readArrayAttr(item, "issued", true);
 
 						// TODO are they the same?
-						it.creator = Utils.readLangAttr(item, "contributor",
+						it.creator = Utils.readAttr(item, "contributor",
 								false);
-						it.dataProvider = Utils.readLangAttr(item,
+						it.dataProvider = Utils.readAttr(item,
 								"contributor", false);
 
 						it.url = new MyURL();

@@ -57,8 +57,8 @@ public class SourceResponse {
 		for (CollectionRecord r : elasticrecords) {
 			ItemsResponse it = new ItemsResponse();
 			it.comesFrom = r.getSource();
-			it.title = Arrays.asList(new Lang(null, r.getTitle()));
-			it.description = Arrays.asList(new Lang(null, r.getDescription()));
+			it.title = r.getTitle();
+			it.description = r.getDescription();
 			it.id = r.getSourceId();
 			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
@@ -113,16 +113,15 @@ public class SourceResponse {
 	public static class ItemsResponse {
 		public String id;
 		public List<String> thumb;
-		public List<Lang> title;
-		public List<Lang> description;
-		public List<Lang> creator;
+		public String title;
+		public String description;
+		public String creator;
 		public List<String> year;
-		public List<Lang> dataProvider;
-		public List<Lang> provider;
+		public String dataProvider;
 		public MyURL url;
 		public List<String> fullresolution;
-		public List<Lang> rights;
 		public String comesFrom;
+		public String rights;
 		public String externalId;
 	}
 
