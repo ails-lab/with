@@ -235,5 +235,18 @@ public class RecordController extends Controller {
 		result.put("message", "Cannot retrieve entries from db");
 		return internalServerError(result);
 	}
+	
+	/**
+	 *
+	 * @param externalId
+	 * @return
+	 */
+	public static Result getRecordCollections(String externalId) {
+		ObjectNode result = Json.newObject();
+
+		
+		result.put("message", "Cannot retrieve entries from db");
+		return internalServerError(result);
+	}
 
 }
