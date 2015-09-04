@@ -180,9 +180,9 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 					}
 					ItemsResponse it = new ItemsResponse();
 					it.id = Utils.readAttr(item, "id", true);
-					it.title = Utils.readLangAttr(item, "title", false);
-					it.creator = Utils.readLangAttr(item, "creator", false);
-					it.description = Utils.readLangAttr(item, "description", false);
+					it.title = Utils.readAttr(item, "title", false);
+					it.creator = Utils.readAttr(item, "creator", false);
+					it.description = Utils.readAttr(item, "description", false);
 
 					it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
 					// TODO not present
@@ -196,7 +196,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 					it.url = new MyURL();
 					it.url.original = Utils.readArrayAttr(item, "landing_url", false);
 					it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
-					it.rights = Utils.readLangAttr(item, "rights_url", false);
+					it.rights = Utils.readAttr(item, "rights_url", false);
 					it.externalId = it.fullresolution.get(0);
 					if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
 						it.externalId = it.url.original.get(0);

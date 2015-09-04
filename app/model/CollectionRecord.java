@@ -54,7 +54,7 @@ public class CollectionRecord {
 	private boolean isPublic;
 
 	// which backend provided this entry
-	// Europeana, DPLA ....
+	// Europeana, DPLA, Mint
 	private String source;
 
 	// an optional URL for the thumbnail
