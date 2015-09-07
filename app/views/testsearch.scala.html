@@ -167,12 +167,12 @@
 				  									<div class="col-md-8">
 				    									<b>Title: </b> 
 				    									<a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
-				 											@shorttext(it.title.get(0).value,40)
+				 											@shorttext(it.title,40)
 				 										</a><br/>
 				 										
 				 										<b>Data Provider: </b> 
-				    									@if(it.dataProvider!=null && it.dataProvider.size()>0) {@shorttext(it.dataProvider.get(0).value,100)} else {NA} <br/>
-				  										<b>Descr: </b>@if(it.description!=null && it.description.size()>0) {@shorttext(it.description.get(0).value,100)} else {NA} <br/>
+				    									@if(it.dataProvider!=null) {@shorttext(it.dataProvider,100)} else {NA} <br/>
+				  										<b>Descr: </b>@if(it.description!=null) {@shorttext(it.description,100)} else {NA} <br/>
 				   									</div>
 				  									
 				  									
