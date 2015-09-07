@@ -16,58 +16,173 @@
 
 package controllers;
 
-import java.util.List;
+import java.util.Set;
 
+import javax.validation.ConstraintViolation;
+
+import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
 public class GroupManager extends Controller {
+
 	public static final ALogger log = Logger.of(UserGroup.class);
 
-	public static Result createGroup() {
+	/**
+	 * Creates a {@link UserGroup} with the specified user as administrator and
+	 * with the given body as JSON.
+	 * <p>
+	 * The name of the group must be unique. If the administrator is not
+	 * provided as a parameter the administrator of the group becomes the user
+	 * who made the call.
+	 *
+	 * @param adminId
+	 *            the administrator id
+	 * @param adminUsername
+	 *            the administrator username
+	 * @return the JSON of the new group
+	 */
+	public static Result createGroup(String adminId, String adminUsername) {
 
-		ObjectNode result = Json.newObject();
-		String userId = AccessManager.effectiveUserIds(
-				session().get("effectiveUserIds")).get(0);
-		UserGroup newGroup = new UserGroup();
-		newGroup.setAdministrator(new ObjectId(userId));
-		newGroup.getUsers().add(new ObjectId(userId));
+		ObjectId admin;
+		UserGroup newGroup = null;
+		JsonNode json = request().body().asJson();
+
+		if (json == null) {
+			return badRequest("Invalid JSON");
+		}
+		if (!json.has("name")) {
+			return badRequest("Must specify name for the group");
+		}
+		if (!uniqueGroupName(json.get("name").asText())) {
+			return badRequest("Group name already exists");
+		}
+		newGroup = Json.fromJson(json, UserGroup.class);
+		if (adminId != null) {
+			admin = new ObjectId(adminId);
+		} else if (adminUsername != null) {
+			admin = DB.getUserDAO().getByUsername(adminUsername).getDbId();
+		} else {
+			if ((adminId = AccessManager.effectiveUserId(session().get(
+					"effectiveUserIds"))).isEmpty()) {
+				return internalServerError("Must specify administrator of group");
+			}
+			admin = new ObjectId(AccessManager.effectiveUserId(session().get(
+					"effectiveUserIds")));
+		}
+		newGroup.setAdministrator(admin);
+		newGroup.getUsers().add(admin);
+		Set<ConstraintViolation<UserGroup>> violations = Validation
+				.getValidator().validate(newGroup);
+		for (ConstraintViolation<UserGroup> cv : violations) {
+			return badRequest("[" + cv.getPropertyPath() + "] "
+					+ cv.getMessage());
+		}
 		try {
 			DB.getUserGroupDAO().makePermanent(newGroup);
+			Set<ObjectId> parentGroups = newGroup.retrieveParents();
+			parentGroups.add(newGroup.getDbId());
+			User user = DB.getUserDAO().get(admin);
+			user.addUserGroup(parentGroups);
+			DB.getUserDAO().makePermanent(user);
 		} catch (Exception e) {
 			log.error("Cannot save group to database!", e);
-			result.put("message", "Cannot save group to database!");
-			return internalServerError(result);
+			return internalServerError("Cannot save group to database!");
 		}
 		return ok(Json.toJson(newGroup));
 	}
 
-	public static Result deleteGroup(String gid) {
-		ObjectNode result = Json.newObject();
+	private static boolean uniqueGroupName(String name) {
+		return (DB.getUserGroupDAO().getByName(name) == null);
+	}
+
+	/**
+	 * Deletes a group from the database. The users who participate are not
+	 * deleted as well.
+	 *
+	 * @param groupId
+	 *            the group id
+	 * @return success message
+	 */
+	public static Result deleteGroup(String groupId) {
 
 		try {
-			DB.getUserGroupDAO().deleteById(new ObjectId(gid));
+			DB.getUserGroupDAO().deleteById(new ObjectId(groupId));
 		} catch (Exception e) {
 			log.error("Cannot delete group from database!", e);
-			result.put("message", "Cannot delete group from database!");
-			return internalServerError(result);
+			return internalServerError("Cannot delete group from database!");
 		}
+		return ok("Group deleted succesfully from database");
+	}
 
-		result.put("message", "Group deleted succesfully from database");
-		return ok(result);
+	/**
+	 * Gets the group.
+	 *
+	 * @param groupId
+	 *            the group id
+	 * @return the group
+	 */
+	public static Result getGroup(String groupId) {
+
+		try {
+			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			return ok(DB.getJson(group));
+		} catch (Exception e) {
+			log.error("Cannot retrieve group from database!", e);
+			return internalServerError("Cannot retrieve group from database!");
+		}
+	}
+
+	/**
+	 * Adds a user to group.
+	 *
+	 * @param userId
+	 *            the user id
+	 * @param groupId
+	 *            the group id
+	 * @return success message
+	 */
+	public static Result addUserToGroup(String userId, String groupId) {
+
+		User user;
+
+		if (userId == null) {
+			userId = AccessManager.effectiveUserId(session().get(
+					"effectiveUserIds"));
+		}
+		user = DB.getUserDAO().get(new ObjectId(userId));
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (group == null) {
+			return internalServerError("Cannot retrieve group from database!");
+		}
+		group.getUsers().add(new ObjectId(userId));
+		Set<ObjectId> parentGroups = group.retrieveParents();
+
+		if (user == null) {
+			return internalServerError("Cannot retrieve user from database!");
+		}
+		parentGroups.add(group.getDbId());
+		user.addUserGroup(parentGroups);
+
+		if (!(DB.getUserDAO().makePermanent(user) == null)
+				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+			return ok("Group succesfully added to User");
+		}
+		return internalServerError("Cannot store to database!");
+
 	}
 }
