@@ -36,6 +36,7 @@ public class UserGroup {
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 	private ObjectId administrator;
+	private String name;
 
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private final List<ObjectId> users = new ArrayList<ObjectId>();
@@ -79,6 +80,14 @@ public class UserGroup {
 		}
 
 		return ancestors;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
