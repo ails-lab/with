@@ -77,9 +77,9 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			
 			$.ajax({
 				type    : "get",
-				url     : "/record/getRecordCollections/" + self.externalId,
-				success : function(data) {
-					self.recordCollections(data.collections);
+				url     : "/record/getRecordCollections/" + self.externalId(),
+				success : function(result) {
+					self.recordCollections(result.collections);
 				},
 				error   : function(request, status, error) {
 					console.log(request);
