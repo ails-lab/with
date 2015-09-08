@@ -15,8 +15,11 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.url = ko.observable("");
 		self.id = ko.observable("");
 		self.externalId = ko.observable("");
+		self.recordCollections = ko.observable("");
+
 		self.cachedThumbnail = ko.pureComputed(function() {
-			
+
+
 			   if(self.thumb()){
 				if (self.thumb().indexOf('//') === 0) {
 					return self.thumb();
@@ -72,6 +75,17 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.externalId(data.externalId);
 			self.source(data.source);
 			
+			$.ajax({
+				type    : "get",
+				url     : "/record/getRecordCollections/" + self.externalId,
+				success : function(data) {
+					self.recordCollections(data.collections);
+				},
+				error   : function(request, status, error) {
+					console.log(request);
+				}
+			});
+
 		};
 
 		self.sourceImage = ko.pureComputed(function () {
