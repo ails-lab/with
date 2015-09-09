@@ -34,7 +34,6 @@ import play.mvc.Result;
 import utils.AccessManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
@@ -149,6 +148,9 @@ public class GroupManager extends Controller {
 
 	/**
 	 * Adds a user to group.
+	 * <p>
+	 * Right now only the administrator of the group and the superuser have the
+	 * rights to add a group to the group.
 	 *
 	 * @param userId
 	 *            the user id
@@ -158,17 +160,21 @@ public class GroupManager extends Controller {
 	 */
 	public static Result addUserToGroup(String userId, String groupId) {
 
-		User user;
-
-		if (userId == null) {
-			userId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+		String adminId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if ((adminId == null) || (adminId.equals(""))) {
+			return forbidden("Only administrator of group has the right to add users");
 		}
-		user = DB.getUserDAO().get(new ObjectId(userId));
+		User admin = DB.getUserDAO().get(new ObjectId(adminId));
 		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 		if (group == null) {
 			return internalServerError("Cannot retrieve group from database!");
 		}
+		if (!group.getAdministrator().equals(new ObjectId(adminId))
+				&& (!admin.isSuperUser())) {
+			return forbidden("Only administrator of group has the right to add users");
+		}
+		User user = DB.getUserDAO().get(new ObjectId(userId));
 		group.getUsers().add(new ObjectId(userId));
 		Set<ObjectId> parentGroups = group.retrieveParents();
 
@@ -183,6 +189,28 @@ public class GroupManager extends Controller {
 			return ok("Group succesfully added to User");
 		}
 		return internalServerError("Cannot store to database!");
+
+	}
+	
+	public static Result editGroup(String groupId) {
+		return TODO;
+
+	}
+
+	/**
+	 * Removes a user from the group.
+	 * <p>
+	 * The users allowed to remove a user from a group is the administrator of
+	 * the group, the superuser and the user himself. 
+	 *
+	 * @param userId
+	 *            the user id
+	 * @param groupId
+	 *            the group id
+	 * @return success message
+	 */
+	public static Result removeUserFromGroup(String userId, String groupId) {
+		return TODO;
 
 	}
 }
