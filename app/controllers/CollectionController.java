@@ -638,14 +638,18 @@ public class CollectionController extends Controller {
 				List<CollectionRecord> storedRecords;
 				if((json.get("externalId") != null) &&
 					((storedRecords =  DB.getCollectionRecordDAO().getByUniqueId(json.get("externalId").asText())) != null) &&
-					storedRecords.get(0).getContent() != null) {
+					(storedRecords.get(0).getContent() != null)) {
 						for (Entry<String , String> e: storedRecords.get(0).getContent().entrySet()) {
 							record.getContent().put(e.getKey(), e.getValue());
 						}
 					DB.getCollectionRecordDAO().makePermanent(record);
+					// index record and merged_record
+					ElasticIndexer indexer = new ElasticIndexer(record);
+					indexer.index();
 				} else {
 					addContentToRecord(record.getDbId(), source, sourceId);
 				}
+
 				//increment likes if collection title is _favourites
 				if(c.getTitle().equals("_favorites")) {
 					ElasticIndexer indexer = new ElasticIndexer(record);
@@ -799,7 +803,7 @@ public class CollectionController extends Controller {
 		if (collection.getTitle().equals("_favorites")) {
 			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
 			ElasticUpdater updater = new ElasticUpdater(null, record);
-			updater.decLikes(); 
+			updater.decLikes();
 		}
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))
 				.getN() == 0) {

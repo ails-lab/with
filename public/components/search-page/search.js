@@ -141,7 +141,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Mint", "Rijksmuseum"]);
+		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Mint", "Rijksmuseum", "WITHin"]);
 		self.mixresults=ko.observableArray([]);
 		
 		self.results = ko.observableArray([]);
@@ -257,7 +257,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 							provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
 							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 							externalId: result.externalId,
-							source: source
+							source: result.comesFrom!=null ? result.comesFrom : source
 						  });
 						 items.push(record);}
 						}
@@ -281,7 +281,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						else if(source=="DigitalNZ"){
 							api_console="http://api.digitalnz.org/"
 						}
-						else{api_console="http://www.europeanafashion.eu/api/search/"+self.term();}
+						else if (source=="EFashion"){
+							api_console="http://www.europeanafashion.eu/api/search/"+self.term();
+						}
+						else if (source=="Rijksmuseum") {
+							api_console="https://www.rijksmuseum.nl/en/api";
+						}
+						else
+							api_console="";
 						var srcCat=new SourceCategory({
 							source:source,
 							items:items,
