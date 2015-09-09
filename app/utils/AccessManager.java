@@ -85,4 +85,11 @@ public class AccessManager {
 		return userIds;
 	}
 
+	public static String effectiveUserId(String effectiveUserIds) {
+		if (effectiveUserIds == null)
+			effectiveUserIds = "";
+		String[] ids = effectiveUserIds.split(",");
+		return ids[0];
+	}
+
 }

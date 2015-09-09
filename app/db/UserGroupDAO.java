@@ -19,12 +19,15 @@ package db;
 import model.UserGroup;
 import play.Logger;
 
-public class UserGroupDAO extends DAO<UserGroup>{
+public class UserGroupDAO extends DAO<UserGroup> {
 	static private final Logger.ALogger log = Logger.of(UserGroup.class);
-
 
 	public UserGroupDAO() {
 		super(UserGroup.class);
+	}
+
+	public UserGroup getByName(String name) {
+		return this.findOne("name", name);
 	}
 
 }

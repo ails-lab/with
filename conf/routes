@@ -59,8 +59,15 @@ PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= 
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
-PUT		/group/create							controllers.GroupManager.createGroup()
+# and image
+PUT		/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null)
+POST	/group/:id								controllers.GroupManager.editGroup(id)
 DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
+GET		/group/:id								controllers.GroupManager.getGroup(id)
+POST	/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
+POST	/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
+#GET	/group/joinRequest/:groupId				controllers.GroupManager.requestJoinToGroup(userId: String ?=null, username: String ?=null, groupId)
+#find by group name (with access rights)
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
@@ -77,6 +84,7 @@ DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 GET		/user/logout						    controllers.UserManager.logout()
+# both users and groups
 GET		/user/listNames			                controllers.UserManager.listNames(prefix:java.lang.String ?= "")
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
@@ -85,7 +93,6 @@ GET     /user/findByUsernameOrEmail				controllers.UserManager.findByUsernameOrE
 GET		/user/:id/photo			                controllers.UserManager.getUserPhoto(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)
-GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup(id, gid: String)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()
