@@ -65,7 +65,7 @@ public class WithSpaceSource extends ISpaceSource {
 			elasticoptions = new SearchOptions();
 			elasticoptions.setUser(q.getUser());
 			searcher.setType(Elastic.type_collection);
-			SearchResponse response = searcher.search(null, elasticoptions);
+			SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
 			colFields = getCollectionMetadaFromHit(response.getHits());
 
 		}

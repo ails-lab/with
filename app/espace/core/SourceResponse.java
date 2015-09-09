@@ -25,14 +25,10 @@ import model.CollectionRecord;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 
-import play.libs.Json;
-import utils.ExtendedCollectionRecord;
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-
-import elastic.Elastic;
+import elastic.ElasticUtils;
 
 public class SourceResponse {
 
@@ -43,7 +39,7 @@ public class SourceResponse {
 		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
 		this.totalCount = (int) resp.getHits().getTotalHits();
 		for (SearchHit hit : resp.getHits().hits()) {
-			elasticrecords.add(hitToRecord(hit));
+			elasticrecords.add(ElasticUtils.hitToRecord(hit));
 		}
 		//source refers to the external APIs and the WITH db
 		//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
@@ -63,29 +59,6 @@ public class SourceResponse {
 			items.add(it);
 		}
 		this.items = items;
-	}
-
-	private ExtendedCollectionRecord hitToRecord(SearchHit hit) {
-		JsonNode json = Json.parse(hit.getSourceAsString());
-		ExtendedCollectionRecord record = Json.fromJson(json, ExtendedCollectionRecord.class);
-		if (hit.type().equals(Elastic.type_general)) {
-			List<String> colIds = new ArrayList<String>();
-			List<String> tags = new ArrayList<String>();
-			ArrayNode ids = (ArrayNode) json.get("collections");
-			ArrayNode allTags = (ArrayNode) json.get("tags");
-
-			for (JsonNode id : ids)
-				if (!colIds.contains(id.asText()))
-					colIds.add(id.asText());
-			for (JsonNode t : allTags)
-				if (!tags.contains(t.asText()))
-					tags.add(t.asText());
-
-			record.setCollections(colIds);
-			record.setAllTags(tags);
-		}
-
-		return record;
 	}
 
 	public static class Lang {
