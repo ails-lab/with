@@ -45,6 +45,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import db.DB;
+import elastic.ElasticEraser;
+import elastic.ElasticIndexer;
 
 public class TestRecordController {
 
@@ -272,6 +274,68 @@ public class TestRecordController {
 			public void run() {
 				Result result = route(fakeRequest("GET", "/record/findInCollections"
 						+ "?source=Youtube&sourceId=123456"));
+
+			    JsonParser parser = new JsonParser();
+			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			    JsonElement el = parser.parse(contentAsString(result));
+			    System.out.println(gson.toJson(el));
+
+			    if(status(result) == 200)
+				    assertThat(status(result)).isEqualTo(OK);
+			    else {
+			    	System.out.println(status(result));
+			    	Assert.fail();
+			    }
+
+			}
+		});
+	}
+
+	@Test
+	public void testGetCollectionMetadata() {
+		User user = new User();
+		user.setEmail("test@controller.gr");
+		user.setUsername("controller");
+		DB.getUserDAO().makePermanent(user);
+
+		Collection col = new Collection();
+		col.setDescription("Collection from Controller");
+		col.setTitle("Test_1 collection from Controller");
+		col.setCreated(new Date());
+		col.setLastModified(new Date());
+		col.setIsPublic(false);
+		col.setOwnerId(user);
+		DB.getCollectionDAO().makePermanent(col);
+
+		CollectionRecord record = new CollectionRecord();
+		record.setCollectionId(col.getDbId());
+		record.setTitle("This is stored to test the controller");
+		record.setDescription("Desc to test controller");
+		record.setCreated(new Date());
+		record.setExternalId("AAA666");
+		record.setSource("Youtube");
+		record.setSourceId("123456");
+		record.setSourceUrl("http://www.youtube.com/");
+		record.setType("Music");
+		record.setItemRights("all");
+
+		try {
+			record.getContent().put("XML-EDM",
+					new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxml-core.xml"))));
+			record.getContent().put("XML-ITEM/CLIP",
+					new String(Files.readAllBytes(Paths.get("test/resources/sample-euscreenxl-item_clip.xml"))));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		DB.getCollectionRecordDAO().makePermanent(record);
+
+		ElasticIndexer indexer = new ElasticIndexer(col, record);
+		indexer.index();
+
+		running( fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				Result result = route(fakeRequest("GET", "/record/AAA666/mergedCollections"));
 
 			    JsonParser parser = new JsonParser();
 			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
