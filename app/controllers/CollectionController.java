@@ -799,7 +799,6 @@ public class CollectionController extends Controller {
 		if (collection.getTitle().equals("_favorites")) {
 			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
 			ElasticUpdater updater = new ElasticUpdater(null, record);
-			System.out.println("Decremented in DB");
 			updater.decLikes(); 
 		}
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId))

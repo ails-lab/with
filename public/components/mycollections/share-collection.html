@@ -13,7 +13,7 @@
 				    <div class="spec">
 				    <label for="firstName">Select user</label>
 						<input type="search" class="form-control" id="usernameOrEmail" placeholder="Username or email"
-						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.addToSharedWithUsers"/>
+						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername"/>
 						 <span style="padding-left:10px;">
 							 <button type="button" class="btn btn-info btn-xs" 
 							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
@@ -56,7 +56,7 @@
 								<!-- /ko -->
 								<!-- ko if: accessRights() == 'WRITE' -->
 								<span class="glyphicon glyphicon-eye-open" title="Share" 
-									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ'), " 
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')" 
 									style="cursor:pointer;color:blue">
 								</span>
 								<!-- /ko -->

@@ -60,7 +60,6 @@ public class SearchController extends Controller {
 	public static final ALogger log = Logger.of(SearchController.class);
 
 	public static Result searchslow() {
-		System.out.println(request().body());
 		JsonNode json = request().body().asJson();
 		CommonQuery q = null;
 		if (json == null) {
@@ -196,7 +195,6 @@ public class SearchController extends Controller {
 	}
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
-		System.out.println(q);
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
 				.getResults(cq);
@@ -223,7 +221,6 @@ public class SearchController extends Controller {
 	}
 
 	public static Promise<Result> searchWithThreads() {
-		System.out.println(request().body());
 		JsonNode json = request().body().asJson();
 		final CommonQuery q;
 
@@ -251,7 +248,6 @@ public class SearchController extends Controller {
 	}
 
 	public static List<SourceResponse> search(CommonQuery q) {
-		System.out.println(q);
 		List<SourceResponse> result = ESpaceSources.fillResults(q);
 		return result;
 	}
@@ -262,7 +258,6 @@ public class SearchController extends Controller {
 
 	public static Result posttestsearch() {
 		// System.out.println("--------------------");
-		System.out.println(userForm.bindFromRequest().toString());
 		CommonQuery q = userForm.bindFromRequest().get();
 		if ((q == null) || (q.searchTerm == null)) {
 			q = new CommonQuery();
@@ -294,7 +289,6 @@ public class SearchController extends Controller {
 			FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 		}
 		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
-			System.out.println(o);
 			return o.export();
 		};
 		List<CommonFilterResponse> merge1 = ListUtils.transform(merge, f);

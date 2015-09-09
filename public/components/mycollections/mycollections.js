@@ -18,8 +18,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 },
 			   		 transformResult: function(response) {
 			   			var result = [];
+			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
 			   			for (var i in response) {
-			   				result.push({"value": response[i]});
+			   				if (response[i] != myUsername)
+			   					result.push({"value": response[i]});
 			   			}
 			   			return {"suggestions": result};
 			   		 },

@@ -225,7 +225,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
 					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
-					it.title = Utils.readAttr(item, "title", false);
+					it.title = Utils.readArrayAttr(item, "title", false).get(0);
 					it.description = Utils.readAttr(item, "dcDescription", false);
 					it.creator = Utils.readAttr(item, "dcCreator", false);
 					it.year = Utils.readArrayAttr(item, "year", false);
