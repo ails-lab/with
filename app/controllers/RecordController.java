@@ -250,7 +250,8 @@ public class RecordController extends Controller {
 	 * @return
 	 */
 	public static Result getCollectionMetadata(String externalId) {
-		ArrayNode result = Json.newObject().arrayNode();
+		
+		ObjectNode result = Json.newObject();
 
 		ElasticSearcher searchMerged = new ElasticSearcher(Elastic.type_general);
 		SearchOptions options = new SearchOptions();
@@ -273,9 +274,9 @@ public class RecordController extends Controller {
 			return internalServerError("message", "No collections found for this merged record");
 		}
 		
-		ObjectNode count = Json.newObject();
-		count.put("count",resp.getHits().getTotalHits());
-		result.add(count);
+		
+		result.put("count",resp.getHits().getTotalHits());
+		ArrayNode collections = Json.newObject().arrayNode();
 		for(SearchHit hit: resp.getHits().getHits()) {
 			ObjectNode o = Json.newObject();
 			Collection c = ElasticUtils.hitToCollection(hit);
@@ -283,9 +284,9 @@ public class RecordController extends Controller {
 			o.put("description", c.getDescription());
 			o.put("thumbnail", c.getThumbnailUrl());
 
-			result.add(o);
+			collections.add(o);
 		}
-
+		result.put("collections",collections);
 		return ok(result);
 	}
 
