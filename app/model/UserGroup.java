@@ -37,6 +37,9 @@ public class UserGroup {
 	private ObjectId dbId;
 	private ObjectId administrator;
 	private String name;
+	private String desc;
+
+	private ObjectId thumbnail;
 
 	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
 	private final List<ObjectId> users = new ArrayList<ObjectId>();
@@ -88,6 +91,22 @@ public class UserGroup {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public ObjectId getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(ObjectId thumbnail) {
+		this.thumbnail = thumbnail;
 	}
 
 }
