@@ -24,12 +24,18 @@ import org.mongodb.morphia.geo.Point;
 public class Organization extends UserGroup {
 
 	private String address;
-	private Point location;
+	private Point coordinates;
+	private String city;
+	private String country;
+
+	private String name;
 	private String url;
+	private String description;
 
-	private ObjectId bgImg;
+	private ObjectId logo;
+	private ObjectId coverImage;
 
-	private List<ObjectId> featuredColsl;
+	private List<ObjectId> featuredCollections;
 
 
 
@@ -42,11 +48,11 @@ public class Organization extends UserGroup {
 	}
 
 	public Point getLocation() {
-		return location;
+		return coordinates;
 	}
 
 	public void setLocation(Point location) {
-		this.location = location;
+		this.coordinates = location;
 	}
 
 	public String getUrl() {
@@ -58,19 +64,59 @@ public class Organization extends UserGroup {
 	}
 
 	public ObjectId getBgImg() {
-		return bgImg;
+		return coverImage;
 	}
 
 	public void setBgImg(ObjectId bgImg) {
-		this.bgImg = bgImg;
+		this.coverImage = bgImg;
 	}
 
 	public List<ObjectId> getFeaturedColsl() {
-		return featuredColsl;
+		return featuredCollections;
 	}
 
 	public void setFeaturedColsl(List<ObjectId> featuredColsl) {
-		this.featuredColsl = featuredColsl;
+		this.featuredCollections = featuredColsl;
+	}
+
+	public ObjectId getLogo() {
+		return logo;
+	}
+
+	public void setLogo(ObjectId logo) {
+		this.logo = logo;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getCountry() {
+		return country;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
 	}
 
 }
