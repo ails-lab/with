@@ -192,58 +192,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return addfilters(q, builder).getHttp();
 	}
 
-	// private String getSearchTerm(CommonQuery q) {
-	// if (Utils.hasAny(q.searchTerm))
-	// return Utils.spacesPlusFormatQuery(q.searchTerm)
-	// + (Utils.hasAny(q.termToExclude) ? "+NOT+("
-	// + Utils.spacesPlusFormatQuery(q.termToExclude)
-	// + ")" : "");
-	// return null;
-	// }
-
-	// private void euroAPI(CommonQuery q, EuropeanaQuery eq) {
-	// if (q.europeanaAPI != null) {
-	// eq.addSearch(Utils.getAttr(q.europeanaAPI.who, "who"));
-	// eq.addSearch(Utils.getAttr(q.europeanaAPI.where, "where"));
-	// if (q.europeanaAPI.facets != null) {
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.TYPE, "TYPE"));
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.LANGUAGE,
-	// "LANGUAGE"));
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.YEAR, "YEAR"));
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.COUNTRY,
-	// "COUNTRY"));
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.RIGHTS,
-	// "RIGHTS"));
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.PROVIDER,
-	// "PROVIDER"));
-	// eq.addSearch(Utils.getFacetsAttr(q.europeanaAPI.facets.UGC, "UGC"));
-	// }
-	// if (q.europeanaAPI.refinement != null) {
-	// if (q.europeanaAPI.refinement.refinementTerms != null) {
-	// for (String t : q.europeanaAPI.refinement.refinementTerms) {
-	// eq.addSearch(t);
-	// }
-	// }
-	// if (q.europeanaAPI.refinement.spatialParams != null) {
-	//
-	// if (q.europeanaAPI.refinement.spatialParams.latitude != null) {
-	// eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_lat", "["
-	// + q.europeanaAPI.refinement.spatialParams.latitude.startPoint + "+TO+"
-	// + q.europeanaAPI.refinement.spatialParams.latitude.endPoint + "]"));
-	// }
-	// if (q.europeanaAPI.refinement.spatialParams.longitude != null) {
-	// eq.addSearch(new Utils.Pair<String>("pl_wgs84_pos_long", "["
-	// + q.europeanaAPI.refinement.spatialParams.longitude.startPoint + "+TO+"
-	// + q.europeanaAPI.refinement.spatialParams.longitude.endPoint + "]"));
-	// }
-	// }
-	// }
-	// if (q.europeanaAPI.reusability != null) {
-	// eq.addSearchParam("reusability",
-	// Utils.getORList(q.europeanaAPI.reusability));
-	// }
-	// }
-	// }
 
 	public String getSourceName() {
 		return LABEL;
@@ -263,40 +211,38 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
-		// CommonFilterLogic contributor =
-		// CommonFilterLogic.contributorFilter();
-		if (checkFilters(q)) {
-			try {
-				response = HttpConnector.getURLContent(httpQuery);
-				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
-				System.out.println("europeana got " + res.totalCount);
-				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
-				if (response.path("success").asBoolean()) {
-					for (JsonNode item : response.path("items")) {
-						ItemsResponse it = new ItemsResponse();
-						String t = Utils.readAttr(item, "type", false);
-						// countValue(type, t);
-						it.id = Utils.readAttr(item, "id", true);
-						it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
-						it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
-						it.title = Utils.readLangAttr(item, "title", false);
-						it.description = Utils.readLangAttr(item, "dcDescription", false);
-						it.creator = Utils.readLangAttr(item, "dcCreator", false);
-						it.year = Utils.readArrayAttr(item, "year", false);
-						it.dataProvider = Utils.readLangAttr(item, "dataProvider", false);
-						it.provider = Utils.readLangAttr(item, "provider", false);
-						it.url = new MyURL();
-						it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
-						it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
-						it.rights = Utils.readLangAttr(item, "rights", false);
-						it.externalId = it.fullresolution.get(0);
-						if (it.externalId == null || it.externalId == "")
-							it.externalId = it.url.original.get(0);
-						it.externalId = DigestUtils.md5Hex(it.externalId);
-						a.add(it);
-					}
+//		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
+		if (checkFilters(q)){
+		try {
+			response = HttpConnector.getURLContent(httpQuery);
+			res.totalCount = Utils.readIntAttr(response, "totalResults", true);
+			System.out.println("europeana got " + res.totalCount);
+			res.count = Utils.readIntAttr(response, "itemsCount", true);
+			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+			if (response.path("success").asBoolean()) {
+				for (JsonNode item : response.path("items")) {
+					ItemsResponse it = new ItemsResponse();
+					it.id = Utils.readAttr(item, "id", true);
+					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
+					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
+					it.title = Utils.readArrayAttr(item, "title", false).get(0);
+					it.description = Utils.readAttr(item, "dcDescription", false);
+					it.creator = Utils.readAttr(item, "dcCreator", false);
+					it.year = Utils.readArrayAttr(item, "year", false);
+					it.dataProvider = Utils.readAttr(item, "dataProvider",
+							false);
+					it.url = new MyURL();
+					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
+							false);
+					it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
+					it.rights = Utils.readAttr(item, "rights", false);
+					it.externalId = it.fullresolution.get(0);
+					if (it.externalId == null || it.externalId == "")
+						it.externalId = it.url.original.get(0);
+					it.externalId = DigestUtils.md5Hex(it.externalId);
+					a.add(it);
 				}
+			}
 				res.items = a;
 				res.facets = response.path("facets");
 
@@ -350,10 +296,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.filtersLogic.add(rights);
 				res.filtersLogic.add(country);
 				res.filtersLogic.add(year);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		}
 		// protected void countValue(CommonFilterResponse type, String t) {
 		// type.addValue(vmap.translateToCommon(type.filterID, t));

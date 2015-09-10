@@ -138,8 +138,8 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "thumbnail", false);
 					it.fullresolution = null;
-					it.title = Utils.readLangAttr(item, "title", false);
-					it.description = Utils.readLangAttr(item, "description", false);
+					it.title = Utils.readAttr(item, "title", false);
+					it.description = Utils.readAttr(item, "description", false);
 					// it.creator =
 					// Utils.readLangAttr(item.path("sourceResource"),
 					// "creator", false);

@@ -19,22 +19,32 @@ package utils;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
-import play.Logger;
-import play.Logger.ALogger;
+import model.User.Access;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class Deserializer {
-	public static final ALogger log = Logger.of(Serializer.class);
 
+
+	public static class CustomMapDeserializer extends JsonDeserializer<Object> {
+
+		@Override
+		public Object deserialize(JsonParser rights_string, DeserializationContext arg1)
+				throws IOException, JsonProcessingException {
+			Map<ObjectId, Access> r = new HashMap<ObjectId,	Access>();
+			return null;
+		}
+
+	}
 
 	public static class DateDeserializer extends JsonDeserializer<Object> {
 

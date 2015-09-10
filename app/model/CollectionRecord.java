@@ -29,12 +29,14 @@ import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
@@ -54,7 +56,7 @@ public class CollectionRecord {
 	private boolean isPublic;
 
 	// which backend provided this entry
-	// Europeana, DPLA ....
+	// Europeana, DPLA, Mint
 	private String source;
 
 	// an optional URL for the thumbnail
@@ -89,7 +91,7 @@ public class CollectionRecord {
 	private int totalLikes;
 
 	private String itemRights;
-	
+
 	private ExhibitionRecord exhibitionRecord;
 
 	// collection specific stuff...
@@ -98,6 +100,7 @@ public class CollectionRecord {
 	private ObjectId collectionId;
 
 	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
 
 	// the place in the collection of this record,

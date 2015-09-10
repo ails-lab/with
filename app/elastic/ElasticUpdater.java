@@ -255,13 +255,6 @@ public class ElasticUpdater {
 			return null;
 		}
 
-		try {
-			System.out.println(doc.string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
 		return doc;
 	}
 
