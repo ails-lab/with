@@ -268,10 +268,14 @@ public class RecordController extends Controller {
 		ElasticSearcher searchCollections = new ElasticSearcher(Elastic.type_collection);
 		resp = searchCollections.searchForCollections(String.join(" ", collectionIds), new SearchOptions(0, 15));
 
+		
 		if(resp.getHits().getTotalHits() == 0) {
 			return internalServerError("message", "No collections found for this merged record");
 		}
-
+		
+		ObjectNode count = Json.newObject();
+		count.put("count",resp.getHits().getTotalHits());
+		result.add(count);
 		for(SearchHit hit: resp.getHits().getHits()) {
 			ObjectNode o = Json.newObject();
 			Collection c = ElasticUtils.hitToCollection(hit);
