@@ -33,17 +33,16 @@ import db.DB;
 public class UserGroup {
 
 	@Id
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 	private ObjectId administrator;
 	private String name;
 
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final List<ObjectId> users = new ArrayList<ObjectId>();
 
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final List<ObjectId> parentGroups = new ArrayList<ObjectId>();
-
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -65,7 +64,7 @@ public class UserGroup {
 		return users;
 	}
 
-	//id of parent user groups
+	// id of parent user groups
 	public List<ObjectId> getParentGroups() {
 		return parentGroups;
 	}
@@ -73,9 +72,9 @@ public class UserGroup {
 	public Set<ObjectId> retrieveParents() {
 		Set<ObjectId> ancestors = new HashSet<ObjectId>();
 		ancestors.addAll(parentGroups);
-		for(ObjectId gid: parentGroups) {
+		for (ObjectId gid : parentGroups) {
 			UserGroup g = DB.getUserGroupDAO().get(gid);
-			if((g !=null) && !g.getParentGroups().isEmpty())
+			if ((g != null) && !g.getParentGroups().isEmpty())
 				ancestors.addAll(g.retrieveParents());
 		}
 
@@ -90,4 +89,12 @@ public class UserGroup {
 		this.name = name;
 	}
 
+	public void accumulateGroups(Set<ObjectId> groupAcc) {
+		groupAcc.addAll(getParentGroups());
+		for (ObjectId grId : getParentGroups()) {
+			UserGroup ug = DB.getUserGroupDAO().get(grId);
+			if (ug != null)
+				ug.accumulateGroups(groupAcc);
+		}
+	}
 }

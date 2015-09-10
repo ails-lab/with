@@ -16,7 +16,13 @@
 
 package db;
 
+import java.util.List;
+
 import model.UserGroup;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 
 public class UserGroupDAO extends DAO<UserGroup> {
@@ -28,6 +34,13 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public UserGroup getByName(String name) {
 		return this.findOne("name", name);
+	}
+	
+	public List<UserGroup> findByUserId(ObjectId dbId) {
+		Query<UserGroup> q = createQuery()
+				.field( "users")
+				.hasThisElement( dbId );
+		return find( q ).asList();
 	}
 
 }
