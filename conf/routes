@@ -66,8 +66,7 @@ DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET		/group/:id								controllers.GroupManager.getGroup(id)
 POST	/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
 POST	/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
-#GET	/group/joinRequest/:groupId				controllers.GroupManager.requestJoinToGroup(userId: String ?=null, username: String ?=null, groupId)
-#find by group name (with access rights)
+GET		/group/findByGroupName					controllers.GroupManager.findByGroupName(name)
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
