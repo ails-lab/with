@@ -273,16 +273,20 @@ public class GroupManager extends Controller {
 		if ((userSession == null) || (userSession.equals(""))) {
 			return forbidden("No rights for user removal");
 		}
-		User user = DB.getUserDAO().get(new ObjectId(userSession));
+		User userS = DB.getUserDAO().get(new ObjectId(userSession));
 		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 		if (group == null) {
 			return internalServerError("Cannot retrieve group from database!");
 		}
 		if (!group.getAdministrator().equals(new ObjectId(userSession))
-				&& (!user.isSuperUser()&&(!userSession.equals(userId)))) {
+				&& (!userS.isSuperUser() && (!userSession.equals(userId)))) {
 			return forbidden("No rights for user removal");
 		}
-		return TODO;
+		User user = DB.getUserDAO().get(new ObjectId(userId));
+		group.getUsers().remove(new ObjectId(userId));
+		user.recalculateGroups();
+		return ok("User successfully removed from group");
+		
 	}
 
 	/**
