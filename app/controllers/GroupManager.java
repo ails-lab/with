@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -34,6 +35,9 @@ import play.mvc.Result;
 import utils.AccessManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
@@ -68,7 +72,7 @@ public class GroupManager extends Controller {
 			return badRequest("Must specify name for the group");
 		}
 		if (!uniqueGroupName(json.get("name").asText())) {
-			return badRequest("Group name already exists");
+			return badRequest("Group name already exists! Please specify another name.");
 		}
 		newGroup = Json.fromJson(json, UserGroup.class);
 		if (adminId != null) {
@@ -107,6 +111,65 @@ public class GroupManager extends Controller {
 
 	private static boolean uniqueGroupName(String name) {
 		return (DB.getUserGroupDAO().getByName(name) == null);
+	}
+
+	/**
+	 * Edits group metadata and updates them according to the POST body.
+	 * <p>
+	 * Only the administrator of the group and the superuser have the right to
+	 * edit the group.
+	 * 
+	 * @param groupId
+	 *            the group id
+	 * @return the updated group metadata
+	 */
+	public static Result editGroup(String groupId) {
+
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+
+		String adminId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if ((adminId == null) || (adminId.equals(""))) {
+			return forbidden("Only administrator of group has the right to edit the group");
+		}
+		User admin = DB.getUserDAO().get(new ObjectId(adminId));
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (group == null) {
+			return internalServerError("Cannot retrieve group from database!");
+		}
+		if (!group.getAdministrator().equals(new ObjectId(adminId))
+				&& (!admin.isSuperUser())) {
+			return forbidden("Only administrator of group has the right to edit the group");
+		}
+		UserGroup oldVersion = group;
+		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
+		UserGroup newVersion;
+		try {
+			newVersion = updator.readValue(json);
+			Set<ConstraintViolation<UserGroup>> violations = Validation
+					.getValidator().validate(newVersion);
+			for (ConstraintViolation<UserGroup> cv : violations) {
+				result.put("message",
+						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+			}
+			if (!violations.isEmpty()) {
+				return badRequest(result);
+			}
+			if (!uniqueGroupName(newVersion.getName())) {
+				return badRequest("Group name already exists! Please specify another name.");
+			}
+			// update group on mongo
+			if (DB.getUserGroupDAO().makePermanent(newVersion) == null) {
+				log.error("Cannot save group to database!");
+				return internalServerError("Cannot save group to database!");
+			}
+			return ok(DB.getJson(newVersion));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return internalServerError(e.getMessage());
+		}
 	}
 
 	/**
@@ -186,14 +249,9 @@ public class GroupManager extends Controller {
 
 		if (!(DB.getUserDAO().makePermanent(user) == null)
 				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-			return ok("Group succesfully added to User");
+			return ok("User succesfully added to group");
 		}
 		return internalServerError("Cannot store to database!");
-
-	}
-	
-	public static Result editGroup(String groupId) {
-		return TODO;
 
 	}
 
@@ -201,7 +259,7 @@ public class GroupManager extends Controller {
 	 * Removes a user from the group.
 	 * <p>
 	 * The users allowed to remove a user from a group is the administrator of
-	 * the group, the superuser and the user himself. 
+	 * the group, the superuser and the user himself.
 	 *
 	 * @param userId
 	 *            the user id
@@ -210,6 +268,29 @@ public class GroupManager extends Controller {
 	 * @return success message
 	 */
 	public static Result removeUserFromGroup(String userId, String groupId) {
+		String userSession = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if ((userSession == null) || (userSession.equals(""))) {
+			return forbidden("No rights for user removal");
+		}
+		User user = DB.getUserDAO().get(new ObjectId(userSession));
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (group == null) {
+			return internalServerError("Cannot retrieve group from database!");
+		}
+		if (!group.getAdministrator().equals(new ObjectId(userSession))
+				&& (!user.isSuperUser()&&(!userSession.equals(userId)))) {
+			return forbidden("No rights for user removal");
+		}
+		return TODO;
+	}
+
+	/**
+	 * @param name
+	 *            the group name
+	 * @return the result
+	 */
+	public static Result findByGroupName(String name) {
 		return TODO;
 
 	}
