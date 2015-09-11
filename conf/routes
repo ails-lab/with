@@ -23,8 +23,9 @@ GET 	/custom/:customName/*file				controllers.CustomAssets.getFile( customName:S
 
 
 # Collection Controller (tested except some methods)
-GET 	 /collection/list						controllers.CollectionController.list(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
-GET 	 /collection/listShared					controllers.CollectionController.listShared(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, offset: Integer ?=0, count: Integer ?=10)
+#GET 	 /collection/list						controllers.CollectionController.list(filterByUserOrGroup ?= null, filterByUserOrGroupId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
+#GET 	 /collection/listShared					controllers.CollectionController.listShared(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, offset: Integer ?=0, count: Integer ?=10)
+GET      /collection/list						controllers.CollectionController.list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false, offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)

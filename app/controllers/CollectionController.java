@@ -47,6 +47,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
+import utils.Tuple;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -307,6 +308,51 @@ public class CollectionController extends Controller {
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
+	}
+	
+	/**
+	 * list accessible collections
+	 * list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false)
+
+	 */
+	public static Result list(String loggedInUserAccess, List<Tuple<String, String>> filterByUserName,
+			List<Tuple<String, String>> filterByGroupName, boolean isExhibition, int offset, int count) {
+		ArrayNode result = Json.newObject().arrayNode();
+		List<Collection> userCollections;
+		ObjectId ownerId = null;
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		List<Tuple<ObjectId, Access>> filterByUserAccess = new ArrayList<Tuple<ObjectId, Access>>();
+		List<Tuple<ObjectId, Access>> filterByGroupAccess = new ArrayList<Tuple<ObjectId, Access>>();
+		for (Tuple<String, String> userAccess: filterByUserName) 
+			if (Access.valueOf(userAccess.y) != null)
+			filterByUserAccess.add(new Tuple(new ObjectId(userAccess.x), Access.valueOf(userAccess.y)));
+		for (Tuple<String, String> groupAccess: filterByGroupName) 
+			if (Access.valueOf(groupAccess.y) != null)
+			filterByGroupAccess.add(new Tuple(new ObjectId(groupAccess.x), Access.valueOf(groupAccess.y)));
+		if (userIds.isEmpty()) {
+			// return all public collections
+				userCollections = DB.getCollectionDAO().getByAccess(true, offset, count);
+			for (Collection collection : userCollections) {
+				ObjectNode c = (ObjectNode) Json.toJson(collection);
+				c.put("access", Access.READ.toString());
+				result.add(c);
+			}
+			return ok(result);
+		}
+		else {
+			if (AccessManager.checkAccess(new HashMap<ObjectId, Access>(), userIds,
+					Action.DELETE)) {
+				if (ownerId != null) {
+					userCollections = DB.getCollectionDAO().getByOwner(ownerId,
+							offset, count);
+				} else {
+					userCollections = DB.getCollectionDAO().getAll(offset, count);
+				}
+			} else {
+				
+			}
+		}
 	}
 
 	/**
