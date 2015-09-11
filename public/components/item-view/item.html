@@ -61,21 +61,16 @@
 					     
 					<!-- ko text: record().collectedCount() --><!-- /ko --> 
 					      collections					      
-					      	
 					    </div>
-					  
-					    </div>
-					    
-					    <div class= "spec "id="collections"data-bind="if: (record().collectedCount()>0)">
-					     <div class="itemlabel">Collections
-					      </div>
-							 <!-- ko foreach: record().collections() -->
+					      	<!-- ko foreach: record().collections() -->
 					      <div class="value">
 							 <h6 data-bind="text: title"></h6> 
 						  </div>
-							 <!-- /ko -->					       	
-						</div>
-						
+							 <!-- /ko -->	
+					  
+					    </div>
+					    
+
 					  
 					   <div class="spec">
 					      <div class="itemlabel">Record source
