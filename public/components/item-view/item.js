@@ -15,7 +15,8 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.url = ko.observable("");
 		self.id = ko.observable("");
 		self.externalId = ko.observable("");
-		self.collections = ko.observable("");
+		self.collectedCount = ko.observable("");
+		self.collections =  ko.observableArray([]);
 
 		self.cachedThumbnail = ko.pureComputed(function() {
 
@@ -79,6 +80,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 				type    : "get",
 				url     : "/record/"+self.externalId() +"/mergedCollections",
 				success : function(result) {
+					self.collectedCount(result.count);
 					self.collections(result.collections);
 				},
 				error   : function(request, status, error) {

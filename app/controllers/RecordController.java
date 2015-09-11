@@ -259,7 +259,11 @@ public class RecordController extends Controller {
 		SearchResponse resp = searchMerged.search(externalId, options);
 
 		if(resp.getHits().getTotalHits() == 0) {
-			return internalServerError("message", "Invalid externalId given to Elastic Search");
+			result.put("count",resp.getHits().getTotalHits());
+			ArrayNode collections = Json.newObject().arrayNode();
+			result.put("collections",collections);
+			return ok(result);
+	//		return internalServerError("message", "Invalid externalId given to Elastic Search");
 		}
 
 		SearchHit merged_hit = resp.getHits().getHits()[0];
@@ -271,7 +275,12 @@ public class RecordController extends Controller {
 
 		
 		if(resp.getHits().getTotalHits() == 0) {
-			return internalServerError("message", "No collections found for this merged record");
+			result.put("count",resp.getHits().getTotalHits());
+			ArrayNode collections = Json.newObject().arrayNode();
+			result.put("collections",collections);
+			return ok(result);
+
+		//	return internalServerError("message", "No collections found for this merged record");
 		}
 		
 		

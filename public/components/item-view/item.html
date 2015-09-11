@@ -7,10 +7,15 @@
 				 
  						 <img src="images/logos/wsmall.png" width="20">
 				
-				<span class="collectit"> collect it</span></span>
+				<span class="collectit"> collect it</span>
+				
+				
+				</span>
 				 
 				
+				
 				<!-- ko text: record().title() --><!-- /ko --> 
+				
 				
 				</h3>
 				<hr class="faded">
@@ -51,6 +56,26 @@
 					      </div>
 					    </div>
 					    
+					    <div class="spec" data-bind="if: (record().collectedCount()>0)">
+					      <div class="itemlabel">In 
+					     
+					<!-- ko text: record().collectedCount() --><!-- /ko --> 
+					      collections					      
+					      	
+					    </div>
+					  
+					    </div>
+					    
+					    <div class= "spec "id="collections"data-bind="if: (record().collectedCount()>0)">
+					     <div class="itemlabel">Collections
+					      </div>
+							 <!-- ko foreach: record().collections() -->
+					      <div class="value">
+							 <h6 data-bind="text: title"></h6> 
+						  </div>
+							 <!-- /ko -->					       	
+						</div>
+						
 					  
 					   <div class="spec">
 					      <div class="itemlabel">Record source
