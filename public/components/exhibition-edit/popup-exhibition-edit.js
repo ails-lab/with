@@ -3,7 +3,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
     function updateRecord(dbId, text, videoUrl) {
 
         var jsonData = {};
-        jsonData.exhibition = {
+        jsonData.exhibitionRecord = {
                 "annotation": text,
                 "videoUrl": videoUrl
             };

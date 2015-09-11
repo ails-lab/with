@@ -137,6 +137,13 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 				});
 			}
 		};
+		
+		self.recordSelect = function (e) {
+			e.view_url=e.sourceUrl;
+			e.thumb=e.cachedThumbnail;
+			
+			itemShow(e);
+		};
 
 		self.loadFavorites();
 	}

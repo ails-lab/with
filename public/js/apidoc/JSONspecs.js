@@ -14,15 +14,12 @@ function getSpecs() {
 //
 ////////////////////////////////////////////////////////
 
-
-
-
 	{
 		    "swagger": "2.0",
 		    "info": {
 		        "version": "v1",
 		        "title": "WITH API",
-		        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://coming.soon.com\n```\n"
+		        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://WITH.com\n```\n"
 		    },
 		    "paths": {
 		        "/api/search": {
@@ -121,7 +118,7 @@ function getSpecs() {
 		                    }
 		                ],
 		                "summary": "Get a list of collections.",
-		                "description": "Using the parameter filters, you can get the collections associated with a specific user.",
+		                "description": "Using the parameter filters, you can get the collections associated with a specific user. You only need to provide one user filter with each call. The access filter refers to the access rights you have to another user's collections. If users are not provided then all publicly available collections are returned.",
 		                "tags": [
 		                    "Collection"
 		                ],
@@ -134,6 +131,16 @@ function getSpecs() {
 		                                "$ref": "#/definitions/Collection"
 		                            }
 		                        }
+		                    },
+		                    "500": {
+		                        "description": "Internal Server Error",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -144,7 +151,7 @@ function getSpecs() {
 		                    "Collection"
 		                ],
 		                "summary": "Create a new collection.",
-		                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required.",
+		                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required. Note that calls to this path can also be used for exhibitions. At least one user must be logged in for the session and will be automatically retrieved. The owner of the collection will be the first user.",
 		                "parameters": [
 		                    {
 		                        "in": "body",
@@ -154,14 +161,10 @@ function getSpecs() {
 		                        "schema": {
 		                            "type": "object",
 		                            "required": [
-		                                "ownerId",
 		                                "title",
 		                                "isPublic"
 		                            ],
 		                            "properties": {
-		                                "ownerId": {
-		                                    "type": "string"
-		                                },
 		                                "title": {
 		                                    "type": "string"
 		                                },
@@ -173,6 +176,17 @@ function getSpecs() {
 		                                },
 		                                "rights": {
 		                                    "type": "string"
+		                                },
+		                                "isExhibition": {
+		                                    "type": "boolean"
+		                                },
+		                                "exhibition": {
+		                                    "type": "object",
+		                                    "properties": {
+		                                        "intro": {
+		                                            "type": "string"
+		                                        }
+		                                    }
 		                                }
 		                            }
 		                        }
@@ -185,11 +199,23 @@ function getSpecs() {
 		                            "$ref": "#/definitions/Collection"
 		                        }
 		                    },
-		                    "403": {
+		                    "400": {
 		                        "description": "Bad Request",
 		                        "schema": {
 		                            "properties": {
 		                                "error": {
+		                                    "description": "invalid json, constraint violations",
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "403": {
+		                        "description": "Forbidden",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "description": "cannot find user or unspecified",
 		                                    "type": "string"
 		                                }
 		                            }
@@ -200,6 +226,7 @@ function getSpecs() {
 		                        "schema": {
 		                            "properties": {
 		                                "error": {
+		                                    "description": "title already exists, cannot save to database",
 		                                    "type": "string"
 		                                }
 		                            }
@@ -218,7 +245,7 @@ function getSpecs() {
 		                }
 		            ],
 		            "post": {
-		                "description": "Adds a record to the specified collection, creating a new record that containts the specified metadata. Note that calls to this path can also be used for exhibitions.",
+		                "description": "Adds a record to the collection specified in the path, creating a new record that containts the specified metadata. You will need to have write access or be the owner of the collection to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0.",
 		                "summary": "Add a record to a collection.",
 		                "tags": [
 		                    "Collection",
@@ -230,7 +257,35 @@ function getSpecs() {
 		                        "name": "body",
 		                        "description": "Record JSON schema",
 		                        "schema": {
-		                            "$ref": "#/definitions/Record"
+		                            "type": "object",
+		                            "required": [
+		                                "ownerId",
+		                                "title",
+		                                "isPublic"
+		                            ],
+		                            "properties": {
+		                                "source": {
+		                                    "type": "string"
+		                                },
+		                                "sourceId": {
+		                                    "type": "string"
+		                                },
+		                                "title": {
+		                                    "type": "string"
+		                                },
+		                                "description": {
+		                                    "type": "string"
+		                                },
+		                                "thymbnailUrl": {
+		                                    "type": "string"
+		                                },
+		                                "sourceUrl": {
+		                                    "type": "string"
+		                                },
+		                                "position": {
+		                                    "type": "integer"
+		                                }
+		                            }
 		                        }
 		                    }
 		                ],
@@ -241,8 +296,35 @@ function getSpecs() {
 		                            "$ref": "#/definitions/Record"
 		                        }
 		                    },
+		                    "400": {
+		                        "description": "Bad Request (no position, constraint violation)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "403": {
+		                        "description": "Forbidden (no permission to edit collection)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error (cannot save to database)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -257,8 +339,8 @@ function getSpecs() {
 		                }
 		            ],
 		            "delete": {
-		                "description": "Removes the specified record from a specified collection. Note that calls to this path can also be used for exhibitions.",
-		                "summary": "Remove a record from a collection",
+		                "description": "Removes the specified record (parameter) from a specified collection (path). Note that calls to this path can also be used for exhibitions.",
+		                "summary": "Remove a record from a collection.",
 		                "tags": [
 		                    "Collection",
 		                    "Exhibition"
@@ -273,13 +355,34 @@ function getSpecs() {
 		                ],
 		                "responses": {
 		                    "200": {
-		                        "description": "OK"
+		                        "description": "OK (collection Id in string)",
+		                        "schema": {
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "403": {
-		                        "description": "Forbidden"
+		                        "description": "Forbidden (no permission to edit collection)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error (no record Id, cannot delete from database, exception error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -294,7 +397,7 @@ function getSpecs() {
 		                }
 		            ],
 		            "get": {
-		                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. The format parameter defines the format of this array.",
+		                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. The format parameter defines the serialization in the records array field of the JSON response.",
 		                "summary": "Retrieve all records in a collection.",
 		                "tags": [
 		                    "Collection"
@@ -321,16 +424,41 @@ function getSpecs() {
 		                ],
 		                "responses": {
 		                    "200": {
-		                        "description": "OK",
+		                        "description": "OK (JSON contains the serialization specified)",
 		                        "schema": {
-		                            "$ref": "#/definitions/Record"
+		                            "type": "object",
+		                            "properties": {
+		                                "itemCount": {
+		                                    "type": "integer"
+		                                },
+		                                "records": {
+		                                    "type": "array",
+		                                    "items": {
+		                                        "$ref": "#/definitions/Record"
+		                                    }
+		                                }
+		                            }
 		                        }
 		                    },
 		                    "403": {
-		                        "description": "Forbiden"
+		                        "description": "Forbiden (invalid collection id, no read access)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error (cannot retrieve records from database)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -340,12 +468,12 @@ function getSpecs() {
 		                {
 		                    "name": "collectionId",
 		                    "in": "path",
-		                    "description": "Internal id of the collection/exhibition",
+		                    "description": "Internal id of the collection or exhibition",
 		                    "type": "string"
 		                }
 		            ],
 		            "get": {
-		                "summary": "Retrieves collection metadata.",
+		                "summary": "Retrieve collection metadata.",
 		                "description": "Returns the metadata of the collection specified in path. Note that calls to this path can also be used for exhibitions.",
 		                "tags": [
 		                    "Collection",
@@ -355,19 +483,43 @@ function getSpecs() {
 		                    "200": {
 		                        "description": "OK",
 		                        "schema": {
-		                            "$ref": "#/definitions/Collection"
+		                            "properties": {
+		                                "owner": {
+		                                    "type": "string"
+		                                },
+		                                "access": {
+		                                    "type": "string"
+		                                },
+		                                "collection": {
+		                                    "$ref": "#/definitions/Collection"
+		                                }
+		                            }
 		                        }
 		                    },
 		                    "403": {
-		                        "description": "Forbidden (No read-access)"
+		                        "description": "Forbidden (no read-access)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error(Database error)"
+		                        "description": "Internal Server Error(database error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            },
 		            "post": {
-		                "summary": "Updates collection metadata.",
+		                "summary": "Update metadata in a collection.",
 		                "description": "Use this call to change the stored metadata of a collection. Note that calls to this path can also be used for exhibitions.",
 		                "tags": [
 		                    "Collection",
@@ -377,21 +529,10 @@ function getSpecs() {
 		                    {
 		                        "in": "body",
 		                        "name": "body",
-		                        "description": "New collection/exhibtion metadata.",
+		                        "description": "New collection/exhibtion metadata. Only provide the fields you wish to be changed!",
 		                        "required": false,
 		                        "schema": {
-		                            "type": "object",
-		                            "properties": {
-		                                "title": {
-		                                    "type": "string"
-		                                },
-		                                "isPublic": {
-		                                    "type": "boolean"
-		                                },
-		                                "description": {
-		                                    "type": "string"
-		                                }
-		                            }
+		                            "$ref": "#/definitions/Collection"
 		                        }
 		                    }
 		                ],
@@ -399,23 +540,54 @@ function getSpecs() {
 		                    "200": {
 		                        "description": "OK",
 		                        "schema": {
-		                            "$ref": "#/definitions/Collection"
+		                            "properties": {
+		                                "owner": {
+		                                    "type": "string"
+		                                },
+		                                "access": {
+		                                    "type": "string"
+		                                },
+		                                "collection": {
+		                                    "$ref": "#/definitions/Collection"
+		                                }
+		                            }
 		                        }
 		                    },
 		                    "400": {
-		                        "description": "Wrong JSON fields"
+		                        "description": "Bad Request (null/invalid JSON, duplicate title, wrong JSON fields)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "403": {
-		                        "description": "Forbidden (No read-access)"
+		                        "description": "Forbidden (no read-access)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error (Database Error)"
+		                        "description": "Internal Server Error (database error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            },
 		            "delete": {
-		                "summary": "Deletes the collection.",
-		                "description": "Removes a collection from the database. Records that were created ?Note that calls to this path can also be used for exhibitions.",
+		                "summary": "Delete a collection.",
+		                "description": "Removes a collection from the database. Records that were created into this collection will also be deleted. Note that calls to this path can also be used for exhibitions.",
 		                "tags": [
 		                    "Collection",
 		                    "Exhibition"
@@ -428,10 +600,24 @@ function getSpecs() {
 		                        }
 		                    },
 		                    "403": {
-		                        "description": "No read-access"
+		                        "description": "Forbiden (no read-access)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Database error"
+		                        "description": "Internal Server Error (database error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -447,8 +633,16 @@ function getSpecs() {
 		                }
 		            ],
 		            "get": {
-		                "summary": "Retrieves a record.",
-		                "description": "Retrieve a JSON with the metadata of the record specified in the path.",
+		                "parameters": [
+		                    {
+		                        "name": "format",
+		                        "in": "query",
+		                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+		                        "type": "string"
+		                    }
+		                ],
+		                "summary": "Retrieve a record.",
+		                "description": "Retrieve a JSON with the metadata of the record specified in the path. The format parameter defines the serialization in the record field of the JSON response.",
 		                "tags": [
 		                    "Record"
 		                ],
@@ -460,14 +654,27 @@ function getSpecs() {
 		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error (database error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            },
 		            "post": {
-		                "summary": "Updates a record.",
-		                "description": "Update the metadata of an existing record, specified by its id in the path.",
+		                "summary": "Update a record.",
+		                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body.",
 		                "parameters": [
+		                    {
+		                        "name": "format",
+		                        "in": "query",
+		                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+		                        "type": "string"
+		                    },
 		                    {
 		                        "in": "body",
 		                        "name": "body",
@@ -484,17 +691,48 @@ function getSpecs() {
 		                    "200": {
 		                        "description": "OK",
 		                        "schema": {
-		                            "$ref": "#/definitions/Record"
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "400": {
+		                        "description": "Bad Request (invalid json)",
+		                        "schema": {
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "403": {
+		                        "description": "Forbiden (no edit permissions)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
 		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error (database error)",
+		                        "schema": {
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            },
 		            "delete": {
-		                "summary": "Removes a record.",
-		                "description": "Remove the record specified in the path from the database.",
+		                "summary": "Remove a record.",
+		                "description": "Remove the whole record specified in the path from the database, or just a single format.",
 		                "tags": [
 		                    "Record"
 		                ],
@@ -502,11 +740,22 @@ function getSpecs() {
 		                    "200": {
 		                        "description": "OK",
 		                        "schema": {
-		                            "$ref": "#/definitions/Record"
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
 		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error",
+		                        "schema": {
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -529,8 +778,8 @@ function getSpecs() {
 		                }
 		            ],
 		            "post": {
-		                "summary": "Set rights",
-		                "description": "Changes access rights (read, write, own) of a specified user for a specifed collection. Only the owner of a collection can use this call. One of username, email or userId need to be provided.",
+		                "summary": "Change access rights to a collection.",
+		                "description": "Changes access rights: \"none\" (withdraws previously given rights), \"read\", \"write\", \"own\", of a specified user (parameter) for a specifed collection (in path). Only the owner of a collection can use this call (you need to be loged in). Just one of username, email or userId needs to be provided.",
 		                "tags": [
 		                    "Rights",
 		                    "Collection"
@@ -557,46 +806,44 @@ function getSpecs() {
 		                ],
 		                "responses": {
 		                    "200": {
-		                        "description": "OK"
-		                    },
-		                    "403": {
-		                        "description": "Bad Request"
-		                    },
-		                    "500": {
-		                        "description": "Interal Server Error"
-		                    }
-		                }
-		            }
-		        },
-		        "/exhibition/create": {
-		            "post": {
-		                "tags": [
-		                    "Exhibition"
-		                ],
-		                "summary": "Create a new exhibition.",
-		                "description": "Creates a new exhibition with a unique dummy title that can be changed later. You can make a POST call to ```/collection/{collectionId}``` to edit an exhibition.",
-		                "parameters": [
-		                    {
-		                        "in": "body",
-		                        "name": "body",
-		                        "description": "Contains metadata about the exhibition",
-		                        "schema": {
-		                            "$ref": "#/definitions/Exhibition"
-		                        }
-		                    }
-		                ],
-		                "responses": {
-		                    "200": {
 		                        "description": "OK",
 		                        "schema": {
-		                            "$ref": "#/definitions/Exhibition"
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
 		                        }
 		                    },
 		                    "400": {
-		                        "description": "Invalid JSON"
+		                        "description": "Bad Request (no user specified)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "403": {
+		                        "description": "Forbidden (no owner rights)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Database Error"
+		                        "description": "Interal Server Error (read/write database error)",
+		                        "schema": {
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -606,8 +853,8 @@ function getSpecs() {
 		                "tags": [
 		                    "Exhibition"
 		                ],
-		                "summary": "Get all user exhibitons.",
-		                "description": "Returns an array of exhibition JSON objects, of all exhibitions owned by the currently logged in user. See ```/user/login```.",
+		                "summary": "Get all your exhibitons.",
+		                "description": "Returns an array of collection JSON objects, for all exhibitions owned by the currently logged in user. See ```/user/login```.",
 		                "parameters": [
 		                    {
 		                        "name": "offset",
@@ -628,12 +875,29 @@ function getSpecs() {
 		                        "schema": {
 		                            "type": "array",
 		                            "items": {
-		                                "$ref": "#/definitions/Exhibition"
+		                                "$ref": "#/definitions/Collection"
 		                            }
 		                        }
 		                    },
 		                    "403": {
-		                        "description": "Forbidden"
+		                        "description": "Forbidden (no user specified)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "500": {
+		                        "description": "Interal Server Error (exception error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -700,7 +964,10 @@ function getSpecs() {
 		                        }
 		                    },
 		                    "400": {
-		                        "description": "Bad Request"
+		                        "description": "Bad Request (json object describes all errors)",
+		                        "schema": {
+		                            "type": "object"
+		                        }
 		                    }
 		                }
 		            }
@@ -711,7 +978,7 @@ function getSpecs() {
 		                    "User"
 		                ],
 		                "summary": "User login.",
-		                "description": "Log an user in (create a browser cookie). Some API calls do not take the user as a parameter and you need to be logged in first.",
+		                "description": "Log an user in (create a browser cookie). Some API calls do not take the user as a parameter and you need to be logged in first. You can log in with your google or facebook id. The email parameter can be a username.",
 		                "parameters": [
 		                    {
 		                        "in": "body",
@@ -726,6 +993,12 @@ function getSpecs() {
 		                                },
 		                                "password": {
 		                                    "type": "string"
+		                                },
+		                                "googleId": {
+		                                    "type": "string"
+		                                },
+		                                "facebokId": {
+		                                    "type": "string"
 		                                }
 		                            }
 		                        }
@@ -733,20 +1006,23 @@ function getSpecs() {
 		                ],
 		                "responses": {
 		                    "200": {
-		                        "description": "OK status, login cookie, user metadata JSON including userID.",
+		                        "description": "OK (creates login browser cookie, returns user metadata JSON including userID.)",
 		                        "schema": {
 		                            "$ref": "#/definitions/User"
 		                        }
 		                    },
 		                    "400": {
-		                        "description": "Error status, problem description JSON."
+		                        "description": "Bad Request (error status, problem description JSON object)",
+		                        "schema": {
+		                            "type": "object"
+		                        }
 		                    }
 		                }
 		            }
 		        },
 		        "/user/logout": {
 		            "get": {
-		                "description": "Browser cookie is removed, user i logged out (all session information is kept in cookie, nothing is stored on server).",
+		                "description": "Browser cookie is removed, user is logged out (all session information is kept in cookie, nothing is stored on server).",
 		                "summary": "User logout.",
 		                "tags": [
 		                    "User"
@@ -779,7 +1055,14 @@ function getSpecs() {
 		                        "description": "OK"
 		                    },
 		                    "400": {
-		                        "description": "Not available"
+		                        "description": "Bad Request (not available)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -806,6 +1089,16 @@ function getSpecs() {
 		                        "schema": {
 		                            "$ref": "#/definitions/User"
 		                        }
+		                    },
+		                    "400": {
+		                        "description": "Bad Request (user does not exist, exception error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            },
@@ -813,7 +1106,7 @@ function getSpecs() {
 		                "tags": [
 		                    "User"
 		                ],
-		                "summary": "Update an user entry.",
+		                "summary": "Update a user entry.",
 		                "description": "Updates the stored info of the user specified by the id provided in the path.",
 		                "parameters": [
 		                    {
@@ -832,6 +1125,12 @@ function getSpecs() {
 		                        "schema": {
 		                            "$ref": "#/definitions/User"
 		                        }
+		                    },
+		                    "400": {
+		                        "description": "Bad Request (error status, problem description JSON object)",
+		                        "schema": {
+		                            "type": "object"
+		                        }
 		                    }
 		                }
 		            },
@@ -840,10 +1139,27 @@ function getSpecs() {
 		                    "User"
 		                ],
 		                "summary": "Deletes the user.",
-		                "description": "Removes a user from the database.",
+		                "description": "Removes a user from the database. (This call might not function currently at the moment.)",
 		                "responses": {
 		                    "200": {
-		                        "description": "OK"
+		                        "description": "OK",
+		                        "schema": {
+		                            "properties": {
+		                                "message": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "400": {
+		                        "description": "Bad Request (user does not exist)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -861,11 +1177,38 @@ function getSpecs() {
 		                "tags": [
 		                    "User"
 		                ],
-		                "summary": "Reset password email.",
+		                "summary": "Send a reset password email.",
 		                "description": "Sends an email to the user provided in the path. The email contains a link to a webpage where the user can provide a new password.",
 		                "responses": {
 		                    "200": {
-		                        "description": "OK"
+		                        "description": "OK",
+		                        "schema": {
+		                            "properties": {
+		                                "mesage": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "400": {
+		                        "description": "Bad Request (invalid username or email, could not send email)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
+		                    },
+		                    "404": {
+		                        "description": "Not Found (user email not found - if user had originally registered with google or facebook account))",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -875,26 +1218,38 @@ function getSpecs() {
 		                "tags": [
 		                    "User"
 		                ],
-		                "parameters": [
-		                    {
-		                        "name": "email",
-		                        "in": "query",
-		                        "description": "An email",
-		                        "required": false,
-		                        "type": "string"
-		                    }
-		                ],
 		                "summary": "Get an API key.",
-		                "description": "If a user is logged in, automatically sends an API key to the stored email address. Alternatively, sends an email to the email address provided as a parameter. If both are true, only the provided email address will be used.",
+		                "description": "Automatically sends an API key to the stored email address of the logged in user.",
 		                "responses": {
 		                    "200": {
-		                        "description": "OK"
+		                        "description": "OK",
+		                        "schema": {
+		                            "properties": {
+		                                "email": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "403": {
-		                        "description": "Bad Request"
+		                        "description": "Bad Request (no user logged in, email already sent in past, email exception error)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    },
 		                    "500": {
-		                        "description": "Internal Server Error"
+		                        "description": "Internal Server Error ( could not create API key)",
+		                        "schema": {
+		                            "properties": {
+		                                "error": {
+		                                    "type": "string"
+		                                }
+		                            }
+		                        }
 		                    }
 		                }
 		            }
@@ -902,6 +1257,7 @@ function getSpecs() {
 		    },
 		    "definitions": {
 		        "User": {
+		            "description": "Describes a registered user in the database.",
 		            "type": "object",
 		            "required": [
 		                "firstName",
@@ -949,50 +1305,7 @@ function getSpecs() {
 		            }
 		        },
 		        "Collection": {
-		            "type": "object",
-		            "properties": {
-		                "id": {
-		                    "type": "object",
-		                    "properties": {
-		                        "value": {
-		                            "type": "string"
-		                        }
-		                    }
-		                },
-		                "ownerId": {
-		                    "type": "object",
-		                    "properties": {
-		                        "value": {
-		                            "type": "string"
-		                        }
-		                    }
-		                },
-		                "className": {
-		                    "type": "string"
-		                },
-		                "title": {
-		                    "type": "string"
-		                },
-		                "description": {
-		                    "type": "string"
-		                },
-		                "itemCount": {
-		                    "type": "integer"
-		                },
-		                "isPublic": {
-		                    "type": "boolean"
-		                },
-		                "rights": {
-		                    "type": "object",
-		                    "properties": {
-		                        "value": {
-		                            "type": "string"
-		                        }
-		                    }
-		                }
-		            }
-		        },
-		        "Exhibition": {
+		            "description": "Collection metadata. The fields isExhibition and exhibition are only used in calls for exhibitions.",
 		            "type": "object",
 		            "properties": {
 		                "id": {
@@ -1048,9 +1361,11 @@ function getSpecs() {
 		            }
 		        },
 		        "Record": {
+		            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions.",
 		            "type": "object",
 		            "required": [
-		                "title"
+		                "title",
+		                "position"
 		            ],
 		            "properties": {
 		                "dbId": {
@@ -1099,15 +1414,15 @@ function getSpecs() {
 		                            "type": "string"
 		                        }
 		                    }
+		                },
+		                "position": {
+		                    "description": "default is 0",
+		                    "type": "integer"
 		                }
 		            }
 		        }
 		    }
 		}
-
-
-
-
 
 
 

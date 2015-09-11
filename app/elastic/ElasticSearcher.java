@@ -58,6 +58,7 @@ public class ElasticSearcher {
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
 		public String user;
+		public boolean _idSearch = false;
 
 		public SearchOptions() {
 		}
@@ -77,6 +78,10 @@ public class ElasticSearcher {
 
 		public void setUser(String user) {
 			this.user = user;
+		}
+
+		public void set_idSearch(boolean value) {
+			this._idSearch = value;
 		}
 
 		public void addFilter(String key, String value) {
@@ -142,38 +147,54 @@ public class ElasticSearcher {
 	public SearchResponse search(String term, int from, int count){ return search(term, new SearchOptions(from, count)); }
 	public SearchResponse search(String term) { return search(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT)); }
 
+	public SearchResponse searchAccessibleCollections(String terms, SearchOptions options) {
+
+		if(terms == null) terms = "";
+
+		BoolQueryBuilder bool = QueryBuilders.boolQuery();
+		MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
+
+		BoolQueryBuilder user = QueryBuilders.boolQuery();
+		MatchQueryBuilder user_match = QueryBuilders.matchQuery("rights.user", options.user);
+		user.must(user_match);
+		//MatchQueryBuilder access_match = QueryBuilders.matchQuery("rights.access", "");
+		//user.must(access_match);
+		NestedQueryBuilder nested = QueryBuilders.nestedQuery("rights", user);
+
+		bool.must(match_all);
+		bool.must(nested);
+		return this.execute(bool, options);
+	}
+
+	public SearchResponse searchForCollections(String terms, SearchOptions options) {
+
+		if(terms == null) terms = "";
+
+		BoolQueryBuilder bool = QueryBuilders.boolQuery();
+		QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
+		str.defaultOperator(Operator.OR);
+		str.defaultField("_id");
+		bool.must(str);
+
+		return this.execute(bool, options);
+	}
+
 	public SearchResponse search(String terms, SearchOptions options){
 		if(terms == null) terms = "";
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
+		/*
+		List<String> list = new ArrayList<String>();
+		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
+		while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
+		 */
+		//implementation with query_string query
+		QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
+		str.defaultOperator(Operator.OR);
+		if(options._idSearch)
+			str.defaultField("_id");
 
-		if(type.equals(Elastic.type_general)) {
-			/*
-			List<String> list = new ArrayList<String>();
-			Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
-			while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
-			 */
-			//implementation with query_string query
-			QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
-			str.defaultOperator(Operator.OR);
-
-			bool.must(str);
-		} else if(type.equals(Elastic.type_collection)) {
-
-			MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
-
-			BoolQueryBuilder user = QueryBuilders.boolQuery();
-			MatchQueryBuilder user_match = QueryBuilders.matchQuery("rights.user", options.user);
-			user.must(user_match);
-			//MatchQueryBuilder access_match = QueryBuilders.matchQuery("rights.access", "");
-			//user.must(access_match);
-			NestedQueryBuilder nested = QueryBuilders.nestedQuery("rights", user);
-
-			bool.must(match_all);
-			bool.must(nested);
-		} else {
-		}
-
+		bool.must(str);
 		return this.execute(bool, options);
 		//return this.executeWithFacets(bool, options);
 	}

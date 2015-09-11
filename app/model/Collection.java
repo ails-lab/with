@@ -84,7 +84,8 @@ public class Collection {
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
-	private final Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
+	//@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
+	private final  Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
 		return this.dbId;
@@ -97,7 +98,7 @@ public class Collection {
 
 	/**
 	 * Get the embeddable Metadata part
-	 * 
+	 *
 	 * @return
 	 */
 	/*
@@ -226,7 +227,12 @@ public class Collection {
 		return rights;
 	}
 
-	public boolean isExhibition() {
+	@JsonIgnore
+	public void setRights(Map<ObjectId, Access> r) {
+
+	}
+
+	public boolean getIsExhibition() {
 		return isExhibition;
 	}
 

@@ -157,7 +157,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	public Key<E> makePermanent(E doc) {
 		try {
-			return this.save(doc);
+			return this.save(doc, WriteConcern.ACKNOWLEDGED);
 		} catch (Exception e) {
 			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}

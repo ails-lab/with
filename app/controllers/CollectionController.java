@@ -139,7 +139,8 @@ public class CollectionController extends Controller {
 						"User does not have permission to delete the collection");
 				return forbidden(result);
 			}
-			DB.getCollectionRecordDAO().removeAll("collectionId", "=", new ObjectId(id));
+			DB.getCollectionRecordDAO().removeAll("collectionId", "=",
+					new ObjectId(id));
 			if (DB.getCollectionDAO().removeById(new ObjectId(id)) != 1) {
 				result.put("error", "Cannot delete collection from database!");
 				return badRequest(result);
@@ -562,6 +563,7 @@ public class CollectionController extends Controller {
 		}
 		CollectionRecord record = null;
 		String recordLinkId;
+		//TODO: what is the recordlink_id??
 		if (json.has("recordlink_id")) {
 			recordLinkId = json.get("recordlink_id").asText();
 			record = DB.getCollectionRecordDAO().getById(
@@ -579,8 +581,9 @@ public class CollectionController extends Controller {
 
 			String sourceId = record.getSourceId();
 			String source = record.getSource();
-			//get totalLikes
-			record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(record.getExternalId()));
+			// get totalLikes
+			record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(
+					record.getExternalId()));
 			record.setCollectionId(new ObjectId(collectionId));
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(record);
@@ -590,9 +593,9 @@ public class CollectionController extends Controller {
 				return badRequest(result);
 			}
 			Status status;
-			if (c.isExhibition()) {
+			if (c.getIsExhibition()) {
 				if (!json.has("position")) {
-					result.put("error", "Must specify position os the record");
+					result.put("error", "Must specify position of the record");
 					return badRequest(result);
 				}
 				int position = json.get("position").asInt();
@@ -604,8 +607,9 @@ public class CollectionController extends Controller {
 						position);
 			} else {
 				DB.getCollectionRecordDAO().makePermanent(record);
-				if(c.getTitle().equals("_favorites")) {
-					DB.getCollectionRecordDAO().incrementLikes(record.getExternalId());
+				if (c.getTitle().equals("_favorites")) {
+					DB.getCollectionRecordDAO().incrementLikes(
+							record.getExternalId());
 					record = DB.getCollectionRecordDAO().get(record.getDbId());
 				}
 				// record in first entries does not contain the content metadata
@@ -624,25 +628,32 @@ public class CollectionController extends Controller {
 				// index record and merged_record and inrement likes
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
-				//increment likes if collection title is _favourites
-				if(c.getTitle().equals("_favorites") &&
-					(record.getTotalLikes() > 0)) {
+				// increment likes if collection title is _favourites
+				if (c.getTitle().equals("_favorites")
+						&& (record.getTotalLikes() > 0)) {
 					ElasticUpdater updater = new ElasticUpdater(null, record);
 					updater.incLikes();
 				}
 			} else {
 				List<CollectionRecord> storedRecords;
 				if((json.get("externalId") != null) &&
-					((storedRecords =  DB.getCollectionRecordDAO().getByUniqueId(json.get("externalId").asText())) != null) ) {
-					for(Entry<String , String> e: storedRecords.get(storedRecords.size()-1).getContent().entrySet()) {
-						record.getContent().put(e.getKey(), e.getValue());
-					}
+					((storedRecords =  DB.getCollectionRecordDAO().getByUniqueId(json.get("externalId").asText())) != null) &&
+					(storedRecords.get(0).getContent() != null)) {
+						for (Entry<String , String> e: storedRecords.get(0).getContent().entrySet()) {
+							record.getContent().put(e.getKey(), e.getValue());
+						}
 					DB.getCollectionRecordDAO().makePermanent(record);
+					// index record and merged_record
+					ElasticIndexer indexer = new ElasticIndexer(record);
+					indexer.index();
 				} else {
 					addContentToRecord(record.getDbId(), source, sourceId);
 				}
+
 				//increment likes if collection title is _favourites
 				if(c.getTitle().equals("_favorites")) {
+					ElasticIndexer indexer = new ElasticIndexer(record);
+					indexer.index();
 					ElasticUpdater updater = new ElasticUpdater(null, record);
 					updater.incLikes();
 				}
@@ -713,11 +724,9 @@ public class CollectionController extends Controller {
 				ArrayList<RecordJSONMetadata> recordsData = s
 						.getRecordFromSource(sourceId);
 				for (RecordJSONMetadata data : recordsData) {
-					record.getContent().put(data.getFormat(),
-							data.getJsonContent());
+					DB.getCollectionRecordDAO().updateContent(record.getDbId(),
+							data.getFormat(), data.getJsonContent());
 				}
-				DB.getCollectionRecordDAO().makePermanent(record);
-
 				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
@@ -746,8 +755,7 @@ public class CollectionController extends Controller {
 	 */
 	// @With(UserLoggedIn.class)
 	public static Result removeRecordFromCollection(String collectionId,
-			String recordId, int version) {
-
+			String recordId) {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
@@ -761,7 +769,8 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		try {
-			// here problem when try to delete a duplicated record in a collection
+			// here problem when try to delete a duplicated record in a
+			// collection
 			if (DB.getCollectionRecordDAO().getById(new ObjectId(recordId)) == null) {
 				result.put("error", "Wrong recordId");
 				return internalServerError(result);
@@ -787,11 +796,11 @@ public class CollectionController extends Controller {
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(
 				new ObjectId(recordId));
 		int position = 0;
-		if (collection.isExhibition()) {
+		if (collection.getIsExhibition()) {
 			position = record.getPosition();
 		}
-		//decrement likes from records
-		if(collection.getTitle().equals("_favorites")) {
+		// decrement likes from records
+		if (collection.getTitle().equals("_favorites")) {
 			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
 			ElasticUpdater updater = new ElasticUpdater(null, record);
 			updater.decLikes();
@@ -807,7 +816,7 @@ public class CollectionController extends Controller {
 		eraser.deleteRecord();
 		eraser.deleteRecordEntryFromMerged();
 
-		if (collection.isExhibition()) {
+		if (collection.getIsExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(
 					new ObjectId(collectionId), position);
 		}
@@ -880,7 +889,6 @@ public class CollectionController extends Controller {
 
 	// delete with external id
 	public static Result removeFromFavorites(String externalId) {
-
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		ObjectId userId = new ObjectId(userIds.get(0));
@@ -889,7 +897,7 @@ public class CollectionController extends Controller {
 		List<CollectionRecord> record = DB.getCollectionRecordDAO()
 				.getByUniqueId(fav, externalId);
 		String recordId = record.get(0).getDbId().toString();
-		return removeRecordFromCollection(fav.toString(), recordId, -1);
+		return removeRecordFromCollection(fav.toString(), recordId);
 	}
 
 	public static Result getFavorites() {

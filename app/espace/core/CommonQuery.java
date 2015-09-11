@@ -31,8 +31,6 @@ public class CommonQuery implements Cloneable {
 	public String termToExclude;
 	public String user;
 	public List<String> source;
-	public boolean mintSource = false;
-	public boolean uploadedByUser = false;
 
 	public List<CommonFilter> filters;
 
@@ -54,7 +52,7 @@ public class CommonQuery implements Cloneable {
 	}
 
 	public List<CommonQuery> splitFilters(ISpaceSource src) {
-		if (filters == null || filters.size() == 0)
+		if ((filters == null) || (filters.size() == 0))
 			return Arrays.asList(this);
 		else
 			return splitFilters(0, new ArrayList<>(), new ArrayList<CommonQuery>(), src);

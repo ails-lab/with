@@ -15,10 +15,13 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.url = ko.observable("");
 		self.id = ko.observable("");
 		self.externalId = ko.observable("");
+		self.collections = ko.observable("");
+
 		self.cachedThumbnail = ko.pureComputed(function() {
-			
+
+
 			   if(self.thumb()){
-				if (self.thumb().indexOf('/') === 0) {
+				if (self.thumb().indexOf('//') === 0) {
 					return self.thumb();
 				} else {
 					var newurl='url=' + encodeURIComponent(self.thumb())+'&';
@@ -72,6 +75,17 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.externalId(data.externalId);
 			self.source(data.source);
 			
+			$.ajax({
+				type    : "get",
+				url     : "/record/"+self.externalId() +"/mergedCollections",
+				success : function(result) {
+					self.collections(result.collections);
+				},
+				error   : function(request, status, error) {
+					console.log(request);
+				}
+			});
+
 		};
 
 		self.sourceImage = ko.pureComputed(function () {

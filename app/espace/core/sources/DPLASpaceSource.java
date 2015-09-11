@@ -184,19 +184,17 @@ public class DPLASpaceSource extends ISpaceSource {
 					it.id = Utils.readAttr(item, "id", true);
 					it.thumb = Utils.readArrayAttr(item, "object", false);
 					it.fullresolution = null;
-					it.title = Utils.readLangAttr(item.path("sourceResource"), "title", false);
-					it.description = Utils.readLangAttr(item.path("sourceResource"), "description", false);
-					it.creator = Utils.readLangAttr(item.path("sourceResource"), "creator", false);
-					countValue(creator, ListUtils.transform(it.creator, (Lang s) -> {
-						return s.value;
-					}));
+					it.title = Utils.readAttr(item.path("sourceResource"), "title", false);
+					it.description = Utils.readAttr(item.path("sourceResource"), "description", false);
+					it.creator = Utils.readAttr(item.path("sourceResource"), "creator", false);
+					countValue(creator, it.creator);
 					it.year = null;
-					it.dataProvider = Utils.readLangAttr(item.path("dataProvider"), "name", false);
-					it.provider = Utils.readLangAttr(item.path("provider"), "name", false);
+					it.dataProvider = Utils.readAttr(item.path("dataProvider"), "name", false);
+					/*it.provider = Utils.readAttr(item.path("provider"), "name", false);*/
 					it.url = new MyURL();
 					it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
 					it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
-					it.rights = Utils.readLangAttr(item.path("sourceResource"), "rights", false);
+					it.rights = Utils.readAttr(item.path("sourceResource"), "rights", false);
 					it.externalId = it.url.original.get(0);
 
 					it.externalId = DigestUtils.md5Hex(it.externalId);
