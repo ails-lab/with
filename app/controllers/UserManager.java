@@ -466,19 +466,49 @@ public class UserManager extends Controller {
 	}
 
 	/**
-	 * Get a list of matching usernames
+	 * Get a list of matching usernames or groupnames
+	 * 
+	 * Used by autocomplete in share collection
 	 *
 	 * @param prefix
-	 *            optional prefix of username
-	 * @return JSON document with an array of matching usernames (or all of
+	 *            optional prefix of username or groupname
+	 * @return JSON document with an array of matching usernames or groupnames (or all of
 	 *         them)
 	 */
 	public static Result listNames(String prefix) {
 		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-		ArrayNode result = Json.newObject().arrayNode();
+
+		ArrayNode suggestions = Json.newObject().arrayNode();
 		for (User user : users) {
-			result.add(user.getUsername());
+			ObjectNode node = Json.newObject();
+			ObjectNode data = Json.newObject().objectNode();
+			data.put("type", "user");
+			//costly?
+			node.put("value", user.getUsername());
+			node.put("data", data);
+			suggestions.add(node);
+			//result.add(user.getUsername());
 		}
+		
+		List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
+		for (UserGroup group : groups) {
+			ObjectNode node = Json.newObject().objectNode();
+			ObjectNode data = Json.newObject().objectNode();
+			data.put("type", "group");
+			node.put("value", group.getName());
+			node.put("data", data);
+			suggestions.add(node);
+			//result.add(user.getUsername());
+		}
+		
+		ArrayNode result = Json.newObject().arrayNode();
+		
+		ObjectNode x = Json.newObject().objectNode();
+		
+		x.put("suggestions", suggestions);
+		
+		result.add(x);
+		
 		return ok(result);
 	}
 

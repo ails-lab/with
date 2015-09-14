@@ -42,5 +42,12 @@ public class UserGroupDAO extends DAO<UserGroup> {
 				.hasThisElement( dbId );
 		return find( q ).asList();
 	}
+	
+	public List<UserGroup> getByGroupNamePrefix(String prefix) {
+		Query<UserGroup> q = this.createQuery().field("name").startsWith(prefix);
+		return find(q).asList();
+
+	}
+
 
 }

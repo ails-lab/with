@@ -19,16 +19,34 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 transformResult: function(response) {
 			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
+			   			var result = [];			   			
 			   			for (var i in response) {
 			   				if (response[i] != myUsername)
 			   					result.push({"value": response[i]});
+
+			   				var suggestions  = response[i].suggestions;
+			   				$.merge(result, suggestions);
 			   			}
+
 			   			return {"suggestions": result};
 			   		 },
 			   		 orientation: "auto",
 				     onSearchComplete: function(query, suggestions) {
-				    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestion-extra");
-				     }
+				    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
+				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+				    	 for (var i in suggestions) {
+				    		 var type = suggestions[i].data.type;
+				    		 var s = $(".autocomplete-suggestion").get(i);
+				    	 }
+				     },
+				  	formatResult: function(suggestion, currentValue) {
+						var s = '<strong>' + currentValue + '</strong>';
+						s    += suggestion.value.substring(currentValue.length);
+						s    += ' <span class="label pull-right">' + suggestion.data.type + '</span>';
+						return s;
+					}
+				     
+				     
 			   		 /*onSelect: function (suggestion) {
 			   			 var funct = valueAccessor();
 			   			funct(suggestion.value);
