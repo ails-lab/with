@@ -6,6 +6,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		return entry;
 	}
 
+	
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 	    	  $(elem).devbridgeAutocomplete({
@@ -17,7 +18,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   			 dataType: "json"
 			   		 },
 			   		 transformResult: function(response) {
-			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
 			   			//TODO: filter out usersToShare from the dropDown 
 			   			var index = arrayFirstIndexOf(response, function(item) {
@@ -34,8 +34,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				   	},
 				   	orientation: "auto",    
 				    onSearchComplete: function(query, suggestions) {
-				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
-				    },
+			   			var result = [];
+				   		var suggestions  = response[0].suggestions;
+				   		
+				   		for (var i in suggestions) {
+					   		if (suggestions[i].value != myUsername){
+					   			result.push(suggestions[i]);
+					   		}
+					   	}
+			   			return {"suggestions": result};
+			   		 },
 					formatResult: function(suggestion, currentValue) {
 						var s = '<strong>' + currentValue + '</strong>';
 						s    += suggestion.value.substring(currentValue.length);
