@@ -18,10 +18,13 @@ package controllers;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
+import model.Collection;
 import model.User;
+import model.User.Access;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
@@ -286,7 +289,7 @@ public class GroupManager extends Controller {
 		group.getUsers().remove(new ObjectId(userId));
 		user.recalculateGroups();
 		return ok("User successfully removed from group");
-		
+
 	}
 
 	/**
@@ -294,8 +297,27 @@ public class GroupManager extends Controller {
 	 *            the group name
 	 * @return the result
 	 */
-	public static Result findByGroupName(String name) {
-		return TODO;
-
+	public static Result findByGroupName(String name, String collectionId) {
+		Function<UserGroup, Status> getGroupJson = (UserGroup group) -> {
+			ObjectNode groupJSON = Json.newObject();
+			groupJSON.put("groupId", group.getDbId().toString());
+			groupJSON.put("name", group.getName());
+			groupJSON.put("description", group.getDesc());
+			if (collectionId != null) {
+				Collection collection = DB.getCollectionDAO().getById(
+						new ObjectId(collectionId));
+				if (collection != null) {
+					Access accessRights = collection.getRights().get(
+							group.getDbId());
+					if (accessRights != null)
+						groupJSON.put("accessRights", accessRights.toString());
+					else
+						groupJSON.put("accessRights", Access.NONE.toString());
+				}
+			}
+			return ok(groupJSON);
+		};
+		UserGroup group = DB.getUserGroupDAO().getByName(name);
+		return getGroupJson.apply(group);
 	}
 }
