@@ -38,6 +38,7 @@ public class UserGroup {
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private String name;
 	private String desc;
+	private boolean privateGroup;
 
 	private ObjectId thumbnail;
 
@@ -123,6 +124,14 @@ public class UserGroup {
 
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
+	}
+
+	public boolean isPrivateGroup() {
+		return privateGroup;
+	}
+
+	public void setPrivateGroup(boolean privateGroup) {
+		this.privateGroup = privateGroup;
 	}
 
 }
