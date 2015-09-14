@@ -57,7 +57,6 @@ public class User {
 
 	private Gender gender;
 	private String about;
-	private String location;
 
 	private String facebookId;
 	private String googleId;
@@ -71,6 +70,8 @@ public class User {
 	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
+	@Embedded
+	private Page page;
 
 	private int recordLimit;
 	private int collectedRecords;
@@ -146,7 +147,7 @@ public class User {
 		}
 		return "";
 	}
-	
+
 	public void recalculateGroups() {
 		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
 		// get all groups I'm in
@@ -201,20 +202,20 @@ public class User {
 		this.about = about;
 	}
 
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
 	public List<Search> getSearchHistory() {
 		return searchHistory;
 	}
 
 	public void setSearchHistory(List<Search> searcHistory) {
 		this.searchHistory = searcHistory;
+	}
+
+	public Page getPage() {
+		return page;
+	}
+
+	public void setPage(Page page) {
+		this.page = page;
 	}
 
 	public String getFacebookId() {

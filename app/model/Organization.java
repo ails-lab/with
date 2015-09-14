@@ -19,65 +19,18 @@ package model;
 import java.util.List;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.geo.Point;
 
 public class Organization extends UserGroup {
 
-	private String address;
-	private Point coordinates;
-	private String city;
-	private String country;
-
 	private String name;
-	private String url;
 	private String description;
-
 	private ObjectId logo;
-	private ObjectId coverImage;
 
-	private List<ObjectId> featuredCollections;
+	@Embedded
+	private Page page;
 
-
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public Point getLocation() {
-		return coordinates;
-	}
-
-	public void setLocation(Point location) {
-		this.coordinates = location;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public ObjectId getBgImg() {
-		return coverImage;
-	}
-
-	public void setBgImg(ObjectId bgImg) {
-		this.coverImage = bgImg;
-	}
-
-	public List<ObjectId> getFeaturedColsl() {
-		return featuredCollections;
-	}
-
-	public void setFeaturedColsl(List<ObjectId> featuredColsl) {
-		this.featuredCollections = featuredColsl;
-	}
 
 	public ObjectId getLogo() {
 		return logo;
@@ -103,20 +56,5 @@ public class Organization extends UserGroup {
 		this.description = description;
 	}
 
-	public String getCountry() {
-		return country;
-	}
-
-	public void setCountry(String country) {
-		this.country = country;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
 
 }
