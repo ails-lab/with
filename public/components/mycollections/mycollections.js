@@ -6,6 +6,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		return entry;
 	}
 
+	
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 	    	  $(elem).devbridgeAutocomplete({
@@ -17,17 +18,15 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   			 dataType: "json"
 			   		 },
 			   		 transformResult: function(response) {
-			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-			   			var result = [];			   			
-			   			for (var i in response) {
-			   				if (response[i] != myUsername)
-			   					result.push({"value": response[i]});
-
-			   				var suggestions  = response[i].suggestions;
-			   				$.merge(result, suggestions);
-			   			}
-
+			   			var result = [];
+				   		var suggestions  = response[0].suggestions;
+				   		
+				   		for (var i in suggestions) {
+					   		if (suggestions[i].value != myUsername){
+					   			result.push(suggestions[i]);
+					   		}
+					   	}
 			   			return {"suggestions": result};
 			   		 },
 			   		 orientation: "auto",
