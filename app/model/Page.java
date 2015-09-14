@@ -20,6 +20,7 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import java.util.List;
 
 public class Page {
 
@@ -49,7 +50,6 @@ public class Page {
 
 	}
 
-	@Embedded
 	private Point coordinates;
 	private String city;
 	private String country;
@@ -59,7 +59,6 @@ public class Page {
 
 	private Set<ObjectId> featuredCollections;
 	private Set<ObjectId> featuredExhibitions;
-
 	public String getAddress() {
 		return address;
 	}

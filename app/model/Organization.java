@@ -18,6 +18,7 @@ package model;
 
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import java.util.List;
 
 @Entity("UserGroup")
 public class Organization extends UserGroup {
@@ -32,5 +33,4 @@ public class Organization extends UserGroup {
 	public void setPage(Page page) {
 		this.page = page;
 	}
-
 }

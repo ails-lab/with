@@ -50,7 +50,6 @@ public class User extends UserOrGroup {
 	private String lastName;
 
 	private Gender gender;
-
 	private String facebookId;
 	private String googleId;
 
