@@ -35,7 +35,7 @@ public class UserGroup {
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
-	private ObjectId administrator;
+	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private String name;
 	private String desc;
 
@@ -55,12 +55,20 @@ public class UserGroup {
 		this.dbId = dbId;
 	}
 
-	public ObjectId getAdministrator() {
-		return administrator;
+	public Set<ObjectId> getAdminIds() {
+		return adminIds;
 	}
 
-	public void setAdministrator(ObjectId administrator) {
-		this.administrator = administrator;
+	public void addAdministrators(Set<ObjectId> administrators) {
+		this.adminIds.addAll(administrators);
+	}
+	
+	public void addAdministrator(ObjectId administrator) {
+		this.adminIds.add(administrator);
+	}
+	
+	public void removeAdministrator(ObjectId administrator) {
+		this.adminIds.remove(administrator);
 	}
 
 	public List<ObjectId> getUsers() {

@@ -90,7 +90,7 @@ public class GroupManager extends Controller {
 			admin = new ObjectId(AccessManager.effectiveUserId(session().get(
 					"effectiveUserIds")));
 		}
-		newGroup.setAdministrator(admin);
+		newGroup.addAdministrator(admin);
 		newGroup.getUsers().add(admin);
 		Set<ConstraintViolation<UserGroup>> violations = Validation
 				.getValidator().validate(newGroup);
@@ -141,7 +141,7 @@ public class GroupManager extends Controller {
 		if (group == null) {
 			return internalServerError("Cannot retrieve group from database!");
 		}
-		if (!group.getAdministrator().equals(new ObjectId(adminId))
+		if (!group.getAdminIds().contains(new ObjectId(adminId))
 				&& (!admin.isSuperUser())) {
 			return forbidden("Only administrator of group has the right to edit the group");
 		}
@@ -236,7 +236,7 @@ public class GroupManager extends Controller {
 		if (group == null) {
 			return internalServerError("Cannot retrieve group from database!");
 		}
-		if (!group.getAdministrator().equals(new ObjectId(adminId))
+		if (!group.getAdminIds().contains(new ObjectId(adminId))
 				&& (!admin.isSuperUser())) {
 			return forbidden("Only administrator of group has the right to add users");
 		}
@@ -281,7 +281,7 @@ public class GroupManager extends Controller {
 		if (group == null) {
 			return internalServerError("Cannot retrieve group from database!");
 		}
-		if (!group.getAdministrator().equals(new ObjectId(userSession))
+		if (!group.getAdminIds().contains(new ObjectId(userSession))
 				&& (!userS.isSuperUser() && (!userSession.equals(userId)))) {
 			return forbidden("No rights for user removal");
 		}
