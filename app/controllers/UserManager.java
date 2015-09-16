@@ -476,46 +476,13 @@ public class UserManager extends Controller {
 	 */
 	public static Result listNames(String prefix) {
 		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-
-		ArrayNode suggestions = Json.newObject().arrayNode();
-		for (User user : users) {
-			ObjectNode node = Json.newObject();
-			ObjectNode data = Json.newObject().objectNode();
-			data.put("type", "user");
-			//costly?
-			node.put("value", user.getUsername());
-			node.put("data", data);
-			suggestions.add(node);
-			//result.add(user.getUsername());
-		}
-		
-		//List<UserGroup> groups = DB.getUserGroupDAO().getByUsernamePrefix(prefix);
-		List<String> groups = new ArrayList<String>();  //remember to remove import, change stuff to usergroup from string!!
-		groups.add("atest1");
-		groups.add("atest2");
-		groups.add("btest3");
-		groups.add("etest4");
-		for (String group : groups) {
-			ObjectNode node = Json.newObject().objectNode();
-			ObjectNode data = Json.newObject().objectNode();
-			data.put("type", "group");
-			//username.put("name", user.getUsername());
-			node.put("value", group);
-			node.put("data", data);
-			suggestions.add(node);
-			//result.add(user.getUsername());
-		}
-		
 		ArrayNode result = Json.newObject().arrayNode();
-		
-		ObjectNode x = Json.newObject().objectNode();
-		
-		x.put("suggestions", suggestions);
-		
-		result.add(x);
-		
+		for (User user : users) {
+			result.add(user.getUsername());
+		}
 		return ok(result);
 	}
+
 
 	/**
 	 * Find if email is already used.
