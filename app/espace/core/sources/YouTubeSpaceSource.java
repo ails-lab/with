@@ -113,14 +113,14 @@ public class YouTubeSpaceSource extends ISpaceSource {
 									.path("default"), "url", false);
 					it.fullresolution = Utils.readArrayAttr(item.path("snippet")
 							.path("thumbnails").path("high"), "url", false);
-					it.title = Utils.readLangAttr(item.path("snippet"), "title",
+					it.title = Utils.readAttr(item.path("snippet"), "title",
 							false);
-					it.description = Utils.readLangAttr(item.path("snippet"),
+					it.description = Utils.readAttr(item.path("snippet"),
 							"description", false);
 					it.creator = null;// Utils.readLangAttr(item.path("sourceResource"),
 										// "creator", false);
 					it.year = null;
-					it.dataProvider = Utils.readLangAttr(item.path("snippet"),
+					it.dataProvider = Utils.readAttr(item.path("snippet"),
 							"channelTitle", false);
 					it.url = new MyURL();
 					it.url.fromSourceAPI = "https://www.youtube.com/watch?v="

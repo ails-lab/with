@@ -92,6 +92,7 @@ public class UserManager extends Controller {
 			String collectionId) {
 		Function<User, Status> getUserJson = (User u) -> {
 			ObjectNode userJSON = Json.newObject();
+			userJSON.put("userId", u.getDbId().toString());
 			userJSON.put("username", u.getUsername());
 			userJSON.put("firstName", u.getFirstName());
 			userJSON.put("lastName", u.getLastName());

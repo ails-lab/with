@@ -121,7 +121,14 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.RIGHTS_NAME;
 		return r;
 	}
-
+	
+	public static CommonFilterLogic reusabilityFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.REUSABILITY_ID;
+		r.data.filterName = CommonFilters.REUSABILITY_NAME;
+		return r;
+	}
+	
 	public static CommonFilterLogic countryFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.COUNTRY_ID;

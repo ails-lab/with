@@ -48,7 +48,7 @@ public class WithSpaceSource extends ISpaceSource {
 
 	@Override
 	public String getSourceName() {
-		return "With";
+		return "WITHin";
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class WithSpaceSource extends ISpaceSource {
 			elasticoptions = new SearchOptions();
 			elasticoptions.setUser(q.getUser());
 			searcher.setType(Elastic.type_collection);
-			SearchResponse response = searcher.search(null, elasticoptions);
+			SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
 			colFields = getCollectionMetadaFromHit(response.getHits());
 
 		}
@@ -80,12 +80,6 @@ public class WithSpaceSource extends ISpaceSource {
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}
-		//which source are available
-		elasticoptions.addFilter("source", "no sources selected");
-		if(q.mintSource)
-			elasticoptions.addFilter("source", "mint");
-		if(q.uploadedByUser)
-			elasticoptions.addFilter("source", "uploadedByUser");
 
 		SearchResponse resp = searcher.search(term, elasticoptions);
 		searcher.closeClient();

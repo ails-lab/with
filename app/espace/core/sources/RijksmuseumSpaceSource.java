@@ -82,8 +82,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 					ItemsResponse it = new ItemsResponse();
 					// countValue(type, t);
 					it.id = Utils.readAttr(item, "objectNumber", true);
-					it.title = Utils.readLangAttr(item, "title", false);
-					it.creator = Utils.readLangAttr(item, "principalOrFirstMaker", false);
+					it.title = Utils.readAttr(item, "title", false);
+					it.creator = Utils.readAttr(item, "principalOrFirstMaker", false);
 
 					it.thumb = Utils.readArrayAttr(item.path("webImage"), "url", false);
 

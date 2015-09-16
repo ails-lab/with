@@ -17,6 +17,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,6 +27,8 @@ import model.Collection;
 import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.search.SearchHit;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -39,18 +42,23 @@ import utils.AccessManager.Action;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.Elastic;
 import elastic.ElasticEraser;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUpdater;
+import elastic.ElasticUtils;
 
 public class RecordController extends Controller {
 	public static final ALogger log = Logger.of(RecordController.class);
 
 	/**
 	 * Retrieve a collection entry or just a specific format
-	 * 
+	 *
 	 * @param entryId
 	 * @param format
 	 * @return
@@ -78,7 +86,7 @@ public class RecordController extends Controller {
 
 	/**
 	 * Update a record. Needs to be implemented in a better way
-	 * 
+	 *
 	 * @param colEntryId
 	 * @param format
 	 * @return
@@ -160,7 +168,7 @@ public class RecordController extends Controller {
 
 	/**
 	 * Deletes a whole collection entry or just a format
-	 * 
+	 *
 	 * @param entryId
 	 * @param format
 	 * @return
@@ -234,6 +242,61 @@ public class RecordController extends Controller {
 
 		result.put("message", "Cannot retrieve entries from db");
 		return internalServerError(result);
+	}
+
+	/**
+	 *
+	 * @param externalId
+	 * @return
+	 */
+	public static Result getCollectionMetadata(String externalId) {
+		
+		ObjectNode result = Json.newObject();
+
+		ElasticSearcher searchMerged = new ElasticSearcher(Elastic.type_general);
+		SearchOptions options = new SearchOptions();
+		options.set_idSearch(true);
+		SearchResponse resp = searchMerged.search(externalId, options);
+
+		if(resp.getHits().getTotalHits() == 0) {
+			result.put("count",resp.getHits().getTotalHits());
+			ArrayNode collections = Json.newObject().arrayNode();
+			result.put("collections",collections);
+			return ok(result);
+	//		return internalServerError("message", "Invalid externalId given to Elastic Search");
+		}
+
+		SearchHit merged_hit = resp.getHits().getHits()[0];
+		List<String> collectionIds =
+				ElasticUtils.hitToRecord(merged_hit).getCollections();
+
+		ElasticSearcher searchCollections = new ElasticSearcher(Elastic.type_collection);
+		resp = searchCollections.searchForCollections(String.join(" ", collectionIds), new SearchOptions(0, 15));
+
+		
+		if(resp.getHits().getTotalHits() == 0) {
+			result.put("count",resp.getHits().getTotalHits());
+			ArrayNode collections = Json.newObject().arrayNode();
+			result.put("collections",collections);
+			return ok(result);
+
+		//	return internalServerError("message", "No collections found for this merged record");
+		}
+		
+		
+		result.put("count",resp.getHits().getTotalHits());
+		ArrayNode collections = Json.newObject().arrayNode();
+		for(SearchHit hit: resp.getHits().getHits()) {
+			ObjectNode o = Json.newObject();
+			Collection c = ElasticUtils.hitToCollection(hit);
+			o.put("title", c.getTitle());
+			o.put("description", c.getDescription());
+			o.put("thumbnail", c.getThumbnailUrl());
+
+			collections.add(o);
+		}
+		result.put("collections",collections);
+		return ok(result);
 	}
 
 }
