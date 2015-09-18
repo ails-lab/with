@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 

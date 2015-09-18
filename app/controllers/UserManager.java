@@ -34,7 +34,7 @@ import model.ApiKey;
 import model.Collection;
 import model.Media;
 import model.User;
-import model.User.Access;
+import model.Rights.Access;
 import model.UserGroup;
 
 import org.apache.commons.codec.binary.Base64;

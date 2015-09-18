@@ -24,7 +24,7 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;

@@ -145,7 +145,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "access=read&offset=0&count=20"
+			data: "loggedInUserAccess=READ&offset=0&count=20&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -168,7 +168,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "access=write&offset=0&count=20"
+			data: "loggedInUserAccess=WRITE&offset=0&count=20&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -194,13 +194,14 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	};
 
 	self.getUserCollections = function () {
+		//filter = [{username:'maria.ralli',access:'OWN'}];
 		return $.ajax({
 			type: "GET",
 			contentType: "application/json",
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "access=owned&offset=0&count=20"
+			data: "loggedInUserAccess=read&offset=0&count=20&isExhibition=false"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -219,9 +220,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			type        : "GET",
 			contentType : "application/json",
 			dataType    : "json",
-			url         : "/exhibition/list",
+			url         : "/collection/list",
 			processData : false,
-			data        : "access=owned&offset=0&count=20"}).done(
+			data        : "loggedInUserAccess=own&offset=0&count=20&isExhibition=true"}).done(
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
 				/*if (sessionStorage.getItem('User') !== null) 

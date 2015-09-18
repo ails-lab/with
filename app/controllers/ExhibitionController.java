@@ -26,7 +26,7 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.User;
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 
@@ -35,6 +35,8 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.Tuple;
+import controllers.parameterTypes.StringTuple;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -107,8 +109,11 @@ public class ExhibitionController extends Controller {
 						.parse("{\"error\" : \"User not specified\"}"));
 			}
 			String userId = userIds.get(0);
-			List<Collection> exhibitions = DB.getCollectionDAO()
-					.getExhibitionsByOwner(new ObjectId(userId), offset, count);
+			List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
+			//userAccess.add(new Tuple<ObjectId, Access>(new ObjectId(userId), Access.OWN));
+			List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId, Access>>>(0);
+			accessFilters.add(userAccess);
+			List<Collection> exhibitions = DB.getCollectionDAO().getByAccess(accessFilters, true, offset, count);
 			for (Collection exhibition : exhibitions) {
 				ObjectNode c = (ObjectNode) Json.toJson(exhibition);
 				c.put("access", Access.OWN.toString());

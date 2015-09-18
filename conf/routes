@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-#GET     /                           controllers.Application.index()
+#GET     /                          controllers.Application.index()
 GET     /                           controllers.Default.redirect(to="assets/index.html")
 
 POST     /api/search                controllers.SearchController.search()
@@ -23,9 +23,8 @@ GET 	/custom/:customName/*file				controllers.CustomAssets.getFile( customName:S
 
 
 # Collection Controller (tested except some methods)
-#GET 	 /collection/list						controllers.CollectionController.list(filterByUserOrGroup ?= null, filterByUserOrGroupId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
-#GET 	 /collection/listShared					controllers.CollectionController.listShared(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, offset: Integer ?=0, count: Integer ?=10)
-GET      /collection/list						controllers.CollectionController.list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false, offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/list						controllers.CollectionController.list(loggedInUserAccess ?= "READ", directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/listShared					controllers.CollectionController.listShared(direct: Boolean ?= true, directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
@@ -43,7 +42,7 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
+#GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)

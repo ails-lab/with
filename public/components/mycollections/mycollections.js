@@ -67,7 +67,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "access=read&offset=0&count=20"}).done(
+			data        : "isExhibition=false&offset=0&count=20"}).done(
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
@@ -134,6 +134,26 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.sharedCollections = ko.mapping.fromJS([], mapping);
 		}
 		else {
+			/*var filter=[{x:'1',y:'2'}, {x:'3',y:'4'}];
+			var stringFilter="";
+			$.each(filter, function(i, obj) {
+				if (i!=0)
+					stringFilter+="&";
+				stringFilter+="filter="+obj;
+		    });
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/listTest",
+				processData: false,
+				data: JSON.stringify(filter)//JSON.stringify(filter[0])+"&testTuple="+JSON.stringify(filter[1])
+			}).done(
+				function (data) {
+					return data;
+				}).fail(function (request, status, error) {
+					alert(error);
+			});*/
 			var promise = app.getUserCollections();
 			$.when(promise).done(function(data) {
 				//convert rights map to array

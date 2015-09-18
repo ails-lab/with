@@ -88,50 +88,65 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.find(q).asList();
 	}
 	
-	public Criteria[] formQueryAccessCriteria(Tuple<ObjectId, Access> userAccess) {
-		Criteria[] criteria = new Criteria[userAccess.y.ordinal()];
+	//userId has userAccess if its accessLevel in rights is equal to or greater than userAccess
+	public CriteriaContainer formAccessLevelQuery(Tuple<ObjectId, Access> userAccess) {
 		int ordinal = userAccess.y.ordinal();
-		for (int i=0; i < ordinal; i++)
+		Criteria[] criteria = new Criteria[Access.values().length-ordinal];
+		for (int i=0; i<Access.values().length-ordinal; i++)
 			criteria[i] = this.createQuery().criteria("rights." + userAccess.x.toHexString())
-			.equal(userAccess.y.toString());
-		return criteria;
+			.equal(Access.values()[i+ordinal].toString());
+		return this.createQuery().or(criteria);
 	}
 	
 	
-	public Criteria[] formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
+	public CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
-			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(userAccess));
+			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
 		}
-		return criteria;
+		return this.createQuery().or(criteria);
 	}
 	
-	public List<Collection> getByAccess(ObjectId userId, List<Tuple<ObjectId, Access>> filterByUserName, 
-			List<Tuple<ObjectId, Access>> filterByUserGroup, Boolean isExhibition, int offset, int count) {
+	public List<Collection> getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
+			Boolean isExhibition, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
 		if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);
-		Criteria[] criteria = formQueryAccessCriteria(filterByUserName);
-		//TODO: check whether userGroup Ids are treated the same as userIds
-		criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(filterByUserGroup));
-	    q.or(criteria);
+		CriteriaContainer[] criteria =  new CriteriaContainer[0];
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
+		}
+		if (criteria.length > 0)
+			q.and(criteria);
 		return this.find(q).asList();
 	}
 	
-	public List<Collection> getPublic(ObjectId userId, List<Tuple<ObjectId, Access>> filterByUserName, 
-			List<Tuple<ObjectId, Access>> filterByUserGroup, Boolean isExhibition, int offset, int count) {
+	public List<Collection> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
+			Boolean isExhibition, int offset, int count) {
+		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		if (isExhibition != null)
+			q.field("isExhibition").equal(isExhibition);
+		CriteriaContainer[] criteria =  new CriteriaContainer[0];
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
+		}
+		criteria =ArrayUtils.add(criteria, this.createQuery().criteria("rights." + userId.toHexString()).notEqual("OWN"));
+		if (criteria.length > 0)
+			q.and(criteria);
+		return this.find(q).asList();
+	}
+	
+	public List<Collection> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, Boolean isExhibition, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
 		if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);
 		Criteria[] criteria = {this.createQuery().criteria("isPublic").equal(true)};
-	    criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(filterByUserName));
-	    q.or(criteria);
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
+		}
+		if (criteria.length > 0)
+			q.and(criteria);
 		return this.find(q).asList();
-	}
-	
-	public List<Collection> getPublic(ObjectId userId, List<Tuple<ObjectId, Access>> filterByUserName, 
-			List<Tuple<ObjectId, Access>> filterByUserGroup,  int offset, int count) {		
-		return getPublic(userId, filterByUserName, filterByUserGroup, null, offset, count);
 	}
 
 	/*

@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.Collection;
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 

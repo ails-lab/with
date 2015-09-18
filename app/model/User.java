@@ -43,10 +43,6 @@ public class User {
 		MALE, FEMALE, UNSPECIFIED
 	}
 
-	public static enum Access {
-		NONE, READ, WRITE, OWN
-	}
-
 	@Id
 	private ObjectId dbId;
 

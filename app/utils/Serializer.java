@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import model.User.Access;
+import model.Rights.Access;
 import org.bson.types.ObjectId;
 
 import play.Logger;
