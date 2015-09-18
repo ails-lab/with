@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 

@@ -658,9 +658,9 @@ public class UserManager extends Controller {
 				if (json.has("about")) {
 					user.setAbout(json.get("about").asText());
 				}
-				if (json.has("location")) {
+				/*if (json.has("location")) {
 					user.setLocation(json.get("location").asText());
-				}
+				}*/
 				DB.getUserDAO().makePermanent(user);
 				result = (ObjectNode) Json.parse(DB.getJson(user));
 				result.remove("md5Password");
