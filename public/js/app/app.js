@@ -201,7 +201,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
+<<<<<<< HEAD
 			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=false"
+=======
+			data: "loggedInUserAccess=read&offset=0&count=20&isExhibition=false"
+>>>>>>> New implementation of collection/list and listShared API call.
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));

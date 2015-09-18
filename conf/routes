@@ -40,7 +40,7 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-#GET		 /exhibition/list					controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
+#GET	 /exhibition/list					    controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)

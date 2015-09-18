@@ -50,7 +50,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
-import utils.Tuple;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -404,6 +403,7 @@ public class CollectionController extends Controller {
 		}
 		return collections;
 	}
+	
 	/**
 	 * list accessible collections
 	 * list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false)
@@ -445,7 +445,6 @@ public class CollectionController extends Controller {
 				}
 				accessedByUserOrGroup.add(recursivelyAccessedByLoggedInUser);
 			}
-			System.out.println(isExhibition);
 			userCollections = DB.getCollectionDAO().getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, offset, count);
 			List<ObjectNode> collections = collectionWithUserData(userCollections, effectiveUserIds);
 			for (ObjectNode c: collections)
