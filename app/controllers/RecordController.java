@@ -284,17 +284,25 @@ public class RecordController extends Controller {
 		}
 		
 		
-		result.put("count",resp.getHits().getTotalHits());
+		//result.put("count",resp.getHits().getTotalHits());
 		ArrayNode collections = Json.newObject().arrayNode();
+		int liked  = 0 ;
 		for(SearchHit hit: resp.getHits().getHits()) {
 			ObjectNode o = Json.newObject();
 			Collection c = ElasticUtils.hitToCollection(hit);
+			if (c.getTitle().equals("_favorites")) {
+				liked++;
+				continue;
+			}
 			o.put("title", c.getTitle());
 			o.put("description", c.getDescription());
 			o.put("thumbnail", c.getThumbnailUrl());
+			o.put("dbId",hit.getId());
 
 			collections.add(o);
 		}
+		result.put("count",collections.size());
+		result.put("liked",liked);
 		result.put("collections",collections);
 		return ok(result);
 	}
