@@ -18,6 +18,8 @@ package espace.core.sources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -52,6 +54,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 	public BritishLibrarySpaceSource() {
 		super();
 		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("media"));
+		addDefaultComplexWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
 		// addDefaultWriter(CommonFilters.COUNTRY_ID,
 		// fwriter("sourceResource.spatial.country"));
 
@@ -67,6 +70,30 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 			@Override
 			public Pair<String> apply(List<String> t) {
 				return new Pair<String>(parameter, Utils.getORList(ListUtils.transform(t, function), false));
+			}
+		};
+	}
+
+	private Function<List<String>, List<Pair<String>>> qfwriterYEAR() {
+		return new Function<List<String>, List<Pair<String>>>() {
+			@Override
+			public List<Pair<String>> apply(List<String> t) {
+				String start = "", end = "";
+				if (t.size() == 1) {
+					start = t.get(0) + "-01-01";
+					end = next(t.get(0)) + "-01-01";
+				} else if (t.size() > 1) {
+					start = t.get(0) + "-01-01";
+					end = next(t.get(1)) + "-01-01";
+				}
+
+				return Arrays.asList(new Pair<String>("min_taken_date", start),
+						new Pair<String>("max_taken_date", end));
+
+			}
+
+			private String next(String string) {
+				return "" + (Integer.parseInt(string) + 1);
 			}
 		};
 	}
@@ -116,7 +143,15 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 					it.thumb = Utils.readArrayAttr(item, "url_s", false);
 					it.fullresolution = Utils.readArrayAttr(item, "url_o", false);
 					it.description = Utils.readAttr(item.path("description"), "_content", false);
-					it.year = Arrays.asList(Utils.readAttr(item, "datetaken", false).substring(0, 4));
+					String date = Utils.readAttr(item, "datetaken", false);
+					if (date.indexOf("-") >= 0) {
+						it.year = Arrays.asList(date.substring(0, 4));
+					} else {
+						Date d = new Date(Long.parseLong(date) * 1000);
+						Calendar c = Calendar.getInstance();
+						c.setTime(d);
+						it.year = Arrays.asList("" + c.get(Calendar.YEAR));
+					}
 					System.out.println(it.year);
 					it.dataProvider = LABEL;
 					it.url = new MyURL();
