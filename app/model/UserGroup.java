@@ -35,7 +35,6 @@ import db.DB;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserGroup extends UserOrGroup {
 
-	private ObjectId thumbnail;
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private boolean privateGroup;
 
