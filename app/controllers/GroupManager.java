@@ -302,7 +302,7 @@ public class GroupManager extends Controller {
 			ObjectNode groupJSON = Json.newObject();
 			groupJSON.put("groupId", group.getDbId().toString());
 			groupJSON.put("name", group.getName());
-			groupJSON.put("description", group.getDesc());
+			groupJSON.put("description", group.getDescription());
 			if (collectionId != null) {
 				Collection collection = DB.getCollectionDAO().getById(
 						new ObjectId(collectionId));

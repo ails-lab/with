@@ -37,9 +37,8 @@ public class UserGroup {
 	private ObjectId dbId;
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private String name;
-	private String desc;
+	private String description;
 	private boolean privateGroup;
-
 	private ObjectId thumbnail;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -110,12 +109,12 @@ public class UserGroup {
 		}
 	}
 
-	public String getDesc() {
-		return desc;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setDesc(String desc) {
-		this.desc = desc;
+	public void setDescription(String desc) {
+		this.description = desc;
 	}
 
 	public ObjectId getThumbnail() {
