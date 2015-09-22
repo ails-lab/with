@@ -57,6 +57,7 @@ public class Page {
 	private ObjectId coverImage;
 
 	private List<ObjectId> featuredCollections;
+	private List<ObjectId> featuredExhibitions;
 
 	public String getAddress() {
 		return address;

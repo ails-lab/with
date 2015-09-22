@@ -34,6 +34,7 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Organization;
 import model.User;
 import model.Rights.Access;
 
@@ -198,8 +199,13 @@ public class CollectionController extends Controller {
 		Collection newVersion;
 		try {
 			newVersion = updator.readValue(json);
-
 			newVersion.setLastModified(new Date());
+			
+			if (json.has("belongsTo")) {
+				String organizationString = json.get("belongsTo").textValue();
+				ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
+				newVersion.getRights().put(organizationId, Access.OWN);
+			}
 
 			Set<ConstraintViolation<Collection>> violations = Validation
 					.getValidator().validate(newVersion);
@@ -272,11 +278,40 @@ public class CollectionController extends Controller {
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
 		String userId = userIds.get(0);
+		
+			
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
 		newCollection.setOwnerId(new ObjectId(userId));
-
+		if (json.has("belongsTo")) {
+			String organizationString = json.get("belongsTo").textValue();
+			ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
+			newCollection.getRights().put(organizationId, Access.OWN);
+		}
+		//Scenario 1: the list of projects the user can select from the ui (to give read access) are  the projects for which s/he is a descendant
+		//if the user gives read access to a project which is not his/her (direct) parent, 
+		//in the backend "REVIEW" access level is given to all direct children of the project (so that it appears in a separate place in these users' collection list ui) 
+		//However, the "REVIEW" level has no obvious position in the Access enum (has to be less than WRITE but have possibility to share, i.e. > WRITE). 
+		//So, we could have in User an exrta field toReview: List[Tuple<CollectionId, UserGroupId>]
+		//When an entry of the list is READ-or-WRITE approved  <UserGroupId, READ-or-WRITE> is added in collection with CollectionId, and
+		//the entry is removed from the toReview list.
+		//Scenario 2: the list of projects the user can select from the ui (to give read access) are the projects of which s/he is a (direct) child
+		//if the user wants to give read access to a project which is not his/her (direct) parent, 
+		//she has to give "OWN" access to a specific user he/she know is a child of the project. This is usually a member of his/her or organization,
+		//so the transfer of "OWN" rights to the organization (via "belongsTo") is enough. The problem is that member of the usergroup
+		//will have no means to distinguish what is shared with him with the intention to be seen by the project, and what is shared with him for other reasons (other projects, personally etc).
+		//The "give ownership" can be part of "share" -- where i can choose only usergroups which are my parents
+		/*if (json.has("submitToProjects")) {
+			JsonNode readableBy = json.get("submitToProjects");
+			if (readableBy.isArray()) {
+				for (JsonNode node: readableBy) {
+					String projectString = node.textValue();
+					ObjectId projectId = DB.getUserGroupDAO().getByName(projectString).getDbId();
+					newCollection.getRights().put(projectId, Access.READ);
+				}
+			}
+		}*/
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
 		for (ConstraintViolation<Collection> cv : violations) {

@@ -120,7 +120,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			mapping.title = {
 				create: function(options) {
 					if (options.data.indexOf('Dummy') === -1) {
-
 						return ko.observable(options.data);
 					}
 					return ko.observable('Add Title');
@@ -134,26 +133,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.sharedCollections = ko.mapping.fromJS([], mapping);
 		}
 		else {
-			/*var filter=[{x:'1',y:'2'}, {x:'3',y:'4'}];
-			var stringFilter="";
-			$.each(filter, function(i, obj) {
-				if (i!=0)
-					stringFilter+="&";
-				stringFilter+="filter="+obj;
-		    });
-			return $.ajax({
-				type: "GET",
-				contentType: "application/json",
-				dataType: "json",
-				url: "/collection/listTest",
-				processData: false,
-				data: JSON.stringify(filter)//JSON.stringify(filter[0])+"&testTuple="+JSON.stringify(filter[1])
-			}).done(
-				function (data) {
-					return data;
-				}).fail(function (request, status, error) {
-					alert(error);
-			});*/
 			var promise = app.getUserCollections();
 			$.when(promise).done(function(data) {
 				//convert rights map to array
