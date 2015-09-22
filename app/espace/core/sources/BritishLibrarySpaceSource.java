@@ -58,13 +58,13 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 		// addDefaultWriter(CommonFilters.COUNTRY_ID,
 		// fwriter("sourceResource.spatial.country"));
 
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "photos");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "videos");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "photo");
+		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "video");
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		Function<String, String> function = (String s) -> {
-			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
+			return  Utils.spacesFormatQuery(s, "%20");
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
@@ -152,7 +152,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 						c.setTime(d);
 						it.year = Arrays.asList("" + c.get(Calendar.YEAR));
 					}
-					System.out.println(it.year);
+//					System.out.println(it.year);
 					it.dataProvider = LABEL;
 					it.url = new MyURL();
 					it.url.original = it.fullresolution;
