@@ -179,6 +179,19 @@ public class Utils {
 		}
 		return res;
 	}
+	
+	public static String getStringList(List<String> values, String separator) {
+		String res = "";
+		if (values.size() > 1) {
+			res +=  spacesPlusFormatQuery(values.get(0));
+			for (int i = 1; i < values.size(); i++) {
+				res += separator + spacesPlusFormatQuery(values.get(i));
+			}
+		} else {
+			res += spacesPlusFormatQuery(values.get(0));
+		}
+		return res;
+	}
 
 	public static class Pair<T> {
 		public T first;
