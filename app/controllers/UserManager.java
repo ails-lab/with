@@ -33,13 +33,12 @@ import javax.net.ssl.HttpsURLConnection;
 import model.ApiKey;
 import model.Collection;
 import model.Media;
-import model.User;
 import model.Rights.Access;
+import model.User;
 import model.UserGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -54,15 +53,11 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import scala.Unit;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import actors.ApiKeyManager;
 import actors.ApiKeyManager.Create;
-import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 
@@ -77,11 +72,6 @@ public class UserManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
-
-	// turns out this has to be called outside a controller else it turns to
-	// null
-	private static String APPLICATION_URL = play.Play.application()
-			.configuration().getString("application.baseUrl");
 
 	/**
 	 * @param emailOrUsername
@@ -251,18 +241,11 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		// ObjectNode error = (ObjectNode) Json.newObject();
-
-		// copied from here
-
 		result = validateUser(json);
-
-		// If everything is ok store the user at the database
-
 		if (result.has("error")) {
 			return badRequest(result);
 		}
-
+		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
 		Collection fav = new Collection();

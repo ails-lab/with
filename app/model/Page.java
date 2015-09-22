@@ -19,11 +19,36 @@ package model;
 import java.util.List;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.geo.Point;
+import org.mongodb.morphia.annotations.Embedded;
 
 public class Page {
 
 	private String address;
+
+	@Embedded
+	public static class Point {
+		
+		private double latitude;
+		private double longitude;
+
+		public double getLatitude() {
+			return latitude;
+		}
+
+		public void setLatitude(double latitude) {
+			this.latitude = latitude;
+		}
+
+		public double getLongitude() {
+			return longitude;
+		}
+
+		public void setLongitude(double longitude) {
+			this.longitude = longitude;
+		}
+
+	}
+	@Embedded
 	private Point coordinates;
 	private String city;
 	private String country;
@@ -33,22 +58,12 @@ public class Page {
 
 	private List<ObjectId> featuredCollections;
 
-
-
 	public String getAddress() {
 		return address;
 	}
 
 	public void setAddress(String address) {
 		this.address = address;
-	}
-
-	public Point getLocation() {
-		return coordinates;
-	}
-
-	public void setLocation(Point location) {
-		this.coordinates = location;
 	}
 
 	public String getUrl() {
@@ -67,7 +82,6 @@ public class Page {
 		this.coverImage = bgImg;
 	}
 
-
 	public String getCountry() {
 		return country;
 	}
@@ -84,12 +98,19 @@ public class Page {
 		this.city = city;
 	}
 
-
 	public List<ObjectId> getFeaturedColsl() {
 		return featuredCollections;
 	}
 
 	public void setFeaturedColsl(List<ObjectId> featuredColsl) {
 		this.featuredCollections = featuredColsl;
+	}
+
+	public Point getCoordinates() {
+		return coordinates;
+	}
+
+	public void setCoordinates(Point coordinates) {
+		this.coordinates = coordinates;
 	}
 }
