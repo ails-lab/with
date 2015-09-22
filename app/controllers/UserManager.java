@@ -74,7 +74,6 @@ public class UserManager extends Controller {
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 
-	
 
 	/**
 	 * Propose new username when it is already in use.

@@ -49,7 +49,6 @@ public class Page {
 		}
 
 	}
-
 	private Point coordinates;
 	private String city;
 	private String country;
