@@ -6,7 +6,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		return entry;
 	}
 
-	
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 	    	  $(elem).devbridgeAutocomplete({
@@ -18,34 +17,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   			 dataType: "json"
 			   		 },
 			   		 transformResult: function(response) {
-			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
 			   			var result = [];
-				   		var suggestions  = response[0].suggestions;
-				   		
-				   		for (var i in suggestions) {
-					   		if (suggestions[i].value != myUsername){
-					   			result.push(suggestions[i]);
-					   		}
-					   	}
+			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
+			   			for (var i in response) {
+			   				if (response[i] != myUsername)
+			   					result.push({"value": response[i]});
+			   			}
 			   			return {"suggestions": result};
 			   		 },
 			   		 orientation: "auto",
 				     onSearchComplete: function(query, suggestions) {
-				    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
-				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
-				    	 for (var i in suggestions) {
-				    		 var type = suggestions[i].data.type;
-				    		 var s = $(".autocomplete-suggestion").get(i);
-				    	 }
-				     },
-				  	formatResult: function(suggestion, currentValue) {
-						var s = '<strong>' + currentValue + '</strong>';
-						s    += suggestion.value.substring(currentValue.length);
-						s    += ' <span class="label pull-right">' + suggestion.data.type + '</span>';
-						return s;
-					}
-				     
-				     
+				    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestion-extra");
+				     }
 			   		 /*onSelect: function (suggestion) {
 			   			 var funct = valueAccessor();
 			   			funct(suggestion.value);
@@ -67,7 +50,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "isExhibition=false&offset=0&count=20"}).done(
+			data        : "access=read&offset=0&count=20"}).done(
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
@@ -120,6 +103,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			mapping.title = {
 				create: function(options) {
 					if (options.data.indexOf('Dummy') === -1) {
+
 						return ko.observable(options.data);
 					}
 					return ko.observable('Add Title');
@@ -172,15 +156,15 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			window.location = '#exhibition-edit';
 		};
 		
-		self.loadCollectionOrExhibition = function(record) {
+		self.loadCollectionOrExhibition = function(collection) {
 			
 			if (self.showsExhibitions) {
 
-				window.location = '#exhibition-edit/'+ record.dbId();		
+				window.location = '#exhibition-edit/'+ collection.dbId();		
 			}
 			else {
 
-				window.location = 'index.html#collectionview/' + record.dbId();		
+				window.location = 'index.html#collectionview/' + collection.dbId();		
 			}
 		};
 		

@@ -19,7 +19,7 @@ function getSpecs() {
 		    "info": {
 		        "version": "v1",
 		        "title": "WITH API",
-		        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://WITH.com\n```\n"
+		        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n"
 		    },
 		    "paths": {
 		        "/api/search": {

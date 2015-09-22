@@ -25,6 +25,7 @@ public class CommonFilters {
 	public static final String CREATOR_ID = "creator";
 	public static final String CREATOR_NAME = "Creator";
 	public static final String RIGHTS_ID = "rights";
+
 	public static final String RIGHTS_NAME = "Content Usage";
 	public static final String COUNTRY_ID = "country";
 	public static final String COUNTRY_NAME = "Country";
@@ -37,4 +38,7 @@ public class CommonFilters {
 
 	public static final String AVAILABILITY_ID = "availability";
 	public static final String AVAILABILITY_NAME = "Availability";
+	
+	public static final String REUSABILITY_ID = "reusability";
+	public static final String REUSABILITY_NAME = "Reusability";
 }

@@ -55,6 +55,29 @@ public class HttpConnector {
 		}
 	}
 	
+	public static String getURLStringContent(String url) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<String> jsonPromise = WS.url(url1).get().map(new Function<WSResponse, String>() {
+				public String apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return response.getBody();
+				}
+			});
+			return jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+	
 	public static JsonNode getPOSTURLContent(String url, String json) throws Exception {
 		try {
 			Logger.debug("calling: " + url);

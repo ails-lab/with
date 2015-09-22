@@ -77,6 +77,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
 		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
+		
+		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
+		
+//		addDefaultWriter(CommonFilters.RIGHTS2_ID, qfwriter("RIGHTS"));
 
 		/**
 		 * TODO check this
@@ -97,24 +101,30 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_SA,
 		// ".*(creative)(.*sa).*");
 		// ok
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nc* AND NOT RIGHTS:*nd*
 		// addMapping(CommonFilters.RIGHTS_ID,
 		// RightsValues.Creative_Commercial_Modify,
 		// ".*(creative)(?!.*(nc|nd)).*");
 		/*// ok RIGHTS:*creative* AND NOT RIGHTS:*nc* AND NOT RIGHTS:*nd*
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
+>>>>>>> master
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",".*non-commercial.*");
+
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
+
+		
+		addMapping(CommonFilters.RIGHTS_ID,RightsValues.Creative,".*creative.*");
+	//	addMapping(CommonFilters.RIGHTS_ID,RightsValues.Creative,".*(creative)(.*(by|sa)).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
-				".*non-commercial.*");
+		//addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*rr-f.*");
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*unknown.*");
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 
 		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");*/
 		
@@ -126,6 +136,17 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr-.*");
 			addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, ".*unknown.*");
 
+	}
+	private Function<List<String>, QueryModifier> qreusabilitywriter() {
+		Function<String, String> function = (String s) -> {
+			return "&REUSABILITY%3A" + s;
+		};
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
+			}
+		};	
 	}
 
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
@@ -211,6 +232,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+		CommonFilterLogic reusability = CommonFilterLogic.reusabilityFilter();
+//		CommonFilterLogic rights2 = CommonFilterLogic.rights2Filter();
+
+		
 //		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
 		if (checkFilters(q)){
 		try {
@@ -246,7 +271,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.items = a;
 				res.facets = response.path("facets");
 
-				for (JsonNode facet : response.path("facets")) {
+				for (JsonNode facet :						 response.path("facets")) {
 					for (JsonNode jsonNode : facet.path("fields")) {
 						String label = jsonNode.path("label").asText();
 						int count = jsonNode.path("count").asInt();
@@ -266,6 +291,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						case "RIGHTS":
 							countValue(rights, label, count);
 							break;
+							
+//						case "RIGHTS2":
+//							countValue(rights2, label, count);
+//							break;
 
 						case "proxy_dc_creator":
 							countValue(creator, label, false, count);
@@ -280,6 +309,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						case "YEAR":
 							countValue(year, label, false, count);
 							break;
+						
+						/*case "REUSABILITY":
+							countValue(reusability, label, false, count);
+							break;*/
 
 						default:
 							break;
@@ -296,10 +329,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.filtersLogic.add(rights);
 				res.filtersLogic.add(country);
 				res.filtersLogic.add(year);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+				res.filtersLogic.add(reusability);
+//				res.filtersLogic.add(rights2);
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 		// protected void countValue(CommonFilterResponse type, String t) {
 		// type.addValue(vmap.translateToCommon(type.filterID, t));

@@ -29,8 +29,9 @@ public class RightsValues {
 	//You can use it with pemission
 	
 
-	public static final String Modify = "Allow re-use and modifications";		
-	public static final String Commercial = "Allow re-use for commercial";	
+	public static final String Modify = "Allow re-use and modifications";
+		
+	public static final String Commercial = "Allow re-use for commercial";
 	
 	public static final String Creative_Commercial_Modify = "use for commercial purposes modify, adapt, or build upon";
 	
@@ -54,7 +55,9 @@ public class RightsValues {
 	public static final String RRRA = "Rights Reserved - Restricted Access";
 	
 	public static final String RRFA = "Rights Reserved - Free Access";
-	public static final String UNKNOWN = "Unknown";	
+
+	public static final String UNKNOWN = "Unknown";
+
 	
 
 }

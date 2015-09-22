@@ -7,11 +7,9 @@
 				 
  						 <img src="images/logos/wsmall.png" width="20">
 				
-				<span class="collectit"> collect it</span></span>
-				 
-				
+				<span class="collectit"> collect it</span>				
+				</span>
 				<!-- ko text: record().title() --><!-- /ko --> 
-				
 				</h3>
 				<hr class="faded">
 				
@@ -51,6 +49,26 @@
 					      </div>
 					    </div>
 					    
+					    <div class="spec" data-bind="if: (record().collectedCount()>0)">
+					      <div class="itemlabel">Within
+					<!-- ko text: record().collectedCount() --><!-- /ko --> 
+						collections					      				      
+					    </div>
+					      	<!-- ko foreach: record().collections() -->
+					       <div style="cursor:pointer" class:"value"  > 
+							 <h6 data-bind="text: title,click: $parent.loadCollectionnnn"></h6> 
+						  </div>			    
+							 <!-- /ko -->	
+					  
+					    </div>
+					    
+					      <div class="spec" data-bind="if: (record().liked()>0)">
+					      <div class="itemlabel">Liked 
+					<!-- ko text: record().liked() --><!-- /ko --> 
+					
+					    </div>					  
+					    </div>
+
 					  
 					   <div class="spec">
 					      <div class="itemlabel">Record source

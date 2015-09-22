@@ -20,7 +20,7 @@
                 url = decodeURIComponent(url[1]);
             } else {
  
-                url = "http://WITH.com";
+                url = "http://with.image.ntua.gr";
             }
  
             window.swaggerUi = new SwaggerUi({
