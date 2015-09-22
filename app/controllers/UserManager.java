@@ -409,8 +409,6 @@ public class UserManager extends Controller {
 		return ok(enc);
 	}
 
-	
-
 	/**
 	 * Find if email is already used.
 	 *

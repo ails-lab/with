@@ -294,7 +294,7 @@ public class UserManagerTest {
 		DB.getUserGroupDAO().makePermanent(parentGroup);
 
 		UserGroup parentGroup1 = new UserGroup();
-		parentGroup1.getParentGroups().add(parentGroup.getDbId());
+		parentGroup1.getAncestorGroups().add(parentGroup.getDbId());
 		DB.getUserGroupDAO().makePermanent(parentGroup1);
 
 		running(fakeApplication(), new Runnable() {

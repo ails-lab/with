@@ -59,6 +59,7 @@ public class Page {
 
 	private Set<ObjectId> featuredCollections;
 	private Set<ObjectId> featuredExhibitions;
+	
 	public String getAddress() {
 		return address;
 	}
@@ -122,4 +123,5 @@ public class Page {
 	public void setFeaturedExhibitions(Set<ObjectId> featuredExhibitions) {
 		this.featuredExhibitions = featuredExhibitions;
 	}
+
 }
