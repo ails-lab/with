@@ -467,7 +467,7 @@ public class UserManager extends Controller {
 
 	/**
 	 * Get a list of matching usernames or groupnames
-	 * 
+	 *
 	 * Used by autocomplete in share collection
 	 *
 	 * @param prefix
@@ -489,7 +489,7 @@ public class UserManager extends Controller {
 			suggestions.add(node);
 			//result.add(user.getUsername());
 		}
-		
+
 		List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
 		for (UserGroup group : groups) {
 			ObjectNode node = Json.newObject().objectNode();
@@ -500,15 +500,15 @@ public class UserManager extends Controller {
 			suggestions.add(node);
 			//result.add(user.getUsername());
 		}
-		
+
 		ArrayNode result = Json.newObject().arrayNode();
-		
+
 		ObjectNode x = Json.newObject().objectNode();
-		
+
 		x.put("suggestions", suggestions);
-		
+
 		result.add(x);
-		
+
 		return ok(result);
 	}
 
@@ -739,7 +739,7 @@ public class UserManager extends Controller {
 		// maximum!
 
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		Create create = new Create();
 
@@ -748,65 +748,65 @@ public class UserManager extends Controller {
 
 		User u;
 
-		
+
 		if (userId != null) {
-			
+
 			result.put("email", "An email has been sent to the email address you have registered with.");
-			
+
 			create.proxyUserId = new ObjectId(userId);
-			
+
 			u = DB.getUserDAO().get(create.proxyUserId);
-			
+
 			create.email = u.getEmail();
 
-			
+
 		} else {
-			
+
 			error.put("error", "You need to log in before an API key can be issued.");
-			
+
 			result.put("error", error);
-			
+
 			return badRequest(result);
 
 		}
-		
-		
-		
+
+
+
 		//Discuss our policy when this happens. ( Resend? How many times? )
-		
+
 		ApiKey withKey = DB.getApiKeyDAO().getByEmail(create.email);
-				
+
 		if(withKey!=null){
-			
+
 			result.remove("email");
-		
+
 			error.put("error", "Your user account already has already been issued an API key. "
 					+ "To request a new one, send an email to: withdev@image.ece.ntua.gr.");
-							
+
 			//result.put("Key", withKey.getKeyString());
-			
+
 			result.put("error", error);
-			
+
 			return badRequest(result);
-		} 
-		
-		
-		
+		}
+
+
+
         final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
-        
+
         create.dbId = "";
         create.call = "";
         create.ip = "";
         create.counterLimit = -1l;
         create.volumeLimit = -1l;
         //create.position = 1;
-        
+
         Timeout timeout = new Timeout(Duration.create(5, "seconds"));
-        
+
     	Future<Object> future = Patterns.ask(testActor, create, timeout);
-    	
+
     	String s = "";
-    	
+
 		try {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
@@ -822,7 +822,7 @@ public class UserManager extends Controller {
 		}
 
 		//result.put("APIKey", "Succesfully created a new API key: " + s);
-		
+
 		String newLine = System.getProperty("line.separator");
 
 		// String url = APPLICATION_URL;

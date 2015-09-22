@@ -300,7 +300,7 @@ public class TestRecordController {
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller");
+		col.setTitle("lalala");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);

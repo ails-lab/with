@@ -74,6 +74,13 @@ public class AccessManager {
 		return maxAccess;
 	}
 
+	/**
+	 * This methods supposes we have all user ids and all userGroup ids
+	 * (recursively obtained) for the user, in a comma-separated list.
+	 * It then transforms the comma-separated in java.util.List
+	 * @param effectiveUserIds
+	 * @return
+	 */
 	public static List<String> effectiveUserIds(String effectiveUserIds) {
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";

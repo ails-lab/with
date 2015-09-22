@@ -32,6 +32,7 @@ public class Page {
 	private ObjectId coverImage;
 
 	private List<ObjectId> featuredCollections;
+	private List<ObjectId> featuredExhibitions;
 
 
 
@@ -91,5 +92,13 @@ public class Page {
 
 	public void setFeaturedColsl(List<ObjectId> featuredColsl) {
 		this.featuredCollections = featuredColsl;
+	}
+
+	public List<ObjectId> getFeaturedExhibitions() {
+		return featuredExhibitions;
+	}
+
+	public void setFeaturedExhibitions(List<ObjectId> featuredExhibitions) {
+		this.featuredExhibitions = featuredExhibitions;
 	}
 }
