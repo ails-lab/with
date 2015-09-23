@@ -1,0 +1,50 @@
+//- mainnav.jade
+
+// mainnav
+nav.main
+
+	//- container
+	.container
+	
+		// logo
+		h1.logo
+			a( href="index.html" title="Home" )
+				| EUSPACE
+
+		// mobile menu
+		button.mobilemenu( type="button" role="button" aria-label="Show Navigation" )
+			span.lines
+			
+		// search
+		ul.search
+			li
+				a( href="search.html" title="Search" )
+					img( src="img/ic-search.png" alt="search")
+
+		// nav
+		ul.menu
+			li
+				a( href="index.html" title="Home" )
+					| Home
+			li
+				a( href="contentproviders.html" title="Content Provider" )
+					| Content Providers
+			li
+				a( href="about.html" title="About" )
+					| About
+			li
+				a( href="#" title="Login" )
+					| Login
+			li.subnav
+				ul
+					li
+						a( href="terms.html" title="Terms of Usage" )
+							| Terms of Use
+					li
+						a( href="privacy.html" title="Privacy Policy" )
+							| Privacy Policy
+					li
+						a( href="contact.html" title="Contact" )
+							| Feedback &amp; Contact
+			li.info
+				| EUSpace is a place to discover exhibits and collections from museums and archives all around the world. 

@@ -1,0 +1,9 @@
+{
+	"name": "Packages for EUSpace",
+	"version": "1.0",
+	"dependencies": {
+    	"jquery"	: "latest",
+    	"modernizr"	: "latest",
+    	"bootstrap" : "latest"
+    }
+}
