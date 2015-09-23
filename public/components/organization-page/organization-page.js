@@ -59,6 +59,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		self.load = function (id) {
 			$.ajax({
 				type: "GET",
+<<<<<<< HEAD
 				url: "/group/" + self.id(),
 				processData: false,
 				success: function (data, text) {
@@ -76,6 +77,22 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 					// self.featuredCollections = ko.mapping(obj.page.featuredCollections); // TODO: Validate it is working
 					self.page.coordinates.longitude(obj.page.coordinates.longitude);
 					self.page.coordinates.latitude(obj.page.coordinates.latitude);
+=======
+				url: "/organization/" + self.id(),
+				processData: false,
+				success: function (data, text) {
+					self.name(data.name);
+					self.thumbnail(data.thumbnail);
+					self.description(data.thumbnail);
+
+					self.page.address(data.page.address);
+					self.page.city(data.page.address);
+					self.page.country(data.page.country);
+					self.page.coverImage(data.page.coverImage);
+					self.featuredCollections = ko.mapping(data.page.featuredCollections); // TODO: Validate it is working
+					self.page.coordinates.longitude(data.page.coordinates.longitude);
+					self.page.coordinates.latitude(data.page.coordinates.latitude);
+>>>>>>> Placeholders ajax calls for organizations
 				},
 				error: function (request, status, error) {
 					// TODO: Display error message
@@ -85,10 +102,16 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 
 		self.create = function () {
 			var data = {
+<<<<<<< HEAD
 				username: self.username,
 				friendlyName: self.friendlyName,
 				thumbnail: self.thumbnail,
 				about: self.about,
+=======
+				name: self.name,
+				thumbnail: self.thumbnail,
+				description: self.description,
+>>>>>>> Placeholders ajax calls for organizations
 				page: self.page
 			};
 
@@ -108,15 +131,26 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 
 		self.saveChanges = function () {
 			var data = {
+<<<<<<< HEAD
 				name: self.username,
 				thumbnail: self.thumbnail,
 				about: self.about,
+=======
+				name: self.name,
+				thumbnail: self.thumbnail,
+				description: self.description,
+>>>>>>> Placeholders ajax calls for organizations
 				page: self.page
 			};
 
 			$.ajax({
+<<<<<<< HEAD
 				type: "PUT",
 				url: "/group/" + self.id(),
+=======
+				type: "POST",
+				url: "/organization/" + self.id(),
+>>>>>>> Placeholders ajax calls for organizations
 				processData: false,
 				data: ko.toJSON(data),
 				success: function (data, text) {
