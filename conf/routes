@@ -59,13 +59,14 @@ PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= 
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
-# and image
-PUT		/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null)
-POST	/group/:id								controllers.GroupManager.editGroup(id)
+POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="group")
+POST	/organization/create					controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="organization")
+POST	/project/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="project")
+PUT		/group/:id								controllers.GroupManager.editGroup(id)
 DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET		/group/:id								controllers.GroupManager.getGroup(id)
-POST	/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
-POST	/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
+PUT		/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
+PUT		/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
 GET		/group/findByGroupName					controllers.GroupManager.findByGroupName(name, collectionId)
 
 # Rights Controller

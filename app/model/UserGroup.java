@@ -22,14 +22,18 @@ import java.util.List;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UserGroup {
 
 	@Id

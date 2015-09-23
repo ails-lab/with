@@ -23,6 +23,8 @@ import java.util.function.Function;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
+import model.Organization;
+import model.Project;
 import model.User;
 import model.Rights.Access;
 import model.UserGroup;
@@ -62,7 +64,8 @@ public class GroupManager extends Controller {
 	 *            the administrator username
 	 * @return the JSON of the new group
 	 */
-	public static Result createGroup(String adminId, String adminUsername) {
+	public static Result createGroup(String adminId, String adminUsername,
+			String groupType) {
 
 		ObjectId admin;
 		UserGroup newGroup = null;
@@ -77,7 +80,17 @@ public class GroupManager extends Controller {
 		if (!uniqueGroupName(json.get("name").asText())) {
 			return badRequest("Group name already exists! Please specify another name.");
 		}
-		newGroup = Json.fromJson(json, UserGroup.class);
+		switch (groupType) {
+		case "organization":
+			newGroup = Json.fromJson(json, Organization.class);
+			break;
+		case "project":
+			newGroup = Json.fromJson(json, Project.class);
+			break;
+		case "group": default:
+			newGroup = Json.fromJson(json, UserGroup.class);
+			break;
+		}
 		if (adminId != null) {
 			admin = new ObjectId(adminId);
 		} else if (adminUsername != null) {

@@ -16,45 +16,21 @@
 
 package model;
 
-import java.util.List;
-
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.geo.Point;
+import org.mongodb.morphia.annotations.Entity;
 
+@Entity
 public class Organization extends UserGroup {
-
-	private String name;
-	private String description;
-	private ObjectId logo;
 
 	@Embedded
 	private Page page;
-
-
-	public ObjectId getLogo() {
-		return logo;
+	
+	public Page getPage() {
+		return page;
 	}
 
-	public void setLogo(ObjectId logo) {
-		this.logo = logo;
+	public void setPage(Page page) {
+		this.page = page;
 	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-
+	
 }
