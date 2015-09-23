@@ -36,6 +36,7 @@ import model.Media;
 import model.Rights.Access;
 import model.User;
 import model.UserGroup;
+import model.UserOrGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -77,18 +78,21 @@ public class UserManager extends Controller {
 	 * @param emailOrUsername
 	 * @return User and image
 	 */
-	public static Result findByUsernameOrEmail(String emailOrUsername,
+	public static Result findByUserOrGroupNameOrEmail(String userOrGroupnameOrEmail,
 			String collectionId) {
-		Function<User, Status> getUserJson = (User u) -> {
+		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
 			ObjectNode userJSON = Json.newObject();
 			userJSON.put("userId", u.getDbId().toString());
-			userJSON.put("username", u.getUsername());
-			userJSON.put("firstName", u.getFirstName());
-			userJSON.put("lastName", u.getLastName());
+			userJSON.put("username", u.getUserName());
+			if (u instanceof User) {
+				userJSON.put("firstName", ((User) u).getFirstName());
+				userJSON.put("lastName", ((User) u).getLastName());
+			}
 			if (collectionId != null) {
 				Collection collection = DB.getCollectionDAO().getById(
 						new ObjectId(collectionId));
 				if (collection != null) {
+					//TODO: have to do recursion here!
 					Access accessRights = collection.getRights().get(
 							u.getDbId());
 					if (accessRights != null)
@@ -103,15 +107,20 @@ public class UserManager extends Controller {
 			}
 			return ok(userJSON);
 		};
-		User user = DB.getUserDAO().getByEmail(emailOrUsername);
+		User user = DB.getUserDAO().getByEmail(userOrGroupnameOrEmail);
 		if (user != null) {
 			return getUserJson.apply(user);
 		} else {
-			user = DB.getUserDAO().getByUsername(emailOrUsername);
+			user = DB.getUserDAO().getByUsername(userOrGroupnameOrEmail);
 			if (user != null)
 				return getUserJson.apply(user);
-			else
-				return badRequest("The string you provided does not match an existing email or username");
+			else {
+				UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupnameOrEmail);
+				if (userGroup != null) 
+					return getUserJson.apply(userGroup);
+				else 
+					return badRequest("The string you provided does not match an existing email or username");
+			}
 		}
 	}
 
@@ -460,39 +469,27 @@ public class UserManager extends Controller {
 	 */
 	public static Result listNames(String prefix) {
 		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-
+		List<UserGroup> groups  = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
 		ArrayNode suggestions = Json.newObject().arrayNode();
 		for (User user : users) {
 			ObjectNode node = Json.newObject();
 			ObjectNode data = Json.newObject().objectNode();
-			data.put("type", "user");
+			data.put("category", "user");
 			//costly?
-			node.put("value", user.getUsername());
+			node.put("value", user.getUserName());
 			node.put("data", data);
 			suggestions.add(node);
-			//result.add(user.getUsername());
 		}
-
-		List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
 		for (UserGroup group : groups) {
 			ObjectNode node = Json.newObject().objectNode();
 			ObjectNode data = Json.newObject().objectNode();
-			data.put("type", "group");
-			node.put("value", group.getName());
+			data.put("category", "group");
+			node.put("value", group.getUserName());
 			node.put("data", data);
 			suggestions.add(node);
-			//result.add(user.getUsername());
 		}
 
-		ArrayNode result = Json.newObject().arrayNode();
-
-		ObjectNode x = Json.newObject().objectNode();
-
-		x.put("suggestions", suggestions);
-
-		result.add(x);
-
-		return ok(result);
+		return ok(suggestions);
 	}
 
 	/**
@@ -536,22 +533,6 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result getUserPhoto(String id) {
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				ObjectId photoId = user.getPhoto();
-				return MediaController.getMetadataOrFile(photoId.toString(),
-						true);
-			} else {
-				return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
-			}
-		} catch (Exception e) {
-			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
-					+ "\"}"));
-		}
-	}
 
 	public static Result editUser(String id) {
 
@@ -629,7 +610,7 @@ public class UserManager extends Controller {
 					media.setData(imageBytes);
 					try {
 						DB.getMediaDAO().makePermanent(media);
-						user.setPhoto(media.getDbId());
+						user.setThumbnail(media.getDbId());
 					} catch (Exception e) {
 						return badRequest(e.getMessage());
 					}
@@ -695,7 +676,7 @@ public class UserManager extends Controller {
 		}
 
 		group.getUsers().add(new ObjectId(uid));
-		Set<ObjectId> parentGroups = group.retrieveParents();
+		Set<ObjectId> parentGroups = group.getAncestorGroups();
 
 		User user = DB.getUserDAO().get(new ObjectId(uid));
 		if (user == null) {
@@ -1066,9 +1047,9 @@ public class UserManager extends Controller {
 
 	}
 
-	public static String getImageBase64(User user) {
-		if (user.getPhoto() != null) {
-			ObjectId photoId = user.getPhoto();
+	public static String getImageBase64(UserOrGroup user) {
+		if (user.getThumbnail() != null) {
+			ObjectId photoId = user.getThumbnail();
 			Media photo = DB.getMediaDAO().findById(photoId);
 			// convert to base64 format
 			return "data:" + photo.getMimeType() + ";base64,"

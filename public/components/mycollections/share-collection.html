@@ -12,7 +12,7 @@
 				  <div class="form-group form-inline">
 				    <div class="spec">
 				    <label for="firstName">Select user</label>
-						<input type="search" class="form-control" id="usernameOrEmail" placeholder="Username or email"
+						<input type="search" class="form-control" id="usernameOrEmail" placeholder="User or group name or email"
 						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername"/>
 						 <span style="padding-left:10px;">
 							 <button type="button" class="btn btn-info btn-xs" title="Show"
@@ -21,12 +21,11 @@
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
 					 		</button>
-					 		<button type="button" class="btn btn-info btn-xs" title="Collaborate" 
-					 		data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
+					 		<button type="button" class="btn btn-info btn-xs" title="Collaborate" data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
 					 			<span class="glyphicon glyphicon-user" 
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
-					 		</button>
+							 </button>
 				      	</span>
 				    	</div>
 				    </div>

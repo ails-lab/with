@@ -19,27 +19,25 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 transformResult: function(response) {
 			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-			   			for (var i in response) {
-			   				if (response[i] != myUsername)
-			   					result.push({"value": response[i]});
-			   			}
-			   			return {"suggestions": result};
-			   		 },
-			   		 orientation: "auto",
-				     onSearchComplete: function(query, suggestions) {
-				    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestion-extra");
-				     }
-			   		 /*onSelect: function (suggestion) {
-			   			 var funct = valueAccessor();
-			   			funct(suggestion.value);
-			   		}*/
+			   			var index = arrayFirstIndexOf(response, function(item) {
+							   return item.value === myUsername;
+						});
+			   			if (index > -1)
+			   				response.splice(index, 1);
+			   			console.log(JSON.stringify(response));
+				   		return {"suggestions": response};
+				   	},
+				   	orientation: "auto",    
+				    onSearchComplete: function(query, suggestions) {
+				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+				    },
+					formatResult: function(suggestion, currentValue) {
+						var s = '<strong>' + currentValue + '</strong>';
+						s    += suggestion.value.substring(currentValue.length);
+						s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
+						return s;
+					} 
 			 });
-	    	  /*$(elem).keypress(function (event) {
-	              if (event.which == 13) {
-	            	  //TODO: add check if email or username exists first
-	            	  valueAccessor()($(elem).val());
-	              }
-	          });*/
 	      }
 	 };
 
@@ -275,15 +273,15 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			$.ajax({
 				method      : "GET",
 				contentType    : "application/json",
-				url         : "/user/findByUsernameOrEmail",
-				data: "emailOrUsername="+username+"&collectionId="+collId,
+				url         : "/user/findByUserOrGroupNameOrEmail",
+				data: "userOrGroupNameOrEmail="+username+"&collectionId="+collId,
 				success		: function(result) {
-					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
-						   return item.username() === username;
+					/*var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+						   return item.name() === username;
 					});
-					if (index < 0) {
+					if (index < 0) {*/
 						self.shareCollection(result, clickedRights);
-					}
+					//}
 				},
 				error      : function(result) {
 					$.smkAlert({text:'There is no such username or email', type:'danger', time: 10});

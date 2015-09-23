@@ -34,30 +34,17 @@ import db.DB;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class UserGroup {
+public class UserGroup extends UserOrGroup {
 
-	@Id
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId dbId;
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
-	private String name;
-	private String description;
 	private boolean privateGroup;
-	private ObjectId thumbnail;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final List<ObjectId> users = new ArrayList<ObjectId>();
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private final List<ObjectId> ancestorGroups = new ArrayList<ObjectId>();
+	private final Set<ObjectId> parentGroups = new HashSet<ObjectId>();
 
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
 
 	public Set<ObjectId> getAdminIds() {
 		return adminIds;
@@ -79,29 +66,21 @@ public class UserGroup {
 		return users;
 	}
 
-	// id of parent user groups
-	public List<ObjectId> getAncestorGroups() {
-		return ancestorGroups;
+	//TODO: recursively find ancestors
+	public Set<ObjectId> getParentGroups() {
+		return parentGroups;
 	}
 
-	public Set<ObjectId> retrieveParents() {
+	public Set<ObjectId> getAncestorGroups() {
 		Set<ObjectId> ancestors = new HashSet<ObjectId>();
-		ancestors.addAll(ancestorGroups);
-		for (ObjectId gid : ancestorGroups) {
+		ancestors.addAll(parentGroups);
+		for (ObjectId gid : parentGroups) {
 			UserGroup g = DB.getUserGroupDAO().get(gid);
 			if ((g != null) && !g.getAncestorGroups().isEmpty())
-				ancestors.addAll(g.retrieveParents());
+				ancestors.addAll(g.getParentGroups());
 		}
 
 		return ancestors;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public void accumulateGroups(Set<ObjectId> groupAcc) {
@@ -111,22 +90,6 @@ public class UserGroup {
 			if (ug != null)
 				ug.accumulateGroups(groupAcc);
 		}
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String desc) {
-		this.description = desc;
-	}
-
-	public ObjectId getThumbnail() {
-		return thumbnail;
-	}
-
-	public void setThumbnail(ObjectId thumbnail) {
-		this.thumbnail = thumbnail;
 	}
 
 	public boolean isPrivateGroup() {

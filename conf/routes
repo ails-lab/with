@@ -42,7 +42,7 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-#GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
+#GET		 /exhibition/list					controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
@@ -89,8 +89,8 @@ GET		/user/listNames			                controllers.UserManager.listNames(prefix:
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
-GET     /user/findByUsernameOrEmail				controllers.UserManager.findByUsernameOrEmail(emailOrUsername: String, collectionId ?= null)
-GET		/user/:id/photo			                controllers.UserManager.getUserPhoto(id)
+GET     /user/findByUserOrGroupNameOrEmail		controllers.UserManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
+GET		/user/:id/photo			                controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)

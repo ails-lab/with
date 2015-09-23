@@ -33,7 +33,7 @@ import play.Logger.ALogger;
 import db.DB;
 
 @Entity
-public class User {
+public class User extends UserOrGroup{
 
 	public static final ALogger log = Logger.of(User.class);
 
@@ -43,23 +43,19 @@ public class User {
 		MALE, FEMALE, UNSPECIFIED
 	}
 
-	@Id
-	private ObjectId dbId;
 
 	private String email;
-	private String username;
+
 	private String firstName;
 	private String lastName;
 
 	private Gender gender;
-	private String about;
 
 	private String facebookId;
 	private String googleId;
 
 	private String md5Password;
 
-	private ObjectId photo;
 	private boolean superUser;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
@@ -76,14 +72,6 @@ public class User {
 
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 	private final Set<ObjectId> whiteList = new HashSet<ObjectId>();
-
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
 
 	/**
 	 * The search should already be stored in the database separately
@@ -190,14 +178,6 @@ public class User {
 		this.md5Password = md5Password;
 	}
 
-	public String getAbout() {
-		return about;
-	}
-
-	public void setAbout(String about) {
-		this.about = about;
-	}
-
 	public List<Search> getSearchHistory() {
 		return searchHistory;
 	}
@@ -220,14 +200,6 @@ public class User {
 
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
 	}
 
 	public String getGender() {
@@ -283,18 +255,6 @@ public class User {
 
 	public void setStorageLimit(double storageLimit) {
 		this.storageLimit = storageLimit;
-	}
-
-	public ObjectId getPhoto() {
-		return this.photo;
-	}
-
-	public Media retrievePhoto() {
-		return DB.getMediaDAO().findById(this.photo);
-	}
-
-	public void setPhoto(ObjectId photo) {
-		this.photo = photo;
 	}
 
 	// public void setPhoto(Media photo) {
