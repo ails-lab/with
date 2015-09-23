@@ -2,6 +2,7 @@
 var require = {
 	baseUrl: ".",
 	paths: {
+		"async"                     : "bower_modules/requirejs-plugins/src/async",
 		"jquery"                    : "bower_modules/jquery/dist/jquery.min",
 		"bridget"                   : "bower_modules/jquery-bridget/jquery.bridget",
 		"bootstrap"                 : "bower_modules/components-bootstrap/js/bootstrap.min",
@@ -37,7 +38,7 @@ var require = {
 		"knockout-mapping"          : "bower_modules/knockout-mapping/build/output/knockout.mapping-latest",
 		"inputtags"                 : "bower_modules/bootstrap-tagsinput/dist/bootstrap-tagsinput.min",
 		"smoke"                     : "bower_modules/smoke/dist/js/smoke.min",
-		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter",	
+		"liveFilter"				: "bower_modules/liveFilter/jquery.liveFilter",
 		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
 		"autoscroll"		    	: "js/aautoscroll.2.4",
 		"bootstrap-select"       	: "bower_modules/bootstrap-select/dist/js/bootstrap-select.min",
@@ -45,7 +46,8 @@ var require = {
 		"barchart"                  : "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
 		"header"                    : "headers",
 		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd",
-		"Modernizr"					: "bower_modules/modernizr/modernizr"
+		"Modernizr"					: "bower_modules/modernizr/modernizr",
+		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
@@ -55,7 +57,8 @@ var require = {
 		"header": { deps: ['jquery'] },
 		'Modernizr': {
             exports: 'Modernizr'
-        }
+        },
+        "gmaps": { deps: ['jquery'] }
 	}
-	
+
 };
