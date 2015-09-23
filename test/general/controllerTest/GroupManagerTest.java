@@ -49,7 +49,12 @@ import controllers.GroupManager;
 import db.DB;
 
 /**
+<<<<<<< HEAD
  * The class <code>GroupManagerTest</code> contains tests for the class {@link <code>GroupManager</code>}
+=======
+ * The class <code>GroupManagerTest</code> contains tests for the class {@link
+ * <code>GroupManager</code>}
+>>>>>>> Save organizations and projects to database using userGroupDAO
  *
  * @pattern JUnit Test Case
  *
@@ -64,8 +69,12 @@ public class GroupManagerTest extends TestCase {
 	/**
 	 * Construct new test instance
 	 *
+<<<<<<< HEAD
 	 * @param name
 	 *            the test name
+=======
+	 * @param name the test name
+>>>>>>> Save organizations and projects to database using userGroupDAO
 	 */
 	public GroupManagerTest(String name) {
 		super(name);
@@ -131,7 +140,6 @@ public class GroupManagerTest extends TestCase {
 					System.out.println(status(result));
 					Assert.fail();
 				}
-
 			}
 		});
 	}
@@ -147,7 +155,6 @@ public class GroupManagerTest extends TestCase {
 		assertTrue(false);
 		UserGroup parentGroup = new UserGroup();
 		DB.getUserGroupDAO().makePermanent(parentGroup);
-
 		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
