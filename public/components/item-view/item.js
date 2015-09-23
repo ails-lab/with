@@ -18,6 +18,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.collectedCount = ko.observable("");
 		self.liked = ko.observable("");
 		self.collections =  ko.observableArray([]);
+		
 
 		self.cachedThumbnail = ko.pureComputed(function() {
 
@@ -159,6 +160,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.route = params.route;
 		var thumb = "";
 		self.record = ko.observable(new Record());
+		self.detailsEnabled =  ko.observable(false);
 
 
 		itemShow = function (e) {
@@ -200,13 +202,46 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 		
 		self.loadCollectionnnn = function(collection) {
-			window.location.href = 'index.html#collectionview/' + collection.dbId;		
+			
+			if (collection.isExhibition) {
+				window.location = '#exhibition-edit/'+ collection.dbId;		
+
+			}
+			
+			else {
+
+				window.location.href = 'index.html#collectionview/' + collection.dbId;		
+			}	
+				
 			
 			if (isOpen){
 				toggleSearch(event,'');
 			}
 			self.close();
 		};
+		
+	        self.enableDetail= function() {
+	        	console.log("lala");
+	            self.detailsEnabled(true); 
+	            $(event.target).parent().addClass('box-Hover');
+	        }
+	        self.disableDetails =  function() {
+	        	console.log("lilo");
+	            self.detailsEnabled(false);
+	            $(event.target).parent().removeClass('box-Hover');
+
+	        }
+		
+		
+	       /*self.detailsEnabled = ko.observable(false);
+	        self.enableDetails = function (data, event) {
+	            //fix hover
+	            $(event.target).parent().addClass('box-Hover');
+	        }
+	        self.disableDetails = function (data, event) {
+	            self.detailsEnabled(false);
+	            $(event.target).parent().removeClass('box-Hover');
+	        }*/
 	}
 	
 	

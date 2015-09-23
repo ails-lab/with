@@ -55,8 +55,11 @@
 						collections					      				      
 					    </div>
 					      	<!-- ko foreach: record().collections() -->
-					       <div style="cursor:pointer" class:"value"  > 
-							 <h6 data-bind="text: title,click: $parent.loadCollectionnnn"></h6> 
+					       <div  style="cursor:pointer" class:"value"  > 
+								 <div data-bind="text: title,click: $parent.loadCollectionnnn,event: { mouseover: $parent.enableDetails, mouseout: $parent.disableDetails }"  ></div>
+								  <div data-bind="visible: $parent.detailsEnabled">
+        							<div id="user" data-bind="text:userName"> </div>
+    							  </div>
 						  </div>			    
 							 <!-- /ko -->	
 					  

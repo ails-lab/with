@@ -257,6 +257,10 @@ public class RecordController extends Controller {
 		SearchOptions options = new SearchOptions();
 		options.set_idSearch(true);
 		SearchResponse resp = searchMerged.search(externalId, options);
+		
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+
 
 		if(resp.getHits().getTotalHits() == 0) {
 			result.put("count",resp.getHits().getTotalHits());
@@ -287,6 +291,7 @@ public class RecordController extends Controller {
 		//result.put("count",resp.getHits().getTotalHits());
 		ArrayNode collections = Json.newObject().arrayNode();
 		int liked  = 0 ;
+		int count = 0;
 		for(SearchHit hit: resp.getHits().getHits()) {
 			ObjectNode o = Json.newObject();
 			Collection c = ElasticUtils.hitToCollection(hit);
@@ -294,14 +299,22 @@ public class RecordController extends Controller {
 				liked++;
 				continue;
 			}
+			count++;
+			if (!AccessManager.checkAccess(c.getRights(), userIds,
+					Action.READ)){
+				continue;
+			}
 			o.put("title", c.getTitle());
 			o.put("description", c.getDescription());
+			o.put("isExhibition", c.getIsExhibition());
 			o.put("thumbnail", c.getThumbnailUrl());
-			o.put("dbId",hit.getId());
-
+			o.put("userName" , DB.getUserDAO().get(c.getOwnerId()).getUsername());
+			o.put("dbId", hit.getId());
+			
+		
 			collections.add(o);
 		}
-		result.put("count",collections.size());
+		result.put("count",count);
 		result.put("liked",liked);
 		result.put("collections",collections);
 		return ok(result);
