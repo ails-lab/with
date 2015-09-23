@@ -62,6 +62,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
         var jsonData = JSON.stringify({
             source: record.source,
             sourceId: record.sourceId,
+            externalId: record.externalId,
             title: record.title,
             description: record.description,
             thumbnailUrl: record.thumbnailUrl,
