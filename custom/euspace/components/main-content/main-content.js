@@ -129,7 +129,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  self.owner='';
 		  self.ownerId=-1;
 		  self.itemCount=0;
-		  self.thumbnail='images/no_image.jpg';
+		  self.thumbnail='img/content/thumb-empty.png';
 		  self.description='';
 		  self.isLoaded = ko.observable(false);
 		  self.isExhibition=false;

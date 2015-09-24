@@ -46,7 +46,7 @@ EUSpaceApp.ui = function( custom ){
 		initMobileMenu();
 
 		// init masonry
-		//initMasonry();
+		//initIsotope();
 
 		// initialize script on homepage only
 		if( settings.page === 'home' ) {
@@ -76,14 +76,31 @@ EUSpaceApp.ui = function( custom ){
 
 		// initialize media tooltip
 		initTooltip();
+			// init exhibition image zoom
+		initImageZoom();
+
+		// initialize search view toggle button
+		initSearchViewToggle();
+
+		// initialize inline viewer for item
+		initInlineViewer();
+
+		// init adjustment for search column view
+		initSearchColumnAdjustment();
 	};
 
-	// method to initialize masonry
-	// dependency: js/vendor/masonry/
-	var initMasonry = function(){
+	this.initSearch=function(){
+		/*these are needed after search page has been loaded*/
+		initSearchColumnAdjustment();	
+		initInlineViewer();
+	}
+	
+	// method to initialize isotope
+	// dependency: js/vendor/isotope/
+	var initIsotope = function(){
 
 		// log
-		logger( 'info','plugins.js / initMasonry' );
+		logger( 'info','plugins.js / initIsotope' );
 
 		// initialize masonry after window.load
 		// safari seems to have problem when initialize on dom ready
@@ -93,7 +110,7 @@ EUSpaceApp.ui = function( custom ){
 			if( $( settings.mSelector ).length > 0 ) {
 
 				// init
-				$( settings.mSelector ).masonry({
+				$( settings.mSelector ).isotope({
 
 					// options
 					columnWidth		: settings.mSizer,
@@ -102,6 +119,35 @@ EUSpaceApp.ui = function( custom ){
 				});
 			}
 		});
+
+		// init filter
+		if( $( '.filter' ).length > 0 ) {
+
+			// get list
+			$( '.filter .nav li' ).each( function(){
+				
+				// list
+				var $list = $( this ),
+					data = $list.attr( 'data-filter' );
+
+				// on click
+				$( 'a', this ).on( 'click', function( e ){
+
+					// prevent
+					e.preventDefault();
+
+					// filter
+					$( settings.mSelector ).isotope({
+						filter: data 
+					});
+
+					// reset
+					$( '.filter .nav li' ).removeClass( 'active' );
+					$list.addClass( 'active' );
+				});
+			});
+
+		}
 	};
 
 	// method to initialize mobile menu
@@ -352,6 +398,136 @@ EUSpaceApp.ui = function( custom ){
 			// init
 			$('[data-toggle="tooltip"]').tooltip();
 		}
+		// popover
+		if( $('[data-toggle="popover"]').length > 0 ) {
+
+			// init
+			$('[data-toggle="popover"]').popover();
+		}
+
+	};
+
+	// method to initialize exhibition image zoom
+	var initImageZoom = function(){
+
+		// log
+		logger( 'info','plugins.js / initImageZoom' );
+
+		// check
+		if( $( '.imagezoom' ).length > 0 ) {
+
+			// init
+			$( '.imagezoom' ).magnificPopup({ type:'image' });
+		}
+
+		// check
+		if( $( '.iframezoom' ).length > 0 ) {
+
+			// init
+			$( '.iframezoom' ).magnificPopup({ type:'iframe' });
+		}
+	};
+
+	// method to initialize search view toggle
+	var initSearchViewToggle = function(){
+
+		// log
+		logger( 'info','plugins.js / initSearchViewToggle' );
+
+		// check
+		if( $( '.searchbar' ).length > 0 ) {
+
+			// set
+			$( '.searchbar .view li a' ).on( 'click', function( e ){
+
+				// prevent
+				e.preventDefault();
+
+				// get view
+				var view = $( this ).attr( 'data-view' );
+
+				// set
+				$( '.searchlist' ).hide();
+				$( '#'+view+'list' ).show();
+
+				// set button
+				$( '.searchbar .view li').removeClass( 'active' );
+				$( this ).parent().addClass( 'active' );
+
+				// check
+				if( view === 'grid' ) {
+
+					// reload
+					$( settings.mSelector ).isotope();
+				}
+			});
+		}
+	};
+
+	// init inline viewer
+	var initInlineViewer = function(){
+
+		// log
+		logger( 'info','plugins.js / initInlineViewer' );
+
+		// get data-item attr
+		$( '[data-view="inline"]' ).each(function(){
+
+			// click
+			$( this ).on( 'click', function(){
+
+				// show 
+				$( '.itemview' ).fadeIn();
+			});
+		});
+
+		// close event
+		$( '.itemview .menubar .action .close a' ).on( 'click', function( e ){
+
+			// e
+			e.preventDefault();
+
+			// show 
+			$( '.itemview' ).fadeOut();
+		});
+	};
+
+	// method to initialize search column width
+	var initSearchColumnAdjustment = function(){
+
+		// log
+		logger( 'info','plugins.js / initSearchColumnAdjustment' );
+
+		// internal method
+		function adjustColumnSize() {
+
+			// reset
+			$( '#columnlist .row .column' ).attr( 'style','');
+
+			// get the screen width
+			var screenWidth = $( window ).width(),
+				columnCount = $( '#columnlist .row .column' ).length,
+				columnWidth = $( '#columnlist .row .column' ).first().width();
+
+			// check
+			if( (screenWidth > (columnCount * columnWidth)) && (screenWidth > 768) ) {
+				
+				var newWidth = 100 / columnCount;
+				$( '#columnlist .row .column' ).css({
+					'width' : newWidth+'%'
+				});
+			}
+		}
+
+		// initial adjustment
+		adjustColumnSize();
+
+		// window resize
+		$( window ).resize(function(){
+			
+			// initial adjustment
+			adjustColumnSize();
+		});
 	};
 };
 

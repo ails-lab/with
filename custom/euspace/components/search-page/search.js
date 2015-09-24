@@ -55,7 +55,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			
 		   if(!self.thumb){
 		   
-					   self.thumb="images/no_image.jpg";
+					   self.thumb="img/content/thumb-empty.png";
 			 }
 		};
 
@@ -103,11 +103,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.consoleurl=ko.observable("");
 		self.items=ko.observableArray();
 
-
+		self.loading=ko.observable(true);
 		self.load=function(data){
 			self.source=data.source;
 			self.consoleurl=data.consoleurl;
 			self.items.push.apply(self.items, data.items);
+			self.loading(false);
 		};
 
 
@@ -295,11 +296,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 						  }
 						if(srcCat.items().length>0 && (!found || self.results().length==0)){
+							srcCat.loading(false);
 							self.results.push(srcCat);
 						}
 
 					}
-
+					window.EUSpaceUI.initSearch();
 					if(moreitems){
 						self.next(self.page()+1);
 
@@ -329,6 +331,19 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			  console.log("searching source");
 	        	
 				self.searching(true);
+				 var inCat=null;
+                 var idx=0;
+					if(self.results().length>0)
+						  for(var k in self.results()){
+							inCat=self.results()[k];
+							if(inCat.source==sdata.source){
+								found=true;
+								inCat.loading(true);
+								idx=k;
+								break;
+							}
+
+						  }
 				$request=$.ajax({
 					"url": "/api/advancedsearch",
 					"method": "post",
@@ -342,18 +357,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 					}),
 					"success": function(reply) {
 						var data=reply.responces;
-	                    var inCat=null;
-	                    var idx=0;
-						if(self.results().length>0)
-							  for(var k in self.results()){
-								inCat=self.results()[k];
-								if(inCat.source==sdata.source){
-									found=true;
-									idx=k;
-									break;
-								}
-
-							  }
+	                   
 						
 	                    for(var i in data) {
 						  source=data[i].source;
@@ -383,12 +387,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 							}
 							if(items.length>0){
 								self.results()[idx].items.push.apply(self.results()[idx].items,items);
+								self.results()[idx].loading(false);
 								
 							}
 							}
 							
 
 						}
+	                    inCat.loading(false);
 
 						
 					},
@@ -453,12 +459,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
 				   return record.recordId === e;
 				});
+			$( '.itemview' ).fadeIn();
 			itemShow(selrecord);
 
 		}
 
         self.columnRecordSelect= function (e){
-
+        	$( '.itemview' ).fadeIn();
 			itemShow(e);
 
 		}

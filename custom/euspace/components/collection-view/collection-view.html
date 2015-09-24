@@ -32,7 +32,7 @@
               <div class="wrap">
                 <!-- anchor--><a data-bind="attr: {href: url}">
                   <!-- thumbnail-->
-                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  alt="Lorem ipsum"></div>
+                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->
                   <div class="info">
                     <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>

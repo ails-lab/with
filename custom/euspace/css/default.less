@@ -111,6 +111,7 @@ a {
 		// grid
 		&.gridlist {
 			padding-top: 152px;
+			display: none;
 		}
 	}
 
@@ -470,6 +471,27 @@ a {
 						.clearfix;
 					}
 				}
+			}
+		}
+	}
+}
+
+// wrap it
+body {
+
+	// popover
+	.popover {
+		border-radius: 0px;
+		border: 0px;
+		font-size: 0.9em;
+		color: @gray-light;
+		font-style: italic;
+		border-top: 3px solid @brand-green;
+
+		// arrow
+		&.bottom {
+			.arrow {
+				border-bottom-color: @brand-green;
 			}
 		}
 	}

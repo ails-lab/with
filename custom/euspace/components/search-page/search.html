@@ -1,4 +1,4 @@
-
+<item-view params="route: route"></item-view>
 
  <!-- searchbar-->
     <section class="searchbar">
@@ -8,7 +8,7 @@
             	<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
 				
             <!-- input-->
-            <div class="searchbox" id="withsearchid"><img src="img/ic-search-blue.png" alt="Search" class="icon"  data-bind="click: function() { search(true,true); }">
+            <div class="searchbox" id="withsearchid"><img alt="Search" class="icon"  data-bind="attr: {src: searching()==true ? 'img/ic-loading.gif' : 'img/ic-search-blue.png'}, click: function() { search(true,true); }">
               <input type="text"  data-bind="value: term" placeholder="Search..." class="searchinput">
             </div>
             <!-- view setting-->
@@ -30,7 +30,7 @@
       </section>
      
       <!-- search result-->
-      <section class="searchresults">
+      <section class="searchresults" id="columnlist" class="searchresults searchlist">
         <div class="container-fluid">
           <!-- row-->
           <div class="row">
@@ -45,21 +45,22 @@
               <!-- wrap-->
               <div class="wrap">
                 <div class="header"><a data-bind="attr: { href:consoleurl}" target="_blank" title="API console">
-                    <div class="source" data-bind="text: source"></div><img src="img/ic-external.png" alt="external" class="externallink"></a></div>
+                    <div class="source" data-bind="text: source"></div><img src="img/ic-external.png" alt="external" class="externallink">
+                    <div class="loading" data-bind="visible: loading()==true"><img src="img/ic-loading.gif" alt="external"></div>
+                    </a></div>
                 <div class="result" data-bind="foreach: items, event: { scroll: $parents[0].scrolled }">
                 
                   <!-- item-->
-                  <div class="item"><a data-bind="event: { click: $parents[1].columnRecordSelect}">
-                      <div class="imgwrap"><img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
+                  <div class="item"><a data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline">
+                      <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
                   <!-- item-->
                   
                  </div>
               </div>
             </div>
+            
             <!-- /ko -->
             <!-- /ko -->
-           
-         
           </div>
         </div>
       </section>

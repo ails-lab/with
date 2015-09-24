@@ -158,7 +158,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
 			}}
 		   else{
-			   return "images/no_image.jpg";
+			   return "img/content/thumb-empty.png";
 		   }
 		});
 		self.sourceCredits = ko.pureComputed(function() {

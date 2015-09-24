@@ -6,11 +6,13 @@
             <div class="settings" data-bind="css: {active: visiblePanel()==true}"><a href="#" title="#" data-bind="click: showfacets,disable:$parent.searching"><img src="img/ic-setting.png" alt="settings"></a>
               <!-- settings-->
               <div class="searchsetting" id="searchfacets" data-bind="if: visiblePanel,visible:visiblePanel">
-                <div class="facetsearchbox">
-			    <div class="box">
-			    <input class="facetinput" id="f_search" placeholder="Search" type="text" value=""/>
-			   </div>
-			   </div>
+               
+			   
+			    <!-- filter Text-->
+                <div class="filtertext">
+                  <input type="text" id="f_search"  placeholder="Search" class="filterinput" value=""><img alt="search" src="img/ic-search.png" class="filterimg">
+                </div>
+                <!-- tabs-->
  
                 <!-- tabs-->
                 <ul role="tablist" class="nav nav-tabs">

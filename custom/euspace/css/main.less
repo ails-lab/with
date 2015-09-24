@@ -875,6 +875,31 @@ body {
 			.title {
 				float: left;
 				font-size: 1em;
+				position: relative;
+
+				// anchor
+				a {
+					width: 20px;
+					height: 20px;
+					border-radius: 10px;
+					float: left;
+					background: @brand-green;
+					text-align: center;
+					font-family: @font-family-serif;
+					color: #fff;
+					font-style: italic;
+					font-weight: bold;
+					font-size: 0.9em;
+					margin-right: 10px;
+					line-height: 1.5em;
+
+					&:hover, &:focus, &:visited {
+						text-decoration: none;
+					}
+					&:hover {
+						background: darken(@brand-green, 10%);
+					}
+				}
 			}
 
 			// action
@@ -916,7 +941,7 @@ body {
 				// counter
 				.counter {
 					border-radius: 20px;
-					padding: 6px 10px 5px 10px;
+					padding: 4px 10px 5px 10px;
 					display: block;
 					background: darken(@brand-green, 10%);
 					color: @brand-white;
@@ -1565,6 +1590,25 @@ body {
 			}
 		}
 
+		// itemview
+		.itemview {
+			width: 100%;
+			position: fixed;
+			top: 70px;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background: @body-bg;
+			z-index: 1000;
+			overflow:auto;
+			display: none;
+
+			// spacer
+			.spacer {
+				padding-top: 50px;
+			}
+		}
+
 		// searchbar
 		.searchbar {
 			width: 100%;
@@ -1610,7 +1654,6 @@ body {
 				.searchsetting {
 					position: absolute;
 					width: 320px;
-					height: 400px;
 					background: #fff;
 					color: @gray;
 					z-index: 2;
@@ -1621,9 +1664,37 @@ body {
 					box-shadow: 0px 0px 14px -1px rgba(0,0,0,0.52);
 					display: none;
 
+					// filter
+					.filtertext {
+						background: @brand-blue;
+						text-align: right;
+						height: 40px;
+						padding: 0px 7px 0px 7px;
+
+						.label {
+							font-size: 0.8em;
+							color: #fff;
+							font-style: italic;
+						}
+						.filterinput {
+							width: 100%;
+							height: 26px;
+							border: 0;
+							margin-top: 7px;
+							padding: 0 0 0 5px;
+							font-size: 0.9em;
+							color: @brand-blue;
+						}
+						.filterimg {
+							float: right;
+							margin: 13px 10px 0 0;
+							display:none;
+						}
+					}
+
 					// res
 					left: -15px;
-					height: 340px;
+					height: 383px;
 
 					// ul
 					> ul {
@@ -1634,7 +1705,7 @@ body {
 						background: @brand-blue;
 
 						// res
-						height: 340px;
+						height: 343px;
 						overflow: auto;
 						
 
@@ -1678,7 +1749,7 @@ body {
 					.tab-content {
 						float: left;
 						width: 65%;
-						height: 400px;
+						height: 365px;
 						overflow: auto;
 
 						// res
@@ -1967,9 +2038,16 @@ body {
 							// icon
 							.externallink {
 								float: right;
-								margin: 7px 5px 0 0;
+								margin: 6px 0px 0 0;
 								.opacity( 0 );
 								.transition( opacity @transition-timing );
+							}
+
+							// loading
+							.loading {
+								float: right;
+								margin-right: 10px;
+								margin-top: -2px;
 							}
 
 							// sources

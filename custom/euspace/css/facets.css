@@ -1,4 +1,14 @@
 
+
+#more{
+	 bottom:100px;
+	 right:40px;
+	 padding: 5px;
+     position: fixed;
+     z-index:1032;
+     font-size:25px;
+	    }
+
 .bootstrap-tagsinput {
   display: block;
   padding: 4px 6px 0px 6.5em;
