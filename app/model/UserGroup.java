@@ -44,6 +44,8 @@ public class UserGroup extends UserOrGroup {
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final Set<ObjectId> parentGroups = new HashSet<ObjectId>();
+	
+	private String friendlyName;
 
 
 	public Set<ObjectId> getAdminIds() {
@@ -98,6 +100,14 @@ public class UserGroup extends UserOrGroup {
 
 	public void setPrivateGroup(boolean privateGroup) {
 		this.privateGroup = privateGroup;
+	}
+
+	public String getFriendlyName() {
+		return friendlyName;
+	}
+
+	public void setFriendlyName(String friendlyName) {
+		this.friendlyName = friendlyName;
 	}
 
 }
