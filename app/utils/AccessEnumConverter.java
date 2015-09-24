@@ -16,12 +16,17 @@
 
 package utils;
 
-import org.mongodb.morphia.converters.EnumConverter;
+import model.Rights.Access;
+
+import org.mongodb.morphia.converters.SimpleValueConverter;
+import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
-import utils.AccessManager.Action;
+public class AccessEnumConverter extends TypeConverter implements SimpleValueConverter{
 
-public class AccessEnumConverter extends EnumConverter{
+	public AccessEnumConverter() {
+		super(Access.class);
+	}
 
 	@Override
 	public Object decode(Class targetClass, Object fromDBObject,
@@ -29,6 +34,6 @@ public class AccessEnumConverter extends EnumConverter{
 		if (fromDBObject == null) {
             return null;
         }
-        return Action.values()[(int)fromDBObject];
+        return Access.values()[(int)fromDBObject];
 	}
 }

@@ -29,10 +29,12 @@ import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
+import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -48,6 +50,7 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Converters(AccessEnumConverter.class)
 public class Collection {
 
 	@Id
