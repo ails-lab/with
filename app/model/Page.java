@@ -58,7 +58,6 @@ public class Page {
 
 	private Set<ObjectId> featuredCollections;
 	private Set<ObjectId> featuredExhibitions;
-	
 	public String getAddress() {
 		return address;
 	}
