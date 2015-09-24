@@ -251,11 +251,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
 					it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
 					it.title = Utils.readArrayAttr(item, "title", false).get(0);
-					it.description = Utils.readAttr(item, "dcDescription", false);
-					it.creator = Utils.readAttr(item, "dcCreator", false);
+					it.description = Utils.readArrayAttr(item, "dcDescription", false).get(0);
+					it.creator = Utils.readArrayAttr(item, "dcCreator", false).get(0);
 					it.year = Utils.readArrayAttr(item, "year", false);
-					it.dataProvider = Utils.readAttr(item, "dataProvider",
-							false);
+					it.dataProvider = Utils.readArrayAttr(item, "dataProvider",
+							false).get(0);
 					it.url = new MyURL();
 					it.url.original = Utils.readArrayAttr(item, "edmIsShownAt",
 							false);

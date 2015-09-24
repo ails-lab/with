@@ -190,10 +190,10 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 						it.year = Utils.readArrayAttr(item, "issued", true);
 
 						// TODO are they the same?
-						it.creator = Utils.readAttr(item, "contributor",
-								false);
-						it.dataProvider = Utils.readAttr(item,
-								"contributor", false);
+						String string = Utils.readArrayAttr(item, "contributor",
+								false).get(0);
+						it.creator = string;
+						it.dataProvider = string;
 
 						it.url = new MyURL();
 						it.url.original = Utils.readArrayAttr(Utils.findNode(

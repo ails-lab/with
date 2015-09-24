@@ -76,7 +76,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 	}
 
 	private void setLicences() {
-		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key=3c76b6b882164694d0a47353d0e74d58&format=json&nojsoncallback=1";
+		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key="+apikey+"&format=json&nojsoncallback=1";
 		licences = new HashMap<String,String>();
 		licencesId = new HashMap<String,String>();
 		JsonNode response;
@@ -94,7 +94,6 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
 	}
 	
 	public String getLicence(String id){

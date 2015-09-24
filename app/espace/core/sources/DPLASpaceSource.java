@@ -185,8 +185,8 @@ public class DPLASpaceSource extends ISpaceSource {
 					it.thumb = Utils.readArrayAttr(item, "object", false);
 					it.fullresolution = null;
 					it.title = Utils.readAttr(item.path("sourceResource"), "title", false);
-					it.description = Utils.readAttr(item.path("sourceResource"), "description", false);
-					it.creator = Utils.readAttr(item.path("sourceResource"), "creator", false);
+					it.description = Utils.readArrayAttr(item.path("sourceResource"), "description", false).get(0);
+					it.creator = Utils.readArrayAttr(item.path("sourceResource"), "creator", false).get(0);
 					countValue(creator, it.creator);
 					it.year = null;
 					it.dataProvider = Utils.readAttr(item.path("dataProvider"), "name", false);

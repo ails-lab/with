@@ -88,12 +88,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 					it.thumb = Utils.readArrayAttr(item.path("webImage"), "url", false);
 
 					it.fullresolution = Utils.readArrayAttr(item.path("headerImage"), "url", false);
-					// it.description = Utils.readLangAttr(item,
-					// "dcDescription", false);
+					it.description = Utils.readAttr(item, "longTitle", false);
 					// it.year = Utils.readArrayAttr(item, "year", false);
-					// it.dataProvider = Utils.readLangAttr(item,
-					// "edmDataProvider",
-					// false);
+					it.dataProvider = LABEL;
 					it.url = new MyURL();
 					it.url.original = it.fullresolution;
 					it.url.fromSourceAPI = "https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/"

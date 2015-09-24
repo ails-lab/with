@@ -181,7 +181,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 					ItemsResponse it = new ItemsResponse();
 					it.id = Utils.readAttr(item, "id", true);
 					it.title = Utils.readAttr(item, "title", false);
-					it.creator = Utils.readAttr(item, "creator", false);
+					List<String> readArrayAttr = Utils.readArrayAttr(item, "creator", false);
+					it.creator = (readArrayAttr!=null && readArrayAttr.size()>0)?readArrayAttr.get(0):null;
 					it.description = Utils.readAttr(item, "description", false);
 
 					it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
