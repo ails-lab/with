@@ -283,15 +283,15 @@ public class GroupManager extends Controller {
 				return MediaController.getMetadataOrFile(photoId.toString(),
 						true);
 			} else {
-				UserGroup userGroup = DB.getUserGroupDAO().get(new ObjectId(id));
+				UserGroup userGroup = DB.getUserGroupDAO()
+						.get(new ObjectId(id));
 				if (userGroup != null) {
 					ObjectId photoId = user.getThumbnail();
-					return MediaController.getMetadataOrFile(photoId.toString(),
-							true);
-				}
-				else
+					return MediaController.getMetadataOrFile(
+							photoId.toString(), true);
+				} else
 					return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
+							.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
 			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
