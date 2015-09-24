@@ -25,6 +25,7 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.User;
+import model.UserOrGroup;
 import model.Rights.Access;
 import model.UserGroup;
 
@@ -36,11 +37,13 @@ import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.Results.Status;
 import utils.AccessManager;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -48,8 +51,91 @@ import db.DB;
 public class UserAndGroupManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
+	
+	/**
+	 * Get a list of matching usernames or groupnames
+	 *
+	 * Used by autocomplete in share collection
+	 *
+	 * @param prefix
+	 *            optional prefix of username or groupname
+	 * @return JSON document with an array of matching usernames or groupnames (or all of
+	 *         them)
+	 */
+	public static Result listNames(String prefix) {
+		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+		List<UserGroup> groups  = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
+		ArrayNode suggestions = Json.newObject().arrayNode();
+		for (User user : users) {
+			ObjectNode node = Json.newObject();
+			ObjectNode data = Json.newObject().objectNode();
+			data.put("category", "user");
+			//costly?
+			node.put("value", user.getUserName());
+			node.put("data", data);
+			suggestions.add(node);
+		}
+		for (UserGroup group : groups) {
+			ObjectNode node = Json.newObject().objectNode();
+			ObjectNode data = Json.newObject().objectNode();
+			data.put("category", "group");
+			node.put("value", group.getUserName());
+			node.put("data", data);
+			suggestions.add(node);
+		}
 
-
+		return ok(suggestions);
+	}
+	
+	/**
+	 * @param userOrGroupnameOrEmail
+	 * @return User and image
+	 */
+	public static Result findByUserOrGroupNameOrEmail(String userOrGroupnameOrEmail,
+			String collectionId) {
+		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
+			ObjectNode userJSON = Json.newObject();
+			userJSON.put("userId", u.getDbId().toString());
+			userJSON.put("username", u.getUserName());
+			if (u instanceof User) {
+				userJSON.put("firstName", ((User) u).getFirstName());
+				userJSON.put("lastName", ((User) u).getLastName());
+			}
+			if (collectionId != null) {
+				Collection collection = DB.getCollectionDAO().getById(
+						new ObjectId(collectionId));
+				if (collection != null) {
+					//TODO: have to do recursion here!
+					Access accessRights = collection.getRights().get(
+							u.getDbId());
+					if (accessRights != null)
+						userJSON.put("accessRights", accessRights.toString());
+					else
+						userJSON.put("accessRights", Access.NONE.toString());
+				}
+			}
+			String image = UserManager.getImageBase64(u);
+			if (image != null) {
+				userJSON.put("image", image);
+			}
+			return ok(userJSON);
+		};
+		User user = DB.getUserDAO().getByEmail(userOrGroupnameOrEmail);
+		if (user != null) {
+			return getUserJson.apply(user);
+		} else {
+			user = DB.getUserDAO().getByUsername(userOrGroupnameOrEmail);
+			if (user != null)
+				return getUserJson.apply(user);
+			else {
+				UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupnameOrEmail);
+				if (userGroup != null) 
+					return getUserJson.apply(userGroup);
+				else 
+					return badRequest("The string you provided does not match an existing email or username");
+			}
+		}
+	}
 	
 	public static Result getUserOrGroupThumbnail(String id) {
 		try {

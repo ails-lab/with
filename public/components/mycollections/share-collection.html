@@ -12,9 +12,10 @@
 				  <div class="form-group form-inline">
 				    <div class="spec">
 				    <label for="firstName">Select user</label>
-						<input type="search" class="form-control" id="usernameOrEmail" placeholder="User or group name or email"
-						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername"/>
-						 <span style="padding-left:10px;">
+						<input type="search" class="form-control" id="usernameOrEmail" placeholder="User/group name or email"
+						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername,
+						event:{keypress: ko.contextFor(mycollections).}"/>
+						 <!--  <span style="padding-left:10px;">
 							 <button type="button" class="btn btn-info btn-xs" title="Show"
 							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
 							 	<span class="glyphicon glyphicon-eye-open" 
@@ -26,7 +27,7 @@
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
 							 </button>
-				      	</span>
+				      	</span>-->
 				    	</div>
 				    </div>
 				</div>
@@ -48,13 +49,13 @@
 							    <span class="glyphicon glyphicon-trash" style="cursor:pointer"></span>
 								</button>
 								<!-- ko if: accessRights() == 'READ' -->
-								<button type="button" class="btn btn-info btn-xs" title="Co-create"
+								<button type="button" class="btn btn-info btn-xs" title="Collaborate"
 								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
 								<span class="glyphicon glyphicon-user" style="cursor:pointer;color:blue"></span>
 								</button>
 								<!-- /ko -->
 								<!-- ko if: accessRights() == 'WRITE' -->
-								<button type="button" class="btn btn-info btn-xs" title="Share"							
+								<button type="button" class="btn btn-info btn-xs" title="Show"							
 								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">				
 								<span class="glyphicon glyphicon-eye-open" style="cursor:pointer;color:blue"></span>
 								</button>

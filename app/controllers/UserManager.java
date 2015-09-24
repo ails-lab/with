@@ -74,55 +74,7 @@ public class UserManager extends Controller {
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 
-	/**
-	 * @param emailOrUsername
-	 * @return User and image
-	 */
-	public static Result findByUserOrGroupNameOrEmail(String userOrGroupnameOrEmail,
-			String collectionId) {
-		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
-			ObjectNode userJSON = Json.newObject();
-			userJSON.put("userId", u.getDbId().toString());
-			userJSON.put("username", u.getUserName());
-			if (u instanceof User) {
-				userJSON.put("firstName", ((User) u).getFirstName());
-				userJSON.put("lastName", ((User) u).getLastName());
-			}
-			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
-						new ObjectId(collectionId));
-				if (collection != null) {
-					//TODO: have to do recursion here!
-					Access accessRights = collection.getRights().get(
-							u.getDbId());
-					if (accessRights != null)
-						userJSON.put("accessRights", accessRights.toString());
-					else
-						userJSON.put("accessRights", Access.NONE.toString());
-				}
-			}
-			String image = UserManager.getImageBase64(u);
-			if (image != null) {
-				userJSON.put("image", image);
-			}
-			return ok(userJSON);
-		};
-		User user = DB.getUserDAO().getByEmail(userOrGroupnameOrEmail);
-		if (user != null) {
-			return getUserJson.apply(user);
-		} else {
-			user = DB.getUserDAO().getByUsername(userOrGroupnameOrEmail);
-			if (user != null)
-				return getUserJson.apply(user);
-			else {
-				UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupnameOrEmail);
-				if (userGroup != null) 
-					return getUserJson.apply(userGroup);
-				else 
-					return badRequest("The string you provided does not match an existing email or username");
-			}
-		}
-	}
+	
 
 	/**
 	 * Propose new username when it is already in use.
@@ -457,40 +409,7 @@ public class UserManager extends Controller {
 		return ok(enc);
 	}
 
-	/**
-	 * Get a list of matching usernames or groupnames
-	 *
-	 * Used by autocomplete in share collection
-	 *
-	 * @param prefix
-	 *            optional prefix of username or groupname
-	 * @return JSON document with an array of matching usernames or groupnames (or all of
-	 *         them)
-	 */
-	public static Result listNames(String prefix) {
-		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-		List<UserGroup> groups  = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
-		ArrayNode suggestions = Json.newObject().arrayNode();
-		for (User user : users) {
-			ObjectNode node = Json.newObject();
-			ObjectNode data = Json.newObject().objectNode();
-			data.put("category", "user");
-			//costly?
-			node.put("value", user.getUserName());
-			node.put("data", data);
-			suggestions.add(node);
-		}
-		for (UserGroup group : groups) {
-			ObjectNode node = Json.newObject().objectNode();
-			ObjectNode data = Json.newObject().objectNode();
-			data.put("category", "group");
-			node.put("value", group.getUserName());
-			node.put("data", data);
-			suggestions.add(node);
-		}
-
-		return ok(suggestions);
-	}
+	
 
 	/**
 	 * Find if email is already used.
