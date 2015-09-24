@@ -16,7 +16,7 @@
 
 package model;
 
-import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -27,7 +27,7 @@ public class Page {
 
 	@Embedded
 	public static class Point {
-		
+
 		private double latitude;
 		private double longitude;
 
@@ -48,6 +48,7 @@ public class Page {
 		}
 
 	}
+
 	@Embedded
 	private Point coordinates;
 	private String city;
@@ -56,8 +57,8 @@ public class Page {
 
 	private ObjectId coverImage;
 
-	private List<ObjectId> featuredCollections;
-	private List<ObjectId> featuredExhibitions;
+	private Set<ObjectId> featuredCollections;
+	private Set<ObjectId> featuredExhibitions;
 
 	public String getAddress() {
 		return address;
@@ -99,19 +100,27 @@ public class Page {
 		this.city = city;
 	}
 
-	public List<ObjectId> getFeaturedColsl() {
-		return featuredCollections;
-	}
-
-	public void setFeaturedColsl(List<ObjectId> featuredColsl) {
-		this.featuredCollections = featuredColsl;
-	}
-
 	public Point getCoordinates() {
 		return coordinates;
 	}
 
 	public void setCoordinates(Point coordinates) {
 		this.coordinates = coordinates;
+	}
+
+	public Set<ObjectId> getFeaturedCollections() {
+		return featuredCollections;
+	}
+
+	public void setFeaturedCollections(Set<ObjectId> featuredCollections) {
+		this.featuredCollections = featuredCollections;
+	}
+
+	public Set<ObjectId> getFeaturedExhibitions() {
+		return featuredExhibitions;
+	}
+
+	public void setFeaturedExhibitions(Set<ObjectId> featuredExhibitions) {
+		this.featuredExhibitions = featuredExhibitions;
 	}
 }
