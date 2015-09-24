@@ -24,6 +24,8 @@ import java.util.Map;
 import model.Rights.Access;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Converters;
+import org.mongodb.morphia.converters.EnumConverter;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -32,6 +34,7 @@ import db.DB;
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
 
+	@Converters(AccessEnumConverter.class)
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
