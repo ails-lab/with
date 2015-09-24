@@ -88,7 +88,7 @@ public class ExhibitionController extends Controller {
 		c.put("access", Access.OWN.toString());
 		User user = DB.getUserDAO().getById(newExhibition.getOwnerId(),
 				new ArrayList<String>(Arrays.asList("username")));
-		c.put("owner", user.getUserName());
+		c.put("owner", user.getUsername());
 		return ok(c);
 	}
 

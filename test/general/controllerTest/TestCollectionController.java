@@ -61,12 +61,12 @@ public class TestCollectionController {
 
 		User user1 = new User();
 		user1.setEmail("user1@controller.gr");
-		user1.setUserName("user1");
+		user1.setUsername("user1");
 		DB.getUserDAO().makePermanent(user1);
 
 		User user2 = new User();
 		user2.setEmail("user2@controller.gr");
-		user2.setUserName("user2");
+		user2.setUsername("user2");
 		DB.getUserDAO().makePermanent(user2);
 
 		UserGroup group = new UserGroup();
@@ -122,12 +122,12 @@ public class TestCollectionController {
 
 		User user1 = new User();
 		user1.setEmail("user1@controller.gr");
-		user1.setUserName("user1");
+		user1.setUsername("user1");
 		DB.getUserDAO().makePermanent(user1);
 
 		User user2 = new User();
 		user2.setEmail("user2@controller.gr");
-		user2.setUserName("user2");
+		user2.setUsername("user2");
 		DB.getUserDAO().makePermanent(user2);
 
 		Collection col = new Collection();
@@ -166,7 +166,7 @@ public class TestCollectionController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -211,7 +211,7 @@ public class TestCollectionController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		running(fakeApplication(), new Runnable() {
@@ -249,7 +249,7 @@ public class TestCollectionController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -312,7 +312,7 @@ public class TestCollectionController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -366,7 +366,7 @@ public class TestCollectionController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -428,7 +428,7 @@ public class TestCollectionController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();

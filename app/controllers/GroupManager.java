@@ -88,7 +88,8 @@ public class GroupManager extends Controller {
 		case "project":
 			newGroup = Json.fromJson(json, Project.class);
 			break;
-		case "group": default:
+		case "group":
+		default:
 			newGroup = Json.fromJson(json, UserGroup.class);
 			break;
 		}
@@ -174,7 +175,7 @@ public class GroupManager extends Controller {
 			if (!violations.isEmpty()) {
 				return badRequest(result);
 			}
-			if (!uniqueGroupName(newVersion.getUserName())) {
+			if (!uniqueGroupName(newVersion.getUsername())) {
 				return badRequest("Group name already exists! Please specify another name.");
 			}
 			// update group on mongo
@@ -271,7 +272,7 @@ public class GroupManager extends Controller {
 		return internalServerError("Cannot store to database!");
 
 	}
-	
+
 	public static Result getUserOrGroupThumbnain(String id) {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
@@ -280,15 +281,15 @@ public class GroupManager extends Controller {
 				return MediaController.getMetadataOrFile(photoId.toString(),
 						true);
 			} else {
-				UserGroup userGroup = DB.getUserGroupDAO().get(new ObjectId(id));
+				UserGroup userGroup = DB.getUserGroupDAO()
+						.get(new ObjectId(id));
 				if (userGroup != null) {
 					ObjectId photoId = user.getThumbnail();
-					return MediaController.getMetadataOrFile(photoId.toString(),
-							true);
-				}
-				else
+					return MediaController.getMetadataOrFile(
+							photoId.toString(), true);
+				} else
 					return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
+							.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
 			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
@@ -339,7 +340,7 @@ public class GroupManager extends Controller {
 		Function<UserGroup, Status> getGroupJson = (UserGroup group) -> {
 			ObjectNode groupJSON = Json.newObject();
 			groupJSON.put("groupId", group.getDbId().toString());
-			groupJSON.put("username", group.getUserName());
+			groupJSON.put("username", group.getUsername());
 			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
 				Collection collection = DB.getCollectionDAO().getById(
@@ -358,4 +359,21 @@ public class GroupManager extends Controller {
 		UserGroup group = DB.getUserGroupDAO().getByName(name);
 		return getGroupJson.apply(group);
 	}
+
+	public static Result findUserGroups(String userId, String username) {
+		User user;
+		String userRequest = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if (userId != null) {
+			user = DB.getUserDAO().get(new ObjectId(userId));
+		} else if (username!=null) {
+			user = DB.getUserDAO().getByUsername(username);
+		} else {
+			user = DB.getUserDAO().get(new ObjectId(userRequest));
+		}
+		DB.getUserGroupDAO();
+		return TODO;
+
+	}
+
 }

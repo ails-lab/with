@@ -288,7 +288,7 @@ public class TestMediaController {
 		// make a user with password
 		User u = new User();
 		u.setEmail("my@you.me");
-		u.setUserName("cool_url");
+		u.setUsername("cool_url");
 		// set password after email, email salts the password!
 		u.setPassword("secret");
 		DB.getUserDAO().makePermanent(u);

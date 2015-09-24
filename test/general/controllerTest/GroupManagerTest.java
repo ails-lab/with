@@ -95,7 +95,7 @@ public class GroupManagerTest extends TestCase {
 				user.setEmail("testuser@test.gr");
 				user.setFirstName("FirstName");
 				user.setLastName("LastName");
-				user.setUserName("usrname");
+				user.setUsername("usrname");
 				DB.getUserDAO().makePermanent(user);
 				// Create Organization
 				json.put("name", "testGroup");

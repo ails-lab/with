@@ -43,11 +43,11 @@ public abstract class UserOrGroup {
 		this.dbId = dbId;
 	}
 
-	public String getUserName() {
+	public String getUsername() {
 		return username;
 	}
 
-	public void setUserName(String name) {
+	public void setUsername(String name) {
 		this.username = name;
 	}
 	

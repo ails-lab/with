@@ -71,7 +71,7 @@ public class UserAndGroupManager extends Controller {
 			ObjectNode data = Json.newObject().objectNode();
 			data.put("category", "user");
 			//costly?
-			node.put("value", user.getUserName());
+			node.put("value", user.getUsername());
 			node.put("data", data);
 			suggestions.add(node);
 		}
@@ -79,7 +79,7 @@ public class UserAndGroupManager extends Controller {
 			ObjectNode node = Json.newObject().objectNode();
 			ObjectNode data = Json.newObject().objectNode();
 			data.put("category", "group");
-			node.put("value", group.getUserName());
+			node.put("value", group.getUsername());
 			node.put("data", data);
 			suggestions.add(node);
 		}
@@ -96,7 +96,7 @@ public class UserAndGroupManager extends Controller {
 		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
 			ObjectNode userJSON = Json.newObject();
 			userJSON.put("userId", u.getDbId().toString());
-			userJSON.put("username", u.getUserName());
+			userJSON.put("username", u.getUsername());
 			if (u instanceof User) {
 				userJSON.put("firstName", ((User) u).getFirstName());
 				userJSON.put("lastName", ((User) u).getLastName());

@@ -117,7 +117,7 @@ public class CollectionController extends Controller {
 		}
 
 		result = (ObjectNode) Json.toJson(c);
-		result.put("owner", collectionOwner.getUserName());
+		result.put("owner", collectionOwner.getUsername());
 		result.put("access", maxAccess.toString());
 		return ok(result);
 	}
@@ -244,7 +244,7 @@ public class CollectionController extends Controller {
 			c.put("access", maxAccess.toString());
 			User user = DB.getUserDAO().getById(newVersion.getOwnerId(),
 					new ArrayList<String>(Arrays.asList("username")));
-			c.put("owner", user.getUserName());
+			c.put("owner", user.getUsername());
 			// result.put("message", "Collection succesfully stored!");
 			// result.put("id", colKey.getId().toString());
 			return ok(c);
@@ -328,7 +328,7 @@ public class CollectionController extends Controller {
 		c.put("access", Access.OWN.toString());
 		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),
 				new ArrayList<String>(Arrays.asList("username")));
-		c.put("owner", user.getUserName());
+		c.put("owner", user.getUsername());
 		// result.put("message", "Collection succesfully stored!");
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
@@ -393,7 +393,7 @@ public class CollectionController extends Controller {
 				c.put("access", maxAccess.toString());
 				User user = DB.getUserDAO().getById(collection.getOwnerId(),
 						new ArrayList<String>(Arrays.asList("username")));
-				c.put("creator", user.getUserName());
+				c.put("creator", user.getUsername());
 				collections.add(c);
 			}
 		}
@@ -454,7 +454,7 @@ public class CollectionController extends Controller {
 			if (user != null) {
 				ObjectNode userJSON = Json.newObject();
 				userJSON.put("userId", user.getDbId().toString());
-				userJSON.put("username", user.getUserName());
+				userJSON.put("username", user.getUsername());
 				userJSON.put("firstName", user.getFirstName());
 				userJSON.put("lastName", user.getLastName());
 				String image = UserManager.getImageBase64(user);

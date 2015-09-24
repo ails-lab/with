@@ -55,7 +55,7 @@ public class TestRecordController {
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -114,7 +114,7 @@ public class TestRecordController {
 	public void testDeleteRecord() {
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -177,7 +177,7 @@ public class TestRecordController {
 	public void testUpdateRecord() {
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -236,7 +236,7 @@ public class TestRecordController {
 	public void testFindInCollections() {
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
@@ -295,7 +295,7 @@ public class TestRecordController {
 	public void testGetCollectionMetadata() {
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();

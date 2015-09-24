@@ -76,7 +76,7 @@ public class UserManagerTest {
 		// make a user with password
 		User u = new User();
 		u.setEmail("my@you.me");
-		u.setUserName("cool_url");
+		u.setUsername("cool_url");
 		// set password after email, email salts the password!
 		u.setPassword("secret");
 		DB.getUserDAO().makePermanent(u);
@@ -118,7 +118,7 @@ public class UserManagerTest {
 		// make a user with password
 		User u = new User();
 		u.setEmail("my@you.me");
-		u.setUserName("cool_url");
+		u.setUsername("cool_url");
 		// set password after email, email salts the password!
 		u.setPassword("secret");
 		DB.getUserDAO().makePermanent(u);
@@ -287,7 +287,7 @@ public class UserManagerTest {
 	public void testAddUserToGroup() {
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUserName("controller");
+		user.setUsername("controller");
 		DB.getUserDAO().makePermanent(user);
 
 		UserGroup parentGroup = new UserGroup();
