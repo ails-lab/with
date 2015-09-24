@@ -42,7 +42,7 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-#GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
+#GET		 /exhibition/list					controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
@@ -59,13 +59,14 @@ PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= 
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
-# and image
-PUT		/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null)
-POST	/group/:id								controllers.GroupManager.editGroup(id)
+POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="group")
+POST	/organization/create					controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="organization")
+POST	/project/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="project")
+PUT		/group/:id								controllers.GroupManager.editGroup(id)
 DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET		/group/:id								controllers.GroupManager.getGroup(id)
-POST	/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
-POST	/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
+PUT		/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
+PUT		/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
 GET		/group/findByGroupName					controllers.GroupManager.findByGroupName(name, collectionId)
 
 # Rights Controller
@@ -84,12 +85,12 @@ POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 GET		/user/logout						    controllers.UserManager.logout()
 # both users and groups
-GET		/user/listNames			                controllers.UserManager.listNames(prefix:java.lang.String ?= "")
+GET		/user/listNames			                controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "")
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
-GET     /user/findByUsernameOrEmail				controllers.UserManager.findByUsernameOrEmail(emailOrUsername: String, collectionId ?= null)
-GET		/user/:id/photo			                controllers.UserManager.getUserPhoto(id)
+GET     /user/findByUserOrGroupNameOrEmail		controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
+GET		/user/:id/photo			                controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)

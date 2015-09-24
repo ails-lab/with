@@ -4,10 +4,7 @@ info:
   title: WITH API
   description: |
     Welcome to the WITH API documentation! 
-    We are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:
-    ```
-    http://WITH.com
-    ```
+    We are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. 
 paths:
   /api/search:
     post:

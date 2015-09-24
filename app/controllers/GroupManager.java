@@ -17,12 +17,15 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
+import model.Organization;
+import model.Project;
 import model.User;
 import model.Rights.Access;
 import model.UserGroup;
@@ -62,7 +65,8 @@ public class GroupManager extends Controller {
 	 *            the administrator username
 	 * @return the JSON of the new group
 	 */
-	public static Result createGroup(String adminId, String adminUsername) {
+	public static Result createGroup(String adminId, String adminUsername,
+			String groupType) {
 
 		ObjectId admin;
 		UserGroup newGroup = null;
@@ -71,13 +75,24 @@ public class GroupManager extends Controller {
 		if (json == null) {
 			return badRequest("Invalid JSON");
 		}
-		if (!json.has("name")) {
+		if (!json.has("username")) {
 			return badRequest("Must specify name for the group");
 		}
-		if (!uniqueGroupName(json.get("name").asText())) {
+		if (!uniqueGroupName(json.get("username").asText())) {
 			return badRequest("Group name already exists! Please specify another name.");
 		}
-		newGroup = Json.fromJson(json, UserGroup.class);
+		switch (groupType) {
+		case "organization":
+			newGroup = Json.fromJson(json, Organization.class);
+			break;
+		case "project":
+			newGroup = Json.fromJson(json, Project.class);
+			break;
+		case "group":
+		default:
+			newGroup = Json.fromJson(json, UserGroup.class);
+			break;
+		}
 		if (adminId != null) {
 			admin = new ObjectId(adminId);
 		} else if (adminUsername != null) {
@@ -100,7 +115,7 @@ public class GroupManager extends Controller {
 		}
 		try {
 			DB.getUserGroupDAO().makePermanent(newGroup);
-			Set<ObjectId> parentGroups = newGroup.retrieveParents();
+			Set<ObjectId> parentGroups = newGroup.getParentGroups();
 			parentGroups.add(newGroup.getDbId());
 			User user = DB.getUserDAO().get(admin);
 			user.addUserGroup(parentGroups);
@@ -160,7 +175,7 @@ public class GroupManager extends Controller {
 			if (!violations.isEmpty()) {
 				return badRequest(result);
 			}
-			if (!uniqueGroupName(newVersion.getName())) {
+			if (!uniqueGroupName(newVersion.getUsername())) {
 				return badRequest("Group name already exists! Please specify another name.");
 			}
 			// update group on mongo
@@ -242,7 +257,7 @@ public class GroupManager extends Controller {
 		}
 		User user = DB.getUserDAO().get(new ObjectId(userId));
 		group.getUsers().add(new ObjectId(userId));
-		Set<ObjectId> parentGroups = group.retrieveParents();
+		Set<ObjectId> parentGroups = group.getParentGroups();
 
 		if (user == null) {
 			return internalServerError("Cannot retrieve user from database!");
@@ -256,6 +271,30 @@ public class GroupManager extends Controller {
 		}
 		return internalServerError("Cannot store to database!");
 
+	}
+
+	public static Result getUserOrGroupThumbnain(String id) {
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
+			if (user != null) {
+				ObjectId photoId = user.getThumbnail();
+				return MediaController.getMetadataOrFile(photoId.toString(),
+						true);
+			} else {
+				UserGroup userGroup = DB.getUserGroupDAO()
+						.get(new ObjectId(id));
+				if (userGroup != null) {
+					ObjectId photoId = user.getThumbnail();
+					return MediaController.getMetadataOrFile(
+							photoId.toString(), true);
+				} else
+					return badRequest(Json
+							.parse("{\"error\":\"User does not exist\"}"));
+			}
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
+					+ "\"}"));
+		}
 	}
 
 	/**
@@ -301,8 +340,8 @@ public class GroupManager extends Controller {
 		Function<UserGroup, Status> getGroupJson = (UserGroup group) -> {
 			ObjectNode groupJSON = Json.newObject();
 			groupJSON.put("groupId", group.getDbId().toString());
-			groupJSON.put("name", group.getName());
-			groupJSON.put("description", group.getDescription());
+			groupJSON.put("username", group.getUsername());
+			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
 				Collection collection = DB.getCollectionDAO().getById(
 						new ObjectId(collectionId));
@@ -320,4 +359,21 @@ public class GroupManager extends Controller {
 		UserGroup group = DB.getUserGroupDAO().getByName(name);
 		return getGroupJson.apply(group);
 	}
+
+	public static Result findUserGroups(String userId, String username) {
+		User user;
+		String userRequest = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if (userId != null) {
+			user = DB.getUserDAO().get(new ObjectId(userId));
+		} else if (username!=null) {
+			user = DB.getUserDAO().getByUsername(username);
+		} else {
+			user = DB.getUserDAO().get(new ObjectId(userRequest));
+		}
+		DB.getUserGroupDAO();
+		return TODO;
+
+	}
+
 }

@@ -16,14 +16,14 @@
 
 package model;
 
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 
+@Entity("UserGroup")
 public class Project extends UserGroup {
 
 	@Embedded
 	private Page page;
-
 
 	public Page getPage() {
 		return page;

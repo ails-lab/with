@@ -15,7 +15,9 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.url = ko.observable("");
 		self.id = ko.observable("");
 		self.externalId = ko.observable("");
-		self.collections = ko.observable("");
+		self.collectedCount = ko.observable("");
+		self.liked = ko.observable("");
+		self.collections =  ko.observableArray([]);
 
 		self.cachedThumbnail = ko.pureComputed(function() {
 
@@ -79,6 +81,8 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 				type    : "get",
 				url     : "/record/"+self.externalId() +"/mergedCollections",
 				success : function(result) {
+					self.collectedCount(result.count);
+					self.liked(result.liked);
 					self.collections(result.collections);
 				},
 				error   : function(request, status, error) {
@@ -194,8 +198,18 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.recordSelect = function (e) {
 			itemShow(e);
 		};
+		
+		self.loadCollectionnnn = function(collection) {
+			window.location.href = 'index.html#collectionview/' + collection.dbId;		
+			
+			if (isOpen){
+				toggleSearch(event,'');
+			}
+			self.close();
+		};
 	}
-
+	
+	
 	return {
 		viewModel: ItemViewModel,
 		template: template

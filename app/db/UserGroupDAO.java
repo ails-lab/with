@@ -33,7 +33,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	}
 
 	public UserGroup getByName(String name) {
-		return this.findOne("name", name);
+		return this.findOne("username", name);
 	}
 	
 	public List<UserGroup> findByUserId(ObjectId dbId) {
@@ -44,7 +44,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	}
 	
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
-		Query<UserGroup> q = this.createQuery().field("name").startsWith(prefix);
+		Query<UserGroup> q = this.createQuery().field("username").startsWith(prefix);
 		return find(q).asList();
 
 	}

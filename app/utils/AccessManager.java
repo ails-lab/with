@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.Rights.Access;
+import model.UserGroup;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
@@ -54,6 +55,11 @@ public class AccessManager {
 				return true;
 			}
 		}
+		return false;
+	}
+	
+	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights,
+			ObjectId groupId) {
 		return false;
 	}
 
