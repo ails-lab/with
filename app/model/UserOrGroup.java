@@ -47,7 +47,7 @@ public abstract class UserOrGroup {
 		return username;
 	}
 
-	public void getUserName(String name) {
+	public void setUserName(String name) {
 		this.username = name;
 	}
 	

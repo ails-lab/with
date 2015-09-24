@@ -49,7 +49,7 @@ public class ExhibitionControllerTest {
 		if (DB.getUserDAO().getByUsername("testExhibition") == null) {
 			User user = new User();
 			user.setEmail("test@test.com");
-			user.setUsername("testExhibition");
+			user.setUserName("testExhibition");
 			// set password after email, email salts the password!
 			user.setPassword("secret");
 			DB.getUserDAO().makePermanent(user);

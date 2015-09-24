@@ -108,7 +108,7 @@ public class UserDAOTest {
 				}
 				// testUser.setSearchHistory(searchHistory);
 			}*/
-			testUser.setUsername("Testuser");
+			testUser.setUserName("Testuser");
 			DB.getUserDAO().makePermanent(testUser);
 		}
 
