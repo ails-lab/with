@@ -1,0 +1,11 @@
+for(Entry<String, String> e: ctx._source.rights) {
+
+	if(e.getValue().equals("OWN"))
+		e.setValue("3")
+	if(e.getValue().equals("WRITE"))
+		e.setValue("2")
+	if(e.getValue().equals("READ"))
+		e.setValue("1")
+	if(e.getValue().equals("NONE"))
+		e.setValue("0")
+}

@@ -30,6 +30,7 @@ public class CommonQuery implements Cloneable {
 	public String searchTerm;
 	public String termToExclude;
 	public String user;
+	public int accessLevel;
 	public List<String> source;
 
 	public List<CommonFilter> filters;
@@ -107,8 +108,18 @@ public class CommonQuery implements Cloneable {
 		return user;
 	}
 
+	public void setAccessLevel(int accessLevel) {
+		this.accessLevel = accessLevel;
+	}
+
+	public int getAccessLevel() {
+		return accessLevel;
+	}
+
 	@Override
 	protected Object clone() throws CloneNotSupportedException {
 		return super.clone();
 	}
+
+
 }

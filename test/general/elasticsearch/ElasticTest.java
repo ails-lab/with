@@ -16,12 +16,15 @@
 
 package general.elasticsearch;
 
+import java.util.List;
+
 import model.Collection;
 import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
+import play.libs.Json;
 import db.DB;
 import elastic.Elastic;
 import elastic.ElasticIndexer;
@@ -66,6 +69,17 @@ public class ElasticTest {
 		ElasticSearcher indexer = new ElasticSearcher( record );
 		indexer.indexSingleRecord();
 */
+	}
+
+	@Test
+	public void reindex_collection_from_mongo() {
+		List<Collection> allCols = DB.getCollectionDAO().find().asList();
+		Collection c = allCols.get(0);
+		System.out.println(Json.toJson(c));
+		/*for(Collection c: allCols) {
+			ElasticIndexer indexer = new ElasticIndexer(c);
+			indexer.indexCollectionMetadata();
+		}*/
 	}
 
 

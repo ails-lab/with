@@ -123,8 +123,11 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				if (session().containsKey("effectiveUserIds")) {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-					if (!userIds.isEmpty())
+					if (!userIds.isEmpty()) {
 						q.setUser(userIds.get(0));
+						q.setAccessLevel(1);
+					}
+
 				}
 				long start = System.currentTimeMillis();
 				Iterable<Promise<SourceResponse>> promises = callSources(q);

@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.validation.constraints.NotNull;
 
@@ -84,7 +85,7 @@ public class Collection {
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
-	//@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
+	@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
 	private final  Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
@@ -227,8 +228,14 @@ public class Collection {
 		return rights;
 	}
 
+	public void setRights(Map<ObjectId, Integer> r) {
+		for(Entry<ObjectId, Integer> e : r.entrySet()) {
+			rights.put(e.getKey(), Access.values()[e.getValue()]);
+		}
+	}
+
 	@JsonIgnore
-	public void setRights(Map<ObjectId, Access> r) {
+	public void setRights_(Map<ObjectId, Access> r) {
 
 	}
 
