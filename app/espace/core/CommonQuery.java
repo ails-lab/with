@@ -163,5 +163,4 @@ public class CommonQuery {
 	public List<String> getEffectiveUserIds() {
 		return effectiveUserIds;
 	}
-
 }
