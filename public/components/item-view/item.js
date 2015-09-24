@@ -219,29 +219,6 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			}
 			self.close();
 		};
-		
-	        self.enableDetail= function() {
-	        	console.log("lala");
-	            self.detailsEnabled(true); 
-	            $(event.target).parent().addClass('box-Hover');
-	        }
-	        self.disableDetails =  function() {
-	        	console.log("lilo");
-	            self.detailsEnabled(false);
-	            $(event.target).parent().removeClass('box-Hover');
-
-	        }
-		
-		
-	       /*self.detailsEnabled = ko.observable(false);
-	        self.enableDetails = function (data, event) {
-	            //fix hover
-	            $(event.target).parent().addClass('box-Hover');
-	        }
-	        self.disableDetails = function (data, event) {
-	            self.detailsEnabled(false);
-	            $(event.target).parent().removeClass('box-Hover');
-	        }*/
 	}
 	
 	
