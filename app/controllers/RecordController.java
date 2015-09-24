@@ -300,16 +300,20 @@ public class RecordController extends Controller {
 				continue;
 			}
 			count++;
-			if (!AccessManager.checkAccess(c.getRights(), userIds,
+			
+			if(!c.getIsPublic() && !AccessManager.checkAccess(c.getRights(), userIds,
 					Action.READ)){
 				continue;
 			}
+			
 			o.put("title", c.getTitle());
 			o.put("description", c.getDescription());
 			o.put("isExhibition", c.getIsExhibition());
+			//o.put("isPublic", c.getIsPublic());
 			o.put("thumbnail", c.getThumbnailUrl());
 			o.put("userName" , DB.getUserDAO().get(c.getOwnerId()).getUsername());
 			o.put("dbId", hit.getId());
+			
 			
 		
 			collections.add(o);
