@@ -17,7 +17,9 @@
 package model;
 
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 
+@Entity("UserGroup")
 public class Project extends UserGroup {
 
 	@Embedded

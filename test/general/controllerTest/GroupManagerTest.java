@@ -90,16 +90,30 @@ public class GroupManagerTest extends TestCase {
 			@Override
 			public void run() {
 				final ObjectNode json = Json.newObject();
+				final ObjectNode page = Json.newObject();
 				User user = new User();
 				user.setEmail("testuser@test.gr");
 				user.setFirstName("FirstName");
 				user.setLastName("LastName");
 				user.setUsername("usrname");
 				DB.getUserDAO().makePermanent(user);
+				// Create Organization
 				json.put("name", "testGroup");
 				json.put("description", "This is a test group");
-				json.put("test", "test");
+				page.put("address", "Hrwwn Polutexneiou 2, Zwgrafou");
+				page.put("city", "Athens");
+				page.put("country", "Greece");
+				json.put("page", page);
 				Result result = route(fakeRequest("POST", "/organization/create")
+						.withJsonBody(json).withSession("user", user.getDbId().toString()));
+			    // Create Project
+			    json.put("name", "testGroup");
+				json.put("description", "This is a test group");
+				page.put("address", "Hrwwn Polutexneiou 2, Zwgrafou");
+				page.put("city", "Athens");
+				page.put("country", "Greece");
+				json.put("page", page);
+				result = route(fakeRequest("POST", "/project/create")
 						.withJsonBody(json).withSession("user", user.getDbId().toString()));
 			    DB.getUserDAO().makeTransient(user);
 				JsonParser parser = new JsonParser();
