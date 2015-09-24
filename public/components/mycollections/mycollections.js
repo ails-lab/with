@@ -149,13 +149,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 			return data;
 		}
-		
-		self.onEnterAddUser: function(data, event) {
-			var keyCode = e.which || e.keyCode;
-            if (keyCode == 13) {
-                //TODO: check if group and direct child
-            }
-        }
 
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
