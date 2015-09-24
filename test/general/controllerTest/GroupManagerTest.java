@@ -49,12 +49,7 @@ import controllers.GroupManager;
 import db.DB;
 
 /**
-<<<<<<< HEAD
  * The class <code>GroupManagerTest</code> contains tests for the class {@link <code>GroupManager</code>}
-=======
- * The class <code>GroupManagerTest</code> contains tests for the class {@link
- * <code>GroupManager</code>}
->>>>>>> Save organizations and projects to database using userGroupDAO
  *
  * @pattern JUnit Test Case
  *
@@ -69,12 +64,8 @@ public class GroupManagerTest extends TestCase {
 	/**
 	 * Construct new test instance
 	 *
-<<<<<<< HEAD
 	 * @param name
 	 *            the test name
-=======
-	 * @param name the test name
->>>>>>> Save organizations and projects to database using userGroupDAO
 	 */
 	public GroupManagerTest(String name) {
 		super(name);
