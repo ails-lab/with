@@ -24,13 +24,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						});
 			   			if (index > -1)
 			   				response.splice(index, 1);
-			   			console.log(JSON.stringify(response));
 			   			var usersAndParents = [];
 			   			$.each(response, function(i, obj) {
 			   				if (obj.data.isParent == null == undefined || obj.data.isParent == null || obj.data.isParent === true)
 			   					usersAndParents.push(obj);
 					    });
-			   			console.log(JSON.stringify(usersAndParents));
 				   		return {"suggestions": usersAndParents};
 				   	},
 				   	orientation: "auto",    
@@ -42,9 +40,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						s    += suggestion.value.substring(currentValue.length);
 						s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 						return s;
-					},
-					onSelect: function(suggestion) {
-						
 					}
 			 });
 	      }
