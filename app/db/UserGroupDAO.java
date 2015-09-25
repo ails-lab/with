@@ -19,6 +19,7 @@ package db;
 import java.util.List;
 
 import model.UserGroup;
+import controllers.GroupManager.GroupType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -35,19 +36,56 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	public UserGroup getByName(String name) {
 		return this.findOne("username", name);
 	}
-	
-	public List<UserGroup> findByUserId(ObjectId dbId) {
-		Query<UserGroup> q = createQuery()
-				.field( "users")
-				.hasThisElement( dbId );
-		return find( q ).asList();
+
+	public List<UserGroup> findByUserIdAll(ObjectId userId, GroupType groupType) {
+		Query<UserGroup> q = createQuery().disableValidation().field("users")
+				.hasThisOne(userId);
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		return find(q).asList();
 	}
-	
+
+	public List<UserGroup> findByUserIdPublic(ObjectId userId,
+			GroupType groupType) {
+		Query<UserGroup> q = createQuery().disableValidation().field("users")
+				.hasThisOne(userId);
+		q.and(q.criteria("privateGroup").equal(false));
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		return find(q).asList();
+	}
+
+	public List<UserGroup> findByUserIdPrivate(ObjectId userId,
+			GroupType groupType) {
+		Query<UserGroup> q = createQuery().disableValidation().field("users")
+				.hasThisOne(userId);
+		q.and(q.criteria("privateGroup").equal(true));
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		return find(q).asList();
+	}
+
+	public List<UserGroup> findByParent(ObjectId parentId, GroupType groupType) {
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("parentGroups").hasThisOne(parentId);
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		return find(q).asList();
+	}
+
 	public List<UserGroup> getByGroupNamePrefix(String prefix) {
-		Query<UserGroup> q = this.createQuery().field("username").startsWith(prefix);
+		Query<UserGroup> q = this.createQuery().field("username")
+				.startsWith(prefix);
 		return find(q).asList();
 
 	}
-
 
 }

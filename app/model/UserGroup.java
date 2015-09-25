@@ -23,7 +23,6 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
 
 import utils.Serializer;
 
@@ -66,7 +65,6 @@ public class UserGroup extends UserOrGroup {
 		return users;
 	}
 
-	//TODO: recursively find ancestors
 	public Set<ObjectId> getParentGroups() {
 		return parentGroups;
 	}

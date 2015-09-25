@@ -28,12 +28,13 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import controllers.GroupManager.GroupType;
 import play.Logger;
 import play.Logger.ALogger;
 import db.DB;
 
 @Entity
-public class User extends UserOrGroup{
+public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
 
@@ -42,7 +43,6 @@ public class User extends UserOrGroup{
 	private enum Gender {
 		MALE, FEMALE, UNSPECIFIED
 	}
-
 
 	private String email;
 
@@ -135,13 +135,14 @@ public class User extends UserOrGroup{
 	public void recalculateGroups() {
 		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
 		// get all groups I'm in
-		List<UserGroup> gr = DB.getUserGroupDAO().findByUserId( this.getDbId());
-		for( UserGroup ug: gr ) {
-			groupAcc.add( ug.getDbId());
-			ug.accumulateGroups( groupAcc );
+		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(
+				this.getDbId(), GroupType.All);
+		for (UserGroup ug : gr) {
+			groupAcc.add(ug.getDbId());
+			ug.accumulateGroups(groupAcc);
 		}
 		getUserGroupsIds().clear();
-		getUserGroupsIds().addAll(groupAcc );
+		getUserGroupsIds().addAll(groupAcc);
 	}
 
 	// getter setter

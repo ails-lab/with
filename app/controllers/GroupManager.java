@@ -51,6 +51,10 @@ public class GroupManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
 
+	public enum GroupType {
+		All, Organization, Project, UserGroup
+	}
+
 	/**
 	 * Creates a {@link UserGroup} with the specified user as administrator and
 	 * with the given body as JSON.
@@ -360,18 +364,15 @@ public class GroupManager extends Controller {
 		return getGroupJson.apply(group);
 	}
 
-	public static Result findUserGroups(String userId, String username) {
-		User user;
-		String userRequest = AccessManager.effectiveUserId(session().get(
+	// TODO check user rights for theese groups
+	public static Result getDescendantGroups(String groupId, String groupType,
+			boolean direct) {
+		ObjectId userID;
+
+		String requester = AccessManager.effectiveUserId(session().get(
 				"effectiveUserIds"));
-		if (userId != null) {
-			user = DB.getUserDAO().get(new ObjectId(userId));
-		} else if (username!=null) {
-			user = DB.getUserDAO().getByUsername(username);
-		} else {
-			user = DB.getUserDAO().get(new ObjectId(userRequest));
-		}
-		DB.getUserGroupDAO();
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		
 		return TODO;
 
 	}
