@@ -19,6 +19,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 transformResult: function(response) {
 			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
+			   			//TODO: filter out usersToShare from the dropDown 
 			   			var index = arrayFirstIndexOf(response, function(item) {
 							   return item.value === myUsername;
 						});
@@ -286,14 +287,28 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					if (index < 0) {*/
 					//TODO: if clicked rights=OWN approval popup
 					if (clickedRights === "OWN") {
-						$.smkConfirm({text:'Are you sure?', accept:'Accept', cancel:'Cancel'}, function(e){
-							if(e){
-								
-							}
+						$("#myModal").find("h4").html("Are you sure?");
+						var body = $("#myModal").find("div.modal-body");
+						body.html("Sharing with others users means that they will have the right to delete your collection, " +
+								"as well as share it with others.");
+
+						var footer = $("#myModal").find("div.modal-footer");
+						if (footer.is(':empty')) {
+					        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
+					        cancelBtn.click(function() {
+					        	$("#myModal").modal('hide');
+					        });
+					        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
+					        confirmBtn.click(function() {
+					        	$("#myModal").modal('hide');
+								self.shareCollection(result, clickedRights);
+					        });
+					    }
+						$("#myModal").modal('show');
+						$('#myModal').on('hidden.bs.modal', function () {
+							$("#myModal").find("div.modal-footer").empty();
 						});
-						var zIndex = parseInt($("#editCollectionPopup").css("zIndex"), 10);
-						console.log(zIndex);
-						$('.smk-confirm').css("z-index", zIndex+1);
+						$('#myModal').addClass("topOfModal");
 					}
 					self.shareCollection(result, clickedRights);
 					//}
@@ -316,6 +331,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				"contentType": "application/json",
 				success: function(result) {
 					if (index < 0) {
+						alert("1");
 						userData.accessRights = clickedRights;
 						self.usersToShare.push(ko.mapping.fromJS(userData));
 					}
