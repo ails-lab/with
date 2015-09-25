@@ -74,12 +74,19 @@ public class ElasticTest {
 	@Test
 	public void reindex_collection_from_mongo() {
 		List<Collection> allCols = DB.getCollectionDAO().find().asList();
-		Collection c = allCols.get(0);
-		System.out.println(Json.toJson(c));
-		/*for(Collection c: allCols) {
+		for(Collection c: allCols) {
 			ElasticIndexer indexer = new ElasticIndexer(c);
 			indexer.indexCollectionMetadata();
-		}*/
+		}
+	}
+
+	@Test
+	public void reindex_records_from_mongo() {
+		List<CollectionRecord> allRecs = DB.getCollectionRecordDAO().find().asList();
+		for(CollectionRecord r: allRecs) {
+			ElasticIndexer indexer = new ElasticIndexer(r);
+			indexer.index();
+		}
 	}
 
 
