@@ -89,20 +89,21 @@ public class CollectionDAO extends DAO<Collection> {
 	}
 	
 	//userId has userAccess if its accessLevel in rights is equal to or greater than userAccess
-	public CriteriaContainer formAccessLevelQuery(Tuple<ObjectId, Access> userAccess) {
+	public Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess) {
 		int ordinal = userAccess.y.ordinal();
-		Criteria[] criteria = new Criteria[Access.values().length-ordinal];
+		/*Criteria[] criteria = new Criteria[Access.values().length-ordinal];
 		for (int i=0; i<Access.values().length-ordinal; i++)
 			criteria[i] = this.createQuery().criteria("rights." + userAccess.x.toHexString())
 			.equal(Access.values()[i+ordinal].toString());
-		return this.createQuery().or(criteria);
+		return this.createQuery().or(criteria);*/
+		return this.createQuery().criteria("rights." + userAccess.x.toHexString()).greaterThanOrEq(new Integer(ordinal));
 	}
 	
 	
 	public CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
-			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
+			ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
 		}
 		return this.createQuery().or(criteria);
 	}
