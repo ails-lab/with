@@ -11,11 +11,14 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 
 		// UserGroup Fields
 		self.id = ko.observable();
-		self.name = ko.observable().extend({
+		self.username = ko.observable().extend({
+			required: true
+		});
+		self.friendlyName = ko.observable().extend({
 			required: true
 		});
 		self.thumbnail = ko.observable();
-		self.description = ko.observable().extend({
+		self.about = ko.observable().extend({
 			required: true
 		});
 		self.page = [];
@@ -56,20 +59,23 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		self.load = function (id) {
 			$.ajax({
 				type: "GET",
-				url: "/organization/" + self.id(),
+				url: "/group/" + self.id(),
 				processData: false,
 				success: function (data, text) {
-					self.name(data.name);
-					self.thumbnail(data.thumbnail);
-					self.description(data.thumbnail);
+					var obj = JSON.parse(data);
+					self.username(obj.username);
+					self.friendlyName(obj.friendlyName);
+					self.thumbnail(obj.thumbnail);
+					self.about(obj.about);
 
-					self.page.address(data.page.address);
-					self.page.city(data.page.address);
-					self.page.country(data.page.country);
-					self.page.coverImage(data.page.coverImage);
-					self.featuredCollections = ko.mapping(data.page.featuredCollections); // TODO: Validate it is working
-					self.page.coordinates.longitude(data.page.coordinates.longitude);
-					self.page.coordinates.latitude(data.page.coordinates.latitude);
+					self.page.address(obj.page.address);
+					self.page.city(obj.page.city);
+					self.page.country(obj.page.country);
+					self.page.url(obj.page.url);
+					self.page.coverImage(obj.page.coverImage);
+					// self.featuredCollections = ko.mapping(obj.page.featuredCollections); // TODO: Validate it is working
+					self.page.coordinates.longitude(obj.page.coordinates.longitude);
+					self.page.coordinates.latitude(obj.page.coordinates.latitude);
 				},
 				error: function (request, status, error) {
 					// TODO: Display error message
@@ -79,9 +85,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 
 		self.create = function () {
 			var data = {
-				name: self.name,
+				username: self.username,
+				friendlyName: self.friendlyName,
 				thumbnail: self.thumbnail,
-				description: self.description,
+				about: self.about,
 				page: self.page
 			};
 
@@ -101,15 +108,15 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 
 		self.saveChanges = function () {
 			var data = {
-				name: self.name,
+				name: self.username,
 				thumbnail: self.thumbnail,
-				description: self.description,
+				about: self.about,
 				page: self.page
 			};
 
 			$.ajax({
-				type: "POST",
-				url: "/organization/" + self.id(),
+				type: "PUT",
+				url: "/group/" + self.id(),
 				processData: false,
 				data: ko.toJSON(data),
 				success: function (data, text) {
