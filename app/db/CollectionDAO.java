@@ -96,14 +96,14 @@ public class CollectionDAO extends DAO<Collection> {
 			criteria[i] = this.createQuery().criteria("rights." + userAccess.x.toHexString())
 			.equal(Access.values()[i+ordinal].toString());
 		return this.createQuery().or(criteria);*/
-		return this.createQuery().criteria("rights." + userAccess.x.toHexString()).greaterThanOrEq(new Integer(ordinal));
+		return this.createQuery().criteria("rights." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
 	}
 	
 	
 	public CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
-			ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
+			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
 		}
 		return this.createQuery().or(criteria);
 	}

@@ -429,8 +429,6 @@ public class CollectionController extends Controller {
 			//check if super user, if not, restrict query to accessible by effectiveUserIds
 			if (!AccessManager.checkAccess(new HashMap<ObjectId, Access>(), effectiveUserIds, Action.DELETE)) {
 				List<Tuple<ObjectId, Access>> recursivelyAccessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
-				if (loggedInUserAccess.toUpperCase().equals("NONE"))
-					loggedInUserAccess = "READ";
 				for (String userId: effectiveUserIds) {
 					recursivelyAccessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
 							new ObjectId(userId), Access.valueOf(loggedInUserAccess.toUpperCase())));
