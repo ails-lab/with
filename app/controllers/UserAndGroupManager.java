@@ -107,7 +107,7 @@ public class UserAndGroupManager extends Controller {
 			String collectionId) {
 		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
 			ObjectNode userJSON = Json.newObject();
-			userJSON.put("userId", u.getDbId().toString());
+			userJSON.put("id", u.getDbId().toString());
 			userJSON.put("username", u.getUsername());
 			if (u instanceof User) {
 				userJSON.put("firstName", ((User) u).getFirstName());
