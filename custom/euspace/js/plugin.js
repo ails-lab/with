@@ -91,8 +91,20 @@ EUSpaceApp.ui = function( custom ){
 
 	this.initSearch=function(){
 		/*these are needed after search page has been loaded*/
-		initSearchColumnAdjustment();	
+		// init search setting bar
+		initSearchSetting();
+
+		// initialize media tooltip
+		initTooltip();
+		
+		// initialize search view toggle button
+		initSearchViewToggle();
+
+		// initialize inline viewer for item
 		initInlineViewer();
+
+		// init adjustment for search column view
+		initSearchColumnAdjustment();
 	}
 	
 	// method to initialize isotope
@@ -371,7 +383,7 @@ EUSpaceApp.ui = function( custom ){
 		logger( 'info','plugins.js / initSearchSetting' );
 
 		// check
-		if( $( '.searchbar .settings' ).length > 0 ) {
+		/*if( $( '.searchbar .settings' ).length > 0 ) {
 
 			// attach
 			$( '.searchbar .settings > a' ).on( 'click', function( e ){
@@ -383,7 +395,7 @@ EUSpaceApp.ui = function( custom ){
 				$( this ).parent().toggleClass( 'active' );
 
 			});
-		}		
+		}	*/	
 	};
 
 	// method to initialize tooltip
@@ -455,11 +467,11 @@ EUSpaceApp.ui = function( custom ){
 				$( this ).parent().addClass( 'active' );
 
 				// check
-				if( view === 'grid' ) {
+				/*if( view === 'grid' ) {
 
 					// reload
 					$( settings.mSelector ).isotope();
-				}
+				}*/
 			});
 		}
 	};

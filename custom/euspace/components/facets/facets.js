@@ -54,16 +54,20 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     
     
     self.showfacets= function(data,e){
+    	e.preventDefault();
+
+		// on
+    	$(e.target).parents("div.settings").toggleClass( 'active' );
     //	e.preventDefault();
 
 		// on
     	//$(e.target).parents("div.settings").toggleClass( 'active' );
-    	if(self.visiblePanel()==false){
-    	    self.visiblePanel(true);
+    	if($(e.target).parents("div.settings").hasClass("active")){
     	    $('.chart').horizBarChart({
   	          selector: '.bar',
   	          speed: 1000
   	        });
+    	    self.visiblePanel(true);
     	    return;
   		
     	}
