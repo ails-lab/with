@@ -48,7 +48,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		isLogged(true);
 
 		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
-			return [self.getEditableCollections()]; //[self.getEditableCollections(), self.getUserCollections()];
+			return [self.getUserCollections()];
 		}
 	};
 

@@ -106,22 +106,7 @@ public class ElasticIndexer {
 					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
 						ObjectNode right = Json.newObject();
 						right.put("user", e.getKey().toString());
-						switch (e.getValue().toString()) {
-						case "OWN":
-							right.put("access", 3);
-							break;
-						case "WRITE":
-							right.put("access", 2);
-							break;
-						case "READ":
-							right.put("access", 1);
-							break;
-						case "NONE":
-							right.put("access", 0);
-							break;
-						default:
-							break;
-						}
+						right.put("access", e.getValue().ordinal()); 
 						array.add(right);
 					}
    					doc.rawField(entry.getKey(), array.toString().getBytes());

@@ -29,6 +29,15 @@ public class AccessEnumConverter extends TypeConverter implements SimpleValueCon
 	}
 
 	@Override
+	public Object encode(Object value, MappedField optionalExtraInfo) {
+		if(value==null) {
+			return null;
+		}
+
+		return ((Access)value).ordinal();
+	}
+
+	@Override
 	public Object decode(Class targetClass, Object fromDBObject,
 			MappedField optionalExtraInfo) {
 		if (fromDBObject == null) {

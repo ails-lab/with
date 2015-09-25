@@ -80,6 +80,16 @@ public class UserAndGroupManager extends Controller {
 			ObjectNode data = Json.newObject().objectNode();
 			data.put("category", "group");
 			node.put("value", group.getUsername());
+			//check if direct ancestor of user
+			List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get(
+					"effectiveUserIds"));
+			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+			if (group.getUsers().contains(userId)) {
+				data.put("isParent", true);
+			}
+			else 
+				data.put("isParent", false);
+			node.put("value", group.getUsername());
 			node.put("data", data);
 			suggestions.add(node);
 		}

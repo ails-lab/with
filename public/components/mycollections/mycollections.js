@@ -25,7 +25,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   			if (index > -1)
 			   				response.splice(index, 1);
 			   			console.log(JSON.stringify(response));
-				   		return {"suggestions": response};
+			   			var usersAndParents = [];
+			   			$.each(response, function(i, obj) {
+			   				if (obj.data.isParent == null == undefined || obj.data.isParent == null || obj.data.isParent === true)
+			   					usersAndParents.push(obj);
+					    });
+			   			console.log(JSON.stringify(usersAndParents));
+				   		return {"suggestions": usersAndParents};
 				   	},
 				   	orientation: "auto",    
 				    onSearchComplete: function(query, suggestions) {
@@ -36,7 +42,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						s    += suggestion.value.substring(currentValue.length);
 						s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 						return s;
-					} 
+					},
+					onSelect: function(suggestion) {
+						
+					}
 			 });
 	      }
 	 };
@@ -138,13 +147,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 			return data;
 		}
-		
-		self.onEnterAddUser: function(data, event) {
-			var keyCode = e.which || e.keyCode;
-            if (keyCode == 13) {
-                //TODO: check if group and direct child
-            }
-        }
 
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
@@ -287,7 +289,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						   return item.name() === username;
 					});
 					if (index < 0) {*/
-						self.shareCollection(result, clickedRights);
+					//TODO: if clicked rights=OWN approval popup
+					self.shareCollection(result, clickedRights);
 					//}
 				},
 				error      : function(result) {
@@ -456,9 +459,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				return {index:-1, set:"none"};
 		}
 
-	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
+	    arrayFirstIndexOf = function(array, predicate) {
 		    for (var i = 0, j = array.length; i < j; i++) {
-		        if (predicate.call(predicateOwner, array[i])) {
+		        if (predicate.call(undefined, array[i])) {
 		            return i;
 		        }
 		    }

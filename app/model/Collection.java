@@ -231,16 +231,8 @@ public class Collection {
 		return rights;
 	}
 
-	public void setRights(Map<ObjectId, Integer> r) {
-		for(Entry<ObjectId, Integer> e : r.entrySet()) {
-			rights.put(e.getKey(), Access.values()[e.getValue()]);
-		}
-	}
-
 	@JsonIgnore
-	public void setRights_(Map<ObjectId, Access> r) {
-
-	}
+	public void setRights(Map<ObjectId, Access> r) {}
 
 	public boolean getIsExhibition() {
 		return isExhibition;
