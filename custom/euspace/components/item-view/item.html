@@ -27,7 +27,7 @@
                   <!-- metadata-->
                   <ul role="tablist" class="nav nav-tabs">
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
-                    <li><a href="#related" title="" data-toggle="tab">Related</a></li>
+                    <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
                     <li><a href="#share" title="" data-toggle="tab">Share</a></li>
                   </ul>
@@ -62,13 +62,14 @@
                     </div>
                     <div id="related" class="tab-pane">
                       <!-- related media-->
-                      <div class="title"><span>OTHER MEDIA ITEMS BY NATIONAL GALLERY ATHENS</span><a href="#" title="#" class="follow">FOLLOW</a></div>
+                      <!-- ko if: record().similar().length > 0 -->
+                      <div class="title"><span data-bind="text: 'OTHER MEDIA ITEMS BY '+record().forsimilar()"></span><a href="#" title="#" class="follow">FOLLOW</a></div>
                       <ul class="related">
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-1.png" alt="media"></a></li>
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-2.png" alt="media"></a></li>
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-3.png" alt="media"></a></li>
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-4.png" alt="media"></a></li>
-                      </ul>
+                      <!-- ko foreach: record().similar -->
+                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb()}" alt="media"></a></li>
+                     <!-- /ko -->
+                       </ul>
+                       <!-- /ko -->
                       <!-- related media-->
                       <div class="title">SIMILAR MEDIA ITEMS</div>
                       <ul class="related">

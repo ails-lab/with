@@ -17,10 +17,13 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.externalId = ko.observable("");
 		self.collectedCount = ko.observable("");
 		self.liked = ko.observable("");
-		self.collections =  ko.observableArray([]);
+		self.related =  ko.observableArray([]);
+		self.similar =  ko.observableArray([]);
 		self.facebook='';
 		self.twitter='';
 		self.mail='';
+		self.forsimilar=ko.observable("").extend({ uppercase: true });
+		self.similarlabel='';
 		self.pinterest=function() {
 		    var url = encodeURIComponent(location.href);
 		    var media = encodeURIComponent(self.fullres());
@@ -94,22 +97,64 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.twitter='https://twitter.com/share?url='+encodeURIComponent(location.href)+'&text='+encodeURIComponent(self.title()+" on "+window.location.host)+'"';
 			self.mail="mailto:?subject="+self.title()+"&body="+encodeURIComponent(location.href);
 			
-			/*this should replaced by find similar
-			$.ajax({
-				type    : "get",
-				url     : "/record/"+self.externalId() +"/mergedCollections",
+			
+	
+			
+		};
+
+		self.findsimilar=function(){
+			
+			self.provider().length>0? self.forsimilar(self.provider().toUpperCase()) : self.forsimilar(self.creator().toUpperCase());
+            self.similarlabel=self.provider().length>0? "PROVIDER" : "CREATOR";
+            if(self.forsimilar().length>0){
+           $.ajax({
+				type    : "post",
+				url     : "/api/advancedsearch",
+				contentType: "application/json",
+				data     : JSON.stringify({
+					searchTerm: self.forsimilar(),
+					page: 1,
+					pageSize:10,
+				    source:[self.source()],
+				    filters:[]
+				}),
 				success : function(result) {
-					self.collectedCount(result.count);
-					self.liked(result.liked);
-					self.collections(result.collections);
+					data=result.responces[0].items;
+					var items=[];
+					if(data!=null) 
+						for (var i in data) {
+							var result = data[i];
+							 if(result !=null){
+									
+						        var record = new Record({
+									recordId: result.recordId || result.id,
+									thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
+									fullres: result.fullresolution!=null ? result.fullresolution : "",
+									title: result.title!=null? result.title:"",
+									view_url: result.url.fromSourceAPI,
+									creator: result.creator!==undefined && result.creator!==null? result.creator : "",
+									provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+									rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
+									externalId: result.externalId,
+									source: source
+								  });
+						        if(record.thumb() && record.thumb().length>0)
+							       items.push(record);
+							}
+							 if(items.length>3){break;}
+						}	
+					self.similar().push.apply(self.similar(),items);
+					self.similar.valueHasMutated();
 				},
 				error   : function(request, status, error) {
 					console.log(request);
 				}
-			});*/
-
-		};
-
+			});
+            }
+            
+            //missing find related
+		}
+		
 		self.sourceImage = ko.pureComputed(function () {
 			switch (self.source()) {
 			case "DPLA":
