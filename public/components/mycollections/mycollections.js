@@ -19,6 +19,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 },
 			   		 transformResult: function(response) {
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
+			   			//TODO: filter out usersToShare from the dropDown 
 			   			var index = arrayFirstIndexOf(response, function(item) {
 							   return item.value === myUsername;
 						});
@@ -353,6 +354,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				success: function(result) {
 					alert(JSON.stringify(userData));
 					if (index < 0) {
+						alert("1");
 						userData.accessRights = clickedRights;
 						self.usersToShare.push(ko.mapping.fromJS(userData));
 					}
