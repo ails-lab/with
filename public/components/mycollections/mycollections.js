@@ -285,6 +285,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 					if (index < 0) {*/
 					//TODO: if clicked rights=OWN approval popup
+					if (clickedRights === "OWN") {
+						$.smkConfirm({text:'Are you sure?', accept:'Accept', cancel:'Cancel'}, function(e){
+							if(e){
+								
+							}
+						});
+						var zIndex = parseInt($("#editCollectionPopup").css("zIndex"), 10);
+						console.log(zIndex);
+						$('.smk-confirm').css("z-index", zIndex+1);
+					}
 					self.shareCollection(result, clickedRights);
 					//}
 				},

@@ -128,6 +128,10 @@ public class UserAndGroupManager extends Controller {
 			if (image != null) {
 				userJSON.put("image", image);
 			}
+			if (u instanceof User)
+				userJSON.put("category", "user");
+			if (u instanceof UserGroup)
+				userJSON.put("category", "group");
 			return ok(userJSON);
 		};
 		User user = DB.getUserDAO().getByEmail(userOrGroupnameOrEmail);
@@ -135,12 +139,13 @@ public class UserAndGroupManager extends Controller {
 			return getUserJson.apply(user);
 		} else {
 			user = DB.getUserDAO().getByUsername(userOrGroupnameOrEmail);
-			if (user != null)
+			if (user != null) {
 				return getUserJson.apply(user);
+			}
 			else {
 				UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupnameOrEmail);
-				if (userGroup != null) 
-					return getUserJson.apply(userGroup);
+				if (userGroup != null)
+					return getUserJson.apply(user);
 				else 
 					return badRequest("The string you provided does not match an existing email or username");
 			}
