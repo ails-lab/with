@@ -47,9 +47,15 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 		isLogged(true);
 
+<<<<<<< HEAD
 		/*if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
 			return [self.getUserCollections()];
 		}*/
+=======
+		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
+			return [self.getUserCollections()];
+		}
+>>>>>>> Fix bug with mongo query for rights.
 	};
 
 	self.loadFavorites = function () {
@@ -201,11 +207,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-<<<<<<< HEAD
 			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=false"
-=======
-			data: "loggedInUserAccess=read&offset=0&count=20&isExhibition=false"
->>>>>>> New implementation of collection/list and listShared API call.
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));

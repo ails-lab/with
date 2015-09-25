@@ -102,7 +102,7 @@ public class CollectionDAO extends DAO<Collection> {
 	public CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
-			ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
+			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
 		}
 		return this.createQuery().or(criteria);
 	}
