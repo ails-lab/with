@@ -331,7 +331,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				"contentType": "application/json",
 				success: function(result) {
 					if (index < 0) {
-						alert("1");
 						userData.accessRights = clickedRights;
 						self.usersToShare.push(ko.mapping.fromJS(userData));
 					}
