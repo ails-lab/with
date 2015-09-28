@@ -20,8 +20,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import model.Collection;
+import model.User;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -34,6 +37,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.libs.Json;
+import utils.Tuple;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
@@ -50,6 +54,18 @@ public class WithSpaceSource extends ISpaceSource {
 	public String getSourceName() {
 		return "WITHin";
 	}
+	
+	private List<List<Tuple<ObjectId, Access>>> mergeLists(List<Tuple<ObjectId, Access>> ... lists) {
+		List<List<Tuple<ObjectId, Access>>> outputList = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		for (List<Tuple<ObjectId, Access>> list: lists) {
+			for (Tuple<ObjectId, Access> tuple: list) {
+				List<Tuple<ObjectId, Access>> sepList = new ArrayList<Tuple<ObjectId, Access>>(1);
+				sepList.add(tuple);
+				outputList.add(sepList);
+			}
+	    }
+		return outputList;
+	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -60,15 +76,22 @@ public class WithSpaceSource extends ISpaceSource {
 
 		SearchOptions elasticoptions = null;
 		List<Collection> colFields = new ArrayList<Collection>();
-
-		if(q.user != null) {
+		List<String> userIds = q.getEffectiveUserIds();
+		List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
+		if (userIds != null && !userIds.isEmpty()) {
+			for (String userId: userIds) {
+				userAccess.add(new Tuple<ObjectId, Access>(new ObjectId(userId), Access.READ));
+			}
 			elasticoptions = new SearchOptions();
-			elasticoptions.setUser(q.getUser());
+			elasticoptions.setUser(q.getEffectiveUserIds().get(0));
 			searcher.setType(Elastic.type_collection);
 			SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
 			colFields = getCollectionMetadaFromHit(response.getHits());
-
 		}
+		List<List<Tuple<ObjectId, Access>>> accessFilters = mergeLists(q.getDirectlyAccessedByGroupName(), q.getDirectlyAccessedByUserName());
+		accessFilters.add(userAccess);
+		System.out.println(accessFilters.toString());
+		//TODO: call elastic search with accessFilters
 		elasticoptions = new SearchOptions(offset, count);
 		elasticoptions.addFilter("isPublic", "true");
 

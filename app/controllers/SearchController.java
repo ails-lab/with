@@ -97,7 +97,7 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				if (session().containsKey("effectiveUserIds")) {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-					q.setUser(userIds.get(0));
+					q.setEffectiveUserIds(userIds);
 				}
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
@@ -123,13 +123,8 @@ public class SearchController extends Controller {
 				final CommonQuery q = Utils.parseJson(json);
 				if (session().containsKey("effectiveUserIds")) {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-					if (!userIds.isEmpty()) {
-						q.setUser(userIds.get(0));
-						q.setAccessLevel(1);
-					}
-
+					q.setEffectiveUserIds(userIds);
 				}
-				long start = System.currentTimeMillis();
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
 
@@ -253,21 +248,10 @@ public class SearchController extends Controller {
 		// System.out.println("--------------------");
 		CommonQuery q = userForm.bindFromRequest().get();
 		if ((q == null) || (q.searchTerm == null)) {
-			q = new CommonQuery();
-			q.searchTerm = "zeus";
+			q = new CommonQuery("zeus");
 		}
 		q.validate();
 		return buildresult(q);
-
-		// JsonNode json = request().body().asJson();
-		//
-		// CommonQuery q = json;
-		// ObjectNode result = Json.newObject();
-		//
-		// System.out.println(json);
-		//
-		//
-		// return ok(result);
 	}
 
 	private static Result buildresult(CommonQuery q) {

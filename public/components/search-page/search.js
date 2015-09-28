@@ -212,6 +212,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		 if(facetinit){self.filterselection.removeAll();}
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 self.currentTerm($(".withsearch-input").val());
+		 var directlyAccessedByGroupName = [{"groupName":"a", "rights": "OWN"}];
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
 			$request=$.ajax({
