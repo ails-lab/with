@@ -72,6 +72,8 @@ public class RightsController extends Controller {
 		}
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
+		System.out.println(collection.getRights());
+		System.out.println(userIds);
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
 				Action.DELETE)) {
 			result.put("error",
