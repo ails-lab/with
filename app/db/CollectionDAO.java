@@ -181,7 +181,7 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getPublic(int offset, int count) {
 		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
-				.field("isExhibition").equal(false);
+				.field("isExhibition").equal(false).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
