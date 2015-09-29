@@ -42,12 +42,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
 
 			   if(self.thumb()){
-				if (self.thumb().indexOf('//') === 0) {
-					return self.thumb();
-				} else {
-					var newurl='url=' + encodeURIComponent(self.thumb())+'&';
-					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-				}}
+				return self.thumb();}
 			   else{
 				   return "img/content/thumb-empty.png";
 			   }

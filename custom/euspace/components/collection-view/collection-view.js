@@ -255,6 +255,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					self.access(data.access);
 					self.revealItems(data.firstEntries);
 					self.loading(false);
+					window.EUSpaceUI.initTooltip();
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
