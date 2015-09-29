@@ -54,7 +54,7 @@ public class WithSpaceSource extends ISpaceSource {
 	public String getSourceName() {
 		return "WITHin";
 	}
-	
+
 	private List<List<Tuple<ObjectId, Access>>> mergeLists(List<Tuple<ObjectId, Access>> ... lists) {
 		List<List<Tuple<ObjectId, Access>>> outputList = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		for (List<Tuple<ObjectId, Access>> list: lists) {
@@ -69,37 +69,49 @@ public class WithSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+		/*
+		 * Set the basic search parameters
+		 */
 		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_general);
 		String term = q.getQuery();
 		int count = Integer.parseInt(q.pageSize);
-		int offset = (Integer.parseInt(q.page)-1)*count;
+		//int offset = (Integer.parseInt(q.page)-1)*count;
+		int offset = Integer.parseInt(q.page)-1;
 
-		SearchOptions elasticoptions = null;
+		/*
+		 * Prepare access lists for searching
+		 */
+		//This value (1000) is problematic. We have to deal with scan and scroll
+		SearchOptions elasticoptions = new SearchOptions(0, 1000);
 		List<Collection> colFields = new ArrayList<Collection>();
 		List<String> userIds = q.getEffectiveUserIds();
 		List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
-		if (userIds != null && !userIds.isEmpty()) {
-			for (String userId: userIds) {
+		if ((userIds != null) && !userIds.isEmpty()) {
+			for (String userId: userIds)
 				userAccess.add(new Tuple<ObjectId, Access>(new ObjectId(userId), Access.READ));
-			}
-			elasticoptions = new SearchOptions();
-			elasticoptions.setUser(q.getEffectiveUserIds().get(0));
-			searcher.setType(Elastic.type_collection);
-			SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
-			colFields = getCollectionMetadaFromHit(response.getHits());
 		}
 		List<List<Tuple<ObjectId, Access>>> accessFilters = mergeLists(q.getDirectlyAccessedByGroupName(), q.getDirectlyAccessedByUserName());
-		accessFilters.add(userAccess);
+		if(!userAccess.isEmpty())
+			accessFilters.add(userAccess);
+		elasticoptions.accessList = accessFilters;
+
+		/*
+		 * Search index for accessible collections
+		 */
+		searcher.setType(Elastic.type_collection);
+		SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
+		colFields = getCollectionMetadaFromHit(response.getHits());
+
+
 		System.out.println(accessFilters.toString());
-		//TODO: call elastic search with accessFilters
+
+		/*
+		 * Search index for merged records according to
+		 * collection ids gathered above
+		 */
 		elasticoptions = new SearchOptions(offset, count);
 		elasticoptions.addFilter("isPublic", "true");
-
-		//search merged_record type
 		searcher.setType(Elastic.type_general);
-		//elasticoptions.setFilterType("OR");
-		//which collections are available
-		//elasticoptions.addFilter("collections", "no_collections_found");
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}

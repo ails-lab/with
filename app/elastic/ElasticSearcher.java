@@ -37,16 +37,13 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedFilterBuilder;
-import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.RangeFilterBuilder;
-import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -71,9 +68,7 @@ public class ElasticSearcher {
 		public int count = DEFAULT_COUNT;
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
-		public String user;
-		public int access;
-		public List<ArrayList<Tuple<ObjectId, Access>>> accessList = new ArrayList<ArrayList<Tuple<ObjectId, Access>>>();
+		public List<List<Tuple<ObjectId, Access>>> accessList = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		// used for method searchForCollections
 		public boolean _idSearch = false;
 
@@ -91,10 +86,6 @@ public class ElasticSearcher {
 
 		public void setCount(int count) {
 			this.count = count;
-		}
-
-		public void setUser(String user) {
-			this.user = user;
 		}
 
 		public void set_idSearch(boolean value) {
@@ -171,13 +162,14 @@ public class ElasticSearcher {
 		MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
 
 		AndFilterBuilder and_filter = FilterBuilders.andFilter();
-		for(ArrayList<Tuple<ObjectId, Access>> ands: options.accessList) {
+		for(List<Tuple<ObjectId, Access>> ands: options.accessList) {
 			OrFilterBuilder or_filter = FilterBuilders.orFilter();
 			for(Tuple<ObjectId, Access> t: ands) {
 				BoolFilterBuilder bool = FilterBuilders.boolFilter();
 				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("rights.access").gte(t.y.ordinal());
 				bool.must(this.filter("rights.user", t.x.toString()));
 				bool.must(range_filter);
+				or_filter.add(bool);
 			}
 			and_filter.add(or_filter);
 		}
