@@ -47,9 +47,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 		isLogged(true);
 
-		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
+		/*if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
 			return [self.getUserCollections()];
-		}
+		}*/
 	};
 
 	self.loadFavorites = function () {
@@ -145,7 +145,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "loggedInUserAccess=READ&offset=0&count=20&isExhibition=false"
+			data: "isPublic=true&offset=0&count=20&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -201,7 +201,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "loggedInUserAccess=read&offset=0&count=20&isExhibition=false"
+			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=false"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -257,8 +257,8 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		sessionStorage.removeItem('EditableCollections');
 		localStorage.removeItem('EditableCollections');
 		sessionStorage.removeItem('PublicCollections');
-		sessionStorage.removeItem('UserCollections');
-		localStorage.removeItem('UserCollections');
+		//sessionStorage.removeItem('UserCollections');
+		//localStorage.removeItem('UserCollections');
 		isLogged(false);
 	};
 

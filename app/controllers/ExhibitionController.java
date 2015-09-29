@@ -113,7 +113,7 @@ public class ExhibitionController extends Controller {
 			//userAccess.add(new Tuple<ObjectId, Access>(new ObjectId(userId), Access.OWN));
 			List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId, Access>>>(0);
 			accessFilters.add(userAccess);
-			List<Collection> exhibitions = DB.getCollectionDAO().getByAccess(accessFilters, true, offset, count);
+			List<Collection> exhibitions = DB.getCollectionDAO().getByAccess(accessFilters, null, true, offset, count);
 			for (Collection exhibition : exhibitions) {
 				ObjectNode c = (ObjectNode) Json.toJson(exhibition);
 				c.put("access", Access.OWN.toString());

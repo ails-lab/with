@@ -24,11 +24,13 @@ import java.util.function.Function;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
+import model.Media;
 import model.User;
 import model.UserOrGroup;
 import model.Rights.Access;
 import model.UserGroup;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -105,7 +107,7 @@ public class UserAndGroupManager extends Controller {
 			String collectionId) {
 		Function<UserOrGroup, Status> getUserJson = (UserOrGroup u) -> {
 			ObjectNode userJSON = Json.newObject();
-			userJSON.put("id", u.getDbId().toString());
+			userJSON.put("userId", u.getDbId().toString());
 			userJSON.put("username", u.getUsername());
 			if (u instanceof User) {
 				userJSON.put("firstName", ((User) u).getFirstName());
@@ -124,7 +126,7 @@ public class UserAndGroupManager extends Controller {
 						userJSON.put("accessRights", Access.NONE.toString());
 				}
 			}
-			String image = UserManager.getImageBase64(u);
+			String image = getImageBase64(u);
 			if (image != null) {
 				userJSON.put("image", image);
 			}
@@ -174,5 +176,16 @@ public class UserAndGroupManager extends Controller {
 			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
 					+ "\"}"));
 		}
+	}
+	
+	public static String getImageBase64(UserOrGroup user) {
+		if (user.getThumbnail() != null) {
+			ObjectId photoId = user.getThumbnail();
+			Media photo = DB.getMediaDAO().findById(photoId);
+			// convert to base64 format
+			return "data:" + photo.getMimeType() + ";base64,"
+					+ new String(Base64.encodeBase64(photo.getData()));
+		} else
+			return null;
 	}
 }
