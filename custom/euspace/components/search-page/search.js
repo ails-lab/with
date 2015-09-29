@@ -570,7 +570,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	   		 //width: "600",
 	   		 orientation: "auto",
 		     onSearchComplete: function(query, suggestions) {
-		    	 if(self.searching()==false){
+		    	 if(self.searching()){ $(".searchinput").devbridgeAutocomplete("hide");}
+		    	 else{
 			    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
 			    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 			    	 for (var i in suggestions) {
