@@ -66,7 +66,7 @@
                       <div class="title"><span data-bind="text: 'OTHER MEDIA ITEMS BY '+record().forsimilar()"></span><a href="#" title="#" class="follow">FOLLOW</a></div>
                       <ul class="related">
                       <!-- ko foreach: record().similar -->
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb()}" alt="media"></a></li>
+                        <li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb()}" alt="media"></a></li>
                      <!-- /ko -->
                        </ul>
                        <!-- /ko -->
