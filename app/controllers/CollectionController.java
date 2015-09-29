@@ -334,25 +334,26 @@ public class CollectionController extends Controller {
 		return ok(c);
 	}
 	
+	//input parameter lists' (directlyAccessedByUserName etc) intended meaning is AND of its entries
+	//returned list of lists accessedByUserOrGroup represents AND of OR entries
+	//i.e. each entry in directlyAccessedByUserName for example has to be included in a separate list!
 	private static List<List<Tuple<ObjectId, Access>>> accessibleByUserOrGroup(Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
 			Option<MyPlayList> recursivelyAccessedByGroupName) {
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
-		//TODO: Support recursive check for groups as well
-		//List<Tuple<ObjectId, Access>> recursivelyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
 		if (directlyAccessedByUserName.isDefined()) {
 			MyPlayList directlyUserNameList = directlyAccessedByUserName.get();
-			List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
 			for (StringTuple userAccess: directlyUserNameList.list) {
+				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
 				ObjectId groupId = DB.getUserDAO().getByUsername(userAccess.x).getDbId();
 				directlyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(userAccess.y.toUpperCase())));
+				accessedByUserOrGroup.add(directlyAccessedByUser);
 			}
-			accessedByUserOrGroup.add(directlyAccessedByUser);
 		}
 		if (recursivelyAccessedByUserName.isDefined()) {
 			MyPlayList recursivelyUserNameList = recursivelyAccessedByUserName.get();
-			List<Tuple<ObjectId, Access>> recursivelyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
 			for (StringTuple userAccess: recursivelyUserNameList.list) {
+				List<Tuple<ObjectId, Access>> recursivelyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
 				User user = DB.getUserDAO().getByUsername(userAccess.x);
 				ObjectId userId = user.getDbId();
 				Access access = Access.valueOf(userAccess.y.toUpperCase());
@@ -361,17 +362,18 @@ public class CollectionController extends Controller {
 				for (ObjectId groupId: groupIds) {
 					recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, access));
 				}
+				accessedByUserOrGroup.add(recursivelyAccessedByUser);
 			}
-			accessedByUserOrGroup.add(recursivelyAccessedByUser);
 		}
+		//TODO: Support recursive check for groups as well
 		if (directlyAccessedByGroupName.isDefined()) {
-			List<Tuple<ObjectId, Access>> directlyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
 			MyPlayList directlyGroupNameList = recursivelyAccessedByGroupName.get();
 			for (StringTuple groupAccess: directlyGroupNameList.list) {
+				List<Tuple<ObjectId, Access>> directlyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
 				ObjectId groupId = DB.getUserGroupDAO().getByName(groupAccess.x).getDbId();
 				directlyAccessedByGroup.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(groupAccess.y.toUpperCase())));
+				accessedByUserOrGroup.add(directlyAccessedByGroup);
 			}
-			accessedByUserOrGroup.add(directlyAccessedByGroup);
 		}
 		return accessedByUserOrGroup;
 	}
@@ -408,14 +410,14 @@ public class CollectionController extends Controller {
 
 	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
-			Option<MyPlayList> recursivelyAccessedByGroupName, Option<Boolean> isExhibition, int offset, int count) {
+			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<Boolean> isPublic, Option<Boolean> isExhibition, int offset, int count) {
 		ArrayNode result = Json.newObject().arrayNode();
 		List<Collection> userCollections;
 		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserName, recursivelyAccessedByUserName,
 				directlyAccessedByGroupName,recursivelyAccessedByGroupName);
 		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;	
-		if (effectiveUserIds.isEmpty()) {//not logged in
+		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {//not logged in or ask for public collections
 			// return all public collections
 			userCollections = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, isExhibitionBoolean, offset, count);
 			for (Collection collection : userCollections) {

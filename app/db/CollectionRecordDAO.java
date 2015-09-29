@@ -72,7 +72,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
-	public List<CollectionRecord> getBySource(String source, String sourceId) {
+	public List<CollectionRecord> getBySource(String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
 		// .field("source").equal(source)
 				.field("sourceId").equal(sourceId);

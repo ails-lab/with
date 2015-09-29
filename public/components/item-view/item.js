@@ -79,7 +79,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			
 			$.ajax({
 				type    : "get",
-				url     : "/record/"+self.externalId() +"/mergedCollections",
+				url     : "/record/merged/"+self.externalId(),
 				success : function(result) {
 					self.collectedCount(result.count);
 					self.liked(result.liked);
@@ -199,7 +199,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			itemShow(e);
 		};
 		
-		self.loadCollectionnnn = function(collection) {
+		self.gotToCollection = function(collection) {
 			window.location.href = 'index.html#collectionview/' + collection.dbId;		
 			
 			if (isOpen){

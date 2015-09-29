@@ -54,7 +54,6 @@ public class MyPlayList implements QueryStringBindable<MyPlayList>{
 			        	StringTuple x = new StringTuple();
 			        	Option<StringTuple> tuple = x.bind(key, tupleMap);
 			        	if (tuple.isDefined()) {
-			        		System.out.println("!!!!" + tuple.get());
 			        		list.add(tuple.get());
 			        	}
 					}

@@ -19,18 +19,17 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 transformResult: function(response) {
 			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
+			   			//TODO: filter out usersToShare from the dropDown 
 			   			var index = arrayFirstIndexOf(response, function(item) {
 							   return item.value === myUsername;
 						});
 			   			if (index > -1)
 			   				response.splice(index, 1);
-			   			console.log(JSON.stringify(response));
 			   			var usersAndParents = [];
 			   			$.each(response, function(i, obj) {
 			   				if (obj.data.isParent == null == undefined || obj.data.isParent == null || obj.data.isParent === true)
 			   					usersAndParents.push(obj);
 					    });
-			   			console.log(JSON.stringify(usersAndParents));
 				   		return {"suggestions": usersAndParents};
 				   	},
 				   	orientation: "auto",    
@@ -42,9 +41,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						s    += suggestion.value.substring(currentValue.length);
 						s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 						return s;
-					},
-					onSelect: function(suggestion) {
-						
 					}
 			 });
 	      }
@@ -290,6 +286,30 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 					if (index < 0) {*/
 					//TODO: if clicked rights=OWN approval popup
+					if (clickedRights === "OWN") {
+						$("#myModal").find("h4").html("Are you sure?");
+						var body = $("#myModal").find("div.modal-body");
+						body.html("Sharing with others users means that they will have the right to delete your collection, " +
+								"as well as share it with others.");
+
+						var footer = $("#myModal").find("div.modal-footer");
+						if (footer.is(':empty')) {
+					        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
+					        cancelBtn.click(function() {
+					        	$("#myModal").modal('hide');
+					        });
+					        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
+					        confirmBtn.click(function() {
+					        	$("#myModal").modal('hide');
+								self.shareCollection(result, clickedRights);
+					        });
+					    }
+						$("#myModal").modal('show');
+						$('#myModal').on('hidden.bs.modal', function () {
+							$("#myModal").find("div.modal-footer").empty();
+						});
+						$('#myModal').addClass("topOfModal");
+					}
 					self.shareCollection(result, clickedRights);
 					//}
 				},
