@@ -47,15 +47,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 		isLogged(true);
 
-<<<<<<< HEAD
 		/*if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
 			return [self.getUserCollections()];
 		}*/
-=======
-		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
-			return [self.getUserCollections()];
-		}
->>>>>>> Fix bug with mongo query for rights.
 	};
 
 	self.loadFavorites = function () {

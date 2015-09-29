@@ -75,10 +75,6 @@ public class GroupManager extends Controller {
 		ObjectId admin;
 		UserGroup newGroup = null;
 		JsonNode json = request().body().asJson();
-<<<<<<< HEAD
-=======
-
->>>>>>> Add call for retrieving child groups
 		try {
 			if (json == null) {
 				return badRequest("Invalid JSON");
