@@ -1,3 +1,4 @@
+<item-view params="route: route"></item-view>
 
  <!-- menu bar-->
       <nav class="titlebar double">
@@ -30,7 +31,7 @@
               
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
-                <!-- anchor--><a data-bind="attr: {href: url}">
+                <!-- anchor--><a data-bind="event: {click: function(){$parent.recordSelect($data)}}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->

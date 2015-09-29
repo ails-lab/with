@@ -8,7 +8,7 @@
             </ul>
             <!-- action-->
             <ul class="action">
-              <li class="close"><a href="#" title="close" data-bind="click: close"><img src="img/ic-close-green.png"></a></li>
+              <li class="close"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close-green.png"></a></li>
             </ul>
           </div>
         </nav>
@@ -29,7 +29,7 @@
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
-                    <li><a href="#share" title="" data-toggle="tab">Share</a></li>
+                    <li data-bind="visible: record().source()=='WITHin'"><a href="#share" title="" data-toggle="tab">Share</a></li>
                   </ul>
                   <!-- panes-->
                   <div class="tab-content">
