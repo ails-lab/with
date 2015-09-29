@@ -123,7 +123,7 @@ public class UserDAOTest {
 
 	public static ObjectId createTestUser() {
 		User testUser = new User();
-		testUser.setUsername("TestUser" + TestUtils.randomString());
+		testUser.setUsername("TestUser" + Math.random());
 		testUser.setEmail(TestUtils.randomString() + "@mail.com");
 		DB.getUserDAO().makePermanent(testUser);
 		return testUser.getDbId();

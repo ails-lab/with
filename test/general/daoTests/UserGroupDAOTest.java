@@ -57,7 +57,7 @@ public class UserGroupDAOTest extends TestCase {
 	@Test
 	public static ObjectId createTestUserGroup(ObjectId admin) {
 		UserGroup group = new UserGroup();
-		group.setUsername("testUserGroup" + TestUtils.randomString());
+		group.setUsername("testUserGroup" + Math.random());
 		group.getAdminIds().add(admin);
 		group.getUsers().add(admin);
 		DB.getUserGroupDAO().makePermanent(group);
@@ -67,7 +67,7 @@ public class UserGroupDAOTest extends TestCase {
 	@Test
 	public static ObjectId createTestOrganization(ObjectId admin) {
 		Organization group = new Organization();
-		group.setUsername("testOrganization" + TestUtils.randomString());
+		group.setUsername("testOrganization" + Math.random());
 		group.getAdminIds().add(admin);
 		group.getUsers().add(admin);
 		DB.getUserGroupDAO().makePermanent(group);
@@ -76,16 +76,16 @@ public class UserGroupDAOTest extends TestCase {
 
 	public static ObjectId createTestProject(ObjectId admin) {
 		Project group = new Project();
-		group.setUsername("testUserGroup" + TestUtils.randomString());
+		group.setUsername("testUserGroup" + Math.random());
 		group.getAdminIds().add(admin);
 		group.getUsers().add(admin);
 		DB.getUserGroupDAO().makePermanent(group);
 		return group.getDbId();
 	}
 
-	private ObjectId createChildGroup(ObjectId parentId) {
+	public static ObjectId createChildGroup(ObjectId parentId) {
 		UserGroup group = new UserGroup();
-		group.setUsername("testUserGroup" + TestUtils.randomString());
+		group.setUsername("testUserGroup" + Math.random());
 		group.getParentGroups().add(parentId);
 		DB.getUserGroupDAO().makePermanent(group);
 		return group.getDbId();
