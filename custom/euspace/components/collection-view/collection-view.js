@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app'], function (bridget, ko, template, Isotope, imagesLoaded,app) {
+define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app','smoke'], function (bridget, ko, template, Isotope, imagesLoaded,app) {
 
 	$.bridget('isotope', Isotope);
 	

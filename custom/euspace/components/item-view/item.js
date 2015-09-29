@@ -1,4 +1,4 @@
-define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
+define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
 	function Record(data) {
 		var self = this;
@@ -297,7 +297,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 					
 				},
 				error: function (xhr, textStatus, errorThrown) {
-					self.loading(false);
+					self.open();
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});
