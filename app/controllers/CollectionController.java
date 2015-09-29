@@ -410,14 +410,14 @@ public class CollectionController extends Controller {
 
 	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
-			Option<MyPlayList> recursivelyAccessedByGroupName, Option<Boolean> isExhibition, int offset, int count) {
+			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<Boolean> isPublic, Option<Boolean> isExhibition, int offset, int count) {
 		ArrayNode result = Json.newObject().arrayNode();
 		List<Collection> userCollections;
 		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserName, recursivelyAccessedByUserName,
 				directlyAccessedByGroupName,recursivelyAccessedByGroupName);
 		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;	
-		if (effectiveUserIds.isEmpty()) {//not logged in
+		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {//not logged in or ask for public collections
 			// return all public collections
 			userCollections = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, isExhibitionBoolean, offset, count);
 			for (Collection collection : userCollections) {
