@@ -54,7 +54,7 @@ public class WithSpaceSource extends ISpaceSource {
 	public String getSourceName() {
 		return "WITHin";
 	}
-	
+
 	private List<List<Tuple<ObjectId, Access>>> mergeLists(List<Tuple<ObjectId, Access>> ... lists) {
 		List<List<Tuple<ObjectId, Access>>> outputList = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		for (List<Tuple<ObjectId, Access>> list: lists) {
