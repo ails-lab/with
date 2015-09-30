@@ -362,19 +362,16 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
      self.listBind=function(e){
     	var link = $(e.target);
     	$('#f_search').val('');$('#f_search').removeAttr('value');
-    	//$("ul.list>li").css('display','block');
     	$('#'+e.filterID).liveFilter('#f_search', 'li', {
     		  filterChildSelector: 'a'
     		});
-    	//event.stopPropagation();
     	
     }
     
     self.sourceBind=function(e){
     	$('#f_search').val('');$('#f_search').removeAttr('value');
-    	//$("ul.list>li").css('display','block');
     	$('#datasources').liveFilter('#f_search', 'li', {
-    		  filterChildSelector: 'label'
+    		  filterChildSelector: 'span'
     		});
     	
     }

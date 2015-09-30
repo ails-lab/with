@@ -387,9 +387,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 		
 	  self.searchSource = function(sdata){
-		  if(self.searching()==false && self.currentTerm()!=""){
-			  console.log("searching source");
-	        	
+		  if(self.searching()==false && self.currentTerm()!="" && Math.floor(sdata.items().length/self.pageSize())+1!=1){
+		    	
 				self.searching(true);
 				 var inCat=null;
                  var idx=0;
