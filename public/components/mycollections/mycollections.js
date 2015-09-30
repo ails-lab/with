@@ -19,7 +19,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 },
 			   		 transformResult: function(response) {
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-			   			//TODO: filter out usersToShare from the dropDown 
 			   			var index = arrayFirstIndexOf(response, function(item) {
 							   return item.value === myUsername;
 						});

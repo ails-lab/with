@@ -274,8 +274,8 @@ public class GroupManager extends Controller {
 		return internalServerError("Cannot store to database!");
 
 	}
-
-	public static Result getUserOrGroupThumbnain(String id) {
+	
+	public static Result getUserOrGroupThumbnail(String id) {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
@@ -283,21 +283,22 @@ public class GroupManager extends Controller {
 				return MediaController.getMetadataOrFile(photoId.toString(),
 						true);
 			} else {
-				UserGroup userGroup = DB.getUserGroupDAO()
-						.get(new ObjectId(id));
+				UserGroup userGroup = DB.getUserGroupDAO().get(new ObjectId(id));
 				if (userGroup != null) {
 					ObjectId photoId = user.getThumbnail();
-					return MediaController.getMetadataOrFile(
-							photoId.toString(), true);
-				} else
+					return MediaController.getMetadataOrFile(photoId.toString(),
+							true);
+				}
+				else
 					return badRequest(Json
-							.parse("{\"error\":\"User does not exist\"}"));
+						.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
 			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
 					+ "\"}"));
 		}
 	}
+
 
 	/**
 	 * Removes a user from the group.

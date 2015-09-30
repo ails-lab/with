@@ -40,7 +40,11 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
+<<<<<<< HEAD
 #GET	 /exhibition/list					    controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
+=======
+#GET		 /exhibition/list					controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
+>>>>>>> Added functionalities for usergroups, restructured classes.
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
@@ -89,7 +93,11 @@ GET		/user/listNames			                controllers.UserAndGroupManager.listNames
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
+<<<<<<< HEAD
 GET     /user/findByUserOrGroupNameOrEmail		controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
+=======
+GET     /user/findByUserOrGroupNameOrEmail		controllers.UserManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
+>>>>>>> Added functionalities for usergroups, restructured classes.
 GET		/user/:id/photo			                controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)
