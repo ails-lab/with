@@ -275,7 +275,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			var selrecord = ko.utils.arrayFirst(self.citems(), function (record) {
 				return record.recordId === e;
 			});
-			itemShow(selrecord);
+			itemShow(selrecord,false);
 		};
 
 		self.addCollectionRecord = function (e) {
