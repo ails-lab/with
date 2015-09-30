@@ -40,7 +40,6 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-#GET	 /exhibition/list					    controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
@@ -85,7 +84,7 @@ POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 GET		/user/logout						    controllers.UserManager.logout()
 # both users and groups
-GET		/user/listNames			                controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "")
+GET		/user/listNames			                controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false)
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )

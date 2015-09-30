@@ -64,7 +64,7 @@ public class UserAndGroupManager extends Controller {
 	 * @return JSON document with an array of matching usernames or groupnames (or all of
 	 *         them)
 	 */
-	public static Result listNames(String prefix) {
+	public static Result listNames(String prefix, Boolean onlyParents) {
 		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
 		List<UserGroup> groups  = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
 		ArrayNode suggestions = Json.newObject().arrayNode();
@@ -77,23 +77,25 @@ public class UserAndGroupManager extends Controller {
 			node.put("data", data);
 			suggestions.add(node);
 		}
+		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		ObjectId userId = new ObjectId(effectiveUserIds.get(0));
 		for (UserGroup group : groups) {
-			ObjectNode node = Json.newObject().objectNode();
-			ObjectNode data = Json.newObject().objectNode();
-			data.put("category", "group");
-			node.put("value", group.getUsername());
-			//check if direct ancestor of user
-			List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get(
-					"effectiveUserIds"));
-			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
-			if (group.getUsers().contains(userId)) {
-				data.put("isParent", true);
+			if (!onlyParents || (onlyParents && group.getUsers().contains(userId))) {
+				ObjectNode node = Json.newObject().objectNode();
+				ObjectNode data = Json.newObject().objectNode();
+				data.put("category", "group");
+				node.put("value", group.getUsername());
+				//check if direct ancestor of user
+				/*if (group.getUsers().contains(userId)) {
+					data.put("isParent", true);
+				}
+				else 
+					data.put("isParent", false);*/
+				node.put("value", group.getUsername());
+				node.put("data", data);
+				suggestions.add(node);
 			}
-			else 
-				data.put("isParent", false);
-			node.put("value", group.getUsername());
-			node.put("data", data);
-			suggestions.add(node);
 		}
 
 		return ok(suggestions);
@@ -147,7 +149,7 @@ public class UserAndGroupManager extends Controller {
 			else {
 				UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupnameOrEmail);
 				if (userGroup != null)
-					return getUserJson.apply(user);
+					return getUserJson.apply(userGroup);
 				else 
 					return badRequest("The string you provided does not match an existing email or username");
 			}

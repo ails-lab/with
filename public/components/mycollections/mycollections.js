@@ -14,6 +14,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 lookupLimit: 10,
 			   		 serviceUrl: "/user/listNames",
 			   		 paramName: "prefix",
+			   		 /*params: {
+			   			 onlyParents: true
+			   		 },*/
 			   		 ajaxSettings: {
 			   			 dataType: "json"
 			   		 },
@@ -25,24 +28,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						});
 			   			if (index > -1)
 			   				response.splice(index, 1);
-			   			var usersAndParents = [];
+			   			/*var usersAndParents = [];
 			   			$.each(response, function(i, obj) {
 			   				if (obj.data.isParent == undefined || obj.data.isParent == null || obj.data.isParent === true)
 			   					usersAndParents.push(obj);
-					    });
-				   		return {"suggestions": usersAndParents};
+					    });*/
+				   		return {"suggestions": response};
 				   	},
 				   	orientation: "auto",    
 				    onSearchComplete: function(query, suggestions) {
-			   			var result = [];
-				   		var suggestions  = response[0].suggestions;
-				   		
-				   		for (var i in suggestions) {
-					   		if (suggestions[i].value != myUsername){
-					   			result.push(suggestions[i]);
-					   		}
-					   	}
-			   			return {"suggestions": result};
+				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 			   		 },
 					formatResult: function(suggestion, currentValue) {
 						var s = '<strong>' + currentValue + '</strong>';
