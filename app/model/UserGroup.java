@@ -16,9 +16,7 @@
 
 package model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
@@ -38,13 +36,12 @@ public class UserGroup extends UserOrGroup {
 	private boolean privateGroup;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private final List<ObjectId> users = new ArrayList<ObjectId>();
+	private final Set<ObjectId> users = new HashSet<ObjectId>();
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final Set<ObjectId> parentGroups = new HashSet<ObjectId>();
-	
-	private String friendlyName;
 
+	private String friendlyName;
 
 	public Set<ObjectId> getAdminIds() {
 		return adminIds;
@@ -53,16 +50,16 @@ public class UserGroup extends UserOrGroup {
 	public void addAdministrators(Set<ObjectId> administrators) {
 		this.adminIds.addAll(administrators);
 	}
-	
+
 	public void addAdministrator(ObjectId administrator) {
 		this.adminIds.add(administrator);
 	}
-	
+
 	public void removeAdministrator(ObjectId administrator) {
 		this.adminIds.remove(administrator);
 	}
 
-	public List<ObjectId> getUsers() {
+	public Set<ObjectId> getUsers() {
 		return users;
 	}
 

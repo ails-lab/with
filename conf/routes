@@ -61,7 +61,7 @@ POST	/project/create							controllers.GroupManager.createGroup(adminId: String 
 PUT		/group/:id								controllers.GroupManager.editGroup(id)
 DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
 GET		/group/:id								controllers.GroupManager.getGroup(id)
-PUT		/group/addUser/:groupId					controllers.GroupManager.addUserToGroup(userId: String ?=null, groupId)
+PUT		/group/addUserOrGroup/:groupId			controllers.UserAndGroupManager.addUserOrGroupToGroup(id: String ?=null, groupId)
 PUT		/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
 GET		/group/findByGroupName					controllers.GroupManager.findByGroupName(name, collectionId)
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true)

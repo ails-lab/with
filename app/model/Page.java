@@ -55,6 +55,7 @@ public class Page {
 	private String url;
 
 	private ObjectId coverImage;
+	private ObjectId coverThumbnail;
 
 	private Set<ObjectId> featuredCollections;
 	private Set<ObjectId> featuredExhibitions;
@@ -80,6 +81,14 @@ public class Page {
 
 	public void setCoverImage(ObjectId bgImg) {
 		this.coverImage = bgImg;
+	}
+
+	public ObjectId getCoverThumbnail() {
+		return coverThumbnail;
+	}
+
+	public void setCoverThumbnail(ObjectId coverThumbnail) {
+		this.coverThumbnail = coverThumbnail;
 	}
 
 	public String getCountry() {

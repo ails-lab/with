@@ -29,7 +29,6 @@ import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
-import org.json.JSONArray;
 
 import play.Logger;
 import play.Logger.ALogger;
