@@ -458,12 +458,12 @@ public class CollectionController extends Controller {
 		userJSON.put("userId", user.getDbId().toString());
 		userJSON.put("username", user.getUsername());
 		if (user instanceof User) {
-			userJSON.put("category", "group");
+			userJSON.put("category", "user");
 			userJSON.put("firstName", ((User) user).getFirstName());
 			userJSON.put("lastName", ((User) user).getLastName());
 		}
 		else
-			userJSON.put("category", "user");
+			userJSON.put("category", "group");
 		String image = UserAndGroupManager.getImageBase64(user);
 		userJSON.put("accessRights", accessRights.toString());
 		if (image != null) {

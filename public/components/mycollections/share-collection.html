@@ -12,8 +12,10 @@
 				  <div class="form-group form-inline">
 				    <div class="spec">
 				    <label for="firstName">Select user</label>
+						<div class="input-group input-group-sm">
 						<input type="search" class="form-control" id="usernameOrEmail" placeholder="User/group name or email"
 						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername"/>
+						</div>
 						 <span style="padding-left:10px;">
 							 <button type="button" class="btn btn-info btn-xs" title="Show"
 							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
@@ -37,11 +39,29 @@
 				    	</div>
 				    </div>
 				</div>
-				<h5>Users with access to the collection</h5>
-				<div class="container-fluid">
-				<div class="row text-center">
-				<!-- ko foreach: ko.contextFor(mycollections).$data.usersToShare() -->
-				<!-- ko if: accessRights() != 'NONE' -->
+				
+				
+
+				<div data-bind="visible:  ko.contextFor(mycollections).$data.usersToShare().length > 0">
+					<h5 align="center">Users with access to the collection</h5>
+					<div class="container-fluid">
+					<div class="row text-center">
+						<div data-bind="template: { name: 'shareWithUsers-template', foreach:  ko.contextFor(mycollections).$data.usersToShare()}"></div>
+					</div>
+					</div>
+				</div>
+				
+				<div data-bind="visible:  ko.contextFor(mycollections).$data.userGroupsToShare().length > 0">
+					<h5 align="center">User groups with access to the collection</h5>
+					<div class="container-fluid">
+					<div class="row text-center">
+						<div data-bind="template: { name: 'shareWithUsers-template', foreach:  ko.contextFor(mycollections).$data.userGroupsToShare()}"></div>
+					</div>
+					</div>
+				</div>
+				
+			    <script type="text/html" id="shareWithUsers-template">
+    				<!-- ko if: accessRights() != 'NONE' -->				
 					<div class="col-md-3">					
 						 <div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer" data-bind="
 						 event: { mouseenter: ko.contextFor(mycollections).$data.showRightsIcons.bind($data), 
@@ -86,19 +106,19 @@
 							</div>
 							<!-- ko if: $data.image -->
 								<img class="img-circle img-thumbnail userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
-								style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
+								css: { readBorder:  accessRights()=='READ', writeBorder: accessRights()=='WRITE', ownBorder: accessRights()=='OWN'}"/>
 							<!-- /ko -->
 						    <!-- ko else -->
 								<img src="images/user.png" class="img-circle img-thumbnail img-responsive userPhoto" 
-								data-bind = "attr: {id: 'image_' + userId()}, style: {border: accessRights()=='READ'? '3px solid grey' : '3px solid #ee656d'}"/>
+								data-bind = "attr: {id: 'image_' + userId()}, 
+								css: { readBorder:  accessRights()=='READ', writeBorder: accessRights()=='WRITE', ownBorder: accessRights()=='OWN'}"/>
 						    <!-- /ko -->
 						 </div>	
 						 <span data-bind="text: username()"></span>
 					</div>
 				<!--  /ko -->
-				<!-- /ko -->
-				</div>
-				</div>
+				</script>
+
 			</form>
 		</div>
 		<div class="modal-footer">

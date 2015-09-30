@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Map;
 
 import model.Collection;
+import model.User;
 import model.Rights.Access;
+import model.UserGroup;
 
 import org.bson.types.ObjectId;
 
@@ -82,13 +84,25 @@ public class RightsController extends Controller {
 		// set rights
 		// the receiver can be either a User or a UserGroup
 		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
-		if (username != null) {
-			userId = DB.getUserDAO().getByUsername(username).getDbId()
-					.toHexString();
-		} else if (email != null) {
-			userId = DB.getUserDAO().getByEmail(email).getDbId().toHexString();
-		} else if (userId == null) {
-			result.put("error", "Must specify user to give rights");
+		if (userId == null) {
+			if (username != null) {
+			User user = DB.getUserDAO().getByUsername(username);
+			if (user !=null) {
+				userId = user.getDbId().toHexString();
+			}
+			else {
+				UserGroup userGroup = DB.getUserGroupDAO().getByName(username);
+				if (userGroup != null)
+					userId = userGroup.getDbId().toHexString();	
+			}
+			} else if (email != null) {
+				User user = DB.getUserDAO().getByEmail(email);
+				if (user != null)
+					userId = user.getDbId().toHexString();
+			}
+		}
+		if (userId == null) {
+			result.put("error", "No user or userGroup with given username/email");
 			return badRequest(result);
 		}
 		if (right.equals("NONE")) {

@@ -22,7 +22,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 },
 			   		 transformResult: function(response) {
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-			   			//TODO: filter out usersToShare from the dropDown 
 			   			var index = arrayFirstIndexOf(response, function(item) {
 							   return item.value === myUsername;
 						});
@@ -103,6 +102,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.isPublicToEdit = ko.observableArray([]);
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
+        self.userGroupsToShare = ko.mapping.fromJS([], {});
         //self.editedUsersToShare = ko.mapping.fromJS([], {});
         self.myUsername = ko.observable(app.currentUser.username());
         if (self.showsExhibitions) {
@@ -254,7 +254,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 		   			if (index > -1)
 		   				result.splice(index, 1);
-					ko.mapping.fromJS(result, self.usersMapping, self.usersToShare);
+		   			var users = [];
+		   			var userGroups = [];
+		   			$.each(result, function(i, item) {
+		   				if (item.category == "user")
+		   					users.push(item);
+		   				else if(item.category == "group")
+		   					userGroups.push(item);
+					});
+					ko.mapping.fromJS(users, self.usersMapping, self.usersToShare);
+					ko.mapping.fromJS(userGroups, self.usersMapping, self.userGroupsToShare);
 					app.showPopup("share-collection");
 				}
 			});
@@ -278,10 +287,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.shareCollection(ko.toJS(this), clickedRights);
 		}
 		
-		self.showInfoPopup = function(title, body, callback) {
+		self.showInfoPopup = function(title, bodyText, callback) {
 			$("#myModal").find("h4").html("Are you sure?");
 			var body = $("#myModal").find("div.modal-body");
-			body.html(body);
+			body.html(bodyText);
 
 			var footer = $("#myModal").find("div.modal-footer");
 			if (footer.is(':empty')) {
@@ -292,7 +301,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
 		        confirmBtn.click(function() {
 		        	$("#myModal").modal('hide');
-					//self.shareCollection(result, clickedRights);
 		        	callback();
 		        });
 		    }
@@ -326,8 +334,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.shareCollection = function(userData, clickedRights) {
+			if (userData.category == "group") {
+				self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user group will acquire these rights.", function() {
+					self.shareCollection2(userData, clickedRights);
+				});
+			}
+		}
+		
+		self.shareCollection2 = function(userData, clickedRights) {
 			if (clickedRights === "OWN") {
-				self.showInfoPopup("Are you sure?", "Sharing with others users means that they will have the right to delete your collection, " +
+				self.showInfoPopup("Are you sure?", "Sharing with others means that they will have the right to delete your collection, " +
 						"as well as share it with others.", function() {
 					self.callShareAPI(userData, clickedRights);
 				});
@@ -339,24 +355,43 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.callShareAPI = function(userData, clickedRights) {
 			var username = userData.username;
 			var collId = self.myCollections()[self.index()].dbId();
-			var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+			var index = -1;
+			var isGroup = false;
+			if (userData.category == "user") 
+			  index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
+			else if (userData.category == "group") {
+				isGroup = true;
+				index = arrayFirstIndexOf(self.userGroupsToShare(), function(item) {
+					   return item.username() === username;
+				});
+			}
 			$.ajax({
 				"url": "/rights/"+collId+"/"+clickedRights+"?username="+username,
 				"method": "GET",
 				"contentType": "application/json",
 				success: function(result) {
-					alert(JSON.stringify(userData));
 					if (index < 0) {
 						userData.accessRights = clickedRights;
-						self.usersToShare.push(ko.mapping.fromJS(userData));
+						if (!isGroup)
+							self.usersToShare.push(ko.mapping.fromJS(userData));
+						else
+							self.userGroupsToShare.push(ko.mapping.fromJS(userData));
 					}
 					else {
-						if (clickedRights == 'NONE')
-							self.usersToShare.splice(index, 1);
-						else
-							self.usersToShare()[index].accessRights(clickedRights);
+						if (clickedRights == 'NONE') {
+							if (!isGroup)
+								self.usersToShare.splice(index, 1);
+							else
+								self.userGroupsToShare.splice(index, 1);
+						}
+						else {
+							if (!isGroup)
+								self.usersToShare()[index].accessRights(clickedRights);
+							else
+								self.userGroupsToShare()[index].accessRights(clickedRights);
+						}
 					}
 				}
 			});
