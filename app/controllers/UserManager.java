@@ -435,7 +435,7 @@ public class UserManager extends Controller {
 				result.put("favoritesId", DB.getCollectionDAO()
 						.getByOwnerAndTitle(new ObjectId(id), "_favorites")
 						.getDbId().toString());
-				String image = getImageBase64(user);
+				String image = UserAndGroupManager.getImageBase64(user);
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);
@@ -965,16 +965,4 @@ public class UserManager extends Controller {
 		return badRequest(result);
 
 	}
-
-	public static String getImageBase64(UserOrGroup user) {
-		if (user.getThumbnail() != null) {
-			ObjectId photoId = user.getThumbnail();
-			Media photo = DB.getMediaDAO().findById(photoId);
-			// convert to base64 format
-			return "data:" + photo.getMimeType() + ";base64,"
-					+ new String(Base64.encodeBase64(photo.getData()));
-		} else
-			return null;
-	}
-
 }

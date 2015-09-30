@@ -36,6 +36,8 @@ import model.Collection;
 import model.CollectionRecord;
 import model.User;
 import model.Rights.Access;
+import model.UserGroup;
+import model.UserOrGroup;
 
 import org.bson.types.ObjectId;
 
@@ -410,16 +412,22 @@ public class CollectionController extends Controller {
 
 	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
-			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<Boolean> isPublic, Option<Boolean> isExhibition, int offset, int count) {
+			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, Option<Boolean> isExhibition, int offset, int count) {
 		ArrayNode result = Json.newObject().arrayNode();
 		List<Collection> userCollections;
 		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserName, recursivelyAccessedByUserName,
 				directlyAccessedByGroupName,recursivelyAccessedByGroupName);
-		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;	
+		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;
+		ObjectId creatorId = null;
+		if (creator.isDefined()) {
+			User creatorUser = DB.getUserDAO().getByUsername(creator.get()); 
+			if (creatorUser != null)
+				creatorId = creatorUser.getDbId();
+		}
 		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {//not logged in or ask for public collections
 			// return all public collections
-			userCollections = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, isExhibitionBoolean, offset, count);
+			userCollections = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, offset, count);
 			for (Collection collection : userCollections) {
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				c.put("access", Access.READ.toString());
@@ -437,7 +445,8 @@ public class CollectionController extends Controller {
 				}
 				accessedByUserOrGroup.add(recursivelyAccessedByLoggedInUser);
 			}
-			userCollections = DB.getCollectionDAO().getByAccess(accessedByUserOrGroup, isExhibitionBoolean, offset, count);
+			System.out.println(isExhibition);
+			userCollections = DB.getCollectionDAO().getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, offset, count);
 			List<ObjectNode> collections = collectionWithUserData(userCollections, effectiveUserIds);
 			for (ObjectNode c: collections)
 				result.add(c);
@@ -445,27 +454,41 @@ public class CollectionController extends Controller {
 		}
 	}
 
+	private static ObjectNode userOrGroupJson(UserOrGroup user, Access accessRights) {
+		ObjectNode userJSON = Json.newObject();
+		userJSON.put("userId", user.getDbId().toString());
+		userJSON.put("username", user.getUsername());
+		if (user instanceof User) {
+			userJSON.put("category", "group");
+			userJSON.put("firstName", ((User) user).getFirstName());
+			userJSON.put("lastName", ((User) user).getLastName());
+		}
+		else
+			userJSON.put("category", "user");
+		String image = UserAndGroupManager.getImageBase64(user);
+		userJSON.put("accessRights", accessRights.toString());
+		if (image != null) {
+			userJSON.put("image", image);
+		}
+		return userJSON;
+	}
+	
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
 		for (ObjectId userId : collection.getRights().keySet()) {
 			User user = DB.getUserDAO().getById(userId, null);
+			Access accessRights = collection.getRights().get(userId);
 			if (user != null) {
-				ObjectNode userJSON = Json.newObject();
-				userJSON.put("userId", user.getDbId().toString());
-				userJSON.put("username", user.getUsername());
-				userJSON.put("firstName", user.getFirstName());
-				userJSON.put("lastName", user.getLastName());
-				String image = UserManager.getImageBase64(user);
-				Access accessRights = collection.getRights().get(userId);
-				userJSON.put("accessRights", accessRights.toString());
-				if (image != null) {
-					userJSON.put("image", image);
-				}
-				result.add(userJSON);
-			} else {
-				return internalServerError("User with id " + userId
+				result.add(userOrGroupJson(user, accessRights));
+			} 
+			else {
+				UserGroup usergroup = DB.getUserGroupDAO().get(userId);
+				if (usergroup != null)
+					result.add(userOrGroupJson(usergroup, accessRights));
+				else
+					return internalServerError("User with id " + userId
 						+ " cannot be retrieved from db");
 			}
 		}

@@ -108,9 +108,11 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.createQuery().or(criteria);
 	}
 	
-	public List<Collection> getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
+	public List<Collection> getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		if (creator != null)
+			q.field("ownerId").equal(creator);
 		if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
@@ -125,22 +127,26 @@ public class CollectionDAO extends DAO<Collection> {
 	public List<Collection> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
 			Boolean isExhibition, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		q.field("ownerId").notEqual(userId);
 		if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
 		}
-		criteria =ArrayUtils.add(criteria, this.createQuery().criteria("rights." + userId.toHexString()).notEqual("OWN"));
+		//criteria =ArrayUtils.add(criteria, this.createQuery().criteria("rights." + userId.toHexString()).notEqual(3));
 		if (criteria.length > 0)
 			q.and(criteria);
 		return this.find(q).asList();
 	}
 	
-	public List<Collection> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, Boolean isExhibition, int offset, int count) {
+	public List<Collection> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
 		if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);
+		if (creator != null)
+			q.field("ownerId").equal(creator);
 		Criteria[] criteria = {this.createQuery().criteria("isPublic").equal(true)};
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
