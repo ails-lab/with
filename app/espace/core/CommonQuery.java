@@ -18,29 +18,86 @@ package espace.core;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
-import espace.core.sources.DigitalNZSpaceSource;
+import model.Rights.Access;
+import model.User;
+import model.UserGroup;
 
-public class CommonQuery implements Cloneable {
+import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
+import utils.Tuple;
+
+public class CommonQuery {
+	
+	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
 	public String pageSize = "20";
 	public String searchTerm;
 	public String termToExclude;
-	public String user;
 	public List<String> source;
+	private List<Tuple<ObjectId, Access>> directlyAccessedByUserName = new ArrayList<Tuple<ObjectId, Access>>();
+	private List<Tuple<ObjectId, Access>> directlyAccessedByGroupName = new ArrayList<Tuple<ObjectId, Access>>();
+	//private List<Tuple<String, String>> recursivelyAccessedByGroupName;
+	private List<String> effectiveUserIds;//not set in JSON
 
 	public List<CommonFilter> filters;
 
 	public CommonQuery(String generalQueryBody) {
-		super();
 		this.searchTerm = generalQueryBody;
 	}
 
 	public CommonQuery() {
-		super();
+	}
+	
+	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {
+		List<Tuple<ObjectId, Access>> list = new ArrayList<Tuple<ObjectId, Access>>();
+		for (int i=0; i<inputList.length; i++) {
+			ObjectNode node = inputList[i];
+			if (node.size() == 2) {
+				Iterator<String> iterator = node.fieldNames();
+				String x = node.get(iterator.next()).asText();
+				Access access = Access.valueOf(node.get(iterator.next()).asText().toUpperCase());
+				ObjectId userOrGroupId;
+				if (!group) {
+					User user = DB.getUserDAO().getByUsername(x);
+					if (user != null) {
+						userOrGroupId = user.getDbId();
+						list.add(new Tuple<ObjectId, Access>(userOrGroupId, access));
+					}
+				}
+				else {
+					UserGroup user = DB.getUserGroupDAO().getByName(x);
+					if (user != null) {
+						userOrGroupId = user.getDbId();
+						list.add(new Tuple<ObjectId, Access>(userOrGroupId, access));
+					}
+				}
+	        }
+		}
+		return list;
+	}
+	
+	public List<Tuple<ObjectId, Access>> getDirectlyAccessedByUserName() {
+		return directlyAccessedByUserName;
+	}
+
+	public void setDirectlyAccessedByUserName(ObjectNode[]  list) {
+		directlyAccessedByUserName = transformList(list, false);
+	}
+	
+	public List<Tuple<ObjectId, Access>> getDirectlyAccessedByGroupName() {
+		return directlyAccessedByGroupName;
+	}
+
+	public void setDirectlyAccessedByGroupName(ObjectNode[]  list) {
+		directlyAccessedByGroupName = transformList(list, true);
 	}
 
 	public String getQuery() {
@@ -99,16 +156,12 @@ public class CommonQuery implements Cloneable {
 		}
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public void setEffectiveUserIds(List<String> effectiveUserIds) {
+		this.effectiveUserIds = effectiveUserIds;
 	}
 
-	public String getUser() {
-		return user;
+	public List<String> getEffectiveUserIds() {
+		return effectiveUserIds;
 	}
 
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
 }

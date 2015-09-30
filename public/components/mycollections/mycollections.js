@@ -19,27 +19,30 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			   		 transformResult: function(response) {
 			   			var result = [];
 			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-			   			for (var i in response) {
-			   				if (response[i] != myUsername)
-			   					result.push({"value": response[i]});
-			   			}
-			   			return {"suggestions": result};
-			   		 },
-			   		 orientation: "auto",
-				     onSearchComplete: function(query, suggestions) {
-				    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestion-extra");
-				     }
-			   		 /*onSelect: function (suggestion) {
-			   			 var funct = valueAccessor();
-			   			funct(suggestion.value);
-			   		}*/
+			   			//TODO: filter out usersToShare from the dropDown 
+			   			var index = arrayFirstIndexOf(response, function(item) {
+							   return item.value === myUsername;
+						});
+			   			if (index > -1)
+			   				response.splice(index, 1);
+			   			var usersAndParents = [];
+			   			$.each(response, function(i, obj) {
+			   				if (obj.data.isParent == undefined || obj.data.isParent == null || obj.data.isParent === true)
+			   					usersAndParents.push(obj);
+					    });
+				   		return {"suggestions": usersAndParents};
+				   	},
+				   	orientation: "auto",    
+				    onSearchComplete: function(query, suggestions) {
+				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+				    },
+					formatResult: function(suggestion, currentValue) {
+						var s = '<strong>' + currentValue + '</strong>';
+						s    += suggestion.value.substring(currentValue.length);
+						s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
+						return s;
+					}
 			 });
-	    	  /*$(elem).keypress(function (event) {
-	              if (event.which == 13) {
-	            	  //TODO: add check if email or username exists first
-	            	  valueAccessor()($(elem).val());
-	              }
-	          });*/
 	      }
 	 };
 
@@ -50,7 +53,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "access=read&offset=0&count=20"}).done(
+			data        : "offset=0&count=20"}).done(
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
@@ -244,7 +247,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				contentType    : "application/json",
 				url         : "/collection/"+collection.dbId()+"/listUsers",
 				success		: function(result) {
-					//self.usersToShare(result);
+					var index = arrayFirstIndexOf(result, function(item) {
+						   return item.username === self.myUsername();
+					});
+		   			if (index > -1)
+		   				result.splice(index, 1);
 					ko.mapping.fromJS(result, self.usersMapping, self.usersToShare);
 					app.showPopup("share-collection");
 				}
@@ -269,21 +276,46 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.shareCollection(ko.toJS(this), clickedRights);
 		}
 		
+		self.showInfoPopup = function(title, body, callback) {
+			$("#myModal").find("h4").html("Are you sure?");
+			var body = $("#myModal").find("div.modal-body");
+			body.html(body);
+
+			var footer = $("#myModal").find("div.modal-footer");
+			if (footer.is(':empty')) {
+		        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
+		        cancelBtn.click(function() {
+		        	$("#myModal").modal('hide');
+		        });
+		        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
+		        confirmBtn.click(function() {
+		        	$("#myModal").modal('hide');
+					//self.shareCollection(result, clickedRights);
+		        	callback();
+		        });
+		    }
+			$("#myModal").modal('show');
+			$('#myModal').on('hidden.bs.modal', function () {
+				$("#myModal").find("div.modal-footer").empty();
+			});
+			$('#myModal').addClass("topOfModal");
+		}
+		
 		self.addToSharedWithUsers = function(clickedRights) {
 			var collId = self.myCollections()[self.index()].dbId();
 			var username = $("#usernameOrEmail").val();
 			$.ajax({
 				method      : "GET",
 				contentType    : "application/json",
-				url         : "/user/findByUsernameOrEmail",
-				data: "emailOrUsername="+username+"&collectionId="+collId,
+				url         : "/user/findByUserOrGroupNameOrEmail",
+				data: "userOrGroupNameOrEmail="+username+"&collectionId="+collId,
 				success		: function(result) {
-					var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
-						   return item.username() === username;
+					/*var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
+						   return item.name() === username;
 					});
-					if (index < 0) {
-						self.shareCollection(result, clickedRights);
-					}
+					if (index < 0) {*/
+					self.shareCollection(result, clickedRights);
+					//}
 				},
 				error      : function(result) {
 					$.smkAlert({text:'There is no such username or email', type:'danger', time: 10});
@@ -292,8 +324,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.shareCollection = function(userData, clickedRights) {
-			var collId = self.myCollections()[self.index()].dbId();
+			if (clickedRights === "OWN") {
+				self.showInfoPopup("Are you sure?", "Sharing with others users means that they will have the right to delete your collection, " +
+						"as well as share it with others.", function() {
+					self.callShareAPI(userData, clickedRights);
+				});
+			}
+			else
+				self.callShareAPI(userData, clickedRights);
+		}
+		
+		self.callShareAPI = function(userData, clickedRights) {
 			var username = userData.username;
+			var collId = self.myCollections()[self.index()].dbId();
 			var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
@@ -302,6 +345,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				"method": "GET",
 				"contentType": "application/json",
 				success: function(result) {
+					alert(JSON.stringify(userData));
 					if (index < 0) {
 						userData.accessRights = clickedRights;
 						self.usersToShare.push(ko.mapping.fromJS(userData));
@@ -451,9 +495,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				return {index:-1, set:"none"};
 		}
 
-	    arrayFirstIndexOf=function(array, predicate, predicateOwner) {
+	    arrayFirstIndexOf = function(array, predicate) {
 		    for (var i = 0, j = array.length; i < j; i++) {
-		        if (predicate.call(predicateOwner, array[i])) {
+		        if (predicate.call(undefined, array[i])) {
 		            return i;
 		        }
 		    }

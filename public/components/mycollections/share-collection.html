@@ -1,4 +1,4 @@
-<div class="modal-dialog editCollectionPopup" id="share-collection">
+<div class="modal-dialog editCollectionPopup data-backdrop='false'" id="share-collection">
 	<div class="modal-content text-left">
 		<div class="modal-header">
 			<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -12,16 +12,23 @@
 				  <div class="form-group form-inline">
 				    <div class="spec">
 				    <label for="firstName">Select user</label>
-						<input type="search" class="form-control" id="usernameOrEmail" placeholder="Username or email"
+						<input type="search" class="form-control" id="usernameOrEmail" placeholder="User/group name or email"
 						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername"/>
 						 <span style="padding-left:10px;">
-							 <button type="button" class="btn btn-info btn-xs" title="Share"
+							 <button type="button" class="btn btn-info btn-xs" title="Show"
 							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
 							 	<span class="glyphicon glyphicon-eye-open" 
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
 					 		</button>
-					 		<button type="button" class="btn btn-info btn-xs" title="Co-create" data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
+					 		<button type="button" class="btn btn-info btn-xs" title="Co-edit"
+							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
+							 	<span class="glyphicon glyphicon glyphicon-edit" 
+					 				aria-hidden="true" style="cursor:pointer">
+					 			</span>
+					 		</button>
+					 		<button type="button" class="btn btn-info btn-xs" title="Share" 
+					 		data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'OWN')">
 					 			<span class="glyphicon glyphicon-user" 
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
@@ -34,7 +41,6 @@
 				<div class="container-fluid">
 				<div class="row text-center">
 				<!-- ko foreach: ko.contextFor(mycollections).$data.usersToShare() -->
-				<!-- ko if: username() != ko.contextFor(mycollections).$data.myUsername()-->
 				<!-- ko if: accessRights() != 'NONE' -->
 					<div class="col-md-3">					
 						 <div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer" data-bind="
@@ -48,15 +54,33 @@
 							    <span class="glyphicon glyphicon-trash" style="cursor:pointer"></span>
 								</button>
 								<!-- ko if: accessRights() == 'READ' -->
-								<button type="button" class="btn btn-info btn-xs" title="Co-create"
+								<button type="button" class="btn btn-info btn-xs" title="Edit"
 								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
+								<span class="glyphicon glyphicon-edit" style="cursor:pointer;color:blue"></span>
+								</button>
+								<button type="button" class="btn btn-info btn-xs" title="Share"
+								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'OWN')">   
 								<span class="glyphicon glyphicon-user" style="cursor:pointer;color:blue"></span>
 								</button>
 								<!-- /ko -->
 								<!-- ko if: accessRights() == 'WRITE' -->
-								<button type="button" class="btn btn-info btn-xs" title="Share"							
+								<button type="button" class="btn btn-info btn-xs" title="Show"							
 								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">				
 								<span class="glyphicon glyphicon-eye-open" style="cursor:pointer;color:blue"></span>
+								</button>
+								<button type="button" class="btn btn-info btn-xs" title="Edit"
+								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'OWN')">   
+								<span class="glyphicon glyphicon-user" style="cursor:pointer;color:blue"></span>
+								</button>
+								<!-- /ko -->
+								<!-- ko if: accessRights() == 'OWN' -->
+								<button type="button" class="btn btn-info btn-xs" title="Read"
+								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">   
+								<span class="glyphicon glyphicon-eye-open" style="cursor:pointer;color:blue"></span>
+								</button>
+								<button type="button" class="btn btn-info btn-xs" title="Edit"
+								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
+								<span class="glyphicon glyphicon-edit" style="cursor:pointer;color:blue"></span>
 								</button>
 								<!-- /ko -->
 							</div>
@@ -72,7 +96,6 @@
 						 <span data-bind="text: username()"></span>
 					</div>
 				<!--  /ko -->
-				<!-- /ko -->
 				<!-- /ko -->
 				</div>
 				</div>

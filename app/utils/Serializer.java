@@ -27,7 +27,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import model.User.Access;
+import model.Rights.Access;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -69,15 +69,15 @@ public class Serializer {
 		public void serialize(Object map, JsonGenerator jsonGen,
 				SerializerProvider arg2) throws IOException,
 				JsonProcessingException {
-			Map<String, String> rights = new HashMap<String, String>();
+			Map<String, Integer>	 rights = new HashMap<String, Integer>();
 			for(Entry<ObjectId, Access> e: ((Map<ObjectId, Access>)map).entrySet()) {
-				rights.put(e.getKey().toString(), e.getValue().toString());
+				rights.put(e.getKey().toString(), e.getValue().ordinal());
 			}
 			jsonGen.writeObject(Json.toJson(rights));
 		}
 
 	}
-	
+
 	public static String serializeXML(Document doc) {
 		DOMImplementationLS domImplementation = (DOMImplementationLS) doc
 				.getImplementation();

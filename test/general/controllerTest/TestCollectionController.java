@@ -223,8 +223,9 @@ public class TestCollectionController {
 						"The newly CREATED test title "
 								+ TestUtils.randomString()
 								+ TestUtils.randomString());
-				json.put("ownerId", user.getDbId().toString());
+				json.put("ownerId", "55f94555e4b0bdd6f065201a");
 				Result result = route(fakeRequest("POST", "/collection/create")
+						.withSession("effectiveUserIds", user.getDbId().toString())
 						.withJsonBody(json));
 
 				JsonParser parser = new JsonParser();

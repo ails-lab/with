@@ -33,6 +33,7 @@ import org.elasticsearch.search.SearchHit;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -63,25 +64,26 @@ public class RecordController extends Controller {
 	 * @param format
 	 * @return
 	 */
-	public static Result getRecord(String entryId, String format) {
+	public static Result getRecord(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 
 		CollectionRecord record = DB.getCollectionRecordDAO().get(
-				new ObjectId(entryId));
+				new ObjectId(id));
 
 		if (record == null) {
-			log.error("Cannot retrieve user modifications from database");
+			log.error("Cannot retrieve record from database");
 			result.put("message",
-					"Cannot retrieve user modifications from database");
+					"Cannot retrieve record from database");
 			return internalServerError(result);
 		}
-
-		if (!format.equals("") && record.getContent().containsKey(format)) {
-			return ok(Json.toJson(record.getContent().get(format)));
-		} else {
-			return ok(Json.toJson(record));
+		else {
+			if (format.isDefined() && record.getContent().containsKey(format)) {
+				return ok(record.getContent().get(format));
+			}
+			else {
+				return ok(Json.toJson(record));
+			}
 		}
-
 	}
 
 	/**
@@ -225,31 +227,10 @@ public class RecordController extends Controller {
 
 	/**
 	 *
-	 * @param source
-	 * @param sourceId
-	 * @param annotated
-	 * @return
-	 */
-	public static Result findInCollections(String source, String sourceId,
-			boolean annotated) {
-		ObjectNode result = Json.newObject();
-
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getBySource(source, sourceId);
-
-		if (records != null)
-			return ok(Json.toJson(records));
-
-		result.put("message", "Cannot retrieve entries from db");
-		return internalServerError(result);
-	}
-
-	/**
-	 *
 	 * @param externalId
 	 * @return
 	 */
-	public static Result getCollectionMetadata(String externalId) {
+	public static Result getMergedRecord(String externalId) {
 		
 		ObjectNode result = Json.newObject();
 

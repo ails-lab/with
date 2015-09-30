@@ -21,17 +21,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.validation.constraints.NotNull;
 
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
+import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -47,6 +50,7 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Converters(AccessEnumConverter.class)
 public class Collection {
 
 	@Id
@@ -84,7 +88,7 @@ public class Collection {
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
-	//@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
+	@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
 	private final  Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
@@ -228,9 +232,7 @@ public class Collection {
 	}
 
 	@JsonIgnore
-	public void setRights(Map<ObjectId, Access> r) {
-
-	}
+	public void setRights(Map<ObjectId, Access> r) {}
 
 	public boolean getIsExhibition() {
 		return isExhibition;

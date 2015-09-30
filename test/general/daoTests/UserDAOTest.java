@@ -20,6 +20,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import general.TestUtils;
 
 import java.util.List;
+import java.util.Random;
 
 import model.User;
 
@@ -30,30 +31,28 @@ import db.DB;
 
 public class UserDAOTest {
 
-	//@Test
+	// @Test
 	public void testCRUD() {
 		// create
 		User testUser = new User();
-		testUser.setEmail( "test@ntua.gr");
+		testUser.setEmail("test@ntua.gr");
 		testUser.setPassword("secret");
 		DB.getUserDAO().makePermanent(testUser);
 
 		ObjectId id = testUser.getDbId();
 
 		// find by Email
-		User a = DB.getUserDAO().findOne( "email", "test@ntua.gr");
-		assertThat(a).isNotNull()
-			.overridingErrorMessage("Test user not found after store.");
+		User a = DB.getUserDAO().findOne("email", "test@ntua.gr");
+		assertThat(a).isNotNull().overridingErrorMessage(
+				"Test user not found after store.");
 
 		// find with email and password
 		User b = DB.getUserDAO().getByEmailPassword("test@ntua.gr", "wrong");
-		assertThat( b )
-			.overridingErrorMessage("User falsly retrieved with wrong password")
-			.isNull();
+		assertThat(b).overridingErrorMessage(
+				"User falsly retrieved with wrong password").isNull();
 		b = DB.getUserDAO().getByEmailPassword("test@ntua.gr", "secret");
-		assertThat(b)
-			.overridingErrorMessage("User with password not retreived.")
-			.isNotNull();
+		assertThat(b).overridingErrorMessage(
+				"User with password not retreived.").isNotNull();
 
 		// update a user
 		b.setFirstName("Bert");
@@ -62,21 +61,18 @@ public class UserDAOTest {
 
 		// check its correct in db
 		User c = DB.getUserDAO().get(id);
-		assertThat( c.getLastName())
-			.isEqualTo("Testuser" );
+		assertThat(c.getLastName()).isEqualTo("Testuser");
 
 		// remove from db
 		DB.getUserDAO().makeTransient(c);
 
 		// check its gone
-		User d = DB.getUserDAO().get( id );
-		assertThat( d )
-			.overridingErrorMessage("User not deleted!")
-			.isNull();
+		User d = DB.getUserDAO().get(id);
+		assertThat(d).overridingErrorMessage("User not deleted!").isNull();
 
 	}
 
-	@Test
+	// @Test
 	public void massStorage() {
 		/* Add 1000 random users */
 		for (int i = 0; i < 1000; i++) {
@@ -97,37 +93,41 @@ public class UserDAOTest {
 			}
 
 			// search history
-			/*if( i==42 ) {
-				List<Search> searchHistory = new ArrayList<Search>();
-				for (int j = 0; j < 1000; j++) {
-					Search s1 = new Search();
-					s1.setSearchDate(TestUtils.randomDate());
-					DB.getSearchDAO().makePermanent(s1);
-					testUser.addToHistory(s1);
-					searchHistory.add(s1);
-				}
-				// testUser.setSearchHistory(searchHistory);
-			}*/
+			/*
+			 * if( i==42 ) { List<Search> searchHistory = new
+			 * ArrayList<Search>(); for (int j = 0; j < 1000; j++) { Search s1 =
+			 * new Search(); s1.setSearchDate(TestUtils.randomDate());
+			 * DB.getSearchDAO().makePermanent(s1); testUser.addToHistory(s1);
+			 * searchHistory.add(s1); } //
+			 * testUser.setSearchHistory(searchHistory); }
+			 */
 			testUser.setUsername("Testuser");
 			DB.getUserDAO().makePermanent(testUser);
 		}
-
 
 		List<User> l = DB.getUserDAO().find().asList();
 		assertThat(l.size()).isGreaterThanOrEqualTo(1000);
 
 		// get User 42
 		User x = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		assertThat(x)
-			.isNotNull();
+		assertThat(x).isNotNull();
 
 		// mass delete
 		/*
-		int res = DB.getUserDAO().removeAll("lastName='Testuser'");
-		assertThat( res )
-			.overridingErrorMessage("Not enough Testusers deleted.")
-			.isGreaterThanOrEqualTo(1000);
-		*/
+		 * int res = DB.getUserDAO().removeAll("lastName='Testuser'");
+		 * assertThat( res )
+		 * .overridingErrorMessage("Not enough Testusers deleted.")
+		 * .isGreaterThanOrEqualTo(1000);
+		 */
+	}
+
+	public static ObjectId createTestUser() {
+		User testUser = new User();
+		testUser.setUsername("TestUser" + Math.random());
+		testUser.setEmail(TestUtils.randomString() + "@mail.com");
+		DB.getUserDAO().makePermanent(testUser);
+		return testUser.getDbId();
+
 	}
 
 }

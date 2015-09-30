@@ -22,26 +22,34 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 public class Deserializer {
 
 
-	public static class CustomMapDeserializer extends JsonDeserializer<Object> {
+	public static class CustomMapDeserializer extends JsonDeserializer<Map<ObjectId, Access>> {
 
 		@Override
-		public Object deserialize(JsonParser rights_string, DeserializationContext arg1)
+		public Map<ObjectId, Access> deserialize(JsonParser rights_string, DeserializationContext arg1)
 				throws IOException, JsonProcessingException {
+			Map<String, Integer> rights_map = rights_string.readValueAs(new TypeReference<Map<String, Integer>>() {
+			});
 			Map<ObjectId, Access> r = new HashMap<ObjectId,	Access>();
-			return null;
+			for(Entry<String, Integer> e : rights_map.entrySet()) {
+				r.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
+			}
+
+			return r;
 		}
 
 	}

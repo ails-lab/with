@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -34,13 +33,13 @@ import javax.net.ssl.HttpsURLConnection;
 import model.ApiKey;
 import model.Collection;
 import model.Media;
+import model.Rights.Access;
 import model.User;
-import model.User.Access;
 import model.UserGroup;
+import model.UserOrGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
@@ -55,15 +54,11 @@ import play.libs.Json;
 import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
-import scala.Unit;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import actors.ApiKeyManager;
 import actors.ApiKeyManager.Create;
-import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
-import akka.actor.UntypedActor;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 
@@ -79,52 +74,7 @@ public class UserManager extends Controller {
 	public static final ALogger log = Logger.of(UserManager.class);
 	private static final long TOKENTIMEOUT = 10 * 1000l /* 10 sec */;
 
-	// turns out this has to be called outside a controller else it turns to
-	// null
-	private static String APPLICATION_URL = play.Play.application()
-			.configuration().getString("application.baseUrl");
-
-	/**
-	 * @param emailOrUsername
-	 * @return User and image
-	 */
-	public static Result findByUsernameOrEmail(String emailOrUsername,
-			String collectionId) {
-		Function<User, Status> getUserJson = (User u) -> {
-			ObjectNode userJSON = Json.newObject();
-			userJSON.put("userId", u.getDbId().toString());
-			userJSON.put("username", u.getUsername());
-			userJSON.put("firstName", u.getFirstName());
-			userJSON.put("lastName", u.getLastName());
-			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
-						new ObjectId(collectionId));
-				if (collection != null) {
-					Access accessRights = collection.getRights().get(
-							u.getDbId());
-					if (accessRights != null)
-						userJSON.put("accessRights", accessRights.toString());
-					else
-						userJSON.put("accessRights", Access.NONE.toString());
-				}
-			}
-			String image = UserManager.getImageBase64(u);
-			if (image != null) {
-				userJSON.put("image", image);
-			}
-			return ok(userJSON);
-		};
-		User user = DB.getUserDAO().getByEmail(emailOrUsername);
-		if (user != null) {
-			return getUserJson.apply(user);
-		} else {
-			user = DB.getUserDAO().getByUsername(emailOrUsername);
-			if (user != null)
-				return getUserJson.apply(user);
-			else
-				return badRequest("The string you provided does not match an existing email or username");
-		}
-	}
+	
 
 	/**
 	 * Propose new username when it is already in use.
@@ -252,18 +202,11 @@ public class UserManager extends Controller {
 
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		// ObjectNode error = (ObjectNode) Json.newObject();
-
-		// copied from here
-
 		result = validateUser(json);
-
-		// If everything is ok store the user at the database
-
 		if (result.has("error")) {
 			return badRequest(result);
 		}
-
+		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
 		Collection fav = new Collection();
@@ -466,23 +409,7 @@ public class UserManager extends Controller {
 		return ok(enc);
 	}
 
-	/**
-	 * Get a list of matching usernames
-	 *
-	 * @param prefix
-	 *            optional prefix of username
-	 * @return JSON document with an array of matching usernames (or all of
-	 *         them)
-	 */
-	public static Result listNames(String prefix) {
-		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-		ArrayNode result = Json.newObject().arrayNode();
-		for (User user : users) {
-			result.add(user.getUsername());
-		}
-		return ok(result);
-	}
-
+	
 
 	/**
 	 * Find if email is already used.
@@ -508,7 +435,7 @@ public class UserManager extends Controller {
 				result.put("favoritesId", DB.getCollectionDAO()
 						.getByOwnerAndTitle(new ObjectId(id), "_favorites")
 						.getDbId().toString());
-				String image = getImageBase64(user);
+				String image = UserAndGroupManager.getImageBase64(user);
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);
@@ -525,22 +452,6 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result getUserPhoto(String id) {
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				ObjectId photoId = user.getPhoto();
-				return MediaController.getMetadataOrFile(photoId.toString(),
-						true);
-			} else {
-				return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
-			}
-		} catch (Exception e) {
-			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
-					+ "\"}"));
-		}
-	}
 
 	public static Result editUser(String id) {
 
@@ -618,7 +529,7 @@ public class UserManager extends Controller {
 					media.setData(imageBytes);
 					try {
 						DB.getMediaDAO().makePermanent(media);
-						user.setPhoto(media.getDbId());
+						user.setThumbnail(media.getDbId());
 					} catch (Exception e) {
 						return badRequest(e.getMessage());
 					}
@@ -630,9 +541,9 @@ public class UserManager extends Controller {
 				if (json.has("about")) {
 					user.setAbout(json.get("about").asText());
 				}
-				if (json.has("location")) {
+				/*if (json.has("location")) {
 					user.setLocation(json.get("location").asText());
-				}
+				}*/
 				DB.getUserDAO().makePermanent(user);
 				result = (ObjectNode) Json.parse(DB.getJson(user));
 				result.remove("md5Password");
@@ -684,7 +595,7 @@ public class UserManager extends Controller {
 		}
 
 		group.getUsers().add(new ObjectId(uid));
-		Set<ObjectId> parentGroups = group.retrieveParents();
+		Set<ObjectId> parentGroups = group.getAncestorGroups();
 
 		User user = DB.getUserDAO().get(new ObjectId(uid));
 		if (user == null) {
@@ -711,7 +622,7 @@ public class UserManager extends Controller {
 		// maximum!
 
 		ObjectNode result = Json.newObject();
-		ObjectNode error = (ObjectNode) Json.newObject();
+		ObjectNode error = Json.newObject();
 
 		Create create = new Create();
 
@@ -720,65 +631,65 @@ public class UserManager extends Controller {
 
 		User u;
 
-		
+
 		if (userId != null) {
-			
+
 			result.put("email", "An email has been sent to the email address you have registered with.");
-			
+
 			create.proxyUserId = new ObjectId(userId);
-			
+
 			u = DB.getUserDAO().get(create.proxyUserId);
-			
+
 			create.email = u.getEmail();
 
-			
+
 		} else {
-			
+
 			error.put("error", "You need to log in before an API key can be issued.");
-			
+
 			result.put("error", error);
-			
+
 			return badRequest(result);
 
 		}
-		
-		
-		
+
+
+
 		//Discuss our policy when this happens. ( Resend? How many times? )
-		
+
 		ApiKey withKey = DB.getApiKeyDAO().getByEmail(create.email);
-				
+
 		if(withKey!=null){
-			
+
 			result.remove("email");
-		
+
 			error.put("error", "Your user account already has already been issued an API key. "
 					+ "To request a new one, send an email to: withdev@image.ece.ntua.gr.");
-							
+
 			//result.put("Key", withKey.getKeyString());
-			
+
 			result.put("error", error);
-			
+
 			return badRequest(result);
-		} 
-		
-		
-		
+		}
+
+
+
         final ActorSelection testActor = Akka.system().actorSelection("/user/apiKeyManager");
-        
+
         create.dbId = "";
         create.call = "";
         create.ip = "";
         create.counterLimit = -1l;
         create.volumeLimit = -1l;
         //create.position = 1;
-        
+
         Timeout timeout = new Timeout(Duration.create(5, "seconds"));
-        
+
     	Future<Object> future = Patterns.ask(testActor, create, timeout);
-    	
+
     	String s = "";
-    	
+
 		try {
 			s = (String) Await.result(future, timeout.duration());
 		} catch (Exception e) {
@@ -794,7 +705,7 @@ public class UserManager extends Controller {
 		}
 
 		//result.put("APIKey", "Succesfully created a new API key: " + s);
-		
+
 		String newLine = System.getProperty("line.separator");
 
 		// String url = APPLICATION_URL;
@@ -1054,16 +965,4 @@ public class UserManager extends Controller {
 		return badRequest(result);
 
 	}
-
-	public static String getImageBase64(User user) {
-		if (user.getPhoto() != null) {
-			ObjectId photoId = user.getPhoto();
-			Media photo = DB.getMediaDAO().findById(photoId);
-			// convert to base64 format
-			return "data:" + photo.getMimeType() + ";base64,"
-					+ new String(Base64.encodeBase64(photo.getData()));
-		} else
-			return null;
-	}
-
 }

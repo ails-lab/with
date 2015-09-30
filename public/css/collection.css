@@ -168,10 +168,14 @@ display: none;
 .rightsIcon {
 	position: absolute;
 	top: 25px;
-    left: 35px; 
+    left: 25px; 
     padding: 0px;
     z-index:99;
 }
+
+.topOfModal {
+    z-index:1100!important;
+} 
 
 .userPhoto {
 	max-width: 70px;

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import model.Collection;
 import model.CollectionRecord;
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
@@ -82,7 +82,7 @@ public class ElasticIndexer {
 			log.error("No records to index!");
 		}
 	}
-	
+
 	//TODO: create a generic indexMetadata method (for collections, collectionRecords etc)
 	//indexMetadata(Object model, List[String] fieldNamesToOmmit)
 	//check entry.getValue().isboolean, isTextual, isObject (or by using JsonNodeType) and put respective
@@ -106,7 +106,7 @@ public class ElasticIndexer {
 					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
 						ObjectNode right = Json.newObject();
 						right.put("user", e.getKey().toString());
-						right.put("access", e.getValue().toString());
+						right.put("access", e.getValue().ordinal()); 
 						array.add(right);
 					}
    					doc.rawField(entry.getKey(), array.toString().getBytes());
@@ -117,7 +117,7 @@ public class ElasticIndexer {
 					doc.field(entry.getKey(), entry.getValue().asBoolean());
 				} else if( !entry.getKey().equals("firstEntries") &&
 						  !entry.getKey().equals("rights") &&
-						  !entry.getKey().equals("dbId")) {	
+						  !entry.getKey().equals("dbId")) {
 					if (entry.getKey().equals("exhibition")) {
 						String introValue =  entry.getValue().get("intro").asText();
 						doc.field("intro_all", introValue);
@@ -127,7 +127,7 @@ public class ElasticIndexer {
 						doc.field(entry.getKey()+"_all", entry.getValue().asText());
 						doc.field(entry.getKey(), entry.getValue().asText());
 					}
-				} 
+				}
 			}
 		} catch(IOException e) {
 				log.error("Cannot create collection json document for indexing", e);
@@ -193,7 +193,7 @@ public class ElasticIndexer {
 					doc.field(entry.getKey(), entry.getValue().asInt());
 				} else if( !entry.getKey().equals("content") &&
 					!entry.getKey().equals("tags")    &&
-					
+
 					!entry.getKey().equals("externalId")    &&
 					!entry.getKey().equals("collectionId") &&
 					!entry.getKey().equals("dbId")) {

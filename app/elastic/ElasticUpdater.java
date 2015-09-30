@@ -26,7 +26,7 @@ import java.util.Map.Entry;
 
 import model.Collection;
 import model.CollectionRecord;
-import model.User.Access;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
@@ -244,7 +244,22 @@ public class ElasticUpdater {
 			for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
 				ObjectNode right = Json.newObject();
 				right.put("user", e.getKey().toString());
-				right.put("access", e.getValue().toString());
+				switch (e.getValue().toString()) {
+				case "OWN":
+					right.put("access", 3);
+					break;
+				case "WRITE":
+					right.put("access", 2);
+					break;
+				case "READ":
+					right.put("access", 1);
+					break;
+				case "NONE":
+					right.put("access", 0);
+					break;
+				default:
+					break;
+				}
 				array.add(right);
 			}
 			doc.rawField("rights", array.toString().getBytes());

@@ -135,7 +135,7 @@ define(['bridget','knockout', 'text!./main-content.html','masonry','imagesloaded
 				dataType    : "json",
 				url         : "/collection/list",
 				processData : false,
-				data        : "access=read&offset=0&count=20"}).done(
+				data        : "loggedInUserAccess=read&offset=0&count=20"}).done(
 				function(data, text) {
 					console.log(data);
 					var citems=[];

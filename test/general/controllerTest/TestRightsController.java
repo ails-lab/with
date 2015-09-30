@@ -56,19 +56,19 @@ public class TestRightsController {
 
 	@Test
 	public void testSetRights() {
-		User receiver = new User();
+		/*User receiver = new User();
 		receiver.setEmail("receive@controller.gr");
-		receiver.setUsername(TestUtils.randomString());
+		receiver.setUsername("user1");
 		DB.getUserDAO().makePermanent(receiver);
 
 		User user = new User();
 		user.setEmail("test@controller.gr");
-		user.setUsername(TestUtils.randomString());
+		user.setUsername("user2");
 		DB.getUserDAO().makePermanent(user);
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");
-		col.setTitle("Test_1 collection from Controller"+TestUtils.randomString()+"453s"+Math.random()+"4cs");
+		col.setTitle("lalala");
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
@@ -94,19 +94,18 @@ public class TestRightsController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		DB.getCollectionRecordDAO().makePermanent(record);
+		DB.getCollectionRecordDAO().makePermanent(record);*/
+
 
 		//test set rights
 		running( fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
-				Result result = route(fakeRequest("POST", "/rights"
-						+ "/"+col.getDbId()
-						+ "/READ"
-						+ "?receiver="+receiver.getDbId())
-						.withSession("user", user.getDbId().toString()));
-
-				System.out.println(col.getDbId());
+				Result result = route(fakeRequest("GET", "/rights"
+						+ "/"+"55f7ea36e4b0516e94e105e0"
+						+ "/WRITE"
+						+ "?username=user2")
+						.withSession("effectiveUserIds", "55f7ea36e4b0516e94e105df"));
 
 			    if(status(result) == 200)
 				    assertThat(status(result)).isEqualTo(OK);
@@ -118,7 +117,7 @@ public class TestRightsController {
 			}
 		});
 
-		running( fakeApplication(), new Runnable() {
+		/*running( fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
 				final ObjectNode json = Json.newObject();
@@ -147,7 +146,7 @@ public class TestRightsController {
 			    }
 
 			}
-		});
+		});*/
 
 		//test list rights
 		/*running( fakeApplication(), new Runnable() {

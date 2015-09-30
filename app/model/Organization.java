@@ -16,61 +16,21 @@
 
 package model;
 
-import java.util.List;
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.geo.Point;
-
+@Entity("UserGroup")
 public class Organization extends UserGroup {
 
-	private String address;
-	private Point location;
-	private String url;
-
-	private ObjectId bgImg;
-
-	private List<ObjectId> featuredColsl;
-
-
-
-	public String getAddress() {
-		return address;
+	@Embedded
+	private Page page;
+	
+	public Page getPage() {
+		return page;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
-	}
-
-	public Point getLocation() {
-		return location;
-	}
-
-	public void setLocation(Point location) {
-		this.location = location;
-	}
-
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
-	public ObjectId getBgImg() {
-		return bgImg;
-	}
-
-	public void setBgImg(ObjectId bgImg) {
-		this.bgImg = bgImg;
-	}
-
-	public List<ObjectId> getFeaturedColsl() {
-		return featuredColsl;
-	}
-
-	public void setFeaturedColsl(List<ObjectId> featuredColsl) {
-		this.featuredColsl = featuredColsl;
+	public void setPage(Page page) {
+		this.page = page;
 	}
 
 }

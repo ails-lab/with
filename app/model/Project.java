@@ -16,19 +16,22 @@
 
 package model;
 
-import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 
+@Entity("UserGroup")
 public class Project extends UserGroup {
 
-	private ObjectId bgImg;
+	@Embedded
+	private Page page;
 
-
-
-	public ObjectId getBgImg() {
-		return bgImg;
+	public Page getPage() {
+		return page;
 	}
 
-	public void setBgImg(ObjectId bgImg) {
-		this.bgImg = bgImg;
+	public void setPage(Page page) {
+		this.page = page;
 	}
+
+
 }

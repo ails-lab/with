@@ -82,7 +82,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			if (showMeta){
 			$.ajax({
 				type    : "get",
-				url     : "/record/"+self.externalId() +"/mergedCollections",
+				url     : "/record/merged/"+self.externalId(),
 				success : function(result) {
 					self.collectedCount(result.count);
 					self.liked(result.liked);
@@ -206,18 +206,16 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			itemShow(e,flag);
 		};
 		
-		self.loadCollectionnnn = function(collection) {
-			
+		self.gotToCollection = function(collection) {
 			if (collection.isExhibition) {
 				window.location = '#exhibition-edit/'+ collection.dbId;		
-
+		
 			}
 			
 			else {
-
+		
 				window.location.href = 'index.html#collectionview/' + collection.dbId;		
 			}	
-				
 			
 			if (isOpen){
 				toggleSearch(event,'');

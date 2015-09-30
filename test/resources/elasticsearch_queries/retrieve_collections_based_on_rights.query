@@ -1,0 +1,80 @@
+{
+    "query": {
+        "filtered": {
+            "query": {
+                "match_all": {}
+            },
+            "filter": {
+                "nested": {
+                    "path": "rights",
+                    "filter": {
+                        "and": [
+                            {
+                                "or": [
+                                    {
+                                        "bool": {
+                                            "must": [
+                                                {
+                                                    "term": {
+                                                        "rights.user": "55f7ea36e4b0516e94e105df"
+                                                    }
+                                                },
+                                                {
+                                                    "range": {
+                                                        "rights.access": {
+                                                            "gt": "2"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "bool": {
+                                            "must": [
+                                                {
+                                                    "term": {
+                                                        "rights.user": "55f94555e4b0bdd6f065201a"
+                                                    }
+                                                },
+                                                {
+                                                    "range": {
+                                                        "rights.access": {
+                                                            "gt": "2"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "or": [
+                                    {
+                                        "bool": {
+                                            "must": [
+                                                {
+                                                    "term": {
+                                                        "rights.user": "55f94605e4b023e00c60a045"
+                                                    }
+                                                },
+                                                {
+                                                    "range": {
+                                                        "rights.access": {
+                                                            "lte": "1"
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}

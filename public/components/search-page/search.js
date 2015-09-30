@@ -141,7 +141,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(false);
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Mint", "Rijksmuseum", "WITHin", "The British Library"]);
+		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "Rijksmuseum", "WITHin", "The British Library"]);
 		self.mixresults=ko.observableArray([]);
 		
 		self.results = ko.observableArray([]);
@@ -212,6 +212,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		 if(facetinit){self.filterselection.removeAll();}
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
 		 self.currentTerm($(".withsearch-input").val());
+		 var directlyAccessedByGroupName = [{"groupName":"a", "rights": "OWN"}];
 		 if(self.searching()==false && self.currentTerm()!=""){
 			self.searching(true);
 			$request=$.ajax({

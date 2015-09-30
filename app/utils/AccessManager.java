@@ -21,9 +21,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import model.User.Access;
+import model.Rights.Access;
+import model.UserGroup;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Converters;
+import org.mongodb.morphia.converters.EnumConverter;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -32,6 +35,7 @@ import db.DB;
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
 
+	@Converters(AccessEnumConverter.class)
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
@@ -51,6 +55,11 @@ public class AccessManager {
 				return true;
 			}
 		}
+		return false;
+	}
+	
+	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights,
+			ObjectId groupId) {
 		return false;
 	}
 
@@ -74,6 +83,13 @@ public class AccessManager {
 		return maxAccess;
 	}
 
+	/**
+	 * This methods supposes we have all user ids and all userGroup ids
+	 * (recursively obtained) for the user, in a comma-separated list.
+	 * It then transforms the comma-separated in java.util.List
+	 * @param effectiveUserIds
+	 * @return
+	 */
 	public static List<String> effectiveUserIds(String effectiveUserIds) {
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";

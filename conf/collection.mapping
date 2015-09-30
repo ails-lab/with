@@ -1,7 +1,7 @@
 {
   "collection": {
     "dynamic_templates": [
-    {
+      {
         "template_1": {
           "match": "itemCount",
           "mapping": {
@@ -21,7 +21,12 @@
         "template_3": {
           "match": "rights",
           "mapping": {
-            "type": "nested"
+            "type": "nested",
+            "properties": {
+              "access": {
+                "type": "integer"
+              }
+            }
           }
         }
       },
