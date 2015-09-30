@@ -76,7 +76,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
 			self.externalId(data.externalId);
 			self.source(data.source);
-			self.isMerged=showMeta;
+			
 			
 			
 			if (showMeta){
