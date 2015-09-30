@@ -205,9 +205,9 @@ public class UserAndGroupManager extends Controller {
 					return ok(result);
 				}
 			}
-			if (DB.getUserGroupDAO().get(new ObjectId(id)) != null) {
+			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(
-						new ObjectId(id));
+						userOrGroupId);
 				childGroup.getParentGroups().add(group.getDbId());
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);

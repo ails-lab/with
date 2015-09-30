@@ -17,12 +17,11 @@
 package general.controllerTest;
 
 import static org.fest.assertions.Assertions.assertThat;
+import static play.test.Helpers.PUT;
 import static play.test.Helpers.fakeApplication;
-import static play.test.Helpers.running;
 import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
-import static play.test.Helpers.PUT;
-import static play.mvc.Http.Status.OK;
+import static play.test.Helpers.running;
 import general.daoTests.UserDAOTest;
 import general.daoTests.UserGroupDAOTest;
 
@@ -30,8 +29,6 @@ import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import db.DB;
-import play.mvc.Result;
-
 
 /**
  * The class <code>UserAndGroupManagerTest</code> contains tests for the class
@@ -56,11 +53,30 @@ public class UserAndGroupManagerTest {
 				ObjectId user1 = UserDAOTest.createTestUser();
 				ObjectId group1 = UserGroupDAOTest.createTestUserGroup(user1);
 				ObjectId user2 = UserDAOTest.createTestUser();
-				assertThat(DB.getUserGroupDAO().get(group1).getUsers().size()).isEqualTo(1);
-				Result result = route(fakeRequest(PUT,
-						"/group/addUserOrGroup/"+group1.toString()+"").withSession(
-						"user", user1.toString()));
-				assertThat(DB.getUserGroupDAO().get(group1).getUsers().size()).isEqualTo(2);
+				ObjectId group2 = UserGroupDAOTest.createTestUserGroup(user2);
+				assertThat(DB.getUserGroupDAO().get(group1).getUsers().size())
+						.isEqualTo(1);
+				route(fakeRequest(
+						PUT,
+						"/group/addUserOrGroup/" + group1.toString() + "?id="
+								+ user2.toString()).withSession("user",
+						user1.toString()));
+				assertThat(DB.getUserGroupDAO().get(group1).getUsers().size())
+						.isEqualTo(2);
+				route(fakeRequest(
+						PUT,
+						"/group/addUserOrGroup/" + group1.toString() + "?id="
+								+ group2.toString()).withSession("user",
+						user1.toString()));
+				assertThat(DB.getUserGroupDAO().get(group1).getUsers().size())
+						.isEqualTo(2);
+				assertThat(
+						DB.getUserGroupDAO().get(group2).getParentGroups()
+								.size()).isEqualTo(1);
+				assertThat(DB.getUserGroupDAO().get(group2).getParentGroups())
+						.contains(group1);
+				assertThat(DB.getUserDAO().get(user2).getUserGroupsIds())
+						.contains(group1);
 			}
 		});
 
