@@ -41,12 +41,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.cachedThumbnail = ko.pureComputed(function() {
 
 
-			   if(self.thumb()){
-				return self.thumb();}
+			   if(data && data.thumb){
+				return data.thumb;}
 			   else{
 				   return "img/content/thumb-empty.png";
 			   }
 			});
+		
+		
 		self.load = function (data) {
 			if (data.title == undefined) {
 				self.title("No title");
@@ -68,10 +70,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 			if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
 				self.fullres(data.fullres[0]);
-			} else {
+			} 
+			else{
 				self.fullres(self.cachedThumbnail());
 			}
-
 			if (data.description == undefined) {
 				self.description(data.title);
 			} else {
@@ -103,8 +105,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 		self.findsimilar=function(){
 		  if(self.similar().length==0){
-			self.provider().length>0? self.forsimilar(self.provider().toUpperCase()) : self.forsimilar(self.creator().toUpperCase());
-            self.similarlabel=self.provider().length>0? "PROVIDER" : "CREATOR";
+			self.creator().length>0? self.forsimilar(self.creator().toUpperCase()) : self.forsimilar(self.provider().toUpperCase());
+            self.similarlabel=self.creator().length>0? "CREATOR" : "PROVIDER";
             if(self.forsimilar().length>0){
            $.ajax({
 				type    : "post",
@@ -262,14 +264,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			itemShow(e);
 		};
 		
-		self.loadCollectionnnn = function(collection) {
-			window.location.href = 'index.html#collectionview/' + collection.dbId;		
-			
-			if (isOpen){
-				toggleSearch(event,'');
-			}
-			self.close();
-		};
+		
 		
 		self.loadItem = function () {
 			$.ajax({
@@ -291,7 +286,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 						  });
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');
-					$(".mediathumb > img").attr("src","");
 					self.open();
 					$( '.itemview' ).fadeIn();
 					
