@@ -24,10 +24,10 @@ import espace.core.Utils.Pair;
 import espace.core.Utils.LongPair;
 public class QueryBuilder {
 
-	private String baseUrl;
-	private Pair<String> query;
-	private List<Pair<String>> parameters;
-	private Object data;
+	protected String baseUrl;
+	protected Pair<String> query;
+	protected List<Pair<String>> parameters;
+	protected Object data;
 
 	
 	public QueryBuilder(String baseUrl) {

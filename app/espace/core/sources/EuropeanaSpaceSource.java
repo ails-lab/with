@@ -17,6 +17,7 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -33,6 +34,7 @@ import espace.core.AdditionalQueryModifier;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
+import espace.core.CommonFilter;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
@@ -173,6 +175,47 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
+	
+	class euroQB extends QueryBuilder{
+		
+		public euroQB() {
+			super();
+		}
+
+		public euroQB(String baseUrl) {
+			super(baseUrl);
+		}
+
+		public String getHttp() {
+			String res = getBaseUrl();
+			Iterator<Pair<String>> it = parameters.iterator();
+			boolean skipqf = false;
+			boolean added = false;
+			if (query.second != null) {
+				res += ("?" + query.getHttp());
+				added = true;
+			}
+			else{
+				skipqf = true;
+			}
+			for (; it.hasNext();) {
+				
+				Pair<String> next = it.next();
+				String string = added?"&":"?";
+				if (next.first.equals("qf") && skipqf)
+				{
+					skipqf = false;
+					res+=(string+"query="+next.second);
+					added = true;
+				} else{
+					added = true;
+					res += string + next.getHttp();
+				}
+			}
+			return res;
+		}
+
+	}
 
 	private Function<List<String>, QueryModifier> qrightwriter() {
 		Function<String, String> function = (String s) -> {
@@ -189,9 +232,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public String getHttpQuery(CommonQuery q) {
-		QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
+		QueryBuilder builder = new euroQB("http://europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", europeanaKey);
+		
 		builder.addQuery("query", q.searchTerm);
+		
 		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
