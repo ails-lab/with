@@ -68,9 +68,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 
-			if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
-				self.fullres(data.fullres[0]);
+			if (data.source!="Rijksmuseum" && data.fullres && data.fullres.length > 0) {
+				self.fullres(data.fullres);
 			} 
+			else if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
+				self.fullres(data.fullres[0]);
+			}
 			else{
 				self.fullres(self.cachedThumbnail());
 			}
@@ -122,7 +125,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				success : function(result) {
 					data=result.responces[0]!=undefined ? result.responces[0].items :null;
 					var items=[];
-					if(data!=null) 
+					if(data!=null) {
 						for (var i in data) {
 							var result = data[i];
 							 if(result !=null){
@@ -139,13 +142,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									externalId: result.externalId,
 									source: self.source()
 								  });
-						        if(record.thumb() && record.thumb().length>0)
+						        if(record.thumb() && record.thumb().length>0 && record.recordId()!=self.recordId())
 							       items.push(record);
 							}
 							 if(items.length>3){break;}
 						}	
 					self.similar().push.apply(self.similar(),items);
-					self.similar.valueHasMutated();
+					self.similar.valueHasMutated();}
 				},
 				error   : function(request, status, error) {
 					console.log(request);
