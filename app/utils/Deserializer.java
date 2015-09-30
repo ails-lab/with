@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import model.ExhibitionRecord;
 import model.Rights.Access;
 
 import org.bson.types.ObjectId;
@@ -36,6 +37,18 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 public class Deserializer {
 
+
+	public static class ExhibitionRecordDeserializer extends JsonDeserializer<ExhibitionRecord> {
+
+		@Override
+		public ExhibitionRecord deserialize(JsonParser annot,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
+			ExhibitionRecord exhRec = new ExhibitionRecord();
+			exhRec.setAnnotation(annot.getValueAsString());
+			return exhRec;
+		}
+	}
 
 	public static class CustomMapDeserializer extends JsonDeserializer<Map<ObjectId, Access>> {
 

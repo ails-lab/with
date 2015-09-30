@@ -106,27 +106,24 @@ public class ElasticIndexer {
 					for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
 						ObjectNode right = Json.newObject();
 						right.put("user", e.getKey().toString());
-						right.put("access", e.getValue().ordinal()); 
+						right.put("access", e.getValue().ordinal());
 						array.add(right);
 					}
    					doc.rawField(entry.getKey(), array.toString().getBytes());
 				} else if( entry.getKey().equals("itemCount") ) {
 					doc.field(entry.getKey(), entry.getValue().asInt());
-				} else if (entry.getKey().equals("isExhibition")) {
+				} else if ( entry.getKey().equals("isExhibition") ) {
 					doc.field(entry.getKey()+"_all", entry.getValue().asBoolean());
 					doc.field(entry.getKey(), entry.getValue().asBoolean());
+				} else if( entry.getKey().equals("exhibition") ) {
+					String introValue =  entry.getValue().get("intro").asText();
+					doc.field("intro_all", introValue);
+					doc.field("intro", introValue);
 				} else if( !entry.getKey().equals("firstEntries") &&
 						  !entry.getKey().equals("rights") &&
 						  !entry.getKey().equals("dbId")) {
-					if (entry.getKey().equals("exhibition")) {
-						String introValue =  entry.getValue().get("intro").asText();
-						doc.field("intro_all", introValue);
-						doc.field("intro", introValue);
-					}
-					else {
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
-					}
+					doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
 		} catch(IOException e) {
@@ -191,14 +188,17 @@ public class ElasticIndexer {
 				if( entry.getKey().equals("itemCount") ||
 					entry.getKey().equals("totalLikes")) {
 					doc.field(entry.getKey(), entry.getValue().asInt());
-				} else if( !entry.getKey().equals("content") &&
-					!entry.getKey().equals("tags")    &&
-
-					!entry.getKey().equals("externalId")    &&
-					!entry.getKey().equals("collectionId") &&
-					!entry.getKey().equals("dbId")) {
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
+				} else if (entry.getKey().equals("exhibitionRecord")) {
+					String introValue =  entry.getValue().get("annotation").asText();
+					doc.field("annotation_all", introValue);
+					doc.field("annotation", introValue);
+				}else if( !entry.getKey().equals("content") &&
+							!entry.getKey().equals("tags")  &&
+							!entry.getKey().equals("externalId")    &&
+							!entry.getKey().equals("collectionId") &&
+							!entry.getKey().equals("dbId")) {
+					doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
 
@@ -219,12 +219,6 @@ public class ElasticIndexer {
 			return null;
 		}
 
-		try {
-			System.out.println(doc.string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		return doc;
 	}
 
@@ -252,15 +246,15 @@ public class ElasticIndexer {
 			while( recordIt.hasNext() ) {
 				Entry<String, JsonNode> entry = recordIt.next();
 				if(	entry.getKey().equals("totalLikes") ) {
-						doc.field(entry.getKey(), entry.getValue().asInt());
+					doc.field(entry.getKey(), entry.getValue().asInt());
 				} else if (entry.getKey().equals("exhibitionRecord")) {
 					String introValue =  entry.getValue().get("annotation").asText();
 					doc.field("annotation_all", introValue);
 					doc.field("annotation", introValue);
-				}  else if( !entry.getKey().equals("content") &&
+				} else if( !entry.getKey().equals("content") &&
 							!entry.getKey().equals("dbId")) {
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
+					doc.field(entry.getKey()+"_all", entry.getValue().asText());
+					doc.field(entry.getKey(), entry.getValue().asText());
 				}
 			}
 
@@ -268,13 +262,6 @@ public class ElasticIndexer {
 		} catch (IOException e) {
 			log.error("Cannot create json document for indexing", e);
 			return null;
-		}
-
-		try {
-			System.out.println(doc.string());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 
 		return doc;
