@@ -121,7 +121,7 @@ public class UserAndGroupManager extends Controller {
 						userJSON.put("accessRights", Access.NONE.toString());
 				}
 			}
-			String image = getImageBase64(u);
+			String image = u.getThumbnailBase64();
 			if (image != null) {
 				userJSON.put("image", image);
 			}
@@ -174,7 +174,7 @@ public class UserAndGroupManager extends Controller {
 					+ "\"}"));
 		}
 	}
-	
+
 	/**
 	 * Adds a user or group to group.
 	 * <p>
@@ -184,7 +184,7 @@ public class UserAndGroupManager extends Controller {
 	 * @param id
 	 *            the user/group id to be added
 	 * @param groupId
-	 *            the group id 
+	 *            the group id
 	 * @return success message
 	 */
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
@@ -242,16 +242,5 @@ public class UserAndGroupManager extends Controller {
 			return internalServerError(Json.parse("{\"error\":\""
 					+ e.getMessage() + "\"}"));
 		}
-	}
-
-	public static String getImageBase64(UserOrGroup user) {
-		if (user.getThumbnail() != null) {
-			ObjectId photoId = user.getThumbnail();
-			Media photo = DB.getMediaDAO().findById(photoId);
-			// convert to base64 format
-			return "data:" + photo.getMimeType() + ";base64,"
-					+ new String(Base64.encodeBase64(photo.getData()));
-		} else
-			return null;
 	}
 }

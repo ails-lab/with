@@ -431,7 +431,7 @@ public class UserManager extends Controller {
 				result.put("favoritesId", DB.getCollectionDAO()
 						.getByOwnerAndTitle(new ObjectId(id), "_favorites")
 						.getDbId().toString());
-				String image = UserAndGroupManager.getImageBase64(user);
+				String image = user.getThumbnailBase64();
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);

@@ -245,7 +245,12 @@ public class GroupManager extends Controller {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			return ok(DB.getJson(group));
+			ObjectNode result = (ObjectNode) Json.parse(DB.getJson(group));
+			String image = group.getThumbnailBase64();
+			if (image != null) {
+				result.put("image", image);
+			}
+			return ok(result);
 		} catch (Exception e) {
 			log.error("Cannot retrieve group from database", e);
 			return internalServerError(Json
