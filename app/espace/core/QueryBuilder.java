@@ -43,10 +43,15 @@ public class QueryBuilder {
 	public String getHttp() {
 		String res = getBaseUrl();
 		Iterator<Pair<String>> it = parameters.iterator();
-		if (query!=null)
+		boolean added = false;
+		if (query!=null && query.second!=null){
 		res+=("?"+query.getHttp());
+		added = true;
+		}
 		for (; it.hasNext();) {
-			res += "&" + it.next().getHttp();
+			String string = added?"&":"?";
+			res += string + it.next().getHttp();
+			added = true;
 		}
 		return res;
 	}
