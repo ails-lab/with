@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import model.Rights.Access;
+import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
@@ -43,17 +44,16 @@ public class AccessManager {
 	public static boolean checkAccess(Map<ObjectId, Access> rights,
 			List<String> userIds, Action action) {
 		for (String id : userIds) {
-			if (DB.getUserDAO()
+			User user = DB.getUserDAO()
 					.getById(new ObjectId(id),
-							new ArrayList<String>(Arrays.asList("superUser")))
-					.isSuperUser()) {
+							new ArrayList<String>(Arrays.asList("superUser")));
+			if (user != null && user.isSuperUser())
 				return true;
-			}
-			if (rights.containsKey(new ObjectId(id))
+			else 
+				if (rights.containsKey(new ObjectId(id))
 					&& (rights.get(new ObjectId(id)).ordinal() > action
-							.ordinal())) {
-				return true;
-			}
+							.ordinal()))
+					return true;
 		}
 		return false;
 	}
@@ -67,17 +67,15 @@ public class AccessManager {
 			List<String> userIds) {
 		Access maxAccess = Access.NONE;
 		for (String id : userIds) {
-			if (DB.getUserDAO()
+			User user = DB.getUserDAO()
 					.getById(new ObjectId(id),
-							new ArrayList<String>(Arrays.asList("superUser")))
-					.isSuperUser()) {
+							new ArrayList<String>(Arrays.asList("superUser")));
+			if (user != null && user.isSuperUser())
 				return Access.OWN;
-			}
-			if (rights.containsKey(new ObjectId(id))) {
+			else if (rights.containsKey(new ObjectId(id))) {
 				Access access = rights.get(new ObjectId(id));
-				if (access.ordinal() > maxAccess.ordinal()) {
+				if (access.ordinal() > maxAccess.ordinal())
 					maxAccess = access;
-				}
 			}
 		}
 		return maxAccess;
