@@ -412,8 +412,10 @@ public class CollectionController extends Controller {
 
 	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
-			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, Option<Boolean> isExhibition, int offset, int count) {
-		ArrayNode result = Json.newObject().arrayNode();
+			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, 
+			Option<Boolean> isExhibition, Boolean totalHits, int offset, int count) {
+		ObjectNode result = Json.newObject().objectNode();
+		ArrayNode collArray = Json.newObject().arrayNode();
 		List<Collection> userCollections;
 		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserName, recursivelyAccessedByUserName,
@@ -427,12 +429,18 @@ public class CollectionController extends Controller {
 		}
 		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {//not logged in or ask for public collections
 			// return all public collections
-			userCollections = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, offset, count);
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, totalHits, offset, count);
+			userCollections = info.x;
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
 			for (Collection collection : userCollections) {
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				c.put("access", Access.READ.toString());
-				result.add(c);
+				collArray.add(c);
 			}
+			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
 		else { //logged in
@@ -445,10 +453,16 @@ public class CollectionController extends Controller {
 				}
 				accessedByUserOrGroup.add(recursivelyAccessedByLoggedInUser);
 			}
-			userCollections = DB.getCollectionDAO().getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, offset, count);
-			List<ObjectNode> collections = collectionWithUserData(userCollections, effectiveUserIds);
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().
+					getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, totalHits, offset, count);
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
+			List<ObjectNode> collections = collectionWithUserData(info.x, effectiveUserIds);
 			for (ObjectNode c: collections)
-				result.add(c);
+				collArray.add(c);
+			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
 	}
@@ -496,8 +510,9 @@ public class CollectionController extends Controller {
 
 	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
-			Option<MyPlayList> recursivelyAccessedByGroupName, Option<Boolean> isExhibition, int offset, int count) {
-		ArrayNode result = Json.newObject().arrayNode();
+			Option<MyPlayList> recursivelyAccessedByGroupName, Option<Boolean> isExhibition, boolean totalHits, int offset, int count) {
+		ObjectNode result = Json.newObject().objectNode();
+		ArrayNode collArray = Json.newObject().arrayNode();
 		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;
 		if (effectiveUserIds.isEmpty()) {
@@ -520,10 +535,16 @@ public class CollectionController extends Controller {
 				}
 				accessedByUserOrGroup.add(accessedByLoggedInUser);
 			}
-			List<Collection> userCollections = DB.getCollectionDAO().getShared(userId, accessedByUserOrGroup, isExhibitionBoolean, offset, count);
-			List<ObjectNode> collections = collectionWithUserData(userCollections, effectiveUserIds);
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().getShared(userId, accessedByUserOrGroup, isExhibitionBoolean, totalHits, offset, count);
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
+
+			List<ObjectNode> collections = collectionWithUserData(info.x, effectiveUserIds);
 			for (ObjectNode c: collections)
-				result.add(c);
+				collArray.add(c);
+			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
 		}
 	}

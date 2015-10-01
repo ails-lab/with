@@ -109,15 +109,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			mapping.title = {
 				create: function(options) {
 					if (options.data.indexOf('Dummy') === -1) {
-						return ko.observable(options.data);
+						return ko.observable(options.data.collectionsOrExhibitions);
 					}
 					return ko.observable('Add Title');
 				}
 			};
 			var promise = app.getUserExhibitions();
 			$.when(promise).done(function(data) {
-				console.log(data);
-				ko.mapping.fromJS(data, mapping, self.myCollections);
+				ko.mapping.fromJS(data.collectionsOrExhibitions, mapping, self.myCollections);
 			});
 			self.sharedCollections = ko.mapping.fromJS([], mapping);
 		}
@@ -125,14 +124,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var promise = app.getUserCollections();
 			$.when(promise).done(function(data) {
 				//convert rights map to array
-				var newData = convertToRightsMap(data);
+				var newData = convertToRightsMap(data.collectionsOrExhibitions);
 				ko.mapping.fromJS(newData, mapping, self.myCollections);
 			});
 			//TODO: Load more sharedCollections with scrolling
 			self.sharedCollections = ko.mapping.fromJS([], mapping);
 			var promiseShared = getCollectionsSharedWithMe();
 			$.when(promiseShared).done(function(data) {
-				ko.mapping.fromJS(convertToRightsMap(data), mapping, self.sharedCollections);
+				ko.mapping.fromJS(convertToRightsMap(data.collectionsOrExhibitions), mapping, self.sharedCollections);
 			});
 		}
 		convertToRightsMap = function(data) {
