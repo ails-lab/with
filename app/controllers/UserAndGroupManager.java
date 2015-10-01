@@ -143,8 +143,10 @@ public class UserAndGroupManager extends Controller {
 						userOrGroupnameOrEmail);
 				if (userGroup != null)
 					return getUserJson.apply(userGroup);
-				else
-					return badRequest("The string you provided does not match an existing email or username");
+				else {
+					return badRequest(Json
+							.parse("{\"error\":\"The string you provided does not match an existing email or username\"}"));
+				}
 			}
 		}
 	}
@@ -172,7 +174,19 @@ public class UserAndGroupManager extends Controller {
 					+ "\"}"));
 		}
 	}
-
+	
+	/**
+	 * Adds a user or group to group.
+	 * <p>
+	 * Right now only the administrator of the group and the superuser have the
+	 * rights to add a user/group to the group.
+	 *
+	 * @param id
+	 *            the user/group id to be added
+	 * @param groupId
+	 *            the group id 
+	 * @return success message
+	 */
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		try {
 			ObjectNode result = Json.newObject();
