@@ -137,9 +137,23 @@ public class CollectionDAO extends DAO<Collection> {
 		return new Tuple<List<Collection>, Tuple<Integer, Integer>>(collections, hits);
 	}
 	
-	public List<Collection> getCollections(Query<Collection> q, ObjectId creator, Boolean isExhibition) {
-		return this.find(q).asList();
-		
+	public Tuple<Integer, Integer> getHits(Query<Collection> q, Boolean isExhibition) {
+		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
+		if (isExhibition == null) {
+			Query<Collection> q2 = q.cloneQuery();
+			q2.field("isExhibition").equal(true);
+			q.field("isExhibition").equal(false);
+			hits.x = (int) this.find(q).countAll();
+			hits.y = (int) this.find(q2).countAll();
+		}
+		else {
+			q.field("isExhibition").equal(isExhibition);
+			if (isExhibition)
+				hits.y = (int) this.find(q).countAll();
+			else
+				hits.x = (int)  this.find(q).countAll();
+		}
+		return hits;
 	}
 	
 	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
