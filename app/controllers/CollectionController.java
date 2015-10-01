@@ -369,7 +369,7 @@ public class CollectionController extends Controller {
 		}
 		//TODO: Support recursive check for groups as well
 		if (directlyAccessedByGroupName.isDefined()) {
-			MyPlayList directlyGroupNameList = recursivelyAccessedByGroupName.get();
+			MyPlayList directlyGroupNameList = directlyAccessedByGroupName.get();
 			for (StringTuple groupAccess: directlyGroupNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
 				ObjectId groupId = DB.getUserGroupDAO().getByName(groupAccess.x).getDbId();
