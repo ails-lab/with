@@ -8,16 +8,16 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 			if (event.target.nodeName != 'INPUT' && event.target.nodeName != 'TEXTAREA') {
 				if (event.which === null) {
 					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
-			    	$("#myModal").modal('hide'); 
+			    	$("#myModal").modal('hide');
 
-					
+
 					var char=String.fromCharCode(event.which);
 					toggleSearch("focus",char);
 
 				}
 				else if (event.which !== 0 && event.charCode !== 0) {
 					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
-			    	$("#myModal").modal('hide'); 
+			    	$("#myModal").modal('hide');
 
 					var chr = String.fromCharCode(event.which);
 					toggleSearch("focus", chr);
@@ -38,6 +38,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		self.profileImage = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
 
 		editProfile       = function() { app.showPopup('edit-profile'); };
+		newOrganization   = function() { app.showPopup('new-organization'); };
 		logout            = function() { app.logout(); };
 	}
 

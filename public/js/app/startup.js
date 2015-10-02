@@ -57,6 +57,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 		viewModel: { require: 'components/organization-page/organization-page' },
 		template: { require: 'text!components/organization-page/organization-page.html' }
 	});
+	ko.components.register('new-organization', {
+		viewModel: { require: 'components/organization-page/organization-page' },
+		template: { require: 'text!components/organization-page/new-organization.html' }
+	});
 
 	// ... or for template-only components, you can just point to a .html file directly:
 	ko.components.register('empty', { template: '&nbsp;' });

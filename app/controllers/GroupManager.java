@@ -79,23 +79,15 @@ public class GroupManager extends Controller {
 		ObjectId admin;
 		UserGroup newGroup = null;
 		JsonNode json = request().body().asJson();
-		ObjectNode result = Json.newObject();
-		ObjectNode error = Json.newObject();
 		try {
 			if (json == null) {
-				result.put("error", "Invalid JSON");
-				return badRequest(result);
+				return badRequest("Invalid JSON");
 			}
 			if (!json.has("username")) {
-				error.put("username", "Must specify name for the group");
-				result.put("error", error);
-				return badRequest(result);
+				return badRequest("Must specify name for the group");
 			}
 			if (!uniqueGroupName(json.get("username").asText())) {
-				error.put("username",
-						"Group name already exists! Please specify another name.");
-				result.put("error", error);
-				return badRequest(result);
+				return badRequest("Group name already exists! Please specify another name.");
 			}
 			Class<?> clazz = Class.forName("model."
 					+ capitalizeFirst(groupType));
@@ -107,8 +99,7 @@ public class GroupManager extends Controller {
 			} else {
 				if ((adminId = AccessManager.effectiveUserId(session().get(
 						"effectiveUserIds"))).isEmpty()) {
-					result.put("error", "Must specify administrator of group");
-					return badRequest(result);
+					return internalServerError("Must specify administrator of group");
 				}
 				admin = new ObjectId(AccessManager.effectiveUserId(session()
 						.get("effectiveUserIds")));
@@ -118,9 +109,8 @@ public class GroupManager extends Controller {
 			Set<ConstraintViolation<UserGroup>> violations = Validation
 					.getValidator().validate(newGroup);
 			for (ConstraintViolation<UserGroup> cv : violations) {
-				result.put("error",
-						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
-				return badRequest(result);
+				return badRequest("[" + cv.getPropertyPath() + "] "
+						+ cv.getMessage());
 			}
 			try {
 				DB.getUserGroupDAO().makePermanent(newGroup);
@@ -131,14 +121,11 @@ public class GroupManager extends Controller {
 				DB.getUserDAO().makePermanent(user);
 			} catch (Exception e) {
 				log.error("Cannot save group to database!", e);
-				result.put("error", "Cannot save group to database");
-				return internalServerError(result);
+				return internalServerError("Cannot save group to database!");
 			}
 			return ok(Json.toJson(newGroup));
 		} catch (Exception e) {
-			log.error("Cannot create group", e);
-			return internalServerError(Json.parse("{\"error\":\""
-					+ e.getMessage() + "\"}"));
+			return internalServerError(e.getMessage());
 		}
 	}
 
@@ -169,22 +156,17 @@ public class GroupManager extends Controller {
 		String adminId = AccessManager.effectiveUserId(session().get(
 				"effectiveUserIds"));
 		if ((adminId == null) || (adminId.equals(""))) {
-			result.put("error",
-					"Only administrator of group has the right to edit the group");
-			return forbidden(result);
+			return forbidden("Only administrator of group has the right to edit the group");
 		}
 		try {
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 			if (group == null) {
-				result.put("error", "Cannot retrieve group from database!");
-				return internalServerError(result);
+				return internalServerError("Cannot retrieve group from database!");
 			}
 			if (!group.getAdminIds().contains(new ObjectId(adminId))
 					&& (!admin.isSuperUser())) {
-				result.put("error",
-						"Only administrator of group has the right to edit the group");
-				return forbidden(result);
+				return forbidden("Only administrator of group has the right to edit the group");
 			}
 			UserGroup oldVersion = group;
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -194,28 +176,24 @@ public class GroupManager extends Controller {
 			Set<ConstraintViolation<UserGroup>> violations = Validation
 					.getValidator().validate(newVersion);
 			for (ConstraintViolation<UserGroup> cv : violations) {
-				result.put("error",
+				result.put("message",
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
 			}
 			if (!violations.isEmpty()) {
 				return badRequest(result);
 			}
 			if (!uniqueGroupName(newVersion.getUsername())) {
-				result.put("error",
-						"Group name already exists! Please specify another name.");
-				return badRequest(result);
+				return badRequest("Group name already exists! Please specify another name.");
 			}
 			// update group on mongo
 			if (DB.getUserGroupDAO().makePermanent(newVersion) == null) {
 				log.error("Cannot save group to database!");
-				result.put("error", "Cannot save group to database!");
-				return internalServerError(result);
+				return internalServerError("Cannot save group to database!");
 			}
 			return ok(DB.getJson(newVersion));
 		} catch (IOException e) {
-			log.error("Cannot edit group", e);
-			return internalServerError(Json.parse("{\"error\":\""
-					+ e.getMessage() + "\"}"));
+			e.printStackTrace();
+			return internalServerError(e.getMessage());
 		}
 	}
 
@@ -232,12 +210,10 @@ public class GroupManager extends Controller {
 		try {
 			DB.getUserGroupDAO().deleteById(new ObjectId(groupId));
 		} catch (Exception e) {
-			log.error("Cannot delete group from database", e);
-			return internalServerError(Json
-					.parse("{\"error\":\"Cannot delete group from database\"}"));
+			log.error("Cannot delete group from database!", e);
+			return internalServerError("Cannot delete group from database!");
 		}
-		return ok(Json
-				.parse("{\"message\":\"Group deleted succesfully from database\"}"));
+		return ok("Group deleted succesfully from database");
 	}
 
 	/**
@@ -250,18 +226,83 @@ public class GroupManager extends Controller {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			ObjectNode result = (ObjectNode) Json.parse(DB.getJson(group));
-			String image = group.getThumbnailBase64();
-			if (image != null) {
-				result.put("image", image);
-			}
-			return ok(result);
+			return ok(DB.getJson(group));
 		} catch (Exception e) {
-			log.error("Cannot retrieve group from database", e);
-			return internalServerError(Json
-					.parse("{\"error\":\"Cannot retrieve group from database\""));
+			log.error("Cannot retrieve group from database!", e);
+			return internalServerError("Cannot retrieve group from database!");
 		}
 	}
+
+	/**
+	 * Adds a user to group.
+	 * <p>
+	 * Right now only the administrator of the group and the superuser have the
+	 * rights to add a group to the group.
+	 *
+	 * @param userId
+	 *            the user id
+	 * @param groupId
+	 *            the group id
+	 * @return success message
+	 */
+	public static Result addUserToGroup(String userId, String groupId) {
+
+		String adminId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
+		if ((adminId == null) || (adminId.equals(""))) {
+			return forbidden("Only administrator of group has the right to add users");
+		}
+		User admin = DB.getUserDAO().get(new ObjectId(adminId));
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (group == null) {
+			return internalServerError("Cannot retrieve group from database!");
+		}
+		if (!group.getAdminIds().contains(new ObjectId(adminId))
+				&& (!admin.isSuperUser())) {
+			return forbidden("Only administrator of group has the right to add users");
+		}
+		User user = DB.getUserDAO().get(new ObjectId(userId));
+		group.getUsers().add(new ObjectId(userId));
+		Set<ObjectId> parentGroups = group.getParentGroups();
+
+		if (user == null) {
+			return internalServerError("Cannot retrieve user from database!");
+		}
+		parentGroups.add(group.getDbId());
+		user.addUserGroup(parentGroups);
+
+		if (!(DB.getUserDAO().makePermanent(user) == null)
+				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+			return ok("User succesfully added to group");
+		}
+		return internalServerError("Cannot store to database!");
+
+	}
+	
+	public static Result getUserOrGroupThumbnail(String id) {
+		try {
+			User user = DB.getUserDAO().getById(new ObjectId(id), null);
+			if (user != null) {
+				ObjectId photoId = user.getThumbnail();
+				return MediaController.getMetadataOrFile(photoId.toString(),
+						true);
+			} else {
+				UserGroup userGroup = DB.getUserGroupDAO()
+						.get(new ObjectId(id));
+				if (userGroup != null) {
+					ObjectId photoId = user.getThumbnail();
+					return MediaController.getMetadataOrFile(
+							photoId.toString(), true);
+				} else
+					return badRequest(Json
+							.parse("{\"error\":\"User does not exist\"}"));
+			}
+		} catch (Exception e) {
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
+					+ "\"}"));
+		}
+	}
+
 
 	/**
 	 * Removes a user from the group.
@@ -295,6 +336,35 @@ public class GroupManager extends Controller {
 		user.recalculateGroups();
 		return ok("User successfully removed from group");
 
+	}
+
+	/**
+	 * @param name
+	 *            the group name
+	 * @return the result
+	 */
+	public static Result findByGroupName(String name, String collectionId) {
+		Function<UserGroup, Status> getGroupJson = (UserGroup group) -> {
+			ObjectNode groupJSON = Json.newObject();
+			groupJSON.put("groupId", group.getDbId().toString());
+			groupJSON.put("username", group.getUsername());
+			groupJSON.put("about", group.getAbout());
+			if (collectionId != null) {
+				Collection collection = DB.getCollectionDAO().getById(
+						new ObjectId(collectionId));
+				if (collection != null) {
+					Access accessRights = collection.getRights().get(
+							group.getDbId());
+					if (accessRights != null)
+						groupJSON.put("accessRights", accessRights.toString());
+					else
+						groupJSON.put("accessRights", Access.NONE.toString());
+				}
+			}
+			return ok(groupJSON);
+		};
+		UserGroup group = DB.getUserGroupDAO().getByName(name);
+		return getGroupJson.apply(group);
 	}
 
 	public static ArrayNode groupsAsJSON(List<UserGroup> groups, ObjectId restrictedById, boolean collectionHits) {
