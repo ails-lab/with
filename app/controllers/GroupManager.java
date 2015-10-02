@@ -367,19 +367,21 @@ public class GroupManager extends Controller {
 		return getGroupJson.apply(group);
 	}
 
-	public static ArrayNode groupsAsJSON(List<UserGroup> groups, ObjectId restrictedById) {
+	public static ArrayNode groupsAsJSON(List<UserGroup> groups, ObjectId restrictedById, boolean collectionHits) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
-			Query<Collection> q = DB.getCollectionDAO().createQuery();
-			CriteriaContainer[] criteria =  new CriteriaContainer[3];
-			criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString()).greaterThanOrEq(1);
-			criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString()).equal(3);
-			criteria[2] = DB.getCollectionDAO().createQuery().criteria("isPublic").equal(true);
-			q.and(criteria);
-			Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
-			g.put("totalCollections", hits.x);
-			g.put("totalExhiitions", hits.y);
+			if (collectionHits) {
+				Query<Collection> q = DB.getCollectionDAO().createQuery();
+				CriteriaContainer[] criteria =  new CriteriaContainer[3];
+				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString()).greaterThanOrEq(1);
+				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString()).equal(3);
+				criteria[2] = DB.getCollectionDAO().createQuery().criteria("isPublic").equal(true);
+				q.and(criteria);
+				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
+				g.put("totalCollections", hits.x);
+				g.put("totalExhiitions", hits.y);
+			}
 			result.add(g);
 		}
 		return result;
@@ -387,7 +389,7 @@ public class GroupManager extends Controller {
 
 	// TODO check user rights for these groups
 	public static Result getDescendantGroups(String groupId, String groupType,
-			boolean direct) {
+			boolean direct, boolean collectionHits) {
 		List<UserGroup> childrenGroups;
 		List<UserGroup> groups;
 		UserGroup group;
@@ -397,7 +399,7 @@ public class GroupManager extends Controller {
 
 		childrenGroups = DB.getUserGroupDAO().findByParent(parentId, type);
 		if (direct) {
-			return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId)));
+			return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId), collectionHits));
 		}
 		groups = childrenGroups;
 		while (!childrenGroups.isEmpty()) {
@@ -405,6 +407,6 @@ public class GroupManager extends Controller {
 			childrenGroups.addAll(DB.getUserGroupDAO().findByParent(
 					group.getDbId(), type));
 		}
-		return ok(groupsAsJSON(groups, new ObjectId(groupId)));
+		return ok(groupsAsJSON(groups, new ObjectId(groupId), collectionHits));
 	}
 }
