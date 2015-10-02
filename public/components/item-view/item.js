@@ -202,7 +202,6 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.recordSelect = function (e,flag) {
-			console.log("recordSelect called");
 			itemShow(e,flag);
 		};
 		
