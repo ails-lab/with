@@ -1,4 +1,4 @@
-define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
+define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','app','smoke'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
 	
 	
 		$.bridget('isotope', Isotope);
@@ -59,9 +59,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 							$(window).off("scroll.ko.scrollHandler");
 							self.updating = false;
 						});
+						
 					},
 
 					update: function (element, valueAccessor, allBindingsAccessor) {
+						 
 						var props = allBindingsAccessor().scrollOptions;
 						var offset = props.offset ? props.offset : "0";
 						var loadFunc = props.loadFunc;
@@ -88,36 +90,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				};
 
 
-			ko.bindingHandlers.homeisotope = {
+			ko.bindingHandlers.profileisotope = {
 					init: initOrUpdate('init'),
 					update: initOrUpdate('update')
 				};
 	
 					
-	function FeaturedExhibit(data){
-	  var fe=this;
-	  fe.title=ko.observable();
-	  fe.description=ko.observable();
-	  fe.dbId=ko.observable(-1);
-	  fe.thumbs=ko.observableArray();
-	  
-	  fe.load=function(data){
-	     fe.title(data.title);
-	     fe.dbId(data.dbId);
-	     fe.description(data.description);
-		  var i=0;
-		  var j=0;
-		  
-		  while (i<2 && j<data.firstEntries.length){
-			  if(data.firstEntries[j].thumbnailUrl){
-				  var thumb={url:data.firstEntries[j].thumbnailUrl,title:data.firstEntries[j].title};
-				  fe.thumbs.push(thumb);
-				  i++;}
-			    j++
-		  }}
-	  if(data != undefined) fe.load(data);
-	  
-	}		
+	
 			
 	 function Collection(data){
 		 var self = this;
@@ -164,17 +143,24 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 	}
 	
-  function MainContentModel(params) {
+  function ProviderModel(params) {
 	  this.route = params.route;
 	  var self = this;
-	  document.body.setAttribute("data-page","home");
-		
+	  document.body.setAttribute("data-page","profile");
+	  self.id = ko.observable(params.id);	
 
 	  /*---*/
 	  self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
-	  self.featured=ko.observable(null);	
-	  self.homecollections=ko.observableArray();
+	  self.collections=ko.observableArray();
+	  self.address=ko.observable('');
+	  self.description=ko.observable('');
+	  self.name=ko.observable('');
+	  self.coords=ko.observable(false);
+	  self.url=ko.observable(false);
+	  self.logo=ko.observable(false);
+	  self.hero=ko.observable(false);
+	  self.username=ko.observable(false);
 	  self.totalCollections=ko.observable(0);
 	  self.totalExhibitions=ko.observable(0);
     
@@ -183,36 +169,52 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				var c=new Collection(
 						data[i]
 						);
-				self.homecollections().push(c);
+				self.collections().push(c);
 			}
-			self.homecollections.valueHasMutated();
+			self.collections.valueHasMutated();
 		};
 		
 	  
 	  self.loadAll = function () {
-		  //this should replaced with get space collections + exhibitions
+		  var promise=self.getProviderData();
 		  
-		  var promise = self.getSpaceCollections();
-		  $.when(promise).done(function(data) {
-					self.totalCollections(data['totalCollections']);
-					self.totalExhibitions(data['totalExhibitions']);
-				    self.revealItems(data['collectionsOrExhibitions']);
-				
-			});
-		  var promise2 = self.getFeaturedExhibition();
-          $.when(promise2).done(function (data) {
+		  $.when(promise).done(function (data) {
         	  
-        	 
-        	  self.featured(new FeaturedExhibit(data));
-        	  $("#featuredExhibit").css('background-image','url('+self.featured().thumbs()[0].url+')');    
-        	  self.exhibitloaded(true);
+	            self.description(data.about);
+	            self.username(data.username);
+	            self.name(data.friendlyName !=null ? data.friendlyName : data.username);
+		        if(data.page){
+			          if(data.page.coordinates && data.page.coordinates.latitude && data.page.coordinates.longitude)
+			          self.coords("https://www.google.com/maps/embed/v1/place?q="+data.page.coordinates.latitude+","+data.page.coordinates.longitude+"&key=AIzaSyAN0om9mFmy1QN6Wf54tXAowK4eT0ZUPrU");
+			          
+			          if(data.page.address)self.address(data.page.address);
+			          if(data.page.city && data.page.country)
+			          self.address(self.address()+" "+data.page.city+ " "+ data.page.country);
+				      self.url(data.page.url);  
+			          self.logo(data.page.thumbnail ? data.page.thumbnail : '');
+			          self.hero(data.page.coverImage ? data.page.coverImage : null); 
+			          if(self.hero()){
+			        	  $(".profilebar > .wrap").css('background-image', 'url('+window.location.origin+'/media/' + self.hero().$oid+')');
+			          }
+			      }
+		          var promise2 = self.getProfileCollections();
+				  $.when(promise2).done(function(data) {
+					       self.totalCollections(data['totalCollections']);  
+					       self.totalExhibitions(data['totalExhibitions']);  
+					       self.revealItems(data['collectionsOrExhibitions']);
+					       window.EUSpaceUI.initProfile();
+					});
           });
+		  
+		 
           
 		  
 		};
-
-		self.getSpaceCollections = function () {
-			//call should be replaced with space collections+exhibitions
+		
+		
+		self.getProfileCollections = function () {
+			//call should be replaced with collection/list?isPublic=true&offset=0&count=20&isExhibition=false&directlyAccessedByGroupName=[{"orgName":self.username(), "access":"READ"}]
+			
 			return $.ajax({
 				type: "GET",
 				contentType: "application/json",
@@ -224,17 +226,21 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			});
 		};
 		
-         self.getFeaturedExhibition=function() {
-			
-			/*call must change to get featured exhibition for space*/
-	        return $.ajax({
-	            type: "GET",
-	            url: "/collection/55b747c3569e1b44eeac72b3",
-	            success: function () {
 
-	            }
-	        });
-	    };
+		self.getProviderData = function () {
+			//call should be replaced with self.id() for now use hardcoded 
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/group/"+self.id(),
+				processData: false,
+				
+			}).success (function(){
+			});
+		};
+		
+       
 		
 		self.loadNext = function () {
 			self.moreCollections();
@@ -246,17 +252,19 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			}
 			if (self.loading() === false) {
 				self.loading(true);
-				var offset = self.homecollections().length+1;
+				//replace with collection/list?isPublic=true&offset=0&count=20&isExhibition=false&directlyAccessedByGroupName=[{"orgName":self.username(), "access":"READ"}]
+				var offset = self.collections().length+1;
 				$.ajax({
 					"url": "/collection/list?access=read&count=20&offset=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
 						self.revealItems(data['collectionsOrExhibitions']);
-						self.loading(false);
+					    self.loading(false);
 					},
 					"error": function (result) {
 						self.loading(false);
+						$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 					}
 				});
 			}
@@ -285,5 +293,5 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
   
  
  
-  return { viewModel: MainContentModel, template: template };
+  return { viewModel: ProviderModel, template: template };
 });
