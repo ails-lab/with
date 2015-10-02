@@ -782,8 +782,8 @@ public class UserManager extends Controller {
 		}
 
 		md5 = u.getMd5Password();
-		if (md5 == "") {
-			// NULL didn't work so i used "", maybe this is not a good fix
+
+		if (md5==null) {
 			if (u.getFacebookId() != "") {
 				result.put("email", "User has registered with Facebook account");
 				return notFound(result); // maybe change type?
