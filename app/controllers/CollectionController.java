@@ -477,8 +477,8 @@ public class CollectionController extends Controller {
 			userJSON.put("lastName", ((User) user).getLastName());
 		}
 		else
-			userJSON.put("category", "group");
-		String image = UserAndGroupManager.getImageBase64(user);
+		userJSON.put("category", "user");
+		String image = user.getThumbnailBase64();
 		userJSON.put("accessRights", accessRights.toString());
 		if (image != null) {
 			userJSON.put("image", image);
