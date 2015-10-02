@@ -431,7 +431,7 @@ public class UserManager extends Controller {
 				result.put("favoritesId", DB.getCollectionDAO()
 						.getByOwnerAndTitle(new ObjectId(id), "_favorites")
 						.getDbId().toString());
-				String image = user.getThumbnailBase64();
+				String image = UserAndGroupManager.getImageBase64(user);
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);
@@ -579,6 +579,37 @@ public class UserManager extends Controller {
 		} catch (IllegalArgumentException e) {
 			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 		}
+	}
+
+	public static Result addUserToGroup(String uid, String gid) {
+		ObjectNode result = Json.newObject();
+
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
+		if (group == null) {
+			result.put("message", "Cannot retrieve group from database!");
+			return internalServerError(result);
+		}
+
+		group.getUsers().add(new ObjectId(uid));
+		Set<ObjectId> parentGroups = group.getAncestorGroups();
+
+		User user = DB.getUserDAO().get(new ObjectId(uid));
+		if (user == null) {
+			result.put("message", "Cannot retrieve user from database!");
+			return internalServerError(result);
+		}
+		parentGroups.add(group.getDbId());
+		user.addUserGroup(parentGroups);
+
+		if (!(DB.getUserDAO().makePermanent(user) == null)
+				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+			result.put("message", "Group succesfully added to User");
+			return ok(result);
+		}
+
+		result.put("message", "Cannot store to database!");
+		return internalServerError(result);
+
 	}
 
 	public static Result apikey() {
