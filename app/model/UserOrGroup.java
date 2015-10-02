@@ -16,7 +16,6 @@
 
 package model;
 
-import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 
@@ -27,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 
 public abstract class UserOrGroup {
-
+	
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
@@ -35,7 +34,7 @@ public abstract class UserOrGroup {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 	private String about;
-
+	
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -51,7 +50,7 @@ public abstract class UserOrGroup {
 	public void setUsername(String name) {
 		this.username = name;
 	}
-
+	
 	public ObjectId getThumbnail() {
 		return this.thumbnail;
 	}
@@ -63,7 +62,7 @@ public abstract class UserOrGroup {
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
 	}
-
+	
 	public String getAbout() {
 		return about;
 	}
@@ -71,21 +70,5 @@ public abstract class UserOrGroup {
 	public void setAbout(String about) {
 		this.about = about;
 	}
-
-	public String getThumbnailBase64() {
-		if (getThumbnail() != null) {
-			ObjectId photoId = getThumbnail();
-			Media photo = DB.getMediaDAO().findById(photoId);
-			// convert to base64 format
-			return "data:" + photo.getMimeType() + ";base64,"
-					+ new String(Base64.encodeBase64(photo.getData()));
-		} else {
-			return null;
-		}
-	}
-	
-	/*public String setThumbnailBytes() {
-		
-	}*/
 
 }

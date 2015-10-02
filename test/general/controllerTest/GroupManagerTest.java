@@ -28,12 +28,12 @@ import static play.test.Helpers.status;
 import general.TestUtils;
 import general.daoTests.UserDAOTest;
 import general.daoTests.UserGroupDAOTest;
+import junit.framework.TestCase;
 import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
 import org.junit.Assert;
-import org.junit.Test;
 
 import play.libs.Json;
 import play.mvc.Result;
@@ -45,6 +45,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import controllers.GroupManager;
 import db.DB;
 
 /**
@@ -58,14 +59,34 @@ import db.DB;
  *
  * @version $Revision$
  */
-public class GroupManagerTest {
+public class GroupManagerTest extends TestCase {
 
+	/**
+	 * Construct new test instance
+	 *
+	 * @param name
+	 *            the test name
+	 */
+	public GroupManagerTest(String name) {
+		super(name);
+	}
+
+	/**
+	 * Run the Result addUserToGroup(String, String) method test
+	 */
+	public void addUserToGroup() {
+		fail("Newly generated method - fix or disable");
+		// add test code here
+		String userId = null;
+		String groupId = null;
+		Result result = GroupManager.addUserToGroup(userId, groupId);
+		assertTrue(false);
+	}
 
 	/**
 	 * Run the Result createGroup(String, String, String) method test
 	 */
-	@Test
-	public void testCreateGroup() {
+	public void createGroup() {
 
 		running(fakeApplication(), new Runnable() {
 			@Override
@@ -117,8 +138,12 @@ public class GroupManagerTest {
 	/**
 	 * Run the Result deleteGroup(String) method test
 	 */
-	@Test
-	public void testdeleteGroup() {
+	public void deleteGroup() {
+		fail("Newly generated method - fix or disable");
+		// add test code here
+		String groupId = null;
+		Result result = GroupManager.deleteGroup(groupId);
+		assertTrue(false);
 		UserGroup parentGroup = new UserGroup();
 		DB.getUserGroupDAO().makePermanent(parentGroup);
 		running(fakeApplication(), new Runnable() {
@@ -140,8 +165,7 @@ public class GroupManagerTest {
 	/**
 	 * Run the Result editGroup(String) method test
 	 */
-	@Test
-	public void testEditGroup() {
+	public void editGroup() {
 		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
@@ -165,7 +189,6 @@ public class GroupManagerTest {
 		});
 	}
 
-	@Test
 	public void testGetDescendantGroups() {
 		running(fakeApplication(), new Runnable() {
 			@Override
@@ -178,21 +201,56 @@ public class GroupManagerTest {
 				JsonParser parser = new JsonParser();
 				JsonArray res = parser.parse(contentAsString(result))
 						.getAsJsonArray();
-				assertThat(res.size()).isEqualTo(0);
+				assertEquals(0, res.size());
 				UserGroupDAOTest.createChildGroup(group1);
 				result = route(fakeRequest(GET,
 						"/group/descendantGroups/" + group1.toString()));
 				res = parser.parse(contentAsString(result))
 						.getAsJsonArray();
-				assertThat(res.size()).isEqualTo(1);
+				assertEquals(1, res.size());
 				UserGroupDAOTest.createChildGroup(group1);
 				result = route(fakeRequest(GET,
 						"/group/descendantGroups/" + group1.toString()));
 				res = parser.parse(contentAsString(result))
 						.getAsJsonArray();
-				assertThat(res.size()).isEqualTo(2);
+				assertEquals(2, res.size());
 			}
 		});
+	}
+
+	/**
+	 * Run the Result findByGroupName(String, String) method test
+	 */
+	public void testFindByGroupName() {
+		fail("Newly generated method - fix or disable");
+		// add test code here
+		String name = null;
+		String collectionId = null;
+		Result result = GroupManager.findByGroupName(name, collectionId);
+		assertTrue(false);
+	}
+
+	/**
+	 * Run the Result getGroup(String) method test
+	 */
+	public void testGetGroup() {
+		fail("Newly generated method - fix or disable");
+		// add test code here
+		String groupId = null;
+		Result result = GroupManager.getGroup(groupId);
+		assertTrue(false);
+	}
+
+	/**
+	 * Run the Result removeUserFromGroup(String, String) method test
+	 */
+	public void testRemoveUserFromGroup() {
+		fail("Newly generated method - fix or disable");
+		// add test code here
+		String userId = null;
+		String groupId = null;
+		Result result = GroupManager.removeUserFromGroup(userId, groupId);
+		assertTrue(false);
 	}
 
 }
