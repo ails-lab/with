@@ -28,6 +28,7 @@ import org.elasticsearch.search.SearchHit;
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import elastic.ElasticUtils;
 
 public class SourceResponse {
@@ -52,7 +53,7 @@ public class SourceResponse {
 			it.comesFrom = r.getSource();
 			it.title = r.getTitle();
 			it.description = r.getDescription();
-			it.id = r.getExternalId();
+			it.id = r.getSourceId();
 			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
 			it.url.fromSourceAPI = r.getSourceUrl();
