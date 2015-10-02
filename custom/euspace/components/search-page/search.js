@@ -41,9 +41,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						$(element).isotope("destroy");
 					});
 					
-				} else {
-					 console.log("updating isotope...");
-				}
+				} 
 			};
 		}
 		

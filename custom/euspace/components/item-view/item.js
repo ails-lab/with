@@ -158,7 +158,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				},
 				error   : function(request, status, error) {
 					self.loading(false);
-					console.log(request);
+					
 				}
 			});
             }
@@ -189,7 +189,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							        var record = new Record({
 										recordId: result.recordId || result.id,
 										thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-										fullres: result.fullresolution!=null ? result.fullresolution : "",
+										fullres: result.fullresolution!=null && result.fullersolution!="null"? result.fullresolution : "",
 										title: result.title!=null? result.title:"",
 										view_url: result.url.fromSourceAPI,
 										creator: result.creator!==undefined && result.creator!==null? result.creator : "",
@@ -209,7 +209,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					},
 					error   : function(request, status, error) {
 						self.loading(false);
-						console.log(request);
+						
 					}
 				});
 	            
