@@ -43,8 +43,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 							$(element).isotope("destroy");
 						});
 						
-					} else {
-						 console.log("updating isotope...");
 					}
 				};
 			}
@@ -269,8 +267,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	  
 	  self.filter=function(data, event) {
-		  				console.log(event);
-					  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
+		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
 					  $(event.currentTarget).siblings().removeClass("active");
 					  $(event.currentTarget).addClass("active");
 					  $( settings.mSelector ).isotope({ filter: selector });

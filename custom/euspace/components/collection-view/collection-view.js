@@ -42,9 +42,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						$(element).isotope("destroy");
 					});
 					
-				} else {
-					 console.log("updating isotope...");
-				}
+				} 
 			};
 		}
 		
@@ -289,7 +287,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.itemCount);
 						self.revealItems(data.records);
 						self.loading(false);
 					},
