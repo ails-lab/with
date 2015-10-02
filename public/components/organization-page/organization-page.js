@@ -55,7 +55,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 			url: ko.observable(),
 			coverImage: ko.observable(),
 			coverThumbnail: ko.observable(),
-			featuredCollections: ko.observableArray(),
+			// featuredCollections: ko.observableArray(),
 			coordinates: {
 				latitude: ko.observable(),
 				longitude: ko.observable()
@@ -142,7 +142,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 					self.page.url(obj.page.url);
 					self.page.coverImage(obj.page.coverImage);
 					self.page.coverThumbnail(obj.page.coverThumbnail);
-					self.featuredCollections = ko.mapping(obj.page.featuredCollections); // TODO: Validate it is working
+					// self.featuredCollections = ko.mapping(obj.page.featuredCollections); // TODO: Validate it is working
 					self.page.coordinates.longitude(obj.page.coordinates.longitude);
 					self.page.coordinates.latitude(obj.page.coordinates.latitude);
 				},
