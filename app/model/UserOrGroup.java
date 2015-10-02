@@ -83,5 +83,9 @@ public abstract class UserOrGroup {
 			return null;
 		}
 	}
+	
+	/*public String setThumbnailBytes() {
+		
+	}*/
 
 }

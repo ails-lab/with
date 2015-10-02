@@ -183,3 +183,15 @@ display: none;
     margin-bottom: 3px;
     z-index: 1;
 }
+
+.readBorder {
+	border: 3px solid grey;
+}
+
+.writeBorder {
+	border: 3px solid green;
+}
+
+.ownBorder {
+	border: 3px solid #ee656d;
+}

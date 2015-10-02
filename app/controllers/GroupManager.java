@@ -17,6 +17,7 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -29,6 +30,9 @@ import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.common.lang3.ArrayUtils;
+import org.mongodb.morphia.query.CriteriaContainer;
+import org.mongodb.morphia.query.Query;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -37,6 +41,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -292,10 +297,21 @@ public class GroupManager extends Controller {
 
 	}
 
-	public static ArrayNode groupsAsJSON(List<UserGroup> groups) {
+	public static ArrayNode groupsAsJSON(List<UserGroup> groups, ObjectId restrictedById, boolean collectionHits) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
+			if (collectionHits) {
+				Query<Collection> q = DB.getCollectionDAO().createQuery();
+				CriteriaContainer[] criteria =  new CriteriaContainer[3];
+				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString()).greaterThanOrEq(1);
+				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString()).equal(3);
+				criteria[2] = DB.getCollectionDAO().createQuery().criteria("isPublic").equal(true);
+				q.and(criteria);
+				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
+				g.put("totalCollections", hits.x);
+				g.put("totalExhiitions", hits.y);
+			}
 			result.add(g);
 		}
 		return result;
@@ -303,24 +319,24 @@ public class GroupManager extends Controller {
 
 	// TODO check user rights for these groups
 	public static Result getDescendantGroups(String groupId, String groupType,
-			boolean direct) {
-		List<UserGroup> parentGroups;
+			boolean direct, boolean collectionHits) {
+		List<UserGroup> childrenGroups;
 		List<UserGroup> groups;
 		UserGroup group;
 
 		ObjectId parentId = new ObjectId(groupId);
 		GroupType type = GroupType.valueOf(capitalizeFirst(groupType));
 
-		parentGroups = DB.getUserGroupDAO().findByParent(parentId, type);
+		childrenGroups = DB.getUserGroupDAO().findByParent(parentId, type);
 		if (direct) {
-			return ok(groupsAsJSON(parentGroups));
+			return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId), collectionHits));
 		}
-		groups = parentGroups;
-		while (!parentGroups.isEmpty()) {
-			group = parentGroups.remove(0);
-			parentGroups.addAll(DB.getUserGroupDAO().findByParent(
+		groups = childrenGroups;
+		while (!childrenGroups.isEmpty()) {
+			group = childrenGroups.remove(0);
+			childrenGroups.addAll(DB.getUserGroupDAO().findByParent(
 					group.getDbId(), type));
 		}
-		return ok(groupsAsJSON(groups));
+		return ok(groupsAsJSON(groups, new ObjectId(groupId), collectionHits));
 	}
 }

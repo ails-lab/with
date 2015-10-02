@@ -16,6 +16,7 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
@@ -27,7 +28,10 @@ import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
+
+import com.mongodb.Cursor;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -107,28 +111,80 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.createQuery().or(criteria);
 	}
 	
-	public List<Collection> getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
-			Boolean isExhibition, int offset, int count) {
+	public Tuple<List<Collection>, Tuple<Integer, Integer>> getCollectionsAndHits(Query<Collection> q, 
+			Boolean isExhibition) {
+		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
+		QueryResults<Collection> result;
+		List<Collection> collections = new ArrayList<Collection>();
+		if (isExhibition == null) {
+			result = this.find(q);
+			collections = result.asList();
+			Query<Collection> q2 = q.cloneQuery();
+			q2.field("isExhibition").equal(true);
+			q.field("isExhibition").equal(false);
+			hits.x = (int) this.find(q).countAll();
+			hits.y = (int) this.find(q2).countAll();
+		}
+		else {
+			q.field("isExhibition").equal(isExhibition);
+			result = this.find(q);
+			collections = result.asList();
+			if (isExhibition)
+				hits.y = (int) result.countAll();
+			else
+				hits.x = (int) result.countAll();
+		}
+		return new Tuple<List<Collection>, Tuple<Integer, Integer>>(collections, hits);
+	}
+	
+	public Tuple<Integer, Integer> getHits(Query<Collection> q, Boolean isExhibition) {
+		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
+		if (isExhibition == null) {
+			Query<Collection> q2 = q.cloneQuery();
+			q2.field("isExhibition").equal(true);
+			q.field("isExhibition").equal(false);
+			hits.x = (int) this.find(q).countAll();
+			hits.y = (int) this.find(q2).countAll();
+		}
+		else {
+			q.field("isExhibition").equal(isExhibition);
+			if (isExhibition)
+				hits.y = (int) this.find(q).countAll();
+			else
+				hits.x = (int)  this.find(q).countAll();
+		}
+		return hits;
+	}
+	
+	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition, boolean totalHits, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
 		if (creator != null)
 			q.field("ownerId").equal(creator);
-		if (isExhibition != null)
-			q.field("isExhibition").equal(isExhibition);
+		/*if (isExhibition != null)
+			q.field("isExhibition").equal(isExhibition)*/
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
 		}
 		if (criteria.length > 0)
 			q.and(criteria);
-		return this.find(q).asList();
+		if (totalHits) {
+			return getCollectionsAndHits(q, isExhibition);
+		}
+		else {
+			if (isExhibition != null)
+				q.field("isExhibition").equal(isExhibition);
+			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
+		}
 	}
 	
-	public List<Collection> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
-			Boolean isExhibition, int offset, int count) {
+	public Tuple<List<Collection>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
+			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
 		q.field("ownerId").notEqual(userId);
-		if (isExhibition != null)
-			q.field("isExhibition").equal(isExhibition);
+		/*if (isExhibition != null)
+			q.field("isExhibition").equal(isExhibition);*/
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
@@ -136,14 +192,21 @@ public class CollectionDAO extends DAO<Collection> {
 		//criteria =ArrayUtils.add(criteria, this.createQuery().criteria("rights." + userId.toHexString()).notEqual(3));
 		if (criteria.length > 0)
 			q.and(criteria);
-		return this.find(q).asList();
+		if (totalHits) {
+			return getCollectionsAndHits(q, isExhibition);
+		}
+		else {
+			if (isExhibition != null)
+				q.field("isExhibition").equal(isExhibition);
+			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
+		}
 	}
 	
-	public List<Collection> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
-			Boolean isExhibition, int offset, int count) {
+	public Tuple<List<Collection>, Tuple<Integer, Integer>> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count);
-		if (isExhibition != null)
-			q.field("isExhibition").equal(isExhibition);
+		/*if (isExhibition != null)
+			q.field("isExhibition").equal(isExhibition);*/
 		if (creator != null)
 			q.field("ownerId").equal(creator);
 		Criteria[] criteria = {this.createQuery().criteria("isPublic").equal(true)};
@@ -152,14 +215,14 @@ public class CollectionDAO extends DAO<Collection> {
 		}
 		if (criteria.length > 0)
 			q.and(criteria);
-		return this.find(q).asList();
-	}
-
-
-	public List<Collection> getPublic(int offset, int count) {
-		Query<Collection> q = this.createQuery().field("isPublic").equal(true)
-				.field("isExhibition").equal(false).offset(offset).limit(count);
-		return this.find(q).asList();
+		if (totalHits) {
+			return getCollectionsAndHits(q, isExhibition);
+		}
+		else {
+			if (isExhibition != null)
+				q.field("isExhibition").equal(isExhibition);
+			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
+		}
 	}
 
 	public User getCollectionOwner(ObjectId id) {

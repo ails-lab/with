@@ -154,7 +154,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
-				sessionStorage.setItem('PublicCollections', JSON.stringify(data));
+				sessionStorage.setItem('PublicCollections', JSON.stringify(data.collectionsOrExhibitions));
 			}).fail(function (request, status, error) {
 
 			//var err = JSON.parse(request.responseText);
@@ -176,7 +176,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
 
 			function (data) {
-				var array = JSON.parse(JSON.stringify(data));
+				var array = JSON.parse(JSON.stringify(data.collectionsOrExhibitions));
 				var editables = [];
 				array.forEach(function (item) {
 					editables.push({
@@ -201,7 +201,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=false"
+			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=false&totalHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
