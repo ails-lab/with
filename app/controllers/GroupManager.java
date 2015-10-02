@@ -380,7 +380,7 @@ public class GroupManager extends Controller {
 				q.and(criteria);
 				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
 				g.put("totalCollections", hits.x);
-				g.put("totalExhiitions", hits.y);
+				g.put("totalExhibitions", hits.y);
 			}
 			result.add(g);
 		}
