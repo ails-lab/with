@@ -49,7 +49,7 @@
 				</div>
  				<div class="row">
 					<div class="col-sm-12">
-						<div class="form-group">
+						<div class="form-group" data-bind="validationElement: about">
 							<label>Description</label>
 							<textarea class="form-control" rows="3" data-bind="value: about"></textarea>
 						</div>
@@ -314,7 +314,7 @@
 				</div>
 				<div class="row">
 					<div class="col-sm-12">
-						<div class="form-group" data-bind="validationElement: url">
+						<div class="form-group">
 							<label for="url">URL</label>
 							<input type="text" class="form-control" id="url" placeholder="URL" data-bind="value: page.url, valueUpdate: 'afterkeypress'" />
 						</div>
@@ -325,10 +325,9 @@
 						<div class="form-group" data-bind="validationElement: username">
 							<label for="username">Page URL</label>
 							<div class="input-group">
-								<div class="input-group-addon" data-bind="text: baseURL"></div>
-								<input type="text" class="form-control" id="username" placeholder="name" data-bind="value: username, valueUpdate: 'afterkeypress'" />
+								<span class="input-group-addon" data-bind="text: baseURL"></span>
+								<input type="text" class="form-control" id="username" placeholder="pageurl" data-bind="value: username, valueUpdate: 'afterkeypress'" />
 							</div>
-							<span id="helpBlock" class="help-block">The name will identify the Organization, should not contains spaces and unique.</span>
 						</div>
 					</div>
 				</div>

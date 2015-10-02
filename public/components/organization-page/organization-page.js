@@ -1,10 +1,26 @@
-define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', , 'jquery.fileupload'], function (ko, template, app) {
+define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'jquery.fileupload'], function (ko, template, app) {
 
 	ko.validation.init({
 		errorElementClass: 'has-error',
 		errorMessageClass: 'help-block',
 		decorateInputElement: true
 	});
+
+	/* Custom bindingHandler for error message */
+	ko.bindingHandlers.validationCore = {
+		init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+			var span = document.createElement('SPAN');
+			span.className = 'help-block';
+			var parent = $(element).parent().closest
+			(".input-group");
+			if (parent.length > 0) {
+				$(parent).after(span);
+			} else {
+				$(element).after(span);
+			}
+			ko.applyBindingsToNode(span, { validationMessage: valueAccessor() });
+		}
+	};
 
 	function OrganizationViewModel(params) {
 		var self = this;
@@ -79,8 +95,6 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 				self.page.coverThumbnail(urlID);
 			},
 			error: function (e, data) {
-				console.log(e);
-				console.log(data);
 				$.smkAlert({
 					text: 'Error uploading the file',
 					type: 'danger',
@@ -92,15 +106,12 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		// Getting the coordinates from Google Maps is done asynchronously, so we have to pass the create/update functions
 		// as parameters to be used as callbacks
 		self.getCoordinatesAndSubmit = function (submitFunc) {
-			console.log('Get Coordinates Function');
 			if (self.page.address && self.page.city && self.page.country) {
 				var address = self.page.address() + ', ' + self.page.city() + ', ' + self.page.country();
 				var geocoder = new google.maps.Geocoder();
 				geocoder.geocode({
 					'address': address
 				}, function (results, status) {
-					console.log(status);
-					console.log(results);
 					if (status == google.maps.GeocoderStatus.OK) {
 						self.page.coordinates.latitude(results[0].geometry.location.lat());
 						self.page.coordinates.longitude(results[0].geometry.location.lng());
@@ -143,7 +154,6 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		};
 
 		self.submit = function (type) {
-			console.log('Submit Function');
 			if (self.validationModel.isValid()) {
 				if (type === 'new') {
 					self.getCoordinatesAndSubmit(self.create);
@@ -153,10 +163,12 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 					console.log('Unknown type: ' + type);
 				}
 			}
+			else {
+				self.validationModel.errors.showAllMessages();
+			}
 		};
 
 		self.create = function () {
-			console.log('Create Function');
 			var data = {
 				username: self.username,
 				friendlyName: self.friendlyName,
@@ -174,7 +186,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 				data: ko.toJSON(data),
 				success: function (data, text) {
 					// TODO: Notification for success and redirect to the organization page
-					console.log('Success!');
+					self.closeWindow();
 				},
 				error: function (request, status, error) {
 					// TODO: Display error message
