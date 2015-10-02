@@ -52,7 +52,7 @@ public class SourceResponse {
 			it.comesFrom = r.getSource();
 			it.title = r.getTitle();
 			it.description = r.getDescription();
-			it.id = r.getSourceId();
+			it.id = r.getDbId().toHexString();
 			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
 			it.url.fromSourceAPI = r.getSourceUrl();

@@ -22,10 +22,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.facebook='';
 		self.twitter='';
 		self.mail='';
-		self.forsimilar=ko.observable("").extend({ uppercase: true });
-		self.similarlabel='';
+		self.forrelated=ko.observable("").extend({ uppercase: true });
+		self.relatedlabel='';
 		self.loc=ko.observable('');
-		
+		self.similarsearch=false;
+		self.relatedsearch=false;
+		self.loading=ko.observable(false);
 		self.pinterest=function() {
 		    var url = encodeURIComponent(self.loc());
 		    var media = encodeURIComponent(self.fullres());
@@ -50,6 +52,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		
 		
 		self.load = function (data) {
+			self.loading(true);
 			if (data.title == undefined) {
 				self.title("No title");
 			} else {
@@ -101,22 +104,24 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.twitter='https://twitter.com/share?url='+encodeURIComponent(self.loc())+'&text='+encodeURIComponent(self.title()+" on "+window.location.host)+'"';
 			self.mail="mailto:?subject="+self.title()+"&body="+encodeURIComponent(self.loc());
 			
-			
+			self.loading(false);
 	
 			
 		};
 
 		self.findsimilar=function(){
-		  if(self.similar().length==0){
-			self.creator().length>0? self.forsimilar(self.creator().toUpperCase()) : self.forsimilar(self.provider().toUpperCase());
-            self.similarlabel=self.creator().length>0? "CREATOR" : "PROVIDER";
-            if(self.forsimilar().length>0){
+		  if(self.related().length==0 && self.relatedsearch==false){
+			self.relatedsearch=true;  
+			self.creator().length>0? self.forrelated(self.creator().toUpperCase()) : self.forrelated(self.provider().toUpperCase());
+            self.relatedlabel=self.creator().length>0? "CREATOR" : "PROVIDER";
+            if(self.forrelated().length>0){
+            	self.loading(true);
            $.ajax({
 				type    : "post",
 				url     : "/api/advancedsearch",
 				contentType: "application/json",
 				data     : JSON.stringify({
-					searchTerm: self.forsimilar(),
+					searchTerm: self.forrelated(),
 					page: 1,
 					pageSize:10,
 				    source:[self.source()],
@@ -147,16 +152,68 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							}
 							 if(items.length>3){break;}
 						}	
-					self.similar().push.apply(self.similar(),items);
-					self.similar.valueHasMutated();}
+					self.related().push.apply(self.related(),items);
+					self.related.valueHasMutated();}
+					self.loading(false);
 				},
 				error   : function(request, status, error) {
+					self.loading(false);
 					console.log(request);
 				}
 			});
             }
 			}
-            //missing find related
+		  if(self.similar().length==0 && self.similarsearch==false){
+				self.similarsearch=true;  
+				
+				self.loading(true);
+	           $.ajax({
+					type    : "post",
+					url     : "/api/advancedsearch",
+					contentType: "application/json",
+					data     : JSON.stringify({
+						searchTerm: self.title(),
+						page: 1,
+						pageSize:10,
+					    source:[self.source()],
+					    filters:[]
+					}),
+					success : function(result) {
+						data=result.responces[0]!=undefined ? result.responces[0].items :null;
+						var items=[];
+						if(data!=null) {
+							for (var i in data) {
+								var result = data[i];
+								 if(result !=null){
+										
+							        var record = new Record({
+										recordId: result.recordId || result.id,
+										thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
+										fullres: result.fullresolution!=null ? result.fullresolution : "",
+										title: result.title!=null? result.title:"",
+										view_url: result.url.fromSourceAPI,
+										creator: result.creator!==undefined && result.creator!==null? result.creator : "",
+										provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+										rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
+										externalId: result.externalId,
+										source: self.source()
+									  });
+							        if(record.thumb() && record.thumb().length>0 && record.recordId()!=self.recordId())
+								       items.push(record);
+								}
+								 if(items.length>3){break;}
+							}	
+						self.similar().push.apply(self.similar(),items);
+						self.similar.valueHasMutated();}
+						self.loading(false);
+					},
+					error   : function(request, status, error) {
+						self.loading(false);
+						console.log(request);
+					}
+				});
+	            
+				}
 		}
 		
 		self.sourceImage = ko.pureComputed(function () {
