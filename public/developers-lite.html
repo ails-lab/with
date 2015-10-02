@@ -25,13 +25,11 @@
 <script src='js/apidoc/swagger-ui/lib/highlight.7.3.pack.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/marked.js' type='text/javascript'></script>
 <script src='js/apidoc/swagger-ui/lib/swagger-oauth.js' type='text/javascript'></script>
-<script src="js/apidoc/JSONspecs.js"></script>
 
 <script>
 
 	var swaggerUi = new SwaggerUi({
-  		url:"http://with.image.ntua.gr",
-  		spec : getSpecs(),
+  		url:"http://with.image.ntua.gr/assets/apispecs.json",
   		dom_id:"swagger-ui-container"
 	});
 
@@ -49,7 +47,11 @@
 			<div id='header'>
   				<div class="swagger-ui-wrap">
     				<a id="logo" href="http://swagger.io">swagger</a>
-  			</div>
+    				<div class="return-button">
+  				   		<a id="logoWITH" href="http://with.image.ntua.gr">Return to WITH</a>
+  					</div>
+    				
+  				</div>
 		</div>
 	
 		<div id="swagger-ui-container" class="swagger-ui-wrap"></div>

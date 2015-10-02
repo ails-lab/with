@@ -3,7 +3,7 @@
     "info": {
         "version": "v1",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect frequent changes. We will keep this documentation updated and this text will include a memo of the latest changes. You can read the full log here:\n```\nhttp://WITH.com\n```\n"
+        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n"
     },
     "paths": {
         "/api/search": {
@@ -32,7 +32,10 @@
                                     "type": "integer"
                                 },
                                 "source": {
-                                    "type": "string"
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
                                 }
                             }
                         }
@@ -45,6 +48,81 @@
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/Record"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Bad request",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/advancedsearch": {
+            "post": {
+                "tags": [
+                    "Search"
+                ],
+                "summary": "Advanced search with filters (faceted sarch).",
+                "description": "An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values. Bear in mind we are aware of a small typographical error, the field \"responces\" will be changed to \"responses\".",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "required": true,
+                        "description": "Search parameters.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "searchTerm": {
+                                    "type": "string"
+                                },
+                                "page": {
+                                    "type": "integer"
+                                },
+                                "pageSize": {
+                                    "type": "integer"
+                                },
+                                "source": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "filters": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "filterID": {
+                                                "type": "string"
+                                            },
+                                            "values": {
+                                                "type": "array",
+                                                "items": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Search"
                             }
                         }
                     },
@@ -129,13 +207,114 @@
                 }
             }
         },
+        "/group/create": {
+            "post": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Create a new group.",
+                "description": "Creates a new group and stores it at the database."
+            }
+        },
+        "/organization/create": {
+            "post": {
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Create a new organization.",
+                "description": "Creates a new organization and stores it at the database."
+            }
+        },
+        "/project/create": {
+            "post": {
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Create a new project.",
+                "description": "Creates a new project and stores it at the database."
+            }
+        },
+        "/group/{groupID}": {
+            "parameters": [
+                {
+                    "name": "groupID",
+                    "in": "path",
+                    "description": "Id of a group.",
+                    "type": "string"
+                }
+            ],
+            "put": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Edit a group.",
+                "description": "Changes attributes of an existing group."
+            },
+            "get": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Retrieve group info.",
+                "description": "Retrieves attributes of a group from the database."
+            },
+            "delete": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Delete a group.",
+                "description": "Removes a group from the database."
+            }
+        },
+        "/group/addUser/{groupID}": {
+            "parameters": [
+                {
+                    "name": "groupID",
+                    "in": "path",
+                    "description": "Id of a group.",
+                    "type": "string"
+                }
+            ],
+            "put": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Add a user to a group.",
+                "description": "Adds a user to the group with the group ID specified in the path."
+            }
+        },
+        "/group/removeUser/{groupID}": {
+            "parameters": [
+                {
+                    "name": "groupID",
+                    "in": "path",
+                    "description": "Id of a group.",
+                    "type": "string"
+                }
+            ],
+            "put": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Removes a user from a group.",
+                "description": "Removes a user from a group with the group ID specified in the path."
+            }
+        },
+        "/group/findByGroupName": {
+            "get": {
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Find a group by name.",
+                "description": "Retrieves the specified group's attributes."
+            }
+        },
         "/collection/create": {
             "post": {
                 "tags": [
                     "Collection"
                 ],
                 "summary": "Create a new collection.",
-                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required. Note that calls to this path can also be used for exhibitions. At least one user must be logged in for the session and will be automatically retrieved. The owner of the collection will be the first user.",
+                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord```. Fields with asterisk are required. Note that calls to this path can also be used for exhibitions. A user must be logged in for the session and will be automatically retrieved. This user will be the owner of this collection.",
                 "parameters": [
                     {
                         "in": "body",
@@ -1402,6 +1581,114 @@
                 "position": {
                     "description": "default is 0",
                     "type": "integer"
+                }
+            }
+        },
+        "Filters": {
+            "description": "This JSON Array contains details about the different filter values available as well as counts of records for each filter.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "filterName": {
+                        "type": "string"
+                    },
+                    "filterID": {
+                        "type": "string"
+                    },
+                    "suggestedValues": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "value": {
+                                    "type": "string"
+                                },
+                                "count": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "Responses": {
+            "description": "This Array contains results from each external source, seperated in respecting objects. Note that the facets field is NOT used in the faceted search. The filters field contains filters seperated for the corresponding source.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string"
+                    },
+                    "totalCount": {
+                        "type": "integer"
+                    },
+                    "startIndex": {
+                        "type": "integer"
+                    },
+                    "count": {
+                        "type": "integer"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Record"
+                        }
+                    },
+                    "source": {
+                        "type": "string"
+                    },
+                    "facets": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "type": "string"
+                                },
+                                "fields": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "label": {
+                                                "type": "string"
+                                            },
+                                            "count": {
+                                                "type": "integer"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Filters"
+                        }
+                    }
+                }
+            }
+        },
+        "Search": {
+            "description": "The search response contains two JSON array objects. Responses contains objects corresponding to each external source queried for the search. Filters contains aggregated filters from all the available sources. Inside the response array objects however, there are filter objects that contain the filters for each individual source.",
+            "type": "object",
+            "properties": {
+                "responses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Responses"
+                    }
+                },
+                "filters": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Filters"
+                    }
                 }
             }
         }

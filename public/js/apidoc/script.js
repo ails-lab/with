@@ -1,6 +1,40 @@
 
 
 
+function apiKeyClick(){
+	
+	$.ajax({
+		type    : "get",
+		url     : "/user/apikey/create",
+		success : function(data) {
+			// Show message that an email was sent
+			$("#myModal").find("h4").html("API key requested!");
+			$("#myModal").find("#popupText").html("<p>An email was successfuly sent. " +
+					"Follow the instructions to create a new password.</p>");
+			$("#myModal").modal('show');
+		},
+		error   : function(request, status, error) {
+			//var err = JSON.parse(request.responseText, function(k,v){
+			//	alert(k);
+			//	alert(v);
+			//			});
+
+			var err = JSON.parse(request.responseText);
+			$("#myModal").find("h4").html("Email not sent");
+			$("#myModal").find("#popupText").html("<p>" + err.error.error + "</p>");
+			$("#myModal").find("h4").html("Email not sent");
+			$("#myModal").modal('show');
+
+		}
+	});
+
+    return false;
+
+}
+
+
+
+
  //  <script type="text/javascript">
         jQuery.browser = jQuery.browser || {};
         (function () {
@@ -20,12 +54,11 @@
                 url = decodeURIComponent(url[1]);
             } else {
  
-                url = "http://with.image.ntua.gr";
+                url = "http://with.image.ntua.gr/assets/apispecs.json";
             }
  
             window.swaggerUi = new SwaggerUi({
                 url: url,
-                spec : getSpecs(),
                 dom_id: "swagger-ui-container",
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
                 onComplete: function (swaggerApi, swaggerUi) {
