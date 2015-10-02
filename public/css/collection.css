@@ -163,29 +163,30 @@ display: none;
 
 .userΙmage {
 	position: relative;
+	height: 90px;
 }
 
 .rightsIcon {
 	position: absolute;
     z-index:99;
     top: 15px;  
-    left: 32px;  
-}
-
-.btn-group-vertical .topRightsIcon{
-	    left: 32px;
+    left: 36.5px;
 }
 
 .btn-group-vertical .topRightsIcon .btn {
 	border-bottom-right-radius: 0;
  	border-top-right-radius: 0;
 	border-radius: 0;
-	margin-left: 0;
+	margin-left: -3px;
 	margin-right: 0;
+	display: inline;
 }
 
-.deleteIcon .btn {
-	width: 50%;
+.deleteIcon {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    margin: 0 0 0 8px;
+    width: 55% !important;
 }
 
 .topOfModal {
@@ -194,9 +195,17 @@ display: none;
 
 .userPhoto {
 	max-width: 70px;
-	max-height: 70px;
+	max-height: 80px;
     margin-bottom: 3px;
     z-index: 1;
+}
+
+.overflowText {
+	overflow: hidden;
+	max-width: 80px;
+	position: relative;
+	display: inline-block;
+	text-overflow:ellipsis;
 }
 
 .readBorder {

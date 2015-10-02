@@ -333,21 +333,23 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.shareCollection = function(userData, clickedRights) {
-			if (userData.category == "group") {
-				self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user group will acquire these rights.", function() {
-					self.shareCollection2(userData, clickedRights);
-				});
-			}
-		}
-		
-		self.shareCollection2 = function(userData, clickedRights) {
-			if (clickedRights === "OWN") {
+			if (userData.category == "group" && clickedRights === "OWN") 
+					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
+							" group will acquire these rights. Sharing with others means that they will have the right to delete" +
+							" your collection, as well as share it with others.", function() {
+						self.callShareAPI(userData, clickedRights);
+					});
+			else if (userData.category == "group")
+					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
+							" group will acquire these rights.", function() {
+						self.callShareAPI(userData, clickedRights);
+					});
+			else if (clickedRights === "OWN") 
 				self.showInfoPopup("Are you sure?", "Sharing with others means that they will have the right to delete your collection, " +
 						"as well as share it with others.", function() {
 					self.callShareAPI(userData, clickedRights);
 				});
-			}
-			else
+			else 
 				self.callShareAPI(userData, clickedRights);
 		}
 		
