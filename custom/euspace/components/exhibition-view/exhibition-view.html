@@ -1,0 +1,96 @@
+
+<!-- menu bar-->
+<nav class="titlebar exhibition">
+    <div class="container">
+        <!-- title--><span class="title" data-bind="text:exhName"></span>
+        <!-- action-->
+        <ul class="action">
+            <li class="hidden"><a href="#" title="#"><img src="img/ic-expand.png"></a></li>
+            <li><a href="#" title="#"><img src="img/ic-close.png"></a></li>
+        </ul>
+    </div>
+</nav>
+<!-- exhibition carousel-->
+<section class="exhibitionplayer">
+    <!-- carousel-->
+    <!--  ko if: exhItems().length > 0 -->
+    <div data-bind="backgroundImage: exhItems()[0].cachedThumbnail()" class="wrap">
+        <div class="carouselexhibition hue">
+            <!-- item-->
+            <div class="item main">
+                <div class="container">
+                    <!-- title-->
+                    <h1 class="title" data-bind="text: exhName"></h1>
+                    <div class="description">
+                        <p data-bind="text: desc"></p>
+                    </div><a data-bind="click: startExhibition" title="START EXHIBITION" class="btn btn-blue">START EXHIBITION</a>
+                </div>
+            </div>
+            <!-- items-->
+            <!-- ko foreach: exhItems -->
+            <div data-bind="css: css">
+                <div class="container">
+                    <!-- image-->
+                    <div class="imagewrap"><img data-bind="attr: {src: cachedThumbnail}" alt="">
+                        <ul class="action">
+                            <li class="zoom"><a data-bind="attr: {href: cachedThumbnail, 'title': title}" href="img/content/img-exhibition-1.png" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                            <li class="view"><a data-bind="attr: {href: view_url}" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
+                        </ul>
+                    </div>
+                    <!-- title-->
+                    <div class="textbox">
+                        <div class="wrap">
+                            <h2 data-bind="text: title"></h2>
+                            <p data-bind="text: annotation"></p>
+                            <div class="expand"><a href="#" title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /ko -->
+
+            <div id="more" data-bind="visible: loading ,scroll: exhItems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+
+            <!-- item-->
+            <div class="item credit">
+                <div class="container">
+                    <!-- wrap-->
+                    <div class="creditwrap">
+                        <!-- title-->
+                        <h1 class="title">CREDIT</h1>
+                        <!-- wrap-->
+                        <div class="row">
+                            <!-- left-->
+                            <div class="left">
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                    incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud
+                                    exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                                </p>
+                                <p>
+                                    Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore
+                                    eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
+                                    in culpa qui officia deserunt mollit anim id est laborum.
+                                </p>
+                            </div>
+                            <!-- right-->
+                            <div class="right">
+                                <p>
+                                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+                                    incididunt ut labore et dolore magna aliqua. Ut enim adminim veniam, quis nostrud
+                                    exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                                </p>
+                                <p>
+                                    Duis aute irure dolor in reprehenderit in voluptate velit essecillum dolore
+                                    eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt
+                                    in culpa qui officia deserunt mollit anim id est laborum.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /ko -->
+</section>

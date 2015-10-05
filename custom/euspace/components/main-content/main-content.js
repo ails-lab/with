@@ -190,11 +190,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
 		  
-		  var promise = self.getSpaceCollections();
-		  $.when(promise).done(function(data) {
-				
-				    self.revealItems(data);
-				
+		  var promiseCollections = self.getSpaceCollections();
+		  var promiseExhibitions = self.getSpaceExhibitions();
+		  $.when(promiseCollections,promiseExhibitions).done(function(responseCollections, responseExhibitions) {
+			  		var dataCollections = responseCollections[0] || [];
+			  		var dataExhibitions = responseExhibitions[0] || [];
+			  		console.log(dataCollections.concat(dataExhibitions));
+				    self.revealItems(dataCollections.concat(dataExhibitions));
 			});
 		  var promise2 = self.getFeaturedExhibition();
           $.when(promise2).done(function (data) {
@@ -220,6 +222,19 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			}).success (function(){
 			});
 		};
+
+	  	self.getSpaceExhibitions= function () {
+			//curently bringing owned
+			return $.ajax({
+				  type        : "GET",
+				  contentType : "application/json",
+				  dataType    : "json",
+				  url         : "/exhibition/list",
+				  processData : false,
+				  data        : "access=owned&offset=0&count=20"
+				}).success (function(){
+				});
+  		};
 		
          self.getFeaturedExhibition=function() {
 			
@@ -258,8 +273,15 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				});
 			}
 		};
-		
-		
+
+	  self.loadCollectionOrExhibition = function(item) {
+		  if (item.isExhibition) {
+			  window.location = 'index.html#exhibitionview/'+ item.id;
+		  }
+		  else {
+			  window.location = 'index.html#collectionview/' + item.id;
+		  }
+	  };
 		
       self.loadAll();	  
 
