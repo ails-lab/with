@@ -28,12 +28,13 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
+import controllers.GroupManager.GroupType;
 import play.Logger;
 import play.Logger.ALogger;
 import db.DB;
 
 @Entity
-public class User {
+public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
 
@@ -43,34 +44,25 @@ public class User {
 		MALE, FEMALE, UNSPECIFIED
 	}
 
-	public static enum Access {
-		NONE, READ, WRITE, OWN
-	}
-
-	@Id
-	private ObjectId dbId;
-
 	private String email;
-	private String username;
+
 	private String firstName;
 	private String lastName;
 
 	private Gender gender;
-	private String about;
-	private String location;
-
 	private String facebookId;
 	private String googleId;
 
 	private String md5Password;
 
-	private ObjectId photo;
 	private boolean superUser;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
 	@Embedded
 	private List<Search> searchHistory = new ArrayList<Search>();
+	@Embedded
+	private Page page;
 
 	private int recordLimit;
 	private int collectedRecords;
@@ -79,14 +71,6 @@ public class User {
 
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 	private final Set<ObjectId> whiteList = new HashSet<ObjectId>();
-
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
 
 	/**
 	 * The search should already be stored in the database separately
@@ -147,6 +131,19 @@ public class User {
 		return "";
 	}
 
+	public void recalculateGroups() {
+		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
+		// get all groups I'm in
+		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(
+				this.getDbId(), GroupType.All);
+		for (UserGroup ug : gr) {
+			groupAcc.add(ug.getDbId());
+			ug.accumulateGroups(groupAcc);
+		}
+		getUserGroupsIds().clear();
+		getUserGroupsIds().addAll(groupAcc);
+	}
+
 	// getter setter
 
 	public String getEmail() {
@@ -181,22 +178,6 @@ public class User {
 		this.md5Password = md5Password;
 	}
 
-	public String getAbout() {
-		return about;
-	}
-
-	public void setAbout(String about) {
-		this.about = about;
-	}
-
-	public String getLocation() {
-		return location;
-	}
-
-	public void setLocation(String location) {
-		this.location = location;
-	}
-
 	public List<Search> getSearchHistory() {
 		return searchHistory;
 	}
@@ -205,20 +186,20 @@ public class User {
 		this.searchHistory = searcHistory;
 	}
 
+	public Page getPage() {
+		return page;
+	}
+
+	public void setPage(Page page) {
+		this.page = page;
+	}
+
 	public String getFacebookId() {
 		return facebookId;
 	}
 
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
-	}
-
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
 	}
 
 	public String getGender() {
@@ -274,18 +255,6 @@ public class User {
 
 	public void setStorageLimit(double storageLimit) {
 		this.storageLimit = storageLimit;
-	}
-
-	public ObjectId getPhoto() {
-		return this.photo;
-	}
-
-	public Media retrievePhoto() {
-		return DB.getMediaDAO().findById(this.photo);
-	}
-
-	public void setPhoto(ObjectId photo) {
-		this.photo = photo;
 	}
 
 	// public void setPhoto(Media photo) {

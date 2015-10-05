@@ -43,8 +43,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 							$(element).isotope("destroy");
 						});
 						
-					} else {
-						 console.log("updating isotope...");
 					}
 				};
 			}
@@ -175,6 +173,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.exhibitloaded=ko.observable(false);
 	  self.featured=ko.observable(null);	
 	  self.homecollections=ko.observableArray();
+	  self.totalCollections=ko.observable(0);
+	  self.totalExhibitions=ko.observable(0);
     
 	  self.revealItems = function (data) {
 			for (var i in data) {
@@ -218,7 +218,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "access=read&offset=0&count=20"
+				data: "access=read&offset=0&count=20&collectionHits=true"
 			}).success (function(){
 			});
 		};
@@ -264,7 +264,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						self.revealItems(data);
+						self.revealItems(data['collectionsOrExhibitions']);
 						self.loading(false);
 					},
 					"error": function (result) {
@@ -288,8 +288,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	  
 	  self.filter=function(data, event) {
-		  				console.log(event);
-					  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
+		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
 					  $(event.currentTarget).siblings().removeClass("active");
 					  $(event.currentTarget).addClass("active");
 					  $( settings.mSelector ).isotope({ filter: selector });

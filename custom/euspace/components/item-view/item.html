@@ -8,7 +8,7 @@
             </ul>
             <!-- action-->
             <ul class="action">
-              <li class="close"><a href="#" title="close" data-bind="click: close"><img src="img/ic-close-green.png"></a></li>
+              <li class="close"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close-green.png"></a></li>
             </ul>
           </div>
         </nav>
@@ -17,7 +17,7 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
-              <div class="mediathumb"><img data-bind="event: { error: changeSource },attr: { src:record().fullres(), alt: record().title() }" ></div>
+              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}" ></div>
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">
@@ -29,7 +29,7 @@
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
-                    <li><a href="#share" title="" data-toggle="tab">Share</a></li>
+                    <li data-bind="visible: record().source()=='WITHin'"><a href="#share" title="" data-toggle="tab">Share</a></li>
                   </ul>
                   <!-- panes-->
                   <div class="tab-content">
@@ -62,22 +62,24 @@
                     </div>
                     <div id="related" class="tab-pane">
                       <!-- related media-->
-                      <!-- ko if: record().similar().length > 0 -->
-                      <div class="title"><span data-bind="text: 'OTHER MEDIA ITEMS BY '+record().forsimilar()"></span><a href="#" title="#" class="follow">FOLLOW</a></div>
+                      <div style="text-align: center;" data-bind="visible: record().loading()==true"><img src="img/ic-loading.gif"></div>
+                      <!-- ko if: record().related().length > 0 -->
+                      <div class="title"><span data-bind="text: 'OTHER MEDIA ITEMS BY '+record().forrelated()"></span><a href="#" title="#" class="follow">FOLLOW</a></div>
                       <ul class="related">
-                      <!-- ko foreach: record().similar -->
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb()}" alt="media"></a></li>
+                      <!-- ko foreach: record().related -->
+                        <li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb()}" alt="media"></a></li>
                      <!-- /ko -->
                        </ul>
                        <!-- /ko -->
                       <!-- related media-->
+                       <!-- ko if: record().similar().length > 0 -->
                       <div class="title">SIMILAR MEDIA ITEMS</div>
                       <ul class="related">
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-4.png" alt="media"></a></li>
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-3.png" alt="media"></a></li>
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-2.png" alt="media"></a></li>
-                        <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img src="img/content/thumb-media-1.png" alt="media"></a></li>
+                       <!-- ko foreach: record().similar -->
+                        <li><a data-bind="event: {click: function(){itemShow($data);}}" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor"><img data-bind="attr:{src:thumb()}" alt="media"></a></li>
+                     <!-- /ko -->
                       </ul>
+                       <!-- /ko -->
                     </div>
                     <div id="comment" class="tab-pane">
                       <!-- comment -->

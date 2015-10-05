@@ -2,13 +2,14 @@
 		<div class="row">
 			<div class="col-lg-12">
 				<!-- ko if: showsExhibitions -->
-				<span class="withmain"><h2>My exhibitions</h2></span>
+				<span class="withmain">
 				<button type="button" class="btn btn-primary btn-sm" data-bind="click: createExhibition">New Exhibition</button>
+				<h2>My exhibitions</h2></span>
 				<!-- /ko -->
 				<!-- ko else -->
-				 <span class="withmain"><h2>My collections</h2></span>
-
-				 <button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button>
+				<span class="withmain">
+				<h2>My collections</h2>
+				<button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button></span>
 				<!-- /ko -->
 				<div id="mycollections">
 				 <!-- collections listed here -->
@@ -37,7 +38,7 @@
 						   		<!-- ko ifnot: isPublic --><span class="label label-danger">Restricted</span><!-- /ko -->
 					   			&bull; <strong>Items: </strong> <span data-bind="text: itemCount()"></span> &bull;
 						   		<b>Created:</b> <i data-bind="text: created()"></i> &bull;
-						   		<!--  ko if: $data.hasOwnProperty('additionalText')--><b>Owner:</b> <i data-bind="text: owner"></i><!-- /ko -->
+						   		<!--  ko if: $data.hasOwnProperty('additionalText')--><b>Creator:</b> <i data-bind="text: creator"></i><!-- /ko -->
 						   </div>
 						</div>
 					 </div>
@@ -84,7 +85,6 @@
 				 <div id="sharedcollections">
 				 <!-- collections listed here -->
 				 <!-- ko foreach: sharedCollections() -->
-
 					 <div class="profilecoll">
 					 <div class="container-fluid">
 					 <div class="row profile">
@@ -110,7 +110,7 @@
 						   		<!-- ko ifnot: isPublic --><span class="label label-danger">Restricted</span><!-- /ko -->
 					   			&bull; <strong>Items: </strong> <span data-bind="text: itemCount()"></span> &bull;
 						   		<b>Created:</b> <i data-bind="text: created()"></i> &bull;
-						   		<b>Owner:</b> <i data-bind="text: owner"></i>
+						   		<b>Creator:</b> <i data-bind="text: creator"></i>
 						   </div>
 						</div>
 					 </div>

@@ -1,4 +1,4 @@
-define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
+define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, app) {
 
 	function Record(data) {
 		var self = this;
@@ -22,10 +22,14 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.facebook='';
 		self.twitter='';
 		self.mail='';
-		self.forsimilar=ko.observable("").extend({ uppercase: true });
-		self.similarlabel='';
+		self.forrelated=ko.observable("").extend({ uppercase: true });
+		self.relatedlabel='';
+		self.loc=ko.observable('');
+		self.similarsearch=false;
+		self.relatedsearch=false;
+		self.loading=ko.observable(false);
 		self.pinterest=function() {
-		    var url = encodeURIComponent(location.href);
+		    var url = encodeURIComponent(self.loc());
 		    var media = encodeURIComponent(self.fullres());
 		    var desc = encodeURIComponent(self.title()+" on "+window.location.host);
 		    window.open("//www.pinterest.com/pin/create/button/"+
@@ -39,18 +43,16 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.cachedThumbnail = ko.pureComputed(function() {
 
 
-			   if(self.thumb()){
-				if (self.thumb().indexOf('//') === 0) {
-					return self.thumb();
-				} else {
-					var newurl='url=' + encodeURIComponent(self.thumb())+'&';
-					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-				}}
+			   if(data && data.thumb){
+				return data.thumb;}
 			   else{
 				   return "img/content/thumb-empty.png";
 			   }
 			});
+		
+		
 		self.load = function (data) {
+			self.loading(true);
 			if (data.title == undefined) {
 				self.title("No title");
 			} else {
@@ -59,20 +61,25 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
 			if (data.id) {
 				self.recordId(data.id);
+				
 			} else {
 				self.recordId(data.recordId);
 			}
-
+			self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId());
+			
 			self.url("#item/" + self.recordId());
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 
-			if (data.source!="Rijksmuseum" && data.fullres[0]  && data.fullres[0].length > 0) {
+			if (data.source!="Rijksmuseum" && data.fullres && data.fullres.length > 0) {
+				self.fullres(data.fullres);
+			} 
+			else if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
 				self.fullres(data.fullres[0]);
-			} else {
+			}
+			else{
 				self.fullres(self.cachedThumbnail());
 			}
-
 			if (data.description == undefined) {
 				self.description(data.title);
 			} else {
@@ -93,35 +100,37 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
 			self.externalId(data.externalId);
 			self.source(data.source);
-			self.facebook='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href);
-			self.twitter='https://twitter.com/share?url='+encodeURIComponent(location.href)+'&text='+encodeURIComponent(self.title()+" on "+window.location.host)+'"';
-			self.mail="mailto:?subject="+self.title()+"&body="+encodeURIComponent(location.href);
+			self.facebook='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(self.loc());
+			self.twitter='https://twitter.com/share?url='+encodeURIComponent(self.loc())+'&text='+encodeURIComponent(self.title()+" on "+window.location.host)+'"';
+			self.mail="mailto:?subject="+self.title()+"&body="+encodeURIComponent(self.loc());
 			
-			
+			self.loading(false);
 	
 			
 		};
 
 		self.findsimilar=function(){
-			
-			self.provider().length>0? self.forsimilar(self.provider().toUpperCase()) : self.forsimilar(self.creator().toUpperCase());
-            self.similarlabel=self.provider().length>0? "PROVIDER" : "CREATOR";
-            if(self.forsimilar().length>0){
+		  if(self.related().length==0 && self.relatedsearch==false){
+			self.relatedsearch=true;  
+			self.creator().length>0? self.forrelated(self.creator().toUpperCase()) : self.forrelated(self.provider().toUpperCase());
+            self.relatedlabel=self.creator().length>0? "CREATOR" : "PROVIDER";
+            if(self.forrelated().length>0){
+            	self.loading(true);
            $.ajax({
 				type    : "post",
 				url     : "/api/advancedsearch",
 				contentType: "application/json",
 				data     : JSON.stringify({
-					searchTerm: self.forsimilar(),
+					searchTerm: self.forrelated(),
 					page: 1,
 					pageSize:10,
 				    source:[self.source()],
 				    filters:[]
 				}),
 				success : function(result) {
-					data=result.responces[0].items;
+					data=result.responces[0]!=undefined ? result.responces[0].items :null;
 					var items=[];
-					if(data!=null) 
+					if(data!=null) {
 						for (var i in data) {
 							var result = data[i];
 							 if(result !=null){
@@ -136,23 +145,75 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 									provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
 									rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 									externalId: result.externalId,
-									source: source
+									source: self.source()
 								  });
-						        if(record.thumb() && record.thumb().length>0)
+						        if(record.thumb() && record.thumb().length>0 && record.recordId()!=self.recordId())
 							       items.push(record);
 							}
 							 if(items.length>3){break;}
 						}	
-					self.similar().push.apply(self.similar(),items);
-					self.similar.valueHasMutated();
+					self.related().push.apply(self.related(),items);
+					self.related.valueHasMutated();}
+					self.loading(false);
 				},
 				error   : function(request, status, error) {
-					console.log(request);
+					self.loading(false);
+					
 				}
 			});
             }
-            
-            //missing find related
+			}
+		  if(self.similar().length==0 && self.similarsearch==false){
+				self.similarsearch=true;  
+				
+				self.loading(true);
+	           $.ajax({
+					type    : "post",
+					url     : "/api/advancedsearch",
+					contentType: "application/json",
+					data     : JSON.stringify({
+						searchTerm: self.title(),
+						page: 1,
+						pageSize:10,
+					    source:[self.source()],
+					    filters:[]
+					}),
+					success : function(result) {
+						data=result.responces[0]!=undefined ? result.responces[0].items :null;
+						var items=[];
+						if(data!=null) {
+							for (var i in data) {
+								var result = data[i];
+								 if(result !=null){
+										
+							        var record = new Record({
+										recordId: result.recordId || result.id,
+										thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
+										fullres: result.fullresolution!=null && result.fullersolution!="null"? result.fullresolution : "",
+										title: result.title!=null? result.title:"",
+										view_url: result.url.fromSourceAPI,
+										creator: result.creator!==undefined && result.creator!==null? result.creator : "",
+										provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+										rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
+										externalId: result.externalId,
+										source: self.source()
+									  });
+							        if(record.thumb() && record.thumb().length>0 && record.recordId()!=self.recordId())
+								       items.push(record);
+								}
+								 if(items.length>3){break;}
+							}	
+						self.similar().push.apply(self.similar(),items);
+						self.similar.valueHasMutated();}
+						self.loading(false);
+					},
+					error   : function(request, status, error) {
+						self.loading(false);
+						
+					}
+				});
+	            
+				}
 		}
 		
 		self.sourceImage = ko.pureComputed(function () {
@@ -171,8 +232,8 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 				{
 					return "images/logos/youtube.jpg";
 				}
-			case "Mint":
-				return "images/logos/mint_logo.png";
+			case "WITHin":
+				return "images/logos/with_logo.png";
 			case "Rijksmuseum":
 				return "images/logos/Rijksmuseum.png";
 			default:
@@ -196,8 +257,8 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 				{
 					return "youtube.com";
 				}
-			case "Mint":
-				return "mint";
+			case "WITHin":
+				return "WITHin";
 			default:
 				return "";
 			}
@@ -218,33 +279,32 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
 	function ItemViewModel(params) {
 		var self = this;
-
+		
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
 		self.record = ko.observable(new Record());
-
-
+		self.id = ko.observable(params.id);
 		itemShow = function (e) {
 			data = ko.toJS(e);
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
-			self.open(data);
+			self.open();
 			self.record(new Record(data));
 			
 		};
 
 		self.open = function () {
-			if (data.id) {
-				window.location.href = 'index.html#item/' +data.id;
-			} else {
-				window.location.href = 'index.html#item/' +data.recordId;
+			if (window.location.href.indexOf('#item')>0) {
+				document.body.setAttribute("data-page","media");	
+				
 			}
 			
 		};
 
 		self.close = function () {
-			window.location.href = self.from;	
+			//self.record(new Record());
+			$( '.itemview' ).fadeOut();
 			
 		};
 
@@ -264,14 +324,43 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			itemShow(e);
 		};
 		
-		self.loadCollectionnnn = function(collection) {
-			window.location.href = 'index.html#collectionview/' + collection.dbId;		
-			
-			if (isOpen){
-				toggleSearch(event,'');
-			}
-			self.close();
+		
+		
+		self.loadItem = function () {
+			$.ajax({
+				"url": "/record/" + self.id(),
+				"method": "get",
+				"contentType": "application/json",
+				"success": function (result) {
+					 var record = new Record({
+							recordId: result.recordId || result.id,
+							thumb: result.thumbnailUrl,
+							fullres: result.fullresolution!=null ? result.fullresolution : "",
+							title: result.title!=null? result.title:"",
+							view_url: result.sourceUrl,
+							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
+							provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
+							externalId: result.externalId,
+							source: result.source
+						  });
+					self.record(record);
+					$('.nav-tabs a[href="#information"]').tab('show');
+					self.open();
+					$( '.itemview' ).fadeIn();
+					
+				},
+				error: function (xhr, textStatus, errorThrown) {
+					self.open();
+					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
+				}
+			});
 		};
+		if(self.id()!=undefined){
+			
+			self.loadItem();
+		}
+		
 	}
 	
 	

@@ -107,6 +107,18 @@ EUSpaceApp.ui = function( custom ){
 		initSearchColumnAdjustment();
 	}
 	
+	this.initTooltip=function(){
+		initTooltip();
+	}
+	
+	this.initProfile=function(){
+		initProfileScroll();
+	}
+	
+	this.initIsotope=function(){
+		initIsotope();
+	}
+	
 	// method to initialize isotope
 	// dependency: js/vendor/isotope/
 	var initIsotope = function(){

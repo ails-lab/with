@@ -12,7 +12,6 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		self.lastName    = ko.observable().extend({ required: true });
 		self.about       = ko.observable();
 		self.imageURL    = ko.observable();
-		self.location    = ko.observable();
 		self.facebookId  = ko.observable();
 		self.googleId    = ko.observable();
 		self.hasGoogle   = ko.computed(function() { return self.googleId() ? true : false; });
@@ -34,7 +33,6 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				self.imageURL(data.image);
 				self.facebookId(data.facebookId);
 				self.googleId(data.googleId);
-				self.location(data.location);
 			},
 			error   : function(request, status, error) {
 				console.log(request);
@@ -64,7 +62,6 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				var data = {
 					firstName : self.firstName,
 					lastName  : self.lastName,
-					location  : self.location,
 					about     : self.about,
 					image     : self.imageURL
 				};

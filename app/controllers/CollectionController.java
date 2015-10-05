@@ -35,13 +35,16 @@ import javax.validation.ConstraintViolation;
 import model.Collection;
 import model.CollectionRecord;
 import model.User;
-import model.User.Access;
+import model.Rights.Access;
+import model.UserGroup;
+import model.UserOrGroup;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -55,6 +58,9 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import utils.Tuple;
+import controllers.parameterTypes.MyPlayList;
+import controllers.parameterTypes.StringTuple;
 import db.DB;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
@@ -194,8 +200,13 @@ public class CollectionController extends Controller {
 		Collection newVersion;
 		try {
 			newVersion = updator.readValue(json);
-
 			newVersion.setLastModified(new Date());
+			
+			if (json.has("belongsTo")) {
+				String organizationString = json.get("belongsTo").textValue();
+				ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
+				newVersion.getRights().put(organizationId, Access.OWN);
+			}
 
 			Set<ConstraintViolation<Collection>> violations = Validation
 					.getValidator().validate(newVersion);
@@ -268,11 +279,27 @@ public class CollectionController extends Controller {
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
 		String userId = userIds.get(0);
+		
+			
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
 		newCollection.setOwnerId(new ObjectId(userId));
-
+		if (json.has("belongsTo")) {
+			String organizationString = json.get("belongsTo").textValue();
+			ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
+			newCollection.getRights().put(organizationId, Access.OWN);
+		}
+		/*if (json.has("submitToProjects")) {
+			JsonNode readableBy = json.get("submitToProjects");
+			if (readableBy.isArray()) {
+				for (JsonNode node: readableBy) {
+					String projectString = node.textValue();
+					ObjectId projectId = DB.getUserGroupDAO().getByName(projectString).getDbId();
+					newCollection.getRights().put(projectId, Access.READ);
+				}
+			}
+		}*/
 		Set<ConstraintViolation<Collection>> violations = Validation
 				.getValidator().validate(newCollection);
 		for (ConstraintViolation<Collection> cv : violations) {
@@ -308,89 +335,53 @@ public class CollectionController extends Controller {
 		// result.put("id", colKey.getId().toString());
 		return ok(c);
 	}
-
-	/**
-	 * list accessible collections
-	 */
-	public static Result list(String filterByUser, String filterByUserId,
-			String filterByEmail, String access, int offset, int count) {
-
-		ArrayNode result = Json.newObject().arrayNode();
-		List<Collection> userCollections;
-
-		ObjectId ownerId = null;
-		List<String> userIds = AccessManager.effectiveUserIds(session().get(
-				"effectiveUserIds"));
-
-		if (filterByUserId != null) {
-			ownerId = new ObjectId(filterByUserId);
-		} else if (filterByUser != null) {
-			ownerId = DB.getUserDAO().getByUsername(filterByUser).getDbId();
-		} else if (filterByEmail != null) {
-			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
+	
+	//input parameter lists' (directlyAccessedByUserName etc) intended meaning is AND of its entries
+	//returned list of lists accessedByUserOrGroup represents AND of OR entries
+	//i.e. each entry in directlyAccessedByUserName for example has to be included in a separate list!
+	private static List<List<Tuple<ObjectId, Access>>> accessibleByUserOrGroup(Option<MyPlayList> directlyAccessedByUserName,
+			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
+			Option<MyPlayList> recursivelyAccessedByGroupName) {
+		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		if (directlyAccessedByUserName.isDefined()) {
+			MyPlayList directlyUserNameList = directlyAccessedByUserName.get();
+			for (StringTuple userAccess: directlyUserNameList.list) {
+				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
+				ObjectId groupId = DB.getUserDAO().getByUsername(userAccess.x).getDbId();
+				directlyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(userAccess.y.toUpperCase())));
+				accessedByUserOrGroup.add(directlyAccessedByUser);
+			}
 		}
-
-		if (userIds.isEmpty()) {
-			// return all public collections
-			if (ownerId == null) {
-				userCollections = DB.getCollectionDAO()
-						.getPublic(offset, count);
-			} else {
-				userCollections = DB.getCollectionDAO().getPublicFiltered(
-						ownerId, offset, count);
-			}
-			for (Collection collection : userCollections) {
-				ObjectNode c = (ObjectNode) Json.toJson(collection);
-				c.put("access", Access.READ.toString());
-				result.add(c);
-			}
-			return ok(result);
-		}
-		// Check if super user
-		if (AccessManager.checkAccess(new HashMap<ObjectId, Access>(), userIds,
-				Action.DELETE)) {
-			if (ownerId != null) {
-				userCollections = DB.getCollectionDAO().getByOwner(ownerId,
-						offset, count);
-			} else {
-				userCollections = DB.getCollectionDAO().getAll(offset, count);
-			}
-		} else {
-			// ok, so there is a user id effective
-			String userId = userIds.get(0);
-			switch (access) {
-			case "read":
-				if (ownerId == null) {
-					userCollections = DB.getCollectionDAO().getByReadAccess(
-							new ObjectId(userId), offset, count);
-				} else {
-					userCollections = DB.getCollectionDAO()
-							.getByReadAccessFiltered(new ObjectId(userId),
-									ownerId, offset, count);
-
+		if (recursivelyAccessedByUserName.isDefined()) {
+			MyPlayList recursivelyUserNameList = recursivelyAccessedByUserName.get();
+			for (StringTuple userAccess: recursivelyUserNameList.list) {
+				List<Tuple<ObjectId, Access>> recursivelyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
+				User user = DB.getUserDAO().getByUsername(userAccess.x);
+				ObjectId userId = user.getDbId();
+				Access access = Access.valueOf(userAccess.y.toUpperCase());
+				recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(userId, access));
+				Set<ObjectId> groupIds = user.getUserGroupsIds();
+				for (ObjectId groupId: groupIds) {
+					recursivelyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, access));
 				}
-				break;
-			case "write":
-				if (ownerId == null) {
-					userCollections = DB.getCollectionDAO().getByWriteAccess(
-							new ObjectId(userId), offset, count);
-				} else {
-					userCollections = DB.getCollectionDAO()
-							.getByWriteAccessFiltered(new ObjectId(userId),
-									ownerId, offset, count);
-
-				}
-				break;
-			case "owned":
-				userCollections = DB.getCollectionDAO().getByOwner(
-						new ObjectId(userId), offset, count);
-				break;
-			default:
-				userCollections = DB.getCollectionDAO().getByOwner(
-						new ObjectId(userId), offset, count);
-				break;
+				accessedByUserOrGroup.add(recursivelyAccessedByUser);
 			}
 		}
+		//TODO: Support recursive check for groups as well
+		if (directlyAccessedByGroupName.isDefined()) {
+			MyPlayList directlyGroupNameList = directlyAccessedByGroupName.get();
+			for (StringTuple groupAccess: directlyGroupNameList.list) {
+				List<Tuple<ObjectId, Access>> directlyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
+				ObjectId groupId = DB.getUserGroupDAO().getByName(groupAccess.x).getDbId();
+				directlyAccessedByGroup.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(groupAccess.y.toUpperCase())));
+				accessedByUserOrGroup.add(directlyAccessedByGroup);
+			}
+		}
+		return accessedByUserOrGroup;
+	}
+	
+	private static List<ObjectNode> collectionWithUserData(List<Collection> userCollections, List<String> effectiveUserIds) {
+		List<ObjectNode> collections = new ArrayList<ObjectNode>(userCollections.size());
 		Collections.sort(userCollections, new Comparator<Collection>() {
 			public int compare(Collection c1, Collection c2) {
 				return -c1.getCreated().compareTo(c2.getCreated());
@@ -398,101 +389,164 @@ public class CollectionController extends Controller {
 		});
 		for (Collection collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(
-					collection.getRights(), userIds);
-			if (collection.getTitle().equals("_favorites")) {
-				continue;
+			Access maxAccess = AccessManager.getMaxAccess(collection.getRights(), effectiveUserIds);
+			if (!collection.getTitle().equals("_favorites")) {
+				if (maxAccess.equals(Access.NONE)) {
+					maxAccess = Access.READ;
+				}
+				c.put("access", maxAccess.toString());
+				User user = DB.getUserDAO().getById(collection.getOwnerId(),
+						new ArrayList<String>(Arrays.asList("username")));
+				c.put("creator", user.getUsername());
+				collections.add(c);
 			}
-			if (maxAccess.equals(Access.NONE)) {
-				maxAccess = Access.READ;
-			}
-			c.put("access", maxAccess.toString());
-			User user = DB.getUserDAO().getById(collection.getOwnerId(),
-					new ArrayList<String>(Arrays.asList("username")));
-			c.put("owner", user.getUsername());
-			result.add(c);
 		}
-		return ok(result);
+		return collections;
+	}
+	
+	/**
+	 * list accessible collections
+	 * list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false)
+
+	 */
+
+	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
+			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
+			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, 
+			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count) {
+		ObjectNode result = Json.newObject().objectNode();
+		ArrayNode collArray = Json.newObject().arrayNode();
+		List<Collection> userCollections;
+		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserName, recursivelyAccessedByUserName,
+				directlyAccessedByGroupName,recursivelyAccessedByGroupName);
+		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;
+		ObjectId creatorId = null;
+		if (creator.isDefined()) {
+			User creatorUser = DB.getUserDAO().getByUsername(creator.get()); 
+			if (creatorUser != null)
+				creatorId = creatorUser.getDbId();
+		}
+		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {//not logged in or ask for public collections
+			// return all public collections
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
+			userCollections = info.x;
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
+			for (Collection collection : userCollections) {
+				ObjectNode c = (ObjectNode) Json.toJson(collection);
+				c.put("access", Access.READ.toString());
+				collArray.add(c);
+			}
+			result.put("collectionsOrExhibitions", collArray);
+			return ok(result);
+		}
+		else { //logged in
+			//check if super user, if not, restrict query to accessible by effectiveUserIds
+			if (!AccessManager.checkAccess(new HashMap<ObjectId, Access>(), effectiveUserIds, Action.DELETE)) {
+				List<Tuple<ObjectId, Access>> recursivelyAccessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
+				for (String userId: effectiveUserIds) {
+					recursivelyAccessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
+							new ObjectId(userId), Access.valueOf(loggedInUserAccess.toUpperCase())));
+				}
+				accessedByUserOrGroup.add(recursivelyAccessedByLoggedInUser);
+			}
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().
+					getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
+			List<ObjectNode> collections = collectionWithUserData(info.x, effectiveUserIds);
+			for (ObjectNode c: collections)
+				collArray.add(c);
+			result.put("collectionsOrExhibitions", collArray);
+			return ok(result);
+		}
 	}
 
+	private static ObjectNode userOrGroupJson(UserOrGroup user, Access accessRights) {
+		ObjectNode userJSON = Json.newObject();
+		userJSON.put("userId", user.getDbId().toString());
+		userJSON.put("username", user.getUsername());
+		if (user instanceof User) {
+			userJSON.put("category", "user");
+			userJSON.put("firstName", ((User) user).getFirstName());
+			userJSON.put("lastName", ((User) user).getLastName());
+		}
+		else
+			userJSON.put("category", "group");
+		String image = UserAndGroupManager.getImageBase64(user);
+		userJSON.put("accessRights", accessRights.toString());
+		if (image != null) {
+			userJSON.put("image", image);
+		}
+		return userJSON;
+	}
+	
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
 		Collection collection = DB.getCollectionDAO().getById(
 				new ObjectId(collectionId));
 		for (ObjectId userId : collection.getRights().keySet()) {
 			User user = DB.getUserDAO().getById(userId, null);
+			Access accessRights = collection.getRights().get(userId);
 			if (user != null) {
-				ObjectNode userJSON = Json.newObject();
-				userJSON.put("userId", user.getDbId().toString());
-				userJSON.put("username", user.getUsername());
-				userJSON.put("firstName", user.getFirstName());
-				userJSON.put("lastName", user.getLastName());
-				String image = UserManager.getImageBase64(user);
-				Access accessRights = collection.getRights().get(userId);
-				userJSON.put("accessRights", accessRights.toString());
-				if (image != null) {
-					userJSON.put("image", image);
-				}
-				result.add(userJSON);
-			} else {
-				return internalServerError("User with id " + userId
+				result.add(userOrGroupJson(user, accessRights));
+			} 
+			else {
+				UserGroup usergroup = DB.getUserGroupDAO().get(userId);
+				if (usergroup != null)
+					result.add(userOrGroupJson(usergroup, accessRights));
+				else
+					return internalServerError("User with id " + userId
 						+ " cannot be retrieved from db");
 			}
 		}
 		return ok(result);
 	}
 
-	public static Result listShared(String filterByUser, String filterByUserId,
-			String filterByEmail, int offset, int count) {
-
-		ArrayNode result = Json.newObject().arrayNode();
-		List<Collection> userCollections;
-		ObjectId ownerId = null;
-		List<String> userIds = AccessManager.effectiveUserIds(session().get(
-				"effectiveUserIds"));
-
-		if (filterByUserId != null) {
-			ownerId = new ObjectId(filterByUserId);
-		} else if (filterByUser != null) {
-			ownerId = DB.getUserDAO().getByUsername(filterByUser).getDbId();
-		} else if (filterByEmail != null) {
-			ownerId = DB.getUserDAO().getByEmail(filterByEmail).getDbId();
-		}
-
-		if (userIds.isEmpty()) {
+	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserName,
+			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
+			Option<MyPlayList> recursivelyAccessedByGroupName, Option<Boolean> isExhibition, boolean collectionHits, int offset, int count) {
+		ObjectNode result = Json.newObject().objectNode();
+		ArrayNode collArray = Json.newObject().arrayNode();
+		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		Boolean isExhibitionBoolean  = isExhibition.isDefined() ? isExhibition.get() : null;
+		if (effectiveUserIds.isEmpty()) {
 			return forbidden(Json
 					.parse("\"error\", \"Must specify user for the collection\""));
 		}
-		// TODO: must expand to support user groups
-		String userId = userIds.get(0);
-		if (ownerId == null) {
-			userCollections = DB.getCollectionDAO().getShared(
-					new ObjectId(userId), offset, count);
-		} else {
-			userCollections = DB.getCollectionDAO().getSharedFiltered(
-					new ObjectId(userId), ownerId, offset, count);
+		else {
+			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
+			accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserName, recursivelyAccessedByUserName,
+					directlyAccessedByGroupName,recursivelyAccessedByGroupName);
+			List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
+			if (direct) {
+				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId, Access.READ));
+				accessedByUserOrGroup.add(accessedByLoggedInUser);
+			}
+			else {//indirectly: include collections for which user has access via userGoup sharing
+				for (String effectiveId: effectiveUserIds) {
+					accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(new ObjectId(effectiveId), Access.READ));
+				}
+				accessedByUserOrGroup.add(accessedByLoggedInUser);
+			}
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().getShared(userId, accessedByUserOrGroup, isExhibitionBoolean, collectionHits, offset, count);
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
 
+			List<ObjectNode> collections = collectionWithUserData(info.x, effectiveUserIds);
+			for (ObjectNode c: collections)
+				collArray.add(c);
+			result.put("collectionsOrExhibitions", collArray);
+			return ok(result);
 		}
-		Collections.sort(userCollections, new Comparator<Collection>() {
-			public int compare(Collection c1, Collection c2) {
-				return -c1.getCreated().compareTo(c2.getCreated());
-			}
-		});
-		for (Collection collection : userCollections) {
-			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(
-					collection.getRights(),
-					new ArrayList<String>(Arrays.asList(userId)));
-			if (maxAccess.equals(Access.NONE)) {
-				maxAccess = Access.READ;
-			}
-			c.put("access", maxAccess.toString());
-			User user = DB.getUserDAO().getById(collection.getOwnerId(),
-					new ArrayList<String>(Arrays.asList("username")));
-			c.put("owner", user.getUsername());
-			result.add(c);
-		}
-		return ok(result);
 	}
 
 	/**

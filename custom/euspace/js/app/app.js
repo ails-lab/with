@@ -2,7 +2,8 @@ define("app", ['knockout'], function (ko) {
 
 	// overwrite default settings*/
 	var self = this;
-	//self.EUSpaceUI=null;
+	//project id goes here
+	
 	self.settings = $.extend({
 
 		// page

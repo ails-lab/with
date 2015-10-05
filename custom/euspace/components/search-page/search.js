@@ -41,9 +41,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						$(element).isotope("destroy");
 					});
 					
-				} else {
-					 console.log("updating isotope...");
-				}
+				} 
 			};
 		}
 		
@@ -217,7 +215,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(true);
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Mint", "Rijksmuseum"]);
+		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray();
 		
 		self.results = ko.observableArray([]);
@@ -387,9 +385,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 		
 	  self.searchSource = function(sdata){
-		  if(self.searching()==false && self.currentTerm()!=""){
-			  console.log("searching source");
-	        	
+		  if(self.searching()==false && self.currentTerm()!="" && Math.floor(sdata.items().length/self.pageSize())+1!=1){
+		    	
 				self.searching(true);
 				 var inCat=null;
                  var idx=0;
@@ -570,7 +567,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	   		 //width: "600",
 	   		 orientation: "auto",
 		     onSearchComplete: function(query, suggestions) {
-		    	 if(self.searching()==false){
+		    	 if(self.searching()){ $(".searchinput").devbridgeAutocomplete("hide");}
+		    	 else{
 			    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
 			    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 			    	 for (var i in suggestions) {

@@ -16,60 +16,92 @@
 
 package model;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Id;
-
+import org.mongodb.morphia.annotations.Entity;
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
-public class UserGroup {
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UserGroup extends UserOrGroup {
 
-	@Id
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
-	private ObjectId dbId;
+	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
+	private boolean privateGroup;
 
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
-	private final List<ObjectId> users = new ArrayList<ObjectId>();
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private final Set<ObjectId> users = new HashSet<ObjectId>();
 
-	@JsonSerialize(using=Serializer.ObjectIdSerializer.class)
-	private final List<ObjectId> parentGroups = new ArrayList<ObjectId>();
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private final Set<ObjectId> parentGroups = new HashSet<ObjectId>();
 
+	private String friendlyName;
 
-	public ObjectId getDbId() {
-		return dbId;
+	public Set<ObjectId> getAdminIds() {
+		return adminIds;
 	}
 
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
+	public void addAdministrators(Set<ObjectId> administrators) {
+		this.adminIds.addAll(administrators);
 	}
 
-	public List<ObjectId> getUsers() {
+	public void addAdministrator(ObjectId administrator) {
+		this.adminIds.add(administrator);
+	}
+
+	public void removeAdministrator(ObjectId administrator) {
+		this.adminIds.remove(administrator);
+	}
+
+	public Set<ObjectId> getUsers() {
 		return users;
 	}
 
-	//id of parent user groups
-	public List<ObjectId> getParentGroups() {
+	public Set<ObjectId> getParentGroups() {
 		return parentGroups;
 	}
 
-	public Set<ObjectId> retrieveParents() {
+	public Set<ObjectId> getAncestorGroups() {
 		Set<ObjectId> ancestors = new HashSet<ObjectId>();
 		ancestors.addAll(parentGroups);
-		for(ObjectId gid: parentGroups) {
+		for (ObjectId gid : parentGroups) {
 			UserGroup g = DB.getUserGroupDAO().get(gid);
-			if((g !=null) && !g.getParentGroups().isEmpty())
-				ancestors.addAll(g.retrieveParents());
+			if ((g != null) && !g.getAncestorGroups().isEmpty())
+				ancestors.addAll(g.getParentGroups());
 		}
 
 		return ancestors;
+	}
+
+	public void accumulateGroups(Set<ObjectId> groupAcc) {
+		groupAcc.addAll(getAncestorGroups());
+		for (ObjectId grId : getAncestorGroups()) {
+			UserGroup ug = DB.getUserGroupDAO().get(grId);
+			if (ug != null)
+				ug.accumulateGroups(groupAcc);
+		}
+	}
+
+	public boolean isPrivateGroup() {
+		return privateGroup;
+	}
+
+	public void setPrivateGroup(boolean privateGroup) {
+		this.privateGroup = privateGroup;
+	}
+
+	public String getFriendlyName() {
+		return friendlyName;
+	}
+
+	public void setFriendlyName(String friendlyName) {
+		this.friendlyName = friendlyName;
 	}
 
 }

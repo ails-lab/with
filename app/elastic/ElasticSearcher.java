@@ -16,29 +16,40 @@
 
 package elastic;
 
+
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
+
+import model.Rights.Access;
+
+import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.AndFilterBuilder;
+import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
+import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
-import org.elasticsearch.index.query.NestedQueryBuilder;
+import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
+import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+
+import utils.Tuple;
 
 public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
@@ -57,7 +68,8 @@ public class ElasticSearcher {
 		public int count = DEFAULT_COUNT;
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
-		public String user;
+		public List<List<Tuple<ObjectId, Access>>> accessList = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		// used for method searchForCollections
 		public boolean _idSearch = false;
 
 		public SearchOptions() {
@@ -74,10 +86,6 @@ public class ElasticSearcher {
 
 		public void setCount(int count) {
 			this.count = count;
-		}
-
-		public void setUser(String user) {
-			this.user = user;
 		}
 
 		public void set_idSearch(boolean value) {
@@ -151,19 +159,24 @@ public class ElasticSearcher {
 
 		if(terms == null) terms = "";
 
-		BoolQueryBuilder bool = QueryBuilders.boolQuery();
 		MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
 
-		BoolQueryBuilder user = QueryBuilders.boolQuery();
-		MatchQueryBuilder user_match = QueryBuilders.matchQuery("rights.user", options.user);
-		user.must(user_match);
-		//MatchQueryBuilder access_match = QueryBuilders.matchQuery("rights.access", "");
-		//user.must(access_match);
-		NestedQueryBuilder nested = QueryBuilders.nestedQuery("rights", user);
+		AndFilterBuilder and_filter = FilterBuilders.andFilter();
+		for(List<Tuple<ObjectId, Access>> ands: options.accessList) {
+			OrFilterBuilder or_filter = FilterBuilders.orFilter();
+			for(Tuple<ObjectId, Access> t: ands) {
+				BoolFilterBuilder bool = FilterBuilders.boolFilter();
+				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("rights.access").gte(t.y.ordinal());
+				bool.must(this.filter("rights.user", t.x.toString()));
+				bool.must(range_filter);
+				or_filter.add(bool);
+			}
+			and_filter.add(or_filter);
+		}
 
-		bool.must(match_all);
-		bool.must(nested);
-		return this.execute(bool, options);
+		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("rights", and_filter);
+		FilteredQueryBuilder filtered = QueryBuilders.filteredQuery(match_all, nested_filter);
+		return this.execute(filtered, options);
 	}
 
 	public SearchResponse searchForCollections(String terms, SearchOptions options) {

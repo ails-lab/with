@@ -1,4 +1,4 @@
-define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app'], function (bridget, ko, template, Isotope, imagesLoaded,app) {
+define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app','smoke'], function (bridget, ko, template, Isotope, imagesLoaded,app) {
 
 	$.bridget('isotope', Isotope);
 	
@@ -42,9 +42,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						$(element).isotope("destroy");
 					});
 					
-				} else {
-					 console.log("updating isotope...");
-				}
+				} 
 			};
 		}
 		
@@ -128,9 +126,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.externalId = "";
 		 self.isLoaded = ko.observable(false);
 		 
-		self.isLiked = ko.pureComputed(function () {
-			return app.isLiked(self.externalId);
-		});
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title="No title";
@@ -176,8 +171,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			    case "YouTube": {
 			    	return "youtube.com";
 			    }
-			    case "Mint":
-			    	return "mint";
+			    case "WITHin":
+			    	return "WITHin";
 			    default: return "";
 			 }
 			});
@@ -258,6 +253,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					self.access(data.access);
 					self.revealItems(data.firstEntries);
 					self.loading(false);
+					window.EUSpaceUI.initTooltip();
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
@@ -291,7 +287,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.itemCount);
 						self.revealItems(data.records);
 						self.loading(false);
 					},
@@ -304,27 +299,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 		
 
-		self.recordSelect = function (e) {
-			var selrecord = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.recordId === e;
-			});
-			itemShow(selrecord);
-		};
+		self.recordSelect= function (e){
+        	$( '.itemview' ).fadeIn();
+			itemShow(e);
 
+		}
 	
-		self.likeRecord = function (id) {
-			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.externalId === id;
-			});
-
-			app.likeItem(rec, function (status) {
-				if (status) {
-					$('#' + id).addClass('active');
-				} else {
-					$('#' + id).removeClass('active');
-				}
-			});
-		};
+		
 
 		
 	}

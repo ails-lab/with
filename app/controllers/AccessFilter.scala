@@ -138,7 +138,7 @@ class AccessFilter extends Filter {
     }
 
     rh.queryString.get("apikey") match {
-      case Some(Seq(key, _)) => access.apikey = key
+      case Some(Seq(key, _*)) => access.apikey = key
       case _ => {
         rh.session.get("apikey") match {
           case Some(key) => access.apikey = key

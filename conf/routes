@@ -3,12 +3,10 @@
 # ~~~~
 
 # Home page
-#GET     /                           controllers.Application.index()
+#GET     /                          controllers.Application.index()
 GET     /                           controllers.Default.redirect(to="assets/index.html")
 
-POST     /api/search                controllers.SearchController.search()
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
-GET      /api/testsearch            controllers.SearchController.testsearch()
 POST     /api/testsearch            controllers.SearchController.posttestsearch()
 
 #Autocomplete
@@ -23,8 +21,8 @@ GET 	/custom/:customName/*file				controllers.CustomAssets.getFile( customName:S
 
 
 # Collection Controller (tested except some methods)
-GET 	 /collection/list						controllers.CollectionController.list(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, access: String ?="owned", offset: Integer ?=0, count: Integer ?=10)
-GET 	 /collection/listShared					controllers.CollectionController.listShared(filterByUser ?= null, filterByUserId ?= null , filterByEmail ?= null, offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/list						controllers.CollectionController.list(loggedInUserAccess ?= "READ", directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
+GET 	 /collection/listShared					controllers.CollectionController.listShared(direct: Boolean ?= true, directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/create                     controllers.CollectionController.createCollection()
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
@@ -42,7 +40,6 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-GET		 /exhibition/list						controllers.ExhibitionController.listMyExhibitions(offset: Integer ?=0, count: Integer ?=10)
 
 #Not Implemented
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
@@ -52,15 +49,24 @@ POST	 /collection/:id 						controllers.CollectionController.editCollection(id)
 DELETE   /collection/:id	                    controllers.CollectionController.deleteCollection(id)
 
 # Record Controller (tested)
-GET 	/record/findInCollections				controllers.RecordController.findInCollections(source: String ?="", sourceId: String ?="", annot: Boolean ?=false)
-GET		/record/:id/mergedCollections 			controllers.RecordController.getCollectionMetadata(id)
-GET		/record/:id								controllers.RecordController.getRecord(id, format: String ?="XML-EDM")
+GET		/record/merged/:externalId  			controllers.RecordController.getMergedRecord(externalId)
+GET		/record/:id								controllers.RecordController.getRecord(id, format: play.libs.F.Option[String])
 PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= null)
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
-POST	/group/create							controllers.GroupManager.createGroup()
+POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
+POST	/organization/create					controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="Organization")
+POST	/project/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="Project")
+PUT		/group/:id								controllers.GroupManager.editGroup(id)
 DELETE 	/group/:id								controllers.GroupManager.deleteGroup(id)
+GET		/group/:id								controllers.GroupManager.getGroup(id)
+PUT		/group/addUserOrGroup/:groupId			controllers.UserAndGroupManager.addUserOrGroupToGroup(id: String ?=null, groupId)
+PUT		/group/removeUser/:groupId				controllers.GroupManager.removeUserFromGroup(userId: String ?=null, groupId)
+GET		/group/findByGroupName					controllers.GroupManager.findByGroupName(name, collectionId)
+GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
+GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
+GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
@@ -77,15 +83,15 @@ DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 GET		/user/logout						    controllers.UserManager.logout()
-GET		/user/listNames			                controllers.UserManager.listNames(prefix:java.lang.String ?= "")
+# both users and groups
+GET		/user/listNames			                controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false)
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
-GET     /user/findByUsernameOrEmail				controllers.UserManager.findByUsernameOrEmail(emailOrUsername: String, collectionId ?= null)
-GET		/user/:id/photo			                controllers.UserManager.getUserPhoto(id)
+GET     /user/findByUserOrGroupNameOrEmail		controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
+GET		/user/:id/photo			                controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)
-GET		/user/addToGroup/:id	                controllers.UserManager.addUserToGroup(id, gid: String)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()

@@ -1,6 +1,6 @@
 define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
-	function Record(data) {
+	function Record(data,showMeta) {
 		var self = this;
 		self.recordId = ko.observable("");
 		self.title = ko.observable(false);
@@ -18,7 +18,6 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.collectedCount = ko.observable("");
 		self.liked = ko.observable("");
 		self.collections =  ko.observableArray([]);
-		
 
 		self.cachedThumbnail = ko.pureComputed(function() {
 
@@ -78,9 +77,12 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.externalId(data.externalId);
 			self.source(data.source);
 			
+			
+			
+			if (showMeta){
 			$.ajax({
 				type    : "get",
-				url     : "/record/"+self.externalId() +"/mergedCollections",
+				url     : "/record/merged/"+self.externalId(),
 				success : function(result) {
 					self.collectedCount(result.count);
 					self.liked(result.liked);
@@ -90,7 +92,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 					console.log(request);
 				}
 			});
-
+			}
 		};
 
 		self.sourceImage = ko.pureComputed(function () {
@@ -162,12 +164,14 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.record = ko.observable(new Record());
 		self.detailsEnabled =  ko.observable(false);
 
-
-		itemShow = function (e) {
+		
+		itemShow = function (e,showMeta) {
 			data = ko.toJS(e);
-			self.record(new Record(data));
+			self.record(new Record(data,showMeta));
 			self.open();
 		};
+		
+	
 
 		self.open = function () {
 			$("body").addClass("modal-open");
@@ -197,22 +201,20 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			}
 		};
 
-		self.recordSelect = function (e) {
-			itemShow(e);
+		self.recordSelect = function (e,flag) {
+			itemShow(e,flag);
 		};
 		
-		self.loadCollectionnnn = function(collection) {
-			
+		self.gotToCollection = function(collection) {
 			if (collection.isExhibition) {
 				window.location = '#exhibition-edit/'+ collection.dbId;		
-
+		
 			}
 			
 			else {
-
+		
 				window.location.href = 'index.html#collectionview/' + collection.dbId;		
 			}	
-				
 			
 			if (isOpen){
 				toggleSearch(event,'');
