@@ -389,13 +389,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
 				   return record.recordId === e;
 				});
-			itemShow(selrecord);
+			itemShow(selrecord,true);
 
 		}
 
         self.columnRecordSelect= function (e){
 
-			itemShow(e);
+			itemShow(e,true);
 
 		}
 
