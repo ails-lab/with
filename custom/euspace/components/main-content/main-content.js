@@ -191,12 +191,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  //this should replaced with get space collections + exhibitions
 		  
 		  var promiseCollections = self.getSpaceCollections();
-		  var promiseExhibitions = self.getSpaceExhibitions();
-		  $.when(promiseCollections,promiseExhibitions).done(function(responseCollections, responseExhibitions) {
-			  		var dataCollections = responseCollections[0] || [];
-			  		var dataExhibitions = responseExhibitions[0] || [];
-			  		console.log(dataCollections.concat(dataExhibitions));
-				    self.revealItems(dataCollections.concat(dataExhibitions));
+		  $.when(promiseCollections).done(function(responseCollections) {
+
+				    self.revealItems(responseCollections);
 			});
 		  var promise2 = self.getFeaturedExhibition();
           $.when(promise2).done(function (data) {
@@ -224,14 +221,14 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		};
 
 	  	self.getSpaceExhibitions= function () {
-			//curently bringing owned
-			return $.ajax({
-				  type        : "GET",
-				  contentType : "application/json",
-				  dataType    : "json",
-				  url         : "/exhibition/list",
-				  processData : false,
-				  data        : "access=owned&offset=0&count=20"
+			//curently bringing owned for testing purposes
+				return $.ajax({
+					type        : "GET",
+					contentType : "application/json",
+					dataType    : "json",
+					url         : "/collection/list",
+					processData : false,
+					data        : "loggedInUserAccess=own&offset=0&count=20&isExhibition=true"
 				}).success (function(){
 				});
   		};

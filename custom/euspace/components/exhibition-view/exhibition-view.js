@@ -159,6 +159,10 @@ define(['knockout', 'text!./exhibition-view.html', 'app'], function (ko, templat
             }
         };
 
+        self.scrollToTop = function () {
+            $('html,body').animate({ scrollTop: 0 }, "slow");
+        }
+
         self.startExhibition = function () {
             $('html,body').animate({
                     scrollTop: $('.item.main').prop('scrollHeight')

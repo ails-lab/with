@@ -121,7 +121,11 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
         var promise = app.getUserCollections();
         self.myCollections = ko.observableArray([]); //holds all the collections
         $.when(promise).done(function (data) {
-            self.myCollections(ko.utils.arrayMap(data, function (collectionData) {
+            var collectionArray = [];
+            if (data.hasOwnProperty('collectionsOrExhibitions')) {
+                collectionArray = data['collectionsOrExhibitions'];
+            }
+            self.myCollections(ko.utils.arrayMap(collectionArray, function (collectionData) {
                 return new MyCollection(collectionData);
             }));
             //then initialise select

@@ -302,6 +302,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		getUserCollections: getUserCollections,
 		getPublicCollections: getPublicCollections,
 		getUserExhibitions: getUserExhibitions,
+		getEditableCollections: getEditableCollections,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,
 		likeItem: likeItem

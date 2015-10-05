@@ -207,7 +207,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			 $container.masonry( 'remove', $container.find('.masonryitem') );
 			 }
 		}
-
+		app.getEditableCollections();//to update the storages
 		self._search = function(facetinit,facetrecacl) {
 		 if(facetinit){self.filterselection.removeAll();}
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
