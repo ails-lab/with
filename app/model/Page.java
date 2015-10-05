@@ -20,6 +20,11 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import java.util.List;
 
 public class Page {
@@ -54,10 +59,14 @@ public class Page {
 	private String country;
 	private String url;
 
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId coverImage;
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId coverThumbnail;
 
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private Set<ObjectId> featuredCollections;
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private Set<ObjectId> featuredExhibitions;
 	public String getAddress() {
 		return address;

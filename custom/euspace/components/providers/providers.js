@@ -80,8 +80,8 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 				self.title="No title";
 			}else{self.title=data.title;}
 			self.url="#provider/"+data.dbId;
-			self.thumbnail=data.thumbnail;
-			self.country=data.country;
+			self.thumbnail=window.location.origin+'/media/' + data.page.coverThumbnail;
+			self.country=data.page.country;
 			self.totalCollections=data.totalCollections;
 			self.totalExhibitions=data.totalExhibitions;
 			self.name=data.friendlyName !=null? data.friendlyName : data.username;
