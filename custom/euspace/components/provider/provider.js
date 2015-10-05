@@ -189,10 +189,10 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 			          if(data.page.city && data.page.country)
 			          self.address(self.address()+" "+data.page.city+ " "+ data.page.country);
 				      self.url(data.page.url);  
-			          self.logo(data.page.thumbnail ? data.page.thumbnail : '');
+			          self.logo(data.page.coverThumbnail ? window.location.origin+'/media/' + data.page.coverThumbnail : '');
 			          self.hero(data.page.coverImage ? data.page.coverImage : null); 
 			          if(self.hero()){
-			        	  $(".profilebar > .wrap").css('background-image', 'url('+window.location.origin+'/media/' + self.hero().$oid+')');
+			        	  $(".profilebar > .wrap").css('background-image', 'url('+window.location.origin+'/media/' + self.hero()+')');
 			          }
 			      }
 		          var promise2 = self.getProfileCollections();
