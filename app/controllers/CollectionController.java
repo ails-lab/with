@@ -119,7 +119,7 @@ public class CollectionController extends Controller {
 		}
 
 		result = (ObjectNode) Json.toJson(c);
-		result.put("owner", collectionOwner.getUsername());
+		result.put("creator", collectionOwner.getUsername());
 		result.put("access", maxAccess.toString());
 		return ok(result);
 	}
