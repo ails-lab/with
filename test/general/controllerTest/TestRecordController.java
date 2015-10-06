@@ -352,4 +352,28 @@ public class TestRecordController {
 			}
 		});
 	}
+
+	@Test
+	public void testGetSimilar() {
+
+		running( fakeApplication(), new Runnable() {
+			@Override
+			public void run() {
+				Result result = route(fakeRequest("GET", "/record/similar/66E4B2D9331962124ACCC683EDF365A9"));
+
+			    JsonParser parser = new JsonParser();
+			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			    JsonElement el = parser.parse(contentAsString(result));
+			    System.out.println(gson.toJson(el));
+
+			    if(status(result) == 200)
+				    assertThat(status(result)).isEqualTo(OK);
+			    else {
+			    	System.out.println(status(result));
+			    	Assert.fail();
+			    }
+
+			}
+		});
+	}
 }
