@@ -53,6 +53,46 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			window.location = '#login';		
 		}
 	};
+	
+	
+	ko.bindingHandlers.scroll = {
+			updating: true,
+
+			init: function (element, valueAccessor, allBindingsAccessor) {
+				var self = this;
+				self.updating = true;
+				ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+					$(window).off("scroll.ko.scrollHandler");
+					self.updating = false;
+				});
+			},
+
+			update: function (element, valueAccessor, allBindingsAccessor) {
+				var props = allBindingsAccessor().scrollOptions;
+				var offset = props.offset ? props.offset : "0";
+				var loadFunc = props.loadFunc;
+				var load = ko.utils.unwrapObservable(valueAccessor());
+				var self = this;
+
+				if (load) {
+					$(window).on("scroll.ko.scrollHandler", function () {
+						if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
+							if (self.updating) {
+								loadFunc();
+								self.updating = false;
+							}
+						} else {
+							self.updating = true;
+						}
+					});
+				} else {
+					element.style.display = "none";
+					$(window).off("scroll.ko.scrollHandler");
+					self.updating = false;
+				}
+			}
+		};
+
 
 	function getCollectionsSharedWithMe() {
 		return $.ajax({
@@ -109,11 +149,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
         self.userGroupsToShare = ko.mapping.fromJS([], {});
+        self.loading=ko.observable(false);
         //self.editedUsersToShare = ko.mapping.fromJS([], {});
     	self.myUsername = ko.observable(app.currentUser.username());
-    	console.log(self.myUsername());
+    	self.moreCollectionData=ko.observable(true);
         if (self.myUsername() !== undefined && self.myUsername() !== null) {
-	        if (self.showsExhibitions) {
+        	if (self.showsExhibitions) {
 				mapping.title = {
 					create: function(options) {
 						if (options.data.indexOf('Dummy') === -1) {
@@ -130,17 +171,17 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 			else {
 				var promise = app.getUserCollections();
-				$.when(promise).done(function(data) {
-					//convert rights map to array
-					var newData = convertToRightsMap(data.collectionsOrExhibitions);
-					ko.mapping.fromJS(newData, mapping, self.myCollections);
-				});
-				//TODO: Load more sharedCollections with scrolling
+				self.loading(true);
 				self.sharedCollections = ko.mapping.fromJS([], mapping);
 				var promiseShared = getCollectionsSharedWithMe();
-				$.when(promiseShared).done(function(data) {
-					ko.mapping.fromJS(convertToRightsMap(data.collectionsOrExhibitions), mapping, self.sharedCollections);
+				
+				$.when(promise,promiseShared).done(function(data,data2) {
+					//convert rights map to array
+					ko.mapping.fromJS(convertToRightsMap(data[0].collectionsOrExhibitions), mapping, self.myCollections);
+					ko.mapping.fromJS(convertToRightsMap(data2[0].collectionsOrExhibitions), mapping, self.sharedCollections);
+					self.loading(false);
 				});
+				
 			}
         }
 	 	
@@ -247,7 +288,72 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		};
+		
+		
+		
+		
 
+		self.moreShared=function(){
+			
+			if (self.loading === true) {
+				setTimeout(self.moreShared(), 300);
+			}
+			if (self.loading() === false && self.moreSharedCollectionData()===true) {
+				if(self.sharedCollections().length<20){
+					self.moreSharedCollectionData(false);
+				}else{
+					self.loading(true);
+					var offset = self.sharedCollections().length;
+					$.ajax({
+						"url": "/collection/listShared?offset="+offset+"&count=20&isExhibition=false",
+						"method": "get",
+						"contentType": "application/json",
+						"success": function (data) {
+							var newData = convertToRightsMap(data.collectionsOrExhibitions);
+							ko.mapping.fromJS(newData, mapping, self.sharedCollections);
+							self.loading(false);
+						},
+						"error": function (result) {
+							self.loading(false);
+						}
+					});
+				}
+			}
+			
+			
+		}
+		
+
+		self.moreCollections=function(){
+			
+			if (self.loading === true) {
+				setTimeout(self.moreCollections(), 300);
+			}
+			if (self.loading() === false && self.moreCollectionData()===true) {
+				if(self.myCollections().length<20){
+					self.moreCollectionData(false);
+				}else{
+					self.loading(true);
+					var offset = self.myCollections().length;
+					$.ajax({
+						"url": "/collection/list?creator="+app.currentUser.username()+"&offset="+offset+"&count=20&isExhibition=false&totalHits=false",
+						"method": "get",
+						"contentType": "application/json",
+						"success": function (data) {
+							var newData = convertToRightsMap(data.collectionsOrExhibitions);
+							ko.mapping.fromJS(newData, mapping, self.myCollections);
+							self.loading(false);
+						},
+						"error": function (result) {
+							self.loading(false);
+						}
+					});
+				}
+			}
+			
+			
+		}
+		
 		self.openShareCollection = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
@@ -528,6 +634,20 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.saveCollectionsToStorage(editables);
 		}
 
+		
+		self.changeTab=function(what,data,event){
+			$(event.target).parents("span.withmain").children("span.collectiontab").toggleClass('active');
+			if(what=="shared"){
+			   $("#mycollections").hide();
+			   $("#sharedtab").show();
+			}
+			else{
+				$("#mycollections").show();
+				   $("#sharedtab").hide();
+			}
+			
+		}
+		
 		self.checkCollectionSet = function(dbId) {
 			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
 				   return item.dbId() === dbId;

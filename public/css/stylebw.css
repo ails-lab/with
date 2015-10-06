@@ -960,3 +960,19 @@ div#publiccolumns figure figcaption {
 .sub-arrow {
   display: none;
 }
+
+.collectiontab {
+	display: inline-block;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.collectiontab h2 a{
+	color:grey;
+}
+
+.active h2 a{
+	color:black
+}
+
+
