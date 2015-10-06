@@ -615,106 +615,92 @@ public class CollectionController extends Controller {
 					"User does not have permission to edit the collection");
 			return forbidden(result);
 		}
-		CollectionRecord record = null;
-		String recordLinkId;
-		//TODO: what is the recordlink_id??
-		if (json.has("recordlink_id")) {
-			recordLinkId = json.get("recordlink_id").asText();
-			record = DB.getCollectionRecordDAO().getById(
-					new ObjectId(recordLinkId));
-			record.setDbId(null);
-			record.setCollectionId(new ObjectId(collectionId));
-			DB.getCollectionRecordDAO().makePermanent(record);
-			return addRecordToFirstEntries(record, result, collectionId);
-		} else {
-			record = Json.fromJson(json, CollectionRecord.class);
-			if (c.getIsPublic())
-				record.setIsPublic(true);
-			else
-				record.setIsPublic(false);
+		CollectionRecord record = Json.fromJson(json, CollectionRecord.class);
+		if (c.getIsPublic())
+			record.setIsPublic(true);
+		else
+			record.setIsPublic(false);
 
-			String sourceId = record.getSourceId();
-			String source = record.getSource();
-			// get totalLikes
-			record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(
-					record.getExternalId()));
-			record.setCollectionId(new ObjectId(collectionId));
-			Set<ConstraintViolation<CollectionRecord>> violations = Validation
-					.getValidator().validate(record);
-			for (ConstraintViolation<CollectionRecord> cv : violations) {
-				result.put("message",
-						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+		String sourceId = record.getSourceId();
+		String source = record.getSource();
+		// get totalLikes
+		record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(
+				record.getExternalId()));
+		record.setCollectionId(new ObjectId(collectionId));
+		Set<ConstraintViolation<CollectionRecord>> violations = Validation
+				.getValidator().validate(record);
+		for (ConstraintViolation<CollectionRecord> cv : violations) {
+			result.put("message",
+					"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+			return badRequest(result);
+		}
+		Status status;
+		if (c.getIsExhibition()) {
+			if (!json.has("position")) {
+				result.put("error", "Must specify position of the record");
 				return badRequest(result);
 			}
-			Status status;
-			if (c.getIsExhibition()) {
-				if (!json.has("position")) {
-					result.put("error", "Must specify position of the record");
-					return badRequest(result);
-				}
-				int position = json.get("position").asInt();
-				DB.getCollectionRecordDAO().shiftRecordsToRight(
-						new ObjectId(collectionId), position);
-				record.setDbId(null);
-				DB.getCollectionRecordDAO().makePermanent(record);
-				status = addRecordToFirstEntries(record, result, collectionId,
-						position);
-			} else {
-				DB.getCollectionRecordDAO().makePermanent(record);
-				if (c.getTitle().equals("_favorites")) {
-					DB.getCollectionRecordDAO().incrementLikes(
-							record.getExternalId());
-					record = DB.getCollectionRecordDAO().get(record.getDbId());
-				}
-				// record in first entries does not contain the content metadata
-				status = addRecordToFirstEntries(record, result, collectionId);
+			int position = json.get("position").asInt();
+			DB.getCollectionRecordDAO().shiftRecordsToRight(
+					new ObjectId(collectionId), position);
+			record.setDbId(null);
+			DB.getCollectionRecordDAO().makePermanent(record);
+			status = addRecordToFirstEntries(record, result, collectionId,
+					position);
+		} else {
+			DB.getCollectionRecordDAO().makePermanent(record);
+			if (c.getTitle().equals("_favorites")) {
+				DB.getCollectionRecordDAO().incrementLikes(
+						record.getExternalId());
+				record = DB.getCollectionRecordDAO().get(record.getDbId());
 			}
-			JsonNode content = json.get("content");
-			if (content != null) {
-				Iterator<String> contentTypes = content.fieldNames();
-				while (contentTypes.hasNext()) {
-					String contentType = contentTypes.next();
-					String contentMetadata = content.get(contentType).asText();
-					record.getContent().put(contentType, contentMetadata);
-				}
-				DB.getCollectionRecordDAO().makePermanent(record);
+			// record in first entries does not contain the content metadata
+			status = addRecordToFirstEntries(record, result, collectionId);
+		}
+		JsonNode content = json.get("content");
+		if (content != null) {
+			Iterator<String> contentTypes = content.fieldNames();
+			while (contentTypes.hasNext()) {
+				String contentType = contentTypes.next();
+				String contentMetadata = content.get(contentType).asText();
+				record.getContent().put(contentType, contentMetadata);
+			}
+			DB.getCollectionRecordDAO().makePermanent(record);
 
-				// index record and merged_record and inrement likes
+			// index record and merged_record and inrement likes
+			ElasticIndexer indexer = new ElasticIndexer(record);
+			indexer.index();
+			// increment likes if collection title is _favourites
+			if (c.getTitle().equals("_favorites")
+					&& (record.getTotalLikes() > 0)) {
+				ElasticUpdater updater = new ElasticUpdater(null, record);
+				updater.incLikes();
+			}
+		} else {
+			List<CollectionRecord> storedRecords;
+			if((json.get("externalId") != null) &&
+				((storedRecords =  DB.getCollectionRecordDAO().getByExternalId(json.get("externalId").asText())) != null) &&
+				(storedRecords.get(0).getContent() != null)) {
+					for (Entry<String , String> e: storedRecords.get(0).getContent().entrySet()) {
+						record.getContent().put(e.getKey(), e.getValue());
+					}
+				DB.getCollectionRecordDAO().makePermanent(record);
+				// index record and merged_record
 				ElasticIndexer indexer = new ElasticIndexer(record);
 				indexer.index();
-				// increment likes if collection title is _favourites
-				if (c.getTitle().equals("_favorites")
-						&& (record.getTotalLikes() > 0)) {
-					ElasticUpdater updater = new ElasticUpdater(null, record);
-					updater.incLikes();
-				}
 			} else {
-				List<CollectionRecord> storedRecords;
-				if((json.get("externalId") != null) &&
-					((storedRecords =  DB.getCollectionRecordDAO().getByUniqueId(json.get("externalId").asText())) != null) &&
-					(storedRecords.get(0).getContent() != null)) {
-						for (Entry<String , String> e: storedRecords.get(0).getContent().entrySet()) {
-							record.getContent().put(e.getKey(), e.getValue());
-						}
-					DB.getCollectionRecordDAO().makePermanent(record);
-					// index record and merged_record
-					ElasticIndexer indexer = new ElasticIndexer(record);
-					indexer.index();
-				} else {
-					addContentToRecord(record.getDbId(), source, sourceId);
-				}
-
-				//increment likes if collection title is _favourites
-				if(c.getTitle().equals("_favorites")) {
-					ElasticIndexer indexer = new ElasticIndexer(record);
-					indexer.index();
-					ElasticUpdater updater = new ElasticUpdater(null, record);
-					updater.incLikes();
-				}
+				addContentToRecord(record.getDbId(), source, sourceId);
 			}
-			return status;
-		}
 
+			//increment likes if collection title is _favourites
+			if(c.getTitle().equals("_favorites")) {
+				ElasticIndexer indexer = new ElasticIndexer(record);
+				indexer.index();
+				ElasticUpdater updater = new ElasticUpdater(null, record);
+				updater.incLikes();
+			}
+		}
+		return status;
 	}
 
 	private static Status addRecordToFirstEntries(CollectionRecord record,

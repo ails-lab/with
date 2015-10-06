@@ -7,7 +7,7 @@
 GET     /                           controllers.Default.redirect(to="assets/index.html")
 
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
-POST     /api/testsearch            controllers.SearchController.posttestsearch()
+POST     /api/search            	controllers.SearchController.search()
 
 #Autocomplete
 GET		/api/autocompleteExt		controllers.AutocompleteController.autocompleteExt(term:java.lang.String,limit:Integer,source:java.util.List[java.lang.String])
@@ -28,7 +28,6 @@ POST     /collection/listByUser			        controllers.CollectionController.listF
 POST     /collection/:id/addRecord              controllers.CollectionController.addRecordToCollection(id)
 DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
-POST 	 /collection/:id/edit					controllers.CollectionController.editCollection(id)
 GET		 /collection/favorites					controllers.CollectionController.getFavorites()
 POST     /collection/liked			            controllers.CollectionController.addToFavorites()
 DELETE   /collection/unliked/:recId			    controllers.CollectionController.removeFromFavorites(recId)
@@ -41,9 +40,6 @@ DELETE   /cache/clear							controllers.CacheController.clearCache()
 # Exhibition Controller
 POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
 
-#Not Implemented
-GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
-GET 	 /collection/:id/download				controllers.CollectionController.download(id)
 GET	     /collection/:id 	        			controllers.CollectionController.getCollection(id)
 POST	 /collection/:id 						controllers.CollectionController.editCollection(id)
 DELETE   /collection/:id	                    controllers.CollectionController.deleteCollection(id)
