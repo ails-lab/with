@@ -158,7 +158,7 @@ public class CollectionDAO extends DAO<Collection> {
 	
 	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition, boolean totalHits, int offset, int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		if (creator != null)
 			q.field("ownerId").equal(creator);
 		/*if (isExhibition != null)
@@ -181,7 +181,7 @@ public class CollectionDAO extends DAO<Collection> {
 	
 	public Tuple<List<Collection>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		q.field("ownerId").notEqual(userId);
 		/*if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);*/
@@ -204,7 +204,7 @@ public class CollectionDAO extends DAO<Collection> {
 	
 	public Tuple<List<Collection>, Tuple<Integer, Integer>> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		/*if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);*/
 		if (creator != null)
