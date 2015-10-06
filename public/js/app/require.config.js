@@ -42,6 +42,7 @@ var require = {
 		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
 		"autoscroll"		    	: "js/aautoscroll.2.4",
 		"bootstrap-select"       	: "bower_modules/bootstrap-select/dist/js/bootstrap-select.min",
+		"bootstrap-switch"       	: "bower_modules/bootstrap-switch/dist/js/bootstrap-switch.min",
 		"jquery.lazyload"           : "bower_modules/jquery.lazyload/jquery.lazyload",
 		"barchart"                  : "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
 		"header"                    : "headers",

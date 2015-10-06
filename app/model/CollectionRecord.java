@@ -92,7 +92,7 @@ public class CollectionRecord {
 
 	private String itemRights;
 
-	@JsonDeserialize(using = Deserializer.ExhibitionRecordDeserializer.class)
+	//@JsonDeserialize(using = Deserializer.ExhibitionRecordDeserializer.class)
 	private ExhibitionRecord exhibitionRecord;
 
 	// collection specific stuff...
