@@ -1,5 +1,22 @@
-define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'bootstrap-select', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, bootstrapSelect, jqueryLazyLoad) {
+define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'bootstrap-select', 'bootstrap-switch', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, bootstrapSelect, bootstrapSwitch, jqueryLazyLoad) {
 
+    function setUpSwitch(exhibition) {
+        console.log(exhibition);
+        $("input.switch").bootstrapSwitch({
+            onText: 'Public',
+            offText: 'Restricted',
+            size: 'small',
+            onColor: 'success',
+            offColor: 'danger',
+            state: exhibition.isPublic()
+        });
+        $("input.switch").on('switchChange.bootstrapSwitch', function(event, state) {
+            var promise = updateExhibitionPropery(exhibition, 'isPublic', state);;
+            $.when(promise).done(function (data) {
+
+            });
+        });
+    }
 
     function MyCollection(collectionData) {
         this.title = ko.observable(collectionData.title);
@@ -15,6 +32,21 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
             this.category = ko.observable(collectionData.category);
         this.firstEntries = collectionData.firstEntries;
     }
+
+    function updateExhibitionPropery(exhibition, propertyName, newValue) {
+        var jsonObject = {};
+        jsonObject[propertyName] = newValue;
+        var jsonData = JSON.stringify(jsonObject);
+        return $.ajax({
+            type: "POST",
+            url: "/collection/" + exhibition.dbId(),
+            data: jsonData,
+            contentType: "application/json",
+            success: function () {
+
+            }
+        });
+    };
 
     function createExhibition() {
         return $.ajax({
@@ -62,7 +94,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
         var jsonData = JSON.stringify({
             source: record.source,
             sourceId: record.sourceId,
-            externalId: record.externalId,
             title: record.title,
             description: record.description,
             thumbnailUrl: record.thumbnailUrl,
@@ -106,6 +137,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
     var ExhibitionEditModel = function (params) {
         var self = this;
         self.route = params.route;
+        self.loading = ko.observable(false);
         self.title = ko.observable('');
         self.description = ko.observable('');
         self.dbId = ko.observable();
@@ -121,11 +153,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
         var promise = app.getUserCollections();
         self.myCollections = ko.observableArray([]); //holds all the collections
         $.when(promise).done(function (data) {
-            var collectionArray = [];
+            var collections = [];
             if (data.hasOwnProperty('collectionsOrExhibitions')) {
-                collectionArray = data['collectionsOrExhibitions'];
+
+                collections = data['collectionsOrExhibitions'];
             }
-            self.myCollections(ko.utils.arrayMap(collectionArray, function (collectionData) {
+            self.myCollections(ko.utils.arrayMap(collections, function (collectionData) {
                 return new MyCollection(collectionData);
             }));
             //then initialise select
@@ -155,8 +188,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
             $('.outer').css("visibility", "visible");
             var promiseCreateExhibtion = createExhibition();
             $.when(promiseCreateExhibtion).done(function (data) {
-
                 ko.mapping.fromJS(data, mappingExhibition, self);
+                setUpSwitch(self);
                 self.title('');
                 self.description('');
             });
@@ -174,6 +207,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
                 if (self.description().indexOf('Description') !== -1) {
                     self.description('');
                 }
+                setUpSwitch(self);
                 self.loadingInitialItemsCount = self.firstEntries.length;
                 self.firstEntries.map(function (record) { //fix for now till service gets implemented
                     record.additionalText = ko.observable('');
@@ -258,7 +292,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
                     record.dbId = data.dbId;
                     $(elem).find('#loadingIcon').fadeOut();
                 }).fail(function (data) {
-                        $(elem).find('#loadingIcon').fadeOut();
+                    $(elem).find('#loadingIcon').fadeOut();
                 });
             }
         }
@@ -369,6 +403,106 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
             }
         };
 
+        ko.bindingHandlers.scroll = {
+            updating: true,
+
+            init: function (element, valueAccessor, allBindingsAccessor) {
+                var self = this;
+                self.updating = true;
+                var parentContainer = element.parentElement;
+                ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+                    $(parentContainer).off("scroll.ko.scrollHandler");
+                    self.updating = false;
+                });
+            },
+
+            update: function (element, valueAccessor, allBindingsAccessor) {
+                var props = allBindingsAccessor().scrollOptions;
+                var offset = props.offset ? props.offset : "0";
+                var loadFunc = props.loadFunc;
+                var load = ko.utils.unwrapObservable(valueAccessor());
+                var self = this;
+                var parentContainer = element.parentElement;
+                if (load) {
+                    $(parentContainer).on("scroll.ko.scrollHandler", function () {
+                        var parentContainer = element.parentElement;
+                        //console.log('Is scrolling');
+                        //console.log('left: ' + parentContainer.scrollLeft + ' offset: ' + parentContainer.offsetWidth  + 'scrollview width' + parentContainer.scrollWidth);
+                        if (parentContainer.scrollWidth - (parentContainer.scrollLeft + parentContainer.offsetWidth) < 150) {
+                            if (self.updating) {
+                                loadFunc();
+                                self.updating = false;
+                            }
+                        } else {
+                            self.updating = true;
+                        }
+                    });
+                } else {
+                    element.style.display = "none";
+                    $(parentContainer).off("scroll.ko.scrollHandler");
+                    self.updating = false;
+                }
+            }
+        };
+
+        self.loadNextCollection = function () {
+            self.moreItems(false);
+        };
+
+        self.loadNextExhibition = function () {
+            self.moreItems(true);
+        };
+
+        self.moreItems = function (isForExhibition) {
+            if (self.loading === true) {
+                setTimeout(self.moreItems(), 300);
+            }
+            if (self.loading() === false) {
+                self.loading(true);
+                var offset;
+                var collectionID;
+                if (isForExhibition) {
+                    offset = self.collectionItemsArray().length;
+                    collectionID = self.dbId();
+                }
+                else {
+                    offset = self.userSavedItemsArray().length;
+                    collectionID = self.selectedCollection().dbId;
+                }
+                $.ajax({
+                    "url": "/collection/" + collectionID + "/list?count=20&start=" + offset,
+                    "method": "get",
+                    "contentType": "application/json",
+                    "success": function (data) {
+                        console.log(data.itemCount);
+                        if (isForExhibition) {
+                            data.records.map(function (record) { //fix for now till service gets implemented
+                                record.additionalText = ko.observable('');
+                                record.videoUrl = ko.observable('');
+                                record.containsVideo = ko.observable(false);
+                                record.containsText = ko.observable(false);
+                                var exhibitionItemInfo = record.exhibition;
+                                if (exhibitionItemInfo !== undefined) {
+                                    record.additionalText(exhibitionItemInfo.annotation);
+                                    record.videoUrl(exhibitionItemInfo.videoUrl);
+                                    record.containsVideo(!isEmpty(record.videoUrl()));
+                                    record.containsText(!isEmpty(record.additionalText()));
+                                }
+                            });
+                            self.loadingInitialItemsCount = self.loadingInitialItemsCount + data.records.length;
+                            self.collectionItemsArray.push.apply(self.collectionItemsArray, data.records);
+                        }
+                        else {
+                            self.userSavedItemsArray.push.apply(self.userSavedItemsArray, data.records);
+                        }
+                        self.loading(false);
+                    },
+                    "error": function (result) {
+                        self.loading(false);
+                    }
+                });
+            }
+        };
 //----knockout solution----//
 
         //for the side scrolling
@@ -405,6 +539,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
             $('.bottom-box').removeClass('box-Hover');
             $(event.target).addClass('box-Hover');
         }
+
         //hide the nav bar
         $('#bottomBar').fadeOut(500);
     };

@@ -42,11 +42,13 @@
                         <div class="wrap">
                             <h2 data-bind="text: title"></h2>
                             <p data-bind="text: annotation"></p>
+                            <!-- ko if: $data.hasOwnProperty('videoUrl')-->
                             <div class="videoWrap">
                                 <div class="embed-responsive embed-responsive-16by9">
                                     <iframe width="100%" height="100%" src="https://www.youtube.com/embed/4nVJ4WhYVWA" frameborder="0" allowfullscreen></iframe>
                                 </div>
                             </div>
+                            <!-- /ko -->
                             <div class="expand"><a data-bind="click: $parent.scrollToTop" title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
                         </div>
                     </div>
