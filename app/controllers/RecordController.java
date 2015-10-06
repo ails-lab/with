@@ -234,7 +234,7 @@ public class RecordController extends Controller {
 	public static Result getSimilar(String externalId) {
 
 		ArrayNode result = Json.newObject().arrayNode();
-		CollectionRecord r = DB.getCollectionRecordDAO().getByUniqueId(externalId).get(0);
+		CollectionRecord r = DB.getCollectionRecordDAO().getByExternalId(externalId).get(0);
 		String title = r.getTitle();
 		String provider = r.getProvider();
 

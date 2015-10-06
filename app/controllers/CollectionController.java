@@ -935,7 +935,7 @@ public class CollectionController extends Controller {
 		ObjectId fav = DB.getCollectionDAO()
 				.getByOwnerAndTitle(userId, "_favorites").getDbId();
 		List<CollectionRecord> record = DB.getCollectionRecordDAO()
-				.getByUniqueId(fav, externalId);
+				.getByExternalId(fav, externalId);
 		String recordId = record.get(0).getDbId().toString();
 		return removeRecordFromCollection(fav.toString(), recordId);
 	}
