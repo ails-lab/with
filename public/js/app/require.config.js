@@ -47,7 +47,8 @@ var require = {
 		"header"                    : "headers",
 		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd",
 		"Modernizr"					: "bower_modules/modernizr/modernizr",
-		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false"
+		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false",
+		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

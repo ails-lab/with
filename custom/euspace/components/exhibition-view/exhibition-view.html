@@ -10,6 +10,7 @@
         </ul>
     </div>
 </nav>
+<!--  ko if: showCarousel-->
 <!-- exhibition carousel-->
 <section class="exhibitionplayer">
     <!-- carousel-->
@@ -23,7 +24,7 @@
                     <h1 class="title" data-bind="text: exhName"></h1>
                     <div class="description">
                         <p data-bind="text: desc"></p>
-                    </div><a data-bind="click: startExhibition" title="START EXHIBITION" class="btn btn-blue">START EXHIBITION</a>
+                    </div><a title="START EXHIBITION" class="btn btn-blue">START EXHIBITION</a>
                 </div>
             </div>
             <!-- items-->
@@ -33,7 +34,7 @@
                     <!-- image-->
                     <div class="imagewrap"><img data-bind="attr: {src: cachedThumbnail}" alt="">
                         <ul class="action">
-                            <li class="zoom"><a data-bind="attr: {href: cachedThumbnail, 'title': title}" href="img/content/img-exhibition-1.png" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                            <li class="zoom"><a data-bind="attr: {href: cachedThumbnail, 'title': title}" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
                             <li class="view"><a data-bind="attr: {href: view_url}" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
                         </ul>
                     </div>
@@ -42,19 +43,17 @@
                         <div class="wrap">
                             <h2 data-bind="text: title"></h2>
                             <p data-bind="text: annotation"></p>
-                            <div class="videoWrap">
-                                <div class="embed-responsive embed-responsive-16by9">
-                                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/4nVJ4WhYVWA" frameborder="0" allowfullscreen></iframe>
-                                </div>
-                            </div>
-                            <div class="expand"><a data-bind="click: $parent.scrollToTop" title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
+                            <!--<div class="videoWrap">-->
+                                <!--<div class="embed-responsive embed-responsive-16by9">-->
+                                    <!--<iframe width="100%" height="100%" src="https://www.youtube.com/embed/4nVJ4WhYVWA" frameborder="0" allowfullscreen></iframe>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                            <div class="expand"><a title="#"><i class="glyphicon glyphicon-chevron-up"></i></a></div>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /ko -->
-
-            <div id="more" data-bind="visible: loading ,scroll: exhItems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
 
             <!-- item-->
             <div class="item credit">
@@ -99,3 +98,4 @@
     </div>
     <!-- /ko -->
 </section>
+<!-- /ko -->

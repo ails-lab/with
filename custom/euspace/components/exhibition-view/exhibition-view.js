@@ -1,4 +1,17 @@
-define(['knockout', 'text!./exhibition-view.html', 'app'], function (ko, template, app) {
+define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], function (ko, template, app, magnificPopup) {
+
+
+    function initCarousel (){
+
+        require(["js/vendor/slick.js/slick/slick.min","js/plugin"], function(slick,EUSpaceApp) {
+            var EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
+
+            });
+            EUSpaceUI.initCarousel();
+            EUSpaceUI.initExpandExhibitionText();
+            EUSpaceUI.initImageZoom();
+        });
+    };
 
     ko.bindingHandlers.backgroundImage = {
         update: function(element, valueAccessor) {
@@ -72,6 +85,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app'], function (ko, templat
         self.exhItems = ko.observableArray();
         self.desc = ko.observable('');
         self.loading = ko.observable(false);
+        self.showCarousel = ko.observable(false);
 
         self.revealItems = function (data) {
             for (var i in data) {
@@ -106,6 +120,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app'], function (ko, templat
                 self.exhItems().push(record);
             }
             self.exhItems.valueHasMutated();
+            initCarousel();
         };
 
         self.loadExhibition = function (id) {
@@ -122,6 +137,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app'], function (ko, templat
                     self.itemCount(data.itemCount);
                     self.access(data.access);
                     self.revealItems(data.firstEntries);
+                    self.showCarousel(true);
                     self.loading(false);
                 },
                 error: function (xhr, textStatus, errorThrown) {
@@ -158,17 +174,6 @@ define(['knockout', 'text!./exhibition-view.html', 'app'], function (ko, templat
                 });
             }
         };
-
-        self.scrollToTop = function () {
-            $('html,body').animate({ scrollTop: 0 }, "slow");
-        }
-
-        self.startExhibition = function () {
-            $('html,body').animate({
-                    scrollTop: $('.item.main').prop('scrollHeight')
-                },
-                800);
-        }
     }
 
     return {
