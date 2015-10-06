@@ -397,8 +397,10 @@ public class CollectionController extends Controller {
 				c.put("access", maxAccess.toString());
 				User user = DB.getUserDAO().getById(collection.getOwnerId(),
 						new ArrayList<String>(Arrays.asList("username")));
-				c.put("creator", user.getUsername());
-				collections.add(c);
+				if (user != null) {
+					c.put("creator", user.getUsername());
+					collections.add(c);
+				}
 			}
 		}
 		return collections;
@@ -709,11 +711,12 @@ public class CollectionController extends Controller {
 				new ObjectId(collectionId));
 		collection.itemCountIncr();
 		collection.setLastModified(new Date());
-		if (collection.getFirstEntries().size() < 20)
+		if (collection.getFirstEntries().size() < 20) {
 			collection.getFirstEntries().add(record);
+		}
 		DB.getCollectionDAO().makePermanent(collection);
 		if (record.getDbId() == null) {
-			result.put("message", "Cannot save RecordLink to database!");
+			result.put("message", "Cannot save record to database!");
 			return internalServerError(result);
 		} else {
 			// update itemCount
