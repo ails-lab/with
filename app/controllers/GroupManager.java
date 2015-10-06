@@ -188,7 +188,7 @@ public class GroupManager extends Controller {
 				log.error("Cannot save group to database!");
 				return internalServerError("Cannot save group to database!");
 			}
-			return ok(DB.getJson(newVersion));
+			return ok(Json.toJson(newVersion));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return internalServerError(e.getMessage());
@@ -224,7 +224,7 @@ public class GroupManager extends Controller {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			return ok(DB.getJson(group));
+			return ok(Json.toJson(group));
 		} catch (Exception e) {
 			log.error("Cannot retrieve group from database!", e);
 			return internalServerError("Cannot retrieve group from database!");
