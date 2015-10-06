@@ -175,12 +175,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
                     return ko.utils.unwrapObservable(data.dbId);
                 }
             },
-            exhibition:{
-                create: function (options) {
-
-                    this.additionalText = ko.observable(options.data.annotation);
-                }
-            },
             'copy': ["firstEntries"]
         };
 
@@ -198,7 +192,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
             self.loadingExhibitionItems = true;
             var promise = getExhibition(self.dbId());
             $.when(promise).done(function (data) {
-                //alert(JSON.stringify(data));
+                console.log(data);
                 $('.outer').css("visibility", "visible");
                 ko.mapping.fromJS(data, mappingExhibition, self);
                 if (self.title().indexOf('Dummy') !== -1) {
@@ -214,7 +208,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
                     record.videoUrl = ko.observable('');
                     record.containsVideo = ko.observable(false);
                     record.containsText = ko.observable(false);
-                    var exhibitionItemInfo = record.exhibition;
+                    var exhibitionItemInfo = record.exhibitionRecord;
                     if (exhibitionItemInfo !== undefined) {
                         record.additionalText(exhibitionItemInfo.annotation);
                         record.videoUrl(exhibitionItemInfo.videoUrl);
@@ -481,7 +475,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
                                 record.videoUrl = ko.observable('');
                                 record.containsVideo = ko.observable(false);
                                 record.containsText = ko.observable(false);
-                                var exhibitionItemInfo = record.exhibition;
+                                var exhibitionItemInfo = record.exhibitionRecord;
                                 if (exhibitionItemInfo !== undefined) {
                                     record.additionalText(exhibitionItemInfo.annotation);
                                     record.videoUrl(exhibitionItemInfo.videoUrl);

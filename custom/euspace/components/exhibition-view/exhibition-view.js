@@ -51,6 +51,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
             self.rights=data.rights;
             self.recordId=data.id;
             self.externalId=data.externalId;
+
         };
 
         self.cachedThumbnail = ko.pureComputed(function() {
