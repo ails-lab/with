@@ -21,13 +21,16 @@ import java.util.List;
 
 import model.Collection;
 
+import org.bson.types.ObjectId;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 
 import play.libs.Json;
 import utils.ExtendedCollectionRecord;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class ElasticUtils {
 
@@ -56,9 +59,32 @@ public class ElasticUtils {
 	}
 
 	public static Collection hitToCollection(SearchHit hit) {
-		JsonNode json = Json.parse(hit.getSourceAsString());
-		Collection c = Json.fromJson(json, Collection.class);
+		JsonNode json         = Json.parse(hit.getSourceAsString());
+		JsonNode accessRights = json.get("rights");
+		if(!accessRights.isMissingNode()) {
+			ObjectNode ar = Json.newObject();
+			for(JsonNode r: accessRights) {
+				String user   = r.get("user").asText();
+				String access = r.get("access").asText();
+				ar.put(user, access);
+			}
+			((ObjectNode)json).remove("rights");
+			((ObjectNode)json).put("rights", ar);
+		}
+		Collection collection = Json.fromJson(json, Collection.class);
+		return collection;
+	}
 
-		return c;
+	public static List<Collection> getCollectionMetadaFromHit(
+			SearchHits hits) {
+
+
+		List<Collection> colFields = new ArrayList<Collection>();
+		for(SearchHit hit: hits.getHits()) {
+			Collection collection = hitToCollection(hit);
+			collection.setDbId(new ObjectId(hit.getId()));
+			colFields.add(collection);
+		}
+		return colFields;
 	}
 }
