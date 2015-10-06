@@ -21,8 +21,10 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -31,7 +33,8 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserGroup extends UserOrGroup {
-
+	
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private boolean privateGroup;
 
@@ -66,7 +69,8 @@ public class UserGroup extends UserOrGroup {
 	public Set<ObjectId> getParentGroups() {
 		return parentGroups;
 	}
-
+	
+	@JsonIgnore
 	public Set<ObjectId> getAncestorGroups() {
 		Set<ObjectId> ancestors = new HashSet<ObjectId>();
 		ancestors.addAll(parentGroups);
