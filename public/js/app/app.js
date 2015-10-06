@@ -47,9 +47,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 		isLogged(true);
 
-		/*if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
-			return [self.getUserCollections()];
-		}*/
+		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
+			return [self.getEditableCollections()]; //[self.getEditableCollections(), self.getUserCollections()];
+		}
 	};
 
 	self.loadFavorites = function () {
@@ -189,7 +189,6 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 				else if (localStorage.getItem('User') !== null)
 					localStorage.setItem("EditableCollections", JSON.stringify(editables));
 			}).fail(function (request, status, error) {
-			console.log(JSON.parse(request.responseText));
 		});
 	};
 
