@@ -299,7 +299,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				setTimeout(self.moreShared(), 300);
 			}
 			if (self.loading() === false && self.moreSharedCollectionData()===true) {
-				if(self.sharedCollections().length<20){
+				if(self.sharedCollections().length<19){
 					self.moreSharedCollectionData(false);
 				}else{
 					self.loading(true);
@@ -310,8 +310,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						"contentType": "application/json",
 						"success": function (data) {
 							var newData = convertToRightsMap(data.collectionsOrExhibitions);
-							ko.mapping.fromJS(newData, mapping, self.sharedCollections);
+							var newItems=ko.mapping.fromJS(newData, mapping);
+							self.sharedCollections.push.apply(self.sharedCollections, newItems());
 							self.loading(false);
+							if(data.collectionsOrExhibitions.length<19){
+								self.moreSharedCollectionData(false);
+							}
 						},
 						"error": function (result) {
 							self.loading(false);
@@ -330,7 +334,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				setTimeout(self.moreCollections(), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
-				if(self.myCollections().length<20){
+				if(self.myCollections().length<19){
 					self.moreCollectionData(false);
 				}else{
 					self.loading(true);
@@ -341,8 +345,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						"contentType": "application/json",
 						"success": function (data) {
 							var newData = convertToRightsMap(data.collectionsOrExhibitions);
-							ko.mapping.fromJS(newData, mapping, self.myCollections);
+							var newItems=ko.mapping.fromJS(newData, mapping);
+							self.myCollections.push.apply(self.myCollections, newItems());
 							self.loading(false);
+							if(data.collectionsOrExhibitions.length<19){
+								self.moreCollectionData(false);
+							}
 						},
 						"error": function (result) {
 							self.loading(false);
