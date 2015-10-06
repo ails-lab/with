@@ -205,7 +205,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			itemShow(e,flag);
 		};
 		
-		self.gotToCollection = function(collection) {
+		self.goToCollection = function(collection) {
 			if (collection.isExhibition) {
 				window.location = '#exhibition-edit/'+ collection.dbId;		
 		
