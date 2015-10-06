@@ -17,7 +17,6 @@
 package controllers;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,7 +29,6 @@ import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 
@@ -90,7 +88,7 @@ public class GroupManager extends Controller {
 				return badRequest("Group name already exists! Please specify another name.");
 			}
 			Class<?> clazz = Class.forName("model."
-					+ capitalizeFirst(groupType));
+					+ groupType);
 			newGroup = (UserGroup) Json.fromJson(json, clazz);
 			if (adminId != null) {
 				admin = new ObjectId(adminId);

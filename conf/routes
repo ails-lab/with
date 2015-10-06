@@ -50,6 +50,7 @@ DELETE   /collection/:id	                    controllers.CollectionController.de
 
 # Record Controller (tested)
 GET		/record/merged/:externalId  			controllers.RecordController.getMergedRecord(externalId)
+GET		/record/similar/:externalId				controllers.RecordController.getSimilar(externalId)
 GET		/record/:id								controllers.RecordController.getRecord(id, format: play.libs.F.Option[String])
 PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= null)
 DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")

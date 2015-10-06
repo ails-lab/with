@@ -33,11 +33,14 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedFilterBuilder;
+import org.elasticsearch.index.query.NotFilterBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -49,6 +52,7 @@ import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 
+import elastic.ElasticSearcher.SearchOptions;
 import utils.Tuple;
 
 public class ElasticSearcher {
@@ -212,6 +216,24 @@ public class ElasticSearcher {
 		//return this.executeWithFacets(bool, options);
 	}
 
+	public SearchResponse searchForSimilar(String terms, String provider, String exclude, SearchOptions elasticoptions) {
+
+		if(terms == null) terms = "";
+
+		DisMaxQueryBuilder dis_max_q = QueryBuilders.disMaxQuery();
+		MatchQueryBuilder title_match = QueryBuilders.matchQuery("title", terms);
+		MatchQueryBuilder desc_match = QueryBuilders.matchQuery("description", terms);
+		MatchQueryBuilder provider_match = QueryBuilders.matchQuery("provider", provider);
+
+		dis_max_q.add(title_match).add(desc_match).add(provider_match);
+		dis_max_q.tieBreaker(0.3f);
+
+		NotFilterBuilder not_filter = FilterBuilders.notFilter(this.filter("_id", exclude));
+		FilteredQueryBuilder filtered = new FilteredQueryBuilder(dis_max_q, not_filter);
+
+		return this.execute(filtered);
+	}
+
 	/*public SearchResponse related(Record record) {
 		JsonNode object = record.getJsonObject(false);
 		Set<String> creators = JSONUtils.getLabelsFromObject(object.get("creator"));
@@ -264,7 +286,7 @@ public class ElasticSearcher {
 		.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 		.setSize(options.count);
 		System.out.println("got in here!");
-		search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
+		//search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
 		FilterBuilder filterBuilder = null;
 
 		if(options.filterType == FILTER_OR) filterBuilder = FilterBuilders.orFilter();
@@ -324,5 +346,7 @@ public class ElasticSearcher {
 	public void setType(String type) {
 		this.type = type;
 	}
+
+
 
 }
