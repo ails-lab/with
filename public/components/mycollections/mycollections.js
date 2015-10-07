@@ -158,8 +158,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         	if (self.showsExhibitions) {
 				mapping.title = {
 					create: function(options) {
+						console.log(options);
 						if (options.data.indexOf('Dummy') === -1) {
-							return ko.observable(options.data.collectionsOrExhibitions);
+							return ko.observable(options.data);
 						}
 						return ko.observable('Add Title');
 					}
