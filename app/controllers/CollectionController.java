@@ -347,9 +347,12 @@ public class CollectionController extends Controller {
 			MyPlayList directlyUserNameList = directlyAccessedByUserName.get();
 			for (StringTuple userAccess: directlyUserNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
-				ObjectId groupId = DB.getUserDAO().getByUsername(userAccess.x).getDbId();
-				directlyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(userAccess.y.toUpperCase())));
-				accessedByUserOrGroup.add(directlyAccessedByUser);
+				User user = DB.getUserDAO().getByUsername(userAccess.x);
+				if (user != null) {
+					ObjectId userId = user.getDbId();
+					directlyAccessedByUser.add(new Tuple<ObjectId, Access>(userId, Access.valueOf(userAccess.y.toUpperCase())));
+					accessedByUserOrGroup.add(directlyAccessedByUser);
+				}		
 			}
 		}
 		if (recursivelyAccessedByUserName.isDefined()) {
@@ -372,9 +375,12 @@ public class CollectionController extends Controller {
 			MyPlayList directlyGroupNameList = directlyAccessedByGroupName.get();
 			for (StringTuple groupAccess: directlyGroupNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
-				ObjectId groupId = DB.getUserGroupDAO().getByName(groupAccess.x).getDbId();
-				directlyAccessedByGroup.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(groupAccess.y.toUpperCase())));
-				accessedByUserOrGroup.add(directlyAccessedByGroup);
+				UserGroup userGroup = DB.getUserGroupDAO().getByName(groupAccess.x);
+				if (userGroup != null) {
+					ObjectId groupId = userGroup.getDbId();
+					directlyAccessedByGroup.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(groupAccess.y.toUpperCase())));
+					accessedByUserOrGroup.add(directlyAccessedByGroup);
+				}
 			}
 		}
 		return accessedByUserOrGroup;
@@ -412,7 +418,7 @@ public class CollectionController extends Controller {
 
 	 */
 
-	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
+	public static Result list(Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
 			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, 
 			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count) {
@@ -447,15 +453,17 @@ public class CollectionController extends Controller {
 		}
 		else { //logged in
 			//check if super user, if not, restrict query to accessible by effectiveUserIds
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info;
 			if (!AccessManager.checkAccess(new HashMap<ObjectId, Access>(), effectiveUserIds, Action.DELETE)) {
-				List<Tuple<ObjectId, Access>> recursivelyAccessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
-				for (String userId: effectiveUserIds) {
-					recursivelyAccessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
-							new ObjectId(userId), Access.valueOf(loggedInUserAccess.toUpperCase())));
+				List<ObjectId> effObjectIds = new ArrayList<ObjectId>(effectiveUserIds.size());
+				for (String id: effectiveUserIds) {
+					effObjectIds.add(new ObjectId(id));
 				}
-				accessedByUserOrGroup.add(recursivelyAccessedByLoggedInUser);
+				info = DB.getCollectionDAO().
+						getByAccess(effObjectIds, accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
 			}
-			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().
+			else 
+				info = DB.getCollectionDAO().
 					getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
