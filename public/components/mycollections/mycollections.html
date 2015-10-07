@@ -1,5 +1,9 @@
-<div id="userCollections" class="container-fluid">
-		<div class="row">
+<div id="userCollections" class="container-fluid" style="padding-bottom: 100px;">
+		 <!--  ko if: myUsername() == undefined || myUsername() == null-->
+		 	<label data-bind="redirectToLogin:{}"></label>
+		  <!-- /ko -->
+		  <!-- ko else -->
+		  <div class="row">
 			<div class="col-lg-12">
 				<!-- ko if: showsExhibitions -->
 				<span class="withmain">
@@ -8,8 +12,8 @@
 				<!-- /ko -->
 				<!-- ko else -->
 				<span class="withmain">
-				<h2>My collections</h2>
-				<button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button></span>
+				<span class="collectiontab active"><h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My collections</a></h2></span> | <span class="collectiontab"><h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Collections shared with me</a></h2></span>
+				<div><button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button></div></span>
 				<!-- /ko -->
 				<div id="mycollections">
 				 <!-- collections listed here -->
@@ -49,9 +53,12 @@
 					  	 <div class="imcontainer">
 					  	  <div data-bind="click: $parent.loadCollectionOrExhibition">
 					  	 	<!-- ko foreach: firstEntries -->
+					  	 	  <!-- ko if: $data.thumbnailUrl -->
 					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl()}">
 					  	 		 </div>
 					  	 	 <!-- /ko -->
+					  	 	 <!-- /ko -->
+					  	 	 
 					  	  </div>
 					  	 </div>
 					  	 </div>
@@ -79,8 +86,11 @@
 				 <!-- /ko -->
 
 				 </div>
+				 	<div id="more" data-bind="visible: loading ,scroll: myCollections(), scrollOptions: { loadFunc: moreCollections, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+		
+				 
 			</div>
-			<div class="col-lg-12" data-bind="visible: sharedCollections().length">
+			<div class="col-lg-12" id="sharedtab" style="display:none">
 				 <span class="withmain"><h2>Collections shared with me</h2></span>
 				 <div id="sharedcollections">
 				 <!-- collections listed here -->
@@ -121,8 +131,10 @@
 					  	 <div class="imcontainer">
 					  	  <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">
 					  	 	<!-- ko foreach: firstEntries -->
+					  	 	<!-- ko if: $data.thumbnailUrl -->
 					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl()}">
 					  	 		 </div>
+					  	 	 <!-- /ko -->
 					  	 	 <!-- /ko -->
 					  	 	 </a>
 					  	 </div>
@@ -145,10 +157,13 @@
 					 </div>
 					 </div>
 				 <!-- /ko -->
-
 				 </div>
+				 	<div id="more" data-bind="visible: loading ,scroll: sharedCollections(), scrollOptions: { loadFunc: moreShared, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+		
 		    </div>
 		</div>
+		<!-- /ko -->
+		
 </div>
 
 

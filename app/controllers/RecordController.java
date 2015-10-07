@@ -25,6 +25,7 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -38,6 +39,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.Tuple;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -226,19 +228,66 @@ public class RecordController extends Controller {
 	}
 
 	/**
+	 * Get similar records based keywords on title
+	 * and provider
+	 */
+	public static Result getSimilar(String externalId) {
+
+		ArrayNode result = Json.newObject().arrayNode();
+		CollectionRecord r = DB.getCollectionRecordDAO().getByExternalId(externalId).get(0);
+		String title = r.getTitle();
+		String provider = r.getProvider();
+
+		/*
+		 * Search for available collections
+		 */
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_collection);
+		SearchOptions elasticoptions = new SearchOptions(0, 1000);
+		List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId,Access>>>();
+
+		elasticoptions.accessList = accessFilters;
+		SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
+		List<Collection> colFields = ElasticUtils.getCollectionMetadaFromHit(response.getHits());
+
+		/*
+		 * Search for similar records
+		 */
+		//elasticoptions = new SearchOptions(offset, count);
+		elasticoptions = new SearchOptions();
+		elasticoptions.addFilter("isPublic", "true");
+		searcher.setType(Elastic.type_general);
+		for(Collection collection : colFields) {
+			elasticoptions.addFilter("collections", collection.getDbId().toString());
+		}
+
+		SearchResponse resp = searcher.searchForSimilar(title, provider, externalId, elasticoptions);
+		searcher.closeClient();
+
+		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
+		for (SearchHit hit : resp.getHits().hits()) {
+			elasticrecords.add(ElasticUtils.hitToRecord(hit));
+			result.add(Json.toJson(ElasticUtils.hitToRecord(hit)));
+		}
+
+
+		return ok(result);
+	}
+
+
+	/**
 	 *
 	 * @param externalId
 	 * @return
 	 */
 	public static Result getMergedRecord(String externalId) {
-		
+
 		ObjectNode result = Json.newObject();
 
 		ElasticSearcher searchMerged = new ElasticSearcher(Elastic.type_general);
 		SearchOptions options = new SearchOptions();
 		options.set_idSearch(true);
 		SearchResponse resp = searchMerged.search(externalId, options);
-		
+
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 
@@ -258,7 +307,7 @@ public class RecordController extends Controller {
 		ElasticSearcher searchCollections = new ElasticSearcher(Elastic.type_collection);
 		resp = searchCollections.searchForCollections(String.join(" ", collectionIds), new SearchOptions(0, 15));
 
-		
+
 		if(resp.getHits().getTotalHits() == 0) {
 			result.put("count",resp.getHits().getTotalHits());
 			ArrayNode collections = Json.newObject().arrayNode();
@@ -267,8 +316,8 @@ public class RecordController extends Controller {
 
 		//	return internalServerError("message", "No collections found for this merged record");
 		}
-		
-		
+
+
 		//result.put("count",resp.getHits().getTotalHits());
 		ArrayNode collections = Json.newObject().arrayNode();
 		int liked  = 0 ;
@@ -281,12 +330,12 @@ public class RecordController extends Controller {
 				continue;
 			}
 			count++;
-			
+
 			if(!c.getIsPublic() && !AccessManager.checkAccess(c.getRights(), userIds,
 					Action.READ)){
 				continue;
 			}
-			
+
 			o.put("title", c.getTitle());
 			o.put("description", c.getDescription());
 			o.put("isExhibition", c.getIsExhibition());
@@ -294,9 +343,9 @@ public class RecordController extends Controller {
 			o.put("thumbnail", c.getThumbnailUrl());
 			o.put("userName" , DB.getUserDAO().get(c.getOwnerId()).getUsername());
 			o.put("dbId", hit.getId());
-			
-			
-		
+
+
+
 			collections.add(o);
 		}
 		result.put("count",count);

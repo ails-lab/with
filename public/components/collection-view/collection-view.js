@@ -172,7 +172,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		self.collname = ko.observable('');
 		self.access = ko.observable("READ");
 		self.id = ko.observable(params.id);
-		self.owner = ko.observable('');
+		self.creator = ko.observable('');
 		self.ownerId = ko.observable(-1);
 		self.itemCount = ko.observable(0);
 		self.citems = ko.observableArray([]);
@@ -196,7 +196,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				"success": function (data) {
 					self.collname(data.title);
 					self.desc(data.description);
-					self.owner(data.owner);
+					self.creator(data.creator);
 					self.ownerId(data.ownerId);
 					self.itemCount(data.itemCount);
 					self.access(data.access);

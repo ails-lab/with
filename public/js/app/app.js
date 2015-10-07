@@ -47,9 +47,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 		isLogged(true);
 
-		/*if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
-			return [self.getUserCollections()];
-		}*/
+		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
+			return [self.getEditableCollections()]; //[self.getEditableCollections(), self.getUserCollections()];
+		}
 	};
 
 	self.loadFavorites = function () {
@@ -145,7 +145,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "isPublic=true&offset=0&count=20&isExhibition=false"
+			data: "isPublic=true&offset=0&count=20"//&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -168,7 +168,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "loggedInUserAccess=WRITE&offset=0&count=20&isExhibition=false"
+			data: "loggedInUserAccess=WRITE&offset=0&count=500&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -189,7 +189,6 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 				else if (localStorage.getItem('User') !== null)
 					localStorage.setItem("EditableCollections", JSON.stringify(editables));
 			}).fail(function (request, status, error) {
-			console.log(JSON.parse(request.responseText));
 		});
 	};
 

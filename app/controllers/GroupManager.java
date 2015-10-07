@@ -17,7 +17,6 @@
 package controllers;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,7 +29,6 @@ import model.User;
 import model.UserGroup;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 
@@ -90,7 +88,7 @@ public class GroupManager extends Controller {
 				return badRequest("Group name already exists! Please specify another name.");
 			}
 			Class<?> clazz = Class.forName("model."
-					+ capitalizeFirst(groupType));
+					+ groupType);
 			newGroup = (UserGroup) Json.fromJson(json, clazz);
 			if (adminId != null) {
 				admin = new ObjectId(adminId);
@@ -190,7 +188,7 @@ public class GroupManager extends Controller {
 				log.error("Cannot save group to database!");
 				return internalServerError("Cannot save group to database!");
 			}
-			return ok(DB.getJson(newVersion));
+			return ok(Json.toJson(newVersion));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return internalServerError(e.getMessage());
@@ -226,7 +224,7 @@ public class GroupManager extends Controller {
 	public static Result getGroup(String groupId) {
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			return ok(DB.getJson(group));
+			return ok(Json.toJson(group));
 		} catch (Exception e) {
 			log.error("Cannot retrieve group from database!", e);
 			return internalServerError("Cannot retrieve group from database!");

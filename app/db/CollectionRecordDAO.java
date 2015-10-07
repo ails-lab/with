@@ -79,7 +79,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).asList();
 	}
 
-	public List<CollectionRecord> getByUniqueId(ObjectId colId, String extId) {
+	public List<CollectionRecord> getByExternalId(ObjectId colId, String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId).field("externalId").equal(extId);
 		return this.find(q).asList();
@@ -102,13 +102,13 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
-	public List<CollectionRecord> getByUniqueId(String extId) {
+	public List<CollectionRecord> getByExternalId(String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("externalId")
 				.equal(extId);
 		return this.find(q).asList();
 	}
 
-	public long countByUniqueId(String extId) {
+	public long countByExternalId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
 		// .field("source").equal(source)
 				.field("externalId").equal(extId);
@@ -164,7 +164,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
-		List<CollectionRecord> mergedRecord = getByUniqueId(extId);
+		List<CollectionRecord> mergedRecord = getByExternalId(extId);
 		for (CollectionRecord mr : mergedRecord) {
 			if (mr.getIsPublic() && !mr.getDbId().equals(dbId))
 				return true;

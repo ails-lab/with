@@ -244,16 +244,6 @@ public class SearchController extends Controller {
 		return buildresult(new CommonQuery("Zeus"));
 	}
 
-	public static Result posttestsearch() {
-		// System.out.println("--------------------");
-		CommonQuery q = userForm.bindFromRequest().get();
-		if ((q == null) || (q.searchTerm == null)) {
-			q = new CommonQuery("zeus");
-		}
-		q.validate();
-		return buildresult(q);
-	}
-
 	private static Result buildresult(CommonQuery q) {
 		// q.source = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);

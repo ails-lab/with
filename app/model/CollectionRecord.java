@@ -175,11 +175,6 @@ public class CollectionRecord {
 		this.thumbnail = thumbnail;
 	}
 
-	/*
-	 * public String getThumbnailUrl() { return "/recordlink/" +
-	 * this.getDbId().toString() + "/thumbnail"; }
-	 */
-
 	public String getThumbnailUrl() {
 		return this.thumbnailUrl;
 

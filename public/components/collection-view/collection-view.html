@@ -1,7 +1,7 @@
 <div class="container-fluid">
 	<div id="withcollection">
 		<span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> <span data-bind="visible: itemCount() > -1  " style="text-transform:lowercase">&nbsp;&nbsp;(<!-- ko text:itemCount --><!-- /ko -->  items)</span></h2> </span>
-		<div data-bind="visible: owner().length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:owner --><!-- /ko --></a></i></div>
+		<div data-bind="visible: creator().length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:creator --><!-- /ko --></a></i></div>
 		<span data-bind="text:desc.display"></span>
 		<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
 		<br>

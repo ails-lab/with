@@ -41,6 +41,7 @@ import utils.Tuple;
 import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
+import elastic.ElasticUtils;
 import espace.core.CommonQuery;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
@@ -54,19 +55,6 @@ public class WithSpaceSource extends ISpaceSource {
 	public String getSourceName() {
 		return "WITHin";
 	}
-
-	private List<List<Tuple<ObjectId, Access>>> mergeLists(List<Tuple<ObjectId, Access>> ... lists) {
-		List<List<Tuple<ObjectId, Access>>> outputList = new ArrayList<List<Tuple<ObjectId, Access>>>();
-		for (List<Tuple<ObjectId, Access>> list: lists) {
-			for (Tuple<ObjectId, Access> tuple: list) {
-				List<Tuple<ObjectId, Access>> sepList = new ArrayList<Tuple<ObjectId, Access>>(1);
-				sepList.add(tuple);
-				outputList.add(sepList);
-			}
-	    }
-		return outputList;
-	}
-
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -101,7 +89,7 @@ public class WithSpaceSource extends ISpaceSource {
 		 */
 		searcher.setType(Elastic.type_collection);
 		SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
-		colFields = getCollectionMetadaFromHit(response.getHits());
+		colFields = ElasticUtils.getCollectionMetadaFromHit(response.getHits());
 
 
 		System.out.println(accessFilters.toString());
@@ -123,37 +111,24 @@ public class WithSpaceSource extends ISpaceSource {
 	}
 
 
-	private List<Collection> getCollectionMetadaFromHit(
-			SearchHits hits) {
-
-
-		List<Collection> colFields = new ArrayList<Collection>();
-		for(SearchHit hit: hits.getHits()) {
-			JsonNode json         = Json.parse(hit.getSourceAsString());
-			JsonNode accessRights = json.get("rights");
-			if(!accessRights.isMissingNode()) {
-				ObjectNode ar = Json.newObject();
-				for(JsonNode r: accessRights) {
-					String user   = r.get("user").asText();
-					String access = r.get("access").asText();
-					ar.put(user, access);
-				}
-				((ObjectNode)json).remove("rights");
-				((ObjectNode)json).put("rights", ar);
-			}
-			Collection collection = Json.fromJson(json, Collection.class);
-			collection.setDbId(new ObjectId(hit.getId()));
-			colFields.add(collection);
-		}
-		return colFields;
-	}
-
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
 		log.debug("Method not implemented yet");
 		return null;
 	}
 
+
+	private List<List<Tuple<ObjectId, Access>>> mergeLists(List<Tuple<ObjectId, Access>> ... lists) {
+		List<List<Tuple<ObjectId, Access>>> outputList = new ArrayList<List<Tuple<ObjectId, Access>>>();
+		for (List<Tuple<ObjectId, Access>> list: lists) {
+			for (Tuple<ObjectId, Access> tuple: list) {
+				List<Tuple<ObjectId, Access>> sepList = new ArrayList<Tuple<ObjectId, Access>>(1);
+				sepList.add(tuple);
+				outputList.add(sepList);
+			}
+	    }
+		return outputList;
+	}
 
 
 }

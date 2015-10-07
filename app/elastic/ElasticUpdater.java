@@ -368,7 +368,7 @@ public class ElasticUpdater {
 	public void incLikesToRecords() {
 
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByUniqueId(record.getExternalId());
+				.getByExternalId(record.getExternalId());
 		if( records.size() < 1 ) {
 			log.debug("No records within the collection to update!");
 		} else {
@@ -394,7 +394,7 @@ public class ElasticUpdater {
 	public void decLikesToRecords() {
 
 		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByUniqueId(record.getExternalId());
+				.getByExternalId(record.getExternalId());
 
 		if( records.size() == 0 ) {
 			log.debug("No records within the collection to update!");

@@ -40,7 +40,6 @@ public class CommonQuery {
 	public String facetsMode = FacetsModes.DEFAULT;
 	public String pageSize = "20";
 	public String searchTerm;
-	public String termToExclude;
 	public List<String> source;
 	private List<Tuple<ObjectId, Access>> directlyAccessedByUserName = new ArrayList<Tuple<ObjectId, Access>>();
 	private List<Tuple<ObjectId, Access>> directlyAccessedByGroupName = new ArrayList<Tuple<ObjectId, Access>>();
