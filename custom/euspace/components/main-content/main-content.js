@@ -192,8 +192,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 		  var promiseCollections = self.getSpaceCollections();
 		  $.when(promiseCollections).done(function(responseCollections) {
-
-				    self.revealItems(responseCollections);
+				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 			});
 		  var promise2 = self.getFeaturedExhibition();
           $.when(promise2).done(function (data) {
@@ -219,19 +218,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			}).success (function(){
 			});
 		};
-
-	  	self.getSpaceExhibitions= function () {
-			//curently bringing owned for testing purposes
-				return $.ajax({
-					type        : "GET",
-					contentType : "application/json",
-					dataType    : "json",
-					url         : "/collection/list",
-					processData : false,
-					data        : "loggedInUserAccess=own&offset=0&count=20&isExhibition=true"
-				}).success (function(){
-				});
-  		};
 		
          self.getFeaturedExhibition=function() {
 			
@@ -257,7 +243,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?access=read&count=20&offset=" + offset,
+					"url": "/collection/list?access=read&count=20&collectionHits=true&offset=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
