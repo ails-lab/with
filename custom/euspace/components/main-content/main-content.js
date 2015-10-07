@@ -224,7 +224,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			/*call must change to get featured exhibition for space*/
 	        return $.ajax({
 	            type: "GET",
-	            url: "/collection/55b747c3569e1b44eeac72b3",
+	            url: "/collection/5614f353569e48389d111281",
 	            success: function () {
 
 	            }
