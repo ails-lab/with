@@ -34,6 +34,9 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Organization;
+import model.Page;
+import model.Project;
 import model.User;
 import model.Rights.Access;
 import model.UserGroup;
@@ -412,10 +415,75 @@ public class CollectionController extends Controller {
 		return collections;
 	}
 	
-	public static Result getFeatured(String userOrGroupName, Option<Boolean> isExhibition, int offset, int count)
+	public static void addCollectionToList(int index, List<Collection> collectionsOrExhibitions, List<ObjectId> colls, 
+			List<String> effectiveUserIds) {
+		if (index < colls.size()) {
+			ObjectId id = colls.get(index);
+			Collection c = DB.getCollectionDAO().getById(id);
+			if (effectiveUserIds.isEmpty()) {
+				if (c.getIsPublic())
+					collectionsOrExhibitions.add(c);
+			}
+			else {
+				Access maxAccess = AccessManager.getMaxAccess(c.getRights(), effectiveUserIds);
+				if (!maxAccess.equals(Access.NONE))
+					collectionsOrExhibitions.add(c);
+			}
+		}
+	}
+	
+	//If isExhibition is undefined, returns (max) countPerType collections and countPerType exhibitions, i.e. (max) 2*countPerType collectionsOrExhibitions
+	public static Result getFeatured(String userOrGroupName, Option<Boolean> isExhibition, int offset, int countPerType)
 	{	
-		
-		return ok();
+		Page page = null;
+		UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupName);
+		if (userGroup != null) {
+			if (userGroup instanceof Organization)
+				page = ((Organization) userGroup).getPage();
+			else if (userGroup instanceof Project)
+				page = ((Project) userGroup).getPage();
+		}
+		else {
+			User user = DB.getUserDAO().getByUsername(userOrGroupName);
+			if (user != null) {
+				page = user.getPage();
+			}
+		}
+		if (page != null) {
+			List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+			ObjectNode result = Json.newObject().objectNode();
+			int start = offset*countPerType;
+			int collectionsSize = page.getFeaturedCollections().size();
+			int exhibitionsSize = page.getFeaturedExhibitions().size();
+			List<Collection> collectionsOrExhibitions = new ArrayList<Collection>();
+			if (!isExhibition.isDefined()) {
+				for (int i = start; i<start+countPerType && i<collectionsSize; i++) {
+					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
+					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
+				}
+			}
+			else {
+				if (!isExhibition.get()) {
+					for (int i = start; i<start+countPerType && i<collectionsSize; i++) 
+						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
+				}
+				else {
+					for (int i = start; i<start+countPerType && i<exhibitionsSize; i++) 
+						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
+				}
+			}
+			ArrayNode collArray = Json.newObject().arrayNode();
+			List<ObjectNode> collections = collectionWithUserData(collectionsOrExhibitions, effectiveUserIds);
+			for (ObjectNode c: collections)
+				collArray.add(c);
+			result.put("totalCollections", collectionsSize);
+			result.put("totalCollections", exhibitionsSize);
+			result.put("collectionsOrExhibitions", collArray);
+			//TODO: put collection and exhibition hits in response
+			return ok(result);
+		}
+		else 
+			return badRequest("User or group with name " + userOrGroupName + " does not exist or has no specified page.");
 		
 	}
 	
@@ -446,7 +514,8 @@ public class CollectionController extends Controller {
 			}
 			for (Collection collection : userCollections) {
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
-				c.put("access", Access.READ.toString());
+				if (effectiveUserIds.isEmpty())
+					c.put("access", Access.READ.toString());
 				collArray.add(c);
 			}
 			result.put("collectionsOrExhibitions", collArray);
