@@ -412,12 +412,13 @@ public class CollectionController extends Controller {
 		return collections;
 	}
 	
-	/**
-	 * list accessible collections
-	 * list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false)
-
-	 */
-
+	public static Result getFeatured(String userOrGroupName, Option<Boolean> isExhibition, int offset, int count)
+	{	
+		
+		return ok();
+		
+	}
+	
 	public static Result list(Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
 			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, 
