@@ -26,7 +26,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
         self.title = "";
         self.description="";
         self.thumb = "";
-        self.fullres="";
+        self.fullres=ko.observable("");
         self.view_url="";
         self.source="";
         self.creator="";
@@ -43,7 +43,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
             self.url="#item/"+data.id;
             self.view_url=data.view_url;
             self.thumb=data.thumb;
-            self.fullres=data.fullres;
+            //self.fullres=data.fullres;
             self.description=data.description;
             self.source=data.source;
             self.creator=data.creator;
@@ -51,6 +51,15 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
             self.rights=data.rights;
             self.recordId=data.id;
             self.externalId=data.externalId;
+            if (data.source!="Rijksmuseum" && data.fullres && data.fullres.length > 0) {
+				self.fullres(data.fullres);
+			} 
+			else if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
+				self.fullres(data.fullres[0]);
+			}
+			else{
+				self.fullres(self.thumb);
+			}
 
         };
 

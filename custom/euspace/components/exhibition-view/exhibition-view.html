@@ -15,7 +15,7 @@
 <section class="exhibitionplayer">
     <!-- carousel-->
     <!--  ko if: exhItems().length > 0 -->
-    <div data-bind="backgroundImage: exhItems()[0].cachedThumbnail()" class="wrap">
+    <div data-bind="backgroundImage: exhItems()[0].fullres()" class="wrap">
         <div class="carouselexhibition hue">
             <!-- item-->
             <div class="item main">
@@ -32,9 +32,9 @@
             <div data-bind="css: css">
                 <div class="container">
                     <!-- image-->
-                    <div class="imagewrap"><img data-bind="attr: {src: cachedThumbnail}" alt="">
+                    <div class="imagewrap"><img data-bind="attr: {src: fullres()}" alt="">
                         <ul class="action">
-                            <li class="zoom"><a data-bind="attr: {href: cachedThumbnail, 'title': title}" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
+                            <li class="zoom"><a data-bind="attr: {href: fullres(), 'title': title}" class="imagezoom"><i class="glyphicon glyphicon-resize-full"></i></a></li>
                             <li class="view"><a data-bind="attr: {href: view_url}" title="#"><i class="glyphicon glyphicon-link"></i></a></li>
                         </ul>
                     </div>
