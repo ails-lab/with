@@ -81,19 +81,19 @@ DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)
 POST	/user/register						    controllers.UserManager.register()
 POST	/user/login							    controllers.UserManager.login()
 GET		/user/logout						    controllers.UserManager.logout()
-# both users and groups
-GET		/user/listNames			                controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false)
 GET		/user/emailAvailable	                controllers.UserManager.emailAvailable(email:java.lang.String)
 GET		/user/token				                controllers.UserManager.getToken()
 GET 	/user/loginWithToken	                controllers.UserManager.loginWithToken( token: java.lang.String )
-GET     /user/findByUserOrGroupNameOrEmail		controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
-GET		/user/:id/photo			                controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
 GET		/user/:id				                controllers.UserManager.getUser(id)
 PUT		/user/:id				                controllers.UserManager.editUser(id)
 DELETE	/user/:id				                controllers.UserManager.deleteUser(id)
 GET		/user/resetPassword/:emailOrUserName	controllers.UserManager.resetPassword(emailOrUserName: String)
 POST	/user/changePassword					controllers.UserManager.changePassword()
 GET		/user/apikey/create						controllers.UserManager.apikey()
+# both users and groups
+GET     /user/findByUserOrGroupNameOrEmail		controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
+GET		/user/:id/photo			                controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
+GET		/user/listNames			                controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false)
 
 
 # trigger reindex (for development / admin )
