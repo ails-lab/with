@@ -80,7 +80,9 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		$('#imageupload').fileupload({
 			type: "POST",
 			url: '/media/create',
-			done: function (e, data) {
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 50000,
+    		done: function (e, data) {
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
 				self.thumbnail(urlID);
 			},
@@ -96,6 +98,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		$('#coverupload').fileupload({
 			type: "POST",
 			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 500000,
 			done: function (e, data) {
 				self.page.coverImage(data.result.results[0].externalId);
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
