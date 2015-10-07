@@ -136,6 +136,8 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 			  
 		  }
+		  
+		 
 		  if(data != undefined) self.load(data);
 		   
 		  
@@ -272,7 +274,14 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		
       self.loadAll();	  
 
-		
+      self.loadCollectionOrExhibition = function(item) {
+		  if (item.isExhibition) {
+			  window.location = 'index.html#exhibitionview/'+ item.id;
+		  }
+		  else {
+			  window.location = 'index.html#collectionview/' + item.id;
+		  }
+	  };	
 	  
 	  self.filter=function(data, event) {
 		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;

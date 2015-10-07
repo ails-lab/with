@@ -76,7 +76,7 @@
             <div class="sizer"></div>
             <div data-bind="visible: isLoaded(), css: itemcss">
               <div class="wrap">
-                <!-- anchor--><a data-bind="attr: {href: 'index.html#collectionview/'+id}" title="Lorem ipsum">
+                <!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
                   <!-- info-->
