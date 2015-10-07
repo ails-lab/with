@@ -214,7 +214,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "loggedInUserAccess=read&offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:"EUScreenXL",rights:"OWN"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
 			}).success (function(){
 			});
 		};
@@ -243,7 +243,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?loggedInUserAccess=read&count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:"EUScreenXL",rights:"OWN"}])
+					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
