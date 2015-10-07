@@ -1,11 +1,12 @@
 
 <div class="exhibition">
+	<input type="checkbox" class="switch"/>
 	<div class="left"></div>  <!-- for scrolling the page when dragging item at left of page-->
 	<div class="outer"><!--
 --><div class="boxBasic boxItem" id="placeholder">
 		<input  class="placeholderD1" data-bind="textInput: title, event: { blur: textfieldsLostFocus.bind($data, true)}" placeholder="Add title" >
 		<input  class="placeholderD2" data-bind="textInput: description, event: { blur: textfieldsLostFocus.bind($data, false)}" placeholder="Add description">
-	</div><!-- 
+	</div><!--
 --><!-- ko template: { foreach: collectionItemsArray,
 			    beforeRemove: removeItem,
 			    afterAdd: showNewItem } --><!--
@@ -48,13 +49,14 @@
 		<!-- /ko -->
 		<img  src="http://www.escrs.org/milan2012/images/button_close.png" data-bind="click: $parent.xButtonClicked" class="XButtonImage"> </img>
 	</div><!--
- --><!-- /ko --><!-- 
+ --><!-- /ko --><!--
 --><div class ="boxBasic dashed-box droppable" data-bind="drop: {index: collectionItemsArray().length, array: collectionItemsArray}">
 		<div id="droppable-Children">
 			<div class="droppable-placeholder-top">Add a new panel</div>
 			<div class="droppable-placeholder-bottom">Drag an image</div>
 		</div>
 	</div>
+		<div data-bind="scroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }"/>
 	</div>
 
 	<div class="right"></div><!-- for scrolling the page when dragging item at right of page-->
@@ -79,6 +81,7 @@
 				<!--<img src="http://www.escrs.org/milan2012/images/button_close.png" class="XButtonImage" data-bind="click: $parent.xButtonClicked"> </img>-->
 			</div>
 			<!-- /ko -->
+			<div data-bind="scroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"/>
 		</div>
 		<!--  ko if: currentItemSet-->
 		<div id="hoverDetails" data-bind="visible: detailsEnabled">

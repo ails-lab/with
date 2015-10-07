@@ -151,6 +151,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.userGroupsToShare = ko.mapping.fromJS([], {});
         self.loading=ko.observable(false);
         //self.editedUsersToShare = ko.mapping.fromJS([], {});
+
     	self.myUsername = ko.observable(app.currentUser.username());
     	self.moreCollectionData=ko.observable(true);
         if (self.myUsername() !== undefined && self.myUsername() !== null) {

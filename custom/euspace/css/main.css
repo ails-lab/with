@@ -1351,6 +1351,10 @@ body [role='main'] .exhibitionplayer .carouselexhibition .item .imagewrap {
   text-align: center;
   position: relative;
 }
+body [role='main'] .exhibitionplayer .carouselexhibition .videoWrap {
+  float: left;
+  width:50%;
+}
 body [role='main'] .exhibitionplayer .carouselexhibition .item .imagewrap img,
 body [role='main'] .exhibitionplayer .carouselexhibition .item .imagewrap iframe,
 body [role='main'] .exhibitionplayer .carouselexhibition .item .imagewrap .embed-responsive {
@@ -2800,6 +2804,7 @@ body.expand [role='main'] .exhibitionplayer {
   body [role='main'] .exhibitionplayer .carouselexhibition .item.style2 .imagewrap {
     float: right;
   }
+
   body [role='main'] .exhibitionplayer .carouselexhibition .item.style2 .textbox {
     float: left;
     padding: 0 50px 0 0;

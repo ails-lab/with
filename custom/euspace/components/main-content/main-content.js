@@ -190,12 +190,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
 		  
-		  var promise = self.getSpaceCollections();
-		  $.when(promise).done(function(data) {
-					self.totalCollections(data['totalCollections']);
-					self.totalExhibitions(data['totalExhibitions']);
-				    self.revealItems(data['collectionsOrExhibitions']);
-				
+		  var promiseCollections = self.getSpaceCollections();
+		  $.when(promiseCollections).done(function(responseCollections) {
+				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 			});
 		  var promise2 = self.getFeaturedExhibition();
           $.when(promise2).done(function (data) {
@@ -246,7 +243,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?access=read&count=20&offset=" + offset,
+					"url": "/collection/list?access=read&count=20&collectionHits=true&offset=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
@@ -259,8 +256,15 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				});
 			}
 		};
-		
-		
+
+	  self.loadCollectionOrExhibition = function(item) {
+		  if (item.isExhibition) {
+			  window.location = 'index.html#exhibitionview/'+ item.id;
+		  }
+		  else {
+			  window.location = 'index.html#collectionview/' + item.id;
+		  }
+	  };
 		
       self.loadAll();	  
 
