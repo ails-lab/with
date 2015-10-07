@@ -3,7 +3,7 @@
     "info": {
         "version": "v1.3",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n"
+        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect changes. We went through some major updates but many changes will follow. \n"
     },
     "paths": {
         "/api/search": {
@@ -125,284 +125,6 @@
                     },
                     "403": {
                         "description": "Bad request",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/listShared": {
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "If set to true, only collections shared directly (ie not via usergroups) with the logged in user will be shown. Default value is false.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "loggedInUserAccess",
-                        "in": "query",
-                        "description": "Filters returned collections based on the logged in user's access level (recursively checked for inheritance from usergroups). Values are \"READ\", ```\"WRITE\", \"OWN\"```. These values have a hierarcy, ie if the value ```\"WRITE\"``` is set, ```\"READ\"``` will also be returned (but not ```\"OWN\"```).",
-                        "type": "string"
-                    },
-                    {
-                        "name": "directlyAccessedByUserName",
-                        "in": "query",
-                        "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByUserName",
-                        "in": "query",
-                        "description": "This field works like ```directlyAccessedByUserName``` with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "directlyAccessedByGroupName",
-                        "in": "query",
-                        "description": "This field also works like ```directlyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are ```\"READ\", \"WRITE\", \"OWN\"```."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByGroupName",
-                        "in": "query",
-                        "description": "See ```recursivelyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are ```\"READ\", \"WRITE\", \"OWN\"```."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "isExhibition",
-                        "in": "query",
-                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Offset",
-                        "type": "integer"
-                    },
-                    {
-                        "name": "count",
-                        "in": "query",
-                        "description": "Count (default 10)",
-                        "type": "integer"
-                    }
-                ],
-                "summary": "Get a list of collections shared with the user.",
-                "description": "This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
-                "tags": [
-                    "Collection"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Collection"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (user not specified)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/list": {
-            "get": {
-                "parameters": [
-                    {
-                        "name": "loggedInUserAccess",
-                        "in": "query",
-                        "description": "Filters returned collections based on the logged in user's access level (recursively checked for inheritance from usergroups). Values are \"READ\", \"WRITE\", \"OWN\". These values have a hierarcy, ie if the value \"WRITE\" is set, \"READ\" will also be returned (but not \"OWN\").",
-                        "type": "string"
-                    },
-                    {
-                        "name": "directlyAccessedByUserName",
-                        "in": "query",
-                        "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByUserName",
-                        "in": "query",
-                        "description": "This field works like '''directlyAccessedByUserName''' with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "directlyAccessedByGroupName",
-                        "in": "query",
-                        "description": "This field also works like '''directlyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByGroupName",
-                        "in": "query",
-                        "description": "See '''recursivelyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "creator",
-                        "in": "query",
-                        "description": "Filters returned collections based on the '''ownerId''' field of a collection, ie the Id of the user that created the collection.",
-                        "type": "string"
-                    },
-                    {
-                        "name": "isPublic",
-                        "in": "query",
-                        "description": "If true returns only public collections, if false or unspecified this filter remains inactive.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "isExhibition",
-                        "in": "query",
-                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Offset",
-                        "type": "integer"
-                    },
-                    {
-                        "name": "count",
-                        "in": "query",
-                        "description": "Count (default 10)",
-                        "type": "integer"
-                    }
-                ],
-                "summary": "Get a list of collections.",
-                "description": "This call returns a list of all the accessible collections (at least read access) to the logged in user. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
-                "tags": [
-                    "Collection"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "collectionsOrExhibitions": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/Collection"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -605,6 +327,7 @@
                 {
                     "name": "groupId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of a group.",
                     "type": "string"
                 }
@@ -734,6 +457,7 @@
                 {
                     "name": "groupId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of a group",
                     "type": "string"
                 }
@@ -802,6 +526,7 @@
                 {
                     "name": "groupId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of a group",
                     "type": "string"
                 }
@@ -860,6 +585,7 @@
                 {
                     "name": "groupId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of a group.",
                     "type": "string"
                 }
@@ -893,6 +619,7 @@
                 {
                     "name": "groupId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of a group.",
                     "type": "string"
                 }
@@ -926,6 +653,7 @@
                 {
                     "name": "groupId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of a group.",
                     "type": "string"
                 }
@@ -1052,6 +780,7 @@
                 {
                     "name": "collectionId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of the collection or exhibition",
                     "type": "string"
                 }
@@ -1118,6 +847,7 @@
                 {
                     "name": "collectionId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of the collection or exhibition from which to remove the record",
                     "type": "string"
                 }
@@ -1176,6 +906,7 @@
                 {
                     "name": "collectionId",
                     "in": "path",
+                    "required": true,
                     "description": "Id of the collection",
                     "type": "string"
                 }
@@ -1254,6 +985,7 @@
                     "name": "collectionId",
                     "in": "path",
                     "description": "Internal id of the collection or exhibition",
+                    "required": true,
                     "type": "string"
                 }
             ],
@@ -2280,10 +2012,7 @@
                 "firstName",
                 "lastName",
                 "username",
-                "email",
-                "password",
-                "about",
-                "location"
+                "email"
             ],
             "properties": {
                 "email": {
@@ -2327,6 +2056,45 @@
                 },
                 "favoritesId": {
                     "type": "string"
+                }
+            }
+        },
+        "Group": {
+            "description": "Describes a group, organization or project.",
+            "type": "object",
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "about": {
+                    "type": "string"
+                },
+                "privateGroup": {
+                    "type": "boolean"
+                },
+                "dbId": {
+                    "type": "string"
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "adminIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "parentGroups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -2455,8 +2223,7 @@
             "description": "An individual record description and metadata. This is the schema for objects acquired through searches in external sources.",
             "type": "object",
             "required": [
-                "title",
-                "position"
+                "title"
             ],
             "properties": {
                 "id": {
