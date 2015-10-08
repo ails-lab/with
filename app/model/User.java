@@ -134,8 +134,7 @@ public class User extends UserOrGroup {
 	public void recalculateGroups() {
 		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
 		// get all groups I'm in
-		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(
-				this.getDbId(), GroupType.All);
+		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(this.getDbId(), GroupType.All);
 		for (UserGroup ug : gr) {
 			groupAcc.add(ug.getDbId());
 			ug.accumulateGroups(groupAcc);
@@ -261,8 +260,20 @@ public class User extends UserOrGroup {
 	// this.photo = photo.getDbId();
 	// }
 
-	public void addUserGroup(Set<ObjectId> groups) {
+	public void addUserGroups(Set<ObjectId> groups) {
 		this.userGroupsIds.addAll(groups);
+	}
+
+	public void removeUserGroups(Set<ObjectId> groups) {
+		this.userGroupsIds.removeAll(groups);
+	}
+
+	public void addUserGroup(ObjectId group) {
+		this.userGroupsIds.add(group);
+	}
+
+	public void removeUserGroup(ObjectId group) {
+		this.userGroupsIds.remove(group);
 	}
 
 	public Set<ObjectId> getUserGroupsIds() {

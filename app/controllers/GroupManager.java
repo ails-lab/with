@@ -115,7 +115,7 @@ public class GroupManager extends Controller {
 				Set<ObjectId> parentGroups = newGroup.getParentGroups();
 				parentGroups.add(newGroup.getDbId());
 				User user = DB.getUserDAO().get(admin);
-				user.addUserGroup(parentGroups);
+				user.addUserGroups(parentGroups);
 				DB.getUserDAO().makePermanent(user);
 			} catch (Exception e) {
 				log.error("Cannot save group to database!", e);
@@ -267,7 +267,7 @@ public class GroupManager extends Controller {
 			return internalServerError("Cannot retrieve user from database!");
 		}
 		parentGroups.add(group.getDbId());
-		user.addUserGroup(parentGroups);
+		user.addUserGroups(parentGroups);
 
 		if (!(DB.getUserDAO().makePermanent(user) == null)
 				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {

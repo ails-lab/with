@@ -599,7 +599,7 @@ public class UserManager extends Controller {
 			return internalServerError(result);
 		}
 		parentGroups.add(group.getDbId());
-		user.addUserGroup(parentGroups);
+		user.addUserGroups(parentGroups);
 
 		if (!(DB.getUserDAO().makePermanent(user) == null)
 				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
