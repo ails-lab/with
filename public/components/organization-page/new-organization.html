@@ -2,7 +2,11 @@
 	<div class="modal-content text-left">
 		<div class="modal-header">
 			<button type="button" class="close" data-bind="click: closeWindow" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+			<!-- ko if: type() === 'organization' -->
 			<h4>Create Organization</h4>
+			<!-- /ko --><!-- ko if: type() === 'project' -->
+			<h4>Create Project</h4>
+			<!-- /ko -->
 		</div>
 		<div class="modal-body row">
 			<form>
