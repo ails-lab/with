@@ -34,6 +34,9 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.Organization;
+import model.Page;
+import model.Project;
 import model.User;
 import model.Rights.Access;
 import model.UserGroup;
@@ -347,9 +350,12 @@ public class CollectionController extends Controller {
 			MyPlayList directlyUserNameList = directlyAccessedByUserName.get();
 			for (StringTuple userAccess: directlyUserNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
-				ObjectId groupId = DB.getUserDAO().getByUsername(userAccess.x).getDbId();
-				directlyAccessedByUser.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(userAccess.y.toUpperCase())));
-				accessedByUserOrGroup.add(directlyAccessedByUser);
+				User user = DB.getUserDAO().getByUsername(userAccess.x);
+				if (user != null) {
+					ObjectId userId = user.getDbId();
+					directlyAccessedByUser.add(new Tuple<ObjectId, Access>(userId, Access.valueOf(userAccess.y.toUpperCase())));
+					accessedByUserOrGroup.add(directlyAccessedByUser);
+				}		
 			}
 		}
 		if (recursivelyAccessedByUserName.isDefined()) {
@@ -372,9 +378,12 @@ public class CollectionController extends Controller {
 			MyPlayList directlyGroupNameList = directlyAccessedByGroupName.get();
 			for (StringTuple groupAccess: directlyGroupNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByGroup = new ArrayList<Tuple<ObjectId, Access>>();
-				ObjectId groupId = DB.getUserGroupDAO().getByName(groupAccess.x).getDbId();
-				directlyAccessedByGroup.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(groupAccess.y.toUpperCase())));
-				accessedByUserOrGroup.add(directlyAccessedByGroup);
+				UserGroup userGroup = DB.getUserGroupDAO().getByName(groupAccess.x);
+				if (userGroup != null) {
+					ObjectId groupId = userGroup.getDbId();
+					directlyAccessedByGroup.add(new Tuple<ObjectId, Access>(groupId, Access.valueOf(groupAccess.y.toUpperCase())));
+					accessedByUserOrGroup.add(directlyAccessedByGroup);
+				}
 			}
 		}
 		return accessedByUserOrGroup;
@@ -406,13 +415,79 @@ public class CollectionController extends Controller {
 		return collections;
 	}
 	
-	/**
-	 * list accessible collections
-	 * list(loggedInUserAccess ?= "read", filterByUserName ?= null, filterByGroupName ?= null, isExhibition ?= false)
-
-	 */
-
-	public static Result list(String loggedInUserAccess, Option<MyPlayList> directlyAccessedByUserName,
+	public static void addCollectionToList(int index, List<Collection> collectionsOrExhibitions, List<ObjectId> colls, 
+			List<String> effectiveUserIds) {
+		if (index < colls.size()) {
+			ObjectId id = colls.get(index);
+			Collection c = DB.getCollectionDAO().getById(id);
+			if (effectiveUserIds.isEmpty()) {
+				if (c.getIsPublic())
+					collectionsOrExhibitions.add(c);
+			}
+			else {
+				Access maxAccess = AccessManager.getMaxAccess(c.getRights(), effectiveUserIds);
+				if (!maxAccess.equals(Access.NONE))
+					collectionsOrExhibitions.add(c);
+			}
+		}
+	}
+	
+	//If isExhibition is undefined, returns (max) countPerType collections and countPerType exhibitions, i.e. (max) 2*countPerType collectionsOrExhibitions
+	public static Result getFeatured(String userOrGroupName, Option<Boolean> isExhibition, int offset, int countPerType)
+	{	
+		Page page = null;
+		UserGroup userGroup = DB.getUserGroupDAO().getByName(userOrGroupName);
+		if (userGroup != null) {
+			if (userGroup instanceof Organization)
+				page = ((Organization) userGroup).getPage();
+			else if (userGroup instanceof Project)
+				page = ((Project) userGroup).getPage();
+		}
+		else {
+			User user = DB.getUserDAO().getByUsername(userOrGroupName);
+			if (user != null) {
+				page = user.getPage();
+			}
+		}
+		if (page != null) {
+			List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+			ObjectNode result = Json.newObject().objectNode();
+			int start = offset*countPerType;
+			int collectionsSize = page.getFeaturedCollections().size();
+			int exhibitionsSize = page.getFeaturedExhibitions().size();
+			List<Collection> collectionsOrExhibitions = new ArrayList<Collection>();
+			if (!isExhibition.isDefined()) {
+				for (int i = start; i<start+countPerType && i<collectionsSize; i++) {
+					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
+					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
+				}
+			}
+			else {
+				if (!isExhibition.get()) {
+					for (int i = start; i<start+countPerType && i<collectionsSize; i++) 
+						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
+				}
+				else {
+					for (int i = start; i<start+countPerType && i<exhibitionsSize; i++) 
+						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
+				}
+			}
+			ArrayNode collArray = Json.newObject().arrayNode();
+			List<ObjectNode> collections = collectionWithUserData(collectionsOrExhibitions, effectiveUserIds);
+			for (ObjectNode c: collections)
+				collArray.add(c);
+			result.put("totalCollections", collectionsSize);
+			result.put("totalCollections", exhibitionsSize);
+			result.put("collectionsOrExhibitions", collArray);
+			//TODO: put collection and exhibition hits in response
+			return ok(result);
+		}
+		else 
+			return badRequest("User or group with name " + userOrGroupName + " does not exist or has no specified page.");
+		
+	}
+	
+	public static Result list(Option<MyPlayList> directlyAccessedByUserName,
 			Option<MyPlayList> recursivelyAccessedByUserName, Option<MyPlayList> directlyAccessedByGroupName, 
 			Option<MyPlayList> recursivelyAccessedByGroupName,  Option<String> creator, Option<Boolean> isPublic, 
 			Option<Boolean> isExhibition, Boolean collectionHits, int offset, int count) {
@@ -439,7 +514,8 @@ public class CollectionController extends Controller {
 			}
 			for (Collection collection : userCollections) {
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
-				c.put("access", Access.READ.toString());
+				if (effectiveUserIds.isEmpty())
+					c.put("access", Access.READ.toString());
 				collArray.add(c);
 			}
 			result.put("collectionsOrExhibitions", collArray);
@@ -447,15 +523,17 @@ public class CollectionController extends Controller {
 		}
 		else { //logged in
 			//check if super user, if not, restrict query to accessible by effectiveUserIds
+			Tuple<List<Collection>, Tuple<Integer, Integer>> info;
 			if (!AccessManager.checkAccess(new HashMap<ObjectId, Access>(), effectiveUserIds, Action.DELETE)) {
-				List<Tuple<ObjectId, Access>> recursivelyAccessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
-				for (String userId: effectiveUserIds) {
-					recursivelyAccessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
-							new ObjectId(userId), Access.valueOf(loggedInUserAccess.toUpperCase())));
+				List<ObjectId> effObjectIds = new ArrayList<ObjectId>(effectiveUserIds.size());
+				for (String id: effectiveUserIds) {
+					effObjectIds.add(new ObjectId(id));
 				}
-				accessedByUserOrGroup.add(recursivelyAccessedByLoggedInUser);
+				info = DB.getCollectionDAO().
+						getByAccess(effObjectIds, accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
 			}
-			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO().
+			else 
+				info = DB.getCollectionDAO().
 					getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);

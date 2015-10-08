@@ -46,7 +46,6 @@ public class StringTuple implements QueryStringBindable<StringTuple>{
 			try {
 				actualObj = mapper.readTree(v);
 				//if (actualObj.has("username") && actualObj.has("access")) {
-				System.out.println(actualObj.size());
 				if (actualObj.size() == 2) {
 					Iterator<String> iterator = actualObj.fieldNames();
 					x = actualObj.get(iterator.next()).asText();
