@@ -169,7 +169,36 @@ public class MediaController extends Controller {
 							med.setWidth(width);
 							med.setOriginal(true);
 							if (width < 212) {
-								med.setThumbnail(true);
+								//med.setThumbnail(true);
+								Image ithumb = image.getScaledInstance(211, -1,
+										Image.SCALE_SMOOTH);
+								// Create a buffered image with transparency
+								BufferedImage thumb = new BufferedImage(
+										ithumb.getWidth(null),
+										ithumb.getHeight(null), image.getType());
+								// Draw the image on to the buffered image
+								Graphics2D bGr = thumb.createGraphics();
+								bGr.drawImage(ithumb, 0, 0, null);
+								bGr.dispose();
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								ImageIO.write(thumb, "jpg", baos);
+								baos.flush();
+								byte[] thumbByte = baos.toByteArray();
+								baos.close();
+								Media thumbMedia = new Media();
+								thumbMedia.setMimeType(med.getMimeType());
+								thumbMedia.setFilename(med.getFilename());
+								thumbMedia.setOwnerId(med.getOwnerId());
+								med.setType(med.getType());
+								thumbMedia.setData(thumbByte);
+								thumbMedia.setWidth(thumb.getWidth());
+								thumbMedia.setHeight(thumb.getHeight());
+								thumbMedia.setThumbnail(true);
+								thumbMedia.setOriginal(false);
+								DB.getMediaDAO().makePermanent(thumbMedia);
+								singleRes.put("thumbnailUrl", "/media/"
+										+ thumbMedia.getDbId().toString());
+							
 							} else {
 								// Resize image and put new width, height and
 								// bytes to data
