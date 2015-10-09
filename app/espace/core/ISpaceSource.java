@@ -60,15 +60,12 @@ public abstract class ISpaceSource {
 		return new AutocompleteResponse();
 	}
 
-//<<<<<<< HEAD
-//	public abstract ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId);
-//=======
+
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(
 			String recordId) {
 		return new ArrayList<RecordJSONMetadata>();
 	}
-//>>>>>>> master
-
+	
 	private FilterValuesMap vmap;
 
 	protected void countValue(CommonFilterLogic type, String t) {
