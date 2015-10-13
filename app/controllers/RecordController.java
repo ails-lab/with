@@ -246,7 +246,7 @@ public class RecordController extends Controller {
 		List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId,Access>>>();
 
 		elasticoptions.accessList = accessFilters;
-		SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
+		SearchResponse response = searcher.searchAccessibleCollectionsScanScroll(elasticoptions);
 		List<Collection> colFields = ElasticUtils.getCollectionMetadaFromHit(response.getHits());
 
 		/*

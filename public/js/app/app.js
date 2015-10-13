@@ -168,7 +168,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUser="+JSON.stringify([{user:self.currentUser.username(),rights:"WRITE"}]),
+			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName="+JSON.stringify([{user:self.currentUser.username(),rights:"WRITE"}]),
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(

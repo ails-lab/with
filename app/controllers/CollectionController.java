@@ -796,7 +796,6 @@ public class CollectionController extends Controller {
 		BiFunction<CollectionRecord, String, Boolean> methodQuery = (CollectionRecord record,
 				String sourceClassName) -> {
 			try {
-				// TODO: create a Mint source class with respective methods
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
 				ArrayList<RecordJSONMetadata> recordsData = s.getRecordFromSource(sourceId);
