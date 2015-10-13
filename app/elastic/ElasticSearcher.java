@@ -30,6 +30,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolFilterBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -126,16 +127,16 @@ public class ElasticSearcher {
 	}
 
 	public SearchResponse execute(QueryBuilder query) {
-		return this.execute(query, new SearchOptions(0, DEFAULT_RESPONSE_COUNT));
+		return this.execute(query, new SearchOptions(0, DEFAULT_RESPONSE_COUNT), false);
 	}
 
-	public SearchResponse execute(QueryBuilder query, SearchOptions options) {
-		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
+	public SearchResponse execute(QueryBuilder query, SearchOptions options, boolean scroll) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, scroll);
 		return search.execute().actionGet();
 	}
 
 	public SearchResponse executeWithFacets(QueryBuilder query, SearchOptions options) {
-		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options)
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, false)
 		.addFacet(this.facet("Designers", "Facets.Designers.text", "Facets.Designers"))
 		.addFacet(this.facet("objectType", "Facets.objectType.uri", "Facets.objectType"))
 		.addFacet(this.facet("colour", "Facets.colours.uri", "Facets.colours"))
@@ -159,9 +160,15 @@ public class ElasticSearcher {
 	public SearchResponse search(String term, int from, int count){ return search(term, new SearchOptions(from, count)); }
 	public SearchResponse search(String term) { return search(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT)); }
 
-	public SearchResponse searchAccessibleCollections(String terms, SearchOptions options) {
+	public SearchResponse searchAccessibleCollections(SearchOptions options) {
+		return searchAccessibleCollections(options, false);
+	}
 
-		if(terms == null) terms = "";
+	public SearchResponse searchAccessibleCollectionsScanScroll(SearchOptions options) {
+		return searchAccessibleCollections(options, true);
+	}
+
+	public SearchResponse searchAccessibleCollections(SearchOptions options, boolean scroll) {
 
 		MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
 
@@ -178,9 +185,11 @@ public class ElasticSearcher {
 			and_filter.add(or_filter);
 		}
 
+		OrFilterBuilder outer_or = FilterBuilders.orFilter();
 		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("rights", and_filter);
-		FilteredQueryBuilder filtered = QueryBuilders.filteredQuery(match_all, nested_filter);
-		return this.execute(filtered, options);
+		outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
+		FilteredQueryBuilder filtered = QueryBuilders.filteredQuery(match_all, outer_or);
+		return this.execute(filtered, options, scroll);
 	}
 
 	public SearchResponse searchForCollections(String terms, SearchOptions options) {
@@ -193,7 +202,7 @@ public class ElasticSearcher {
 		str.defaultField("_id");
 		bool.must(str);
 
-		return this.execute(bool, options);
+		return this.execute(bool, options, false);
 	}
 
 	public SearchResponse search(String terms, SearchOptions options){
@@ -212,7 +221,7 @@ public class ElasticSearcher {
 			str.defaultField("_id");
 
 		bool.must(str);
-		return this.execute(bool, options);
+		return this.execute(bool, options, false);
 		//return this.executeWithFacets(bool, options);
 	}
 
@@ -279,12 +288,18 @@ public class ElasticSearcher {
 		.setSearchType(SearchType.QUERY_THEN_FETCH);
 	}
 
-	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options) {
+	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options, boolean scroll) {
 
-		SearchRequestBuilder search = this.getSearchRequestBuilder(type)
-		.setFrom(options.offset)
-		.setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
-		.setSize(options.count);
+		SearchRequestBuilder search = this.getSearchRequestBuilder(type);
+		if(!scroll) {
+			search.setFrom(options.offset)
+				  .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
+				  .setSize(options.count);
+		} else {
+			search.setSearchType(SearchType.SCAN)
+				  .setScroll(new TimeValue(60000))
+				  .setSize(100);
+		}
 		System.out.println("got in here!");
 		//search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
 		FilterBuilder filterBuilder = null;
