@@ -23,11 +23,13 @@ import java.util.Map;
 import java.util.Set;
 
 import model.Collection;
+import model.Rights;
 import model.User;
 import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -71,7 +73,7 @@ public class WithSpaceSource extends ISpaceSource {
 		 * Prepare access lists for searching
 		 */
 		//This value (1000) is problematic. We have to deal with scan and scroll
-		SearchOptions elasticoptions = new SearchOptions(0, 1000);
+		SearchOptions elasticoptions = new SearchOptions();
 		List<Collection> colFields = new ArrayList<Collection>();
 		List<String> userIds = q.getEffectiveUserIds();
 		List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
@@ -84,12 +86,14 @@ public class WithSpaceSource extends ISpaceSource {
 			accessFilters.add(userAccess);
 		elasticoptions.accessList = accessFilters;
 
+
 		/*
 		 * Search index for accessible collections
 		 */
 		searcher.setType(Elastic.type_collection);
-		SearchResponse response = searcher.searchAccessibleCollections(null, elasticoptions);
-		colFields = ElasticUtils.getCollectionMetadaFromHit(response.getHits());
+		SearchResponse response = searcher.searchAccessibleCollectionsScanScroll(elasticoptions);
+		List<SearchHit> hits = getTotalHitsFromScroll(response);
+		colFields = getCollectionMetadaFromHit(hits);
 
 
 		System.out.println(accessFilters.toString());
@@ -110,6 +114,48 @@ public class WithSpaceSource extends ISpaceSource {
 		return new SourceResponse(resp, count);
 	}
 
+
+
+	private List<SearchHit> getTotalHitsFromScroll(SearchResponse scrollResp) {
+
+		List<SearchHit> totalHits = new ArrayList<SearchHit>();
+		while(true) {
+			for(SearchHit hit: scrollResp.getHits().getHits())
+				totalHits.add(hit);
+
+			scrollResp = Elastic.getTransportClient()
+					.prepareSearchScroll(scrollResp.getScrollId())
+					.setScroll(new TimeValue(60000))
+					.execute().actionGet();
+
+			if(scrollResp.getHits().getHits().length == 0) break;
+		}
+		return totalHits;
+	}
+
+	private List<Collection> getCollectionMetadaFromHit(List<SearchHit> hits) {
+
+
+		List<Collection> colFields = new ArrayList<Collection>();
+		for(SearchHit hit: hits) {
+			JsonNode json         = Json.parse(hit.getSourceAsString());
+			JsonNode accessRights = json.get("rights");
+			if(!accessRights.isMissingNode()) {
+				ObjectNode ar = Json.newObject();
+				for(JsonNode r: accessRights) {
+					String user   = r.get("user").asText();
+					String access = r.get("access").asText();
+					ar.put(user, access);
+				}
+				((ObjectNode)json).remove("rights");
+				((ObjectNode)json).put("rights", ar);
+			}
+			Collection collection = Json.fromJson(json, Collection.class);
+			collection.setDbId(new ObjectId(hit.getId()));
+			colFields.add(collection);
+		}
+		return colFields;
+	}
 
 	@Override
 	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
