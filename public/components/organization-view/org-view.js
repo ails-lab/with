@@ -45,7 +45,7 @@ define(['bridget','knockout', 'text!./org-view.html','isotope','imagesloaded','a
 			    if( $( window ).height() > 600  && $( window ).width() > 767 ) {
 
 			    	// stick part of the banner on top
-					if( $( document ).scrollTop() >= 226 ) {
+					if( $( document ).scrollTop() >= 169 ) {
 						$( '.profilebar' ).addClass( 'fixed' );
 					} else {
 						if( $( '.profilebar' ).hasClass( 'fixed' ) ) {

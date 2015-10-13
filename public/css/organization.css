@@ -458,10 +458,15 @@ body [role='main'] .filter .wrap ul.counter {
 }
 
 @media (min-width: 992px){
+	
 body [role='main'] .profilebar .wrap .profileinfo .tab-content .tab-pane .description {
     height: 100px;
     
 }
+
+body [role='main'] .filter.fixed .wrap {
+    width: 940px;
+  }
 
 body [role='main'] .profilebar .wrap .profileinfo {
     width: 70%;
