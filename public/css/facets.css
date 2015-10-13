@@ -54,7 +54,7 @@
   bottom: 0;
 }
 
-.nav-tabs {
+.modalfacets .nav-tabs {
   float: left;
   border-bottom: 0;
   text-transform: uppercase;
@@ -63,12 +63,12 @@
   font-weight: 900;
 }
 
-.nav-tabs li {
+.modalfacets .nav-tabs li {
   float: none;
   margin: 0;
 }
 
-.nav-tabs li a {
+.modalfacets .nav-tabs li a {
   margin-right: 0;
   border: 0;
   /*background-color: #c0392b;*/
@@ -76,19 +76,19 @@
   font-weight:400;font-size:0.9em;
 }
 
-.nav-tabs li a:hover { background-color: white; }
+.modalfacets .nav-tabs li a:hover { background-color: white; }
 
-.nav-tabs .glyphicon { color: #555; }
+.modalfacets .nav-tabs .glyphicon { color: #555; }
 
-.nav-tabs .active .glyphicon { color: #555; }
+.modalfacets .nav-tabs .active .glyphicon { color: #555; }
 
-.nav-tabs > li.active > a,
-.nav-tabs > li.active > a:hover,
-.nav-tabs > li.active > a:focus { border: 0; }
+.modalfacets .nav-tabs > li.active > a,
+.modalfacets .nav-tabs > li.active > a:hover,
+.modalfacets .nav-tabs > li.active > a:focus { border: 0; }
 
-.tab-content { margin-left: 45px; }
+.modalfacets .tab-content { margin-left: 45px; }
 
-.tab-content .tab-pane {
+.modalfacets .tab-content .tab-pane {
   display: none;
   background-color: #fff;
   padding: 10px 0px 3px 3px;
@@ -98,9 +98,9 @@
   border-radius: 4px;
 }
 
-.tab-content .active {   display: list-item; }
+.modalfacets .tab-content .active {   display: list-item; }
 
-.wrapper{
+modalfacets .wrapper{
 	position: absolute;
   top: 0;
   left: 0;

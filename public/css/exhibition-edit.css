@@ -147,7 +147,7 @@ body {
     /*background-color:  pink;*/
 }
 
-.description {
+.ImageDescription .description {
     max-width: 270px;
     margin-left: 30px;
     border-width: 2px;
