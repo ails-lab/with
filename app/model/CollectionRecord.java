@@ -62,10 +62,6 @@ public class CollectionRecord {
 	// an optional URL for the thumbnail
 	private String thumbnailUrl;
 
-	// an optional cached version of a thumbnail for this record'
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId thumbnail;
-
 	@NotNull
 	@NotBlank
 	private String title;
@@ -159,20 +155,6 @@ public class CollectionRecord {
 		} else {
 			this.source = source;
 		}
-	}
-
-	public Media retrieveThumbnail() {
-		Media thumbnail = DB.getMediaDAO().findById(this.thumbnail);
-		return thumbnail;
-	}
-
-	public ObjectId getThumbnail() {
-		return this.thumbnail;
-	}
-
-	@JsonIgnore
-	public void setThumbnail(ObjectId thumbnail) {
-		this.thumbnail = thumbnail;
 	}
 
 	public String getThumbnailUrl() {
