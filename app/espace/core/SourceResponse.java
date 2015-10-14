@@ -34,6 +34,8 @@ import elastic.ElasticUtils;
 public class SourceResponse {
 
 	public SourceResponse() {
+		items = new ArrayList<>();
+		filters = new ArrayList<>();
 	}
 
 	public SourceResponse(SearchResponse resp, int offset) {
@@ -83,6 +85,7 @@ public class SourceResponse {
 
 	public static class ItemsResponse {
 		public String id;
+		public List<String> type;
 		public List<String> thumb;
 		public String title;
 		public String description;

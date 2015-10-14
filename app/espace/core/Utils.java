@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import play.libs.Json;
+import riotcmd.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -99,7 +100,8 @@ public class Utils {
 			List<String> res = new ArrayList<String>(a.size());
 			if (a.isArray()) {
 				for (int i = 0; i < a.size(); i++) {
-					res.add(a.get(i).textValue());
+					JsonNode jsonNode = a.get(i);
+					res.add(getPlainString(jsonNode));
 				}
 			} else {
 				res.add(a.asText());
@@ -107,6 +109,16 @@ public class Utils {
 			return res;
 		}
 	}
+
+	private static String getPlainString(JsonNode jsonNode) {
+		if (jsonNode.isTextual())
+		return jsonNode.textValue();
+		else{
+			return jsonNode.path(0).textValue();
+		}
+	}
+	
+	
 
 	public static List<Lang> readLangAttr(JsonNode json, String string, boolean force) throws Exception {
 		if (json == null)
