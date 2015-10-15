@@ -968,11 +968,41 @@ div#publiccolumns figure figcaption {
 }
 
 .collectiontab h2 a{
-	color:grey;
+	color: grey;
 }
 
 .active h2 a{
 	color:black
 }
 
-
+/* Submenus */
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu:hover > .dropdown-menu {
+  display: block;
+}
+.dropdown-submenu > a:after {
+  display: block;
+  content: " ";
+  float: left;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 5px solid #333333;
+  margin-top: 5px;
+  margin-left: -10px;
+}
+.dropdown-submenu:hover > a:after {
+  border-left-color: #333333;
+}
+.dropdown-submenu > .dropdown-menu {
+  top: 0;
+  right: 100%;
+  margin-top: 12px;
+  margin-right: -6px;
+  -webkit-border-radius: 6px 0 6px 6px;
+  -moz-border-radius: 6px 0 6px 6px;
+  border-radius: 6px 0 6px 6px;
+}

@@ -109,12 +109,18 @@ public class UserDAO extends DAO<User> {
 		for (Search s : userSearches)
 			DB.getSearchDAO().makeTransient(s);
 
-		//delete user related collections
-		/*List<ObjectId> collectionIds = user.getCollectionIds();
-		for (ObjectId cid: collectionIds)
-			DB.getCollectionDAO().removeById(cid);
-*/
+		// delete user related collections
+		/*
+		 * List<ObjectId> collectionIds = user.getCollectionIds(); for (ObjectId
+		 * cid: collectionIds) DB.getCollectionDAO().removeById(cid);
+		 */
 
 		return this.makeTransient(user);
+	}
+
+	public List<User> getByGroupId(ObjectId groupId) {
+		Query<User> q = this.createQuery().field("userGroupsIds")
+				.hasThisOne(groupId);
+		return find(q).asList();
 	}
 }

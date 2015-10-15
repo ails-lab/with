@@ -115,7 +115,7 @@ public class GroupManager extends Controller {
 				Set<ObjectId> parentGroups = newGroup.getParentGroups();
 				parentGroups.add(newGroup.getDbId());
 				User user = DB.getUserDAO().get(admin);
-				user.addUserGroup(parentGroups);
+				user.addUserGroups(parentGroups);
 				DB.getUserDAO().makePermanent(user);
 			} catch (Exception e) {
 				log.error("Cannot save group to database!", e);
@@ -231,52 +231,6 @@ public class GroupManager extends Controller {
 		}
 	}
 
-	/**
-	 * Adds a user to group.
-	 * <p>
-	 * Right now only the administrator of the group and the superuser have the
-	 * rights to add a group to the group.
-	 *
-	 * @param userId
-	 *            the user id
-	 * @param groupId
-	 *            the group id
-	 * @return success message
-	 */
-	public static Result addUserToGroup(String userId, String groupId) {
-
-		String adminId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
-		if ((adminId == null) || (adminId.equals(""))) {
-			return forbidden("Only administrator of group has the right to add users");
-		}
-		User admin = DB.getUserDAO().get(new ObjectId(adminId));
-		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-		if (group == null) {
-			return internalServerError("Cannot retrieve group from database!");
-		}
-		if (!group.getAdminIds().contains(new ObjectId(adminId))
-				&& (!admin.isSuperUser())) {
-			return forbidden("Only administrator of group has the right to add users");
-		}
-		User user = DB.getUserDAO().get(new ObjectId(userId));
-		group.getUsers().add(new ObjectId(userId));
-		Set<ObjectId> parentGroups = group.getParentGroups();
-
-		if (user == null) {
-			return internalServerError("Cannot retrieve user from database!");
-		}
-		parentGroups.add(group.getDbId());
-		user.addUserGroup(parentGroups);
-
-		if (!(DB.getUserDAO().makePermanent(user) == null)
-				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-			return ok("User succesfully added to group");
-		}
-		return internalServerError("Cannot store to database!");
-
-	}
-	
 	public static Result getUserOrGroupThumbnail(String id) {
 		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
@@ -299,41 +253,6 @@ public class GroupManager extends Controller {
 			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
 					+ "\"}"));
 		}
-	}
-
-
-	/**
-	 * Removes a user from the group.
-	 * <p>
-	 * The users allowed to remove a user from a group is the administrator of
-	 * the group, the superuser and the user himself.
-	 *
-	 * @param userId
-	 *            the user id
-	 * @param groupId
-	 *            the group id
-	 * @return success message
-	 */
-	public static Result removeUserFromGroup(String userId, String groupId) {
-		String userSession = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
-		if ((userSession == null) || (userSession.equals(""))) {
-			return forbidden("No rights for user removal");
-		}
-		User userS = DB.getUserDAO().get(new ObjectId(userSession));
-		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-		if (group == null) {
-			return internalServerError("Cannot retrieve group from database!");
-		}
-		if (!group.getAdminIds().contains(new ObjectId(userSession))
-				&& (!userS.isSuperUser() && (!userSession.equals(userId)))) {
-			return forbidden("No rights for user removal");
-		}
-		User user = DB.getUserDAO().get(new ObjectId(userId));
-		group.getUsers().remove(new ObjectId(userId));
-		user.recalculateGroups();
-		return ok("User successfully removed from group");
-
 	}
 
 	/**

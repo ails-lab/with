@@ -201,7 +201,7 @@ public class UserAndGroupManager extends Controller {
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
 				group.getUsers().add(user.getDbId());
-				user.addUserGroup(ancestorGroups);
+				user.addUserGroups(ancestorGroups);
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 					result.put("message", "User succesfully added to group");
@@ -213,11 +213,68 @@ public class UserAndGroupManager extends Controller {
 				childGroup.getParentGroups().add(group.getDbId());
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);
-					user.addUserGroup(ancestorGroups);
+					user.addUserGroups(ancestorGroups);
 					DB.getUserDAO().makePermanent(user);
 				}
 				if (!(DB.getUserGroupDAO().makePermanent(childGroup) == null)) {
 					result.put("message", "Group succesfully added to group");
+					return ok(result);
+				}
+			}
+			result.put("error", "Wrong user or group id");
+			return badRequest(result);
+
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{\"error\":\""
+					+ e.getMessage() + "\"}"));
+		}
+	}
+	
+	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
+		try {
+			ObjectNode result = Json.newObject();
+			String adminId = AccessManager.effectiveUserId(session().get(
+					"effectiveUserIds"));
+			if ((adminId == null) || (adminId.equals(""))) {
+				result.put("error",
+						"Only administrator of group has the right to edit the group");
+				return forbidden(result);
+			}
+			User admin = DB.getUserDAO().get(new ObjectId(adminId));
+			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			if (group == null) {
+				result.put("error", "Cannot retrieve group from database");
+				return internalServerError(result);
+			}
+			if (!group.getAdminIds().contains(new ObjectId(adminId))
+					&& (!admin.isSuperUser())) {
+				result.put("error",
+						"Only administrator of group has the right to edit the group");
+				return forbidden(result);
+			}
+			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
+			ObjectId userOrGroupId = new ObjectId(id);
+			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
+				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
+				childGroup.getParentGroups().remove(group.getDbId());
+				List<User> users = DB.getUserDAO().getByGroupId(childGroup.getDbId());
+				for (User user : users) {
+					user.removeUserGroups(ancestorGroups);
+					DB.getUserDAO().makePermanent(user);
+				}
+				if (!(DB.getUserGroupDAO().makePermanent(childGroup) == null)) {
+					result.put("message", "Group succesfully removed from group");
+					return ok(result);
+				}
+			}
+			if (DB.getUserDAO().get(userOrGroupId) != null) {
+				User user = DB.getUserDAO().get(userOrGroupId);
+				ancestorGroups.add(group.getDbId());
+				group.removeUser(user.getDbId());
+				user.removeUserGroups(ancestorGroups);
+				if (!(DB.getUserDAO().makePermanent(user) == null)
+						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+					result.put("message", "User succesfully removed from group");
 					return ok(result);
 				}
 			}

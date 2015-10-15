@@ -168,7 +168,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "loggedInUserAccess=WRITE&offset=0&count=500&isExhibition=false"
+			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName="+JSON.stringify([{user:self.currentUser.username(),rights:"WRITE"}]),
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -221,7 +221,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType    : "json",
 			url         : "/collection/list",
 			processData : false,
-			data        : "loggedInUserAccess=own&offset=0&count=20&isExhibition=true"}).done(
+			data        : "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=true"}).done(
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
 				/*if (sessionStorage.getItem('User') !== null) 
@@ -301,6 +301,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		getUserCollections: getUserCollections,
 		getPublicCollections: getPublicCollections,
 		getUserExhibitions: getUserExhibitions,
+		getEditableCollections: getEditableCollections,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,
 		likeItem: likeItem

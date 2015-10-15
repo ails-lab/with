@@ -1,8 +1,81 @@
-define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','app','smoke'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
+define(['bridget','knockout', 'text!./org-view.html','isotope','imagesloaded','app','smoke'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
 	
 	
 		$.bridget('isotope', Isotope);
 		
+		
+		
+		
+		self.transDuration = '0.4s';
+		var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
+		if (isFirefox) {
+			self.transDuration = 0;
+		}
+		
+		var settings = $.extend({
+
+			// page
+			page  	  : 'default',
+
+			// masonry
+			mSelector : '.grid',
+			mItem	  : '.item',
+			mSizer	  : '.sizer',
+
+			// mobile menu
+			mobileSelector : '.mobilemenu',
+			mobileMenu 	   : '.main .menu'
+		}, {});
+
+		
+		var initProfileScroll = function(){
+
+		
+			// windows scroll event
+			$( window ).on( 'scroll touchmove', function(){
+
+				// set class
+				toggleProfileClasses();
+			});
+
+			// function init
+			function toggleProfileClasses() {
+
+			    // check window height
+			    if( $( window ).height() > 600  && $( window ).width() > 767 ) {
+
+			    	// stick part of the banner on top
+					if( $( document ).scrollTop() >= 169 ) {
+						$( '.profilebar' ).addClass( 'fixed' );
+					} else {
+						if( $( '.profilebar' ).hasClass( 'fixed' ) ) {
+							$( '.profilebar' ).removeClass( 'fixed' );
+						}
+					}
+
+					// check
+				    if( $( '.filter' ).length > 0 ) {
+
+				    	// vars
+				    	var offset = $('.filter').offset(),
+				    		topPos = parseInt( offset.top ) - 226;
+
+				    	// stick part of the banner on top
+						if( $( document ).scrollTop() >= topPos ) {
+							$( '.filter' ).addClass( 'fixed' );
+						} else {
+							if( $( '.filter' ).hasClass( 'fixed' ) ) {
+								$( '.filter' ).removeClass( 'fixed' );
+							}
+						}
+				    }
+			    }
+			}
+
+			// set on init
+			toggleProfileClasses();
+		};
+
 
 		 function initOrUpdate(method) {
 				return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
@@ -190,7 +263,9 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 			          if(data.page.address)self.address(data.page.address);
 			          if(data.page.city && data.page.country)
 			          self.address(self.address()+" "+data.page.city+ " "+ data.page.country);
-				      self.url(data.page.url);  
+			          var siteurl=data.page.url;
+			          if(siteurl.length>0 && siteurl.indexOf("http")==-1){siteurl="http://"+siteurl;}
+				      self.url(siteurl);  
 			          self.logo(data.page.coverThumbnail ? window.location.origin+'/media/' + data.page.coverThumbnail : '');
 			          self.hero(data.page.coverImage ? data.page.coverImage : null); 
 			          if(self.hero()){
@@ -202,7 +277,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 					       self.totalCollections(data['totalCollections']);  
 					       self.totalExhibitions(data['totalExhibitions']);  
 					       self.revealItems(data['collectionsOrExhibitions']);
-					       window.EUSpaceUI.initProfile();
+					       initProfileScroll();
 					});
           });
 		};
@@ -217,7 +292,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				url: "/collection/list",
 				processData: false,
 				//TODO:add parent project filter
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"OWN"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.id(),rights:"OWN"}]),
 			}).success (function(){
 			});
 		};

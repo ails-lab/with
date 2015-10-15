@@ -26,7 +26,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		var self = this;
 
 		// Generic Parameters
-		self.baseURL = ko.observable('http://localhost:9000/assets/index.html#organization/');
+		self.type = ko.observable('organization');	// Default is organization. If user gives a different parameter, that changes
+		self.baseURL = ko.computed(function () {	// TODO: Dynamically get the address
+			return 'www.with.image.ntua.gr/assets/index.html#' + self.type() + '/';
+		});
 
 		// UserGroup Fields
 		self.id = ko.observable();
@@ -73,14 +76,17 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 			return self.thumbnail ? '/media/' + self.thumbnail() : null;
 		});
 
-		if (params.id !== undefined) {
-			self.id(params.id);
-		}
+		if (params.id !== undefined) { self.id(params.id); }
+		if (params.type !== undefined) { self.type(params.type); }
 
 		$('#imageupload').fileupload({
 			type: "POST",
 			url: '/media/create',
-			done: function (e, data) {
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 50000,
+    		done: function (e, data) {
+    			console.log(e);
+    			console.log(data);
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
 				self.thumbnail(urlID);
 			},
@@ -96,6 +102,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 		$('#coverupload').fileupload({
 			type: "POST",
 			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 500000,
 			done: function (e, data) {
 				self.page.coverImage(data.result.results[0].externalId);
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
@@ -186,14 +194,14 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 
 			$.ajax({
 				type: "POST",
-				url: "/organization/create",
+				url: "/" + self.type() + "/create",
 				contentType: 'application/json',
 				dataType: 'json',
 				processData: false,
 				data: ko.toJSON(data),
 				success: function (data, text) {
 					$.smkAlert({
-						text: 'Organization created successfully!',
+						text: 'A new ' + self.type() + ' was created successfully!',
 						type: 'success'
 					});
 					self.closeWindow();
@@ -220,7 +228,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'async!https://maps.
 				data: ko.toJSON(data),
 				success: function (data, text) {
 					$.smkAlert({
-						text: 'Organization updated successfully!',
+						text: 'Update successful!',
 						type: 'success'
 					});
 					self.closeWindow();

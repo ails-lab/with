@@ -21,22 +21,12 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import model.ApiKey;
-import model.Collection;
-import model.Media;
-import model.Rights.Access;
-import model.User;
-import model.UserGroup;
-import model.UserOrGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -46,6 +36,21 @@ import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import actors.ApiKeyManager.Create;
+import akka.actor.ActorSelection;
+import akka.pattern.Patterns;
+import akka.util.Timeout;
+import db.DB;
+import elastic.ElasticIndexer;
+import model.ApiKey;
+import model.Collection;
+import model.Media;
+import model.User;
+import model.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Akka;
@@ -57,17 +62,6 @@ import play.mvc.Result;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import actors.ApiKeyManager.Create;
-import akka.actor.ActorSelection;
-import akka.pattern.Patterns;
-import akka.util.Timeout;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-import elastic.ElasticIndexer;
 
 public class UserManager extends Controller {
 
@@ -599,7 +593,7 @@ public class UserManager extends Controller {
 			return internalServerError(result);
 		}
 		parentGroups.add(group.getDbId());
-		user.addUserGroup(parentGroups);
+		user.addUserGroups(parentGroups);
 
 		if (!(DB.getUserDAO().makePermanent(user) == null)
 				&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {

@@ -98,9 +98,18 @@ public class CollectionDAO extends DAO<Collection> {
 		/*Criteria[] criteria = new Criteria[Access.values().length-ordinal];
 		for (int i=0; i<Access.values().length-ordinal; i++)
 			criteria[i] = this.createQuery().criteria("rights." + userAccess.x.toHexString())
-			.equal(Access.values()[i+ordinal].toString());
-		return this.createQuery().or(criteria);*/
+			.equal(Access.values()[i+ordinal].toString());*/
 		return this.createQuery().criteria("rights." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
+	}
+	
+	public CriteriaContainer formLoggedInUserQuery(List<ObjectId> loggedInUserEffIds) {
+		int ordinal = Access.READ.ordinal();
+		Criteria[] criteria = new Criteria[loggedInUserEffIds.size()+1];
+		for (int i=0; i<loggedInUserEffIds.size(); i++) {
+			criteria[i] = this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
+		}
+		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("isPublic").equal(true);
+		return this.createQuery().or(criteria);
 	}
 	
 	public CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
@@ -156,19 +165,41 @@ public class CollectionDAO extends DAO<Collection> {
 		return hits;
 	}
 	
-	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
-			Boolean isExhibition, boolean totalHits, int offset, int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+	public Query<Collection> formBasicQuery(CriteriaContainer[] criteria, ObjectId creator, Boolean isExhibition,  int offset, int count) {
+		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		if (creator != null)
 			q.field("ownerId").equal(creator);
-		/*if (isExhibition != null)
-			q.field("isExhibition").equal(isExhibition)*/
-		CriteriaContainer[] criteria =  new CriteriaContainer[0];
-		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
-			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
-		}
 		if (criteria.length > 0)
 			q.and(criteria);
+		return q;
+	}
+	
+	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition, boolean totalHits, int offset, int count) {
+		CriteriaContainer[] criteria =  new CriteriaContainer[0];
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(orAccessed));
+		}
+		Query<Collection> q = formBasicQuery(criteria, creator, isExhibition, offset, count);
+		if (totalHits) {
+			return getCollectionsAndHits(q, isExhibition);
+		}
+		else {
+			if (isExhibition != null)
+				q.field("isExhibition").equal(isExhibition);
+			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
+		}
+	}
+	
+	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(
+			List<ObjectId> loggeInEffIds, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition, boolean totalHits, int offset, int count) {
+		CriteriaContainer[] criteria =  new CriteriaContainer[0];
+		criteria = ArrayUtils.addAll(criteria, formLoggedInUserQuery(loggeInEffIds));
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(orAccessed));
+		}
+		Query<Collection> q = formBasicQuery(criteria, creator, isExhibition, offset, count);
 		if (totalHits) {
 			return getCollectionsAndHits(q, isExhibition);
 		}
@@ -181,7 +212,7 @@ public class CollectionDAO extends DAO<Collection> {
 	
 	public Tuple<List<Collection>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		q.field("ownerId").notEqual(userId);
 		/*if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);*/
@@ -204,7 +235,7 @@ public class CollectionDAO extends DAO<Collection> {
 	
 	public Tuple<List<Collection>, Tuple<Integer, Integer>> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-		Query<Collection> q = this.createQuery().offset(offset).limit(count);
+		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		/*if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);*/
 		if (creator != null)

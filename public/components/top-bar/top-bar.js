@@ -38,7 +38,8 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		self.profileImage = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
 
 		editProfile       = function() { app.showPopup('edit-profile'); };
-		newOrganization   = function() { app.showPopup('new-organization'); };
+		newOrganization   = function() { app.showPopup('new-organization', { type: 'organization' }); };
+		newProject        = function() { app.showPopup('new-organization', { type: 'project' }); };
 		logout            = function() { app.logout(); };
 	}
 

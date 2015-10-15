@@ -17,7 +17,7 @@
                
                   </div>
                   <!-- view button-->
-                  <div class="view"><a href="exhibition.html" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
+                  <div class="view"><a href="#exhibitionview/5614f353569e48389d111281" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
                 </div>
               </div>
               <!-- thumbnails-->
@@ -62,7 +62,7 @@
             <div class="sizer"></div>
             <div data-bind="visible: isLoaded(), css: itemcss">
               <div class="wrap">
-                <!-- anchor--><a data-bind="attr: {href: 'index.html#collectionview/'+id}" title="Lorem ipsum">
+                <!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
                   <!-- info-->

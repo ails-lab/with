@@ -15,6 +15,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('item-view', { require: 'components/item-view/item' });
 	ko.components.register('collection', { require: 'components/collection/collection' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
+	ko.components.register('exhibition-view', { require: 'components/exhibition-view/exhibition-view' });
 	ko.components.register('facets', { require: 'components/facets/facets' });
 	ko.components.register('providers', { require: 'components/providers/providers' });
 	ko.components.register('provider', { require: 'components/provider/provider' });

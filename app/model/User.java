@@ -26,12 +26,13 @@ import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import controllers.GroupManager.GroupType;
+import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
-import db.DB;
 
 @Entity
 public class User extends UserOrGroup {
@@ -64,13 +65,9 @@ public class User extends UserOrGroup {
 	@Embedded
 	private Page page;
 
-	private int recordLimit;
-	private int collectedRecords;
 	private int exhibitionsCreated;
-	private double storageLimit;
 
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
-	private final Set<ObjectId> whiteList = new HashSet<ObjectId>();
 
 	/**
 	 * The search should already be stored in the database separately
@@ -134,8 +131,7 @@ public class User extends UserOrGroup {
 	public void recalculateGroups() {
 		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
 		// get all groups I'm in
-		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(
-				this.getDbId(), GroupType.All);
+		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(this.getDbId(), GroupType.All);
 		for (UserGroup ug : gr) {
 			groupAcc.add(ug.getDbId());
 			ug.accumulateGroups(groupAcc);
@@ -170,10 +166,12 @@ public class User extends UserOrGroup {
 		this.lastName = lastName;
 	}
 
+	@JsonIgnore
 	public String getMd5Password() {
 		return md5Password;
 	}
 
+	@JsonIgnore
 	public void setMd5Password(String md5Password) {
 		this.md5Password = md5Password;
 	}
@@ -233,58 +231,42 @@ public class User extends UserOrGroup {
 		this.googleId = googleId;
 	}
 
-	public int getRecordLimit() {
-		return recordLimit;
-	}
-
-	public void setRecordLimit(int recordLimit) {
-		this.recordLimit = recordLimit;
-	}
-
-	public int getCollectedRecords() {
-		return collectedRecords;
-	}
-
-	public void setCollectedRecords(int collectedRecords) {
-		this.collectedRecords = collectedRecords;
-	}
-
-	public double getStorageLimit() {
-		return storageLimit;
-	}
-
-	public void setStorageLimit(double storageLimit) {
-		this.storageLimit = storageLimit;
-	}
-
-	// public void setPhoto(Media photo) {
-	// this.photo = photo.getDbId();
-	// }
-
-	public void addUserGroup(Set<ObjectId> groups) {
+	public void addUserGroups(Set<ObjectId> groups) {
 		this.userGroupsIds.addAll(groups);
+	}
+
+	public void removeUserGroups(Set<ObjectId> groups) {
+		this.userGroupsIds.removeAll(groups);
+	}
+
+	public void addUserGroup(ObjectId group) {
+		this.userGroupsIds.add(group);
+	}
+
+	public void removeUserGroup(ObjectId group) {
+		this.userGroupsIds.remove(group);
 	}
 
 	public Set<ObjectId> getUserGroupsIds() {
 		return userGroupsIds;
 	}
-
-	public Set<ObjectId> getWhiteList() {
-		return whiteList;
-	}
-
+	
+	@JsonIgnore
 	public boolean isSuperUser() {
 		return superUser;
 	}
 
+	@JsonIgnore
 	public void setSuperUser(boolean isSuperUser) {
 		this.superUser = isSuperUser;
 	}
-
+	
+	@JsonIgnore
 	public int getExhibitionsCreated() {
 		return exhibitionsCreated;
 	}
 
+	@JsonIgnore
 	public void setExhibitionsCreated(int exhibitionsCreated) {
 		this.exhibitionsCreated = exhibitionsCreated;
 	}

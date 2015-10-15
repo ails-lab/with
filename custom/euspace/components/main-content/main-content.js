@@ -190,12 +190,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
 		  
-		  var promise = self.getSpaceCollections();
-		  $.when(promise).done(function(data) {
-					self.totalCollections(data['totalCollections']);
-					self.totalExhibitions(data['totalExhibitions']);
-				    self.revealItems(data['collectionsOrExhibitions']);
-				
+		  var promiseCollections = self.getSpaceCollections();
+		  $.when(promiseCollections).done(function(responseCollections) {
+				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 			});
 		  var promise2 = self.getFeaturedExhibition();
           $.when(promise2).done(function (data) {
@@ -208,7 +205,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
           
 		  
 		};
-
+		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
 		self.getSpaceCollections = function () {
 			//call should be replaced with space collections+exhibitions
 			return $.ajax({
@@ -217,7 +214,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "access=read&offset=0&count=20&collectionHits=true"
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
 			}).success (function(){
 			});
 		};
@@ -227,7 +224,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			/*call must change to get featured exhibition for space*/
 	        return $.ajax({
 	            type: "GET",
-	            url: "/collection/55b747c3569e1b44eeac72b3",
+	            url: "/collection/5614f353569e48389d111281",
 	            success: function () {
 
 	            }
@@ -246,7 +243,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?access=read&count=20&offset=" + offset,
+					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
@@ -259,8 +256,15 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				});
 			}
 		};
-		
-		
+
+	  self.loadCollectionOrExhibition = function(item) {
+		  if (item.isExhibition) {
+			  window.location = 'index.html#exhibitionview/'+ item.id;
+		  }
+		  else {
+			  window.location = 'index.html#collectionview/' + item.id;
+		  }
+	  };
 		
       self.loadAll();	  
 
