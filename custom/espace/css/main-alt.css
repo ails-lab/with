@@ -453,6 +453,10 @@ body header {
 			}
 		}*/
 }
+body header.minimize .main {
+    background: #5D727B !important;
+    height: 70px !important;
+}
 body header .main {
   background: #5D727B;
   position: fixed;
