@@ -899,7 +899,6 @@ body [role='main'] .featured {
 body [role='main'] .featured .exhibition {
   width: 100%;
   height: 430px;
-  background: url('../img/content/bg-cover-exhibition-small-alt.png') no-repeat;
   background-size: cover;
   background-position: center;
   color: #ffffff;
