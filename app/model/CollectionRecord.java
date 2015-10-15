@@ -71,6 +71,10 @@ public class CollectionRecord {
 
 	private String provider;
 
+	private String dataProvider;
+
+	private String contributor;
+
 	// the id in the source system
 	private String sourceId;
 	// a link to the record on its source
@@ -83,6 +87,8 @@ public class CollectionRecord {
 	private String isShownBy;
 
 	private String type;
+
+	private String year;
 
 	private int totalLikes;
 
@@ -198,6 +204,22 @@ public class CollectionRecord {
 		this.provider = provider;
 	}
 
+	public String getDataProvider() {
+		return dataProvider;
+	}
+
+	public void setDataProvider(String dataProvider) {
+		this.dataProvider = dataProvider;
+	}
+
+	public String getContributor() {
+		return contributor;
+	}
+
+	public void setContributor(String contributor) {
+		this.contributor = contributor;
+	}
+
 	public String getSourceId() {
 		return sourceId;
 	}
@@ -236,6 +258,14 @@ public class CollectionRecord {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public String getYear() {
+		return year;
+	}
+
+	public void setYear(String year) {
+		this.year = year;
 	}
 
 	public int getTotalLikes() {
