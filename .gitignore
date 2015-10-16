@@ -94,3 +94,5 @@ public/.idea/vcs.xml
 public/.idea/modules.xml
 public/.idea/workspace.xml
 /node_modules/
+/.cache-main
+/.cache-tests
