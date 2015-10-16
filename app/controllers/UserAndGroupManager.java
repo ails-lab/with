@@ -291,9 +291,12 @@ public class UserAndGroupManager extends Controller {
 		if (user.getThumbnail() != null) {
 			ObjectId photoId = user.getThumbnail();
 			Media photo = DB.getMediaDAO().findById(photoId);
+			if (photo != null)
 			// convert to base64 format
-			return "data:" + photo.getMimeType() + ";base64,"
+				return "data:" + photo.getMimeType() + ";base64,"
 					+ new String(Base64.encodeBase64(photo.getData()));
+			else
+				return null;
 		} else
 			return null;
 	}
