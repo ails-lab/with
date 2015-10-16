@@ -1,0 +1,55 @@
+<item-view params="route: route"></item-view>
+
+ <!-- menu bar-->
+      <nav class="titlebar double">
+        <div class="container">
+          <!-- type-->
+          <div class="info">
+            <div class="type">Collection<span class="counter" data-bind="text: itemCount() + ' ITEMS'">ITEMS</span></div>
+          </div>
+          <!-- meta-->
+          <div class="meta">
+            <!-- title-->
+            <div class="title"><a href="javascript:void(null);" data-placement="bottom" data-toggle="popover" data-trigger="focus" data-bind=" attr: { 'data-content': desc() }">i</a><!-- ko text:collname --><!-- /ko --></div>
+            <!-- owner-->
+            <div class="owner"><a href="#" title="#"><span class="name" data-bind="text: owner"></span><img src="img/content/img-profilepicture.png" alt="" class="profilepicture"></a></div>
+          
+          
+		
+		  </div>
+        </div>
+      </nav>
+      <!-- wrap spacer-->
+      <div class="spacer double">
+        <!-- listing-->
+        <section class="listing">
+          <div class="container">
+            <!-- grid-->
+            <div class="grid" data-bind="collectionIsotope: citems">
+              <!-- item-->
+              <div class="sizer"></div>
+              
+              
+              <div class="item media" data-bind="visible: isLoaded()">
+              <div class="wrap">
+                <!-- anchor--><a data-bind="event: {click: function(){$parent.recordSelect($data)}}">
+                  <!-- thumbnail-->
+                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
+                  <!-- info-->
+                  <div class="info">
+                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
+                  </div>
+                 <span class="rights" data-bind="text: sourceCredits()"></span>
+                  <!-- pointer-->
+                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
+              </div>
+            </div>
+              
+            
+            </div>
+          </div>
+        </section>
+      </div>
+      
+      	<div id="more" data-bind="visible: loading ,scroll: citems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+      

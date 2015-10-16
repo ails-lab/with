@@ -1,45 +1,93 @@
-<div style="margin-bottom: 200px;">
-	<div class="container-fluid">
-		<div class="row">
-			<span class="withmain"><h2>Collections</h2></span>
-			<div class="withsearch-content-masonry" style="padding-top:0;">
-				<div id="publiccolumns" data-bind="foreach: collections, masonrypc">
-					<figure class="masonryitem">
-					<a data-bind="attr: {href: 'index.html#collectionview/'+id()}"><img data-bind="attr: {src: thumbnail()}" /></a><figcaption data-bind="text: collname()"></figcaption></figure>
-				</div>
-			</div>
-		</div>
-		<div class="row">
-			<span class="withmain"><h2>Featured Exhibitions</h2></span>
-			<div class="row">
-				<div class="outlay">
-					<h2>Photography
-					<div><p>All our yesterdays </p>
-					</div></h2>
-					<div class="containermason">
-						<div class="square bigsquare" id="omeka"><img src="images/collections/photo/ph5.jpg" class="img-responsive desaturate"></div>
-						<div class="square littlesquare"><img src="images/collections/photo/ph2.jpg" class="img-responsive"></div>
-						<div class="square littlesquare"><img src="images/collections/photo/ph3.jpg" class="img-responsive"></div>
-						<div class="square littlesquare"><img src="images/collections/photo/ph4.jpg" class="img-responsive"></div>
-						<div class="square littlesquare"><img src="images/collections/photo/ph6.jpg" class="img-responsive"></div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="row" style="padding-top:20px;">
-			<span class="withmain"><h2>3D Galleries</h2></span>
-			<div class="galleries">
-				<div style="float:left;width:300px;">
-					<div class="gr-gallery2">
-						<figure><div><a href="#gallery/55b747c3569e1b44eeac72b3/2"><img src="images/gallery/portrait1.jpg" width="200"/></a></div><figcaption style="font-size: 1.3em;cursor: auto;">Female Portraits</figcaption></figure>
-					</div>
-				</div>
-				<div style="float:right;width:300px;">
-					<div class="gr-gallery">
-						<figure><div><a href="#gallery/55b74e5b569e1b44eeac72c0/1"><img src="images/gallery/streetart1.jpg" width="200"/></a></div><figcaption style="font-size: 1.3em;cursor: auto;">Street art</figcaption></figure>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+
+      <!-- featured-->
+      <section class="featured">
+        <div class="container">
+          <!-- title-->
+          <div class="sectionhead">FEATURED EXHIBITION</div>
+          <!-- featured exhibition-->
+          <div id="featuredExhibit" class="exhibition" data-bind="with: featured">
+            <div class="hue">
+              <!-- info-->
+              <div class="info">
+                <div class="type">EXHIBITION</div>
+                <h1 class="title"><!-- ko text:title --><!-- /ko --> </h1>
+                <div class="description">
+                  <!-- description-->
+                  <div class="text" data-bind="text: description">
+               
+                  </div>
+                  <!-- view button-->
+                  <div class="view"><a href="#exhibitionview/5614f353569e48389d111281" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
+                </div>
+              </div>
+              <!-- thumbnails-->
+              <div class="thumbnails">
+                <!-- left-->
+                
+                <div class="left"><img data-bind="attr: { src: thumbs()[0].url}">
+                  <div class="title" data-bind="text: thumbs()[0].title"></div>
+                </div>
+                <!-- right-->
+                <div class="right"><img data-bind="attr: { src: thumbs()[1].url}">
+                  <div class="title" data-bind="text: thumbs()[1].title"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- filter-->
+      <section class="filter">
+        <div class="container">
+          <div class="wrap">
+            <!-- menu-->
+            <ul class="nav">
+              <li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+              <li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
+              <li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+            </ul>
+            <!-- menu-->
+            <ul class="counter">
+              <li class="collection"><!-- ko text:totalCollections --> <!-- /ko --> Collection </li>
+              <li class="exhibition"><!-- ko text:totalExhibitions --> <!-- /ko --> Exhibition </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <!-- listing-->
+      <section class="listing">
+        <div class="container">
+          <!-- grid-->
+          <div class="grid" id="homemasonry" data-bind="homeisotope: homecollections">
+            <div class="sizer"></div>
+            <div data-bind="visible: isLoaded(), css: itemcss">
+              <div class="wrap">
+                <!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
+                  <!-- thumbnail-->
+                  <div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
+                  <!-- info-->
+                  <div class="info"><span class="type" data-bind="text:type"></span>
+                    <h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
+                  </div>
+                  <!-- pointer-->
+                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
+              </div>
+            </div>
+            
+          </div>
+          
+          <div id="more" data-bind="visible: loading, scroll: homecollections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+          </div>
+        
+      </section>
+ 
+
+
+
+
+			
+					
+		 						
+		 					
+		 
+					  
