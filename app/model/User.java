@@ -28,11 +28,13 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import controllers.GroupManager.GroupType;
 import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
+import utils.Serializer;
 
 @Entity
 public class User extends UserOrGroup {
@@ -67,6 +69,7 @@ public class User extends UserOrGroup {
 
 	private int exhibitionsCreated;
 
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 
 	/**
@@ -250,7 +253,7 @@ public class User extends UserOrGroup {
 	public Set<ObjectId> getUserGroupsIds() {
 		return userGroupsIds;
 	}
-	
+
 	@JsonIgnore
 	public boolean isSuperUser() {
 		return superUser;
@@ -260,7 +263,7 @@ public class User extends UserOrGroup {
 	public void setSuperUser(boolean isSuperUser) {
 		this.superUser = isSuperUser;
 	}
-	
+
 	@JsonIgnore
 	public int getExhibitionsCreated() {
 		return exhibitionsCreated;

@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 
 public abstract class UserOrGroup {
-	
+
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
@@ -34,7 +34,7 @@ public abstract class UserOrGroup {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
 	private String about;
-	
+
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -50,7 +50,7 @@ public abstract class UserOrGroup {
 	public void setUsername(String name) {
 		this.username = name;
 	}
-	
+
 	public ObjectId getThumbnail() {
 		return this.thumbnail;
 	}
@@ -62,7 +62,7 @@ public abstract class UserOrGroup {
 	public void setThumbnail(ObjectId thumbnail) {
 		this.thumbnail = thumbnail;
 	}
-	
+
 	public String getAbout() {
 		return about;
 	}
