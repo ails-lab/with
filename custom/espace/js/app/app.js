@@ -23,8 +23,7 @@ define("app", ['knockout'], function (ko) {
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
-
-	 require(["./js/plugin"], function(EUSpaceApp) {
+    require(["./js/plugin"], function(EUSpaceApp) {
 		 window.EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
 
 		 		// page name
@@ -43,6 +42,24 @@ define("app", ['knockout'], function (ko) {
 		 window.EUSpaceUI.init();
 			});
 	
-	
+    require(["js/vendor/slick.js/slick/slick.min","js/plugin"], function(slick,EUSpaceApp) {
+		 var EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
+
+		 		// page name
+		 		page  	  : document.body.getAttribute("data-page"),
+
+		 		// masonry
+		 		mSelector : '.grid',
+		 		mItem	  : '.item',
+		 		mSizer	  : '.sizer',
+
+		 		// mobile menu
+		 		mobileSelector : '.mobilemenu',
+		 		mobileMenu 	   : '.main .menu'
+		 	})
+
+		 EUSpaceUI.init();
+			});
+  
 	
 });

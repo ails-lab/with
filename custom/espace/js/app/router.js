@@ -31,6 +31,10 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'apidoc', params: { page: 'api-docu', title: 'API Documentation' } },
 			{ url: 'testsearch', params: { page: 'testsearch', title: 'testsearch' } },
 			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } },
+			{ url: 'about',     params: { page: 'about',  title: 'About' } },
+			{ url: 'contact',     params: { page: 'contact',  title: 'Contact' } },
+			{ url: 'terms',     params: { page: 'terms',  title: 'Terms' } },
+			{ url: 'privacy',     params: { page: 'privacy',  title: 'Privacy' } },
 			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } }
 		]
 	});

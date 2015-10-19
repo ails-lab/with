@@ -19,7 +19,14 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('facets', { require: 'components/facets/facets' });
 	ko.components.register('providers', { require: 'components/providers/providers' });
 	ko.components.register('provider', { require: 'components/provider/provider' });
+	ko.components.register('about', { require: 'components/statichtml/statichtml' });
+	ko.components.register('contact', { require: 'components/statichtml/statichtml' });
+	ko.components.register('privacy', { require: 'components/statichtml/statichtml' });
+	ko.components.register('terms', { require: 'components/statichtml/statichtml' });
+	
 	// ... or for template-only components, you can just point to a .html file directly:
+	
+	
 	ko.components.register('empty', { template: '&nbsp;' });
 
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
