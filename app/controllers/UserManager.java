@@ -437,9 +437,9 @@ public class UserManager extends Controller {
 						break;
 					}
 				}
-				result.put("UserGroups", userGroups);
-				result.put("Organizations", organizations);
-				result.put("Projects", projects);
+				result.put("usergroups", userGroups);
+				result.put("organizations", organizations);
+				result.put("projects", projects);
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);
