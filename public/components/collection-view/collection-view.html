@@ -4,8 +4,15 @@
 		<div data-bind="visible: creator().length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:creator --><!-- /ko --></a></i></div>
 		<span data-bind="text:desc.display"></span>
 		<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
-		<br>
+		 <br>
 		<button type="button" class="btn btn-primary" data-bind="click: uploadItem, visible: isLogged" style="margin-top: 10px;"><span class="glyphicon glyphicon-cloud-upload" aria-hidden="true" style="vertical-align: top;"></span> Upload</button>
+		<button type="button" class="btn btn-info" data-bind="click: presentAPICalls" style="margin-left: 30px; margin-top: 10px;" title="Show API Calls">API Calls</button>
+		<div class="well" data-bind="visible: showAPICalls" style="margin-top: 10px;">
+		 <span class="label label-success">Get</span><code data-bind="text: getAPIUrlCollection() "></code>
+		 <br>
+		 <span class="label label-success">Get</span><code data-bind="text: getAPIUrlRecords()"></code>
+			<br>
+		</div>
 		<div class="withsearch-content-masonry">
 			<div id="collcolumns" class="columns" data-bind="masonrycoll">
 			</div>

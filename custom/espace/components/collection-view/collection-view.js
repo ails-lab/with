@@ -261,7 +261,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			});
 		};
-
 		self.loadCollection();
 		self.isOwner = ko.pureComputed(function () {
 			if (app.currentUser._id() == self.ownerId()) {

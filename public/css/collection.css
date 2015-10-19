@@ -163,31 +163,16 @@ display: none;
 
 .userΙmage {
 	position: relative;
-	height: 90px;
 }
 
 .rightsIcon {
 	position: absolute;
+	top: 50%;
+   left: 50%;
+   transform: translate(-50%,-50%); 
     z-index:99;
-    top: 15px;  
-    left: 36.5px;
 }
 
-.btn-group-vertical .topRightsIcon .btn {
-	border-bottom-right-radius: 0;
- 	border-top-right-radius: 0;
-	border-radius: 0;
-	margin-left: -3px;
-	margin-right: 0;
-	display: inline;
-}
-
-.deleteIcon {
-    border-bottom-left-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    margin: 0 0 0 8px;
-    width: 55% !important;
-}
 
 .topOfModal {
     z-index:1100!important;
@@ -209,11 +194,11 @@ display: none;
 }
 
 .readBorder {
-	border: 3px solid grey;
+	border: 3px solid #337ab7;
 }
 
 .writeBorder {
-	border: 3px solid #009900;
+	border: 3px solid #5cb85c;
 }
 
 .ownBorder {

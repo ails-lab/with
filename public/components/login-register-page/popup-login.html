@@ -5,11 +5,11 @@
 
 	<div>
 		<div class="externalLogin">
-			<button class="facebook" type="button" data-bind="click: function() { fbLogin(true, collectionShow); }">
+			<button class="facebook" type="button" data-bind="click: function() { fbLogin(true, collectionShow);window.opener.location.reload(); }">
 				<i class="facebook_small"></i>
 				<span>Facebook</span>
 			</button>
-			<button class="google" type="button" data-bind="click: function() { googleLogin(true, collectionShow, $parents[1]); }">
+			<button class="google" type="button" data-bind="click: function() { googleLogin(true, collectionShow, $parents[1]); window.opener.location.reload();}">
 				<i class="google_small"></i>
 				<span>Google</span>
 			</button>
@@ -35,7 +35,7 @@
 					</div>
 				</div>
 				<div class="col-md-2 col-sm-2 col-ms-2 col-xs-12">
-					<button type="submit" class="btn btn-primary btn-block" data-bind="click: function() { emailLogin(true, collectionShow); }" style="vertical-align: top;">Login</button>
+					<button type="submit" class="btn btn-primary btn-block" data-bind="click: function() { emailLogin(true, collectionShow); window.opener.location.reload();}" style="vertical-align: top;">Login</button>
 				</div>
 
 				<div class="col-xs-12">

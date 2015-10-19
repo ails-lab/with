@@ -15,24 +15,18 @@
 						data-bind="autocompleteUsername: ko.contextFor(mycollections).$data.myUsername"/>
 						</div>
 						 <span style="padding-left:10px;">
-							 <button type="button" class="btn btn-info btn-xs" title="Show"
+							 <button type="button" class="btn btn-primary btn-xs" title="Show" 
 							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'READ')">
 							 	<span class="glyphicon glyphicon-eye-open" 
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
 					 		</button>
-					 		<button type="button" class="btn btn-info btn-xs" title="Co-edit"
+					 		<button type="button" class="btn btn-success btn-xs" title="Co-edit"
 							 	data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'WRITE')">
 							 	<span class="glyphicon glyphicon glyphicon-edit" 
 					 				aria-hidden="true" style="cursor:pointer">
 					 			</span>
 					 		</button>
-					 		<button type="button" class="btn btn-info btn-xs" title="Share" 
-					 		data-bind="click: ko.contextFor(mycollections).$data.addToSharedWithUsers.bind($data, 'OWN')">
-					 			<span class="glyphicon glyphicon-user" 
-					 				aria-hidden="true" style="cursor:pointer">
-					 			</span>
-							 </button>
 				      	</span>
 				    	</div>
 				    </div>
@@ -57,57 +51,59 @@
 				</div>
 				
 			    <script type="text/html" id="shareWithUsers-template">
-    				<!-- ko if: accessRights() != 'NONE' -->	
+    				<!-- ko if: accessRights() != 'NONE' && accessRights() != 'OWN'-->	
 					<div class="col-md-3">					
 						 <div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer" data-bind="
 						 event: { mouseenter: ko.contextFor(mycollections).$data.showRightsIcons.bind($data), 
-						 mouseleave: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data, userId())}">	
-							<div class="btn-group-vertical rightsIcon" role="group" style="display:none" data-bind="attr: {id: 'rightsIcons_'+userId()}" area-label="Change Rights">
-								<div class="topRightsIcon">
-								<!-- ko if: accessRights() == 'READ' -->
-								<button type="button" class="btn btn-info btn-xs" title="Edit"
-								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
-								<span class="glyphicon glyphicon-edit" style="cursor:pointer"></span>
-								</button>
-								<button type="button" class="btn btn-info btn-xs" title="Share"
-								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'OWN')">   
-								<span class="glyphicon glyphicon-user" style="cursor:pointer"></span>
-								</button>
-								<!-- /ko -->
-								<!-- ko if: accessRights() == 'WRITE' -->
-								<button type="button" class="btn btn-info btn-xs" title="Show"							
-								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">				
-								<span class="glyphicon glyphicon-eye-open" style="cursor:pointer"></span>
-								</button>
-								<button type="button" class="btn btn-info btn-xs" title="Edit"
-								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'OWN')">   
-								<span class="glyphicon glyphicon-user" style="cursor:pointer"></span>
-								</button>
-								<!-- /ko -->
-								<!-- ko if: accessRights() == 'OWN' -->
-								<button type="button" class="btn btn-info btn-xs" title="Read"
-								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">   
-								<span class="glyphicon glyphicon-eye-open" style="cursor:pointer"></span>
-								</button>
-								<button type="button" class="btn btn-info btn-xs" title="Edit"
-								data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
-								<span class="glyphicon glyphicon-edit" style="cursor:pointer"></span>
-								</button>
-								<!-- /ko -->
-								</div>
-								<button type="button" class="btn btn-info btn-xs deleteIcon" title="Remove rights" 
-							  	data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'NONE')" >   
-							    <span class="glyphicon glyphicon-trash" style="cursor:pointer"></span>
-								</button>
-							</div>
+						 mouseleave: ko.contextFor(mycollections).$data.hideRightsIcons.bind($data, userId())}">				
 							<!-- ko if: $data.image -->
 								<img class="img-circle img-thumbnail userPhoto"  data-bind="attr: {src: image, id: 'image_' + userId()},
-								css: { readBorder: accessRights()=='READ', writeBorder: accessRights()=='WRITE', ownBorder: accessRights()=='OWN'}"/>
+								css: { readBorder: accessRights()=='READ', writeBorder: accessRights()=='WRITE'}">
+									<div class="btn-group rightsIcon" role="group" style="display:none" 
+									data-bind="attr: {id: 'rightsIcons_'+userId()}" area-label="Change Rights">
+									<!-- ko if: accessRights() == 'READ' -->
+									<button type="button" class="btn btn-success btn-xs" title="Edit"
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
+									<span class="glyphicon glyphicon-edit" style="cursor:pointer"></span>
+									</button>
+									<!-- /ko -->
+									<!-- ko if: accessRights() == 'WRITE' -->
+									<button type="button" class="btn btn-primary btn-xs" title="Show"							
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">				
+									<span class="glyphicon glyphicon-eye-open" style="cursor:pointer"></span>
+									</button>
+									<!-- /ko -->
+									<button type="button" class="btn btn-info btn-xs" title="Remove rights" 
+							  		data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'NONE')" >   
+							    	<span class="glyphicon glyphicon-trash" style="cursor:pointer"></span>
+									</button>
+									</div>
+								</img>
 							<!-- /ko -->
 						    <!-- ko else -->
 								<img src="images/user.png" class="img-circle img-thumbnail img-responsive userPhoto" 
 								data-bind = "attr: {id: 'image_' + userId()}, 
-								css: { readBorder: accessRights()=='READ', writeBorder: accessRights()=='WRITE', ownBorder: accessRights()=='OWN'}"/>
+								css: { readBorder: accessRights()=='READ', writeBorder: accessRights()=='WRITE'}">
+								<div class="btn-group rightsIcon" role="group" style="display:none" 
+									data-bind="attr: {id: 'rightsIcons_'+userId()}" area-label="Change Rights">
+									<!-- ko if: accessRights() == 'READ' -->
+									<button type="button" class="btn btn-success btn-xs" title="Edit"
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'WRITE')">   
+									<span class="glyphicon glyphicon-edit" style="cursor:pointer"></span>
+									</button>
+									<!-- /ko -->
+									<!-- ko if: accessRights() == 'WRITE' -->
+									<button type="button" class="btn btn-primary btn-xs" title="Show"							
+									data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'READ')">				
+									<span class="glyphicon glyphicon-eye-open" style="cursor:pointer"></span>
+									</button>
+									<!-- /ko -->
+									<button type="button" class="btn btn-info btn-xs" title="Remove rights" 
+							  		data-bind="click: ko.contextFor(mycollections).$data.changeRights.bind($data, 'NONE')" >   
+							    	<span class="glyphicon glyphicon-trash" style="cursor:pointer"></span>
+									</button>
+									</div>
+								</img>
 						    <!-- /ko -->
 						 </div>	
 						 <span class="overflowText" data-bind="text: username()"></span>

@@ -192,7 +192,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		});
 	};
 
-	self.getUserCollections = function () {
+	self.getUserCollections = function (isExhibition) {
 		//filter = [{username:'maria.ralli',access:'OWN'}];
 		return $.ajax({
 			type: "GET",
@@ -200,7 +200,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=false&totalHits=true"
+			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition="+isExhibition+"&totalHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -214,25 +214,27 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		});
 	};
 	
-	self.getUserExhibitions = function() {
+	
+	self.getAllUserCollections = function () {
+		//filter = [{username:'maria.ralli',access:'OWN'}];
 		return $.ajax({
-			type        : "GET",
-			contentType : "application/json",
-			dataType    : "json",
-			url         : "/collection/list",
-			processData : false,
-			data        : "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=true"}).done(
-			function(data) {
+			type: "GET",
+			contentType: "application/json",
+			dataType: "json",
+			url: "/collection/list",
+			processData: false,
+			data: "creator="+self.currentUser.username()+"&offset=0&count=1000&isExhibition=false&totalHits=true"
+		}).done(
+			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
-				/*if (sessionStorage.getItem('User') !== null) 
+				/*if (sessionStorage.getItem('User') !== null)
 					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
-				  else if (localStorage.getItem('User') !== null) 
+				  else if (localStorage.getItem('User') !== null)
 					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
 				return data;
-			}).fail(function(request, status, error) {
-				//var err = JSON.parse(request.responseText);
-			}
-		);
+			}).fail(function (request, status, error) {
+			//var err = JSON.parse(request.responseText);
+		});
 	};
 
 	self.isLiked = function (id) {
@@ -246,6 +248,8 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			success: function () {
 				self.clearSession();
 				window.location.href = "/assets/index.html";
+				//update custom spaces 
+				window.opener.location.reload();
 			}
 		});
 	};
@@ -299,8 +303,8 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		closePopup: closePopup,
 		logout: logout,
 		getUserCollections: getUserCollections,
+		getAllUserCollections: getAllUserCollections,
 		getPublicCollections: getPublicCollections,
-		getUserExhibitions: getUserExhibitions,
 		getEditableCollections: getEditableCollections,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,

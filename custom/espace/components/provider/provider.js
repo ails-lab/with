@@ -217,7 +217,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				url: "/collection/list",
 				processData: false,
 				//TODO:add parent project filter
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"OWN"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:window.pname,rights:"READ"}]),
 			}).success (function(){
 			});
 		};

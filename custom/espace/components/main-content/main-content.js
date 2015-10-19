@@ -192,6 +192,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 		  var promiseCollections = self.getSpaceCollections();
 		  $.when(promiseCollections).done(function(responseCollections) {
+			        self.totalCollections(responseCollections.totalCollections);
+			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 			});
 		  var promise2 = self.getFeaturedExhibition();
@@ -214,7 +216,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:window.pname,rights:"READ"}]),
 			}).success (function(){
 			});
 		};
@@ -224,7 +226,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			/*call must change to get featured exhibition for space*/
 	        return $.ajax({
 	            type: "GET",
-	            url: "/collection/5614f353569e48389d111281",
+	            url: "/collection/5624a338569e4959735d8558",
 	            success: function () {
 
 	            }
@@ -243,7 +245,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
+					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:window.pname,rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
