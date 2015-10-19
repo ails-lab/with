@@ -41,12 +41,20 @@
             <li class="dropdown-submenu">
               <a tabindex="-1">Organizations</a>
               <ul class="dropdown-menu">
+              <!-- ko foreach: organizations -->
+                <li><a data-bind="attr: { href: '#organization/' + id }, text: friendlyName"></a></li>
+              <!-- /ko -->
+                <li class="divider"></li>
                 <li><a href="#" onclick="newOrganization(); return false;">New Organization...</a></li>
               </ul>
             </li>
             <li class="dropdown-submenu">
               <a tabindex="0">Projects</a>
               <ul class="dropdown-menu">
+              <!-- ko foreach: projects -->
+                <li><a data-bind="attr: { href: '#project/' + id }, text: friendlyName"></a></li>
+              <!-- /ko -->
+                <li class="divider"></li>
                 <li><a href="#" onclick="newProject(); return false;">New Project...</a></li>
               </ul>
             </li>

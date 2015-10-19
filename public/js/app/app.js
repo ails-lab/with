@@ -15,12 +15,15 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
 		"favorites": ko.observableArray(),
-		"favoritesId": ko.observable()
+		"favoritesId": ko.observable(),
+		"usergroups": ko.observableArray(),
+		"organizations": ko.observableArray(),
+		"projects": ko.observableArray()
 	};
 	isLogged = ko.observable(false);
 
 	loadUser = function (data, remember, loadCollections) {
-		self.currentUser._id(data._id.$oid);
+		self.currentUser._id(data.dbid);
 		self.currentUser.email(data.email);
 		self.currentUser.username(data.username);
 		self.currentUser.firstName(data.firstName);
@@ -33,6 +36,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
 		self.currentUser.favoritesId(data.favoritesId);
+		self.currentUser.usergroups(data.usergroups);
+		self.currentUser.organizations(data.organizations);
+		self.currentUser.projects(data.projects);
 
 		self.loadFavorites();
 
@@ -59,9 +65,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
-				for(i in data){
-					if($("#"+data[i])){
-						$("#"+data[i]).addClass('active');
+				for(var i in data) {
+					if($("#" + data[i])){
+						$("#" + data[i]).addClass('active');
 					}
 				}
 			})
@@ -213,7 +219,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			//var err = JSON.parse(request.responseText);
 		});
 	};
-	
+
 	self.getUserExhibitions = function() {
 		return $.ajax({
 			type        : "GET",
@@ -224,9 +230,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			data        : "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=true"}).done(
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
-				/*if (sessionStorage.getItem('User') !== null) 
+				/*if (sessionStorage.getItem('User') !== null)
 					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
-				  else if (localStorage.getItem('User') !== null) 
+				  else if (localStorage.getItem('User') !== null)
 					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
 				return data;
 			}).fail(function(request, status, error) {
