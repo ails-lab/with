@@ -192,6 +192,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 		  var promiseCollections = self.getSpaceCollections();
 		  $.when(promiseCollections).done(function(responseCollections) {
+			        self.totalCollections(responseCollections.totalCollections);
+			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 			});
 		  var promise2 = self.getFeaturedExhibition();
