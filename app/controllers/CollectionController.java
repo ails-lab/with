@@ -921,12 +921,14 @@ public class CollectionController extends Controller {
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {
 				recordsList.add(Json.toJson(e.getContent()));
-			} else if (!format.equals("default")) {
-				recordsList.add(e.getContent().get(format));
-			} else {
+			} 
+			else if (format.equals("default")) {
 				e.getContent().clear();
 				recordsList.add(Json.toJson(e));
 			}
+			else if (e.getContent().containsKey(format)) {
+				recordsList.add(e.getContent().get(format));
+			}		
 		}
 		result.put("itemCount", collection.getItemCount());
 		result.put("records", recordsList);
