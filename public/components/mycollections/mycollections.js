@@ -94,14 +94,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 
-	function getCollectionsSharedWithMe() {
+	function getCollectionsSharedWithMe(isExhibition) {
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "isExhibition=false&offset=0&count=20"}).done(
+			data        : "isExhibition="+isExhibition+"&offset=0&count=20"}).done(
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
@@ -154,6 +154,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
     	self.myUsername = ko.observable(app.currentUser.username());
     	self.moreCollectionData=ko.observable(true);
+    	self.sharedCollections = ko.mapping.fromJS([], mapping);
         if (self.myUsername() !== undefined && self.myUsername() !== null) {
         	if (self.showsExhibitions) {
 				mapping.title = {
@@ -165,18 +166,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						return ko.observable('Add Title');
 					}
 				};
-				var promise = app.getUserExhibitions();
-				$.when(promise).done(function(data) {
-					ko.mapping.fromJS(data.collectionsOrExhibitions, mapping, self.myCollections);
+				var promise = app.getUserCollections(true);
+				var promiseShared = getCollectionsSharedWithMe(true);
+				$.when(promise,promiseShared).done(function(data,data2) {
+					//convert rights map to array
+					ko.mapping.fromJS(convertToRightsMap(data[0].collectionsOrExhibitions), mapping, self.myCollections);
+					ko.mapping.fromJS(convertToRightsMap(data2[0].collectionsOrExhibitions), mapping, self.sharedCollections);
+					self.loading(false);
 				});
-				self.sharedCollections = ko.mapping.fromJS([], mapping);
 			}
 			else {
-				var promise = app.getUserCollections();
+				var promise = app.getUserCollections(false);
 				self.loading(true);
-				self.sharedCollections = ko.mapping.fromJS([], mapping);
-				var promiseShared = getCollectionsSharedWithMe();
-				
+				var promiseShared = getCollectionsSharedWithMe(false);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					//convert rights map to array
 					ko.mapping.fromJS(convertToRightsMap(data[0].collectionsOrExhibitions), mapping, self.myCollections);
@@ -295,7 +297,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		
 
-		self.moreShared=function(){
+		self.moreShared=function(isExhibition){
 			
 			if (self.loading === true) {
 				setTimeout(self.moreShared(), 300);
@@ -307,7 +309,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.loading(true);
 					var offset = self.sharedCollections().length;
 					$.ajax({
-						"url": "/collection/listShared?offset="+offset+"&count=20&isExhibition=false",
+						"url": "/collection/listShared?offset="+offset+"&count=20&isExhibition="+isExhibition,
 						"method": "get",
 						"contentType": "application/json",
 						"success": function (data) {
@@ -330,7 +332,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 		
 
-		self.moreCollections=function(){
+		self.moreCollections=function(isExhibition){
 			
 			if (self.loading === true) {
 				setTimeout(self.moreCollections(), 300);
@@ -342,7 +344,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.loading(true);
 					var offset = self.myCollections().length;
 					$.ajax({
-						"url": "/collection/list?creator="+app.currentUser.username()+"&offset="+offset+"&count=20&isExhibition=false&totalHits=false",
+						"url": "/collection/list?creator="+app.currentUser.username()+"&offset="+offset+"&count=20&isExhibition="+isExhibition+"&totalHits=false",
 						"method": "get",
 						"contentType": "application/json",
 						"success": function (data) {

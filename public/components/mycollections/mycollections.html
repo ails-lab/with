@@ -7,13 +7,25 @@
 			<div class="col-lg-12">
 				<!-- ko if: showsExhibitions -->
 				<span class="withmain">
-				<h2>My exhibitions</h2></span>
-				<button type="button" class="btn btn-primary btn-sm" data-bind="click: createExhibition">New Exhibition</button>
+				<span class="collectiontab active">
+					<h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My exhibitions</a></h2>
+				</span> | 
+				<span class="collectiontab">
+					<h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Exhibitions shared with me</a></h2>
+				</span>
+				<div><button type="button" class="btn btn-primary btn-sm" data-bind="click: createExhibition">New Exhibition</button></div>
+				</span>
 				<!-- /ko -->
 				<!-- ko else -->
 				<span class="withmain">
-				<span class="collectiontab active"><h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My collections</a></h2></span> | <span class="collectiontab"><h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Collections shared with me</a></h2></span>
-				<div><button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button></div></span>
+				<span class="collectiontab active">
+					<h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My collections</a></h2>
+				</span> | 
+				<span class="collectiontab">
+					<h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Collections shared with me</a></h2>
+				</span>
+				<div><button type="button" class="btn btn-primary btn-sm" data-bind="click: createCollection">New Collection</button></div>
+				</span>
 				<!-- /ko -->
 				<div id="mycollections">
 				 <!-- collections listed here -->
@@ -91,7 +103,14 @@
 				 
 			</div>
 			<div class="col-lg-12" id="sharedtab" style="display:none">
-				 <span class="withmain"><h2>Collections shared with me</h2></span>
+				 <span class="withmain">
+				<!-- ko if: showsExhibitions --> 
+				 <h2>Exhibitions shared with me</h2>
+				  <!-- /ko -->
+				 <!-- ko else -->
+				 <h2>Collections shared with me</h2>
+				 <!-- /ko -->
+				 </span>
 				 <div id="sharedcollections">
 				 <!-- collections listed here -->
 				 <!-- ko foreach: sharedCollections() -->
@@ -165,5 +184,3 @@
 		<!-- /ko -->
 		
 </div>
-
-
