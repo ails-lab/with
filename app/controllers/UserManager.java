@@ -412,19 +412,34 @@ public class UserManager extends Controller {
 						DB.getCollectionDAO().getByOwnerAndTitle(new ObjectId(id), "_favorites").getDbId().toString());
 				String image = UserAndGroupManager.getImageBase64(user);
 				JsonNode groupIds = result.get("userGroupsIds");
-				ArrayNode groups = Json.newObject().arrayNode();
+				ArrayNode userGroups = Json.newObject().arrayNode();
+				ArrayNode organizations = Json.newObject().arrayNode();
+				ArrayNode projects = Json.newObject().arrayNode();
 				String groupId;
 				for (int i = 0; i < groupIds.size(); i++) {
 					groupId = groupIds.get(i).asText();
 					UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 					ObjectNode groupInfo = Json.newObject();
 					groupInfo.put("id", groupId);
-					groupInfo.put("name", group.getUsername());
+					groupInfo.put("username", group.getUsername());
+					groupInfo.put("friendlyName", group.getFriendlyName());
 					String type = group.getClass().toString();
-					groupInfo.put("type", type.substring(type.lastIndexOf(".") + 1));
-					groups.add(groupInfo);
+					type = type.substring(type.lastIndexOf(".") + 1);
+					switch (type) {
+					case "UserGroup":
+						userGroups.add(groupInfo);
+						break;
+					case "Organization":
+						organizations.add(groupInfo);
+						break;
+					case "Project":
+						projects.add(groupInfo);
+						break;
+					}
 				}
-				result.put("groups", groups);
+				result.put("UserGroups", userGroups);
+				result.put("Organizations", organizations);
+				result.put("Projects", projects);
 				if (image != null) {
 					result.put("image", image);
 					return ok(result);
@@ -435,7 +450,7 @@ public class UserManager extends Controller {
 				return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
-			return internalServerError(e.getMessage());
+			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
 		}
 	}
 
