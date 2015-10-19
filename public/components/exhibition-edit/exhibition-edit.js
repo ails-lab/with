@@ -150,7 +150,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
         self.userSavedItemsArray = ko.observableArray([]);//holds the selected collections items
         self.collectionItemsArray = ko.observableArray([]);//holds the exhibitions items
         var collections = [];
-        var promise = app.getUserCollections();
+        var promise = app.getAllUserCollections();
         self.myCollections = ko.observableArray([]); //holds all the collections
         $.when(promise).done(function (data) {
             var collections = [];
