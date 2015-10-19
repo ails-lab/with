@@ -17,6 +17,8 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -303,27 +305,38 @@ public class GroupManager extends Controller {
 		}
 		return result;
 	}
+	
+	public static Set<UserGroup> recursiveDescendants(Set<UserGroup> list, GroupType type) {
+		Set<UserGroup> descendantGroups = new HashSet<UserGroup>();
+		for (UserGroup group: list) {
+			List<UserGroup> descendants = DB.getUserGroupDAO().findByParent(group.getDbId(), type);
+			if ( descendants != null) {	
+				Set<UserGroup> descendantsSet = recursiveDescendants(new HashSet<UserGroup>(descendants), type);
+				descendantGroups.addAll(descendantsSet);
+			}
+			descendantGroups.add(group);
+		}
+		return descendantGroups;
+	}
 
 	// TODO check user rights for these groups
 	public static Result getDescendantGroups(String groupId, String groupType,
 			boolean direct, boolean collectionHits) {
 		List<UserGroup> childrenGroups;
-		List<UserGroup> groups;
-		UserGroup group;
-
+		List<UserGroup> descendantGroups;
 		ObjectId parentId = new ObjectId(groupId);
 		GroupType type = GroupType.valueOf(capitalizeFirst(groupType));
-
 		childrenGroups = DB.getUserGroupDAO().findByParent(parentId, type);
-		if (direct) {
-			return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId), collectionHits));
+		if (childrenGroups != null) {
+			if (direct) {
+				return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId), collectionHits));
+			}
+			else {
+				descendantGroups = new ArrayList<UserGroup>(recursiveDescendants(new HashSet<UserGroup>(childrenGroups), type));
+				return ok(groupsAsJSON(descendantGroups, new ObjectId(groupId), collectionHits));
+			}	
 		}
-		groups = childrenGroups;
-		while (!childrenGroups.isEmpty()) {
-			group = childrenGroups.remove(0);
-			childrenGroups.addAll(DB.getUserGroupDAO().findByParent(
-					group.getDbId(), type));
-		}
-		return ok(groupsAsJSON(groups, new ObjectId(groupId), collectionHits));
+		else 
+			return ok();
 	}
 }
