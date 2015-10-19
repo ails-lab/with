@@ -184,6 +184,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
+		self.showAPICalls = ko.observable(false);
 
 		self.loadCollection = function (id) {
 			self.loading(true);
@@ -386,6 +387,26 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 
 			self.masonryImagesReveal($newitems, $container);
 		};
+		
+		 self.getAPIUrlCollection = function() {
+				var url   = window.location.href.split("assets")[0];
+				var collectionCall = url + "collection/" + self.id();
+				return collectionCall;
+		}
+		 
+		 self.getAPIUrlRecords = function() {
+				var url   = window.location.href.split("assets")[0];
+				var recordsCall = url + "collection/" + self.id()+"/list?start=0&count=20&format=default";
+				return recordsCall;
+		}
+		 
+		self.presentAPICalls = function() {
+			 if (self.showAPICalls())
+				 self.showAPICalls(false);
+			 else
+				 self.showAPICalls(true);
+		}
+
 	}
 
 	return {
