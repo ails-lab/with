@@ -1021,7 +1021,7 @@ body [role='main'] .featured .exhibition .thumbnails .right {
   position: absolute;
   z-index: 2;
   right: 50px;
-  bottom: 50px;
+  top: 50px;
 }
 body [role='main'] .featured .exhibition .thumbnails .right .title {
   top: 230px;
@@ -3104,9 +3104,10 @@ body[data-page='home'] header .main .search li a {
     height: 430px;
   }
   body [role='main'] .featured .exhibition .info {
-    width: 45%;
+    width: 55%;
     float: left;
     padding: 45px 55px 0px 55px;
+    border-left: 80px solid #5D727B;
   }
   body [role='main'] .featured .exhibition .info h1 {
     font-size: 1.8em;
@@ -3271,11 +3272,11 @@ body[data-page='home'] header .main .search li a {
   }
   body [role='main'] .featured .exhibition .thumbnails .left .title {
     bottom: 230px;
-    right: 0px;
+    right: 40px;
   }
   body [role='main'] .featured .exhibition .thumbnails .right .title {
     top: 230px;
-    left: 0px;
+    left: 40px;
   }
   body [role='main'] .about .wrap {
     padding: 40px 175px 40px 175px;
