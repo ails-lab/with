@@ -214,6 +214,30 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		});
 	};
 	
+	
+	self.getAllUserCollections = function () {
+		//filter = [{username:'maria.ralli',access:'OWN'}];
+		return $.ajax({
+			type: "GET",
+			contentType: "application/json",
+			dataType: "json",
+			url: "/collection/list",
+			processData: false,
+			data: "creator="+self.currentUser.username()+"&offset=0&count=1000&isExhibition=false&totalHits=true"
+		}).done(
+			function (data) {
+				// console.log("User collections " + JSON.stringify(data));
+				/*if (sessionStorage.getItem('User') !== null)
+					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
+				  else if (localStorage.getItem('User') !== null)
+					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
+				return data;
+			}).fail(function (request, status, error) {
+			//var err = JSON.parse(request.responseText);
+		});
+	};
+	
+	
 	self.getUserExhibitions = function() {
 		return $.ajax({
 			type        : "GET",
@@ -246,6 +270,8 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			success: function () {
 				self.clearSession();
 				window.location.href = "/assets/index.html";
+				//update custom spaces 
+				window.opener.location.reload();
 			}
 		});
 	};
@@ -299,6 +325,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		closePopup: closePopup,
 		logout: logout,
 		getUserCollections: getUserCollections,
+		getAllUserCollections: getAllUserCollections,
 		getPublicCollections: getPublicCollections,
 		getUserExhibitions: getUserExhibitions,
 		getEditableCollections: getEditableCollections,

@@ -11,12 +11,12 @@
 				<div class="container">
 					<div class="row">
 						<div class="col-lg-5 col-lg-offset-1">
-							<button class="facebook huge" type="button" data-bind="click: function() { fbLogin(); }">
+							<button class="facebook huge" type="button" data-bind="click: function() { fbLogin(); window.opener.location.reload(); }">
 								<i class="facebook_huge"></i>
 								<p>Facebook</p>
 							</button>
 
-							<button class="google huge" type="button" data-bind="click: function() { googleLogin(); }">
+							<button class="google huge" type="button" data-bind="click: function() { googleLogin(); window.opener.location.reload();}">
 								<i class="google_huge"></i>
 								<p>Google</p>
 							</button>
@@ -48,7 +48,7 @@
 							<div class="well well-sm">
 								<div class="row">
 									<div class="col-md-2 col-md-offset-10 col-sm-4 col-sm-offset-4 col-xs-12">
-										<a class="btn btn-primary btn-block" data-bind="click: function() { emailLogin(); }">Login</a>
+										<a class="btn btn-primary btn-block" data-bind="click: function() { emailLogin(); window.opener.location.reload();}">Login</a>
 									</div>
 								</div>
 							</div>
