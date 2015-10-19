@@ -87,12 +87,10 @@ server.pid
 *.iml
 *.eml
 /dist/
-.cache
+.cache*
 public/.idea/misc.xml
 public/.idea/.name
 public/.idea/vcs.xml
 public/.idea/modules.xml
 public/.idea/workspace.xml
 /node_modules/
-/.cache-main
-/.cache-tests
