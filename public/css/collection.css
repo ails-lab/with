@@ -167,9 +167,9 @@ display: none;
 
 .rightsIcon {
 	position: absolute;
-	top: 25px;
-    left: 34px; 
-    padding: 0px;
+	top: 50%;
+   left: 50%;
+   transform: translate(-50%,-50%); 
     z-index:99;
 }
 
