@@ -199,7 +199,6 @@ public class MediaController extends Controller {
 								singleRes.put("thumbnailUrl", "/media/"
 										+ thumbMedia.getDbId().toString());
 								
-							//comment leme	
 							
 							} else {
 								// Resize image and put new width, height and
