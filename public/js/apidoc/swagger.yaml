@@ -22,14 +22,25 @@ paths:
             properties:
               searchTerm:
                 type: string
+                default: "zeus"
               page:
                 type: integer
+                default: 1
               pageSize:
                 type: integer
+                default: 10
               source:
+                description: Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.
                 type: array
                 items:
                   type: string
+                  enum:
+                    - Europeana
+                    - DPLA
+                    - DigitalNZ
+                    - Rijksmuseum
+                    - WITHin
+                    - The British Library
       responses:
         '200':
           description: OK
@@ -58,25 +69,39 @@ paths:
             properties:
               searchTerm:
                 type: string
+                default: "zeus"
               page:
                 type: integer
+                default: 1
               pageSize:
                 type: integer
+                default: 10
               source:
+                description: Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.
                 type: array
                 items:
                   type: string
+                  enum:
+                    - Europeana
+                    - DPLA
+                    - DigitalNZ
+                    - Rijksmuseum
+                    - WITHin
+                    - The British Library
               filters:
+                description: To find information about filters we suggest you check the inspector console of a web browser while performing a faceted search from the frontend.
                 type: array
                 items:
                   type: object
                   properties:
                     filterID:
                       type: string
+                      default: type
                     values:
                       type: array
                       items:
                         type: string
+                        default: image
       responses:
         '200':
           description: OK
@@ -128,16 +153,16 @@ paths:
                 description: Values are "READ", "WRITE", "OWN".
         - name: directlyAccessedByGroupName
           in: query
-          description: This field also works like ```directlyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users.
+          description: This field also works like ```directlyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users. For testing purposes please use this as input ```[{group1:username1,rights:"READ"},{group2:username2,rights2:"WRITE"}]```
           type: array
           items:
-            type: object
+            type: string
             properties:
               groupname:
                 type: string
               rights:
                 type: string
-                description: Values are ```"READ", "WRITE", "OWN"```.
+                description: Values are "READ", "WRITE", "OWN".
         - name: recursivelyAccessedByGroupName
           in: query
           description: See ```recursivelyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users.
@@ -154,12 +179,19 @@ paths:
           in: query
           description: If true returns only exhibitions, if false only collections and if unspecified returns both.
           type: boolean
+        - name: collectionHits
+          in: query
+          type: boolean
+          description: If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).
+          default: false
         - name: offset
           in: query
           description: Offset
           type: integer
+          default: 0
         - name: count
           in: query
+          default: 10
           description: Count (default 10)
           type: integer          
       summary: Get a list of collections shared with the user.
@@ -214,7 +246,7 @@ paths:
                 description: Values are "READ", "WRITE", "OWN".
         - name: directlyAccessedByGroupName
           in: query
-          description: This field also works like '''directlyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users.
+          description: This field also works like '''directlyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users. For testing purposes please use this as input ```[{group1:username1,rights:"READ"},{group2:username2,rights2:"WRITE"}]```
           type: array
           items:
             type: object
@@ -248,12 +280,20 @@ paths:
           in: query
           description: If true returns only exhibitions, if false only collections and if unspecified returns both.
           type: boolean
+          
+        - name: collectionHits
+          in: query
+          type: boolean
+          description: If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).
+          default: false
         - name: offset
           in: query
+          default: 0
           description: Offset
           type: integer
         - name: count
           in: query
+          default: 10
           description: Count (default 10)
           type: integer
 
@@ -405,6 +445,7 @@ paths:
     parameters:
       - name: groupId
         in: path
+        required: true
         description: Id of a group.
         type: string
     put:
@@ -487,6 +528,7 @@ paths:
     parameters:
       - name: groupId
         in: path
+        required: true
         description: Id of a group
         type: string
     put:
@@ -532,6 +574,7 @@ paths:
     parameters:
       - name: groupId
         in: path
+        required: true
         description: Id of a group
         type: string
     put:
@@ -572,6 +615,7 @@ paths:
     parameters:
       - name: groupId
         in: path
+        required: true
         description: Id of a group.
         type: string
     get:
@@ -595,6 +639,7 @@ paths:
     parameters:
       - name: groupId
         in: path
+        required: true
         description: Id of a group.
         type: string
     get:
@@ -618,6 +663,7 @@ paths:
     parameters:
       - name: groupId
         in: path
+        required: true
         description: Id of a group.
         type: string
     get:
@@ -702,6 +748,7 @@ paths:
     parameters:
       - name: collectionId
         in: path
+        required: true
         description: Id of the collection or exhibition 
         type: string
     post:
@@ -744,6 +791,7 @@ paths:
     parameters:
       - name: collectionId
         in: path
+        required: true
         description: Id of the collection or exhibition from which to remove the record
         type: string
     delete:
@@ -783,6 +831,7 @@ paths:
     parameters:
       - name: collectionId
         in: path
+        required: true
         description: Id of the collection
         type: string
     get:
@@ -796,14 +845,17 @@ paths:
           in: query
           description: offset
           type: integer
+          default: 0
         - name: count
           in: query
           description: count (default 10)
           type: integer
+          default: 10
         - name: format
           in: query
           description: 'One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
           type: string
+          default: "all"
           
       responses:
         '200':
@@ -837,6 +889,7 @@ paths:
       - name: collectionId
         in: path
         description: Internal id of the collection or exhibition
+        required: true
         type: string
     get:
       summary: Retrieve collection metadata.
@@ -1126,40 +1179,6 @@ paths:
               message:
                 type: string
 
-  /exhibition/list:
-    get:
-      tags:
-        - Exhibition
-      summary: Get all your exhibitons.
-      description: Returns an array of collection JSON objects, for all exhibitions owned by the currently logged in user. See ```/user/login```.
-      parameters:
-        - name: offset
-          description: Offset (default is 0)
-          in: query
-          type: integer
-        - name: count
-          description: Number of results (default is 10)
-          in: query
-          type: integer
-      responses:
-        '200':
-          description: OK
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/Collection'
-        '403':
-          description: Forbidden (no user specified)
-          schema:
-            properties:
-              error:
-                type: string
-        '500':
-          description: Interal Server Error (exception error)
-          schema:
-            properties:
-              error:
-                type: string
 
   /user/register:
     post:
@@ -1207,6 +1226,7 @@ paths:
           description: Bad Request (json object describes all errors)
           schema:
             type: object
+            
   /user/login:
     post:
       tags:
@@ -1248,6 +1268,7 @@ paths:
       responses:
         '200':
           description: OK
+          
   /user/emailAvailable:
     get:
       tags:
@@ -1384,7 +1405,7 @@ paths:
               email:
                 type: string
 
-        '403':
+        '400':
           description: Bad Request (no user logged in, email already sent in past, email exception error)
           schema:
             properties:
@@ -1418,7 +1439,7 @@ paths:
             properties:
               photoId:
                 type: string
-        '403':
+        '400':
           description: Bad Request (user or group do not exist)
           schema:
             properties:
@@ -1435,6 +1456,7 @@ paths:
           required: true
           description: user or group name or email
           type: string
+          default: "ntua"
         - name: collectionId
           in: query
           required: false
@@ -1455,8 +1477,8 @@ paths:
           description: OK (found group)
           schema:
             $ref: '#/definitions/Group'
-
-        '403':
+        
+        '400':
           description: Bad Request (no user or group found)
           schema:
             properties:
@@ -1465,34 +1487,6 @@ paths:
 
 
 
-  /group/findByGroupName:
-    get:
-      parameters:
-        - name: name
-          in: query
-          required: true
-          description: The group name to search
-          type: string
-        - name: collectionId
-          in: query
-          required: false
-          description: A collection id to check for access rights
-          type: string
-      tags:
-        - Group
-      summary: Find a group by name.
-      description: Retrieves the specified group's attributes. This call can be applied to all group types, ie organizations and projects. An optional functionality of this call is to check what access rights a group has to a collection. Just use the ```collectionId``` parameter. The access rights will be returned as an extra field named ```accessRights``` in the group json response.
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/Group'
-        '500':
-          description: Internal Server Error (cannot read database)
-          schema:
-            properties:
-              error:
-                type: string
 
 
   /user/listNames:
@@ -1503,11 +1497,13 @@ paths:
           required: true
           description: Optional prefix of user or group name
           type: string
+          default: "ntua"
         - name: onlyParents
           in: query
           required: false
           description: If true filters results to groups and users that have other subgroups or subusers
           type: boolean
+          default: false
       tags:
         - User
         - Group
@@ -1528,6 +1524,226 @@ paths:
                   properties:
                     category:
                       type: string
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+
+  '/collection/55b74e5b569e1b44eeac72c0/list':
+    parameters:
+      - name: collectionId
+        in: path
+        required: true
+        description: Id of the collection
+        type: string
+    get:
+      description: This call makes a test request for all records of a sampled collection. Please see ```/api/advancedsearch``` for more. In this example the collection is called "street art".
+
+      summary: Retrieve all records in a collection.
+      tags:
+        - Test calls
+      parameters:
+        - name: start
+          in: query
+          description: offset
+          type: integer
+          default: 0
+        - name: count
+          in: query
+          description: count
+          type: integer
+          default: 10
+        - name: format
+          in: query
+          description: 'One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+          default: "all"
+          
+      responses:
+        '200':
+          description: OK (JSON contains the serialization specified)
+          schema:
+            type: object
+            properties:
+              itemCount:
+                type: integer
+              records:
+                type: array
+                items:
+                  $ref: '#/definitions/InternalRecord'
+
+        '403':
+          description: Forbiden (invalid collection id, no read access)
+          schema:
+            properties:
+              error:
+                type: string
+
+        '500':
+          description: Internal Server Error (cannot retrieve records from database)
+          schema:
+            properties:
+              error:
+                type: string
+
+  '/collection/55b74e5b569e1b44eeac72c0':
+    parameters:
+      - name: collectionId
+        in: path
+        description: Internal id of the collection or exhibition
+        required: true
+        type: string
+    get:
+      summary: Retrieve collection metadata.
+      description: This call makes a test request for the sample collection "street art" and returns all its metadata. Please see ```/collection/{collectionId}``` for more.
+      tags:
+        - Test calls
+      responses:
+        '200':
+          description: OK
+          schema:
+            properties:
+              collection:
+                $ref: '#/definitions/Collection'
+        '403':
+          description: Forbidden (no read-access)
+          schema:
+            properties:
+              error:
+                type: string
+        '500':
+          description: Internal Server Error(database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+      
+  '/group/5620e9f8e4b0857763602205':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      tags:
+        - Test calls
+      summary: Retrieve group info.
+      description: This call requests the stored metadata about the group "ntua". Please see ```/group/{groupId}``` for more. 
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+        '500':
+          description: Internal Server Error (cannot retrieve or save to database)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+        
+        
+  '/group/descendantGroups/561fa2f4e4b069ad810ab44b':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+          default: true
+      tags:
+        - Test calls
+      summary: Find subgroups of a group.
+      description: This call finds all the descendant groups of the "ntua" organization. Please see ```/group/descendantGroups/{groupId}``` for more. 
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+  '/group/descendantOrganizations/5620e9f8e4b0857763602205':
+    parameters:
+      - name: groupId
+        in: path
+        required: true
+        description: Id of a group.
+        type: string
+    get:
+      parameters:
+        - name: direct
+          in: query
+          description: Only direct descendants (default is true)
+          type: boolean
+          default: true
+      tags:
+        - Test calls
+      summary: Find subgroups of an organization.
+      description: This call finds all the descendant groups of the "espace" organization. Please see ```/group/descendantOrganizations/{groupId}``` for more. In the results you can see the "ntua" group of the previous examples.
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Group'
+
+
+        
+  '/record/55b74e8b569e1b44eeac72c3':
+    parameters:
+      - name: recordId
+        in: path
+        required: true
+        description: The id of the record
+        type: string
+    get:
+      parameters:
+        - name: format
+          in: query
+          description: 'The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.'
+          type: string
+      summary: Retrieve a record.
+      description: This is a test call of a record metadata. The sample record is called "Big walls - street art on Hereford Street". Note that by default the content object has the "JSON-DNZ" and "XML-DNZ" serializations. For more details please see ```/record/{recordId}```.
+      tags:
+        - Test calls
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/InternalRecord'
+        '500':
+          description: Internal Server Error (database error)
+          schema:
+            properties:
+              error:
+                type: string
+
+
+
         
 
 definitions:
@@ -1572,7 +1788,34 @@ definitions:
       favoritesId:
         type: string
 
-        
+  Group:
+    description: Describes a group, organization or project.
+    type: object
+    properties:
+      username:
+        type: string
+      about:
+        type: string
+      privateGroup:
+        type: boolean
+      dbId:
+        type: string
+      thumbnail:
+        type: string
+      adminIds:
+        type: array
+        items:
+          type: string
+      users:
+        type: array
+        items:
+          type: string
+      parentGroups:
+        type: array
+        items:
+          type: string
+
+  
   Collection:
     description: Collection metadata. The fields isExhibition and exhibition are only used in calls for exhibitions. 
     type: object
