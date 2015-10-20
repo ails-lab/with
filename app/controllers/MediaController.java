@@ -198,6 +198,8 @@ public class MediaController extends Controller {
 								DB.getMediaDAO().makePermanent(thumbMedia);
 								singleRes.put("thumbnailUrl", "/media/"
 										+ thumbMedia.getDbId().toString());
+								//comment
+								system.out.println("test");
 							
 							} else {
 								// Resize image and put new width, height and
