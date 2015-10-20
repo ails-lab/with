@@ -123,7 +123,7 @@ public class UserGroup extends UserOrGroup {
 		return creator;
 	}
 
-	public void setCreaator(ObjectId creator) {
+	public void setCreator(ObjectId creator) {
 		this.creator = creator;
 	}
 
