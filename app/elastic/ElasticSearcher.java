@@ -48,6 +48,9 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
 import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
@@ -132,6 +135,27 @@ public class ElasticSearcher {
 
 	public SearchResponse execute(QueryBuilder query, SearchOptions options, boolean scroll) {
 		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, scroll);
+		return search.execute().actionGet();
+	}
+
+	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options, boolean scroll) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, scroll);
+		TermsBuilder termAgg = AggregationBuilders.terms("types").field("type_all");
+		TermsBuilder providerAgg = AggregationBuilders.terms("providers").field("provider_all");
+		TermsBuilder dataProviderAgg = AggregationBuilders.terms("dataProviders").field("dataProvider_all");
+		TermsBuilder creatorAgg = AggregationBuilders.terms("creators").field("creator_all");
+		TermsBuilder rightsAgg = AggregationBuilders.terms("rights").field("rights_all");
+		TermsBuilder countryAgg = AggregationBuilders.terms("countries").field("country_all");
+		TermsBuilder yearAgg = AggregationBuilders.terms("years").field("year_all");
+		TermsBuilder reuseAgg = AggregationBuilders.terms("reusability").field("reusability_all");
+		search.addAggregation(termAgg)
+			  .addAggregation(providerAgg)
+			  .addAggregation(dataProviderAgg)
+			  .addAggregation(creatorAgg)
+			  .addAggregation(rightsAgg)
+			  .addAggregation(countryAgg)
+			  .addAggregation(yearAgg)
+			  .addAggregation(reuseAgg);
 		return search.execute().actionGet();
 	}
 
@@ -221,8 +245,8 @@ public class ElasticSearcher {
 			str.defaultField("_id");
 
 		bool.must(str);
-		return this.execute(bool, options, false);
-		//return this.executeWithFacets(bool, options);
+		//return this.execute(bool, options, false);
+		return this.executeWithAggs(bool, options, false);
 	}
 
 	public SearchResponse searchForSimilar(String terms, String provider, String exclude, SearchOptions elasticoptions) {
