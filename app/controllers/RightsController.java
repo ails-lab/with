@@ -102,7 +102,7 @@ public class RightsController extends Controller {
 			collection.getRights().putAll(rightsMap);
 		}
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
-			result.put("message", "Cannot store collection to database!");
+			result.put("error", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
 
@@ -113,4 +113,59 @@ public class RightsController extends Controller {
 		return ok(result);
 	}
 
+	public static Result approveCollection(String collectionId, String groupId) {
+
+		ObjectNode result = Json.newObject();
+		Collection collection;
+		UserGroup group;
+		ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		try {
+			group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			collection = DB.getCollectionDAO().get(new ObjectId(collectionId));
+		} catch (Exception e) {
+			log.error("Cannot retrieve object from database!", e);
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+		if (!group.getAdminIds().contains(userId)) {
+			result.put("error",
+					"Only the administrators of the group have the right to approve the shared collections");
+			return forbidden(result);
+		}
+		collection.removeFromModeration(new ObjectId(groupId));
+		if (DB.getCollectionDAO().makePermanent(collection) == null) {
+			result.put("error", "Cannot store collection to database!");
+			return internalServerError(result);
+		}
+		result.put("message", "OK");
+		return ok(result);
+	}
+
+	public static Result rejectCollection(String collectionId, String groupId) {
+
+		ObjectNode result = Json.newObject();
+		Collection collection;
+		UserGroup group;
+		ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		try {
+			group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			collection = DB.getCollectionDAO().get(new ObjectId(collectionId));
+		} catch (Exception e) {
+			log.error("Cannot retrieve object from database!", e);
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+		if (!group.getAdminIds().contains(userId)) {
+			result.put("error", "Only the administrators of the group have the right to reject the shared collections");
+			return forbidden(result);
+		}
+		collection.getRights().remove(new ObjectId(groupId));
+		collection.removeFromModeration(new ObjectId(groupId));
+		if (DB.getCollectionDAO().makePermanent(collection) == null) {
+			result.put("error", "Cannot store collection to database!");
+			return internalServerError(result);
+		}
+		result.put("message", "OK");
+		return ok(result);
+	}
 }
