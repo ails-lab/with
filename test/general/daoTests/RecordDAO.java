@@ -52,7 +52,7 @@ public class RecordDAO {
 		} catch(Exception e) {
 			System.out.println("Cannot save image (media object) to database!");
 		}
-		recordLink.setThumbnail(image.getDbId());
+		//recordLink.setThumbnail(image.getDbId());
 
 		Key<CollectionRecord> recId = DB.getCollectionRecordDAO().makePermanent(recordLink);
 		assertThat(recId).isNotNull()
@@ -86,7 +86,7 @@ public class RecordDAO {
 			} catch(Exception e) {
 				System.out.println("Cannot save image (media object) to database!");
 			}
-			record.setThumbnail(image.getDbId());
+			//record.setThumbnail(image.getDbId());
 
 			Key<CollectionRecord> recId = DB.getCollectionRecordDAO().makePermanent(record);
 			assertThat(recId).isNotNull();

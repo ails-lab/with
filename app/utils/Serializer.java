@@ -27,7 +27,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
+import model.Rights;
 import model.Rights.Access;
+
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -36,8 +38,11 @@ import play.libs.Json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class Serializer {
 	public static final ALogger log = Logger.of(Serializer.class);
@@ -62,6 +67,24 @@ public class Serializer {
 			jsonGen.writeString(sdf.format((Date)date));
 		}
 
+	}
+	
+	public static class RightsSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object rights, JsonGenerator jsonGen,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			boolean isPublic = ((Rights) rights).isPublic();
+			Map<String, Integer> rightsMap = new HashMap<String, Integer>();
+			for(Entry<ObjectId, Access> e: ((Map<ObjectId, Access>)rights).entrySet()) {
+				rightsMap.put(e.getKey().toString(), e.getValue().ordinal());
+			}
+		    ObjectMapper mapper = new ObjectMapper();
+			ObjectNode json = mapper.createObjectNode();
+			json.put("isPublic", isPublic);
+			json.put("rights", Json.toJson(rightsMap));	 
+			jsonGen.writeObject(json);
+		}
 	}
 
 	public static class CustomMapSerializer extends JsonSerializer<Object> {

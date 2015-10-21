@@ -259,7 +259,7 @@ public class CollectionDAO extends DAO<Collection> {
 	public User getCollectionOwner(ObjectId id) {
 		Query<Collection> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "ownerId");
-		return findOne(q).retrieveOwner();
+		return findOne(q).retrieveCreator();
 	}
 
 	public int removeById(ObjectId id) {

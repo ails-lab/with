@@ -55,10 +55,9 @@ public class SourceResponse {
 			it.comesFrom = r.getSource();
 			it.title = r.getTitle();
 			it.description = r.getDescription();
-			it.id = r.getSourceId();
 			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
-			it.url.fromSourceAPI = r.getSourceUrl();
+			it.url.fromSourceAPI = r.getRecordUrlInSource();
 			items.add(it);
 		}
 		this.items = items;

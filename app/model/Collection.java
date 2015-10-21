@@ -57,7 +57,7 @@ public class Collection {
 
 	@NotNull
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId ownerId;
+	private ObjectId creatorId;
 
 	@NotNull
 	@NotBlank
@@ -68,7 +68,7 @@ public class Collection {
 	private ObjectId thumbnail;
 
 	private int itemCount;
-	private boolean isPublic;
+	//private boolean isPublic;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
@@ -85,9 +85,9 @@ public class Collection {
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
-	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
-	@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
-	private final  Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
+	//@JsonSerialize(using = Serializer.CustomMapSerializer.class)
+	//@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
+	private final  Rights rights = new Rights();
 
 	public ObjectId getDbId() {
 		return this.dbId;
@@ -127,38 +127,38 @@ public class Collection {
 	}
 
 	public boolean getIsPublic() {
-		return isPublic;
+		return rights.isPublic();
 	}
 
 	public void setIsPublic(boolean isPublic) {
-		this.isPublic = isPublic;
+		rights.setPublic(isPublic);
 	}
 
-	public User retrieveOwner() {
-		return DB.getUserDAO().getById(this.ownerId, null);
+	public User retrieveCreator() {
+		return DB.getUserDAO().getById(this.creatorId, null);
 	}
 
-	public ObjectId getOwnerId() {
-		return this.ownerId;
+	public ObjectId getCreatorId() {
+		return this.creatorId;
 	}
 
 	@JsonProperty
-	public void setOwnerId(ObjectId ownerId) {
+	public void setCreatorId(ObjectId creatorId) {
 		// Set owner for first time
-		if (this.ownerId == null) {
-			this.ownerId = ownerId;
-			rights.put(this.ownerId, Access.OWN);
+		if (this.creatorId == null) {
+			this.creatorId = creatorId;
+			rights.put(this.creatorId, Access.OWN);
 			// Owner has changed
-		} else if (!this.ownerId.equals(ownerId)) {
+		} else if (!this.creatorId.equals(creatorId)) {
 			// Remove rights for old owner
-			rights.remove(this.ownerId, Access.OWN);
-			this.ownerId = null;
-			setOwnerId(ownerId);
+			rights.remove(this.creatorId, Access.OWN);
+			this.creatorId = null;
+			setCreatorId(creatorId);
 		}
 	}
 
 	public void setOwnerId(User owner) {
-		setOwnerId(owner.getDbId());
+		setCreatorId(owner.getDbId());
 	}
 
 	public List<CollectionRecord> getFirstEntries() {
@@ -225,12 +225,12 @@ public class Collection {
 		this.itemCount--;
 	}
 
-	public Map<ObjectId, Access> getRights() {
+	public Rights getRights() {
 		return rights;
 	}
 
 	@JsonIgnore
-	public void setRights(Map<ObjectId, Access> r) {}
+	public void setRights(Rights r) {}
 
 	public boolean getIsExhibition() {
 		return isExhibition;

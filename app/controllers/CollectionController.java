@@ -95,7 +95,7 @@ public class CollectionController extends Controller {
 				result.put("error", "User does not have read-access for the collection");
 				return forbidden(result);
 			}
-			collectionOwner = DB.getUserDAO().getById(c.getOwnerId(), null);
+			collectionOwner = DB.getUserDAO().getById(c.getCreatorId(), null);
 		} catch (Exception e) {
 			log.error("Cannot retrieve metadata for the specified collection or user!", e);
 			return internalServerError();
@@ -202,7 +202,7 @@ public class CollectionController extends Controller {
 			if (!violations.isEmpty()) {
 				return badRequest(result);
 			}
-			if ((DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getOwnerId(), newVersion.getTitle()) != null)
+			if ((DB.getCollectionDAO().getByOwnerAndTitle(newVersion.getCreatorId(), newVersion.getTitle()) != null)
 					&& (!oldTitle.equals(newVersion.getTitle()))) {
 				result.put("message", "Title already exists! Please specify another title.");
 				return internalServerError(result);
@@ -226,7 +226,7 @@ public class CollectionController extends Controller {
 
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
 			c.put("access", maxAccess.toString());
-			User user = DB.getUserDAO().getById(newVersion.getOwnerId(),
+			User user = DB.getUserDAO().getById(newVersion.getCreatorId(),
 					new ArrayList<String>(Arrays.asList("username")));
 			c.put("owner", user.getUsername());
 			// result.put("message", "Collection succesfully stored!");
@@ -264,7 +264,7 @@ public class CollectionController extends Controller {
 		Collection newCollection = Json.fromJson(json, Collection.class);
 		newCollection.setCreated(new Date());
 		newCollection.setLastModified(new Date());
-		newCollection.setOwnerId(new ObjectId(userId));
+		newCollection.setCreatorId(new ObjectId(userId));
 		if (json.has("belongsTo")) {
 			String organizationString = json.get("belongsTo").textValue();
 			ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
@@ -284,7 +284,7 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 
-		if (DB.getCollectionDAO().getByOwnerAndTitle(newCollection.getOwnerId(), newCollection.getTitle()) != null) {
+		if (DB.getCollectionDAO().getByOwnerAndTitle(newCollection.getCreatorId(), newCollection.getTitle()) != null) {
 			result.put("message", "Title already exists! Please specify another title.");
 			return internalServerError(result);
 		}
@@ -298,11 +298,11 @@ public class CollectionController extends Controller {
 		ElasticIndexer indexer = new ElasticIndexer(newCollection);
 		indexer.indexCollectionMetadata();
 
-		User owner = DB.getUserDAO().get(newCollection.getOwnerId());
+		User owner = DB.getUserDAO().get(newCollection.getCreatorId());
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newCollection);
 		c.put("access", Access.OWN.toString());
-		User user = DB.getUserDAO().getById(newCollection.getOwnerId(),
+		User user = DB.getUserDAO().getById(newCollection.getCreatorId(),
 				new ArrayList<String>(Arrays.asList("username")));
 		c.put("owner", user.getUsername());
 		// result.put("message", "Collection succesfully stored!");
@@ -380,7 +380,7 @@ public class CollectionController extends Controller {
 					maxAccess = Access.READ;
 				}
 				c.put("access", maxAccess.toString());
-				User user = DB.getUserDAO().getById(collection.getOwnerId(),
+				User user = DB.getUserDAO().getById(collection.getCreatorId(),
 						new ArrayList<String>(Arrays.asList("username")));
 				if (user != null) {
 					c.put("creator", user.getUsername());
@@ -669,12 +669,7 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		CollectionRecord record = Json.fromJson(json, CollectionRecord.class);
-		if (c.getIsPublic()) {
-			record.setIsPublic(true);
-		} else {
-			record.setIsPublic(false);
-		}
-		String sourceId = record.getSourceId();
+		String sourceId = record.getRecordIdInSource();
 		String source = record.getSource();
 		// get totalLikes
 		record.setTotalLikes(DB.getCollectionRecordDAO().getTotalLikes(record.getExternalId()));

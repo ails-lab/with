@@ -203,7 +203,7 @@ public class UserManager extends Controller {
 		DB.getUserDAO().makePermanent(user);
 		Collection fav = new Collection();
 		fav.setCreated(new Date());
-		fav.setOwnerId(user.getDbId());
+		fav.setCreatorId(user.getDbId());
 		fav.setTitle("_favorites");
 		DB.getCollectionDAO().makePermanent(fav);
 		ElasticIndexer indexer = new ElasticIndexer(fav);

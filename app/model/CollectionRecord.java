@@ -16,13 +16,18 @@
 
 package model;
 
+import java.time.Year;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
+
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
@@ -46,6 +51,16 @@ import db.DB;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class CollectionRecord {
+	
+	public static enum RecordType {
+		IMAGE, TEXT, VIDEO, AUDIO, UNKNOWN
+	}
+	
+	public class Provider {
+		public String provider;
+		public String recordId;
+		public String recordUrl;
+	}
 
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -53,28 +68,15 @@ public class CollectionRecord {
 
 	private String externalId;
 
-	private boolean isPublic;
-
-	// which backend provided this entry
-	// Europeana, DPLA, Mint
-	private String source;
-
-	// an optional URL for the thumbnail
-	private String thumbnailUrl;
-
 	@NotNull
 	@NotBlank
 	private String title;
 	private String description;
 
 	private String creator;
-
-	private String provider;
-
-	// the id in the source system
-	private String sourceId;
-	// a link to the record on its source
-	private String sourceUrl;
+	
+	// an optional URL for the thumbnail
+	private String thumbnailUrl;
 
 	// url to the provider web page for that record
 	private String isShownAt;
@@ -82,16 +84,14 @@ public class CollectionRecord {
 	// url to the (full resoultion) content - external on in the WITH db
 	private String isShownBy;
 
-	private String type;
+	//media type
+	private  RecordType type;
 
 	private int totalLikes;
-
+	
 	private String itemRights;
 
-	//@JsonDeserialize(using = Deserializer.ExhibitionRecordDeserializer.class)
 	private ExhibitionRecord exhibitionRecord;
-
-	// collection specific stuff...
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
@@ -99,6 +99,12 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
+	
+	private List<String> contributors;
+	
+	private List<Year> year;
+	
+	private List<Provider> provenanceChain = new ArrayList<Provider>();
 
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
@@ -111,13 +117,21 @@ public class CollectionRecord {
 	// "source format" -> ...
 	private final Map<String, String> content = new HashMap<String, String>();
 
+	
+	private String subject;
+	
 	// fixed-size, denormalization of Tags on this record
 	// When somebody adds a tag to a record, and the cap is not reached, it will
-	// go here
+	// go here.
 	// This might get out of sync on tag deletes, since a deleted tag from one
 	// user doesn't necessarily delete
 	// the tag from here. Tag cleaning has to be performed regularly.
 	private final Set<String> tags = new HashSet<String>();
+	
+	private final HashMap<String, Object> extraFields = new HashMap<String, Object>();
+	
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private final ObjectId annotation;
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -133,28 +147,6 @@ public class CollectionRecord {
 
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		if (source.toLowerCase().contains("europeana")) {
-			this.source = "Europeana";
-		} else if (source.equalsIgnoreCase("DPLA")) {
-			this.source = "DPLA";
-		} else if (source.equalsIgnoreCase("NLA")) {
-			this.source = "NLA";
-		} else if ((source.equalsIgnoreCase("DNZ"))
-				|| (source.equalsIgnoreCase("DigitalNZ"))) {
-			this.source = "DigitalNZ";
-		} else if ((source.equalsIgnoreCase("EFashion"))
-				|| (source.equalsIgnoreCase("EuropeanaFashion"))) {
-			this.source = "EuropeanaFashion";
-		} else {
-			this.source = source;
-		}
 	}
 
 	public String getThumbnailUrl() {
@@ -190,30 +182,6 @@ public class CollectionRecord {
 		this.creator = creator;
 	}
 
-	public String getProvider() {
-		return provider;
-	}
-
-	public void setProvider(String provider) {
-		this.provider = provider;
-	}
-
-	public String getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
-	public String getSourceUrl() {
-		return sourceUrl;
-	}
-
-	public void setSourceUrl(String sourceUrl) {
-		this.sourceUrl = sourceUrl;
-	}
-
 	public String getIsShownAt() {
 		return isShownAt;
 	}
@@ -230,11 +198,11 @@ public class CollectionRecord {
 		this.isShownBy = isShownBy;
 	}
 
-	public String getType() {
+	public RecordType getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+	public void setType(RecordType type) {
 		this.type = type;
 	}
 
@@ -296,14 +264,6 @@ public class CollectionRecord {
 		return tags;
 	}
 
-	public boolean getIsPublic() {
-		return isPublic;
-	}
-
-	public void setIsPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	public ExhibitionRecord getExhibitionRecord() {
 		return exhibitionRecord;
 	}
@@ -319,6 +279,67 @@ public class CollectionRecord {
 			return ((CollectionRecord) record).getDbId().equals(this.dbId);
 		else
 			return false;
+	}
+	
+	public List<Provider> getProvenanceChain() {
+		return provenanceChain;
+	}
+	
+	public void setProvenanceChain() {
+	}
+	
+	
+	public void addProvider(Provider provider, int position) {
+		provenanceChain.add(position, provider);
+	}
+	
+	public String getSource() {
+		if (!provenanceChain.isEmpty())
+			return provenanceChain.get(provenanceChain.size()-1).provider;
+		else 
+			return "";
+	}
+	
+	public String getRecordIdInSource() {
+		if (!provenanceChain.isEmpty())
+			return provenanceChain.get(provenanceChain.size()-1).recordId;
+		else 
+			return "";
+	}
+	
+	public String getRecordUrlInSource() {
+		if (!provenanceChain.isEmpty())
+			return provenanceChain.get(provenanceChain.size()-1).recordUrl;
+		else 
+			return "";
+	}
+
+	public List<String> getContributors() {
+		return contributors;
+	}
+
+	public void setContributors(List<String> contributors) {
+		this.contributors = contributors;
+	}
+
+	public List<Year> getYear() {
+		return year;
+	}
+
+	public void setYear(List<Year> year) {
+		this.year = year;
+	}
+
+	public HashMap<String, Object> getExtraFields() {
+		return extraFields;
+	}
+
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
 
 }

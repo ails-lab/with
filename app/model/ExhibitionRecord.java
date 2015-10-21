@@ -18,16 +18,16 @@ package model;
 
 public class ExhibitionRecord {
 
-	private String annotation;
+	private String extraDescription;
 	private String audioUrl;
 	private String videoUrl;
 
-	public String getAnnotation() {
-		return annotation;
+	public String getExtraDescription() {
+		return extraDescription;
 	}
 
-	public void setAnnotation(String annotation) {
-		this.annotation = annotation;
+	public void setExtraDescription(String extraDescription) {
+		this.extraDescription = extraDescription;
 	}
 
 	public String getAudioUrl() {
