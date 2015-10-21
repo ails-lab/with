@@ -16,18 +16,20 @@
 
 package controllers;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import model.Collection;
-import model.User;
-import model.Rights.Access;
-import model.UserGroup;
-
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
+import elastic.ElasticUpdater;
+import model.Collection;
+import model.Rights.Access;
+import model.UserGroup;
+import model.UserOrGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -35,11 +37,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-import elastic.ElasticUpdater;
 
 public class RightsController extends Controller {
 	public static final ALogger log = Logger.of(CollectionController.class);
@@ -53,15 +50,10 @@ public class RightsController extends Controller {
 	 *            the right to give ("none" to withdraw previously given right)
 	 * @param username
 	 *            the username of user to give rights to (or take away from)
-	 * @param email
-	 *            the email of the user
-	 * @param userId
-	 *            the Id of the user
 	 * @return OK or Error with JSON detailing the problem
 	 *
 	 */
-	public static Result setRights(String colId, String right, String username,
-			String email, String userId) {
+	public static Result setRights(String colId, String right, String username) {
 
 		ObjectNode result = Json.newObject();
 		Collection collection = null;
@@ -69,59 +61,111 @@ public class RightsController extends Controller {
 			collection = DB.getCollectionDAO().get(new ObjectId(colId));
 		} catch (Exception e) {
 			log.error("Cannot retrieve collection from database!", e);
-			result.put("message", "Cannot retrieve collection from database!");
+			result.put("error", "Cannot retrieve collection from database!");
 			return internalServerError(result);
 		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
-				.split(","));
-		if (!AccessManager.checkAccess(collection.getRights(), userIds,
-				Action.DELETE)) {
-			result.put("error",
-					"Sorry! You do not own this collection so you cannot set rights. "
-							+ "Please contact the owner of this collection");
+		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		if (!AccessManager.checkAccess(collection.getRights(), userIds, Action.DELETE)) {
+			result.put("error", "Sorry! You do not own this collection so you cannot set rights. "
+					+ "Please contact the owner of this collection");
 			return forbidden(result);
 		}
 		// set rights
 		// the receiver can be either a User or a UserGroup
 		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
-		if (userId == null) {
-			if (username != null) {
-			User user = DB.getUserDAO().getByUsername(username);
-			if (user !=null) {
-				userId = user.getDbId().toHexString();
+		UserOrGroup userOrGroup;
+		ObjectId userOrGroupId = null;
+		Access access = Access.valueOf(right);
+		if (username != null) {
+			if ((userOrGroup = DB.getUserDAO().getByUsername(username)) != null) {
+				userOrGroupId = userOrGroup.getDbId();
+			} else if ((userOrGroup = DB.getUserGroupDAO().getByName(username)) != null) {
+				UserGroup group = (UserGroup) userOrGroup;
+				userOrGroupId = group.getDbId();
+				userOrGroupId = userOrGroup.getDbId();
+				if (AccessManager.increasedAccess(collection.getRights().get(userOrGroupId), access)
+						&& !group.getUsers().contains(userId)) {
+					collection.addForModeration(userOrGroupId);
+				} else {
+					collection.removeFromModeration(userOrGroupId);
+				}
+			} else {
+				result.put("error", "No user or userGroup with given username");
+				return badRequest(result);
 			}
-			else {
-				UserGroup userGroup = DB.getUserGroupDAO().getByName(username);
-				if (userGroup != null)
-					userId = userGroup.getDbId().toHexString();	
-			}
-			} else if (email != null) {
-				User user = DB.getUserDAO().getByEmail(email);
-				if (user != null)
-					userId = user.getDbId().toHexString();
-			}
-		}
-		if (userId == null) {
-			result.put("error", "No user or userGroup with given username/email");
-			return badRequest(result);
 		}
 		if (right.equals("NONE")) {
-			collection.getRights().remove(new ObjectId(userId));
-		}
-		else {
-			rightsMap.put(new ObjectId(userId), Access.valueOf(right));
+			collection.getRights().remove(userOrGroupId);
+		} else {
+			rightsMap.put(userOrGroupId, Access.valueOf(right));
 			collection.getRights().putAll(rightsMap);
 		}
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
-			result.put("message", "Cannot store collection to database!");
+			result.put("error", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
 
-		//update collection rights in index
+		// update collection rights in index
 		ElasticUpdater updater = new ElasticUpdater(collection);
 		updater.updateCollectionRights();
 		result.put("message", "OK");
 		return ok(result);
 	}
 
+	public static Result approveCollection(String collectionId, String groupId) {
+
+		ObjectNode result = Json.newObject();
+		Collection collection;
+		UserGroup group;
+		ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		try {
+			group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			collection = DB.getCollectionDAO().get(new ObjectId(collectionId));
+		} catch (Exception e) {
+			log.error("Cannot retrieve object from database!", e);
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+		if (!group.getAdminIds().contains(userId)) {
+			result.put("error",
+					"Only the administrators of the group have the right to approve the shared collections");
+			return forbidden(result);
+		}
+		collection.removeFromModeration(new ObjectId(groupId));
+		if (DB.getCollectionDAO().makePermanent(collection) == null) {
+			result.put("error", "Cannot store collection to database!");
+			return internalServerError(result);
+		}
+		result.put("message", "OK");
+		return ok(result);
+	}
+
+	public static Result rejectCollection(String collectionId, String groupId) {
+
+		ObjectNode result = Json.newObject();
+		Collection collection;
+		UserGroup group;
+		ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		try {
+			group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			collection = DB.getCollectionDAO().get(new ObjectId(collectionId));
+		} catch (Exception e) {
+			log.error("Cannot retrieve object from database!", e);
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+		if (!group.getAdminIds().contains(userId)) {
+			result.put("error", "Only the administrators of the group have the right to reject the shared collections");
+			return forbidden(result);
+		}
+		collection.getRights().remove(new ObjectId(groupId));
+		collection.removeFromModeration(new ObjectId(groupId));
+		if (DB.getCollectionDAO().makePermanent(collection) == null) {
+			result.put("error", "Cannot store collection to database!");
+			return internalServerError(result);
+		}
+		result.put("message", "OK");
+		return ok(result);
+	}
 }

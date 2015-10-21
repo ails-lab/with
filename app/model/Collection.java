@@ -19,8 +19,11 @@ package model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 
 import model.Rights.Access;
@@ -85,9 +88,12 @@ public class Collection {
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
+
 	//@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 	//@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
 	private final  Rights rights = new Rights();
+	@Embedded
+	private final Set<ObjectId> underModerationInGroups = new HashSet<ObjectId>();
 
 	public ObjectId getDbId() {
 		return this.dbId;
@@ -248,4 +254,11 @@ public class Collection {
 		this.exhibition = exhibition;
 	}
 
+	public void addForModeration(ObjectId groupId) {
+		this.underModerationInGroups.add(groupId);
+	}
+
+	public void removeFromModeration(ObjectId groupId) {
+		this.underModerationInGroups.remove(groupId);
+	}
 }

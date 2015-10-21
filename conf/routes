@@ -69,7 +69,7 @@ GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantG
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
-GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null, email: String ?=null, userId: String ?=null)
+GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)
