@@ -131,7 +131,7 @@ public class CollectionRecord {
 	private final HashMap<String, Object> extraFields = new HashMap<String, Object>();
 	
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private final ObjectId annotation;
+	private ObjectId annotation;
 
 	public ObjectId getDbId() {
 		return dbId;
