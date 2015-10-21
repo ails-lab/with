@@ -21,17 +21,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import model.Rights.Access;
-import model.User;
-import model.UserGroup;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
-import org.mongodb.morphia.converters.EnumConverter;
 
+import db.DB;
+import model.Rights.Access;
+import model.User;
 import play.Logger;
 import play.Logger.ALogger;
-import db.DB;
 
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
@@ -41,35 +38,26 @@ public class AccessManager {
 		READ, EDIT, DELETE
 	};
 
-	public static boolean checkAccess(Map<ObjectId, Access> rights,
-			List<String> userIds, Action action) {
+	public static boolean checkAccess(Map<ObjectId, Access> rights, List<String> userIds, Action action) {
 		for (String id : userIds) {
-			User user = DB.getUserDAO()
-					.getById(new ObjectId(id),
-							new ArrayList<String>(Arrays.asList("superUser")));
+			User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
 				return true;
-			else 
-				if (rights.containsKey(new ObjectId(id))
-					&& (rights.get(new ObjectId(id)).ordinal() > action
-							.ordinal()))
-					return true;
+			else if (rights.containsKey(new ObjectId(id))
+					&& (rights.get(new ObjectId(id)).ordinal() > action.ordinal()))
+				return true;
 		}
 		return false;
 	}
-	
-	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights,
-			ObjectId groupId) {
+
+	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights, ObjectId groupId) {
 		return false;
 	}
 
-	public static Access getMaxAccess(Map<ObjectId, Access> rights,
-			List<String> userIds) {
+	public static Access getMaxAccess(Map<ObjectId, Access> rights, List<String> userIds) {
 		Access maxAccess = Access.NONE;
 		for (String id : userIds) {
-			User user = DB.getUserDAO()
-					.getById(new ObjectId(id),
-							new ArrayList<String>(Arrays.asList("superUser")));
+			User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
 				return Access.OWN;
 			else if (rights.containsKey(new ObjectId(id))) {
@@ -81,10 +69,22 @@ public class AccessManager {
 		return maxAccess;
 	}
 
+	public static boolean increasedAccess(Access before, Access after) {
+		if (before == null) {
+			if (after == null) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+		return (after.ordinal() > before.ordinal());
+	}
+
 	/**
 	 * This methods supposes we have all user ids and all userGroup ids
-	 * (recursively obtained) for the user, in a comma-separated list.
-	 * It then transforms the comma-separated in java.util.List
+	 * (recursively obtained) for the user, in a comma-separated list. It then
+	 * transforms the comma-separated in java.util.List
+	 * 
 	 * @param effectiveUserIds
 	 * @return
 	 */
