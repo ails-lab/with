@@ -50,47 +50,14 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class CollectionRecord {
-	
-	public static enum RecordType {
-		IMAGE, TEXT, VIDEO, AUDIO, UNKNOWN
-	}
-	
-	public class Provider {
-		public String provider;
-		public String recordId;
-		public String recordUrl;
-	}
+public class CollectionRecord extends ExternalBasicRecord {
 
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
-	private String externalId;
-
-	@NotNull
-	@NotBlank
-	private String title;
-	private String description;
-
-	private String creator;
-	
-	// an optional URL for the thumbnail
-	private String thumbnailUrl;
-
-	// url to the provider web page for that record
-	private String isShownAt;
-
-	// url to the (full resoultion) content - external on in the WITH db
-	private String isShownBy;
-
-	//media type
-	private  RecordType type;
-
 	private int totalLikes;
 	
-	private String itemRights;
-
 	private ExhibitionRecord exhibitionRecord;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -100,12 +67,6 @@ public class CollectionRecord {
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
 	
-	private List<String> contributors;
-	
-	private List<Year> year;
-	
-	private List<Provider> provenanceChain = new ArrayList<Provider>();
-
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
@@ -116,9 +77,6 @@ public class CollectionRecord {
 	// "json UI" -> ...
 	// "source format" -> ...
 	private final Map<String, String> content = new HashMap<String, String>();
-
-	
-	private String subject;
 	
 	// fixed-size, denormalization of Tags on this record
 	// When somebody adds a tag to a record, and the cap is not reached, it will
@@ -140,72 +98,7 @@ public class CollectionRecord {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getThumbnailUrl() {
-		return this.thumbnailUrl;
-
-	}
-
-	public void setThumbnailUrl(String thumbnailUrl) {
-		this.thumbnailUrl = thumbnailUrl;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getCreator() {
-		return creator;
-	}
-
-	public void setCreator(String creator) {
-		this.creator = creator;
-	}
-
-	public String getIsShownAt() {
-		return isShownAt;
-	}
-
-	public void setIsShownAt(String isShownAt) {
-		this.isShownAt = isShownAt;
-	}
-
-	public String getIsShownBy() {
-		return isShownBy;
-	}
-
-	public void setIsShownBy(String isShownBy) {
-		this.isShownBy = isShownBy;
-	}
-
-	public RecordType getType() {
-		return type;
-	}
-
-	public void setType(RecordType type) {
-		this.type = type;
-	}
-
+	
 	public int getTotalLikes() {
 		return totalLikes;
 	}
@@ -214,14 +107,7 @@ public class CollectionRecord {
 		this.totalLikes = totalLikes;
 	}
 
-	public String getItemRights() {
-		return itemRights;
-	}
-
-	public void setItemRights(String itemRights) {
-		this.itemRights = itemRights;
-	}
-
+	
 	@JsonIgnore
 	public Collection getCollection() {
 		return DB.getCollectionDAO().getById(this.collectionId);
@@ -280,66 +166,9 @@ public class CollectionRecord {
 		else
 			return false;
 	}
-	
-	public List<Provider> getProvenanceChain() {
-		return provenanceChain;
-	}
-	
-	public void setProvenanceChain() {
-	}
-	
-	
-	public void addProvider(Provider provider, int position) {
-		provenanceChain.add(position, provider);
-	}
-	
-	public String getSource() {
-		if (!provenanceChain.isEmpty())
-			return provenanceChain.get(provenanceChain.size()-1).provider;
-		else 
-			return "";
-	}
-	
-	public String getRecordIdInSource() {
-		if (!provenanceChain.isEmpty())
-			return provenanceChain.get(provenanceChain.size()-1).recordId;
-		else 
-			return "";
-	}
-	
-	public String getRecordUrlInSource() {
-		if (!provenanceChain.isEmpty())
-			return provenanceChain.get(provenanceChain.size()-1).recordUrl;
-		else 
-			return "";
-	}
-
-	public List<String> getContributors() {
-		return contributors;
-	}
-
-	public void setContributors(List<String> contributors) {
-		this.contributors = contributors;
-	}
-
-	public List<Year> getYear() {
-		return year;
-	}
-
-	public void setYear(List<Year> year) {
-		this.year = year;
-	}
 
 	public HashMap<String, Object> getExtraFields() {
 		return extraFields;
-	}
-
-	public String getSubject() {
-		return subject;
-	}
-
-	public void setSubject(String subject) {
-		this.subject = subject;
 	}
 
 }
