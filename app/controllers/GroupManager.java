@@ -109,8 +109,13 @@ public class GroupManager extends Controller {
 			newGroup.addAdministrator(admin);
 			newGroup.getUsers().add(admin);
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newGroup);
-			for (ConstraintViolation<UserGroup> cv : violations) {
-				return badRequest("[" + cv.getPropertyPath() + "] " + cv.getMessage());
+			if (!violations.isEmpty()) {
+				ArrayNode properties = Json.newObject().arrayNode();
+				for (ConstraintViolation<UserGroup> cv : violations) {
+					properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+				}
+				error.put("error", properties);
+				return badRequest(error);
 			}
 			try {
 				DB.getUserGroupDAO().makePermanent(newGroup);
@@ -120,13 +125,14 @@ public class GroupManager extends Controller {
 				user.addUserGroups(parentGroups);
 				DB.getUserDAO().makePermanent(user);
 			} catch (Exception e) {
-				log.error("Cannot save group to database!", e);
-				
-				return internalServerError("{\"error\":\"Cannot save group to database!\"}");
+				log.error("Cannot save group to database!", e.getMessage());
+				error.put("error", "Cannot save group to database!");
+				return internalServerError(error);
 			}
 			return ok(Json.toJson(newGroup));
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+			error.put("error", e.getMessage());
+			return internalServerError(error);
 		}
 	}
 
@@ -154,16 +160,19 @@ public class GroupManager extends Controller {
 
 		String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 		if ((adminId == null) || (adminId.equals(""))) {
-			return forbidden("Only administrator of group has the right to edit the group");
+			result.put("error", "Only creator of the group has the right to edit the group");
+			return forbidden(result);
 		}
 		try {
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 			if (group == null) {
-				return internalServerError("Cannot retrieve group from database!");
+				result.put("error", "Cannot retrieve group from database!");
+				return internalServerError(result);
 			}
 			if (!group.getCreator().equals(new ObjectId(adminId)) && (!admin.isSuperUser())) {
-				return forbidden("Only creator of group has the right to edit the group");
+				result.put("error", "Only creator of group has the right to edit the group");
+				return forbidden(result);
 			}
 			UserGroup oldVersion = group;
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -171,10 +180,12 @@ public class GroupManager extends Controller {
 			UserGroup newVersion;
 			newVersion = updator.readValue(json);
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newVersion);
-			for (ConstraintViolation<UserGroup> cv : violations) {
-				result.put("message", "[" + cv.getPropertyPath() + "] " + cv.getMessage());
-			}
 			if (!violations.isEmpty()) {
+				ArrayNode properties = Json.newObject().arrayNode();
+				for (ConstraintViolation<UserGroup> cv : violations) {
+					properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+				}
+				result.put("error", properties);
 				return badRequest(result);
 			}
 			if (!uniqueGroupName(newVersion.getUsername())) {
