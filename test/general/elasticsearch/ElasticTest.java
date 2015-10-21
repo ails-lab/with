@@ -22,13 +22,13 @@ import model.Collection;
 import model.CollectionRecord;
 
 import org.bson.types.ObjectId;
+import org.junit.*;
 import org.junit.Test;
+import org.junit.Assert;
 
-import play.libs.Json;
 import db.DB;
 import elastic.Elastic;
 import elastic.ElasticIndexer;
-import elastic.ElasticUpdater;
 
 public class ElasticTest {
 
