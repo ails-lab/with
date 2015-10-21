@@ -23,7 +23,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	isLogged = ko.observable(false);
 
 	loadUser = function (data, remember, loadCollections) {
-		self.currentUser._id(data.dbid);
+		self.currentUser._id(data.dbId);
 		self.currentUser.email(data.email);
 		self.currentUser.username(data.username);
 		self.currentUser.firstName(data.firstName);
