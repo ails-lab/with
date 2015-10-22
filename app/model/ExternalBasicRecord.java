@@ -226,11 +226,11 @@ public class ExternalBasicRecord {
 		this.subject = subject;
 	}
 	
-	public String getItemRights() {
+	public ItemRights getItemRights() {
 		return itemRights;
 	}
 
-	public void setItemRights(String itemRights) {
+	public void setItemRights(ItemRights itemRights) {
 		this.itemRights = itemRights;
 	}
 

@@ -41,16 +41,16 @@ public class ESpaceSources {
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
 		esources.add(new EuropeanaSpaceSource());
-		esources.add(new DPLASpaceSource());
+		/*esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
 		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
 		esources.add(new ElasticSource());
-		esources.add(new WithSpaceSource());
 		esources.add(new RijksmuseumSpaceSource());
 		esources.add(new DDBSpaceSource());
-		esources.add(new BritishLibrarySpaceSource());
+		esources.add(new BritishLibrarySpaceSource());*/
+		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 
@@ -58,7 +58,7 @@ public class ESpaceSources {
 		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
 		ISpaceSource s = new EuropeanaSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
-		s = new DPLASpaceSource();
+		/*s = new DPLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new NLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
@@ -67,7 +67,7 @@ public class ESpaceSources {
 		s = new EuropeanaFashionSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new YouTubeSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
+		sourcesMap.put(s.getSourceName(), s);*/
 		s = new WithSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		return sourcesMap;
