@@ -52,6 +52,7 @@ import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
 import espace.core.CommonFilter;
 import espace.core.CommonFilterLogic;
+import espace.core.CommonFilters;
 import espace.core.CommonQuery;
 import espace.core.ISpaceSource;
 import espace.core.RecordJSONMetadata;
@@ -124,15 +125,10 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 
 		SourceResponse res = new SourceResponse(resp, offset);
-
-		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
-		CommonFilterLogic dataprovider = CommonFilterLogic.dataproviderFilter();
-		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
-		CommonFilterLogic country = CommonFilterLogic.countryFilter();
-		CommonFilterLogic year = CommonFilterLogic.yearFilter();
-		CommonFilterLogic reusability = CommonFilterLogic.reusabilityFilter();
+		
+		for (CommonFilters filter: CommonFilters.values()) {
+			
+		}
 
 		if (checkFilters(q)) {
 
@@ -141,67 +137,17 @@ public class WithSpaceSource extends ISpaceSource {
 				e.getKey();
 
 			}
-
+			res.filtersLogic = new ArrayList<>();
 			for (Aggregation agg : resp.getAggregations().asList()) {
-
 				InternalTerms aggTerm = (InternalTerms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
-					switch (agg.getName()) {
-					case "types":
-						countValue(type, aggTerm.getBuckets().get(0).getKey(),
-								(int) aggTerm.getBuckets().get(0).getDocCount());
-						break;
-					case "providers":
-						countValue(provider, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
-						break;
-					case "dataProviders":
-						countValue(dataprovider, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
-						break;
-					case "creators":
-						countValue(creator, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
-						break;
-					case "rights":
-						countValue(rights,
-								aggTerm.getBuckets().get(0).getKey(),
-								(int) aggTerm.getBuckets().get(0).getDocCount());
-						break;
-					case "countries":
-						countValue(country, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
-						break;
-					case "years":
-						countValue(year, aggTerm.getBuckets().get(0).getKey(),
-								(int) aggTerm.getBuckets().get(0).getDocCount());
-						break;
-					case "reusability":
-						countValue(reusability, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
-						break;
-					default:
-						break;
-					}
+					CommonFilterLogic filter = new CommonFilterLogic(CommonFilters.valueOf(agg.getName()));
+					countValue(filter, aggTerm.getBuckets().get(0).getKey(),
+							(int) aggTerm.getBuckets().get(0).getDocCount());
+					res.filtersLogic.add(filter);
 				}
 			}
-
-			res.filtersLogic = new ArrayList<>();
-			res.filtersLogic.add(type);
-			res.filtersLogic.add(provider);
-			res.filtersLogic.add(dataprovider);
-			res.filtersLogic.add(creator);
-			res.filtersLogic.add(rights);
-			res.filtersLogic.add(country);
-			res.filtersLogic.add(year);
-			res.filtersLogic.add(reusability);
 		}
-
 		return res;
 	}
 
