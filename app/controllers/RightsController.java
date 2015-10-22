@@ -71,41 +71,53 @@ public class RightsController extends Controller {
 					+ "Please contact the owner of this collection");
 			return forbidden(result);
 		}
-		// set rights
-		// the receiver can be either a User or a UserGroup
+		// Set rights
+		// The receiver can be either a User or a UserGroup
 		Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
 		UserOrGroup userOrGroup;
 		ObjectId userOrGroupId = null;
-		Access access = Access.valueOf(right);
+		Access newRight = Access.valueOf(right);
 		if (username != null) {
+			// In case that the receiver is a user the rights are given
+			// automatically
 			if ((userOrGroup = DB.getUserDAO().getByUsername(username)) != null) {
 				userOrGroupId = userOrGroup.getDbId();
+				if (right.equals("NONE")) {
+					collection.getRights().remove(userOrGroupId);
+				} else {
+					rightsMap.put(userOrGroupId, newRight);
+					collection.getRights().putAll(rightsMap);
+				}
+				// In case that the receiver is a group extra checks are needed
 			} else if ((userOrGroup = DB.getUserGroupDAO().getByName(username)) != null) {
 				UserGroup group = (UserGroup) userOrGroup;
 				userOrGroupId = group.getDbId();
 				userOrGroupId = userOrGroup.getDbId();
-				if (AccessManager.increasedAccess(collection.getRights().get(userOrGroupId), access)
+				// If the user who shared the collection with the group belongs
+				// to the collection, the rights are given automatically. Also,
+				// the rights are given automatically if the access level is
+				// decreased. (e.g. from WRITE to READ)
+				if (AccessManager.increasedAccess(collection.getRights().get(userOrGroupId), newRight)
 						&& !group.getUsers().contains(userId)) {
-					collection.addForModeration(userOrGroupId);
+					collection.addForModeration(userOrGroupId, newRight);
 				} else {
 					collection.removeFromModeration(userOrGroupId);
+					if (right.equals("NONE")) {
+						collection.getRights().remove(userOrGroupId);
+					} else {
+						rightsMap.put(userOrGroupId, newRight);
+						collection.getRights().putAll(rightsMap);
+					}
 				}
 			} else {
 				result.put("error", "No user or userGroup with given username");
 				return badRequest(result);
 			}
 		}
-		if (right.equals("NONE")) {
-			collection.getRights().remove(userOrGroupId);
-		} else {
-			rightsMap.put(userOrGroupId, Access.valueOf(right));
-			collection.getRights().putAll(rightsMap);
-		}
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("error", "Cannot store collection to database!");
 			return internalServerError(result);
 		}
-
 		// update collection rights in index
 		ElasticUpdater updater = new ElasticUpdater(collection);
 		updater.updateCollectionRights();
@@ -119,8 +131,9 @@ public class RightsController extends Controller {
 		Collection collection;
 		UserGroup group;
 		ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		ObjectId groupID = new ObjectId(groupId);
 		try {
-			group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			group = DB.getUserGroupDAO().get(groupID);
 			collection = DB.getCollectionDAO().get(new ObjectId(collectionId));
 		} catch (Exception e) {
 			log.error("Cannot retrieve object from database!", e);
@@ -132,7 +145,16 @@ public class RightsController extends Controller {
 					"Only the administrators of the group have the right to approve the shared collections");
 			return forbidden(result);
 		}
-		collection.removeFromModeration(new ObjectId(groupId));
+		Access access = collection.removeFromModeration(groupID);
+		if (access == null) {
+			result.put("error", "Collection was not listed for approval");
+			return badRequest(result);
+		}
+		if (access.equals("NONE")) {
+			collection.getRights().remove(groupID);
+		} else {
+			collection.getRights().put(groupID, access);
+		}
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("error", "Cannot store collection to database!");
 			return internalServerError(result);
@@ -159,7 +181,6 @@ public class RightsController extends Controller {
 			result.put("error", "Only the administrators of the group have the right to reject the shared collections");
 			return forbidden(result);
 		}
-		collection.getRights().remove(new ObjectId(groupId));
 		collection.removeFromModeration(new ObjectId(groupId));
 		if (DB.getCollectionDAO().makePermanent(collection) == null) {
 			result.put("error", "Cannot store collection to database!");
@@ -168,4 +189,5 @@ public class RightsController extends Controller {
 		result.put("message", "OK");
 		return ok(result);
 	}
+
 }

@@ -19,14 +19,10 @@ package model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.validation.constraints.NotNull;
-
-import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
@@ -34,10 +30,6 @@ import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-
-import utils.AccessEnumConverter;
-import utils.Deserializer;
-import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -47,6 +39,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+import model.Rights.Access;
+import utils.AccessEnumConverter;
+import utils.Deserializer;
+import utils.Serializer;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -71,7 +67,7 @@ public class Collection {
 	private ObjectId thumbnail;
 
 	private int itemCount;
-	//private boolean isPublic;
+	// private boolean isPublic;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
@@ -88,12 +84,12 @@ public class Collection {
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
-
-	//@JsonSerialize(using = Serializer.RightsSerializer.class)
-	//@JsonDeserialize(using = Deserializer.RightsDeserializer.class)
-	private final  Rights rights = new Rights();
+	// @JsonSerialize(using = Serializer.RightsSerializer.class)
+	// @JsonDeserialize(using = Deserializer.RightsDeserializer.class)
+	private final Rights rights = new Rights();
 	@Embedded
-	private final Set<ObjectId> underModerationInGroups = new HashSet<ObjectId>();
+	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
+	private final Map<ObjectId, Access> underModerationInGroups = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
 		return this.dbId;
@@ -236,7 +232,8 @@ public class Collection {
 	}
 
 	@JsonIgnore
-	public void setRights(Rights r) {}
+	public void setRights(Rights r) {
+	}
 
 	public boolean getIsExhibition() {
 		return isExhibition;
@@ -254,11 +251,11 @@ public class Collection {
 		this.exhibition = exhibition;
 	}
 
-	public void addForModeration(ObjectId groupId) {
-		this.underModerationInGroups.add(groupId);
+	public void addForModeration(ObjectId groupId, Access access) {
+		this.underModerationInGroups.put(groupId, access);
 	}
 
-	public void removeFromModeration(ObjectId groupId) {
-		this.underModerationInGroups.remove(groupId);
+	public Access removeFromModeration(ObjectId groupId) {
+		return this.underModerationInGroups.remove(groupId);
 	}
 }
