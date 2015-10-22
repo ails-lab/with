@@ -80,24 +80,11 @@ public class FilterValuesMap {
 	public List<String> translateToCommon(String filterID, String specificValue) {
 		if (specificValue != null) {
 			String matchexpr = getKey(filterID, specificValue);
-			List<String> v = new ArrayList<>();
-
-//			if (filterID.equals(CommonFilters.RIGHTS_ID)){
-//				System.out.println(commonvalues.keySet());
-//			}
-			
+			List<String> v = new ArrayList<>();			
 			for (String kk : commonvalues.keySet()) {
-//				if (filterID.equals(CommonFilters.RIGHTS_ID)){
-//					System.out.println("------------------------------------------------");
-//					System.out.println(kk+" match? "+matchexpr);
-//				}
 				if (matchexpr.matches(kk)) {
 					// String k = getKey(filterID, specificValue);
 					List<String> orset = getOrset(commonvalues, kk, false);
-//					if (filterID.equals(CommonFilters.RIGHTS_ID)){
-//					System.out.println("MATCHED to "+orset);
-//					}
-
 					v.addAll(orset);
 					return v;
 				}
