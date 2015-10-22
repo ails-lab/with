@@ -283,7 +283,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 					record.setYear(years);
 					if (Utils.readArrayAttr(item, "edmIsShownAt", false)!=null)
 						record.setIsShownAt(Utils.readArrayAttr(item, "edmIsShownAt", false).get(0));
-					record.setItemRights(Utils.readAttr(item, "rights", false));
+					//record.setItemRights(Utils.readAttr(item, "rights", false));
 					record.setExternalId(record.getIsShownAt());
 					if (record.getExternalId() == null || record.getExternalId() == "")
 						record.setExternalId(record.getIsShownBy());
