@@ -49,10 +49,6 @@ import espace.core.ParallelAPICall;
 import espace.core.SearchResponse;
 import espace.core.SourceResponse;
 import espace.core.Utils;
-import espace.core.sources.DPLASpaceSource;
-import espace.core.sources.DigitalNZSpaceSource;
-import espace.core.sources.EuropeanaFashionSpaceSource;
-import espace.core.sources.EuropeanaSpaceSource;
 
 public class SearchController extends Controller {
 
@@ -240,7 +236,7 @@ public class SearchController extends Controller {
 		return result;
 	}
 
-	public static Result testsearch() {
+	/*public static Result testsearch() {
 		return buildresult(new CommonQuery("Zeus"));
 	}
 
@@ -263,7 +259,7 @@ public class SearchController extends Controller {
 
 		return ok(views.html.testsearch.render(userForm, res, merge1));
 	}
-
+	 */
 	public static Result reindex() {
 		Promise.promise(new Function0<String>() {
 			public String apply() throws Exception {
