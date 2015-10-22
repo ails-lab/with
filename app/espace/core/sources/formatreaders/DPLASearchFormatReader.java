@@ -25,7 +25,7 @@ import espace.core.SourceResponse.MyURL;
 import espace.core.utils.JsonContextRecord;
 import espace.core.utils.JsonNodeUtils;
 
-public class DPLASearchFormatReader extends FormatReader {
+public class DPLASearchFormatReader extends JsonContextRecordFormatReader {
 
 	@Override
 	public Object buildObjectFrom() {
@@ -34,10 +34,9 @@ public class DPLASearchFormatReader extends FormatReader {
 	}
 
 	@Override
-	public Object fillObjectFrom(String text, Object object) {
+	public Object fillObjectFrom(JsonContextRecord r, Object object) {
 		// TODO Auto-generated method stub
 		ItemsResponse it = new ItemsResponse();
-		JsonContextRecord r = new JsonContextRecord(text);
 		System.out.println(r.getValue("f.size"));
 		System.out.println(r.getValue("ages[1]"));
 		it.id = r.getStringValue("id");
