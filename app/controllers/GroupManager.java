@@ -137,7 +137,7 @@ public class GroupManager extends Controller {
 	}
 
 	private static boolean uniqueGroupName(String name) {
-		return (DB.getUserGroupDAO().getByName(name) == null);
+		return (DB.getUserGroupDAO().getByName(name) == null && DB.getUserDAO().getByUsername(name) == null);
 	}
 
 	private static String capitalizeFirst(String str) {
@@ -174,6 +174,13 @@ public class GroupManager extends Controller {
 				result.put("error", "Only creator of group has the right to edit the group");
 				return forbidden(result);
 			}
+			if (json.get("username") != null) {
+				if (!group.getUsername().equals(json.get("username").asText())) {
+					if (!uniqueGroupName(json.get("username").asText())) {
+						return badRequest("Group name already exists! Please specify another name.");
+					}
+				}
+			}
 			UserGroup oldVersion = group;
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
@@ -188,9 +195,7 @@ public class GroupManager extends Controller {
 				result.put("error", properties);
 				return badRequest(result);
 			}
-			if (!uniqueGroupName(newVersion.getUsername())) {
-				return badRequest("Group name already exists! Please specify another name.");
-			}
+
 			// update group on mongo
 			if (DB.getUserGroupDAO().makePermanent(newVersion) == null) {
 				log.error("Cannot save group to database!");
