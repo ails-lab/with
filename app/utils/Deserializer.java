@@ -25,15 +25,25 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
+import model.Rights;
 import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 
+import play.libs.Json;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class Deserializer {
 
@@ -45,8 +55,30 @@ public class Deserializer {
 				DeserializationContext arg1) throws IOException,
 				JsonProcessingException {
 			ExhibitionRecord exhRec = new ExhibitionRecord();
-			exhRec.setAnnotation(annot.getValueAsString());
+			exhRec.setExtraDescription(annot.getValueAsString());
 			return exhRec;
+		}
+	}
+	
+	public static class RightsDeserializer extends JsonDeserializer<Rights> {
+		
+		@Override
+		public Rights deserialize(JsonParser rightsString, DeserializationContext arg1)
+				throws IOException, JsonProcessingException {
+			Rights rights = new Rights();
+			TreeNode treeNode = rightsString.readValueAsTree();
+			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
+			if (isPublic != null) {
+				rights.setPublic(isPublic.asBoolean());
+			}
+			ObjectNode jsonRights = (ObjectNode) treeNode.get("rights"); 
+			if (jsonRights != null) {
+				Map<String, Integer> rightsMap = jsonRights.traverse().readValueAs(new TypeReference<Map<String, Integer>>() {});
+				if (rightsMap != null)
+					for(Entry<String, Integer> e : rightsMap.entrySet()) 
+					rights.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
+			}
+			return rights;
 		}
 	}
 

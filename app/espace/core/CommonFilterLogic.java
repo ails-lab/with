@@ -25,16 +25,14 @@ import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {
 
-	private HashMap<String, ValueCount> counts;
-	private boolean global = true;
+	private HashMap<String, ValueCount> counts = new HashMap<String, ValueCount>();
 
 	public CommonFilterResponse data = new CommonFilterResponse();
 
-	public CommonFilterLogic() {
-		super();
-		counts = new HashMap<String, ValueCount>();
+	public CommonFilterLogic(CommonFilters filter) {
+		this.data.filter = filter;
 	}
-
+	
 	public void addValue(String value, int count) {
 		if (value != null) {
 			// System.out.println(filterName + " Added " + value);
@@ -62,7 +60,7 @@ public class CommonFilterLogic implements Cloneable {
 			addValue(string, count);
 		}
 	}
-
+	/*
 	public static CommonFilterLogic typeFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.TYPE_ID;
@@ -89,11 +87,11 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterID = CommonFilters.CREATOR_ID;
 		r.data.filterName = CommonFilters.CREATOR_NAME;
 		return r;
-	}
+	}*/
 
 	@Override
 	public String toString() {
-		return "Filter [" + data.filterName + ", values=" + counts.values().size() + "]";
+		return "Filter [" + data.filter.toString() + ", values=" + counts.values().size() + "]";
 	}
 
 	public CommonFilterResponse export() {
@@ -104,9 +102,7 @@ public class CommonFilterLogic implements Cloneable {
 
 	@Override
 	protected CommonFilterLogic clone() {
-		CommonFilterLogic res = new CommonFilterLogic();
-		res.data.filterID = this.data.filterID;
-		res.data.filterName = this.data.filterName;
+		CommonFilterLogic res = new CommonFilterLogic(this.data.filter);
 		res.counts = (HashMap<String, ValueCount>) counts.clone();
 		return res;
 	}
@@ -115,6 +111,7 @@ public class CommonFilterLogic implements Cloneable {
 		return counts.values();
 	}
 
+	/*
 	public static CommonFilterLogic rightsFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.RIGHTS_ID;
@@ -142,9 +139,6 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.YEAR_NAME;
 		return r;
 	}
-	/**
-	 * TODO check this added for availability face of NLA 
-	 */
 	public static CommonFilterLogic contributorFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.CONTRIBUTOR_ID;
@@ -157,5 +151,5 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterID = CommonFilters.AVAILABILITY_ID;
 		r.data.filterName = CommonFilters.AVAILABILITY_NAME;
 		return r;
-	}
+	}*/
 }

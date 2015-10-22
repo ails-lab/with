@@ -37,13 +37,13 @@ public class RecordDAO {
 		// create and store
 		CollectionRecord recordLink = new CollectionRecord();
 		recordLink.setDescription("Testing CRUD for RecordLink");
-		recordLink.setItemRights("CC");
+		/*recordLink.setItemRights("CC");
 		recordLink.setSource(null);
 		recordLink.setSourceId("item_42");
 		recordLink.setSourceUrl("http://eur");
 		recordLink.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
 		recordLink.setTitle("Test recordLink!");
-		recordLink.setType("The blue-black or white-gold dress");
+		recordLink.setType("The blue-black or white-gold dress");*/
 
 		MediaDAOTest mediaDAO = new MediaDAOTest();
 		Media image = null;
@@ -68,7 +68,7 @@ public class RecordDAO {
 	public CollectionRecord storeRecordLink() {
 			CollectionRecord record = new CollectionRecord();
 			record.setDescription("This is a test RecordLink");
-			record.setItemRights("CC");
+			/*record.setItemRights("CC");
 			record.setSource("Europeana");
 			record.setSourceId("item_42");
 			record.setSourceUrl("http://eur");
@@ -84,8 +84,7 @@ public class RecordDAO {
 				image = mediaDAO.testMediaStorage();
 			} catch(Exception e) {
 				System.out.println("Cannot save image (media object) to database!");
-			}
-
+			}*/
 			Key<CollectionRecord> recId = DB.getCollectionRecordDAO().makePermanent(record);
 			assertThat(recId).isNotNull();
 			return record;

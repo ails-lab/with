@@ -19,22 +19,18 @@ package espace.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
-
-import org.json.JSONObject;
-
 import utils.ListUtils;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import espace.core.RecordJSONMetadata.Format;
 import espace.core.Utils.Pair;
 import espace.core.sources.FilterValuesMap;
-import espace.core.sources.TypeValues;
 
 public abstract class ISpaceSource {
-
+	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
+	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
+	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
+	
 	public ISpaceSource() {
 		super();
 		vmap = new FilterValuesMap();
@@ -84,7 +80,7 @@ public abstract class ISpaceSource {
 
 	protected void countValue(CommonFilterLogic type, String t, boolean toglobal, int count) {
 		if (toglobal)
-			type.addValue(vmap.translateToCommon(type.data.filterID, t), count);
+			type.addValue(vmap.translateToCommon(type.data.filter.name(), t), count);
 		else
 			type.addValue(t, count);
 

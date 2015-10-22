@@ -19,8 +19,7 @@ package espace.core;
 import java.util.List;
 
 public class CommonFilterResponse {
-	public String filterName;
-	public String filterID;
+	public CommonFilters filter;
 	public List<ValueCount> suggestedValues;
 
 	public CommonFilterResponse() {
@@ -28,7 +27,7 @@ public class CommonFilterResponse {
 
 	@Override
 	public String toString() {
-		return "CommonFilterResponse [filterName=" + filterName + ", suggestedValues=" + suggestedValues.size() + "]";
+		return "CommonFilterResponse [filterName=" + filter.toString() + ", suggestedValues=" + suggestedValues.size() + "]";
 	}
 
 }

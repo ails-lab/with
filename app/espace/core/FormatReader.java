@@ -16,14 +16,14 @@
 
 package espace.core;
 
-import espace.core.Utils.Pair;
+public abstract class FormatReader<T> {
 
-public class MainQueryModifier extends ParameterQueryModifier {
-	public MainQueryModifier(Pair<String> param) {
-		super(param);
+	public abstract T buildObjectFrom();
+
+	public abstract T fillObjectFrom(String text, T object);
+
+	public T readObjectFrom(String text){
+		return fillObjectFrom(text, buildObjectFrom());
 	}
 
-	public QueryBuilder modify(QueryBuilder builder){
-		return builder.addQuery(param[0]);
-	}
 }

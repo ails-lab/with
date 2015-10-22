@@ -236,7 +236,7 @@ public class RecordController extends Controller {
 		ArrayNode result = Json.newObject().arrayNode();
 		CollectionRecord r = DB.getCollectionRecordDAO().getByExternalId(externalId).get(0);
 		String title = r.getTitle();
-		String provider = r.getProvider();
+		String provider = r.getProvenanceChain().get(0).providerName;
 
 		/*
 		 * Search for available collections
@@ -341,7 +341,7 @@ public class RecordController extends Controller {
 			o.put("isExhibition", c.getIsExhibition());
 			//o.put("isPublic", c.getIsPublic());
 			o.put("thumbnail", c.getThumbnailUrl());
-			o.put("userName" , DB.getUserDAO().get(c.getOwnerId()).getUsername());
+			o.put("userName" , DB.getUserDAO().get(c.getCreatorId()).getUsername());
 			o.put("dbId", hit.getId());
 
 

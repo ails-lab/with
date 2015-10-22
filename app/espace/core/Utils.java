@@ -20,13 +20,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 import play.libs.Json;
-import riotcmd.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.SourceResponse.Lang;
-
 public class Utils {
+	
+	public static class Lang {
+		public Lang(String languageCode, String textValue) {
+			this.lang = languageCode;
+			this.value = textValue;
+		}
+
+		public Lang() {
+			super();
+		}
+
+		public String lang;
+		public String value;
+	}
 
 	public static String toLower(String text) {
 		if (text != null) {

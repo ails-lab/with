@@ -16,13 +16,18 @@
 
 package model;
 
+import java.time.Year;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
+
+import model.Rights.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
@@ -45,59 +50,15 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class CollectionRecord {
+public class CollectionRecord extends ExternalBasicRecord {
 
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 
-	private String externalId;
-
-	private boolean isPublic;
-
-	// which backend provided this entry
-	// Europeana, DPLA, Mint
-	private String source;
-
-	// an optional URL for the thumbnail
-	private String thumbnailUrl;
-
-	@NotNull
-	@NotBlank
-	private String title;
-	private String description;
-
-	private String creator;
-
-	private String provider;
-
-	private String dataProvider;
-
-	private String contributor;
-
-	// the id in the source system
-	private String sourceId;
-	// a link to the record on its source
-	private String sourceUrl;
-
-	// url to the provider web page for that record
-	private String isShownAt;
-
-	// url to the (full resoultion) content - external on in the WITH db
-	private String isShownBy;
-
-	private String type;
-
-	private String year;
-
 	private int totalLikes;
-
-	private String itemRights;
-
-	//@JsonDeserialize(using = Deserializer.ExhibitionRecordDeserializer.class)
+	
 	private ExhibitionRecord exhibitionRecord;
-
-	// collection specific stuff...
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
@@ -105,7 +66,7 @@ public class CollectionRecord {
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
-
+	
 	// the place in the collection of this record,
 	// mostly irrelevant I would think ..
 	private int position;
@@ -116,14 +77,19 @@ public class CollectionRecord {
 	// "json UI" -> ...
 	// "source format" -> ...
 	private final Map<String, String> content = new HashMap<String, String>();
-
+	
 	// fixed-size, denormalization of Tags on this record
 	// When somebody adds a tag to a record, and the cap is not reached, it will
-	// go here
+	// go here.
 	// This might get out of sync on tag deletes, since a deleted tag from one
 	// user doesn't necessarily delete
 	// the tag from here. Tag cleaning has to be performed regularly.
 	private final Set<String> tags = new HashSet<String>();
+	
+	private final HashMap<String, Object> extraFields = new HashMap<String, Object>();
+	
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId annotation;
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -131,141 +97,6 @@ public class CollectionRecord {
 
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
-	}
-
-	public String getExternalId() {
-		return externalId;
-	}
-
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
-
-	public String getSource() {
-		return source;
-	}
-
-	public void setSource(String source) {
-		if (source.toLowerCase().contains("europeana")) {
-			this.source = "Europeana";
-		} else if (source.equalsIgnoreCase("DPLA")) {
-			this.source = "DPLA";
-		} else if (source.equalsIgnoreCase("NLA")) {
-			this.source = "NLA";
-		} else if ((source.equalsIgnoreCase("DNZ"))
-				|| (source.equalsIgnoreCase("DigitalNZ"))) {
-			this.source = "DigitalNZ";
-		} else if ((source.equalsIgnoreCase("EFashion"))
-				|| (source.equalsIgnoreCase("EuropeanaFashion"))) {
-			this.source = "EuropeanaFashion";
-		} else {
-			this.source = source;
-		}
-	}
-
-	public String getThumbnailUrl() {
-		return this.thumbnailUrl;
-
-	}
-
-	public void setThumbnailUrl(String thumbnailUrl) {
-		this.thumbnailUrl = thumbnailUrl;
-	}
-
-	public String getTitle() {
-		return title;
-	}
-
-	public void setTitle(String title) {
-		this.title = title;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public String getCreator() {
-		return creator;
-	}
-
-	public void setCreator(String creator) {
-		this.creator = creator;
-	}
-
-	public String getProvider() {
-		return provider;
-	}
-
-	public void setProvider(String provider) {
-		this.provider = provider;
-	}
-
-	public String getDataProvider() {
-		return dataProvider;
-	}
-
-	public void setDataProvider(String dataProvider) {
-		this.dataProvider = dataProvider;
-	}
-
-	public String getContributor() {
-		return contributor;
-	}
-
-	public void setContributor(String contributor) {
-		this.contributor = contributor;
-	}
-
-	public String getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
-	public String getSourceUrl() {
-		return sourceUrl;
-	}
-
-	public void setSourceUrl(String sourceUrl) {
-		this.sourceUrl = sourceUrl;
-	}
-
-	public String getIsShownAt() {
-		return isShownAt;
-	}
-
-	public void setIsShownAt(String isShownAt) {
-		this.isShownAt = isShownAt;
-	}
-
-	public String getIsShownBy() {
-		return isShownBy;
-	}
-
-	public void setIsShownBy(String isShownBy) {
-		this.isShownBy = isShownBy;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public String getYear() {
-		return year;
-	}
-
-	public void setYear(String year) {
-		this.year = year;
 	}
 
 	public int getTotalLikes() {
@@ -276,14 +107,7 @@ public class CollectionRecord {
 		this.totalLikes = totalLikes;
 	}
 
-	public String getItemRights() {
-		return itemRights;
-	}
-
-	public void setItemRights(String itemRights) {
-		this.itemRights = itemRights;
-	}
-
+	
 	@JsonIgnore
 	public Collection getCollection() {
 		return DB.getCollectionDAO().getById(this.collectionId);
@@ -326,14 +150,6 @@ public class CollectionRecord {
 		return tags;
 	}
 
-	public boolean getIsPublic() {
-		return isPublic;
-	}
-
-	public void setIsPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
-
 	public ExhibitionRecord getExhibitionRecord() {
 		return exhibitionRecord;
 	}
@@ -349,6 +165,10 @@ public class CollectionRecord {
 			return ((CollectionRecord) record).getDbId().equals(this.dbId);
 		else
 			return false;
+	}
+
+	public HashMap<String, Object> getExtraFields() {
+		return extraFields;
 	}
 
 }

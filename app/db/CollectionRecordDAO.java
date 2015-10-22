@@ -166,7 +166,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
 		List<CollectionRecord> mergedRecord = getByExternalId(extId);
 		for (CollectionRecord mr : mergedRecord) {
-			if (mr.getIsPublic() && !mr.getDbId().equals(dbId))
+			if (mr.getCollection().getIsPublic() && !mr.getDbId().equals(dbId))
 				return true;
 		}
 		return false;

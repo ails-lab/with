@@ -61,7 +61,7 @@ public class ExhibitionController extends Controller {
 		Collection newExhibition = new Collection();
 		newExhibition.setCreated(new Date());
 		newExhibition.setLastModified(new Date());
-		newExhibition.setOwnerId(new ObjectId(userId));
+		newExhibition.setCreatorId(new ObjectId(userId));
 		newExhibition.setIsExhibition(true);
 		newExhibition.setTitle(getAvailableTitle(owner));
 		newExhibition.setDescription("Description");
@@ -86,7 +86,7 @@ public class ExhibitionController extends Controller {
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newExhibition);
 		c.put("access", Access.OWN.toString());
-		User user = DB.getUserDAO().getById(newExhibition.getOwnerId(),
+		User user = DB.getUserDAO().getById(newExhibition.getCreatorId(),
 				new ArrayList<String>(Arrays.asList("username")));
 		c.put("owner", user.getUsername());
 		return ok(c);
@@ -108,7 +108,6 @@ public class ExhibitionController extends Controller {
 				return forbidden(Json
 						.parse("{\"error\" : \"User not specified\"}"));
 			}
-			String userId = userIds.get(0);
 			List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
 			//userAccess.add(new Tuple<ObjectId, Access>(new ObjectId(userId), Access.OWN));
 			List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId, Access>>>(0);

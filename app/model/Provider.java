@@ -16,33 +16,27 @@
 
 package model;
 
-public class ExhibitionRecord {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-	private String extraDescription;
-	private String audioUrl;
-	private String videoUrl;
-
-	public String getExtraDescription() {
-		return extraDescription;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+public class Provider {
+	
+	public String providerName;
+	public String recordId;
+	public String recordUrl;
+	
+	public Provider(String providerName) {
+		this.providerName = providerName;
 	}
-
-	public void setExtraDescription(String extraDescription) {
-		this.extraDescription = extraDescription;
+	
+	public Provider(String providerName, String recordId, String recordUrl) {
+		this.providerName = providerName;
+		this.recordId = recordId;
+		this.recordUrl = recordUrl;
 	}
+	
+	
 
-	public String getAudioUrl() {
-		return audioUrl;
-	}
-
-	public void setAudioUrl(String audioUrl) {
-		this.audioUrl = audioUrl;
-	}
-
-	public String getVideoUrl() {
-		return videoUrl;
-	}
-
-	public void setVideoUrl(String videoUrl) {
-		this.videoUrl = videoUrl;
-	}
 }

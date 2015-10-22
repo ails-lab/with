@@ -16,12 +16,16 @@
 
 package espace.core;
 
-public class JsonResponseKeys {
+import espace.core.utils.JsonContextRecord;
 
-	public static final String source = "source";
-	public static final String query = "query";
-	public static final String totalCount = "totalCount";
-	public static final String count = "count";
-	public static final String id = "id";
+public abstract class JsonContextRecordFormatReader<T> extends FormatReader<T> {
+
+	@Override
+	public T fillObjectFrom(String text, T object) {
+		JsonContextRecord rec = new JsonContextRecord(text);
+		return fillObjectFrom(rec, object);
+	}
+	
+	public abstract T fillObjectFrom(JsonContextRecord text, T object);
 
 }

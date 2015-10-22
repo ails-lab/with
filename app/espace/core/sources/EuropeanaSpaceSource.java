@@ -16,10 +16,18 @@
 
 package espace.core.sources;
 
+import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
+
+import model.ExternalBasicRecord;
+import model.ExternalBasicRecord.ItemRights;
+import model.Provider;
+import model.ExternalBasicRecord.RecordType;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
@@ -34,11 +42,9 @@ import espace.core.AdditionalQueryModifier;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
-import espace.core.CommonFilter;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
-import espace.core.EuropeanaQuery;
 import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -47,8 +53,6 @@ import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
 
@@ -59,37 +63,41 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super();
+	    filtersSupportedBySource = new ArrayList<CommonFilters>(
+	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
+	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
+	    				CommonFilters.TYPE, CommonFilters.YEAR)
+	    		);
+	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
+	    		for (CommonFilters filter: filtersSupportedBySource) {
+	    			put(filter.getID(), filter);
+	    		}
+	    	}};
+	    filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
+	    		for (String key: sourceToFiltersMappings.keySet()) {
+	    			put(sourceToFiltersMappings.get(key), key);
+	    		}
+	    	}};
+		filtersSupportedBySource = new ArrayList<CommonFilters>(
+	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
+	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
+	    				CommonFilters.TYPE, CommonFilters.YEAR)
+	    		);
+		for (CommonFilters filterType: filtersSupportedBySource) {
+			addDefaultWriter(filterType.getID(), qfwriter(filtersToSourceMappings.get(filterType)));
+		}
+		for (RecordType type: RecordType.values()) {
+			addMapping(CommonFilters.TYPE.getID(), type.name(), type.name());
+		}
 
-		addDefaultWriter(CommonFilters.PROVIDER_ID, qfwriter("PROVIDER"));
-		addDefaultWriter(CommonFilters.DATAPROVIDER_ID, qfwriter("DATA_PROVIDER"));
-		addDefaultWriter(CommonFilters.COUNTRY_ID, qfwriter("COUNTRY"));
-
-		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
-
-		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("CREATOR"));
-
-		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
-		// qfwriter("proxy_dc_contributor"));
-
-		addDefaultQueryModifier(CommonFilters.RIGHTS_ID, qrightwriter());
-
-		addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
-
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
-
-		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.name(), ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.name(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.name(), ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.UNKNOWN.name(), ".*unknown.*");
 
 	}
-
+	/*
 	private Function<List<String>, QueryModifier> qreusabilitywriter() {
 		Function<String, String> function = (String s) -> {
 			return "&REUSABILITY%3A" + s;
@@ -101,8 +109,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
-
+	*/
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
+		if (parameter.equals(CommonFilters.YEAR.getID())) {
+			return qfwriterYEAR();
+		}
 		Function<String, String> function = (String s) -> {
 			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
 		};
@@ -210,6 +221,80 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public String getSourceName() {
 		return LABEL;
 	}
+	
+	public List<CommonFilterLogic> createFilters(JsonNode response) {
+		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
+		for (JsonNode facet : response.path("facets")) {
+			String filterType = facet.path("name").asText();
+			CommonFilters withFilter = sourceToFiltersMappings.get(filterType);
+			if (withFilter != null) {
+				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
+				for (JsonNode jsonNode : facet.path("fields")) {
+					String label = jsonNode.path("label").asText();
+					int count = jsonNode.path("count").asInt();
+					switch (filterType) {
+						case "TYPE": 
+						case "RIGHTS":
+							countValue(filter, label, count);
+							break;
+						case "DATA_PROVIDER": 
+						case "PROVIDER":
+						case "proxy_dc_creator":
+						case "COUNTRY":
+						case "YEAR":
+							countValue(filter, label, false, count);
+							break;
+						default:
+							break;
+					}
+					filters.add(filter);
+				}
+			}
+		}
+		return filters;
+	}
+	
+	public ArrayList<ExternalBasicRecord> getItems(JsonNode response) {
+		ArrayList<ExternalBasicRecord> items = new ArrayList<ExternalBasicRecord>();
+		if (response.path("success").asBoolean()) {
+			for (JsonNode item : response.path("items")) {
+				ExternalBasicRecord record = new ExternalBasicRecord();
+				try {
+					Provider recordProvider = new Provider(Utils.readArrayAttr(item, "dataProvider", false).get(0));
+					record.addProvider(recordProvider);
+					//TODO: add provider if available
+					//TODO:are indeed guid and id the right fields?
+					recordProvider = new Provider(getSourceName(),
+							Utils.readAttr(item, "id", true),
+							Utils.readAttr(item, "guid", false)
+							);
+					record.addProvider(recordProvider);
+					//TODO: add null checks
+					record.setThumbnailUrl(Utils.readArrayAttr(item, "edmPreview", false).get(0));
+					record.setIsShownBy(Utils.readArrayAttr(item, "edmIsShownBy", false).get(0));
+					record.setTitle(Utils.readArrayAttr(item, "title", false).get(0));
+					record.setDescription(Utils.readArrayAttr(item, "dcDescription", false).get(0));
+					record.setCreator(Utils.readArrayAttr(item, "dcCreator", false).get(0));
+					List<String> yearsString = Utils.readArrayAttr(item, "year", false);
+					List<Year> years = new ArrayList<Year>();
+					for (String yearString: yearsString) {
+						years.add(Year.parse(yearString));
+					}
+					record.setYear(years);
+					if (Utils.readArrayAttr(item, "edmIsShownAt", false)!=null)
+						record.setIsShownAt(Utils.readArrayAttr(item, "edmIsShownAt", false).get(0));
+					record.setItemRights(Utils.readAttr(item, "rights", false));
+					record.setExternalId(record.getIsShownAt());
+					if (record.getExternalId() == null || record.getExternalId() == "")
+						record.setExternalId(record.getIsShownBy());
+					record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+					items.add(record);
+				} catch (Exception e) {
+				}
+			}
+		}
+		return items;
+	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -218,103 +303,21 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
-		CommonFilterLogic dataprovider = CommonFilterLogic.dataproviderFilter();
-		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
-		CommonFilterLogic country = CommonFilterLogic.countryFilter();
-		CommonFilterLogic year = CommonFilterLogic.yearFilter();
-		CommonFilterLogic reusability = CommonFilterLogic.reusabilityFilter();
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
-				System.out.println("europeana got " + res.totalCount);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
-				if (response.path("success").asBoolean()) {
-					for (JsonNode item : response.path("items")) {
-						ItemsResponse it = new ItemsResponse();
-						it.id = Utils.readAttr(item, "id", true);
-						it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
-						it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
-						it.title = Utils.readArrayAttr(item, "title", false).get(0);
-						it.description = Utils.readArrayAttr(item, "dcDescription", false).get(0);
-						it.creator = Utils.readArrayAttr(item, "dcCreator", false).get(0);
-						it.year = Utils.readArrayAttr(item, "year", false);
-						it.dataProvider = Utils.readArrayAttr(item, "dataProvider", false).get(0);
-						it.url = new MyURL();
-						it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
-						it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
-						it.rights = Utils.readAttr(item, "rights", false);
-						it.externalId = it.fullresolution.get(0);
-						if (it.externalId == null || it.externalId == "")
-							it.externalId = it.url.original.get(0);
-						it.externalId = DigestUtils.md5Hex(it.externalId);
-						a.add(it);
-					}
-				}
-				res.items = a;
+				
+				res.items = getItems(response);
 				res.facets = response.path("facets");
-
-				for (JsonNode facet : response.path("facets")) {
-					for (JsonNode jsonNode : facet.path("fields")) {
-						String label = jsonNode.path("label").asText();
-						int count = jsonNode.path("count").asInt();
-						switch (facet.path("name").asText()) {
-						case "TYPE":
-							countValue(type, label, count);
-							break;
-
-						case "DATA_PROVIDER":
-							countValue(dataprovider, label, false, count);
-							break;
-
-						case "PROVIDER":
-							countValue(provider, label, false, count);
-							break;
-
-						case "RIGHTS":
-							countValue(rights, label, count);
-							break;
-
-						case "proxy_dc_creator":
-							countValue(creator, label, false, count);
-							break;
-						case "COUNTRY":
-							countValue(country, label, false, count);
-							break;
-
-						case "YEAR":
-							countValue(year, label, false, count);
-							break;
-
-						default:
-							break;
-						}
-					}
-				}
-
-				res.filtersLogic = new ArrayList<>();
-				res.filtersLogic.add(type);
-				res.filtersLogic.add(provider);
-				res.filtersLogic.add(dataprovider);
-				res.filtersLogic.add(creator);
-				res.filtersLogic.add(rights);
-				res.filtersLogic.add(country);
-				res.filtersLogic.add(year);
-				res.filtersLogic.add(reusability);
+				res.filtersLogic = createFilters(response);
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				// e.printStackTrace();
 			}
-
 		}
-		// protected void countValue(CommonFilterResponse type, String t) {
-		// type.addValue(vmap.translateToCommon(type.filterID, t));
-		// }
 		return res;
 	}
 
@@ -360,7 +363,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			JsonNode record = response.get("object");
 			if (response != null){
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
-			
+			    /*
 				JsonNode item = record;
 				
 				ItemsResponse it = new ItemsResponse();
@@ -390,7 +393,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				it.externalId = it.fullresolution.get(0);
 				if (it.externalId == null || it.externalId == "")
 					it.externalId = it.url.original.get(0);
-				it.externalId = DigestUtils.md5Hex(it.externalId);
+				it.externalId = DigestUtils.md5Hex(it.externalId);*/
 			
 			}
 			response = HttpConnector

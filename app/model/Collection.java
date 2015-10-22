@@ -21,9 +21,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.validation.constraints.NotNull;
 
-import model.Rights.Access;
+import javax.validation.constraints.NotNull;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
@@ -31,10 +30,6 @@ import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-
-import utils.AccessEnumConverter;
-import utils.Deserializer;
-import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,6 +39,10 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+import model.Rights.Access;
+import utils.AccessEnumConverter;
+import utils.Deserializer;
+import utils.Serializer;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -57,7 +56,7 @@ public class Collection {
 
 	@NotNull
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId ownerId;
+	private ObjectId creatorId;
 
 	@NotNull
 	@NotBlank
@@ -68,7 +67,7 @@ public class Collection {
 	private ObjectId thumbnail;
 
 	private int itemCount;
-	private boolean isPublic;
+	// private boolean isPublic;
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
@@ -85,9 +84,12 @@ public class Collection {
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
+	// @JsonSerialize(using = Serializer.RightsSerializer.class)
+	// @JsonDeserialize(using = Deserializer.RightsDeserializer.class)
+	private final Rights rights = new Rights();
+	@Embedded
 	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
-	@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
-	private final  Map<ObjectId, Access> rights = new HashMap<ObjectId, Access>();
+	private final Map<ObjectId, Access> underModerationInGroups = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {
 		return this.dbId;
@@ -127,38 +129,38 @@ public class Collection {
 	}
 
 	public boolean getIsPublic() {
-		return isPublic;
+		return rights.isPublic();
 	}
 
 	public void setIsPublic(boolean isPublic) {
-		this.isPublic = isPublic;
+		rights.setPublic(isPublic);
 	}
 
-	public User retrieveOwner() {
-		return DB.getUserDAO().getById(this.ownerId, null);
+	public User retrieveCreator() {
+		return DB.getUserDAO().getById(this.creatorId, null);
 	}
 
-	public ObjectId getOwnerId() {
-		return this.ownerId;
+	public ObjectId getCreatorId() {
+		return this.creatorId;
 	}
 
 	@JsonProperty
-	public void setOwnerId(ObjectId ownerId) {
+	public void setCreatorId(ObjectId creatorId) {
 		// Set owner for first time
-		if (this.ownerId == null) {
-			this.ownerId = ownerId;
-			rights.put(this.ownerId, Access.OWN);
+		if (this.creatorId == null) {
+			this.creatorId = creatorId;
+			rights.put(this.creatorId, Access.OWN);
 			// Owner has changed
-		} else if (!this.ownerId.equals(ownerId)) {
+		} else if (!this.creatorId.equals(creatorId)) {
 			// Remove rights for old owner
-			rights.remove(this.ownerId, Access.OWN);
-			this.ownerId = null;
-			setOwnerId(ownerId);
+			rights.remove(this.creatorId, Access.OWN);
+			this.creatorId = null;
+			setCreatorId(creatorId);
 		}
 	}
 
 	public void setOwnerId(User owner) {
-		setOwnerId(owner.getDbId());
+		setCreatorId(owner.getDbId());
 	}
 
 	public List<CollectionRecord> getFirstEntries() {
@@ -225,12 +227,13 @@ public class Collection {
 		this.itemCount--;
 	}
 
-	public Map<ObjectId, Access> getRights() {
+	public Rights getRights() {
 		return rights;
 	}
 
 	@JsonIgnore
-	public void setRights(Map<ObjectId, Access> r) {}
+	public void setRights(Rights r) {
+	}
 
 	public boolean getIsExhibition() {
 		return isExhibition;
@@ -248,4 +251,11 @@ public class Collection {
 		this.exhibition = exhibition;
 	}
 
+	public void addForModeration(ObjectId groupId, Access access) {
+		this.underModerationInGroups.put(groupId, access);
+	}
+
+	public Access removeFromModeration(ObjectId groupId) {
+		return this.underModerationInGroups.remove(groupId);
+	}
 }
