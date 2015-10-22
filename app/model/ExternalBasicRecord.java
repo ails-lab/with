@@ -28,7 +28,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class ExternalBasicRecord {
 	
 	public static enum RecordType {
-		IMAGE, TEXT, VIDEO, SOUND, UNKNOWN
+		IMAGE("Image"), TEXT("Text"), VIDEO("Video"), SOUND("Sound"), UNKNOWN("Unknown");
+
+		private final String text;
+
+	    private RecordType(final String text) {
+	        this.text = text;
+	    }
+
+	    @Override
+	    public String toString() {
+	        return text;
+	    }
 	}
 	
 	public enum ItemRights {
@@ -57,7 +68,7 @@ public class ExternalBasicRecord {
 	    @Override
 	    public String toString() {
 	        return text;
-	    };
+	    }
 
 	}
 	

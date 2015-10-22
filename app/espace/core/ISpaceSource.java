@@ -19,6 +19,7 @@ package espace.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
@@ -34,7 +35,9 @@ import espace.core.sources.FilterValuesMap;
 import espace.core.sources.TypeValues;
 
 public abstract class ISpaceSource {
-
+	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
+	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
+	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
 	public ISpaceSource() {
 		super();
 		vmap = new FilterValuesMap();

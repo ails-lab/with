@@ -18,6 +18,8 @@ package espace.core.sources;
 
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -40,11 +42,9 @@ import espace.core.AdditionalQueryModifier;
 import espace.core.AutocompleteResponse;
 import espace.core.AutocompleteResponse.DataJSON;
 import espace.core.AutocompleteResponse.Suggestion;
-import espace.core.CommonFilter;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
-import espace.core.EuropeanaQuery;
 import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
@@ -63,22 +63,41 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super();
-
-		for (CommonFilters filterType: CommonFilters.values()) {
-			addDefaultWriter(filterType.name(), qfwriter(filterType.name()));
+	    filtersSupportedBySource = new ArrayList<CommonFilters>(
+	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
+	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
+	    				CommonFilters.TYPE, CommonFilters.YEAR)
+	    		);
+	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
+	    		for (CommonFilters filter: filtersSupportedBySource) {
+	    			put(filter.getID(), filter);
+	    		}
+	    	}};
+	    filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
+	    		for (String key: sourceToFiltersMappings.keySet()) {
+	    			put(sourceToFiltersMappings.get(key), key);
+	    		}
+	    	}};
+		filtersSupportedBySource = new ArrayList<CommonFilters>(
+	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
+	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
+	    				CommonFilters.TYPE, CommonFilters.YEAR)
+	    		);
+		for (CommonFilters filterType: filtersSupportedBySource) {
+			addDefaultWriter(filterType.getID(), qfwriter(filtersToSourceMappings.get(filterType)));
 		}
 		for (RecordType type: RecordType.values()) {
-			addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
+			addMapping(CommonFilters.TYPE.getID(), type.name(), type.name());
 		}
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.name(), ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.name(), ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.name(), ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.name(), ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.name(), ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.name(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.name(), ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.UNKNOWN.name(), ".*unknown.*");
 
 	}
-
+	/*
 	private Function<List<String>, QueryModifier> qreusabilitywriter() {
 		Function<String, String> function = (String s) -> {
 			return "&REUSABILITY%3A" + s;
@@ -90,8 +109,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
-
+	*/
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
+		if (parameter.equals(CommonFilters.YEAR.getID())) {
+			return qfwriterYEAR();
+		}
 		Function<String, String> function = (String s) -> {
 			return "%22" + Utils.spacesFormatQuery(s, "%20") + "%22";
 		};
@@ -202,29 +224,31 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		//JsonNode facets = response.path("facets");
 		for (JsonNode facet : response.path("facets")) {
-			for (JsonNode jsonNode : facet.path("fields")) {
-				String label = jsonNode.path("label").asText();
-				int count = jsonNode.path("count").asInt();
-				String filterType = facet.path("name").asText();
-				CommonFilterLogic filter = new CommonFilterLogic(CommonFilters.valueOf(filterType));
-				switch (filterType) {
-					case "TYPE": 
-					case "RIGHTS":
-						countValue(filter, label, count);
-						break;
-					case "DATA_PROVIDER": 
-					case "PROVIDER":
-					case "proxy_dc_creator":
-					case "COUNTRY":
-					case "YEAR":
-						countValue(filter, label, false, count);
-						break;
-					default:
-						break;
+			String filterType = facet.path("name").asText();
+			CommonFilters withFilter = sourceToFiltersMappings.get(filterType);
+			if (withFilter != null) {
+				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
+				for (JsonNode jsonNode : facet.path("fields")) {
+					String label = jsonNode.path("label").asText();
+					int count = jsonNode.path("count").asInt();
+					switch (filterType) {
+						case "TYPE": 
+						case "RIGHTS":
+							countValue(filter, label, count);
+							break;
+						case "DATA_PROVIDER": 
+						case "PROVIDER":
+						case "proxy_dc_creator":
+						case "COUNTRY":
+						case "YEAR":
+							countValue(filter, label, false, count);
+							break;
+						default:
+							break;
+					}
+					filters.add(filter);
 				}
-				filters.add(filter);
 			}
 		}
 		return filters;
@@ -238,8 +262,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				try {
 					Provider recordProvider = new Provider(Utils.readArrayAttr(item, "dataProvider", false).get(0));
 					record.addProvider(recordProvider);
+					//TODO: add provider if available
 					//TODO:are indeed guid and id the right fields?
-					recordProvider = new Provider(LABEL,
+					recordProvider = new Provider(getSourceName(),
 							Utils.readAttr(item, "id", true),
 							Utils.readAttr(item, "guid", false)
 							);
