@@ -16,48 +16,35 @@
 
 package espace.core.sources;
 
-public class RightsValues {
+public enum RightsValues {
+	Public("Attribution Alone"), Restricted("Restricted"),
+	Permission("Permission"), Modify("Allow re-use and modifications"),
+	Commercial("Allow re-use for commercial"),
+	Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
+	Creative_Not_Commercial("NOT Comercial"),
+	Creative_Not_Modify("NOT Modify"),
+	Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes"),
+	Creative_SA("share alike"),
+	Creative_BY("use by attribution"),
+	Creative("Allow re-use"),
+	RR("Rights Reserved"),
+	RRPA("Rights Reserved - Paid Access"),
+	RRRA("Rights Reserved - Restricted Access"),
+	RRFA("Rights Reserved - Free Access"),
+	UNKNOWN("Unknown");
 
-	//open
-	public static final String Public = "Attribution alone";
-	//You can use it with attribution
 	
-	public static final String Restricted = "Restricted";
-	//You can use it with restrictions
-	
-	public static final String Permission = "Permission";
-	//You can use it with pemission
-	
+	private final String text;
 
-	public static final String Modify = "Allow re-use and modifications";
-		
-	public static final String Commercial = "Allow re-use for commercial";
-	
-	public static final String Creative_Commercial_Modify = "use for commercial purposes modify, adapt, or build upon";
-	
-	public static final String Creative_Not_Commercial = "NOT Comercial";
+    private RightsValues(final String text) {
+        this.text = text;
+    }
 
-	public static final String Creative_Not_Modify = "NOT Modify";
+    @Override
+    public String toString() {
+        return text;
+    };
 	
-	
-	public static final String Creative_Not_Commercial_Modify = "not modify, adapt, or build upon, not for commercial purposes";
-	
-	public static final String Creative_SA = "share alike";
-	
-	public static final String Creative_BY = "use by attribution";
-
-	public static final String Creative = "Allow re-use";
-
-	public static final String RR = "Rights Reserved";
-
-	public static final String RRPA = "Rights Reserved - Paid Access";
-
-	public static final String RRRA = "Rights Reserved - Restricted Access";
-	
-	public static final String RRFA = "Rights Reserved - Free Access";
-
-	public static final String UNKNOWN = "Unknown";
-
 	
 
 }

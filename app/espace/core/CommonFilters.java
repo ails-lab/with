@@ -16,26 +16,23 @@
 
 package espace.core;
 
-public class CommonFilters {
-	
-	public static enum FilterTypes {
-		TYPE("Type"), PROVIDER("Provider"), CREATOR("Creator"), RIGHTS("Rights"),
-		COUTNRY("Country"), YEAR("Year"), CONTRIBUTOR("Contributor"), DATA_PROVIDER("Data Provider");
+public enum CommonFilters {
+		TYPE("Type"), PROVIDER("Provider"), CREATOR("Creator"), RIGHTS("Content Usage"),
+		COUNTRY("Country"), YEAR("Year"), CONTRIBUTOR("Contributor"), DATA_PROVIDER("Data Provider");
 		
 		private final String text;
 
-	    private FilterTypes(final String text) {
+	    private CommonFilters(final String text) {
 	        this.text = text;
 	    }
 
 	    @Override
 	    public String toString() {
 	        return text;
-	    }};
+	    };
 	
-	
+	/*
 	//TODO: remove duplication
-	public static final String TYPE_ID = "type";
 	public static final String TYPE_NAME = "Type";
 	public static final String PROVIDER_ID = "provider";
 	public static final String PROVIDER_NAME = "Provider";
@@ -57,5 +54,5 @@ public class CommonFilters {
 	public static final String AVAILABILITY_NAME = "Availability";
 
 	public static final String REUSABILITY_ID = "reusability";
-	public static final String REUSABILITY_NAME = "Reusability";
+	public static final String REUSABILITY_NAME = "Reusability";*/
 }

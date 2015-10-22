@@ -19,7 +19,7 @@ package espace.core;
 import java.util.List;
 
 public class CommonFilterResponse {
-	public CommonFilters.FilterTypes filter;
+	public CommonFilters filter;
 	public List<ValueCount> suggestedValues;
 
 	public CommonFilterResponse() {

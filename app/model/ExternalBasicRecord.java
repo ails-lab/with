@@ -28,7 +28,37 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class ExternalBasicRecord {
 	
 	public static enum RecordType {
-		IMAGE, TEXT, VIDEO, AUDIO, UNKNOWN
+		IMAGE, TEXT, VIDEO, SOUND, UNKNOWN
+	}
+	
+	public enum ItemRights {
+		Public("Attribution Alone"), Restricted("Restricted"),
+		Permission("Permission"), Modify("Allow re-use and modifications"),
+		Commercial("Allow re-use for commercial"),
+		Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
+		Creative_Not_Commercial("NOT Comercial"),
+		Creative_Not_Modify("NOT Modify"),
+		Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes"),
+		Creative_SA("share alike"),
+		Creative_BY("use by attribution"),
+		Creative("Allow re-use"),
+		RR("Rights Reserved"),
+		RRPA("Rights Reserved - Paid Access"),
+		RRRA("Rights Reserved - Restricted Access"),
+		RRFA("Rights Reserved - Free Access"),
+		UNKNOWN("Unknown");
+
+		private final String text;
+
+	    private ItemRights(final String text) {
+	        this.text = text;
+	    }
+
+	    @Override
+	    public String toString() {
+	        return text;
+	    };
+
 	}
 	
 	private String externalId;
@@ -50,7 +80,7 @@ public class ExternalBasicRecord {
 	//media type
 	private  RecordType type;
 
-	private String itemRights;
+	private ItemRights itemRights;
 
 	private List<String> contributors;
 	

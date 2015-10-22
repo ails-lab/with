@@ -84,7 +84,7 @@ public abstract class ISpaceSource {
 
 	protected void countValue(CommonFilterLogic type, String t, boolean toglobal, int count) {
 		if (toglobal)
-			type.addValue(vmap.translateToCommon(type.data.filter, t), count);
+			type.addValue(vmap.translateToCommon(type.data.filter.name(), t), count);
 		else
 			type.addValue(t, count);
 

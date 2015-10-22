@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.function.Function;
 
 import model.ExternalBasicRecord;
+import model.ExternalBasicRecord.ItemRights;
 import model.Provider;
+import model.ExternalBasicRecord.RecordType;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
@@ -51,8 +53,6 @@ import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
 
@@ -64,33 +64,18 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public EuropeanaSpaceSource() {
 		super();
 
-		addDefaultWriter(CommonFilters.PROVIDER_ID, qfwriter("PROVIDER"));
-		addDefaultWriter(CommonFilters.DATAPROVIDER_ID, qfwriter("DATA_PROVIDER"));
-		addDefaultWriter(CommonFilters.COUNTRY_ID, qfwriter("COUNTRY"));
+		for (CommonFilters filterType: CommonFilters.values()) {
+			addDefaultWriter(filterType.name(), qfwriter(filterType.name()));
+		}
+		for (RecordType type: RecordType.values()) {
+			addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
+		}
 
-		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
-
-		addDefaultWriter(CommonFilters.CREATOR_ID, qfwriter("CREATOR"));
-
-		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
-		// qfwriter("proxy_dc_contributor"));
-
-		addDefaultQueryModifier(CommonFilters.RIGHTS_ID, qrightwriter());
-
-		addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
-
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "IMAGE");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "VIDEO");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "SOUND");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "TEXT");
-
-		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
-
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.name(), ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.name(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.name(), ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.name(), ".*unknown.*");
 
 	}
 
@@ -215,15 +200,15 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return LABEL;
 	}
 	
-	public ArrayList<CommonFilterLogic> createFilters(JsonNode response) {
+	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		JsonNode facets = response.path("facets");
+		//JsonNode facets = response.path("facets");
 		for (JsonNode facet : response.path("facets")) {
 			for (JsonNode jsonNode : facet.path("fields")) {
 				String label = jsonNode.path("label").asText();
 				int count = jsonNode.path("count").asInt();
 				String filterType = facet.path("name").asText();
-				CommonFilterLogic filter = new CommonFilterLogic(CommonFilters.FilterTypes.valueOf(filterType));
+				CommonFilterLogic filter = new CommonFilterLogic(CommonFilters.valueOf(filterType));
 				switch (filterType) {
 					case "TYPE": 
 					case "RIGHTS":
@@ -231,7 +216,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						break;
 					case "DATA_PROVIDER": 
 					case "PROVIDER":
-					case "CREATOR"://proxy_dc_creator
+					case "proxy_dc_creator":
 					case "COUNTRY":
 					case "YEAR":
 						countValue(filter, label, false, count);
@@ -242,6 +227,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				filters.add(filter);
 			}
 		}
+		return filters;
 	}
 	
 	public ArrayList<ExternalBasicRecord> getItems(JsonNode response) {
@@ -249,34 +235,37 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		if (response.path("success").asBoolean()) {
 			for (JsonNode item : response.path("items")) {
 				ExternalBasicRecord record = new ExternalBasicRecord();
-				Provider recordProvider = new Provider(Utils.readArrayAttr(item, "dataProvider", false).get(0));
-				record.addProvider(recordProvider);
-				//TODO:are indeed guid and id the right fields?
-				recordProvider = new Provider(LABEL,
-						Utils.readAttr(item, "id", true),
-						Utils.readAttr(item, "guid", false)
-						);
-				record.addProvider(recordProvider);
-				//TODO: add null checks
-				record.setThumbnailUrl(Utils.readArrayAttr(item, "edmPreview", false).get(0));
-				record.setIsShownBy(Utils.readArrayAttr(item, "edmIsShownBy", false).get(0));
-				record.setTitle(Utils.readArrayAttr(item, "title", false).get(0));
-				record.setDescription(Utils.readArrayAttr(item, "dcDescription", false).get(0));
-				record.setCreator(Utils.readArrayAttr(item, "dcCreator", false).get(0));
-				List<String> yearsString = Utils.readArrayAttr(item, "year", false);
-				List<Year> years = new ArrayList<Year>();
-				for (String yearString: yearsString) {
-					years.add(Year.parse(yearString));
+				try {
+					Provider recordProvider = new Provider(Utils.readArrayAttr(item, "dataProvider", false).get(0));
+					record.addProvider(recordProvider);
+					//TODO:are indeed guid and id the right fields?
+					recordProvider = new Provider(LABEL,
+							Utils.readAttr(item, "id", true),
+							Utils.readAttr(item, "guid", false)
+							);
+					record.addProvider(recordProvider);
+					//TODO: add null checks
+					record.setThumbnailUrl(Utils.readArrayAttr(item, "edmPreview", false).get(0));
+					record.setIsShownBy(Utils.readArrayAttr(item, "edmIsShownBy", false).get(0));
+					record.setTitle(Utils.readArrayAttr(item, "title", false).get(0));
+					record.setDescription(Utils.readArrayAttr(item, "dcDescription", false).get(0));
+					record.setCreator(Utils.readArrayAttr(item, "dcCreator", false).get(0));
+					List<String> yearsString = Utils.readArrayAttr(item, "year", false);
+					List<Year> years = new ArrayList<Year>();
+					for (String yearString: yearsString) {
+						years.add(Year.parse(yearString));
+					}
+					record.setYear(years);
+					if (Utils.readArrayAttr(item, "edmIsShownAt", false)!=null)
+						record.setIsShownAt(Utils.readArrayAttr(item, "edmIsShownAt", false).get(0));
+					record.setItemRights(Utils.readAttr(item, "rights", false));
+					record.setExternalId(record.getIsShownAt());
+					if (record.getExternalId() == null || record.getExternalId() == "")
+						record.setExternalId(record.getIsShownBy());
+					record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+					items.add(record);
+				} catch (Exception e) {
 				}
-				record.setYear(years);
-				if (Utils.readArrayAttr(item, "edmIsShownAt", false)!=null)
-					record.setIsShownAt(Utils.readArrayAttr(item, "edmIsShownAt", false).get(0));
-				record.setItemRights(Utils.readAttr(item, "rights", false));
-				record.setExternalId(record.getIsShownAt());
-				if (record.getExternalId() == null || record.getExternalId() == "")
-					record.setExternalId(record.getIsShownBy());
-				record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
-				items.add(record);
 			}
 		}
 		return items;
