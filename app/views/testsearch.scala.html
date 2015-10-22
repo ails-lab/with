@@ -161,18 +161,12 @@
 				  							@for(it <- p.items) {
 				  								<div  class="col-md-12 thumbnail">
 				  									<div class="col-md-4 text-right">
-				  										<img alt="NO IMAGE" class="img-thumbnail" src="@if(it.thumb!=null && it.thumb.get(0)!="null") {@it.thumb.get(0)} else {}" /> 
+				  										<img alt="NO IMAGE" class="img-thumbnail" src="@if(it.getThumbnailUrl()!=null && it.getThumbnailUrl()!="null") {@it.getThumbnailUrl()} else {}" /> 
 				    								</div>
 				    								
 				  									<div class="col-md-8">
 				    									<b>Title: </b> 
-				    									<a href="@if(it.url!=null) {@if(it.url.original!=null) {@it.url.original.get(0)} else {#}} else {NA}"> 
-				 											@shorttext(it.title,40)
-				 										</a><br/>
-				 										
-				 										<b>Data Provider: </b> 
-				    									@if(it.dataProvider!=null) {@shorttext(it.dataProvider,100)} else {NA} <br/>
-				  										<b>Descr: </b>@if(it.description!=null) {@shorttext(it.description,100)} else {NA} <br/>
+				    									
 				   									</div>
 				  									
 				  									
