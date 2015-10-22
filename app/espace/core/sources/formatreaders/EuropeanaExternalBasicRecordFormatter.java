@@ -51,6 +51,7 @@ public class EuropeanaExternalBasicRecordFormatter extends JsonContextRecordForm
 		record.setTitle(rec.getStringValue("title"));
 		record.setDescription(rec.getStringValue("dcDescription"));
 		record.setCreator(rec.getStringValue("dcCreator"));
+		record.setContributors(rec.getStringArrayValue("dcContributor"));
 		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 		record.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		record.setItemRights(rec.getStringValue("rights"));
