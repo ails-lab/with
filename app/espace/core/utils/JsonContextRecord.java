@@ -39,6 +39,7 @@ public class JsonContextRecord {
 
 	private JsonNode rootInformation;
 	private List<String> context;
+	
 	public JsonContextRecord(JsonNode rootInformation) {
 		this();
 		this.rootInformation = rootInformation;

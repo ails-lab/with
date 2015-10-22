@@ -89,8 +89,8 @@ public class Collection {
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 
-	//@JsonSerialize(using = Serializer.CustomMapSerializer.class)
-	//@JsonDeserialize(using = Deserializer.CustomMapDeserializer.class)
+	//@JsonSerialize(using = Serializer.RightsSerializer.class)
+	//@JsonDeserialize(using = Deserializer.RightsDeserializer.class)
 	private final  Rights rights = new Rights();
 	@Embedded
 	private final Set<ObjectId> underModerationInGroups = new HashSet<ObjectId>();

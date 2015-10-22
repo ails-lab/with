@@ -17,10 +17,11 @@
 package espace.core;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import model.CollectionRecord;
+import model.ExternalBasicRecord;
+import model.Provider;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -32,6 +33,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import elastic.ElasticUtils;
 
 public class SourceResponse {
+	
+	public String query;
+	public int totalCount;
+	public int startIndex;
+	public int count;
+	public List<ExternalBasicRecord> items;
+	public String source;
+	public JsonNode facets;
+	public List<CommonFilterResponse> filters;
+	public List<CommonFilterLogic> filtersLogic;
 
 	public SourceResponse() {
 		items = new ArrayList<>();
@@ -49,64 +60,19 @@ public class SourceResponse {
 		this.source = "WITHin";
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
-		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
+		List<ExternalBasicRecord> items = new ArrayList<ExternalBasicRecord>();
 		for (CollectionRecord r : elasticrecords) {
-			ItemsResponse it = new ItemsResponse();
-			it.comesFrom = r.getSource();
-			it.title = r.getTitle();
-			it.description = r.getDescription();
-			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
-			it.url = new MyURL();
-			it.url.fromSourceAPI = r.getRecordUrlInSource();
-			items.add(it);
+			ExternalBasicRecord item = new ExternalBasicRecord();
+			Provider provider = new Provider(source);
+			provider.providerName = source; 
+			item.addProvider(provider);
+			item.setTitle(r.getTitle());
+			item.setDescription(r.getDescription());
+			item.setThumbnailUrl(r.getThumbnailUrl().toString());
+			items.add(item);
 		}
 		this.items = items;
 	}
-
-	public static class Lang {
-		public Lang(String languageCode, String textValue) {
-			this.lang = languageCode;
-			this.value = textValue;
-		}
-
-		public Lang() {
-			super();
-		}
-
-		public String lang;
-		public String value;
-	}
-
-	public static class MyURL {
-		public List<String> original;
-		public String fromSourceAPI;
-	}
-
-	public static class ItemsResponse {
-		public String id;
-		public List<String> type;
-		public List<String> thumb;
-		public String title;
-		public String description;
-		public String creator;
-		public List<String> year;
-		public String dataProvider;
-		public MyURL url;
-		public List<String> fullresolution;
-		public String comesFrom;
-		public String rights;
-		public String externalId;
-	}
-
-	public String query;
-	public int totalCount;
-	public int startIndex;
-	public int count;
-	public List<ItemsResponse> items;
-	public String source;
-	public JsonNode facets;
-	public List<CommonFilterResponse> filters;
-	public List<CommonFilterLogic> filtersLogic;
 
 	public SourceResponse merge(SourceResponse r2) {
 		SourceResponse res = new SourceResponse();

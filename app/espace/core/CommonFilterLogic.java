@@ -25,16 +25,14 @@ import utils.SortedList;
 
 public class CommonFilterLogic implements Cloneable {
 
-	private HashMap<String, ValueCount> counts;
-	private boolean global = true;
+	private HashMap<String, ValueCount> counts = new HashMap<String, ValueCount>();
 
 	public CommonFilterResponse data = new CommonFilterResponse();
 
-	public CommonFilterLogic() {
-		super();
-		counts = new HashMap<String, ValueCount>();
+	public CommonFilterLogic(CommonFilters.FilterTypes filter) {
+		this.data.filter = filter;
 	}
-
+	
 	public void addValue(String value, int count) {
 		if (value != null) {
 			// System.out.println(filterName + " Added " + value);
@@ -62,7 +60,7 @@ public class CommonFilterLogic implements Cloneable {
 			addValue(string, count);
 		}
 	}
-
+	
 	public static CommonFilterLogic typeFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.TYPE_ID;
@@ -93,7 +91,7 @@ public class CommonFilterLogic implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "Filter [" + data.filterName + ", values=" + counts.values().size() + "]";
+		return "Filter [" + data.filter.toString() + ", values=" + counts.values().size() + "]";
 	}
 
 	public CommonFilterResponse export() {
