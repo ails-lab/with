@@ -149,6 +149,12 @@ public class JsonContextRecord {
 		return getValue(buildpaths(path));
 	}
 	
+	public String getStringValue(String... path){
+		return JsonNodeUtils.asString(getValue(buildpaths(path)));
+	}
+	public List<String> getStringArrayValue(String... path){
+		return JsonNodeUtils.asStringArray(getValue(buildpaths(path)));
+	}
 	
 	
 	public JsonNode getRootInformation() {
@@ -161,7 +167,8 @@ public class JsonContextRecord {
 
 	public static void main(String[] args) {
 		JsonContextRecord r = new JsonContextRecord("{\"a\":\"b\",\"ages\":[1,2], \"f\":{\"size\":\"4\"}}");
-		System.out.println(r.getValue("f.size"));
+		JsonNode value = r.getValue("f.size3.jk");
+		System.out.println(value);
 		System.out.println(r.getValue("ages[1]"));
 		r.setValue("f.color.name.enrique", r.getValue("a"));
 		r.setValue("f.color.name.mijalis", r.getValue("a"));
