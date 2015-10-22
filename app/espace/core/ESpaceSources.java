@@ -22,17 +22,18 @@ import java.util.List;
 import java.util.Map;
 
 import play.Logger;
-import espace.core.sources.BritishLibrarySpaceSource;
+/*import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.sources.DDBSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
-import espace.core.sources.ElasticSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
-import espace.core.sources.EuropeanaSpaceSource;
-import espace.core.sources.WithSpaceSource;
 import espace.core.sources.NLASpaceSource;
 import espace.core.sources.RijksmuseumSpaceSource;
-import espace.core.sources.YouTubeSpaceSource;
+import espace.core.sources.YouTubeSpaceSource;*/
+import espace.core.sources.EuropeanaSpaceSource;
+import espace.core.sources.WithSpaceSource;
+import espace.core.sources.ElasticSource;
+
 
 public class ESpaceSources {
 
