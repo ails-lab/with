@@ -248,6 +248,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 						it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
 						it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
 						it.rights = Utils.readAttr(item, "rights", false);
+						it.type = Utils.readAttr(item, "type", false);
 						it.externalId = it.fullresolution.get(0);
 						if (it.externalId == null || it.externalId == "")
 							it.externalId = it.url.original.get(0);
@@ -366,7 +367,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 //				not added before
-				it.type = Utils.readArrayAttr(item, "type", true);
+				it.type = Utils.readAttr(item, "type", true);
 				it.title = Utils.readArrayAttr(item, "title", false).get(0);
 				it.year = Utils.readArrayAttr(item, "year", false);
 				it.creator = Utils.readArrayAttr(item.path("europeanaAggregation"), "dcCreator", false).get(0);
