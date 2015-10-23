@@ -159,8 +159,8 @@ public class Collection {
 		}
 	}
 
-	public void setOwnerId(User owner) {
-		setCreatorId(owner.getDbId());
+	public void setCreatorId(User creator) {
+		setCreatorId(creator.getDbId());
 	}
 
 	public List<CollectionRecord> getFirstEntries() {

@@ -61,9 +61,9 @@ public class CollectionDAO extends DAO<Collection> {
 		return this.find(q).asList();
 	}
 
-	public Collection getByOwnerAndTitle(ObjectId ownerId, String title) {
-		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).field("title").equal(title);
+	public Collection getByOwnerAndTitle(ObjectId creatorId, String title) {
+		Query<Collection> q = this.createQuery().field("creatorId")
+				.equal(creatorId).field("title").equal(title);
 		return this.findOne(q);
 	}
 
@@ -85,9 +85,9 @@ public class CollectionDAO extends DAO<Collection> {
 		return getByOwner(id, 0, 1);
 	}
 
-	public List<Collection> getByOwner(ObjectId ownerId, int offset, int count) {
-		Query<Collection> q = this.createQuery().field("ownerId")
-				.equal(ownerId).field("isExhibition").equal(false)
+	public List<Collection> getByOwner(ObjectId creatorId, int offset, int count) {
+		Query<Collection> q = this.createQuery().field("creatorId")
+				.equal(creatorId).field("isExhibition").equal(false)
 				.offset(offset).limit(count);
 		return this.find(q).asList();
 	}
@@ -168,7 +168,7 @@ public class CollectionDAO extends DAO<Collection> {
 	public Query<Collection> formBasicQuery(CriteriaContainer[] criteria, ObjectId creator, Boolean isExhibition,  int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		if (creator != null)
-			q.field("ownerId").equal(creator);
+			q.field("creatorId").equal(creator);
 		if (criteria.length > 0)
 			q.and(criteria);
 		return q;
@@ -213,7 +213,7 @@ public class CollectionDAO extends DAO<Collection> {
 	public Tuple<List<Collection>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
-		q.field("ownerId").notEqual(userId);
+		q.field("creatorId").notEqual(userId);
 		/*if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);*/
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
@@ -239,7 +239,7 @@ public class CollectionDAO extends DAO<Collection> {
 		/*if (isExhibition != null)
 			q.field("isExhibition").equal(isExhibition);*/
 		if (creator != null)
-			q.field("ownerId").equal(creator);
+			q.field("creatorId").equal(creator);
 		Criteria[] criteria = {this.createQuery().criteria("isPublic").equal(true)};
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
@@ -258,7 +258,7 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public User getCollectionOwner(ObjectId id) {
 		Query<Collection> q = this.createQuery().field("_id").equal(id)
-				.retrievedFields(true, "ownerId");
+				.retrievedFields(true, "creatorId");
 		return findOne(q).retrieveCreator();
 	}
 

@@ -625,8 +625,8 @@ public class CollectionController extends Controller {
 			result.put("error", "User not specified");
 			return forbidden(result);
 		}
-		if (json.has("ownerId")) {
-			String userId = json.get("ownerId").asText();
+		if (json.has("creatorId")) {
+			String userId = json.get("creatorId").asText();
 			String sessionId = userIds.get(0);
 			if (!userId.equals(sessionId)) {
 				result.put("error", "User does not have access to requested records");
