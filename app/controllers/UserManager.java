@@ -37,7 +37,6 @@ import org.apache.commons.mail.SimpleEmail;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -86,16 +85,19 @@ public class UserManager extends Controller {
 		String proposedName;
 		int i = 0;
 		User u;
+		UserGroup g;
 		do {
 			proposedName = initial + i++;
 			u = DB.getUserDAO().getByUsername(proposedName);
-		} while (u != null);
+			g = DB.getUserGroupDAO().getByName(proposedName);
+		} while (u != null || g != null);
 		names.add(proposedName);
 		if ((firstName == null) || (lastName == null))
 			return names;
 		proposedName = firstName + "_" + lastName;
 		i = 0;
-		while (DB.getUserDAO().getByUsername(proposedName) != null) {
+		while (DB.getUserDAO().getByUsername(proposedName) != null
+				|| DB.getUserGroupDAO().getByName(proposedName) != null) {
 			proposedName = proposedName + i++;
 		}
 		names.add(proposedName);
@@ -168,7 +170,7 @@ public class UserManager extends Controller {
 			error.put("username", "Username is Empty");
 		} else {
 			username = json.get("username").asText();
-			if (DB.getUserDAO().getByUsername(username) != null) {
+			if (DB.getUserDAO().getByUsername(username) != null || DB.getUserGroupDAO().getByName(username) != null) {
 				error.put("username", "Username Already in Use");
 				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);

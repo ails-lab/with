@@ -30,8 +30,6 @@ import org.mongodb.morphia.annotations.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import controllers.GroupManager.GroupType;
-import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
 import utils.Serializer;
