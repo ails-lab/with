@@ -480,14 +480,7 @@ public class CollectionController extends Controller {
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
 		}
-		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {// not
-																								// logged
-																								// in
-																								// or
-																								// ask
-																								// for
-																								// public
-																								// collections
+		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {// not logged or ask for public collections
 			// return all public collections
 			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO()
 					.getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
@@ -504,9 +497,7 @@ public class CollectionController extends Controller {
 			}
 			result.put("collectionsOrExhibitions", collArray);
 			return ok(result);
-		} else { // logged in
-					// check if super user, if not, restrict query to accessible
-					// by effectiveUserIds
+		} else { //logged in, check if super user, if not, restrict query to accessible by effectiveUserIds
 			Tuple<List<Collection>, Tuple<Integer, Integer>> info;
 			if (!AccessManager.checkAccess(new HashMap<ObjectId, Access>(), effectiveUserIds, Action.DELETE)) {
 				List<ObjectId> effObjectIds = new ArrayList<ObjectId>(effectiveUserIds.size());
