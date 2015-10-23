@@ -23,23 +23,9 @@ import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
-import model.Collection;
-import model.Rights.Access;
-import model.User;
-import model.UserGroup;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.data.validation.Validation;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import utils.AccessManager;
-import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,6 +34,21 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import espace.core.HttpConnector;
+import model.Collection;
+import model.Organization;
+import model.Project;
+import model.Rights.Access;
+import model.User;
+import model.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
+import play.data.validation.Validation;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import utils.AccessManager;
+import utils.Tuple;
 
 public class GroupManager extends Controller {
 
@@ -158,7 +159,7 @@ public class GroupManager extends Controller {
 	 */
 	public static Result editGroup(String groupId) {
 
-		JsonNode json = request().body().asJson();
+		ObjectNode json = (ObjectNode) request().body().asJson();
 		ObjectNode result = Json.newObject();
 
 		String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
@@ -182,6 +183,49 @@ public class GroupManager extends Controller {
 					if (!uniqueGroupName(json.get("username").asText())) {
 						return badRequest("Group name already exists! Please specify another name.");
 					}
+				}
+			}
+			if ((json.get("page").get("address") != null || json.get("page").get("city") != null
+					|| json.get("page").get("country") != null)
+					&& (group instanceof Organization || group instanceof Project)) {
+				String address = null, city = null, country = null;
+				if (group instanceof Organization) {
+					address = ((Organization) group).getPage().getAddress();
+					city = ((Organization) group).getPage().getCity();
+					country = ((Organization) group).getPage().getCountry();
+				} else if (group instanceof Project) {
+					address = ((Project) group).getPage().getAddress();
+					city = ((Project) group).getPage().getCity();
+					country = ((Project) group).getPage().getCountry();
+				}
+				// ((string == null) ? "" : string)
+				if (json.get("page").get("address") != null) {
+					address = json.get("page").get("address").asText();
+				}
+				if (json.get("page").get("city") != null) {
+					city = json.get("page").get("city").asText();
+				}
+				if (json.get("page").get("country") != null) {
+					country = json.get("page").get("country").asText();
+				}
+				String fullAddress = ((address == null) ? "" : address) + "," + ((city == null) ? "" : city) + ","
+						+ ((country == null) ? "" : country);
+				fullAddress = fullAddress.replace(" ", "+");
+				try {
+					JsonNode response = HttpConnector
+							.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
+					ObjectNode page = Json.newObject();
+					page.put("address", address);
+					page.put("city", city);
+					page.put("country", country);
+					ObjectNode coordinates = Json.newObject();
+					coordinates.put("latitude", response.get("results").get(0).get("geometry").get("location").get("lat"));
+					coordinates.put("longitude", response.get("results").get(0).get("geometry").get("location").get("lng"));
+					page.put("coordinates", coordinates);
+					json.put("page", page);
+				} catch (Exception e) {
+					log.error("Cannot update group Page", e);
+					json.remove("page");
 				}
 			}
 			UserGroup oldVersion = group;

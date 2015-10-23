@@ -16,16 +16,14 @@
 
 package model;
 
-import java.util.Set;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 
-import utils.Serializer;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.List;
+import utils.Serializer;
 
 public class Page {
 
