@@ -131,20 +131,6 @@ public class User extends UserOrGroup {
 		return "";
 	}
 
-	public void recalculateGroups() {
-		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
-		// get all groups I'm in
-		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(this.getDbId(), GroupType.All);
-		for (UserGroup ug : gr) {
-			groupAcc.add(ug.getDbId());
-			ug.accumulateGroups(groupAcc);
-		}
-		getUserGroupsIds().clear();
-		getUserGroupsIds().addAll(groupAcc);
-	}
-
-	// getter setter
-
 	public String getEmail() {
 		return email;
 	}

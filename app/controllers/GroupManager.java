@@ -82,6 +82,11 @@ public class GroupManager extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
+			if (AccessManager.effectiveUserId(session().get("effectiveUserIds")).isEmpty()) {
+				error.put("error", "No rights for group creation");
+				return forbidden(error);
+			}
+			ObjectId creator = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
@@ -97,16 +102,14 @@ public class GroupManager extends Controller {
 			} else if (adminUsername != null) {
 				admin = DB.getUserDAO().getByUsername(adminUsername).getDbId();
 			} else {
-				if ((adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"))).isEmpty()) {
-					error.put("error", "Must specify administrator of group");
-					return internalServerError(error);
-				}
-				admin = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+				admin = creator;
 			}
 			if (newGroup.getCreator() == null) {
-				newGroup.setCreator(admin);
+				newGroup.setCreator(creator);
 			}
+			newGroup.addAdministrator(creator);
 			newGroup.addAdministrator(admin);
+			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newGroup);
 			if (!violations.isEmpty()) {
@@ -218,13 +221,33 @@ public class GroupManager extends Controller {
 	 */
 	public static Result deleteGroup(String groupId) {
 
+		ObjectNode result = Json.newObject();
+		String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error", "Only creator of the group has the right to delete the group");
+			return forbidden(result);
+		}
 		try {
+			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			if (!group.getCreator().equals(new ObjectId(userId))) {
+				result.put("error", "Only creator of the group has the right to delete the group");
+				return forbidden(result);
+			}
+			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
+			ancestorGroups.add(group.getDbId());
+			List<User> users = DB.getUserDAO().getByGroupId(group.getDbId());
+			for (User user : users) {
+				user.removeUserGroups(ancestorGroups);
+				DB.getUserDAO().makePermanent(user);
+			}
 			DB.getUserGroupDAO().deleteById(new ObjectId(groupId));
 		} catch (Exception e) {
 			log.error("Cannot delete group from database!", e);
-			return internalServerError("Cannot delete group from database!");
+			result.put("error", "Cannot delete group from database!");
+			return internalServerError(result);
 		}
-		return ok("Group deleted succesfully from database");
+		result.put("message", "Group deleted succesfully from database");
+		return ok(result);
 	}
 
 	/**
