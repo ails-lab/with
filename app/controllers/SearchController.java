@@ -110,7 +110,6 @@ public class SearchController extends Controller {
 
 	public static Promise<Result> searchwithfilter() {
 		JsonNode json = request().body().asJson();
-		System.out.println(json);
 		if (json == null) {
 			return Promise.pure((Result) badRequest("Expecting Json query"));
 		} else {
