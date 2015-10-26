@@ -73,14 +73,11 @@ public class WithSpaceSource extends ISpaceSource {
 		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_general);
 		String term = q.getQuery();
 		int count = Integer.parseInt(q.pageSize);
-		// int offset = (Integer.parseInt(q.page)-1)*count;
-		int offset = Integer.parseInt(q.page) - 1;
+		int offset = (Integer.parseInt(q.page)-1)*count;
 
 		/*
 		 * Prepare access lists for searching
 		 */
-		// This value (1000) is problematic. We have to deal with scan and
-		// scroll
 		SearchOptions elasticoptions = new SearchOptions();
 		List<Collection> colFields = new ArrayList<Collection>();
 		List<String> userIds = q.getEffectiveUserIds();
