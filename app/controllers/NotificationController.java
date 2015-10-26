@@ -26,7 +26,9 @@ import play.mvc.WebSocket;
 
 public class NotificationController extends Controller {
 	public static final ALogger log = Logger.of(NotificationController.class);
-	public static WebSocket<JsonNode> notifications() {
+	
+	public static WebSocket<JsonNode> socket() {
 	    return WebSocket.withActor(NotificationActor::props);
 	}
+
 }

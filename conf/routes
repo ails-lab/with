@@ -6,6 +6,8 @@
 #GET     /                          controllers.Application.index()
 GET     /                           controllers.Default.redirect(to="assets/index.html")
 
+GET 	/notifications/socket		controllers.NotificationController.socket()
+
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
 POST     /api/search            	controllers.SearchController.search()
 
