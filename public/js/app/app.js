@@ -1,5 +1,13 @@
 define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
+	var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+	var notificationSocket = new WS("ws://localhost:9000/notifications/socket");
+
+	var receiveEvent = function(event) {
+		$.smkAlert({ text: event.data, type: 'info', time: 30 });
+	};
+	notificationSocket.onmessage = receiveEvent;
+
 	var self = this;
 	self.currentUser = {
 		"_id": ko.observable(),
@@ -213,7 +221,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			//var err = JSON.parse(request.responseText);
 		});
 	};
-	
+
 	self.getUserExhibitions = function() {
 		return $.ajax({
 			type        : "GET",
@@ -224,9 +232,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			data        : "loggedInUserAccess=own&offset=0&count=20&isExhibition=true"}).done(
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
-				/*if (sessionStorage.getItem('User') !== null) 
+				/*if (sessionStorage.getItem('User') !== null)
 					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
-				  else if (localStorage.getItem('User') !== null) 
+				  else if (localStorage.getItem('User') !== null)
 					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
 				return data;
 			}).fail(function(request, status, error) {
