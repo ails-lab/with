@@ -81,12 +81,15 @@ public class Collection {
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
+	// we need to remove some fields from CollectionRecord 
+	//otherwise the whole document will be very heavy
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 	// @JsonSerialize(using = Serializer.RightsSerializer.class)
 	// @JsonDeserialize(using = Deserializer.RightsDeserializer.class)
 	private final Rights rights = new Rights();
+	
 	@Embedded
 	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 	private final Map<ObjectId, Access> underModerationInGroups = new HashMap<ObjectId, Access>();

@@ -46,8 +46,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 
-// there is an option Record link if the link is already materialized
-@Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class CollectionRecord extends ExternalBasicRecord {
@@ -63,6 +61,15 @@ public class CollectionRecord extends ExternalBasicRecord {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
 
+	/**
+	 * Mongo uses ISODate type to store dates.
+	 * That's why we nee these jackson annotation 
+	 * to keep the format yyyy//MM/dd at the frontend.
+	 * 
+	 * Tip: If we want to write queries/criteria for
+	 * the create field we have to use ISODate() constructor
+	 * for these. 
+	 */
 	@JsonSerialize(using = Serializer.DateSerializer.class)
 	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
@@ -76,6 +83,14 @@ public class CollectionRecord extends ExternalBasicRecord {
 	// "json EDM" -> json format of the EDM?
 	// "json UI" -> ...
 	// "source format" -> ...
+	/*
+	 *  Some Questions:
+	 *  
+	 *  1. Do we need to store XML/JSON to BSON in Mongo?
+	 *  2. Do we need to query that data?
+	 *  3. Finally what is the reason to store them?
+	 *  4. Do we need to index them?
+	 */
 	private final Map<String, String> content = new HashMap<String, String>();
 	
 	// fixed-size, denormalization of Tags on this record
