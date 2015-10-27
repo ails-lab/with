@@ -18,8 +18,6 @@ package espace.core.sources;
 
 import java.util.ArrayList;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonQuery;
@@ -28,12 +26,13 @@ import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
 import espace.core.SourceResponse;
 import espace.core.Utils;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
+import espace.core.sources.formatreaders.RijksmuseumBasicRecordFormatter;
+import model.ExternalBasicRecord;
 
 public class RijksmuseumSpaceSource extends ISpaceSource {
 	public static final String LABEL = "Rijksmuseum";
 	private String apikey = "SECRET_KEY";
+	private RijksmuseumBasicRecordFormatter formatreader;
 
 	@Override
 	public String getSourceName() {
@@ -54,6 +53,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+		formatreader = new RijksmuseumBasicRecordFormatter();
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);
@@ -74,28 +74,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				// res.count = q.pageSize;
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 				for (JsonNode item : response.path("artObjects")) {
-					ItemsResponse it = new ItemsResponse();
-					// countValue(type, t);
-					it.id = Utils.readAttr(item, "objectNumber", true);
-					it.title = Utils.readAttr(item, "title", false);
-					it.creator = Utils.readAttr(item, "principalOrFirstMaker", false);
-
-					it.thumb = Utils.readArrayAttr(item.path("webImage"), "url", false);
-
-					it.fullresolution = Utils.readArrayAttr(item.path("headerImage"), "url", false);
-					it.description = Utils.readAttr(item, "longTitle", false);
-					// it.year = Utils.readArrayAttr(item, "year", false);
-					it.dataProvider = LABEL;
-					it.url = new MyURL();
-					it.url.original = it.fullresolution;
-					it.url.fromSourceAPI = "https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/"
-							+ it.id + ",0";
-					// it.rights = Utils.readLangAttr(item, "rights", false);
-					it.externalId = it.fullresolution.get(0);
-					it.externalId = DigestUtils.md5Hex(it.externalId);
-					a.add(it);
+					a.add(formatreader.readObjectFrom(item));
 				}
 				res.items = a;
 				res.count = a.size();

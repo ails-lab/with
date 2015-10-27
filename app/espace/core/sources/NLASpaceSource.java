@@ -39,10 +39,10 @@ import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
+import espace.core.sources.formatreaders.NLAExternalBasicRecordFormatter;
+import model.ExternalBasicRecord;
 
 
 
@@ -50,19 +50,22 @@ public class NLASpaceSource extends ISpaceSource {
 
 
 	
+	public static final String LABEL = "NLA";
 	private String Key = "SECRET_KEY";
+	private NLAExternalBasicRecordFormatter formatreader;
 
 	public NLASpaceSource() {
 		super();
-		addDefaultQueryModifier(CommonFilters.TYPE_ID, qfwriter("format"));
-		addDefaultQueryModifier(CommonFilters.YEAR_ID,qfwriterYEAR());
+		formatreader = new NLAExternalBasicRecordFormatter();
+		addDefaultQueryModifier(CommonFilters.TYPE.getID(), qfwriter("format"));
+		addDefaultQueryModifier(CommonFilters.YEAR.getID(),qfwriterYEAR());
 		
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, 
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.IMAGE, 
 				"Image","Photograph", "Poster, chart, other");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "Video");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, 
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.VIDEO, "Video");
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.SOUND, 
 				"Sound","Sheet music");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books","Article");
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.TEXT, "Books","Article");
 	}
 	
 	private Function<List<String>, QueryModifier> qfwriterYEAR() {
@@ -122,7 +125,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 	}
 
 	public String getSourceName() {
-		return "NLA";
+		return LABEL;
 	}
 
 	public String getDPLAKey() {
@@ -148,7 +151,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
 			JsonNode pa = response.path("response").path("zone");
-			ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+			ArrayList<ExternalBasicRecord> a = new ArrayList<ExternalBasicRecord>();
 
 			for (int i = 0; i < pa.size(); i++) {
 				JsonNode o = pa.get(i);
@@ -175,43 +178,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 //						for (String string : v) {
 //							countValue(type, string);
 //						}
-
-						ItemsResponse it = new ItemsResponse();
-						it.id = Utils.readAttr(item, "id", true);
-						it.thumb = Utils.readArrayAttr(Utils.findNode(item
-								.path("identifier"), new Pair<String>("type",
-								"url"), new Pair<String>("linktype",
-								"thumbnail")), "value", false);
-						// TODO not present
-						it.fullresolution = null;
-						it.title = Utils.readAttr(item, "title", false);
-						it.description = Utils.readAttr(item, "abstract",
-								false);
-						it.year = Utils.readArrayAttr(item, "issued", true);
-
-						// TODO are they the same?
-						String string = Utils.readArrayAttr(item, "contributor",
-								false).get(0);
-						it.creator = string;
-						it.dataProvider = string;
-
-						it.url = new MyURL();
-						it.url.original = Utils.readArrayAttr(Utils.findNode(
-								item.path("identifier"), new Pair<String>(
-										"type", "url"), new Pair<String>(
-										"linktype",
-										"fulltext, restricted, unknown")),
-								"value", false);
-						it.url.fromSourceAPI = Utils.readAttr(item, "troveUrl",
-								false);
-
-						if (it.url.original != null)
-							it.externalId = it.url.original.get(0);
-						else
-							it.externalId=getSourceName() + "_" + it.id;
-						it.externalId = DigestUtils.md5Hex(it.externalId);
-						it.rights=null;
-
+						ExternalBasicRecord it = formatreader.readObjectFrom(item);
 						a.add(it);
 						
 					}

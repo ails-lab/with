@@ -22,8 +22,10 @@ public abstract class FormatReader<T> {
 
 	public abstract T fillObjectFrom(String text, T object);
 
+
 	public T readObjectFrom(String text){
 		return fillObjectFrom(text, buildObjectFrom());
 	}
+	
 
 }

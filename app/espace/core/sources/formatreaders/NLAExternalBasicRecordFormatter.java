@@ -16,18 +16,15 @@
 
 package espace.core.sources.formatreaders;
 
-import java.time.Year;
-
 import org.apache.commons.codec.digest.DigestUtils;
 
 import espace.core.JsonContextRecordFormatReader;
-import espace.core.sources.EuropeanaSpaceSource;
+import espace.core.sources.NLASpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
-import utils.ListUtils;
 
-public class EuropeanaExternalBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
+public class NLAExternalBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
 
 	@Override
 	public ExternalBasicRecord buildObjectFrom() {
@@ -36,24 +33,29 @@ public class EuropeanaExternalBasicRecordFormatter extends JsonContextRecordForm
 
 	@Override
 	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		record.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		record.addProvider(new Provider(rec.getStringValue("provider")));
+		//TODO: add type
 		//TODO: add null checks
-		record.setThumbnailUrl(rec.getStringValue("edmPreview"));
-		record.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		record.setThumbnailUrl(rec.getStringValue("identifier[type=url,linktype=thumbnail].value"));
+		record.setIsShownBy(null);
 		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("dcDescription"));
-		record.setCreator(rec.getStringValue("dcCreator"));
-		record.setContributors(rec.getStringArrayValue("dcContributor"));
-		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		record.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-//		record.setItemRights(rec.getStringValue("rights"));
+		record.setDescription(rec.getStringValue("abstract"));
+		record.setCreator(rec.getStringValue("contributor"));
+//		record.setContributors(rec.getStringArrayValue("contributor"));
+		// TODO: add years
+//		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+		record.setIsShownAt(
+				rec.getStringValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
+		// TODO: add rights
+//		record.setItemRights(rec.getStringValue("sourceResource.rights"));
 		record.setExternalId(record.getIsShownAt());
 		if (record.getExternalId() == null || record.getExternalId() == "")
 			record.setExternalId(record.getIsShownBy());
 		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
-		Provider recordProvider = new Provider(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid"));
+		String id = rec.getStringValue("id");
+		Provider recordProvider = new Provider(NLASpaceSource.LABEL, id, 
+				rec.getStringValue("troveUrl"));
 		record.addProvider(recordProvider);
+		
 		return record;
 	}
 

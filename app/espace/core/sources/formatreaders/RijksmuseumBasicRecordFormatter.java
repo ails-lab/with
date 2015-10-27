@@ -21,13 +21,14 @@ import java.time.Year;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import espace.core.JsonContextRecordFormatReader;
-import espace.core.sources.EuropeanaSpaceSource;
+import espace.core.sources.NLASpaceSource;
+import espace.core.sources.RijksmuseumSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
 import utils.ListUtils;
 
-public class EuropeanaExternalBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
+public class RijksmuseumBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
 
 	@Override
 	public ExternalBasicRecord buildObjectFrom() {
@@ -36,23 +37,27 @@ public class EuropeanaExternalBasicRecordFormatter extends JsonContextRecordForm
 
 	@Override
 	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		record.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		record.addProvider(new Provider(rec.getStringValue("provider")));
+		//TODO: add type
 		//TODO: add null checks
-		record.setThumbnailUrl(rec.getStringValue("edmPreview"));
-		record.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		record.setThumbnailUrl(rec.getStringValue("webImage.url"));
+		record.setIsShownBy(rec.getStringValue("headerImage.url"));
 		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("dcDescription"));
-		record.setCreator(rec.getStringValue("dcCreator"));
-		record.setContributors(rec.getStringArrayValue("dcContributor"));
+		record.setDescription(rec.getStringValue("longTitle"));
+		record.setCreator(rec.getStringValue("principalOrFirstMaker"));
+//		record.setContributors(rec.getStringArrayValue("contributor"));
+		// TODO: add years
 		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		record.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		record.setIsShownAt(record.getIsShownBy());
+		// TODO: add rights
 //		record.setItemRights(rec.getStringValue("rights"));
 		record.setExternalId(record.getIsShownAt());
 		if (record.getExternalId() == null || record.getExternalId() == "")
 			record.setExternalId(record.getIsShownBy());
 		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
-		Provider recordProvider = new Provider(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid"));
+		String id = rec.getStringValue("objectNumber");
+		Provider recordProvider = new Provider(RijksmuseumSpaceSource.LABEL, id, 
+				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/"
+						+ id + ",0");
 		record.addProvider(recordProvider);
 		return record;
 	}

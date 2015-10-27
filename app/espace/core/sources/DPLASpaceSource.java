@@ -21,10 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
-import utils.ListUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonFilterLogic;
@@ -36,17 +32,17 @@ import espace.core.QueryBuilder;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.Lang;
-import espace.core.SourceResponse.MyURL;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.Utils.LongPair;
+import espace.core.sources.formatreaders.DPLAExternalBasicRecordFormatter;
+import model.ExternalBasicRecord;
+import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
 
 	public static String LABEL = "DPLA";
 	private String DPLAKey = "SECRET_KEY";
+	private DPLAExternalBasicRecordFormatter formatreader;
 
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
@@ -62,40 +58,41 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public DPLASpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
-		addDefaultWriter(CommonFilters.COUNTRY_ID, fwriter("sourceResource.spatial.country"));
-		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("sourceResource.creator"));
-		addDefaultWriter(CommonFilters.CONTRIBUTOR_ID, fwriter("sourceResource.contributor"));
-		addDefaultWriter(CommonFilters.PROVIDER_ID, fwriter("provider.name"));
-		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("sourceResource.type"));
-		addDefaultComplexWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
+		formatreader = new DPLAExternalBasicRecordFormatter();
+		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
+		addDefaultWriter(CommonFilters.COUNTRY.getID(), fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(CommonFilters.CREATOR.getID(), fwriter("sourceResource.creator"));
+		addDefaultWriter(CommonFilters.CONTRIBUTOR.getID(), fwriter("sourceResource.contributor"));
+		addDefaultWriter(CommonFilters.PROVIDER.getID(), fwriter("provider.name"));
+		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
+		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
 
 		/**
 		 * TODO check this
 		 */
 
-		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, ".*creative(?!.*nc).*");
+		addDefaultWriter(CommonFilters.RIGHTS.getID(), fwriter("sourceResource.rights"));
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Commercial, ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Modify, ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
 				".*non-commercial.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRPA, ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRRA, ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*rr-f.*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRPA, ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRRA, ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRFA, ".*rr-f.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RRFA, ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRFA, ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, ".*(creative).*");
+		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative, ".*(creative).*");
 
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "image");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "moving image");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "sound");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "text");
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.IMAGE, "image");
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.VIDEO, "moving image");
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.SOUND, "sound");
+		addMapping(CommonFilters.TYPE.getID(), TypeValues.TEXT, "text");
 
 		// TODO: what to do with physical objects?
 	}
@@ -172,7 +169,7 @@ public class DPLASpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				res.count = docs.size();
 				res.startIndex = Utils.readIntAttr(response, "start", true);
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 
 				for (JsonNode item : docs) {
 
@@ -180,25 +177,10 @@ public class DPLASpaceSource extends ISpaceSource {
 					// "type", false);
 					// countValue(type, t);
 
-					ItemsResponse it = new ItemsResponse();
-					it.id = Utils.readAttr(item, "id", true);
-					it.thumb = Utils.readArrayAttr(item, "object", false);
-					it.fullresolution = null;
-					it.title = Utils.readAttr(item.path("sourceResource"), "title", false);
-					it.description = Utils.readArrayAttr(item.path("sourceResource"), "description", false).get(0);
-					it.creator = Utils.readArrayAttr(item.path("sourceResource"), "creator", false).get(0);
-					countValue(creator, it.creator);
-					it.year = null;
-					it.dataProvider = Utils.readAttr(item.path("dataProvider"), "name", false);
-					/*it.provider = Utils.readAttr(item.path("provider"), "name", false);*/
-					it.url = new MyURL();
-					it.url.original = Utils.readArrayAttr(item, "isShownAt", false);
-					it.url.fromSourceAPI = "http://dp.la/item/" + Utils.readAttr(item, "id", false);
-					it.rights = Utils.readAttr(item.path("sourceResource"), "rights", false);
-					it.externalId = it.url.original.get(0);
-
-					it.externalId = DigestUtils.md5Hex(it.externalId);
-					a.add(it);
+					ExternalBasicRecord obj = formatreader.readObjectFrom(item);
+					a.add(obj);
+					countValue(creator, obj.getCreator());
+					
 				}
 				res.items = a;
 				res.facets = response.path("facets");

@@ -16,6 +16,8 @@
 
 package espace.core;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import espace.core.utils.JsonContextRecord;
 
 public abstract class JsonContextRecordFormatReader<T> extends FormatReader<T> {
@@ -26,6 +28,15 @@ public abstract class JsonContextRecordFormatReader<T> extends FormatReader<T> {
 		return fillObjectFrom(rec, object);
 	}
 	
+	public T fillObjectFrom(JsonNode text, T object) {
+		JsonContextRecord rec = new JsonContextRecord(text);
+		return fillObjectFrom(rec, object);
+	}
+	
 	public abstract T fillObjectFrom(JsonContextRecord text, T object);
+	
+	public T readObjectFrom(JsonNode text){
+		return fillObjectFrom(text, buildObjectFrom());
+	}
 
 }
