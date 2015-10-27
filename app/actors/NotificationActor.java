@@ -16,12 +16,15 @@
 
 package actors;
 
+import org.bson.types.ObjectId;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
+import db.DB;
 import model.User;
 import play.Logger;
 import play.Logger.ALogger;
@@ -30,55 +33,62 @@ import utils.NotificationCenter;
 
 /**
  * 
- * @author Arne Stabenau
- * The actor that talks with the web app.
+ * @author Arne Stabenau The actor that talks with the web app.
  */
-public class NotificationActor extends UntypedActor  {
-	public static final ALogger log = Logger.of( NotificationActor.class);
+public class NotificationActor extends UntypedActor {
+	public static final ALogger log = Logger.of(NotificationActor.class);
 
-	private User loggedInUser;
+	private User loggedInUser = null;
 	private final ActorRef out;
-	
+
 	public static Props props(ActorRef out) {
 		return Props.create(NotificationActor.class, out);
 	}
 
 	public NotificationActor(ActorRef out) {
+		NotificationCenter.addActor(getSelf());
 		this.out = out;
 	}
 
 	public void onReceive(Object message) throws Exception {
-		if (message instanceof JsonNode ) {
+		if (message instanceof JsonNode) {
 			// only login / logout messages are expected
-			log.debug( "Received Message from browser: " + message.toString());
+			log.debug("Received Message from browser: " + message.toString());
+			if (((JsonNode) message).get("action").equals("login")) {
+				String id = ((JsonNode) message).get("id").asText();
+				loggedInUser = DB.getUserDAO().get(new ObjectId(id));
+			}
+
 		}
-		if( message instanceof NotificationCenter.Message ) {
-			notifyMessage( (NotificationCenter.Message) message );
+		if (message instanceof NotificationCenter.Message) {
+			notifyMessage((NotificationCenter.Message) message);
 		}
-		if( message instanceof NotificationCenter.UserUpdate) {
-			
+		if (message instanceof NotificationCenter.UserUpdate) {
+
 		}
 	}
-	
+
 	/**
-	 * Simple message notification, to be printed on the browser if the user matches the given objectId.
+	 * Simple message notification, to be printed on the browser if the user
+	 * matches the given objectId.
+	 * 
 	 * @param mesg
 	 * @param userOrGroup
 	 */
-	public void notifyMessage( NotificationCenter.Message mesg ) {
-		if( mesg.userOrGroup == null ) {
+	public void notifyMessage(NotificationCenter.Message mesg) {
+		if (mesg.userOrGroup == null) {
 			// public messsage
-			out.tell( Json.toJson(mesg) , self());
+			out.tell(Json.toJson(mesg), self());
 		} else {
-			if( loggedInUser != null ) {
-				if( loggedInUser.getUserGroupsIds().contains(mesg.userOrGroup)) {
-					out.tell( Json.toJson( mesg ), self());					
+			if (loggedInUser != null) {
+				if (loggedInUser.getUserGroupsIds().contains(mesg.userOrGroup)) {
+					out.tell(Json.toJson(mesg), self());
 				}
 			}
 		}
 	}
-	
-	public void userUpdate( NotificationCenter.UserUpdate userUp) {
-		
+
+	public void userUpdate(NotificationCenter.UserUpdate userUp) {
+
 	}
 }

@@ -1,14 +1,16 @@
 define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
+	var self = this;
 	var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-	var notificationSocket = new WS("ws://localhost:9000/notifications/socket");
+	self.notificationSocket = new WS("ws://localhost:9000/notifications/socket");
 
-	var receiveEvent = function(event) {
+	self.receiveEvent = function(event) {
 		$.smkAlert({ text: event.data, type: 'info', time: 30 });
 	};
-	notificationSocket.onmessage = receiveEvent;
-
-	var self = this;
+	self.notificationSocket.onmessage = self.receiveEvent;
+	self.notificationSocket.onclose = function(evt) { console.log("disconected"); };;
+	
+	
 	self.currentUser = {
 		"_id": ko.observable(),
 		"email": ko.observable(),
@@ -52,8 +54,21 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 				sessionStorage.setItem("User", JSON.stringify(data));
 			}
 		}
-
+		
 		isLogged(true);
+		function waitForConnection(callback, interval) {
+			if (self.notificationSocket.readyState === 1) {
+				callback();
+			} else {
+			// optional: implement backoff for interval here
+				setTimeout(function () {
+			    waitForConnection(callback, interval);
+			    }, interval);
+			}
+		}
+		waitForConnection(function () {
+	        self.notificationSocket.send('{"action":"login","id":"'+data._id.$oid+'"}');
+	    }, 1000)
 
 		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
 			return [self.getEditableCollections()]; //[self.getEditableCollections(), self.getUserCollections()];
