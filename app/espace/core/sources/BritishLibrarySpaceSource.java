@@ -18,29 +18,25 @@ package espace.core.sources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
-
-import org.apache.commons.codec.digest.DigestUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
-import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
 import espace.core.SourceResponse;
 import espace.core.Utils;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
 import espace.core.Utils.Pair;
-import play.libs.Json;
+import espace.core.sources.formatreaders.BritishLibraryBasicRecordFormatter;
+import model.ExternalBasicRecord;
+import model.ExternalBasicRecord.ItemRights;
+import model.ExternalBasicRecord.RecordType;
 import utils.ListUtils;
 
 public class BritishLibrarySpaceSource extends ISpaceSource {
@@ -48,6 +44,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 	private String apikey = "8bddf33bef4c14c98d469bfb1f8e78c7";
 	private HashMap<String, String> licences;
 	private HashMap<String, String> licencesId;
+	private BritishLibraryBasicRecordFormatter formatreader;
 
 	@Override
 	public String getSourceName() {
@@ -56,23 +53,24 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 
 	public BritishLibrarySpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("media"));
-		addDefaultWriter(CommonFilters.RIGHTS_ID, frwriter());
-		addDefaultComplexWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
-		// addDefaultWriter(CommonFilters.COUNTRY_ID,
+		formatreader = new BritishLibraryBasicRecordFormatter();
+		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("media"));
+		addDefaultWriter(CommonFilters.RIGHTS.getID(), frwriter());
+		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
+		// addDefaultWriter(CommonFilters.COUNTRY.getID(),
 		// fwriter("sourceResource.spatial.country"));
 
 		setLicences();
 		
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "photo");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.VIDEO, "video");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "photo");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "video");
 		
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, getLicence("0"));
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Not_Commercial, getLicence("3"),getLicence("2"),getLicence("1"));
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, getLicence("6"));
-		addMapping(CommonFilters.RIGHTS_ID,RightsValues.Creative,getLicence("1"),getLicence("2"),getLicence("3"),getLicence("4"),getLicence("5"),getLicence("6"));
-		addMapping(CommonFilters.RIGHTS_ID,RightsValues.UNKNOWN,getLicence("7"));
-		addMapping(CommonFilters.RIGHTS_ID,RightsValues.Public,getLicence("9"),getLicence("10"));
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.toString(), getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),getLicence("2"),getLicence("1"));
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.Creative.toString(),getLicence("1"),getLicence("2"),getLicence("3"),getLicence("4"),getLicence("5"),getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.UNKNOWN.toString(),getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.Public.toString(),getLicence("9"),getLicence("10"));
 	}
 
 	private void setLicences() {
@@ -176,45 +174,17 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
+//		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response.path("photos"), "total", true);
 				res.count = Utils.readIntAttr(response.path("photos"), "perpage", true);
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 				for (JsonNode item : response.path("photos").path("photo")) {
-					ItemsResponse it = new ItemsResponse();
 					// countValue(type, t);
-					it.id = Utils.readAttr(item, "id", true);
-					it.title = Utils.readAttr(item, "title", false);
-					// it.creator = Utils.readAttr(item,
-					// "principalOrFirstMaker", false);
-
-					it.thumb = Utils.readArrayAttr(item, "url_s", false);
-					it.fullresolution = Utils.readArrayAttr(item, "url_o", false);
-					it.description = Utils.readAttr(item.path("description"), "_content", false);
-					String date = Utils.readAttr(item, "datetaken", false);
-					if (date.indexOf("-") >= 0) {
-						it.year = Arrays.asList(date.substring(0, 4));
-					} else {
-						Date d = new Date(Long.parseLong(date) * 1000);
-						Calendar c = Calendar.getInstance();
-						c.setTime(d);
-						it.year = Arrays.asList("" + c.get(Calendar.YEAR));
-					}
-//					System.out.println(it.year);
-					it.dataProvider = LABEL;
-					it.url = new MyURL();
-					it.url.original = it.fullresolution;
-					it.url.fromSourceAPI = "https://www.flickr.com/photos/britishlibrary/" + it.id + "/";
-					// it.rights = Utils.readLangAttr(item, "rights", false);
-					it.externalId = it.fullresolution.get(0);
-					it.externalId = DigestUtils.md5Hex(it.externalId);
-					String licID = Utils.readAttr(item, "license", false);
-					it.rights =  getLicence(licID);
-					countValue(rights, it.rights, 1);
-					a.add(it);
+//					countValue(rights, it.rights, 1);
+					a.add(formatreader.readObjectFrom(item));
 				}
 				res.items = a;
 				res.count = a.size();
@@ -226,12 +196,12 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 //				for (String ir : licencesId.keySet()) {
 //					countValue(rights, ir, 1);
 //				}
-				res.filtersLogic.add(rights);
+//				res.filtersLogic.add(rights);
 				
-				CommonFilterLogic type = CommonFilterLogic.typeFilter();
-				countValue(type, "video", 1);
-				countValue(type, "photo", 1);
-				res.filtersLogic.add(type);
+//				CommonFilterLogic type = CommonFilterLogic.typeFilter();
+//				countValue(type, "video", 1);
+//				countValue(type, "photo", 1);
+//				res.filtersLogic.add(type);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

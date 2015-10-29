@@ -17,27 +17,29 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.CommonFilterLogic;
 import espace.core.CommonQuery;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
 import espace.core.SourceResponse;
 import espace.core.Utils;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
-import play.libs.Json;
-import utils.ListUtils;
+import espace.core.sources.formatreaders.DDBBasicRecordFormatter;
+import model.ExternalBasicRecord;
 
 public class DDBSpaceSource extends ISpaceSource {
 
 	public static final String LABEL = "DDB";
 	private String key = "SECRET_KEY";
+	private DDBBasicRecordFormatter formatreader;
+
+	
+	public DDBSpaceSource() {
+		super();
+		formatreader = new DDBBasicRecordFormatter();
+	}
 
 	@Override
 	public String getSourceName() {
@@ -82,42 +84,20 @@ public class DDBSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
 				// res.startIndex = Utils.readIntAttr(response, "offset", true);
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+				ArrayList<ExternalBasicRecord> a = new ArrayList<ExternalBasicRecord>();
 
 				for (JsonNode item : docs) {
-					ItemsResponse it = new ItemsResponse();
-					it.id = Utils.readAttr(item, "id", true);
-					List<String> readArrayAttr = Utils.readArrayAttr(item, "thumbnail", false);
-					Function<String, String> f = (String x) -> {
-						return "https://www.deutsche-digitale-bibliothek.de/" + x;
-					};
-					it.thumb = ListUtils.transform(readArrayAttr, f);
-					it.fullresolution = null;
-					it.title = Utils.readAttr(item, "title", false);
-					// it.description = Utils.readLangAttr(item, "description",
-					// false);
-					// it.creator =
-					// Utils.readLangAttr(item.path("sourceResource"),
-					// "creator", false);
-					// it.year = null;
-					// it.dataProvider =
-					// Utils.readLangAttr(item.path("provider"),
-					// "name", false);
-					it.url = new MyURL();
-					// it.url.original = Utils.readArrayAttr(item, "isShownAt",
-					// false);
-					it.url.fromSourceAPI = "https://www.deutsche-digitale-bibliothek.de/item/" + it.id;
-					a.add(it);
+					a.add(formatreader.readObjectFrom(item));
 				}
 				res.items = a;
 
-				CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
+//				CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
 
 				// JsonNode o = response.path("facets");
 				// readList(o.path("dataProviders"), dataProvider);
 
 				res.filtersLogic = new ArrayList<>();
-				res.filtersLogic.add(dataProvider);
+//				res.filtersLogic.add(dataProvider);
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

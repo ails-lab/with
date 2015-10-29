@@ -17,16 +17,11 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.function.Function;
-
-import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import espace.core.CommonFilter;
 import espace.core.CommonFilterLogic;
 import espace.core.CommonFilters;
 import espace.core.CommonQuery;
@@ -37,9 +32,6 @@ import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
-import espace.core.Utils;
 
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
@@ -51,7 +43,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		// addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 		// addDefaultQueryModifier(CommonFilters.TYPE_ID, getFunction("219",
 		// "objectType"));
-		addDefaultQueryModifier(CommonFilters.DATAPROVIDER_ID, getFunction("302", "dataProviders"));
+		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getID(), getFunction("302", "dataProviders"));
 
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10303"));
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10460"));
@@ -118,56 +110,56 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
-		res.source = getSourceName();
-		// String httpQuery = getHttpQuery(q);
-		QueryBuilder builder = getBuilder(q);
-		res.query = builder.getHttp();
-		JsonNode response;
-		if (checkFilters(q)) {
-			try {
-				response = HttpConnector.getPOSTURLContent(res.query, Json.toJson(builder.getData()).toString());
-				// System.out.println(response.toString());
-				JsonNode docs = response.path("results");
-				res.totalCount = Utils.readIntAttr(response, "total", true);
-				res.count = docs.size();
-				res.startIndex = Utils.readIntAttr(response, "offset", true);
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
-
-				for (JsonNode item : docs) {
-					ItemsResponse it = new ItemsResponse();
-					it.id = Utils.readAttr(item, "id", true);
-					it.thumb = Utils.readArrayAttr(item, "thumbnail", false);
-					it.fullresolution = null;
-					it.title = Utils.readAttr(item, "title", false);
-					it.description = Utils.readAttr(item, "description", false);
-					// it.creator =
-					// Utils.readLangAttr(item.path("sourceResource"),
-					// "creator", false);
-					// it.year = null;
-					// it.dataProvider =
-					// Utils.readLangAttr(item.path("provider"),
-					// "name", false);
-					it.url = new MyURL();
-					// it.url.original = Utils.readArrayAttr(item, "isShownAt",
-					// false);
-					it.url.fromSourceAPI = "http://www.europeanafashion.eu/record/a/" + it.id;
-					a.add(it);
-				}
-				res.items = a;
-
-				CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
-
-				JsonNode o = response.path("facets");
-				readList(o.path("dataProviders"), dataProvider);
-
-				res.filtersLogic = new ArrayList<>();
-				res.filtersLogic.add(dataProvider);
-
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+//		res.source = getSourceName();
+//		// String httpQuery = getHttpQuery(q);
+//		QueryBuilder builder = getBuilder(q);
+//		res.query = builder.getHttp();
+//		JsonNode response;
+//		if (checkFilters(q)) {
+//			try {
+//				response = HttpConnector.getPOSTURLContent(res.query, Json.toJson(builder.getData()).toString());
+//				// System.out.println(response.toString());
+//				JsonNode docs = response.path("results");
+//				res.totalCount = Utils.readIntAttr(response, "total", true);
+//				res.count = docs.size();
+//				res.startIndex = Utils.readIntAttr(response, "offset", true);
+//				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+//
+//				for (JsonNode item : docs) {
+//					ItemsResponse it = new ItemsResponse();
+//					it.id = Utils.readAttr(item, "id", true);
+//					it.thumb = Utils.readArrayAttr(item, "thumbnail", false);
+//					it.fullresolution = null;
+//					it.title = Utils.readAttr(item, "title", false);
+//					it.description = Utils.readAttr(item, "description", false);
+//					// it.creator =
+//					// Utils.readLangAttr(item.path("sourceResource"),
+//					// "creator", false);
+//					// it.year = null;
+//					// it.dataProvider =
+//					// Utils.readLangAttr(item.path("provider"),
+//					// "name", false);
+//					it.url = new MyURL();
+//					// it.url.original = Utils.readArrayAttr(item, "isShownAt",
+//					// false);
+//					it.url.fromSourceAPI = "http://www.europeanafashion.eu/record/a/" + it.id;
+//					a.add(it);
+//				}
+//				res.items = a;
+//
+//				CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
+//
+//				JsonNode o = response.path("facets");
+//				readList(o.path("dataProviders"), dataProvider);
+//
+//				res.filtersLogic = new ArrayList<>();
+//				res.filtersLogic.add(dataProvider);
+//
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
 
 		return res;
 	}

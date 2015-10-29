@@ -43,6 +43,7 @@ import espace.core.Utils;
 import espace.core.Utils.Pair;
 import espace.core.sources.formatreaders.NLAExternalBasicRecordFormatter;
 import model.ExternalBasicRecord;
+import model.ExternalBasicRecord.RecordType;
 
 
 
@@ -60,12 +61,12 @@ public class NLASpaceSource extends ISpaceSource {
 		addDefaultQueryModifier(CommonFilters.TYPE.getID(), qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR.getID(),qfwriterYEAR());
 		
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.IMAGE, 
+		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), 
 				"Image","Photograph", "Poster, chart, other");
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.VIDEO, "Video");
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.SOUND, 
+		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "Video");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), 
 				"Sound","Sheet music");
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.TEXT, "Books","Article");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "Books","Article");
 	}
 	
 	private Function<List<String>, QueryModifier> qfwriterYEAR() {
@@ -143,8 +144,8 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+//		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+//		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 
 		if (checkFilters(q)){
 		try {
@@ -193,10 +194,10 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 //							System.out.println(" path "+path);
 							switch (path.asText()) {
 							case "format":
-								countValue(type, label, count);
+//								countValue(type, label, count);
 								break;
 							case "year":
-								countValue(year, label, count);
+//								countValue(year, label, count);
 								break;
 							default:
 								break;
@@ -211,8 +212,8 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		
 			res.items = a;
 			res.filtersLogic = new ArrayList<>();
-			res.filtersLogic.add(type);
-			res.filtersLogic.add(year);
+//			res.filtersLogic.add(type);
+//			res.filtersLogic.add(year);
 			
 		
 			

@@ -147,9 +147,10 @@ public class JsonContextRecord {
 				return node.path(p).get(index);
 			} catch (NumberFormatException e) {
 				// should be a condition:
+				node = node.path(p);
 				for (int i = 0; i < node.size(); i++) {
 					JsonNode current = node.get(i);
-					elements = path.split(",");
+					elements = elements[1].split(",");
 					for (int h = 0; h < elements.length; h++) {
 						String string = elements[h];
 						String[] splits = string.split("=");

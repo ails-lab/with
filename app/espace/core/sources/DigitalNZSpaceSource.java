@@ -17,7 +17,6 @@
 package espace.core.sources;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -25,9 +24,6 @@ import java.util.function.Function;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
-
-import utils.ListUtils;
-import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -40,10 +36,14 @@ import espace.core.QueryBuilder;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
-import espace.core.SourceResponse.ItemsResponse;
-import espace.core.SourceResponse.MyURL;
-import espace.core.Utils.Pair;
 import espace.core.Utils;
+import espace.core.Utils.Pair;
+import espace.core.sources.formatreaders.DNZBasicRecordFormatter;
+import model.ExternalBasicRecord;
+import model.ExternalBasicRecord.ItemRights;
+import model.ExternalBasicRecord.RecordType;
+import utils.ListUtils;
+import utils.Serializer;
 
 public class DigitalNZSpaceSource extends ISpaceSource {
 
@@ -52,44 +52,46 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 	 * National Library of New Zealand
 	 */
 	private String Key = "SECRET_KEY";
+	private DNZBasicRecordFormatter formatreader;
 
 	public DigitalNZSpaceSource() {
 		super();
-		addDefaultWriter(CommonFilters.TYPE_ID, fwriter("and[category][]"));
-		addDefaultWriter(CommonFilters.CREATOR_ID, fwriter("and[creator][]"));
-		addDefaultWriter(CommonFilters.YEAR_ID, qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS_ID, fwriter("and[usage][]"));
+		formatreader = new DNZBasicRecordFormatter();
+		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("and[category][]"));
+		addDefaultWriter(CommonFilters.CREATOR.getID(), fwriter("and[creator][]"));
+		addDefaultWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.RIGHTS.getID(), fwriter("and[usage][]"));
 
 		// TODO: rights_url shows the license in the search
 
-		addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, "Images");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.SOUND, "Audio");
-		addMapping(CommonFilters.TYPE_ID, TypeValues.TEXT, "Books");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "Images");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), "Audio");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "Books");
 
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Commercial,
+		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Commercial,
 		// "");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative_Modify,
+		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Modify,
 		// ".*creative(?!.*nd).*");
 
-		// addMapping(CommonFilters.RIGHTS_ID,
+		// addMapping(CommonFilters.RIGHTS.getID(),
 		// RightsValues.Creative_Not_Commercial,
 		// "http://creativecommons.org/licenses/by-nc/3.0/nz/",
 		// "http://creativecommons.org/licenses/by-nc-sa/3.0/",
 		// "This work is licensed under a Creative Commons
 		// Attribution-Noncommercial 3.0 New Zealand License");
 		//
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "No known
+		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.UNKNOWN, "No known
 		// copyright restrictions\nCopyright Expired",
 		// "No known copyright restrictions");
-		// addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, "All rights
+		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RR, "All rights
 		// reserved");
 
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Creative, "Share");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Modify, "Modify");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.Commercial, "Use commercially");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.UNKNOWN, "Unknown");
-		addMapping(CommonFilters.RIGHTS_ID, RightsValues.RR, "All rights reserved");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.toString(), "Share");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), "Modify");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.toString(), "Use commercially");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.UNKNOWN.toString(), "Unknown");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.toString(), "All rights reserved");
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
@@ -151,16 +153,16 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
-		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+//		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+//		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+//		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
+//		CommonFilterLogic year = CommonFilterLogic.yearFilter();
 
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
 
-				ArrayList<ItemsResponse> a = new ArrayList<ItemsResponse>();
+				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 
 				JsonNode o = response.path("search");
 				// System.out.print(o.path("name").asText() + " ");
@@ -173,55 +175,29 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				for (JsonNode item : aa) {
 					// System.out.println(item.toString());
 
-					List<String> v = Utils.readArrayAttr(item, "category", false);
-					// System.out.println("add " + v);
-					for (String string : v) {
-						countValue(type, string);
-					}
-					ItemsResponse it = new ItemsResponse();
-					it.id = Utils.readAttr(item, "id", true);
-					it.title = Utils.readAttr(item, "title", false);
-					List<String> readArrayAttr = Utils.readArrayAttr(item, "creator", false);
-					it.creator = (readArrayAttr!=null && readArrayAttr.size()>0)?readArrayAttr.get(0):null;
-					it.description = Utils.readAttr(item, "description", false);
-
-					it.thumb = Utils.readArrayAttr(item, "thumbnail_url", false);
-					// TODO not present
-					it.fullresolution = Utils.readArrayAttr(item, "large_thumbnail_url", false);
-					// TODO read date and take year?
-					it.year = null; // Utils.readArrayAttr(item, "issued",
-									// true);
-					// TODO use author?
-					it.dataProvider = null;// Utils.readLangAttr(item,
-											// "contributor", false);
-					it.url = new MyURL();
-					it.url.original = Utils.readArrayAttr(item, "landing_url", false);
-					it.url.fromSourceAPI = "http://www.digitalnz.org/records/" + it.id;
-					it.rights = Utils.readAttr(item, "rights_url", false);
-					it.externalId = it.fullresolution.get(0);
-					if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
-						it.externalId = it.url.original.get(0);
-					if (it.externalId == null || it.externalId == "" || it.externalId.equals("null"))
-						it.externalId = getSourceName() + "_" + it.id;
-					it.externalId = DigestUtils.md5Hex(it.externalId);
-					a.add(it);
+//					List<String> v = Utils.readArrayAttr(item, "category", false);
+//					// System.out.println("add " + v);
+//					for (String string : v) {
+//						countValue(type, string);
+//					}
+					a.add(formatreader.readObjectFrom(item));
 
 				}
 				res.count = a.size();
 
 				res.items = a;
 
-				readList(o.path("facets").path("category"), type);
-				readList(o.path("facets").path("usage"), rights);
-				readList(o.path("facets").path("year"), year);
+//				readList(o.path("facets").path("category"), type);
+//				readList(o.path("facets").path("usage"), rights);
+//				readList(o.path("facets").path("year"), year);
 
-				readList(o.path("facets").path("creator"), creator);
+//				readList(o.path("facets").path("creator"), creator);
 
 				res.filtersLogic = new ArrayList<>();
-				res.filtersLogic.add(type);
-				res.filtersLogic.add(creator);
-				res.filtersLogic.add(rights);
-				res.filtersLogic.add(year);
+//				res.filtersLogic.add(type);
+//				res.filtersLogic.add(creator);
+//				res.filtersLogic.add(rights);
+//				res.filtersLogic.add(year);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

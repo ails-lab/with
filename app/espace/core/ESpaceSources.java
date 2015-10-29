@@ -41,7 +41,7 @@ public class ESpaceSources {
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
 		esources.add(new EuropeanaSpaceSource());
-		/*esources.add(new DPLASpaceSource());
+		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
 		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
@@ -49,7 +49,7 @@ public class ESpaceSources {
 		esources.add(new ElasticSource());
 		esources.add(new RijksmuseumSpaceSource());
 		esources.add(new DDBSpaceSource());
-		esources.add(new BritishLibrarySpaceSource());*/
+		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}

@@ -227,33 +227,33 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		for (JsonNode facet : response.path("facets")) {
-			String filterType = facet.path("name").asText();
-			CommonFilters withFilter = sourceToFiltersMappings.get(filterType);
-			if (withFilter != null) {
-				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
-				for (JsonNode jsonNode : facet.path("fields")) {
-					String label = jsonNode.path("label").asText();
-					int count = jsonNode.path("count").asInt();
-					switch (filterType) {
-						case "TYPE": 
-						case "RIGHTS":
-							countValue(filter, label, count);
-							break;
-						case "DATA_PROVIDER": 
-						case "PROVIDER":
-						case "proxy_dc_creator":
-						case "COUNTRY":
-						case "YEAR":
-							countValue(filter, label, false, count);
-							break;
-						default:
-							break;
-					}
-					filters.add(filter);
-				}
-			}
-		}
+//		for (JsonNode facet : response.path("facets")) {
+//			String filterType = facet.path("name").asText();
+//			CommonFilters withFilter = sourceToFiltersMappings.get(filterType);
+//			if (withFilter != null) {
+//				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
+//				for (JsonNode jsonNode : facet.path("fields")) {
+//					String label = jsonNode.path("label").asText();
+//					int count = jsonNode.path("count").asInt();
+//					switch (filterType) {
+//						case "TYPE": 
+//						case "RIGHTS":
+//							countValue(filter, label, count);
+//							break;
+//						case "DATA_PROVIDER": 
+//						case "PROVIDER":
+//						case "proxy_dc_creator":
+//						case "COUNTRY":
+//						case "YEAR":
+//							countValue(filter, label, false, count);
+//							break;
+//						default:
+//							break;
+//					}
+//					filters.add(filter);
+//				}
+//			}
+//		}
 		return filters;
 	}
 	

@@ -36,6 +36,8 @@ import espace.core.Utils;
 import espace.core.Utils.Pair;
 import espace.core.sources.formatreaders.DPLAExternalBasicRecordFormatter;
 import model.ExternalBasicRecord;
+import model.ExternalBasicRecord.ItemRights;
+import model.ExternalBasicRecord.RecordType;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
@@ -72,27 +74,27 @@ public class DPLASpaceSource extends ISpaceSource {
 		 */
 
 		addDefaultWriter(CommonFilters.RIGHTS.getID(), fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Not_Commercial, ".*creative.*nc.*",
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
 				".*non-commercial.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRPA, ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRRA, ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRFA, ".*rr-f.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRPA.toString(), ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRRA.toString(), ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRFA.toString(), ".*rr-f.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RRFA, ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRFA.toString(), ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Not_Modify, ".*creative.*nd.*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative, ".*(creative).*");
+		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.toString(), ".*(creative).*");
 
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.IMAGE, "image");
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.VIDEO, "moving image");
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.SOUND, "sound");
-		addMapping(CommonFilters.TYPE.getID(), TypeValues.TEXT, "text");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "image");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "moving image");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), "sound");
+		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "text");
 
 		// TODO: what to do with physical objects?
 	}
@@ -155,12 +157,12 @@ public class DPLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
-		CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
-		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-		CommonFilterLogic country = CommonFilterLogic.countryFilter();
-		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
+//		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+//		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
+//		CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
+//		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+//		CommonFilterLogic country = CommonFilterLogic.countryFilter();
+//		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
@@ -179,31 +181,31 @@ public class DPLASpaceSource extends ISpaceSource {
 
 					ExternalBasicRecord obj = formatreader.readObjectFrom(item);
 					a.add(obj);
-					countValue(creator, obj.getCreator());
+//					countValue(creator, obj.getCreator());
 					
 				}
 				res.items = a;
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();
 
-				readList(response.path("facets").path("provider.name"), provider);
-
-				readList(response.path("facets").path("dataProvider"), dataProvider);
-
-				readList(response.path("facets").path("sourceResource.type"), type);
-
-				readList(response.path("facets").path("sourceResource.contributor"), contributor);
-
-				readList(response.path("facets").path("sourceResource.spatial.country"), country);
+//				readList(response.path("facets").path("provider.name"), provider);
+//
+//				readList(response.path("facets").path("dataProvider"), dataProvider);
+//
+//				readList(response.path("facets").path("sourceResource.type"), type);
+//
+//				readList(response.path("facets").path("sourceResource.contributor"), contributor);
+//
+//				readList(response.path("facets").path("sourceResource.spatial.country"), country);
 
 				res.filtersLogic = new ArrayList<>();
-				res.filtersLogic.add(type);
-				res.filtersLogic.add(provider);
-				res.filtersLogic.add(dataProvider);
-				res.filtersLogic.add(creator);
-				res.filtersLogic.add(country);
-
-				res.filtersLogic.add(contributor);
+//				res.filtersLogic.add(type);
+//				res.filtersLogic.add(provider);
+//				res.filtersLogic.add(dataProvider);
+//				res.filtersLogic.add(creator);
+//				res.filtersLogic.add(country);
+//
+//				res.filtersLogic.add(contributor);
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
