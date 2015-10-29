@@ -95,6 +95,7 @@ public class JsonContextRecord {
 		return node;
 	}
 	
+	
 	public void setValue(String steps, String val){
 		List<String> path = buildpaths(steps);
 		setValue(path,val);
@@ -140,9 +141,29 @@ public class JsonContextRecord {
 		if (path.endsWith("]")){
 			String[] elements = path.split("\\[|\\]");
 			String p = elements[0];
+			// is a index
+			try{
 				int index = Integer.parseInt(elements[1]);
 				return node.path(p).get(index);
-		}
+			} catch (NumberFormatException e) {
+				// should be a condition:
+				node = node.path(p);
+				for (int i = 0; i < node.size(); i++) {
+					JsonNode current = node.get(i);
+					elements = elements[1].split(",");
+					for (int h = 0; h < elements.length; h++) {
+						String string = elements[h];
+						String[] splits = string.split("=");
+						String name = splits[0];
+						String vals = splits[1];
+						if (current.path(name).asText().matches(vals)){
+							return current;
+						}
+					}
+					
+				}
+			}
+		} 
 		return node.path(path);
 	}
 	

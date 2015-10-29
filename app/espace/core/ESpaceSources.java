@@ -22,6 +22,11 @@ import java.util.List;
 import java.util.Map;
 
 import play.Logger;
+import espace.core.sources.BritishLibrarySpaceSource;
+import espace.core.sources.DDBSpaceSource;
+import espace.core.sources.DPLASpaceSource;
+import espace.core.sources.DigitalNZSpaceSource;
+import espace.core.sources.EuropeanaFashionSpaceSource;
 /*import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.sources.DDBSpaceSource;
 import espace.core.sources.DPLASpaceSource;
@@ -31,8 +36,11 @@ import espace.core.sources.NLASpaceSource;
 import espace.core.sources.RijksmuseumSpaceSource;
 import espace.core.sources.YouTubeSpaceSource;*/
 import espace.core.sources.EuropeanaSpaceSource;
+import espace.core.sources.NLASpaceSource;
+import espace.core.sources.RijksmuseumSpaceSource;
 import espace.core.sources.WithSpaceSource;
 import espace.core.sources.ElasticSource;
+import espace.core.sources.YouTubeSpaceSource;
 
 
 public class ESpaceSources {
@@ -42,7 +50,7 @@ public class ESpaceSources {
 	static void init() {
 		esources = new ArrayList<ISpaceSource>();
 		esources.add(new EuropeanaSpaceSource());
-		/*esources.add(new DPLASpaceSource());
+		esources.add(new DPLASpaceSource());
 		esources.add(new NLASpaceSource());
 		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
@@ -50,7 +58,7 @@ public class ESpaceSources {
 		esources.add(new ElasticSource());
 		esources.add(new RijksmuseumSpaceSource());
 		esources.add(new DDBSpaceSource());
-		esources.add(new BritishLibrarySpaceSource());*/
+		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
