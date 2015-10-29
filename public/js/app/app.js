@@ -10,6 +10,16 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	self.notificationSocket.onmessage = self.receiveEvent;
 	self.notificationSocket.onclose = function(evt) { console.log("disconected"); };;
 	
+	function waitForConnection(callback, interval) {
+		if (self.notificationSocket.readyState === 1) {
+			callback();
+		} else {
+		// optional: implement backoff for interval here
+			setTimeout(function () {
+		    waitForConnection(callback, interval);
+		    }, interval);
+		}
+	}
 	
 	self.currentUser = {
 		"_id": ko.observable(),
@@ -56,16 +66,6 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		}
 		
 		isLogged(true);
-		function waitForConnection(callback, interval) {
-			if (self.notificationSocket.readyState === 1) {
-				callback();
-			} else {
-			// optional: implement backoff for interval here
-				setTimeout(function () {
-			    waitForConnection(callback, interval);
-			    }, interval);
-			}
-		}
 		waitForConnection(function () {
 	        self.notificationSocket.send('{"action":"login","id":"'+data._id.$oid+'"}');
 	    }, 1000)
@@ -267,6 +267,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			type: "GET",
 			url: "/user/logout",
 			success: function () {
+				waitForConnection(function () {
+			        self.notificationSocket.send('{"action":"logout","id":"'+self.currentUser._id()+'"}');
+			    }, 1000)
 				self.clearSession();
 				window.location.href = "/assets/index.html";
 			}

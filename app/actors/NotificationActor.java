@@ -19,7 +19,6 @@ package actors;
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import akka.actor.ActorRef;
 import akka.actor.Props;
@@ -46,17 +45,37 @@ public class NotificationActor extends UntypedActor {
 	}
 
 	public NotificationActor(ActorRef out) {
-		NotificationCenter.addActor(getSelf());
 		this.out = out;
+	}
+	
+	public void preStart() {
+		NotificationCenter.addActor(getSelf());
+
+	}
+
+	public void postStop() {
+		NotificationCenter.removeActor(getSelf());
 	}
 
 	public void onReceive(Object message) throws Exception {
 		if (message instanceof JsonNode) {
 			// only login / logout messages are expected
-			log.debug("Received Message from browser: " + message.toString());
-			if (((JsonNode) message).get("action").equals("login")) {
-				String id = ((JsonNode) message).get("id").asText();
-				loggedInUser = DB.getUserDAO().get(new ObjectId(id));
+			JsonNode json = (JsonNode) message;
+			log.debug("Received Message from browser: " + json.toString());
+			if (json.get("action").asText().equals("login")) {
+				String id = json.get("id").asText();
+				try {
+					loggedInUser = DB.getUserDAO().get(new ObjectId(id));
+				} catch (Exception e) {
+					log.error(e.getMessage());
+				}
+			} else if (json.get("action").asText().equals("logout")) {
+				String id = json.get("id").asText();
+				if (loggedInUser != null && id.equals(loggedInUser.getDbId().toString())) {
+					loggedInUser = null;
+				} else {
+					log.error("User is already logged out");
+				}
 			}
 
 		}
