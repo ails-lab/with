@@ -178,54 +178,61 @@ public class GroupManager extends Controller {
 				result.put("error", "Only creator of group has the right to edit the group");
 				return forbidden(result);
 			}
-			if (json.get("username") != null) {
-				if (!group.getUsername().equals(json.get("username").asText())) {
-					if (!uniqueGroupName(json.get("username").asText())) {
-						return badRequest("Group name already exists! Please specify another name.");
+			if (json.has("username")) {
+				if (json.get("username") != null) {
+					if (!group.getUsername().equals(json.get("username").asText())) {
+						if (!uniqueGroupName(json.get("username").asText())) {
+							return badRequest("Group name already exists! Please specify another name.");
+						}
 					}
 				}
 			}
-			if ((json.get("page").get("address") != null || json.get("page").get("city") != null
-					|| json.get("page").get("country") != null)
-					&& (group instanceof Organization || group instanceof Project)) {
-				String address = null, city = null, country = null;
-				if (group instanceof Organization) {
-					address = ((Organization) group).getPage().getAddress();
-					city = ((Organization) group).getPage().getCity();
-					country = ((Organization) group).getPage().getCountry();
-				} else if (group instanceof Project) {
-					address = ((Project) group).getPage().getAddress();
-					city = ((Project) group).getPage().getCity();
-					country = ((Project) group).getPage().getCountry();
-				}
-				// ((string == null) ? "" : string)
-				if (json.get("page").get("address") != null) {
-					address = json.get("page").get("address").asText();
-				}
-				if (json.get("page").get("city") != null) {
-					city = json.get("page").get("city").asText();
-				}
-				if (json.get("page").get("country") != null) {
-					country = json.get("page").get("country").asText();
-				}
-				String fullAddress = ((address == null) ? "" : address) + "," + ((city == null) ? "" : city) + ","
-						+ ((country == null) ? "" : country);
-				fullAddress = fullAddress.replace(" ", "+");
-				try {
-					JsonNode response = HttpConnector
-							.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
-					ObjectNode page = Json.newObject();
-					page.put("address", address);
-					page.put("city", city);
-					page.put("country", country);
-					ObjectNode coordinates = Json.newObject();
-					coordinates.put("latitude", response.get("results").get(0).get("geometry").get("location").get("lat"));
-					coordinates.put("longitude", response.get("results").get(0).get("geometry").get("location").get("lng"));
-					page.put("coordinates", coordinates);
-					json.put("page", page);
-				} catch (Exception e) {
-					log.error("Cannot update group Page", e);
-					json.remove("page");
+			// Update user page
+			if (json.has("page")) {
+				if ((json.get("page").get("address") != null || json.get("page").get("city") != null
+						|| json.get("page").get("country") != null)
+						&& (group instanceof Organization || group instanceof Project)) {
+					String address = null, city = null, country = null;
+					if (group instanceof Organization) {
+						address = ((Organization) group).getPage().getAddress();
+						city = ((Organization) group).getPage().getCity();
+						country = ((Organization) group).getPage().getCountry();
+					} else if (group instanceof Project) {
+						address = ((Project) group).getPage().getAddress();
+						city = ((Project) group).getPage().getCity();
+						country = ((Project) group).getPage().getCountry();
+					}
+					// ((string == null) ? "" : string)
+					if (json.get("page").get("address") != null) {
+						address = json.get("page").get("address").asText();
+					}
+					if (json.get("page").get("city") != null) {
+						city = json.get("page").get("city").asText();
+					}
+					if (json.get("page").get("country") != null) {
+						country = json.get("page").get("country").asText();
+					}
+					String fullAddress = ((address == null) ? "" : address) + "," + ((city == null) ? "" : city) + ","
+							+ ((country == null) ? "" : country);
+					fullAddress = fullAddress.replace(" ", "+");
+					try {
+						JsonNode response = HttpConnector.getURLContent(
+								"https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
+						ObjectNode page = Json.newObject();
+						page.put("address", address);
+						page.put("city", city);
+						page.put("country", country);
+						ObjectNode coordinates = Json.newObject();
+						coordinates.put("latitude",
+								response.get("results").get(0).get("geometry").get("location").get("lat"));
+						coordinates.put("longitude",
+								response.get("results").get(0).get("geometry").get("location").get("lng"));
+						page.put("coordinates", coordinates);
+						json.put("page", page);
+					} catch (Exception e) {
+						log.error("Cannot update group Page", e);
+						json.remove("page");
+					}
 				}
 			}
 			UserGroup oldVersion = group;
@@ -233,6 +240,9 @@ public class GroupManager extends Controller {
 			ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
 			UserGroup newVersion;
 			newVersion = updator.readValue(json);
+			/*
+			 * if (json.has("page")) { newVersion }
+			 */
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newVersion);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
