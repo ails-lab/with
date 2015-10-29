@@ -1,4 +1,4 @@
-define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope', 'imagesloaded', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'jquery.fileupload'], function (ko, template, app, bridget, Isotope, imagesLoaded) {
+define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope', 'imagesloaded', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'jquery.fileupload', 'knockout.x-editable'], function (ko, template, app, bridget, Isotope, imagesLoaded) {
 
 	$.bridget('isotope', Isotope);
 
@@ -7,6 +7,121 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
+
+	// Settings for X-Editable
+	$.fn.editable.defaults.url = function(params) {
+		var d = new $.Deferred();
+		console.log(params);
+		var data = {};
+		if (params.name === 'address') {
+			data = {
+				page: {
+					address: params.value.address,
+					city: params.value.city,
+					country: params.value.country
+				}
+			};
+		} else if (params.name === 'url') {
+			data = {
+				page: {
+					url: params.value
+				}
+			};
+		} else {
+			data[params.name] = params.value;
+		}
+
+		$.ajax({
+			type: 'PUT',
+			url: '/group/' + params.pk,
+			contentType: 'application/json',
+			dataType: 'json',
+			processData: false,
+			data: JSON.stringify(data),
+			success: function (data, text) {
+				d.resolve(data, text);
+			},
+			error: function (request, status, error) {
+				d.reject(request, status, error);
+			}
+		});
+	};
+
+	// Custom field for editing the address
+	var Address = function (options) {
+		this.init('address', options, Address.defaults);
+	};
+	$.fn.editableutils.inherit(Address, $.fn.editabletypes.abstractinput);
+	$.extend(Address.prototype, {
+		render: function() {					// Renders input from tpl
+			this.$input = this.$tpl.find('input');
+		},
+		value2html: function(value, element) {	// Default method to show value in element
+			if (!value) {
+				$(element).empty();
+				return;
+			}
+
+			var html = '';
+			if (value.city && value.country) {
+				html = $('<div>').text(value.city).html() + ', ' + $('<div>').text(value.country).html();
+				// html = '';
+			} else if (value.city || value.county) {
+				html = $('<div>').text(value.city).html() + $('<div>').text(value.country).html();
+			}
+
+			$(element).html(html);
+		},
+		html2value: function(html) {
+			return null;
+		},
+		value2str: function(value) {
+			var str = '';
+			if (value) {
+				for (var k in value) {
+					str = str + k + ':' + value[k] + ';';
+				}
+			}
+			return str;
+		},
+		str2value: function(str) {
+			return str;
+		},
+		value2input: function(value) {
+			if (!value) {
+				return;
+			}
+			this.$input.filter('[name="address"]').val(value.address);
+			this.$input.filter('[name="city"]').val(value.city);
+			this.$input.filter('[name="country"]').val(value.country);
+		},
+		input2value: function() {
+			return {
+				address: this.$input.filter('[name="address"]').val(),
+				city: this.$input.filter('[name="city"]').val(),
+				country: this.$input.filter('[name="country"]').val()
+			};
+		},
+		activate: function() {
+			this.$input.filter('[name="address"]').focus();
+		},
+		autosubmit: function() {
+			this.$input.keydown(function (e) {
+				if (e.which === 13) {
+					$(this).closest('form').submit();
+				}
+			});
+		}
+	});
+	Address.defaults = $.extend({}, $.fn.editabletypes.abstractinput.defaults, {
+		tpl: '<div class="editable-address"><label class="address"><span>Address: </span><input type="text" name="address" class="form-control" data-bind="value: page.address"></label></div>'+
+			 '<div class="editable-address"><label class="address"><span>City: </span><input type="text" name="city" class="form-control" data-bind="value: page.city"></label></div>'+
+			 '<div class="editable-address"><label class="address"><span>Country: </span><input type="text" name="country" class="form-control" data-bind="value: page.country"></label></div>',
+
+		inputclass: ''
+	});
+
+	$.fn.editabletypes.address = Address;
 
 	var settings = $.extend({
 		// page
@@ -233,6 +348,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 		// UserGroup Fields
 		self.id = ko.observable();
+		self.creator = ko.observable();
 		self.username = ko.observable().extend({
 			required: true
 		});
@@ -291,6 +407,9 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				return null;
 			}
 		});
+		self.isCreator = ko.computed(function() {
+			return isLogged() && app.currentUser._id() === self.creator();
+		});
 
 		if (params.id !== undefined) { self.id(params.id); }
 		if (params.type !== undefined) { self.type(params.type); }
@@ -300,9 +419,9 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			url: '/media/create',
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 50000,
-    		done: function (e, data) {
-    			console.log(e);
-    			console.log(data);
+			done: function (e, data) {
+				console.log(e);
+				console.log(data);
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
 				self.thumbnail(urlID);
 			},
@@ -403,15 +522,18 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 		self.update = function () {
 			var data = {
-				name: self.username,
+				username: self.username,
+				friendlyName: self.friendlyName,
 				thumbnail: self.thumbnail,
 				about: self.about,
 				page: self.page
 			};
 
 			$.ajax({
-				type: "PUT",
-				url: "/group/" + self.id(),
+				type: 'PUT',
+				url: '/group/' + self.id(),
+				contentType: 'application/json',
+				dataType: 'json',
 				processData: false,
 				data: ko.toJSON(data),
 				success: function (data, text) {
@@ -419,10 +541,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 						text: 'Update successful!',
 						type: 'success'
 					});
-					self.closeWindow();
 				},
 				error: function (request, status, error) {
 					// TODO: Display error message
+					console.log(error);
 				}
 			});
 		};
@@ -451,6 +573,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.friendlyName(data.friendlyName);
 				self.thumbnail(data.thumbnail);
 				self.about(data.about);
+				self.creator(data.creator);
 
 				self.page.address(data.page.address);
 				self.page.city(data.page.city);
@@ -465,6 +588,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 				if (self.coverImage) {
 					$(".profilebar > .wrap").css('background-image', 'url(' + self.coverImage() + ')');
+				}
+
+				if (!self.isCreator()) {
+					$('.editable').editable('destroy');
 				}
 
 				var promise2 = self.getProfileCollections();

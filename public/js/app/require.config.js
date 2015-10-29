@@ -49,7 +49,9 @@ var require = {
 		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd",
 		"Modernizr"					: "bower_modules/modernizr/modernizr",
 		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false",
-		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min"
+		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min",
+		"x-editable"                : "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
+		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
@@ -60,7 +62,8 @@ var require = {
 		'Modernizr': {
             exports: 'Modernizr'
         },
-        "gmaps": { deps: ['jquery'] }
+        "gmaps": { deps: ['jquery'] },
+        "knockout.x-editable": { deps: ['x-editable']}
 	}
 
 };

@@ -33,7 +33,8 @@
     "horizontal-chart":"https://github.com/eriku/horizontal-chart/archive/master.zip",
     "isotope": "latest",
     "modernizr":"latest",
-    "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip"
+    "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
+    "knockout-x-editable": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"

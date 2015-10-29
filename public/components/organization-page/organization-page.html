@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="bower_modules/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css" />
 <link rel="stylesheet" type="text/css" href="css/organization.css" />
 <div role="main">
 
@@ -13,10 +14,10 @@
 						<div class="logo"><img data-bind="attr : { src: logo }" alt="provider"></div>
 						<!-- title-->
 						<div class="title">
-							<h1><!-- ko text: friendlyName() --><!-- /ko --></h1>
+							<h1><span data-bind="editable: friendlyName, editableOptions: { name: 'friendlyName', pk: id }" data-inputclass="editable-class"></span></h1>
 						</div>
 						<!-- location-->
-						<div class="location" data-bind="text: location"></div>
+						<div class="location"><span  data-bind="editable: { address: page.address(), city: page.city(), country: page.country() }, editableOptions: { name: 'address', type: 'address', placement: 'bottom', emptytext: 'Click to enter the address', pk: id }"></span></div>
 					</div>
 					<!-- profile info-->
 					<div class="profileinfo">
@@ -24,12 +25,13 @@
 						<ul class="nav nav-tabs">
 							<li role="presentation" class="active"><a href="#profile-desc" aria-controls="home" role="tab" data-toggle="tab">INFO</a></li>
 							<li data-bind="visible: page.url"><a data-bind="attr: { href: page.url }" target="_blank">VISIT SITE</a></li>
+							<li data-bind="visible: isCreator"><a data-bind="editable: page.url, editableOptions: { type: 'text', name: 'url', 'placeholder': 'Enter URL', display: false, pk: id }" data-inputclass="editable-class">Click to enter/change URL</a></li>
 						</ul>
 						<!-- content-->
 						<div class="tab-content">
 							<!-- content-->
 							<div id="profile-desc" role="tabpanel" class="tab-pane active">
-								<div class="description" data-bind="text: about">
+								<div class="description" data-bind="editable: about, editableOptions: { type: 'textarea', name: 'about', emptytext: 'Click to enter a short description', pk: id }" data-inputclass="editable-class">
 								</div>
 							</div>
 
