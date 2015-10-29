@@ -219,7 +219,7 @@ public class CollectionController extends Controller {
 			ElasticUpdater updater = new ElasticUpdater(newVersion);
 			updater.updateCollectionMetadata();
 			if (oldIsPublic != newVersion.getIsPublic()) {
-				DB.getCollectionRecordDAO().setSpecificRecordField(newVersion.getDbId(), "isPublic",
+				DB.getCollectionRecordDAO().setSpecificRecordField(newVersion.getDbId(), "rights.isPublic",
 						String.valueOf(newVersion.getIsPublic()));
 				updater.updateVisibility();
 			}
@@ -453,7 +453,7 @@ public class CollectionController extends Controller {
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("totalCollections", collectionsSize);
-			result.put("totalCollections", exhibitionsSize);
+			result.put("totalExhibitions", exhibitionsSize);
 			result.put("collectionsOrExhibitions", collArray);
 			// TODO: put collection and exhibition hits in response
 			return ok(result);

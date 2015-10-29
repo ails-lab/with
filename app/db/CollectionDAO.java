@@ -108,7 +108,7 @@ public class CollectionDAO extends DAO<Collection> {
 		for (int i=0; i<loggedInUserEffIds.size(); i++) {
 			criteria[i] = this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
 		}
-		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("isPublic").equal(true);
+		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("rights.isPublic").equal(true);
 		return this.createQuery().or(criteria);
 	}
 	
@@ -240,7 +240,7 @@ public class CollectionDAO extends DAO<Collection> {
 			q.field("isExhibition").equal(isExhibition);*/
 		if (creator != null)
 			q.field("creatorId").equal(creator);
-		Criteria[] criteria = {this.createQuery().criteria("isPublic").equal(true)};
+		Criteria[] criteria = {this.createQuery().criteria("rights.isPublic").equal(true)};
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
 		}

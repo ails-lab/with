@@ -295,7 +295,7 @@ public class GroupManager extends Controller {
 				CriteriaContainer[] criteria =  new CriteriaContainer[3];
 				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString()).greaterThanOrEq(1);
 				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString()).equal(3);
-				criteria[2] = DB.getCollectionDAO().createQuery().criteria("isPublic").equal(true);
+				criteria[2] = DB.getCollectionDAO().createQuery().criteria("rights.isPublic").equal(true);
 				q.and(criteria);
 				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
 				g.put("totalCollections", hits.x);
