@@ -277,7 +277,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		self.owner = '';
 		self.ownerId = -1;
 		self.itemCount = 0;
-		self.thumbnail = 'img/content/thumb-empty.png';
+		self.thumbnail = 'images/thumb-empty.png';
 		self.description = '';
 		self.isLoaded = ko.observable(false);
 		self.isExhibition = false;
