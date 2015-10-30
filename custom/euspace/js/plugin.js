@@ -118,6 +118,18 @@ EUSpaceApp.ui = function( custom ){
 	this.initIsotope=function(){
 		initIsotope();
 	}
+
+	this.initCarousel=function(){
+		initCarousel();
+	}
+
+	this.initExpandExhibitionText=function(){
+		initExpandExhibitionText();
+	}
+
+	this.initImageZoom=function(){
+		initImageZoom();
+	}
 	
 	// method to initialize isotope
 	// dependency: js/vendor/isotope/
@@ -351,8 +363,8 @@ EUSpaceApp.ui = function( custom ){
 				'infinite' : false,
 				'dots'   : true,
 				'arrows' : true,
-				'prevArrow' : '<a href="#" class="slick-prev"><img src="img/ic-left-arrow.png"></a>',
-				'nextArrow' : '<a href="#" class="slick-next"><img src="img/ic-right-arrow.png"></a>'
+				'prevArrow' : '<a class="slick-prev"><img src="img/ic-left-arrow.png"></a>',
+				'nextArrow' : '<a class="slick-next"><img src="img/ic-right-arrow.png"></a>'
 			});
 
 			// on btn click

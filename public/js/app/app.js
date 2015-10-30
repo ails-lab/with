@@ -35,12 +35,15 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
 		"favorites": ko.observableArray(),
-		"favoritesId": ko.observable()
+		"favoritesId": ko.observable(),
+		"usergroups": ko.observableArray(),
+		"organizations": ko.observableArray(),
+		"projects": ko.observableArray()
 	};
 	isLogged = ko.observable(false);
 
 	loadUser = function (data, remember, loadCollections) {
-		self.currentUser._id(data._id.$oid);
+		self.currentUser._id(data.dbId);
 		self.currentUser.email(data.email);
 		self.currentUser.username(data.username);
 		self.currentUser.firstName(data.firstName);
@@ -53,6 +56,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
 		self.currentUser.favoritesId(data.favoritesId);
+		self.currentUser.usergroups(data.usergroups);
+		self.currentUser.organizations(data.organizations);
+		self.currentUser.projects(data.projects);
 
 		self.loadFavorites();
 
@@ -82,9 +88,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
-				for(i in data){
-					if($("#"+data[i])){
-						$("#"+data[i]).addClass('active');
+				for(var i in data) {
+					if($("#" + data[i])){
+						$("#" + data[i]).addClass('active');
 					}
 				}
 			})
@@ -191,7 +197,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "loggedInUserAccess=WRITE&offset=0&count=500&isExhibition=false"
+			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName="+JSON.stringify([{user:self.currentUser.username(),rights:"WRITE"}]),
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -244,7 +250,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			dataType    : "json",
 			url         : "/collection/list",
 			processData : false,
-			data        : "loggedInUserAccess=own&offset=0&count=20&isExhibition=true"}).done(
+			data        : "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition=true"}).done(
 			function(data) {
 				// console.log("User collections " + JSON.stringify(data));
 				/*if (sessionStorage.getItem('User') !== null)
@@ -327,6 +333,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		getUserCollections: getUserCollections,
 		getPublicCollections: getPublicCollections,
 		getUserExhibitions: getUserExhibitions,
+		getEditableCollections: getEditableCollections,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,
 		likeItem: likeItem

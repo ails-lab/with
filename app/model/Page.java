@@ -16,16 +16,14 @@
 
 package model;
 
-import java.util.Set;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 
-import utils.Serializer;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import java.util.List;
+import utils.Serializer;
 
 public class Page {
 
@@ -65,9 +63,9 @@ public class Page {
 	private ObjectId coverThumbnail;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private Set<ObjectId> featuredCollections;
+	private List<ObjectId> featuredCollections;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private Set<ObjectId> featuredExhibitions;
+	private List<ObjectId> featuredExhibitions;
 	public String getAddress() {
 		return address;
 	}
@@ -124,20 +122,28 @@ public class Page {
 		this.coordinates = coordinates;
 	}
 
-	public Set<ObjectId> getFeaturedCollections() {
+	public List<ObjectId> getFeaturedCollections() {
 		return featuredCollections;
 	}
 
-	public void setFeaturedCollections(Set<ObjectId> featuredCollections) {
+	public void setFeaturedCollections(List<ObjectId> featuredCollections) {
 		this.featuredCollections = featuredCollections;
 	}
+	
+	public void addFeaturedCollection(ObjectId featuredCollection) {
+		this.featuredCollections.add(featuredCollection);
+	}
 
-	public Set<ObjectId> getFeaturedExhibitions() {
+	public List<ObjectId> getFeaturedExhibitions() {
 		return featuredExhibitions;
 	}
 
-	public void setFeaturedExhibitions(Set<ObjectId> featuredExhibitions) {
+	public void setFeaturedExhibitions(List<ObjectId> featuredExhibitions) {
 		this.featuredExhibitions = featuredExhibitions;
+	}
+	
+	public void addFeaturedExhibition(ObjectId featuredExhibition) {
+		this.featuredExhibitions.add(featuredExhibition);
 	}
 
 }

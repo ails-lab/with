@@ -42,12 +42,16 @@ var require = {
 		"jquery.imageupload"        : "bower_modules/jquery-file-upload/js/jquery.fileupload-image",
 		"autoscroll"		    	: "js/aautoscroll.2.4",
 		"bootstrap-select"       	: "bower_modules/bootstrap-select/dist/js/bootstrap-select.min",
+		"bootstrap-switch"       	: "bower_modules/bootstrap-switch/dist/js/bootstrap-switch.min",
 		"jquery.lazyload"           : "bower_modules/jquery.lazyload/jquery.lazyload",
 		"barchart"                  : "bower_modules/horizontal-chart/build/js/jquery.horizBarChart.min",
 		"header"                    : "headers",
 		"isotope"                   : "bower_modules/isotope/dist/isotope.pkgd",
 		"Modernizr"					: "bower_modules/modernizr/modernizr",
-		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false"
+		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false",
+		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min",
+		"x-editable"                : "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
+		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
@@ -58,7 +62,8 @@ var require = {
 		'Modernizr': {
             exports: 'Modernizr'
         },
-        "gmaps": { deps: ['jquery'] }
+        "gmaps": { deps: ['jquery'] },
+        "knockout.x-editable": { deps: ['x-editable']}
 	}
 
 };

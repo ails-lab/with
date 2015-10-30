@@ -136,6 +136,8 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 
 			  
 		  }
+		  
+		 
 		  if(data != undefined) self.load(data);
 		   
 		  
@@ -203,23 +205,19 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 					       window.EUSpaceUI.initProfile();
 					});
           });
-		  
-		 
-          
-		  
 		};
 		
 		
 		self.getProfileCollections = function () {
 			//call should be replaced with collection/list?isPublic=true&offset=0&count=20&isExhibition=false&directlyAccessedByGroupName=[{"orgName":self.username(), "access":"READ"}]
-			
 			return $.ajax({
 				type: "GET",
 				contentType: "application/json",
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "access=read&offset=0&count=20&collectionHits=true"
+				//TODO:add parent project filter
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"OWN"}]),
 			}).success (function(){
 			});
 		};
@@ -250,10 +248,10 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 			}
 			if (self.loading() === false) {
 				self.loading(true);
-				//replace with collection/list?isPublic=true&offset=0&count=20&isExhibition=false&directlyAccessedByGroupName=[{"orgName":self.username(), "access":"READ"}]
 				var offset = self.collections().length+1;
 				$.ajax({
-					"url": "/collection/list?access=read&count=20&offset=" + offset,
+					"url": '/collection/list',
+					data: "count=20&offset=" + offset + "&directlyAccessedByGroupName=" + JSON.stringify([{"group":self.username(),rights:"OWN"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
@@ -272,7 +270,14 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		
       self.loadAll();	  
 
-		
+      self.loadCollectionOrExhibition = function(item) {
+		  if (item.isExhibition) {
+			  window.location = 'index.html#exhibitionview/'+ item.id;
+		  }
+		  else {
+			  window.location = 'index.html#collectionview/' + item.id;
+		  }
+	  };	
 	  
 	  self.filter=function(data, event) {
 		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;

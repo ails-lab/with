@@ -33,7 +33,10 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserGroup extends UserOrGroup {
-	
+
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId creator;
+
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private boolean privateGroup;
@@ -66,10 +69,18 @@ public class UserGroup extends UserOrGroup {
 		return users;
 	}
 
+	public void addUser(ObjectId user) {
+		this.getUsers().add(user);
+	}
+
+	public void removeUser(ObjectId user) {
+		this.getUsers().remove(user);
+	}
+
 	public Set<ObjectId> getParentGroups() {
 		return parentGroups;
 	}
-	
+
 	@JsonIgnore
 	public Set<ObjectId> getAncestorGroups() {
 		Set<ObjectId> ancestors = new HashSet<ObjectId>();
@@ -106,6 +117,14 @@ public class UserGroup extends UserOrGroup {
 
 	public void setFriendlyName(String friendlyName) {
 		this.friendlyName = friendlyName;
+	}
+
+	public ObjectId getCreator() {
+		return creator;
+	}
+
+	public void setCreator(ObjectId creator) {
+		this.creator = creator;
 	}
 
 }

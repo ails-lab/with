@@ -87,7 +87,7 @@ server.pid
 *.iml
 *.eml
 /dist/
-.cache
+.cache*
 public/.idea/misc.xml
 public/.idea/.name
 public/.idea/vcs.xml
