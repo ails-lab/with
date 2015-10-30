@@ -69,6 +69,8 @@ public class User extends UserOrGroup {
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private final Set<ObjectId> invitedInGroups = new HashSet<ObjectId>();
 
 	/**
 	 * The search should already be stored in the database separately
@@ -232,6 +234,14 @@ public class User extends UserOrGroup {
 
 	public void removeUserGroup(ObjectId group) {
 		this.userGroupsIds.remove(group);
+	}
+
+	public void addInvitationFromGroup(ObjectId group) {
+		this.invitedInGroups.add(group);
+	}
+
+	public void removeInvitationFromGroup(ObjectId group) {
+		this.invitedInGroups.remove(group);
 	}
 
 	public Set<ObjectId> getUserGroupsIds() {

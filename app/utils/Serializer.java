@@ -85,7 +85,6 @@ public class Serializer {
 			}
 			jsonGen.writeObject(Json.toJson(rights));
 		}
-
 	}
 
 	public static String serializeXML(Document doc) {

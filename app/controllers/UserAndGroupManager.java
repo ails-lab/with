@@ -36,6 +36,9 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.NotificationCenter;
+import utils.NotificationCenter.Activity;
+import utils.NotificationCenter.UserUpdate;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -183,16 +186,22 @@ public class UserAndGroupManager extends Controller {
 			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
 			ancestorGroups.add(group.getDbId());
 			ObjectId userOrGroupId = new ObjectId(id);
+			// Add a user to the group
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
-				User user = DB.getUserDAO().get(userOrGroupId);
-				group.getUsers().add(user.getDbId());
+				User usr = DB.getUserDAO().get(userOrGroupId);
+				// Send notification to the user
+				usr.addInvitationFromGroup(group.getDbId());
+				DB.getUserDAO().makePermanent(usr);
+				NotificationCenter.userUpdate(usr, group, Activity.GROUP_MEM_INVITE);
+			/*	group.getUsers().add(user.getDbId());
 				user.addUserGroups(ancestorGroups);
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 					result.put("message", "User succesfully added to group");
 					return ok(result);
 				}
-			}
+			}*/
+			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
 				childGroup.getParentGroups().add(group.getDbId());

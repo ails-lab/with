@@ -50,7 +50,6 @@ public class NotificationActor extends UntypedActor {
 	
 	public void preStart() {
 		NotificationCenter.addActor(getSelf());
-
 	}
 
 	public void postStop() {
