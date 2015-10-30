@@ -143,7 +143,8 @@ body [role='main'] .profilebar .wrap .profilemap {
     float: left;
     padding-left: 30px;
     height: 170px;
-    margin-top: 30px;
+    margin-top: 15px;
+    margin-bottom: 15px;
 }
 
 body [role='main'] .filter {

@@ -349,6 +349,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		// UserGroup Fields
 		self.id = ko.observable();
 		self.creator = ko.observable();
+		self.adminIds = {};
 		self.username = ko.observable().extend({
 			required: true
 		});
@@ -411,6 +412,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			return isLogged() && app.currentUser._id() === self.creator();
 		});
 
+		self.isAdmin = ko.computed(function() {
+			return isLogged() && $.inArray(app.currentUser._id(), self.adminIds);
+		});
+
 		if (params.id !== undefined) { self.id(params.id); }
 		if (params.type !== undefined) { self.type(params.type); }
 
@@ -443,6 +448,49 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.page.coverImage(data.result.results[0].externalId);
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
 				self.page.coverThumbnail(urlID);
+			},
+			error: function (e, data) {
+				$.smkAlert({
+					text: 'Error uploading the file',
+					type: 'danger',
+					time: 10
+				});
+			}
+		});
+
+		$('#coverupdate').fileupload({
+			type: "POST",
+			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 500000,
+			done: function (e, data) {
+				self.page.coverImage(data.result.results[0].externalId);
+				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				self.page.coverThumbnail(urlID);
+
+				var updateData = {
+					page: {
+						coverImage: self.page.coverImage(),
+						coverThumbnail: self.page.coverThumbnail()
+					}
+				};
+
+				$.ajax({
+					type: 'PUT',
+					url: '/group/' + self.id(),
+					contentType: 'application/json',
+					dataType: 'json',
+					processData: false,
+					data: JSON.stringify(updateData),
+					success: function (data, text) {
+						console.log(self.page.coverImage());
+						$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
+					},
+					error: function (request, status, error) {
+						// TODO: Show notification
+					}
+				});
+
 			},
 			error: function (e, data) {
 				$.smkAlert({
@@ -520,15 +568,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			});
 		};
 
-		self.update = function () {
-			var data = {
-				username: self.username,
-				friendlyName: self.friendlyName,
-				thumbnail: self.thumbnail,
-				about: self.about,
-				page: self.page
-			};
-
+		self.update = function (data) {
 			$.ajax({
 				type: 'PUT',
 				url: '/group/' + self.id(),
@@ -574,6 +614,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.thumbnail(data.thumbnail);
 				self.about(data.about);
 				self.creator(data.creator);
+				self.adminIds = data.adminIds;
 
 				self.page.address(data.page.address);
 				self.page.city(data.page.city);
@@ -586,8 +627,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					self.page.coordinates.latitude(data.page.coordinates.latitude);
 				}
 
-				if (self.coverImage) {
-					$(".profilebar > .wrap").css('background-image', 'url(' + self.coverImage() + ')');
+				if (self.page.coverImage) {
+					$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
 				}
 
 				if (!self.isCreator()) {

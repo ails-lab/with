@@ -41,6 +41,16 @@
 					<div class="profilemap" data-bind="visible: coords">
 						<iframe data-bind="attr : { src: coords }" frameborder="0" style="border:0" allowfullscreen class="maps"></iframe>
 					</div>
+
+					<div class="btn-group pull-right" role="group" data-bind="visible: isAdmin">
+						<a href="javascript: void(0)" class="btn btn-primary btn-image" data-bind="visible: isCreator">
+							<span class="glyphicon glyphicon-camera"></span> Change Cover
+							<input type="file" id="coverupdate" name="cover" />
+						</a>
+						<a href="javascript: void(0)" class="btn btn-primary">
+							<span class="glyphicon glyphicon-user"></span> Manage Members
+						</a>
+					</div>
 				</div>
 			</div>
 		</div>
