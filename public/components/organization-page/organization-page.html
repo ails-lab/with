@@ -11,7 +11,16 @@
 					<!-- profile box-->
 					<div class="profilebox">
 						<!-- logo-->
-						<div class="logo"><img data-bind="attr : { src: logo }" alt="provider"></div>
+						<div class="logo">
+							<a href="javascript: void(0)" class="btn btn-image" style="outline: 0; padding: 0;">
+							<!-- ko if: thumbnail -->
+								<img data-bind="attr : { src: logo }" alt="provider">
+							<!-- /ko --><!-- ko ifnot: thumbnail -->
+								<img src="images/no_image.jpg" alt="provider">
+							<!-- /ko -->
+								<input type="file" id="logoupdate" name="logo" style="right: 0" data-bind="enable: isCreator" />
+							</a>
+						</div>
 						<!-- title-->
 						<div class="title">
 							<h1><span data-bind="editable: friendlyName, editableOptions: { name: 'friendlyName', pk: id }" data-inputclass="editable-class"></span></h1>

@@ -399,7 +399,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			return self.page.coverThumbnail ? '/media/' + self.page.coverThumbnail() : null;
 		});
 		self.logo = ko.computed(function() {
-			return self.thumbnail ? '/media/' + self.thumbnail() : null;
+			return self.thumbnail ? '/media/' + self.thumbnail() : false;
 		});
 		self.coords = ko.computed(function () {
 			if (self.page.coordinates.latitude() && self.page.coordinates.longitude()) {
@@ -429,6 +429,45 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				console.log(data);
 				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
 				self.thumbnail(urlID);
+			},
+			error: function (e, data) {
+				$.smkAlert({
+					text: 'Error uploading the file',
+					type: 'danger',
+					time: 10
+				});
+			}
+		});
+
+
+		$('#logoupdate').fileupload({
+			type: "POST",
+			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 50000,
+			done: function (e, data) {
+				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				self.thumbnail(urlID);
+
+				var updateData = {
+					thumbnail: self.thumbnail()
+				};
+
+				$.ajax({
+					type: 'PUT',
+					url: '/group/' + self.id(),
+					contentType: 'application/json',
+					dataType: 'json',
+					processData: false,
+					data: JSON.stringify(updateData),
+					success: function (data, text) {
+						// TODO: Show the thumbnail
+					},
+					error: function (request, status, error) {
+						// TODO: Show notification
+					}
+				});
+
 			},
 			error: function (e, data) {
 				$.smkAlert({
