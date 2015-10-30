@@ -581,7 +581,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.page.url(data.page.url);
 				self.page.coverImage(data.page.coverImage);
 				self.page.coverThumbnail(data.page.coverThumbnail);
-				if (data.page.coordinages) {
+				if (data.page.coordinates) {
 					self.page.coordinates.longitude(data.page.coordinates.longitude);
 					self.page.coordinates.latitude(data.page.coordinates.latitude);
 				}
