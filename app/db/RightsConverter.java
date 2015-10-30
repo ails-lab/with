@@ -41,7 +41,7 @@ public class RightsConverter extends TypeConverter {
 				r.setPublic((Boolean) dbObj.get("isPublic"));
 			else
 				r.put( new ObjectId(k),  
-						Rights.Access.values()[(int)dbObj.get(k)]);
+					Rights.Access.values()[(int)dbObj.get(k)]);
 		}
 		return r;
 	}
