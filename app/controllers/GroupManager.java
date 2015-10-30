@@ -37,6 +37,7 @@ import db.DB;
 import espace.core.HttpConnector;
 import model.Collection;
 import model.Organization;
+import model.Page;
 import model.Project;
 import model.Rights.Access;
 import model.User;
@@ -49,6 +50,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.Tuple;
+import model.Page.Point;
 
 public class GroupManager extends Controller {
 
@@ -188,51 +190,50 @@ public class GroupManager extends Controller {
 				}
 			}
 			// Update user page
-			if (json.has("page")) {
+			if (json.has("page") && (group instanceof Organization || group instanceof Project)) {
+				String address = null, city = null, country = null;
+				Page oldPage = null;
+				JsonNode newPage = json.get("page");
+				// Keep previous page fields
+				if (group instanceof Organization) {
+					oldPage = ((Organization) group).getPage();
+				} else if (group instanceof Project) {
+					oldPage = ((Project) group).getPage();
+				}
+				// Update Page
+				ObjectMapper pageObjectMapper = new ObjectMapper();
+				ObjectReader pageUpdator = pageObjectMapper.readerForUpdating(oldPage);
+				Page page;
+				page = pageUpdator.readValue(newPage);
+				// In case that the location has changed we need to calculate
+				// the new coordinates
 				if ((json.get("page").get("address") != null || json.get("page").get("city") != null
-						|| json.get("page").get("country") != null)
-						&& (group instanceof Organization || group instanceof Project)) {
-					String address = null, city = null, country = null;
-					if (group instanceof Organization) {
-						address = ((Organization) group).getPage().getAddress();
-						city = ((Organization) group).getPage().getCity();
-						country = ((Organization) group).getPage().getCountry();
-					} else if (group instanceof Project) {
-						address = ((Project) group).getPage().getAddress();
-						city = ((Project) group).getPage().getCity();
-						country = ((Project) group).getPage().getCountry();
-					}
-					// ((string == null) ? "" : string)
-					if (json.get("page").get("address") != null) {
-						address = json.get("page").get("address").asText();
-					}
-					if (json.get("page").get("city") != null) {
-						city = json.get("page").get("city").asText();
-					}
-					if (json.get("page").get("country") != null) {
-						country = json.get("page").get("country").asText();
-					}
+						|| json.get("page").get("country") != null)) {
+					address = page.getAddress();
+					city = page.getCity();
+					country = page.getCountry();
 					String fullAddress = ((address == null) ? "" : address) + "," + ((city == null) ? "" : city) + ","
 							+ ((country == null) ? "" : country);
 					fullAddress = fullAddress.replace(" ", "+");
 					try {
 						JsonNode response = HttpConnector.getURLContent(
 								"https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
-						ObjectNode page = Json.newObject();
-						page.put("address", address);
-						page.put("city", city);
-						page.put("country", country);
-						ObjectNode coordinates = Json.newObject();
-						coordinates.put("latitude",
-								response.get("results").get(0).get("geometry").get("location").get("lat"));
-						coordinates.put("longitude",
-								response.get("results").get(0).get("geometry").get("location").get("lng"));
-						page.put("coordinates", coordinates);
-						json.put("page", page);
+						Point coordinates = new Point();
+						coordinates.setLatitude(
+								response.get("results").get(0).get("geometry").get("location").get("lat").asDouble());
+						coordinates.setLongitude(
+								response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());
+						page.setCoordinates(coordinates);
 					} catch (Exception e) {
-						log.error("Cannot update group Page", e);
-						json.remove("page");
+						log.error("Cannot update coordinates of group Page", e);
+						page.setCoordinates(null);
 					}
+				}
+				json.remove("page");
+				if (group instanceof Organization) {
+					((Organization) group).setPage(page);
+				} else if (group instanceof Project) {
+					((Project) group).setPage(page);
 				}
 			}
 			UserGroup oldVersion = group;
@@ -240,9 +241,6 @@ public class GroupManager extends Controller {
 			ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
 			UserGroup newVersion;
 			newVersion = updator.readValue(json);
-			/*
-			 * if (json.has("page")) { newVersion }
-			 */
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newVersion);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
@@ -259,10 +257,15 @@ public class GroupManager extends Controller {
 				return internalServerError("Cannot save group to database!");
 			}
 			return ok(Json.toJson(newVersion));
-		} catch (IOException e) {
+		} catch (
+
+		IOException e)
+
+		{
 			e.printStackTrace();
 			return internalServerError(e.getMessage());
 		}
+
 	}
 
 	/**
