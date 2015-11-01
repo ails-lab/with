@@ -29,6 +29,9 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import utils.NotificationCenter;
+import utils.NotificationCenter.Activity;
+import utils.NotificationCenter.Message;
+import utils.NotificationCenter.UserUpdate;
 
 /**
  * 
@@ -47,7 +50,7 @@ public class NotificationActor extends UntypedActor {
 	public NotificationActor(ActorRef out) {
 		this.out = out;
 	}
-	
+
 	public void preStart() {
 		NotificationCenter.addActor(getSelf());
 	}
@@ -76,13 +79,13 @@ public class NotificationActor extends UntypedActor {
 					log.error("User is already logged out");
 				}
 			}
-
 		}
 		if (message instanceof NotificationCenter.Message) {
 			notifyMessage((NotificationCenter.Message) message);
 		}
-		if (message instanceof NotificationCenter.UserUpdate) {
-
+		if (message instanceof UserUpdate) {
+			UserUpdate userUpdate = (UserUpdate) message;
+			userUpdate(userUpdate);
 		}
 	}
 
@@ -93,7 +96,7 @@ public class NotificationActor extends UntypedActor {
 	 * @param mesg
 	 * @param userOrGroup
 	 */
-	public void notifyMessage(NotificationCenter.Message mesg) {
+	public void notifyMessage(Message mesg) {
 		if (mesg.userOrGroup == null) {
 			// public messsage
 			out.tell(Json.toJson(mesg), self());
@@ -106,7 +109,15 @@ public class NotificationActor extends UntypedActor {
 		}
 	}
 
-	public void userUpdate(NotificationCenter.UserUpdate userUp) {
-
+	public void userUpdate(UserUpdate userUp) {
+		// Check if this update is about the user and inform him else ignore it.
+		// If the user is offline he is not informed and the notification is not
+		// kept. However, the action (invitation to group / rejection e.t.c) is
+		// kept in the user object
+		if (loggedInUser != null && loggedInUser.equals(userUp.user)) {
+			if (userUp.activity.equals(Activity.GROUP_MEM_INVITE)) {
+				notifyMessage(new Message("invited you", userUp.userGroup.getDbId()));
+			}
+		}
 	}
 }
