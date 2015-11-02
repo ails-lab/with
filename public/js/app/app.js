@@ -58,6 +58,18 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		}
 	};
 
+	self.reloadUser = function() {
+		if (self.currentUser._id === undefined) { return; }
+
+		$.ajax({
+			url: '/user/' + self.currentUser._id(),
+			type: 'GET',
+			success: function(data, text) {
+				loadUser(data, false, false);
+			}
+		});
+	};
+
 	self.loadFavorites = function () {
 		$.ajax({
 				url: "/collection/favorites",
@@ -301,6 +313,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	return {
 		currentUser: currentUser,
 		loadUser: loadUser,
+		reloadUser: reloadUser,
 		showPopup: showPopup,
 		closePopup: closePopup,
 		logout: logout,

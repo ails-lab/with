@@ -598,6 +598,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 						text: 'A new ' + self.type() + ' was created successfully!',
 						type: 'success'
 					});
+					app.reloadUser();
 					self.closeWindow();
 				},
 				error: function (request, status, error) {
