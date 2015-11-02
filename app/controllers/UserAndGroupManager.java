@@ -164,12 +164,23 @@ public class UserAndGroupManager extends Controller {
 		}
 	}
 
+	/**
+	 * Add a user as a member of a group or a group as a child group. Only the
+	 * administrators of the group have the right to add users/groups to the
+	 * group. This action needs approval by the user/group that it concerns.
+	 *
+	 * @param id
+	 *            the user/group id to add
+	 * @param groupId
+	 *            the group id
+	 * @return success message
+	 */
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		try {
 			ObjectNode result = Json.newObject();
 			String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
-				result.put("error", "Only creator or administrators of the group have the right to edit the group");
+				result.put("error", "Only administrators of the group have the right to edit the group");
 				return forbidden(result);
 			}
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
@@ -180,7 +191,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (!group.getAdminIds().contains(new ObjectId(adminId)) && !admin.isSuperUser()
 					&& !group.getCreator().equals(new ObjectId(adminId))) {
-				result.put("error", "Only creator or administrators of the group have the right to edit the group");
+				result.put("error", "Only administrators of the group have the right to edit the group");
 				return forbidden(result);
 			}
 			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
@@ -193,14 +204,17 @@ public class UserAndGroupManager extends Controller {
 				usr.addInvitationFromGroup(group.getDbId());
 				DB.getUserDAO().makePermanent(usr);
 				NotificationCenter.userUpdate(usr, group, Activity.GROUP_MEM_INVITE);
-			/*	group.getUsers().add(user.getDbId());
-				user.addUserGroups(ancestorGroups);
-				if (!(DB.getUserDAO().makePermanent(user) == null)
-						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-					result.put("message", "User succesfully added to group");
-					return ok(result);
-				}
-			}*/
+				/*
+				 * group.getUsers().add(user.getDbId());
+				 * user.addUserGroups(ancestorGroups); if
+				 * (!(DB.getUserDAO().makePermanent(user) == null) &&
+				 * !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+				 * result.put("message", "User succesfully added to group");
+				 * return ok(result); } }
+				 */
+				result.put("message", "User succesfully invited to group");
+				return ok(result);
+			}
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
@@ -217,7 +231,6 @@ public class UserAndGroupManager extends Controller {
 			}
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
-
 		} catch (Exception e) {
 			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
 		}

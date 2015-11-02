@@ -109,11 +109,15 @@ public class NotificationActor extends UntypedActor {
 		}
 	}
 
+	/**
+	 * Check if this update is about the user and inform him else ignore it. If
+	 * the user is offline he is not informed and the notification is not kept.
+	 * However, the action (invitation to group / rejection e.t.c) is kept in
+	 * the user object.
+	 * 
+	 * @param userUp
+	 */
 	public void userUpdate(UserUpdate userUp) {
-		// Check if this update is about the user and inform him else ignore it.
-		// If the user is offline he is not informed and the notification is not
-		// kept. However, the action (invitation to group / rejection e.t.c) is
-		// kept in the user object
 		if (loggedInUser != null && loggedInUser.equals(userUp.user)) {
 			if (userUp.activity.equals(Activity.GROUP_MEM_INVITE)) {
 				notifyMessage(new Message("invited you", userUp.userGroup.getDbId()));
