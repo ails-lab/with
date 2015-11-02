@@ -73,7 +73,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		
 		isLogged(true);
 		waitForConnection(function () {
-	        self.notificationSocket.send('{"action":"login","id":"'+data._id.$oid+'"}');
+	        self.notificationSocket.send('{"action":"login","id":"'+data.dbId+'"}');
 	    }, 1000)
 
 		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {

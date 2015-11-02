@@ -118,10 +118,21 @@ public class NotificationActor extends UntypedActor {
 	 * @param userUp
 	 */
 	public void userUpdate(UserUpdate userUp) {
-		if (loggedInUser != null && loggedInUser.equals(userUp.user)) {
-			if (userUp.activity.equals(Activity.GROUP_MEM_INVITE)) {
-				notifyMessage(new Message("invited you", userUp.userGroup.getDbId()));
+		if (loggedInUser == null) {
+			return;
+		}
+		switch (userUp.activity) {
+		case GROUP_MEM_INVITE:
+			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
+				notifyMessage(new Message("Invited you", userUp.userGroup.getDbId()));
 			}
+			break;
+		case GROUP_INVITE_ACCEPT:
+			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
+				notifyMessage(new Message("Accepted invitation", userUp.user.getDbId()));
+			}			
+		default:
+			break;
 		}
 	}
 }
