@@ -647,7 +647,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		self.loadAll = function () {
 			var promise = self.getProviderData();
 
-			$.when(promise).done(function (data) {
+			$.when(promise).done(function (data, textStatus, jqXHR) {
 
 				self.username(data.username);
 				self.friendlyName(data.friendlyName);
@@ -681,6 +681,13 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					self.totalExhibitions(data.totalExhibitions);
 					self.revealItems(data.collectionsOrExhibitions);
 					initProfileScroll();
+				});
+			}).fail(function(jqXHR, textStatus, errorThrown) {
+				// window.location.href = "/assets/index.html";
+				$.smkAlert({
+					text: 'Page not found!',
+					type: 'danger',
+					time: 10
 				});
 			});
 		};
