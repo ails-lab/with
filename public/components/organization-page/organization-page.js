@@ -370,8 +370,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		// Page Fields
 		self.page = {
 			address: ko.observable(),
-			city: ko.observable(false),
-			country: ko.observable(false),
+			city: ko.observable(),
+			country: ko.observable(),
 			url: ko.observable(),
 			coverImage: ko.observable(),
 			coverThumbnail: ko.observable(),
@@ -389,7 +389,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		self.totalExhibitions = ko.observable(0);
 
 		self.location = ko.computed(function () {
-			if (self.page.city() && self.page.country()) {
+			if (self.page.city() === '' && self.page.country() === '') {
 				return self.page.country() && self.page.city() ? self.page.city() + ', ' + self.page.country() : self.page.city() + self.page.country();
 			} else {
 				return '';
@@ -667,7 +667,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					self.page.coordinates.latitude(data.page.coordinates.latitude);
 				}
 
-				if (self.page.coverImage) {
+				if (self.page.coverImage()) {
 					$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
 				}
 
