@@ -119,7 +119,9 @@
   z-index: 3;
 }
 .profilebar.fixed .wrap .profileinfo,
-.profilebar.account .wrap .profileinfo {
+.profilebar.account .wrap .profileinfo,
+.profilebar.fixed .wrap .profileactions,
+.profilebar.account .wrap .profileactions {
   display: none;
 }
 .profilebar.fixed .wrap .profilebox,
