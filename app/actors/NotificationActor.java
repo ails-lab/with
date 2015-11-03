@@ -25,11 +25,11 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import db.DB;
 import model.User;
+import model.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import utils.NotificationCenter;
-import utils.NotificationCenter.Activity;
 import utils.NotificationCenter.Message;
 import utils.NotificationCenter.UserUpdate;
 
@@ -122,7 +122,7 @@ public class NotificationActor extends UntypedActor {
 			return;
 		}
 		switch (userUp.activity) {
-		case GROUP_MEM_INVITE:
+		case GROUP_INVITE:
 			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
 				notifyMessage(new Message("Invited you", userUp.userGroup.getDbId()));
 			}
@@ -130,8 +130,30 @@ public class NotificationActor extends UntypedActor {
 		case GROUP_INVITE_ACCEPT:
 			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
 				notifyMessage(new Message("Accepted invitation", userUp.user.getDbId()));
-			}			
+			}
+			break;
+		case GROUP_INVITE_DECLINED:
+			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
+				notifyMessage(new Message("Declined invitation", userUp.user.getDbId()));
+			}
+			break;
+		case GROUP_REQUEST:
+			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
+				notifyMessage(new Message("Join request", userUp.user.getDbId()));
+			}
+			break;
+		case GROUP_REQUEST_ACCEPT:
+			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
+				notifyMessage(new Message("Group accepted your join request", userUp.userGroup.getDbId()));
+			}
+			break;
+		case GROUP_REQUEST_DENIED:
+			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
+				notifyMessage(new Message("Group denied your join request", userUp.userGroup.getDbId()));
+			}
+			break;
 		default:
+			log.info("Action for user update is not implemented yet");
 			break;
 		}
 	}

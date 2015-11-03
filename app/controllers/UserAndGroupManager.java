@@ -20,16 +20,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.apache.commons.codec.binary.Base64;
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
 import model.Collection;
 import model.Media;
+import model.Notification;
+import model.Notification.Activity;
 import model.Rights.Access;
 import model.User;
 import model.UserGroup;
 import model.UserOrGroup;
-
-import org.apache.commons.codec.binary.Base64;
-import org.bson.types.ObjectId;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -37,13 +42,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.NotificationCenter;
-import utils.NotificationCenter.Activity;
-import utils.NotificationCenter.UserUpdate;
-
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
 
 public class UserAndGroupManager extends Controller {
 
@@ -201,9 +199,10 @@ public class UserAndGroupManager extends Controller {
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User usr = DB.getUserDAO().get(userOrGroupId);
 				// Send notification to the user
-				usr.addInvitationFromGroup(group.getDbId());
+				Notification notification = new Notification();
+				// Add info about this notification
 				DB.getUserDAO().makePermanent(usr);
-				NotificationCenter.userUpdate(usr, group, Activity.GROUP_MEM_INVITE);
+				NotificationCenter.userUpdate(usr, group, Activity.GROUP_INVITE);
 				/*
 				 * group.getUsers().add(user.getDbId());
 				 * user.addUserGroups(ancestorGroups); if

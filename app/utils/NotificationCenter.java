@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import akka.actor.ActorRef;
 import model.Collection;
+import model.Notification.Activity;
 import model.User;
 import model.UserGroup;
 
@@ -34,23 +35,6 @@ import model.UserGroup;
  *
  */
 public class NotificationCenter {
-
-	
-	// there is no strict need for this, but its a nice place to collect all the activities that
-	// we expect notifications to be necessary for
-	public enum Activity {
-		// group related
-		GROUP_MEM_INVITE, GROUP_INVITE_ACCEPT, GROUP_MEM_REQUEST, GROUP_REQUEST_ACCEPT,
-		GROUP_REQUEST_DENIED, GROUP_INVITE_DECLINED,
-		
-		// collection related
-		COLLECTION_ITEM_ADDED, COLLECTION_ITEM_REMOVED, COLLECTION_SHARED,
-
-		// messages
-		MESSAGE
-	}
-	
-	
 
 	// Messages are send explicitly to people logged in,
 	// Do we want to store them? For people that are not logged in?
