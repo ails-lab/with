@@ -15,12 +15,15 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
 		"favorites": ko.observableArray(),
-		"favoritesId": ko.observable()
+		"favoritesId": ko.observable(),
+		"usergroups": ko.observableArray(),
+		"organizations": ko.observableArray(),
+		"projects": ko.observableArray()
 	};
 	isLogged = ko.observable(false);
 
 	loadUser = function (data, remember, loadCollections) {
-		self.currentUser._id(data._id.$oid);
+		self.currentUser._id(data.dbId);
 		self.currentUser.email(data.email);
 		self.currentUser.username(data.username);
 		self.currentUser.firstName(data.firstName);
@@ -33,6 +36,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
 		self.currentUser.favoritesId(data.favoritesId);
+		self.currentUser.usergroups(data.usergroups);
+		self.currentUser.organizations(data.organizations);
+		self.currentUser.projects(data.projects);
 
 		self.loadFavorites();
 
@@ -52,6 +58,18 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		}
 	};
 
+	self.reloadUser = function() {
+		if (self.currentUser._id === undefined) { return; }
+
+		$.ajax({
+			url: '/user/' + self.currentUser._id(),
+			type: 'GET',
+			success: function(data, text) {
+				loadUser(data, false, false);
+			}
+		});
+	};
+
 	self.loadFavorites = function () {
 		$.ajax({
 				url: "/collection/favorites",
@@ -59,9 +77,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
-				for(i in data){
-					if($("#"+data[i])){
-						$("#"+data[i]).addClass('active');
+				for(var i in data) {
+					if($("#" + data[i])){
+						$("#" + data[i]).addClass('active');
 					}
 				}
 			})
@@ -213,8 +231,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			//var err = JSON.parse(request.responseText);
 		});
 	};
-	
-	
+
 	self.getAllUserCollections = function () {
 		//filter = [{username:'maria.ralli',access:'OWN'}];
 		return $.ajax({
@@ -248,7 +265,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			success: function () {
 				self.clearSession();
 				window.location.href = "/assets/index.html";
-				//update custom spaces 
+				//update custom spaces
 				window.opener.location.reload();
 			}
 		});
@@ -299,6 +316,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	return {
 		currentUser: currentUser,
 		loadUser: loadUser,
+		reloadUser: reloadUser,
 		showPopup: showPopup,
 		closePopup: closePopup,
 		logout: logout,

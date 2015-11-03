@@ -1,0 +1,111 @@
+<link rel="stylesheet" href="bower_modules/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css" />
+<link rel="stylesheet" type="text/css" href="css/organization.css" />
+<div role="main" data-bind="visible: username">
+
+	<!-- profile bar-->
+	<section class="profilebar">
+		<!-- wrap-->
+		<div class="wrap">
+			<div class="hue">
+				<div class="container">
+					<!-- profile box-->
+					<div class="profilebox">
+						<!-- logo-->
+						<div class="logo">
+							<a href="javascript: void(0)" class="btn btn-image" style="outline: 0; padding: 0;">
+							<!-- ko if: thumbnail -->
+								<img data-bind="attr : { src: logo }" alt="provider">
+							<!-- /ko --><!-- ko ifnot: thumbnail -->
+								<img src="images/no_image.jpg" alt="provider">
+							<!-- /ko -->
+								<input type="file" id="logoupdate" name="logo" style="right: 0" data-bind="enable: isCreator" />
+							</a>
+						</div>
+						<!-- title-->
+						<div class="title">
+							<h1><span data-bind="editable: friendlyName, editableOptions: { name: 'friendlyName', pk: id }" data-inputclass="editable-class"></span></h1>
+						</div>
+						<!-- location-->
+						<div class="location"><span  data-bind="editable: { address: page.address(), city: page.city(), country: page.country() }, editableOptions: { name: 'address', type: 'address', placement: 'bottom', emptytext: 'Click to enter the address', pk: id }"></span></div>
+					</div>
+					<!-- profile info-->
+					<div class="profileinfo">
+						<!-- nav-->
+						<ul class="nav nav-tabs">
+							<li role="presentation" class="active"><a href="#profile-desc" aria-controls="home" role="tab" data-toggle="tab">INFO</a></li>
+							<li data-bind="visible: page.url"><a data-bind="attr: { href: page.url }" target="_blank">VISIT SITE</a></li>
+							<li data-bind="visible: isCreator"><a data-bind="editable: page.url, editableOptions: { type: 'text', name: 'url', 'placeholder': 'Enter URL', display: false, pk: id }" data-inputclass="editable-class">Click to enter/change URL</a></li>
+						</ul>
+						<!-- content-->
+						<div class="tab-content">
+							<!-- content-->
+							<div id="profile-desc" role="tabpanel" class="tab-pane active">
+								<div class="description" data-bind="editable: about, editableOptions: { type: 'textarea', name: 'about', emptytext: 'Click to enter a short description', pk: id }" data-inputclass="editable-class">
+								</div>
+							</div>
+
+						</div>
+					</div>
+					<!-- profile map-->
+					<div class="profilemap" data-bind="visible: coords">
+						<iframe data-bind="attr : { src: coords }" frameborder="0" style="border:0" allowfullscreen class="maps"></iframe>
+					</div>
+
+					<div class="profileactions btn-group pull-right" role="group" data-bind="visible: isAdmin">
+						<a href="javascript: void(0)" class="btn btn-primary btn-image" data-bind="visible: isCreator">
+							<span class="glyphicon glyphicon-camera"></span> Change Cover
+							<input type="file" id="coverupdate" name="cover" />
+						</a>
+						<a href="javascript: void(0)" class="btn btn-primary">
+							<span class="glyphicon glyphicon-user"></span> Manage Members
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- filter-->
+	<section class="filter">
+		<div class="container">
+			<div class="wrap">
+				<!-- menu-->
+				<ul class="nav">
+					<li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+					<li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
+					<li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+				</ul>
+				<!-- menu-->
+				<ul class="counter">
+					<li class="collection"><!-- ko text:totalCollections --> <!-- /ko --> Collection </li>
+					<li class="exhibition"><!-- ko text:totalExhibitions --> <!-- /ko --> Exhibition </li>
+				</ul>
+			</div>
+		</div>
+	</section>
+	<!-- listing-->
+	<section class="listing">
+		<div class="container">
+			<!-- grid-->
+			<div class="grid" id="homemasonry" data-bind="profileisotope: page.featuredCollections">
+				<div class="sizer"></div>
+				<div data-bind="visible: isLoaded(), css: itemcss">
+					<div class="wrap">
+						<!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
+						<!-- thumbnail-->
+						<div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
+						<!-- info-->
+						<div class="info"><span class="type" data-bind="text:type"></span>
+							<h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
+						</div>
+						<!-- pointer-->
+						<div class="pointer"><span class="arrow"><img src="images/ic-right-arrow.png" alt="Arrow"></span></div></a>
+					</div>
+				</div>
+
+			</div>
+
+			<div id="more" data-bind="visible: loading, scroll: page.featuredCollections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+		</div>
+	</section>
+</div>

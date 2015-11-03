@@ -25,23 +25,9 @@ import java.util.function.Function;
 
 import javax.validation.ConstraintViolation;
 
-import model.Collection;
-import model.Rights.Access;
-import model.User;
-import model.UserGroup;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.data.validation.Validation;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import utils.AccessManager;
-import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -50,6 +36,23 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import espace.core.HttpConnector;
+import model.Collection;
+import model.Organization;
+import model.Page;
+import model.Project;
+import model.Rights.Access;
+import model.User;
+import model.UserGroup;
+import play.Logger;
+import play.Logger.ALogger;
+import play.data.validation.Validation;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import utils.AccessManager;
+import utils.Tuple;
+import model.Page.Point;
 
 public class GroupManager extends Controller {
 
@@ -73,44 +76,54 @@ public class GroupManager extends Controller {
 	 *            the administrator username
 	 * @return the JSON of the new group
 	 */
-	public static Result createGroup(String adminId, String adminUsername,
-			String groupType) {
+	public static Result createGroup(String adminId, String adminUsername, String groupType) {
 
 		ObjectId admin;
 		UserGroup newGroup = null;
+		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
 		try {
 			if (json == null) {
-				return badRequest("Invalid JSON");
+				error.put("error", "Invalid JSON");
+				return badRequest(error);
 			}
+			if (AccessManager.effectiveUserId(session().get("effectiveUserIds")).isEmpty()) {
+				error.put("error", "No rights for group creation");
+				return forbidden(error);
+			}
+			ObjectId creator = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
 			if (!json.has("username")) {
-				return badRequest("Must specify name for the group");
+				error.put("error", "Must specify name for the group");
+				return badRequest(error);
 			}
 			if (!uniqueGroupName(json.get("username").asText())) {
-				return badRequest("Group name already exists! Please specify another name.");
+				error.put("error", "Group name already exists! Please specify another name");
+				return badRequest(error);
 			}
-			Class<?> clazz = Class.forName("model."
-					+ groupType);
+			Class<?> clazz = Class.forName("model." + groupType);
 			newGroup = (UserGroup) Json.fromJson(json, clazz);
 			if (adminId != null) {
 				admin = new ObjectId(adminId);
 			} else if (adminUsername != null) {
 				admin = DB.getUserDAO().getByUsername(adminUsername).getDbId();
 			} else {
-				if ((adminId = AccessManager.effectiveUserId(session().get(
-						"effectiveUserIds"))).isEmpty()) {
-					return internalServerError("Must specify administrator of group");
-				}
-				admin = new ObjectId(AccessManager.effectiveUserId(session()
-						.get("effectiveUserIds")));
+				admin = creator;
 			}
+			if (newGroup.getCreator() == null) {
+				newGroup.setCreator(creator);
+			}
+			newGroup.addAdministrator(creator);
 			newGroup.addAdministrator(admin);
+			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
-			Set<ConstraintViolation<UserGroup>> violations = Validation
-					.getValidator().validate(newGroup);
-			for (ConstraintViolation<UserGroup> cv : violations) {
-				return badRequest("[" + cv.getPropertyPath() + "] "
-						+ cv.getMessage());
+			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newGroup);
+			if (!violations.isEmpty()) {
+				ArrayNode properties = Json.newObject().arrayNode();
+				for (ConstraintViolation<UserGroup> cv : violations) {
+					properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+				}
+				error.put("error", properties);
+				return badRequest(error);
 			}
 			try {
 				DB.getUserGroupDAO().makePermanent(newGroup);
@@ -120,81 +133,141 @@ public class GroupManager extends Controller {
 				user.addUserGroups(parentGroups);
 				DB.getUserDAO().makePermanent(user);
 			} catch (Exception e) {
-				log.error("Cannot save group to database!", e);
-				return internalServerError("Cannot save group to database!");
+				log.error("Cannot save group to database!", e.getMessage());
+				error.put("error", "Cannot save group to database!");
+				return internalServerError(error);
 			}
 			return ok(Json.toJson(newGroup));
 		} catch (Exception e) {
-			return internalServerError(e.getMessage());
+			error.put("error", e.getMessage());
+			return internalServerError(error);
 		}
 	}
 
 	private static boolean uniqueGroupName(String name) {
-		return (DB.getUserGroupDAO().getByName(name) == null);
+		return (DB.getUserGroupDAO().getByName(name) == null && DB.getUserDAO().getByUsername(name) == null);
 	}
 
 	private static String capitalizeFirst(String str) {
-		return str.substring(0, 1).toUpperCase()
-				+ str.substring(1).toLowerCase();
+		return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
 	}
 
 	/**
-	 * Edits group metadata and updates them according to the POST body.
+	 * Edits group metadata and updates them according to the JSON body.
 	 * <p>
-	 * Only the administrator of the group and the superuser have the right to
-	 * edit the group.
-	 * 
+	 * Only the creator of the group has the right to edit the group.
+	 *
 	 * @param groupId
 	 *            the group id
 	 * @return the updated group metadata
 	 */
 	public static Result editGroup(String groupId) {
 
-		JsonNode json = request().body().asJson();
+		ObjectNode json = (ObjectNode) request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		String adminId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
+		String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 		if ((adminId == null) || (adminId.equals(""))) {
-			return forbidden("Only administrator of group has the right to edit the group");
+			result.put("error", "Only creator of the group has the right to edit the group");
+			return forbidden(result);
 		}
 		try {
 			User admin = DB.getUserDAO().get(new ObjectId(adminId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 			if (group == null) {
-				return internalServerError("Cannot retrieve group from database!");
+				result.put("error", "Cannot retrieve group from database!");
+				return internalServerError(result);
 			}
-			if (!group.getAdminIds().contains(new ObjectId(adminId))
-					&& (!admin.isSuperUser())) {
-				return forbidden("Only administrator of group has the right to edit the group");
+			if (!group.getCreator().equals(new ObjectId(adminId)) && (!admin.isSuperUser())) {
+				result.put("error", "Only creator of group has the right to edit the group");
+				return forbidden(result);
+			}
+			if (json.has("username")) {
+				if (json.get("username") != null) {
+					if (!group.getUsername().equals(json.get("username").asText())) {
+						if (!uniqueGroupName(json.get("username").asText())) {
+							return badRequest("Group name already exists! Please specify another name.");
+						}
+					}
+				}
+			}
+			// Update user page
+			if (json.has("page") && (group instanceof Organization || group instanceof Project)) {
+				String address = null, city = null, country = null;
+				Page oldPage = null;
+				JsonNode newPage = json.get("page");
+				// Keep previous page fields
+				if (group instanceof Organization) {
+					oldPage = ((Organization) group).getPage();
+				} else if (group instanceof Project) {
+					oldPage = ((Project) group).getPage();
+				}
+				// Update Page
+				ObjectMapper pageObjectMapper = new ObjectMapper();
+				ObjectReader pageUpdator = pageObjectMapper.readerForUpdating(oldPage);
+				Page page;
+				page = pageUpdator.readValue(newPage);
+				// In case that the location has changed we need to calculate
+				// the new coordinates
+				if ((json.get("page").get("address") != null || json.get("page").get("city") != null
+						|| json.get("page").get("country") != null)) {
+					address = page.getAddress();
+					city = page.getCity();
+					country = page.getCountry();
+					String fullAddress = ((address == null) ? "" : address) + "," + ((city == null) ? "" : city) + ","
+							+ ((country == null) ? "" : country);
+					fullAddress = fullAddress.replace(" ", "+");
+					try {
+						JsonNode response = HttpConnector.getURLContent(
+								"https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
+						Point coordinates = new Point();
+						coordinates.setLatitude(
+								response.get("results").get(0).get("geometry").get("location").get("lat").asDouble());
+						coordinates.setLongitude(
+								response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());
+						page.setCoordinates(coordinates);
+					} catch (Exception e) {
+						log.error("Cannot update coordinates of group Page", e);
+						page.setCoordinates(null);
+					}
+				}
+				json.remove("page");
+				if (group instanceof Organization) {
+					((Organization) group).setPage(page);
+				} else if (group instanceof Project) {
+					((Project) group).setPage(page);
+				}
 			}
 			UserGroup oldVersion = group;
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
 			UserGroup newVersion;
 			newVersion = updator.readValue(json);
-			Set<ConstraintViolation<UserGroup>> violations = Validation
-					.getValidator().validate(newVersion);
-			for (ConstraintViolation<UserGroup> cv : violations) {
-				result.put("message",
-						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
-			}
+			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newVersion);
 			if (!violations.isEmpty()) {
+				ArrayNode properties = Json.newObject().arrayNode();
+				for (ConstraintViolation<UserGroup> cv : violations) {
+					properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+				}
+				result.put("error", properties);
 				return badRequest(result);
 			}
-			if (!uniqueGroupName(newVersion.getUsername())) {
-				return badRequest("Group name already exists! Please specify another name.");
-			}
+
 			// update group on mongo
 			if (DB.getUserGroupDAO().makePermanent(newVersion) == null) {
 				log.error("Cannot save group to database!");
 				return internalServerError("Cannot save group to database!");
 			}
 			return ok(Json.toJson(newVersion));
-		} catch (IOException e) {
+		} catch (
+
+		IOException e)
+
+		{
 			e.printStackTrace();
 			return internalServerError(e.getMessage());
 		}
+
 	}
 
 	/**
@@ -207,13 +280,33 @@ public class GroupManager extends Controller {
 	 */
 	public static Result deleteGroup(String groupId) {
 
+		ObjectNode result = Json.newObject();
+		String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+		if ((userId == null) || (userId.equals(""))) {
+			result.put("error", "Only creator of the group has the right to delete the group");
+			return forbidden(result);
+		}
 		try {
+			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			if (!group.getCreator().equals(new ObjectId(userId))) {
+				result.put("error", "Only creator of the group has the right to delete the group");
+				return forbidden(result);
+			}
+			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
+			ancestorGroups.add(group.getDbId());
+			List<User> users = DB.getUserDAO().getByGroupId(group.getDbId());
+			for (User user : users) {
+				user.removeUserGroups(ancestorGroups);
+				DB.getUserDAO().makePermanent(user);
+			}
 			DB.getUserGroupDAO().deleteById(new ObjectId(groupId));
 		} catch (Exception e) {
 			log.error("Cannot delete group from database!", e);
-			return internalServerError("Cannot delete group from database!");
+			result.put("error", "Cannot delete group from database!");
+			return internalServerError(result);
 		}
-		return ok("Group deleted succesfully from database");
+		result.put("message", "Group deleted succesfully from database");
+		return ok(result);
 	}
 
 	/**
@@ -238,22 +331,17 @@ public class GroupManager extends Controller {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				ObjectId photoId = user.getThumbnail();
-				return MediaController.getMetadataOrFile(photoId.toString(),
-						true);
+				return MediaController.getMetadataOrFile(photoId.toString(), true);
 			} else {
-				UserGroup userGroup = DB.getUserGroupDAO()
-						.get(new ObjectId(id));
+				UserGroup userGroup = DB.getUserGroupDAO().get(new ObjectId(id));
 				if (userGroup != null) {
 					ObjectId photoId = user.getThumbnail();
-					return MediaController.getMetadataOrFile(
-							photoId.toString(), true);
+					return MediaController.getMetadataOrFile(photoId.toString(), true);
 				} else
-					return badRequest(Json
-							.parse("{\"error\":\"User does not exist\"}"));
+					return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
-			return badRequest(Json.parse("{\"error\":\"" + e.getMessage()
-					+ "\"}"));
+			return badRequest(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
 		}
 	}
 
@@ -269,11 +357,9 @@ public class GroupManager extends Controller {
 			groupJSON.put("username", group.getUsername());
 			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
-						new ObjectId(collectionId));
+				Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getRights().get(
-							group.getDbId());
+					Access accessRights = collection.getRights().get(group.getDbId());
 					if (accessRights != null)
 						groupJSON.put("accessRights", accessRights.toString());
 					else
@@ -292,9 +378,11 @@ public class GroupManager extends Controller {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 			if (collectionHits) {
 				Query<Collection> q = DB.getCollectionDAO().createQuery();
-				CriteriaContainer[] criteria =  new CriteriaContainer[3];
-				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString()).greaterThanOrEq(1);
-				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString()).equal(3);
+				CriteriaContainer[] criteria = new CriteriaContainer[3];
+				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString())
+						.greaterThanOrEq(1);
+				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString())
+						.equal(3);
 				criteria[2] = DB.getCollectionDAO().createQuery().criteria("isPublic").equal(true);
 				q.and(criteria);
 				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
@@ -305,12 +393,12 @@ public class GroupManager extends Controller {
 		}
 		return result;
 	}
-	
+
 	public static Set<UserGroup> recursiveDescendants(Set<UserGroup> list, GroupType type) {
 		Set<UserGroup> descendantGroups = new HashSet<UserGroup>();
 		for (UserGroup group: list) {
 			List<UserGroup> descendants = DB.getUserGroupDAO().findByParent(group.getDbId(), type);
-			if ( descendants != null) {	
+			if ( descendants != null) {
 				Set<UserGroup> descendantsSet = recursiveDescendants(new HashSet<UserGroup>(descendants), type);
 				descendantGroups.addAll(descendantsSet);
 			}
@@ -320,13 +408,13 @@ public class GroupManager extends Controller {
 	}
 
 	// TODO check user rights for these groups
-	public static Result getDescendantGroups(String groupId, String groupType,
-			boolean direct, boolean collectionHits) {
+	public static Result getDescendantGroups(String groupId, String groupType, boolean direct, boolean collectionHits) {
 		List<UserGroup> childrenGroups;
 		List<UserGroup> descendantGroups;
 		ObjectId parentId = new ObjectId(groupId);
 		GroupType type = GroupType.valueOf(capitalizeFirst(groupType));
 		childrenGroups = DB.getUserGroupDAO().findByParent(parentId, type);
+
 		if (childrenGroups != null) {
 			if (direct) {
 				return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId), collectionHits));
@@ -334,9 +422,9 @@ public class GroupManager extends Controller {
 			else {
 				descendantGroups = new ArrayList<UserGroup>(recursiveDescendants(new HashSet<UserGroup>(childrenGroups), type));
 				return ok(groupsAsJSON(descendantGroups, new ObjectId(groupId), collectionHits));
-			}	
+			}
 		}
-		else 
+		else
 			return ok();
 	}
 }

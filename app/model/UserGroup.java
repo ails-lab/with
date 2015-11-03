@@ -35,6 +35,9 @@ import db.DB;
 public class UserGroup extends UserOrGroup {
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId creator;
+
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private final Set<ObjectId> adminIds = new HashSet<ObjectId>();
 	private boolean privateGroup;
 
@@ -114,6 +117,14 @@ public class UserGroup extends UserOrGroup {
 
 	public void setFriendlyName(String friendlyName) {
 		this.friendlyName = friendlyName;
+	}
+
+	public ObjectId getCreator() {
+		return creator;
+	}
+
+	public void setCreator(ObjectId creator) {
+		this.creator = creator;
 	}
 
 }

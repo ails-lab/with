@@ -36,6 +36,9 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		var self          = this;
 		self.username     = app.currentUser.username;
 		self.profileImage = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
+		self.organizations = app.currentUser.organizations;
+		self.projects     = app.currentUser.projects;
+		self.usergroups   = app.currentUser.usergroups;
 
 		editProfile       = function() { app.showPopup('edit-profile'); };
 		newOrganization   = function() { app.showPopup('new-organization', { type: 'organization' }); };
