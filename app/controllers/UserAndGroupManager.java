@@ -274,7 +274,8 @@ public class UserAndGroupManager extends Controller {
 			if (photo != null)
 			// convert to base64 format
 			return "data:" + photo.getMimeType() + ";base64," + new String(Base64.encodeBase64(photo.getData()));
-		} else
-			return null;
+		}
+
+		return null;
 	}
 }
