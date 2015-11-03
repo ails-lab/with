@@ -629,6 +629,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			});
 		};
 
+		self.manageMembersPopup = function() {
+			app.showPopup('members-popup', {});
+		};
+
 		self.closeWindow = function () {
 			app.closePopup();
 		};
