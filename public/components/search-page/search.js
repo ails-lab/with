@@ -20,7 +20,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 
 	function Record(data) {
-		var self = this;
+		/*var self = this;
 	    self.recordId = "";
 		self.title = "";
 		self.description="";
@@ -34,31 +34,43 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.url="";
 		self.externalId = "";
 		self.cachedThumbnail="";
-		self.isLike=ko.observable(false);
+		self.isLike=ko.observable(false);*/
 		
+		var mapping = {
+				'dbId': {
+					key: function(data) {
+			            return ko.utils.unwrapObservable(data.dbId);
+			        }
+				},
+			    'include': ["title", "thumbnail"],
+				'observe': [],
+				'recordUrl': {
+			        create: function(options) {
+			            return "#item/"+options.data.id;
+			        }
+			    }
+		};
+		
+		self.record = ko.mapping.fromJS({"title": "No title", "thumbnail": "images/no_image.jpg", "rights":"", "provider":"",
+			creator:"", importedFrom:""}, mapping);
+
+		self.isLike=ko.observable(false);
+
 		self.load = function(data) {
-			if(data.title==undefined){
-				self.title="No title";
-			}else{self.title=data.title;}
-			self.url="#item/"+data.recordId;
-			self.view_url=data.view_url;
-			self.thumb=data.thumb;
-			//self.imageThumb(data.thumb);
-			self.fullres=data.fullres;
-			self.description=data.description;
-			self.source=data.source;
-			self.creator=data.creator;
-			self.provider=data.provider;
-			self.rights=data.rights;
-			self.recordId=data.recordId;
-			self.externalId=data.externalId;
-			var likeval=app.isLiked(self.externalId);
+			ko.mapping.fromJS(data, mapping, self.record);
+			var likeval=app.isLiked(self.record().externalId);
 			self.isLike(likeval);
-			
-		   if(!self.thumb){
-		   
-					   self.thumb="images/no_image.jpg";
-			 }
+			/*recordId: result.recordId || result.id,
+			thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
+			fullres: result.fullresolution,
+			title: result.title!=null ? result.title : "",
+			view_url: result.url.fromSourceAPI,
+			description: result.description,
+			creator: result.creator!==undefined && result.creator!==null? result.creator : "",
+			provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+			rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
+			externalId: result.externalId,
+			source: result.comesFrom!=null ? result.comesFrom : source*/
 		};
 
 		self.doLike=function(){
@@ -66,7 +78,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		}
 		
 		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source) {
+			switch(self.record().importedFrom.providerName) {
 			    case "DPLA":
 			    	return "dp.la";
 			    case "Europeana":
@@ -85,21 +97,22 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 					return "www.rijksmuseum.nl";
 			    default: return "";
 			 }
-			});
+		});
 
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
-			distitle=self.title;
-			if(self.creator!==undefined && self.creator.length>0)
-				distitle+=", by "+self.creator;
-			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
-				distitle+=", "+self.provider;
+			distitle=self.record().title;
+			var creator = self.record().creator();
+			if (creator!==undefined && creator.length>0)
+				distitle+=", by "+ creator;
+			var provider = self.record().provenanceChain[0];
+			if(provider==undefined && provider.length>0 && provider!=creator)
+				distitle+=", "+ provider;
 			return distitle;
 		});
-
 		
-		
-		if(data != undefined) self.load(data);
+		if(data != undefined) 
+			self.load(data);
 	}
 
 	function SourceCategory(data) {
@@ -108,19 +121,34 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.consoleurl=ko.observable("");
 		self.items=ko.observableArray([]);
 
-
 		self.load=function(data){
 			self.source=data.source;
-			self.consoleurl=data.consoleurl;
 			self.items=data.items;
+			if(source=="Europeana"){
+				self.consoleurl="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
+				}
+			else if(source=="DPLA"){
+				self.consoleurl="http://api.dp.la/";
+			}
+			else if(source=="NLA"){
+				self.consoleurl="http://api.trove.nla.gov.au/";
+			}
+			else if(source=="DigitalNZ"){
+				self.consoleurl="http://api.digitalnz.org/"
+			}
+			else if (source=="EFashion"){
+				self.consoleurl="http://www.europeanafashion.eu/api/search/"+self.term();
+			}
+			else if (source=="Rijksmuseum") {
+				self.consoleurl="https://www.rijksmuseum.nl/en/api";
+			}
+			else
+				self.consoleurl="";
 		};
-
 
 		self.addItem = function(c) {
 	           self.items.push(new Record(c));
 	        };
-
-
 
 		self.append =function(newitems){
 			self.items.push.apply(self.items, newitems);
@@ -229,8 +257,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
-                    var data=reply.responces;
-
+                    var data=reply.responses;
                     var filters=reply.filters;
                     if(facetinit || facetrecacl){
                     self.filters.removeAll();
@@ -243,57 +270,20 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 						}
 						var items = [];
 						for(var j in data[i].items){
-						 var result = data[i].items[j];
-
-						 if(result !=null ){
-							 //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
-						 var record = new Record({
-							recordId: result.recordId || result.id,
-							thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-							fullres: result.fullresolution,
-							title: result.title!=null ? result.title : "",
-							view_url: result.url.fromSourceAPI,
-							description: result.description,
-							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-							provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-							externalId: result.externalId,
-							source: result.comesFrom!=null ? result.comesFrom : source
-						  });
-						 items.push(record);}
+							var result = data[i].items[j];
+							if(result !=null ){
+							   //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
+								var record = new Record(result);
+								items.push(record);}
 						}
 						if(items.length>0){
 							 var $newitems=getItems(items);
 						     self.mixresults.push.apply(self.mixresults, items);
-
-						     self.masonryImagesReveal( $newitems,$container );
-
+						     self.masonryImagesReveal($newitems,$container);
 							}
-						api_console="";
-						if(source=="Europeana"){
-							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
-							}
-						else if(source=="DPLA"){
-							api_console="http://api.dp.la/";
-						}
-						else if(source=="NLA"){
-							api_console="http://api.trove.nla.gov.au/";
-						}
-						else if(source=="DigitalNZ"){
-							api_console="http://api.digitalnz.org/"
-						}
-						else if (source=="EFashion"){
-							api_console="http://www.europeanafashion.eu/api/search/"+self.term();
-						}
-						else if (source=="Rijksmuseum") {
-							api_console="https://www.rijksmuseum.nl/en/api";
-						}
-						else
-							api_console="";
 						var srcCat=new SourceCategory({
 							source:source,
-							items:items,
-							consoleurl:api_console
+							items:items
 						});
 						var found=false;
 						if(self.results().length>0)

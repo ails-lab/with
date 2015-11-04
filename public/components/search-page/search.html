@@ -11,11 +11,7 @@
 		</form>
 
 				<div id="withsearch-content" class="withsearch-content">
-					 
-					
-					
 
-					
 					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
 					
 					<!-- ko if: noResults -->
@@ -39,7 +35,7 @@
 					 <!-- ko foreach: items -->
 					 
 					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
-							<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:thumb }"/>
+							<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:record().thumbnail }"/>
 								<span><!-- ko text: title --><!-- /ko --></span>
 						</a>
 					   <!-- /ko -->
