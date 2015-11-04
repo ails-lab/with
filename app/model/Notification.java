@@ -23,6 +23,7 @@ import org.mongodb.morphia.annotations.Id;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import db.DB;
 import utils.Serializer;
 
 public class Notification {
@@ -82,6 +83,10 @@ public class Notification {
 		return sender;
 	}
 
+	public String getSenderName() {
+		return DB.getUserDAO().get(this.sender).getUsername();
+	}
+
 	public void setSender(ObjectId sender) {
 		this.sender = sender;
 	}
@@ -94,12 +99,20 @@ public class Notification {
 		this.collection = collection;
 	}
 
+	public String getCollectionName() {
+		return DB.getCollectionDAO().get(this.collection).getTitle();
+	}
+
 	public ObjectId getGroup() {
 		return group;
 	}
 
 	public void setGroup(ObjectId group) {
 		this.group = group;
+	}
+
+	public String getGroupName() {
+		return DB.getUserGroupDAO().get(this.group).getUsername();
 	}
 
 	public String getMessage() {

@@ -218,7 +218,8 @@ public class UserAndGroupManager extends Controller {
 					notification.setOpenedAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
 					// Send notification to the user through socket
-					NotificationCenter.userUpdate(usr, group, Activity.GROUP_INVITE);
+					NotificationCenter.sendNotification(notification);
+					;
 					result.put("message", "User succesfully invited to group");
 					return ok(result);
 				}
@@ -248,13 +249,14 @@ public class UserAndGroupManager extends Controller {
 					Date now = new Date();
 					notification.setOpenedAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
+					NotificationCenter.sendNotification(notification);
 					// Notification for the administrators of the group
 					notification.setReceiver(group.getDbId());
 					notification.setDbId(null);
 					DB.getNotificationDAO().makePermanent(notification);
 					// Send notification through socket (to user and group
 					// administrators)
-					NotificationCenter.userUpdate(usr, group, Activity.GROUP_INVITE_ACCEPT);
+					NotificationCenter.sendNotification(notification);
 					result.put("message", "User succesfully added to group");
 					return ok(result);
 				}

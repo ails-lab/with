@@ -24,7 +24,9 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import db.DB;
+import model.Notification;
 import model.User;
+import model.UserGroup;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -82,9 +84,19 @@ public class NotificationActor extends UntypedActor {
 		if (message instanceof NotificationCenter.Message) {
 			notifyMessage((NotificationCenter.Message) message);
 		}
-		if (message instanceof UserUpdate) {
-			UserUpdate userUpdate = (UserUpdate) message;
-			userUpdate(userUpdate);
+		if (message instanceof Notification) {
+			Notification notification = (Notification) message;
+			if (loggedInUser == null) {
+				return;
+			}
+			if (loggedInUser.getDbId().equals(notification.getReceiver())) {
+				out.tell(Json.toJson(notification), self());
+			} else {
+				UserGroup group = DB.getUserGroupDAO().get(notification.getReceiver());
+				if (group != null && group.getAdminIds().contains(loggedInUser)) {
+					out.tell(Json.toJson(notification), self());
+				}
+			}
 		}
 	}
 
@@ -105,57 +117,6 @@ public class NotificationActor extends UntypedActor {
 					out.tell(Json.toJson(mesg), self());
 				}
 			}
-		}
-	}
-
-	/**
-	 * Check if this update is about the user and inform him else ignore it. If
-	 * the user is offline he is not informed and the notification is not kept.
-	 * However, the action (invitation to group / rejection e.t.c) is kept in
-	 * the user object.
-	 * 
-	 * @param userUp
-	 */
-	public void userUpdate(UserUpdate userUp) {
-		if (loggedInUser == null) {
-			return;
-		}
-		switch (userUp.activity) {
-		case GROUP_INVITE:
-			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
-				notifyMessage(new Message("Invited you", userUp.userGroup.getDbId()));
-			}
-			break;
-		case GROUP_INVITE_ACCEPT:
-			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
-				notifyMessage(new Message("Accepted invitation", userUp.user.getDbId()));
-			}
-			break;
-		case GROUP_INVITE_DECLINED:
-			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
-				notifyMessage(new Message("Declined invitation", userUp.user.getDbId()));
-			}
-			break;
-		case GROUP_REQUEST:
-			if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
-				notifyMessage(new Message("Join request", userUp.user.getDbId()));
-			}
-			break;
-		case GROUP_REQUEST_ACCEPT:
-			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
-				notifyMessage(new Message("You were accepted to group", userUp.userGroup.getDbId()));
-			} else if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
-				notifyMessage(new Message("New member joined the group", userUp.user.getDbId()));
-			}
-			break;
-		case GROUP_REQUEST_DENIED:
-			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
-				notifyMessage(new Message("Group denied your join request", userUp.userGroup.getDbId()));
-			}
-			break;
-		default:
-			log.info("Action for user update is not implemented yet");
-			break;
 		}
 	}
 }
