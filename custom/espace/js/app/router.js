@@ -50,12 +50,33 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 
 		activateCrossroads();
 	}
+	
+	
+	
 
 	function activateCrossroads() {
+		function resetMenu(){
+			/*in case we changed from item view without closing */
+			$("div[role='main']").removeClass("itemopen");
+			//now reset mobile menu
+			var $menu = $( '.main .menu');
+			
+	          if($menu.hasClass("visible")){
+	        	  $menu.toggleClass( 'visible' );
+
+					// toggle button
+					$( '.mobilemenu' ).toggleClass( 'active' );
+	          }
+		}
 		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+		crossroads.ignoreState= true; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
+		hasher.changed.add(resetMenu);
+		
 		hasher.init();
 	}
+	
+	
 });

@@ -81,6 +81,8 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
 
     function EViewModel(params) {
         document.body.setAttribute("data-page","collection");
+        setTimeout(function(){ EUSpaceUI.init(); }, 300);
+	    
         var self = this;
 
         var $container = $(".grid");

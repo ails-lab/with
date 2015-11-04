@@ -1,93 +1,11 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <!-- meta-->
-    <title>EUscreen Space - About</title>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description" content="EUscreen Space - About">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#009edf">
-    <!-- icons-->
-    <link rel="apple-touch-icon" href="apple-touch-icon.png">
-    <link rel="icon" type="image/png" href="favicon.png">
-    <meta name="msapplication-TileImage" content="tile.png">
-    <meta name="msapplication-TileColor" content="#d83434">
-    <!-- stylesheets-->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
-    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
-    <!-- script-->
-    <script src="js/vendor/modernizr/modernizr.js"></script>
-     <script src="js/app/require.config.js"></script>
-	<script data-main="js/app/startup" src="bower_modules/requirejs/require.js"></script>
-	<script>
-	
-	   
-	   require(["js/vendor/slick.js/slick/slick.min","js/plugin"], function(slick,EUSpaceApp) {
-			 var EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
 
-			 		// page name
-			 		page  	  : document.body.getAttribute("data-page"),
-
-			 		// masonry
-			 		mSelector : '.grid',
-			 		mItem	  : '.item',
-			 		mSizer	  : '.sizer',
-
-			 		// mobile menu
-			 		mobileSelector : '.mobilemenu',
-			 		mobileMenu 	   : '.main .menu'
-			 	})
-
-			 EUSpaceUI.init();
-				});
-	   
-	  
-	</script>
-  </head>
-  <body data-page="about">
-    <!-- header-->
-    <header>
-      <!-- mainnav-->
-      <nav class="main">
-        <div class="container">
-          <!-- logo-->
-          <h1 class="logo"><a href="index.html" title="Home">EUSPACE</a></h1>
-          <!-- mobile menu-->
-          <button type="button" role="button" aria-label="Show Navigation" class="mobilemenu"><span class="lines"></span></button>
-          <!-- search-->
-          <ul class="search">
-            <li><a href="index.html#search" title="Search"><img src="img/ic-search.png" alt="search"></a></li>
-          </ul>
-          <!-- nav-->
-          <ul class="menu">
-            <li><a href="index.html" title="Home">Home</a></li>
-            <li><a href="index.html#providers" title="Content Provider">Content Providers</a></li>
-            <li><a href="about.html" title="About">About</a></li>
-            <li><a href="../assets/index.html#login" title="Login">Login</a></li>
-            <li class="subnav">
-              <ul>
-                <li><a href="terms.html" title="Terms of Usage">Terms of Use</a></li>
-                <li><a href="privacy.html" title="Privacy Policy">Privacy Policy</a></li>
-                <li><a href="contact.html" title="Contact">Feedback &amp; Contact</a></li>
-              </ul>
-            </li>
-            <li class="info">EUSpace is a place to discover exhibits and collections from museums and archives all around the world. </li>
-          </ul>
-        </div>
-      </nav>
-    </header>
-    <!-- main-->
-    <div role="main">
-      <!-- menu bar-->
       <section class="menubar">
         <div class="container">
           <ul>
-            <li class="active"><a href="about.html" title="#">About</a></li>
-            <li><a href="terms.html" title="#">Terms of Use</a></li>
-            <li><a href="privacy.html" title="#">Privacy Policy</a></li>
-            <li><a href="contact.html" title="#">Feedback &amp; Contact</a></li>
+            <li class="active"><a href="#about" title="#">About</a></li>
+            <li><a href="#terms" title="#">Terms of Use</a></li>
+            <li><a href="#privacy" title="#">Privacy Policy</a></li>
+            <li><a href="#contact" title="#">Feedback &amp; Contact</a></li>
           </ul>
         </div>
       </section>
@@ -98,7 +16,7 @@
           <div class="container">
             <!-- banner-->
             <div class="banner">
-              <h1>About EUspace</h1>
+              <h1>About EUSpace</h1>
               <p>
                 Discover exhibits and collections from museums and archives all around the world.
                 Explore cultural treasures in extraordinary detail from hidden gems to masterpieces. 
@@ -221,11 +139,9 @@
           <!-- ul-->
           <ul>
             <li><a href="contact.html" title="Contact Us" class="btn btn-alt">CONTACT US</a></li>
-            <li><a href="index.html#search" title="Explore EUspace" class="btn btn-alt">EXPLORE</a></li>
+            <li><a href="index.html#search" title="Explore EUSpace" class="btn btn-alt">EXPLORE</a></li>
           </ul>
         </div>
       </section>
     </div>
     
-   </body>
-</html>

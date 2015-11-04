@@ -12,53 +12,10 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
       return Math.floor(Math.random()*(max-min+1)+min);
   }
 
-	 function initOrUpdate(method) {
-			return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-				function isotopeAppend(ele) {
-					if (ele.nodeType === 1) { // Element type
-						$(element).imagesLoaded(function () {
-							$(element).isotope('appended', ele).isotope('layout');
-						});
-					}
-				}
-
-				function attachCallback(valueAccessor) {
-					return function() {
-						return {
-							data: valueAccessor(),
-							afterAdd: isotopeAppend,
-						};
-					};
-				}
-
-				var data = ko.utils.unwrapObservable(valueAccessor());
-				//extend foreach binding
-				ko.bindingHandlers.foreach[method](element,
-					 attachCallback(valueAccessor), // attach 'afterAdd' callback
-					 allBindings, viewModel, bindingContext);
-
-				if (method === 'init') {
-					$(element).isotope({
-						itemSelector: '.item',
-						transitionDuration: transDuration,
-						masonry: {
-							columnWidth		: '.sizer',
-							percentPosition	: true
-						}
-					});
-
-					ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-						$(element).isotope("destroy");
-					});
-					
-				} 
-			};
-		}
-		
 	
-		ko.bindingHandlers.providerIsotope = {
-				init: initOrUpdate('init'),
-				update: initOrUpdate('update')
+	ko.bindingHandlers.providerIsotope = {
+				init: app.initOrUpdate('init'),
+				update: app.initOrUpdate('update')
 			};
 
 	
@@ -97,7 +54,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 	function ProvidersViewModel(params) {
 		this.route = params.route;
 	    document.body.setAttribute("data-page","contentproviders");
-		
+	    setTimeout(function(){ EUSpaceUI.init(); }, 300);
 		var self = this;
 
 		var $container = $(".grid");
@@ -120,6 +77,8 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 
 		
 		self.revealItems = function (data) {
+			if(data.length==0){ self.loading(false);}
+			
 			for (var i in data) {
 				var result = data[i];
 				var record = new Provider(data[i]);
@@ -142,8 +101,8 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 				"success": function (data) {
 					
 					self.revealItems(data);
-					self.loading(false);
-					window.EUSpaceUI.initTooltip();
+					
+					
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);

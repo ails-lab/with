@@ -4,93 +4,10 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		$.bridget('isotope', Isotope);
 		
 
-		 function initOrUpdate(method) {
-				return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-					function isotopeAppend(ele) {
-						if (ele.nodeType === 1) { // Element type
-							$(element).imagesLoaded(function () {
-								$(element).isotope('appended', ele).isotope('layout');
-							});
-						}
-					}
-
-					function attachCallback(valueAccessor) {
-						return function() {
-							return {
-								data: valueAccessor(),
-								afterAdd: isotopeAppend,
-							};
-						};
-					}
-
-					var data = ko.utils.unwrapObservable(valueAccessor());
-					//extend foreach binding
-					ko.bindingHandlers.foreach[method](element,
-						 attachCallback(valueAccessor), // attach 'afterAdd' callback
-						 allBindings, viewModel, bindingContext);
-
-					if (method === 'init') {
-						$(element).isotope({
-							itemSelector: '.item',
-							transitionDuration: transDuration,
-							masonry: {
-								columnWidth		: '.sizer',
-								percentPosition	: true
-							}
-						});
-
-						ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-							$(element).isotope("destroy");
-						});
-						
-					} 
-				};
-			}
-			
-			ko.bindingHandlers.scroll = {
-					updating: true,
-
-					init: function (element, valueAccessor, allBindingsAccessor) {
-						var self = this;
-						self.updating = true;
-						ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-							$(window).off("scroll.ko.scrollHandler");
-							self.updating = false;
-						});
-						
-					},
-
-					update: function (element, valueAccessor, allBindingsAccessor) {
-						 
-						var props = allBindingsAccessor().scrollOptions;
-						var offset = props.offset ? props.offset : "0";
-						var loadFunc = props.loadFunc;
-						var load = ko.utils.unwrapObservable(valueAccessor());
-						var self = this;
-
-						if (load) {
-							$(window).on("scroll.ko.scrollHandler", function () {
-								if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
-									if (self.updating) {
-										loadFunc();
-										self.updating = false;
-									}
-								} else {
-									self.updating = true;
-								}
-							});
-						} else {
-							element.style.display = "none";
-							$(window).off("scroll.ko.scrollHandler");
-							self.updating = false;
-						}
-					}
-				};
-
-
-			ko.bindingHandlers.profileisotope = {
-					init: initOrUpdate('init'),
-					update: initOrUpdate('update')
+		
+		ko.bindingHandlers.profileisotope = {
+					init: app.initOrUpdate('init'),
+					update: app.initOrUpdate('update')
 				};
 	
 					
@@ -147,6 +64,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","profile");
+	  setTimeout(function(){ EUSpaceUI.init(); }, 300);
 	  self.id = ko.observable(params.id);	
 
 	  /*---*/
@@ -165,6 +83,8 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  self.totalExhibitions=ko.observable(0);
     
 	  self.revealItems = function (data) {
+		   if(data.length==0){ self.loading(false);}
+			
 			for (var i in data) {
 				var c=new Collection(
 						data[i]
@@ -177,7 +97,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  
 	  self.loadAll = function () {
 		  var promise=self.getProviderData();
-		  
+		  self.loading(true);
 		  $.when(promise).done(function (data) {
         	  
 	            self.description(data.about);
@@ -202,7 +122,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 					       self.totalCollections(data['totalCollections']);  
 					       self.totalExhibitions(data['totalExhibitions']);  
 					       self.revealItems(data['collectionsOrExhibitions']);
-					       window.EUSpaceUI.initProfile();
+					       
 					});
           });
 		};
@@ -251,12 +171,12 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				var offset = self.collections().length+1;
 				$.ajax({
 					"url": '/collection/list',
-					data: "count=20&offset=" + offset + "&directlyAccessedByGroupName=" + JSON.stringify([{"group":self.username(),rights:"OWN"}]),
+					data: "count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:window.pname,rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
 						self.revealItems(data['collectionsOrExhibitions']);
-					    self.loading(false);
+					   
 					},
 					"error": function (result) {
 						self.loading(false);

@@ -106,14 +106,14 @@ a {
   padding-bottom: 50px;
 }
 .listing .grid {
-  padding-top: 10px;
-  margin: 0 -5px 0 -5px;
+  padding-top: 15px;
+  margin: 0 -7.5px 0 -7.5px;
 }
 .listing .grid .sizer,
 .listing .grid .item {
   width: 50%;
-  margin-bottom: 10px;
-  padding: 0 5px 0 5px;
+   margin-bottom: 15px;
+  padding: 0 7.5px 0 7.5px;
 }
 .listing .grid .sizer .wrap,
 .listing .grid .item .wrap {
@@ -415,44 +415,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
-body header {
-  /*home background
-		&.minimize {
-
-			// main
-			.main {
-				background: @brand-orange !important;
-				height: 70px !important;
-
-				// logo
-				.logo {
-					margin: 12px 0 0 !important;
-
-					// anchor
-					a {
-						background-position: 0 -47px !important;
-					}
-				}
-
-				// search
-				.search {
-					// margin-left: 25px;
-
-					// li
-					li {
-						margin-top: 0px !important;
-						
-						// anchor
-						a {
-							height: 70px !important;
-							width: 70px !important;
-							background-color: @brand-blue !important;
-						}
-					}
-				}
-			}
-		}*/
-}
 body header.minimize .main {
     background: #5D727B !important;
     height: 70px !important;
@@ -523,6 +485,7 @@ body header .main .menu li a {
   display: block;
   padding: 5px 25px 10px 25px;
   font-size: 1.143em;
+   text-decoration: none;
 }
 body header .main .menu li a:hover {
   text-decoration: none;
@@ -696,8 +659,12 @@ body header .hero .banner .btn {
   margin: 13px 0 0 0;
   font-size: 0.929em;
 }
+
 body [role='main'] {
   height: 100%;
+}
+body [role='main'].itemopen {
+  overflow: hidden;
 }
 body [role='main'] .hero {
   padding-top: 125px;
@@ -899,13 +866,14 @@ body [role='main'] .featured {
 body [role='main'] .featured .exhibition {
   width: 100%;
   height: 430px;
+   background: url('') no-repeat;
   background-size: cover;
   background-position: center;
   color: #ffffff;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
-  border-radius: 6px;
+ /* border-radius: 6px;*/
 }
 body [role='main'] .featured .exhibition:before,
 body [role='main'] .featured .exhibition:after {
@@ -916,7 +884,6 @@ body [role='main'] .featured .exhibition:after {
   clear: both;
 }
 body [role='main'] .featured .exhibition .hue {
-  border-radius: 6px;
   background: rgba(0, 0, 0, 0.4);
   width: 100%;
   height: 100%;
@@ -928,8 +895,7 @@ body [role='main'] .featured .exhibition .info {
   border-left: 0px;
   width: 100%;
   padding: 30px;
-  border-bottom-left-radius: 6px;
-  border-top-left-radius: 6px;
+ 
 }
 body [role='main'] .featured .exhibition .info h1 {
   font-size: 1.8em;
@@ -995,9 +961,10 @@ body [role='main'] .featured .exhibition .thumbnails {
   position: relative;
   display: none;
 }
-body [role='main'] .featured .exhibition .thumbnails img {
+body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
   height: 219px;
-  max-width: 219px;
+  width: 219px;
+  overflow: hidden;
 }
 body [role='main'] .featured .exhibition .thumbnails .title {
   font-size: 0.8em;
@@ -1242,6 +1209,7 @@ body [role='main'] .titlebar:after {
 body [role='main'] .titlebar .title {
   float: left;
   font-size: 1em;
+   position: relative;
 }
 body [role='main'] .titlebar .title a {
     width: 20px;
@@ -1862,7 +1830,7 @@ body [role='main'] .searchbar .settings .searchsetting {
   box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
   display: none;
   left: -15px;
-  height: 404px;
+  height: 383px;
 }
 body [role='main'] .searchbar .settings .searchsetting:before,
 body [role='main'] .searchbar .settings .searchsetting:after {
@@ -1934,10 +1902,12 @@ body [role='main'] .searchbar .settings .searchsetting .tab-content {
   width: 65%;
   overflow: auto;
   height: 365px;
+  background-color: white;
 }
 body [role='main'] .searchbar .settings .searchsetting .tab-content ul.list {
   margin: 0;
   padding: 20px;
+   background-color: white;
 }
 body [role='main'] .searchbar .settings .searchsetting .tab-content ul.chart {
    padding-left:35px;}	
@@ -1949,6 +1919,9 @@ body [role='main'] .searchbar .settings .searchsetting .tab-content ul.list li {
   color: #555555;
   border-bottom: 1px solid #e9e9e9;
 }
+body [role='main'] .searchbar .settings .searchsetting .tab-content ul.chart {
+   padding-left:35px;}	
+
 body [role='main'] .searchbar .settings .searchsetting .tab-content ul.list li label,
 body [role='main'] .searchbar .settings .searchsetting .tab-content ul.list li a {
   display: block;
@@ -2236,10 +2209,25 @@ body [role='main'] .searchresults .column .wrap .result .item.collection a label
 body [role='main'] .searchresults .column:first-child {
   border-right: 0px;
 }
+body [role='main'] .mediadetails {
+  height: 100% !important;
+}
+body [role='main'] .mediadetails .container {
+  height: 100%;
+}
 body [role='main'] .mediadetails .wrap {
   margin-left: -15px;
   margin-right: -15px;
   margin-top: 15px;
+  height: 100%;
+}
+body [role='main'] .mediadetails .wrap:before,
+body [role='main'] .mediadetails .wrap:after {
+  content: " ";
+  display: table;
+}
+body [role='main'] .mediadetails .wrap:after {
+  clear: both;
 }
 body [role='main'] .mediadetails .mediathumb,
 body [role='main'] .mediadetails .mediainfo {
@@ -2264,13 +2252,12 @@ body [role='main'] .mediadetails .mediainfo {
 }
 body [role='main'] .mediadetails .mediathumb {
   text-align: center;
+  padding-bottom: 25px;
 }
 body [role='main'] .mediadetails .mediathumb img {
   max-width: 100%;
+  max-height: 100%;
   min-width: 300px;
-}
-body [role='main'] .mediadetails .mediainfo {
-  margin-top: 15px;
 }
 body [role='main'] .mediadetails .mediainfo .infowrap {
   background: #ffffff;
@@ -2445,8 +2432,7 @@ body [role='main'] .mediadetails .mediainfo .infowrap .tab-content ul.related li
 }
 body [role='main'] .mediadetails .mediainfo .infowrap .tab-content ul.related li a img {
   min-width: 110px;
-  min-height: 110px;
-  max-width: 200px;
+  max-width: 110px;
 }
 body [role='main'] .mediadetails .mediainfo .infowrap .tab-content .sharetext {
   font-style: italic;
@@ -2572,110 +2558,7 @@ body.expand [role='main'] .exhibitionplayer {
 }
 /* Small devices (tablets, 768px and up) */
 @media (min-width: 768px) {
-  body {
-    /* homepage custom styling
-		&[ data-page = 'home' ] {
-
-			// fixed header
-			header {
-
-				// hero
-				.main {
-					background: transparent;
-					height: auto;
-
-					// logo
-					.logo {
-						margin: 39px 0 0 0;
-
-						// anchor
-						a {
-							background-position: 0 0;
-						}
-					}
-
-					// ul
-					.menu {
-						margin: 27px 0 0 0;
-
-						// li
-						li {
-							margin: 24px 0 0 25px;
-
-							// anchor
-							a {
-								color: @brand-white;
-							}
-						}
-					}
-
-					// search
-					.search {
-						margin: 50px 0 0 0;
-
-						// search
-						li {
-							margin: 0 0 0 25px;
-							
-							// anchor
-							a {
-								background: none;
-								width: auto;
-								height: auto;
-
-								// img
-								img {
-									margin-top: 4px;
-								}
-							}
-						}
-					}
-				}
-
-				/* minimize
-				&.minimize {
-
-					// main
-					.main {
-
-						// ul
-						.menu {
-							margin: 0px 0 0 0;
-
-							// li
-							li {
-								margin-top: 23px;
-
-								// anchor
-								a {
-									color: inherit;
-								}
-							}
-						}
-
-						// search
-						.search {
-							margin: 0;
-
-							// search
-							li {
-								
-								// anchor
-								a {
-									
-									// img
-									img {
-										margin-top: 30px;
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}*/
-  }
-  body[data-page='home'] header .main {
+   body[data-page='home'] header .main {
     background: transparent;
     height: auto;
 }
@@ -3015,7 +2898,7 @@ body[data-page='home'] header .main .search li a {
   }
   body [role='main'] .searchbar .settings .searchsetting {
     left: 0px;
-    height: 400px;
+    height: 404px;
     width: 500px;
   }
   body [role='main'] .searchbar .settings .searchsetting > ul {
@@ -3025,7 +2908,14 @@ body[data-page='home'] header .main .search li a {
   }
   body [role='main'] .searchbar .settings .searchsetting .tab-content {
     width: 70%;
-    height: 400px;
+    height: 365px;
+  }
+  body [role='main'] .searchbar .settings .searchsetting .filtertext .filterinput {
+    float: right;
+    width: 60%;
+  }
+  body [role='main'] .searchbar .settings .searchsetting .filtertext .filterimg {
+    display: block;
   }
   body [role='main'] .searchresults .column {
     overflow: auto;
@@ -3034,6 +2924,7 @@ body[data-page='home'] header .main .search li a {
   body [role='main'] .searchresults .column .wrap .result .item a .text {
     font-size: 1.2em;
   }
+ 
   body[data-page='profile'] .filter.fixed .wrap,
   body[data-page='account'] .filter.fixed .wrap {
     top: 229px;
@@ -3122,9 +3013,14 @@ body[data-page='home'] header .main .search li a {
   body [role='main'] .featured .exhibition .thumbnails {
     display: block;
   }
-  body [role='main'] .featured .exhibition .thumbnails img {
+ body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
     height: 180px;
-    max-width: 180px;
+    width: 180px;
+    overflow: auto;
+  }
+  body [role='main'] .featured .exhibition .thumbnails .imagewrapper img {
+    width: 180px;
+    height: auto;
   }
   body [role='main'] .featured .exhibition .thumbnails .title {
     width: 127px;
@@ -3229,6 +3125,9 @@ body[data-page='home'] header .main .search li a {
     width: 100%;
     display: block;
   }
+   body [role='main'] .searchresults .column .wrap .result .item {
+    white-space: normal;
+  }
   body [role='main'] .searchresults .column .wrap .result .item a .text {
     font-size: 0.9em;
   }
@@ -3263,9 +3162,26 @@ body[data-page='home'] header .main .search li a {
   body [role='main'] .featured .exhibition .info {
     padding: 75px 55px 0px 55px;
   }
-  body [role='main'] .featured .exhibition .thumbnails img {
+   body [role='main'] .mediadetails .mediathumb {
+    height: 100%;
+  }
+  body [role='main'] .mediadetails .mediainfo {
+    height: 100%;
+  }
+  body [role='main'] .mediadetails .mediainfo .infowrap {
+    height: 75%;
+  }
+  body [role='main'] .itemview {
+    overflow: hidden;
+  }
+   body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
+    width: 219px;
     height: 219px;
-    max-width: 219px;
+    overflow: auto;
+  }
+  body [role='main'] .featured .exhibition .thumbnails .imagewrapper img {
+    width: 219px;
+    height: auto;
   }
   body [role='main'] .featured .exhibition .thumbnails .title {
     width: 179px;

@@ -15,9 +15,11 @@
             <!-- grid-->
             <div class="grid" data-bind="providerIsotope: providers">
               <!-- item-->
+              <!-- ko if: $index() === 0 -->
               <div class="sizer"></div>
+              <!-- /ko -->
               <!-- item-->
-              <div class="item provider" data-bind="visible: isLoaded()">
+              <div class="item provider">
                 <div class="wrap">
                   <!-- anchor--><a data-bind="attr :{ href: url}" title="View provider">
                     <!-- thumbnail-->

@@ -83,6 +83,9 @@ EUSpaceApp.ui = function( custom ){
 
 		// init adjustment for search column view
 		initSearchColumnAdjustment();
+
+		// limit character description
+		initCharacterLimiter();
 	};
 
 	// method to initialize isotope
@@ -481,6 +484,38 @@ EUSpaceApp.ui = function( custom ){
 			// show 
 			$( '.itemview' ).fadeOut();
 		});
+		});
+
+		// close event
+		$( '.itemview .menubar .action .close a' ).on( 'click', function( e ){
+
+			// e
+			e.preventDefault();
+
+			// show 
+			$( '.itemview' ).fadeOut();
+
+			// enable scroll on main
+			$('[role="main"]').removeClass('itemopen');
+		});
+
+		// function
+		function adjustHeight() {
+
+			// vars 
+			var wHeight = $( window ).height(),
+				wWidth = $( window ).width(),
+				itemHeight = wHeight - 70;
+
+			// check
+			if( wWidth >= 1200 ) {
+
+				// set height
+				$( '.itemopen .itemview' ).css({
+					height : itemHeight+"px"
+				});
+			}
+		}
 	};
 
 	// method to initialize search column width
@@ -519,6 +554,24 @@ EUSpaceApp.ui = function( custom ){
 			// initial adjustment
 			adjustColumnSize();
 		});
+	};
+
+	// method to limit character description
+	var initCharacterLimiter = function(){
+
+		// log
+		logger( 'info','plugins.js / initCharacterLimiter' );
+
+		// check
+		if( $( '.featured .exhibition .description' ).length > 0 ) {
+
+			// elem
+			var $texts = $( '.featured .exhibition .description .text' );
+			if ( $texts.text().length > 240 ) {
+				var tmp = $texts.text().substr(0,240)+'...';
+				$texts.text( tmp );
+			}
+		}
 	};
 
 };

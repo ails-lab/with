@@ -2,96 +2,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	$.bridget('isotope', Isotope);
 	
-	 function initOrUpdate(method) {
-			return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-				function isotopeAppend(ele) {
-					if (ele.nodeType === 1) { // Element type
-						$(element).imagesLoaded(function () {
-							$(element).isotope('appended', ele).isotope('layout');
-						});
-					}
-				}
-
-				function attachCallback(valueAccessor) {
-					return function() {
-						return {
-							data: valueAccessor(),
-							afterAdd: isotopeAppend,
-						};
-					};
-				}
-
-				var data = ko.utils.unwrapObservable(valueAccessor());
-				//extend foreach binding
-				ko.bindingHandlers.foreach[method](element,
-					 attachCallback(valueAccessor), // attach 'afterAdd' callback
-					 allBindings, viewModel, bindingContext);
-
-				if (method === 'init') {
-					$(element).isotope({
-						itemSelector: '.media',
-						transitionDuration: transDuration,
-						masonry: {
-							columnWidth		: '.sizer',
-							percentPosition	: true
-						}
-					});
-
-					ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-						$(element).isotope("destroy");
-					});
-					
-				} 
-			};
-		}
-		
-		ko.bindingHandlers.scroll = {
-				updating: true,
-
-				init: function (element, valueAccessor, allBindingsAccessor) {
-					var self = this;
-					self.updating = true;
-					ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-						$(window).off("scroll.ko.scrollHandler");
-						self.updating = false;
-					});
-				},
-
-				update: function (element, valueAccessor, allBindingsAccessor) {
-					var props = allBindingsAccessor().scrollOptions;
-					var offset = props.offset ? props.offset : "0";
-					var loadFunc = props.loadFunc;
-					var load = ko.utils.unwrapObservable(valueAccessor());
-					var self = this;
-
-					if (load) {
-						$(window).on("scroll.ko.scrollHandler", function () {
-							if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
-								if (self.updating) {
-									loadFunc();
-									self.updating = false;
-								}
-							} else {
-								self.updating = true;
-							}
-							 if ($(window).scrollTop() > 100) {
-									$('.scroll-top-wrapper').addClass('show');
-								} else {
-									$('.scroll-top-wrapper').removeClass('show');
-								}
-						});
-					} else {
-						element.style.display = "none";
-						$(window).off("scroll.ko.scrollHandler");
-						self.updating = false;
-					}
-				}
-			};
-
-
-		ko.bindingHandlers.searchIsotope = {
-				init: initOrUpdate('init'),
-				update: initOrUpdate('update')
+	 
+	ko.bindingHandlers.searchIsotope = {
+				init: app.initOrUpdate('init'),
+				update: app.initOrUpdate('update')
 			};
 
 
@@ -207,7 +121,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	function SearchModel(params) {
 		var self = this;
-		document.body.setAttribute("data-page","search");	
+		document.body.setAttribute("data-page","search");
+		setTimeout(function(){ EUSpaceUI.init(); }, 300);
 		var $container = $('.grid');
 		var $request;
 		self.filterselect=ko.observable(false);
@@ -217,11 +132,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.sourceview=ko.observable(true);
 		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray();
+		self.selectedSource=ko.observable(self.sources()[0]);
 		
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
 		self.searching = ko.observable(false);
+		
 		self.scrolled= function(data, event) {
 	        var elem = event.target;
 	        if (elem.scrollTop > (elem.scrollHeight - elem.offsetHeight-100)) {
@@ -236,7 +153,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.pageSize=ko.observable(20);
 		self.next = ko.observable(-1);
 		self.filters=ko.observableArray([]);
-
+		
+		self.columnChanged=function(){
+			$(".column").removeClass("selected");
+			$("#"+self.selectedSource()+"_result").addClass("selected");
+		}  
+		
 		self.noResults = ko.computed(function() {
 			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
 		})
@@ -244,20 +166,19 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.toggleSourceview = function (data,event) { 
 			if($(event.currentTarget).find("a").attr('data-view')=='column'){
 				self.sourceview(true);
-				window.EUSpaceUI.initSearch();
-				
+				EUSpaceUI.initSearchColumnAdjustment();	
 			}
 			else{
 				
 				self.sourceview(false);
-				$container.isotope({
+				/*$container.isotope({
 					itemSelector: '.media',
 					transitionDuration: transDuration,
 					masonry: {
 						columnWidth		: '.sizer',
 						percentPosition	: true
 					}
-				  });
+				  });*/
 			}
 			
 
@@ -356,10 +277,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						if(srcCat.items().length>0 && (!found || self.results().length==0)){
 							srcCat.loading(false);
 							self.results.push(srcCat);
+							EUSpaceUI.initSearchColumnAdjustment();
 						}
 
 					}
-					window.EUSpaceUI.initSearch();
+					
 					if(moreitems){
 						self.next(self.page()+1);
 
@@ -504,18 +426,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			
 		};
 
-		self.recordSelect= function (e){
-			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
-				   return record.recordId === e;
-				});
-			$( '.itemview' ).fadeIn();
-			itemShow(selrecord);
-
-		}
-
+		
         self.columnRecordSelect= function (e){
         	$( '.itemview' ).fadeIn();
 			itemShow(e);
+			return false;
 
 		}
 
@@ -614,12 +529,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		
 	
 	  
-		$(document).on("keypress", ".searchinput", function(e) {
-		     if (e.which == 13) {
-		         self.search(true,true);
-		     }
-		});
-        
         self.goToTop= function () {
         	if($request!==undefined)$request.abort();
         	
@@ -628,20 +537,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
             }, 600);
         }
 
-		self.likeRecord = function (id) {
-			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.externalId=== id;
-			});
-
-			app.likeItem(rec, function (status) {
-				if (status) {
-					$('#' + id).addClass('active');
-				} else {
-					$('#' + id).removeClass('active');
-				}
-			});
-		};
-
+		
       
 
 

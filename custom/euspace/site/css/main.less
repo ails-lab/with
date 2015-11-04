@@ -367,6 +367,11 @@ body {
 	[ role = 'main' ] {
 		height: 100%;
 
+		// open item
+		&.itemopen {
+			overflow: hidden;
+		}
+
 		// hero
 		.hero {
 			padding-top: 125px;
@@ -673,9 +678,10 @@ body {
 					display: none;
 
 					// img
-					img {
+					.imagewrapper {
+						width: 219px;
 						height: 219px;
-						max-width: 219px;
+						overflow: hidden;
 					}
 
 					// title
@@ -2165,11 +2171,19 @@ body {
 
 		// media details
 		.mediadetails {
+			height: 100% !important;
+
+			// container
+			.container {
+				height: 100%;
+			}
 
 			// wrap
 			.wrap {
 				.make-row();
 				margin-top: 15px;
+				height: 100%;
+				.clearfix;
 			}
 
 			// media thumbnail & media information
@@ -2181,19 +2195,19 @@ body {
 			// media thumb
 			.mediathumb {
 				text-align: center;
+				padding-bottom: 25px;
+				
 
 				// image
 				img {
 					max-width: 100%;
+					max-height: 100%;
 					min-width: 300px;
 				} 
 			}
 
 			// info
 			.mediainfo {
-
-				// res
-				margin-top: 15px;
 
 				// infowrap
 				.infowrap {
@@ -2364,9 +2378,8 @@ body {
 
 									// img
 									img {
+										max-width: 110px;
 										min-width: 110px;
-										min-height: 110px;
-										max-width: 200px;
 									}
 								}
 							}

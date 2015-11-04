@@ -102,14 +102,14 @@ a {
   padding-bottom: 50px;
 }
 .listing .grid {
-  padding-top: 10px;
-  margin: 0 -5px 0 -5px;
+  padding-top: 15px;
+  margin: 0 -7.5px 0 -7.5px;
 }
 .listing .grid .sizer,
 .listing .grid .item {
   width: 50%;
-  margin-bottom: 10px;
-  padding: 0 5px 0 5px;
+  margin-bottom: 15px;
+  padding: 0 7.5px 0 7.5px;
 }
 .listing .grid .sizer .wrap,
 .listing .grid .item .wrap {
@@ -671,6 +671,9 @@ body header.minimize .main .search li a {
 body [role='main'] {
   height: 100%;
 }
+body [role='main'].itemopen {
+  overflow: hidden;
+}
 body [role='main'] .hero {
   padding-top: 125px;
   height: 310px;
@@ -964,9 +967,10 @@ body [role='main'] .featured .exhibition .thumbnails {
   position: relative;
   display: none;
 }
-body [role='main'] .featured .exhibition .thumbnails img {
+body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
+  width: 219px;
   height: 219px;
-  max-width: 219px;
+  overflow: hidden;
 }
 body [role='main'] .featured .exhibition .thumbnails .title {
   font-size: 0.8em;
@@ -1906,7 +1910,7 @@ body [role='main'] .searchbar .settings .searchsetting > ul > li.active a {
 body [role='main'] .searchbar .settings .searchsetting .tab-content {
   float: left;
   width: 65%;
-  height: 400px;
+  height: 365px;
   overflow: auto;
   height: 340px;
 }
@@ -2204,10 +2208,25 @@ body [role='main'] .searchresults .column .wrap .result .item.collection a label
 body [role='main'] .searchresults .column:first-child {
   border-right: 0px;
 }
+body [role='main'] .mediadetails {
+  height: 100% !important;
+}
+body [role='main'] .mediadetails .container {
+  height: 100%;
+}
 body [role='main'] .mediadetails .wrap {
   margin-left: -15px;
   margin-right: -15px;
   margin-top: 15px;
+  height: 100%;
+}
+body [role='main'] .mediadetails .wrap:before,
+body [role='main'] .mediadetails .wrap:after {
+  content: " ";
+  display: table;
+}
+body [role='main'] .mediadetails .wrap:after {
+  clear: both;
 }
 body [role='main'] .mediadetails .mediathumb,
 body [role='main'] .mediadetails .mediainfo {
@@ -2232,13 +2251,12 @@ body [role='main'] .mediadetails .mediainfo {
 }
 body [role='main'] .mediadetails .mediathumb {
   text-align: center;
+  padding-bottom: 25px;
 }
 body [role='main'] .mediadetails .mediathumb img {
   max-width: 100%;
+  max-height: 100%;
   min-width: 300px;
-}
-body [role='main'] .mediadetails .mediainfo {
-  margin-top: 15px;
 }
 body [role='main'] .mediadetails .mediainfo .infowrap {
   background: #ffffff;
@@ -2412,9 +2430,8 @@ body [role='main'] .mediadetails .mediainfo .infowrap .tab-content ul.related li
   overflow: hidden;
 }
 body [role='main'] .mediadetails .mediainfo .infowrap .tab-content ul.related li a img {
+  max-width: 110px;
   min-width: 110px;
-  min-height: 110px;
-  max-width: 200px;
 }
 body [role='main'] .mediadetails .mediainfo .infowrap .tab-content .sharetext {
   font-style: italic;
@@ -3023,9 +3040,14 @@ body.expand [role='main'] .exhibitionplayer {
   body [role='main'] .featured .exhibition .thumbnails {
     display: block;
   }
-  body [role='main'] .featured .exhibition .thumbnails img {
+  body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
     height: 180px;
-    max-width: 180px;
+    width: 180px;
+    overflow: auto;
+  }
+  body [role='main'] .featured .exhibition .thumbnails .imagewrapper img {
+    width: 180px;
+    height: auto;
   }
   body [role='main'] .featured .exhibition .thumbnails .title {
     width: 127px;
@@ -3162,12 +3184,29 @@ body.expand [role='main'] .exhibitionplayer {
   body [role='main'] .filter.fixed .wrap {
     width: 1140px;
   }
+  body [role='main'] .mediadetails .mediathumb {
+    height: 100%;
+  }
+  body [role='main'] .mediadetails .mediainfo {
+    height: 100%;
+  }
+  body [role='main'] .mediadetails .mediainfo .infowrap {
+    height: 75%;
+  }
+  body [role='main'] .itemview {
+    overflow: hidden;
+  }
   body [role='main'] .featured .exhibition .info {
     padding: 75px 55px 0px 55px;
   }
-  body [role='main'] .featured .exhibition .thumbnails img {
+  body [role='main'] .featured .exhibition .thumbnails .imagewrapper {
+    width: 219px;
     height: 219px;
-    max-width: 219px;
+    overflow: auto;
+  }
+  body [role='main'] .featured .exhibition .thumbnails .imagewrapper img {
+    width: 219px;
+    height: auto;
   }
   body [role='main'] .featured .exhibition .thumbnails .title {
     width: 179px;
