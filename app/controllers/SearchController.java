@@ -55,23 +55,6 @@ public class SearchController extends Controller {
 	final static Form<CommonQuery> userForm = Form.form(CommonQuery.class);
 	public static final ALogger log = Logger.of(SearchController.class);
 
-	public static Result searchslow() {
-		JsonNode json = request().body().asJson();
-		CommonQuery q = null;
-		if (json == null) {
-			return badRequest("Expecting Json query");
-		} else {
-			// Parse the query.
-			try {
-				q = Utils.parseJson(json);
-			} catch (Exception e) {
-				return badRequest(e.getMessage());
-			}
-		}
-
-		return ok(Json.toJson(search(q)));
-	}
-
 	// here is how the ApiKey check can be build into the controllers
 	// @With( CallAllowedCheck.class)
 	@SuppressWarnings("unchecked")
@@ -146,7 +129,7 @@ public class SearchController extends Controller {
 						}
 
 						r1.filters = ListUtils.transform(merge, f);
-						r1.responces = mergeResponses(finalResponses);
+						r1.responses = mergeResponses(finalResponses);
 
 						return ok(Json.toJson(r1));
 					}
@@ -203,37 +186,6 @@ public class SearchController extends Controller {
 		return promises;
 	}
 
-	public static Promise<Result> searchWithThreads() {
-		JsonNode json = request().body().asJson();
-		final CommonQuery q;
-
-		if (json == null) {
-			return Promise.pure((Result) badRequest("Expecting Json query"));
-		} else {
-			// Parse the query.
-			try {
-				q = Utils.parseJson(json);
-			} catch (Exception e) {
-				return Promise.pure((Result) badRequest(e.getMessage()));
-			}
-		}
-		final long initTime = System.currentTimeMillis();
-		return Promise.promise(new Function0<JsonNode>() {
-			public JsonNode apply() {
-				return Json.toJson(search(q));
-			}
-		}).map(new play.libs.F.Function<JsonNode, Result>() {
-			public Result apply(JsonNode i) {
-				Logger.debug("Total time for all sources to respond: " + (System.currentTimeMillis() - initTime));
-				return ok(i);
-			}
-		});
-	}
-
-	public static List<SourceResponse> search(CommonQuery q) {
-		List<SourceResponse> result = ESpaceSources.fillResults(q);
-		return result;
-	}
 
 	/*public static Result testsearch() {
 		return buildresult(new CommonQuery("Zeus"));
@@ -259,6 +211,7 @@ public class SearchController extends Controller {
 		return ok(views.html.testsearch.render(userForm, res, merge1));
 	}
 	 */
+	
 	public static Result reindex() {
 		Promise.promise(new Function0<String>() {
 			public String apply() throws Exception {

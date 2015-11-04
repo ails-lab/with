@@ -36,7 +36,5 @@ public class Provider {
 		this.recordId = recordId;
 		this.recordUrl = recordUrl;
 	}
-	
-	
 
 }

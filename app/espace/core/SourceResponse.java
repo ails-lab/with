@@ -94,4 +94,9 @@ public class SourceResponse {
 		}
 		return res;
 	}
+	
+	public void addItem(ExternalBasicRecord record) {
+		if (record!=null)
+			items.add(record);
+	}
 }

@@ -184,7 +184,9 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 				for (JsonNode item : response.path("photos").path("photo")) {
 					// countValue(type, t);
 //					countValue(rights, it.rights, 1);
-					a.add(formatreader.readObjectFrom(item));
+					ExternalBasicRecord record = formatreader.readObjectFrom(item);
+					if (record != null)
+						a.add(record);
 				}
 				res.items = a;
 				res.count = a.size();

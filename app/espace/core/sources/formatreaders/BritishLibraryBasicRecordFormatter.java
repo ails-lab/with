@@ -18,6 +18,7 @@ package espace.core.sources.formatreaders;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.utils.JsonContextRecord;
@@ -25,37 +26,32 @@ import espace.core.utils.StringUtils;
 import model.ExternalBasicRecord;
 import model.Provider;
 
-public class BritishLibraryBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
+public class BritishLibraryBasicRecordFormatter extends ExternalBasicRecordReader {
 
 	@Override
-	public ExternalBasicRecord buildObjectFrom() {
-		return new ExternalBasicRecord();
+	public void fillInExternalId(JsonContextRecord rec) {
+		object.setIsShownBy(rec.getStringValue("url_o"));
+		object.setIsShownAt(rec.getStringValue("landing_url"));
 	}
 
 	@Override
-	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		// TODO: add type
-		// TODO: add null checks
-		record.setThumbnailUrl(rec.getStringValue("url_s"));
-		record.setIsShownBy(rec.getStringValue("url_o"));
-		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("description"));
-		record.setCreator(rec.getStringValue("principalOrFirstMaker"));
-		record.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-		record.setYear(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
-		record.setIsShownAt(rec.getStringValue("landing_url"));
+	public void fillInValidRecord(JsonContextRecord rec) {
+		object.setThumbnailUrl(rec.getStringValue("url_s"));
+		object.setTitle(rec.getStringValue("title"));
+		object.setDescription(rec.getStringValue("description"));
+		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
+		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
+		object.setYear(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
 		// TODO: add rights
-		// record.setItemRights(rec.getStringValue("rights"));
-		record.setExternalId(record.getIsShownAt());
-		if (record.getExternalId() == null || record.getExternalId() == "")
-			record.setExternalId(record.getIsShownBy());
-		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+		// object.setItemRights(rec.getStringValue("rights"));
+		object.setExternalId(object.getIsShownAt());
+		if (object.getExternalId() == null || object.getExternalId() == "")
+			object.setExternalId(object.getIsShownBy());
+		object.setExternalId(DigestUtils.md5Hex(object.getExternalId()));
 		String id = rec.getStringValue("id");
 		Provider recordProvider = new Provider(BritishLibrarySpaceSource.LABEL, id,
 				"https://www.flickr.com/photos/britishlibrary/" + id + "/");
-		record.addProvider(recordProvider);
-
-		return record;
+		object.addProvider(recordProvider);
 	}
 
 }

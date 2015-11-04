@@ -17,13 +17,10 @@
 package espace.core;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import play.Logger;
 import espace.core.sources.BritishLibrarySpaceSource;
-import espace.core.sources.DDBSpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.sources.EuropeanaFashionSpaceSource;
@@ -57,17 +54,17 @@ public class ESpaceSources {
 		esources.add(new YouTubeSpaceSource());
 		esources.add(new ElasticSource());
 		esources.add(new RijksmuseumSpaceSource());
-		esources.add(new DDBSpaceSource());
+		//esources.add(new DDBSpaceSource());
 		esources.add(new BritishLibrarySpaceSource());
 		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
 
-	public static Map<String, ISpaceSource> initSourceByNameMap() {
+	/*public static Map<String, ISpaceSource> initSourceByNameMap() {
 		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
 		ISpaceSource s = new EuropeanaSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
-		/*s = new DPLASpaceSource();
+		s = new DPLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new NLASpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
@@ -76,11 +73,11 @@ public class ESpaceSources {
 		s = new EuropeanaFashionSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		s = new YouTubeSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);*/
+		sourcesMap.put(s.getSourceName(), s);
 		s = new WithSpaceSource();
 		sourcesMap.put(s.getSourceName(), s);
 		return sourcesMap;
-	}
+	}*/
 
 	public static List<ISpaceSource> getESources() {
 		if (esources == null) {
@@ -89,37 +86,4 @@ public class ESpaceSources {
 		return esources;
 
 	}
-
-	public static List<SourceResponse> fillResults(final CommonQuery q) {
-		final ArrayList<SourceResponse> srcs = new ArrayList<SourceResponse>();
-		ArrayList<Thread> t = new ArrayList<Thread>();
-		for (final ISpaceSource src : ESpaceSources.getESources()) {
-			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
-				Thread tit = new Thread(new Runnable() {
-
-					@Override
-					public void run() {
-						// TODO Auto-generated method stub
-						SourceResponse results = src.getResults(q);
-						synchronized (srcs) {
-							srcs.add(results);
-							System.out.println(results.source + " found " + results.count);
-						}
-					}
-				});
-				t.add(tit);
-				tit.start();
-			}
-		}
-		for (Thread thread : t) {
-			try {
-				thread.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		return srcs;
-	}
-
 }

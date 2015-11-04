@@ -18,44 +18,37 @@ package espace.core.sources.formatreaders;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.DDBSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
 
-public class DDBBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
+public class DDBBasicRecordFormatter extends ExternalBasicRecordReader {
 
 	@Override
-	public ExternalBasicRecord buildObjectFrom() {
-		return new ExternalBasicRecord();
+	public void fillInExternalId(JsonContextRecord rec) {
+		object.setIsShownBy(null);
+		object.setIsShownAt(object.getIsShownBy());
 	}
 
 	@Override
-	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		//TODO: add type
-		//TODO: add null checks
-		record.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
-		record.setIsShownBy(null);
-		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("description"));
-		record.setCreator(rec.getStringValue("principalOrFirstMaker"));
-//		record.setContributors(rec.getStringArrayValue("contributor"));
+	public void fillInValidRecord(JsonContextRecord rec) {
+		object.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
+		object.setTitle(rec.getStringValue("title"));
+		object.setDescription(rec.getStringValue("description"));
+		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
+//		object.setContributors(rec.getStringArrayValue("contributor"));
 		// TODO: add years
-//		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		record.setIsShownAt(record.getIsShownBy());
+//		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 		// TODO: add rights
-//		record.setItemRights(rec.getStringValue("rights"));
-		record.setExternalId(record.getIsShownAt());
-		if (record.getExternalId() == null || record.getExternalId() == "")
-			record.setExternalId(record.getIsShownBy());
-		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+//		object.setItemRights(rec.getStringValue("rights"));
 		String id = rec.getStringValue("id");
 		Provider recordProvider = new Provider(DDBSpaceSource.LABEL, id, 
 				"https://www.deutsche-digitale-bibliothek.de/item/"
 						+ id );
-		record.addProvider(recordProvider);
-		return record;
+		object.addProvider(recordProvider);
 	}
 
 }

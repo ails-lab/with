@@ -18,47 +18,43 @@ package espace.core.sources.formatreaders;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
 
-public class DNZBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
+public class DNZBasicRecordFormatter extends ExternalBasicRecordReader {
 
+	
 	@Override
-	public ExternalBasicRecord buildObjectFrom() {
-		return new ExternalBasicRecord();
+	public void fillInExternalId(JsonContextRecord rec) {
+		object.setIsShownBy(rec.getStringValue("large_thumbnail_url"));
+		object.setIsShownAt(rec.getStringValue("landing_url"));
 	}
 
 	@Override
-	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		record.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		record.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
+	public void fillInValidRecord(JsonContextRecord rec) {
+		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
+		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
 		//TODO: add type
 		//TODO: add null checks
-		record.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
-		record.setIsShownBy(rec.getStringValue("large_thumbnail_url"));
-		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("description"));
-		record.setCreator(rec.getStringValue("creator"));
-		record.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
+		object.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
+		object.setTitle(rec.getStringValue("title"));
+		object.setDescription(rec.getStringValue("description"));
+		object.setCreator(rec.getStringValue("creator"));
+		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
 		// TODO: add years here:
 //		Utils.readArrayAttr(item, "issued",
 				// true);
-//		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		record.setIsShownAt(rec.getStringValue("landing_url"));
+//		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 		// TODO: add rights
-//		record.setItemRights(rec.getStringValue("rights_url"));
-		record.setExternalId(record.getIsShownAt());
-		if (record.getExternalId() == null || record.getExternalId() == "")
-			record.setExternalId(record.getIsShownBy());
-		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+//		object.setItemRights(rec.getStringValue("rights_url"));
 		String id = rec.getStringValue("id");
 		Provider recordProvider = new Provider(DigitalNZSpaceSource.LABEL, id, 
-				"http://www.digitalnz.org/records/" +id);
-		record.addProvider(recordProvider);
-		return record;
+				"http://www.digitalnz.org/objects/" +id);
+		object.addProvider(recordProvider);
 	}
 
 }

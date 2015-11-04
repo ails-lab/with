@@ -18,6 +18,7 @@ package espace.core.sources.formatreaders;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.NLASpaceSource;
 import espace.core.utils.JsonContextRecord;
@@ -25,37 +26,29 @@ import espace.core.utils.StringUtils;
 import model.ExternalBasicRecord;
 import model.Provider;
 
-public class NLAExternalBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
+public class NLAExternalBasicRecordFormatter extends ExternalBasicRecordReader {
 
 	@Override
-	public ExternalBasicRecord buildObjectFrom() {
-		return new ExternalBasicRecord();
+	public void fillInExternalId(JsonContextRecord rec) {
+		object.setIsShownBy(null);
+		object.setIsShownAt(rec.getStringValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
 	}
 
 	@Override
-	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		// TODO: add type
-		// TODO: add null checks
-		record.setThumbnailUrl(rec.getStringValue("identifier[type=url,linktype=thumbnail].value"));
-		record.setIsShownBy(null);
-		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("abstract"));
-		record.setCreator(rec.getStringValue("contributor"));
-		// record.setContributors(rec.getStringArrayValue("contributor"));
+	public void fillInValidRecord(JsonContextRecord rec) {
+		object.setThumbnailUrl(rec.getStringValue("identifier[type=url,linktype=thumbnail].value"));
+		object.setTitle(rec.getStringValue("title"));
+		object.setDescription(rec.getStringValue("abstract"));
+		object.setCreator(rec.getStringValue("contributor"));
+		// object.setContributors(rec.getStringArrayValue("contributor"));
 		// TODO: add years
-		record.setYear(StringUtils.getYears(rec.getStringArrayValue("issued")));
-		record.setIsShownAt(rec.getStringValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
+		object.setYear(StringUtils.getYears(rec.getStringArrayValue("issued")));
 		// TODO: add rights
-		// record.setItemRights(rec.getStringValue("sourceResource.rights"));
-		record.setExternalId(record.getIsShownAt());
-		if (record.getExternalId() == null || record.getExternalId() == "")
-			record.setExternalId(record.getIsShownBy());
-		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+		// object.setItemRights(rec.getStringValue("sourceResource.rights"));
 		String id = rec.getStringValue("id");
 		Provider recordProvider = new Provider(NLASpaceSource.LABEL, id, rec.getStringValue("troveUrl"));
-		record.addProvider(recordProvider);
-
-		return record;
+		object.addProvider(recordProvider);
+		
 	}
 
 }

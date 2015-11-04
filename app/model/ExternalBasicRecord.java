@@ -89,7 +89,7 @@ public class ExternalBasicRecord {
 	private String isShownBy;
 
 	//media type
-	private  RecordType type;
+	private  RecordType type = RecordType.UNKNOWN;
 
 	private ItemRights itemRights;
 
@@ -98,7 +98,7 @@ public class ExternalBasicRecord {
 	private List<Year> year;
 	
 	private List<Provider> provenanceChain = new ArrayList<Provider>();
-	
+		
 	private String subject;
 	
 	/**
@@ -121,6 +121,11 @@ public class ExternalBasicRecord {
 	 */
 	public void setExternalId(String externalId) {
 		this.externalId = externalId;
+	}
+	
+	public boolean externalIdNotNull() {
+		return !((getIsShownBy() == null || getIsShownBy().isEmpty()) &&
+		  (getIsShownAt() == null || getIsShownAt().isEmpty()));
 	}
 	
 	/**

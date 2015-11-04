@@ -20,6 +20,7 @@ import java.time.Year;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
+import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.utils.JsonContextRecord;
@@ -27,34 +28,29 @@ import model.ExternalBasicRecord;
 import model.Provider;
 import utils.ListUtils;
 
-public class EuropeanaExternalBasicRecordFormatter extends JsonContextRecordFormatReader<ExternalBasicRecord> {
-
+public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordReader {
+	
 	@Override
-	public ExternalBasicRecord buildObjectFrom() {
-		return new ExternalBasicRecord();
+	public void fillInExternalId(JsonContextRecord rec) {
+		object.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		object.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 	}
 
 	@Override
-	public ExternalBasicRecord fillObjectFrom(JsonContextRecord rec, ExternalBasicRecord record) {
-		record.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		record.addProvider(new Provider(rec.getStringValue("provider")));
+	public void fillInValidRecord(JsonContextRecord rec) {
+		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
+		object.addProvider(new Provider(rec.getStringValue("provider")));
 		//TODO: add null checks
-		record.setThumbnailUrl(rec.getStringValue("edmPreview"));
-		record.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		record.setTitle(rec.getStringValue("title"));
-		record.setDescription(rec.getStringValue("dcDescription"));
-		record.setCreator(rec.getStringValue("dcCreator"));
-		record.setContributors(rec.getStringArrayValue("dcContributor"));
-		record.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		record.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-//		record.setItemRights(rec.getStringValue("rights"));
-		record.setExternalId(record.getIsShownAt());
-		if (record.getExternalId() == null || record.getExternalId() == "")
-			record.setExternalId(record.getIsShownBy());
-		record.setExternalId(DigestUtils.md5Hex(record.getExternalId()));
+		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
+		object.setTitle(rec.getStringValue("title"));
+		object.setDescription(rec.getStringValue("dcDescription"));
+		object.setCreator(rec.getStringValue("dcCreator"));
+		object.setContributors(rec.getStringArrayValue("dcContributor"));
+		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		object.setItemRights(rec.getStringValue("rights"));
 		Provider recordProvider = new Provider(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid"));
-		record.addProvider(recordProvider);
-		return record;
+		object.addProvider(recordProvider);
+		
 	}
 
 }

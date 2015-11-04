@@ -41,12 +41,12 @@ public class JsonContextRecord {
 	private List<String> context;
 	
 	public JsonContextRecord(JsonNode rootInformation) {
-		this();
 		this.rootInformation = rootInformation;
 	}
 	
 	public JsonContextRecord(String jsonString) {
-		this();
+		//TODO: what us context?
+		context = new ArrayList<>();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			this.rootInformation = mapper.readTree(jsonString);
@@ -60,7 +60,6 @@ public class JsonContextRecord {
 	}
 	
 	public JsonContextRecord() {
-		super();
 		context = new ArrayList<>();
 	}
 	
@@ -74,10 +73,13 @@ public class JsonContextRecord {
 	
 	protected List<String> buildpaths(String... path){
 		List<String> spath = new ArrayList<>();
+		//TODO: what is context?
+		/*
 		for (String string : context) {
 			String[] singlepaths = string.split("\\.");
 			spath.addAll(Arrays.asList(singlepaths));
 		}
+		*/
 		for (String string : path) {
 			String[] singlepaths = string.split("\\.");
 			spath.addAll(Arrays.asList(singlepaths));

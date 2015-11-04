@@ -57,13 +57,15 @@ public class CollectionRecord extends ExternalBasicRecord {
 	private int totalLikes;
 	
 	private ExhibitionRecord exhibitionRecord;
+	
+	private Provider importedFrom;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
 
 	/**
 	 * Mongo uses ISODate type to store dates.
-	 * That's why we nee these jackson annotation 
+	 * That's why we need these jackson annotation 
 	 * to keep the format yyyy//MM/dd at the frontend.
 	 * 
 	 * Tip: If we want to write queries/criteria for
@@ -184,6 +186,14 @@ public class CollectionRecord extends ExternalBasicRecord {
 
 	public HashMap<String, Object> getExtraFields() {
 		return extraFields;
+	}
+
+	public Provider getImportedFrom() {
+		return importedFrom;
+	}
+
+	public void setImportedFrom(Provider importedFrom) {
+		this.importedFrom = importedFrom;
 	}
 
 }
