@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -197,11 +199,20 @@ public class UserAndGroupManager extends Controller {
 			ObjectId userOrGroupId = new ObjectId(id);
 			// Add a user to the group
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
+				// If the user has not requested to join to the group, he gets a notification
+				//
 				User usr = DB.getUserDAO().get(userOrGroupId);
-				// Send notification to the user
+				// Store notification at the database
 				Notification notification = new Notification();
-				// Add info about this notification
+				notification.setActivity(Activity.GROUP_INVITE);
+				notification.setGroup(group.getDbId());
+				notification.setReceiver(usr.getDbId());
+				notification.setSender(admin.getDbId());
+				notification.setOpen(true);
+				Date now = new Date();
+				notification.setSentAt(new Timestamp(now.getTime()));
 				DB.getUserDAO().makePermanent(usr);
+				// Send notification to the user through socket 
 				NotificationCenter.userUpdate(usr, group, Activity.GROUP_INVITE);
 				/*
 				 * group.getUsers().add(user.getDbId());

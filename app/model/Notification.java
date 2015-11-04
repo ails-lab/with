@@ -29,7 +29,8 @@ public class Notification {
 
 	public enum Activity {
 		// group related
-		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED, GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
+		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED, 
+		GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
 
 		// collection related
 		COLLECTION_ITEM_ADDED, COLLECTION_ITEM_REMOVED, COLLECTION_SHARED,
@@ -49,13 +50,88 @@ public class Notification {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId sender;
 
+	// The collection related with the action (if collection related)
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collection;
 
+	// The group that is involved with the action (if group related)
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId group;
 	private String message;
+	// While the notification is pending for an answer, it remains open 
 	private boolean open;
 	private Timestamp sentAt;
 	private Timestamp readAt;
+
+	public ObjectId getReceiver() {
+		return receiver;
+	}
+
+	public void setReceiver(ObjectId receiver) {
+		this.receiver = receiver;
+	}
+
+	public ObjectId getSender() {
+		return sender;
+	}
+
+	public void setSender(ObjectId sender) {
+		this.sender = sender;
+	}
+
+	public ObjectId getCollection() {
+		return collection;
+	}
+
+	public void setCollection(ObjectId collection) {
+		this.collection = collection;
+	}
+
+	public ObjectId getGroup() {
+		return group;
+	}
+
+	public void setGroup(ObjectId group) {
+		this.group = group;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
+	}
+
+	public boolean isOpen() {
+		return open;
+	}
+
+	public void setOpen(boolean open) {
+		this.open = open;
+	}
+
+	public Timestamp getSentAt() {
+		return sentAt;
+	}
+
+	public void setSentAt(Timestamp sentAt) {
+		this.sentAt = sentAt;
+	}
+
+	public Timestamp getReadAt() {
+		return readAt;
+	}
+
+	public void setReadAt(Timestamp readAt) {
+		this.readAt = readAt;
+	}
+
+	public Activity getActivity() {
+		return activity;
+	}
+
+	public void setActivity(Activity activity) {
+		this.activity = activity;
+	}
 }
