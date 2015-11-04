@@ -1006,3 +1006,14 @@ div#publiccolumns figure figcaption {
   -moz-border-radius: 6px 0 6px 6px;
   border-radius: 6px 0 6px 6px;
 }
+
+a {
+  outline: 0!important;
+}
+
+nav .badge {
+  position: absolute;
+  right: 2px;
+  top: 5px;
+  background-color: rgb(238, 43, 51);
+}

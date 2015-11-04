@@ -29,6 +29,10 @@
 		  <li data-bind="visible: !isLogged()"><a href="#register"><i class="fa fa-user-plus"></i> Register</a></li>
         <li data-bind="visible: isLogged()"><a href="#mycollections">My collections</a></li>
         <li data-bind="visible: isLogged()"><a href="#myexhibitions">My exhibitions</a></li>
+        <li data-bind="visible: isLogged()">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-flag fa-2x"></i></a>
+          <span class="badge red">2</span>
+        </li>
         <li data-bind="visible: isLogged()" class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
             <img class="img-circle img-thumbnail" data-bind="attr: { src: profileImage }" />
