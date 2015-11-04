@@ -1011,9 +1011,50 @@ a {
   outline: 0!important;
 }
 
+/* Notification System */
 nav .badge {
   position: absolute;
   right: 2px;
   top: 5px;
   background-color: rgb(238, 43, 51);
+}
+
+.popover {
+  display: block!important;
+  max-height: 100%;
+  height: auto;
+  font-size: 12px;
+
+}
+
+.popover-content {
+  padding: 0;
+}
+
+.popover-content > ul {
+  list-style-type: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.notify-list li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.notify-list .new {
+  background-color: #f6f7f8;
+}
+
+.notify-list em {
+  color: #f36e6c;
+}
+
+.notify-all {
+  border-radius: 0 0 5px 5px;
+  position: relative;
+  font-weight: 700;
+  text-align: center;
+  background-color: #f7f7f7;
+  padding: 6px 14px;
 }

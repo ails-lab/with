@@ -2,6 +2,12 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 
   function TopBarViewModel(params) {
 
+		$("[data-toggle=popover]").popover({
+			html: true,
+			content: function() {
+				return $('#notifications-content').html();
+			}
+		});
 
 		$( document ).on( 'keypress', function( event ) {
 
