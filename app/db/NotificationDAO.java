@@ -22,9 +22,9 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 
 import model.Notification;
+import model.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
-import utils.AccessManager.Action;
 
 public class NotificationDAO extends DAO<Notification> {
 
@@ -50,9 +50,10 @@ public class NotificationDAO extends DAO<Notification> {
 		return find(q).asList();
 	}
 
-	public List<Notification> getGroupRelatedNotifications(ObjectId receiverId, ObjectId groupId, Action action) {
+	public List<Notification> getGroupRelatedNotifications(ObjectId receiverId, ObjectId groupId, Activity activity) {
 		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId);
-		q.and(q.criteria("open").equal(true), q.criteria("groupId").equal(groupId), q.criteria("action").equal(action));
+		q.and(q.criteria("open").equal(true), q.criteria("groupId").equal(groupId),
+				q.criteria("activity").equal(activity));
 		return find(q).asList();
 	}
 }

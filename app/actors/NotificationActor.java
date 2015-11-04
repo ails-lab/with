@@ -25,7 +25,6 @@ import akka.actor.Props;
 import akka.actor.UntypedActor;
 import db.DB;
 import model.User;
-import model.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -144,7 +143,9 @@ public class NotificationActor extends UntypedActor {
 			break;
 		case GROUP_REQUEST_ACCEPT:
 			if (loggedInUser.getDbId().equals(userUp.user.getDbId())) {
-				notifyMessage(new Message("Group accepted your join request", userUp.userGroup.getDbId()));
+				notifyMessage(new Message("You were accepted to group", userUp.userGroup.getDbId()));
+			} else if (userUp.userGroup.getAdminIds().contains(loggedInUser.getDbId())) {
+				notifyMessage(new Message("New member joined the group", userUp.user.getDbId()));
 			}
 			break;
 		case GROUP_REQUEST_DENIED:

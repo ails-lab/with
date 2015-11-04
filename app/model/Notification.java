@@ -29,8 +29,7 @@ public class Notification {
 
 	public enum Activity {
 		// group related
-		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED, 
-		GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
+		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED, GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
 
 		// collection related
 		COLLECTION_ITEM_ADDED, COLLECTION_ITEM_REMOVED, COLLECTION_SHARED,
@@ -58,10 +57,18 @@ public class Notification {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId group;
 	private String message;
-	// While the notification is pending for an answer, it remains open 
+	// While the notification is pending for an answer, it remains open
 	private boolean open;
-	private Timestamp sentAt;
-	private Timestamp readAt;
+	private Timestamp openedAt;
+	private Timestamp closedAt;
+
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
 
 	public ObjectId getReceiver() {
 		return receiver;
@@ -111,20 +118,20 @@ public class Notification {
 		this.open = open;
 	}
 
-	public Timestamp getSentAt() {
-		return sentAt;
+	public Timestamp getOpenedAt() {
+		return openedAt;
 	}
 
-	public void setSentAt(Timestamp sentAt) {
-		this.sentAt = sentAt;
+	public void setOpenedAt(Timestamp openedAt) {
+		this.openedAt = openedAt;
 	}
 
-	public Timestamp getReadAt() {
-		return readAt;
+	public Timestamp getClosedAt() {
+		return closedAt;
 	}
 
-	public void setReadAt(Timestamp readAt) {
-		this.readAt = readAt;
+	public void setClosedAt(Timestamp closedAt) {
+		this.closedAt = closedAt;
 	}
 
 	public Activity getActivity() {
