@@ -199,8 +199,8 @@ public class UserAndGroupManager extends Controller {
 			ObjectId userOrGroupId = new ObjectId(id);
 			// Add a user to the group
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
-				User usr = DB.getUserDAO().get(userOrGroupId);
-				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(usr.getDbId(),
+				User user = DB.getUserDAO().get(userOrGroupId);
+				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
 						group.getDbId(), Activity.GROUP_REQUEST);
 				// If the user has not requested to join to the group, he gets a
 				// notification
@@ -211,7 +211,7 @@ public class UserAndGroupManager extends Controller {
 					Notification notification = new Notification();
 					notification.setActivity(Activity.GROUP_INVITE);
 					notification.setGroup(group.getDbId());
-					notification.setReceiver(usr.getDbId());
+					notification.setReceiver(user.getDbId());
 					notification.setSender(admin.getDbId());
 					notification.setOpen(true);
 					Date now = new Date();
@@ -225,9 +225,9 @@ public class UserAndGroupManager extends Controller {
 				}
 				// If the user has already requested to join the administrator
 				// adds him
-				group.getUsers().add(usr.getDbId());
-				usr.addUserGroups(ancestorGroups);
-				if (!(DB.getUserDAO().makePermanent(usr) == null)
+				group.getUsers().add(user.getDbId());
+				user.addUserGroups(ancestorGroups);
+				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 					// Mark the user join requests as closed with the
 					// appropriate timestamp
@@ -243,7 +243,7 @@ public class UserAndGroupManager extends Controller {
 					Notification notification = new Notification();
 					notification.setActivity(Activity.GROUP_INVITE_ACCEPT);
 					notification.setGroup(group.getDbId());
-					notification.setReceiver(usr.getDbId());
+					notification.setReceiver(user.getDbId());
 					notification.setSender(admin.getDbId());
 					notification.setOpen(true);
 					Date now = new Date();
@@ -324,14 +324,49 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-				ancestorGroups.add(group.getDbId());
-				group.removeUser(user.getDbId());
-				user.removeUserGroups(ancestorGroups);
-				if (!(DB.getUserDAO().makePermanent(user) == null)
-						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-					result.put("message", "User succesfully removed from group");
-					return ok(result);
+				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+						group.getDbId(), Activity.GROUP_REQUEST);
+				if (requests.isEmpty()) {
+					ancestorGroups.add(group.getDbId());
+					group.removeUser(user.getDbId());
+					user.removeUserGroups(ancestorGroups);
+					if (!(DB.getUserDAO().makePermanent(user) == null)
+							&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+						// TODO send notification for the removal
+						result.put("message", "User succesfully removed from group");
+						return ok(result);
+					} else {
+						result.put("error", "Could not remove user from group");
+						return internalServerError(result);
+					}
 				}
+				// if the user has made a request to join the group his request
+				// gets declined
+				for (Notification request : requests) {
+					request.setOpen(false);
+					Date now = new Date();
+					request.setClosedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(request);
+				}
+				Notification notification = new Notification();
+				notification.setActivity(Activity.GROUP_REQUEST_DENIED);
+				notification.setGroup(group.getDbId());
+				notification.setReceiver(user.getDbId());
+				notification.setSender(admin.getDbId());
+				notification.setOpen(true);
+				Date now = new Date();
+				notification.setOpenedAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(notification);
+				// Send notification to the user through socket
+				NotificationCenter.sendNotification(notification);
+				// Notification for the administrators of the group
+				notification.setReceiver(group.getDbId());
+				notification.setDbId(null);
+				DB.getNotificationDAO().makePermanent(notification);
+				// Send notification through socket to group administrators
+				NotificationCenter.sendNotification(notification);
+				result.put("message", "Group denied join request for user");
+				return ok(result);
 			}
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
@@ -339,6 +374,7 @@ public class UserAndGroupManager extends Controller {
 		} catch (Exception e) {
 			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
 		}
+
 	}
 
 	public static String getImageBase64(UserOrGroup user) {
