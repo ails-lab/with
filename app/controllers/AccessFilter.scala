@@ -151,6 +151,7 @@ class AccessFilter extends Filter {
 //                  case None => access.ip = rh.remoteAddress 
                   case None => 
 		    log.info( "No KEY! ")
+		    access.apikey = "empty"
 		    
                   
                 }

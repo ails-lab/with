@@ -45,9 +45,9 @@ public class CallAllowedCheck extends Action.Simple {
 			access.apikey = apikeys[0];
 		} else if( ctx.session().containsKey("apikey")) {
 			access.apikey = ctx.session().get( "apikey" );
-		} else {
-			// check if ip is allowed
-			access.ip = ctx.request().remoteAddress();
+//		} else {
+//			// check if ip is allowed
+//			access.ip = ctx.request().remoteAddress();
 		}
 		access.call = ctx.request().path();
 

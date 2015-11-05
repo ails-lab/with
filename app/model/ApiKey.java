@@ -44,7 +44,8 @@ public class ApiKey {
 
 	public static enum Response {
 		// INVALID_xxxx have to be checked somewhere else
-		INVALID_IP, EXPIRED_IP, INVALID_APIKEY, EXPIRED_APIKEY, BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED, ALLOWED
+//		INVALID_IP, EXPIRED_IP, INVALID_APIKEY, EXPIRED_APIKEY, BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED, ALLOWED
+		EMPTY_APIKEY, INVALID_APIKEY, EXPIRED_APIKEY, BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED, ALLOWED	
 	}
 
 	// a call limit is an api call that can be executed with this key
@@ -86,9 +87,9 @@ public class ApiKey {
 	// the random key string
 	private String keyString;
 
-	// a pattern of IP numbers, if matched, this key applies
-	// usually just for counting
-	private String ipPattern;
+//	// a pattern of IP numbers, if matched, this key applies
+//	// usually just for counting
+//	private String ipPattern;
 
 	// optional, when a call comes with this key, it has the rights of
 	// this user (and others, if login is an allowed call)
@@ -172,11 +173,11 @@ public class ApiKey {
 	public Response check(String call, long volume) {
 		if (expires != null) {
 			if (new Date().after(expires)) {
-				if (StringUtils.isEmpty(ipPattern)) {
+//				if (StringUtils.isEmpty(ipPattern)) {
 					return Response.EXPIRED_APIKEY;
-				} else {
-					return Response.EXPIRED_IP;
-				}
+//				} else {
+//					return Response.EXPIRED_IP;
+//				}
 			}
 		}
 
@@ -264,13 +265,13 @@ public class ApiKey {
 		this.expires = expires;
 	}
 
-	public String getIpPattern() {
-		return ipPattern;
-	}
-
-	public void setIpPattern(String ipPattern) {
-		this.ipPattern = ipPattern;
-	}
+//	public String getIpPattern() {
+//		return ipPattern;
+//	}
+//
+//	public void setIpPattern(String ipPattern) {
+//		this.ipPattern = ipPattern;
+//	}
 
 	public String getName() {
 		return name;

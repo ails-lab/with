@@ -670,7 +670,7 @@ public class UserManager extends Controller {
 
 		create.dbId = "";
 		create.call = "";
-		create.ip = "";
+//		create.ip = "";
 		create.counterLimit = -1l;
 		create.volumeLimit = -1l;
 		// create.position = 1;
