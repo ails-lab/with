@@ -41,7 +41,7 @@ public class BritishLibraryBasicRecordFormatter extends ExternalBasicRecordReade
 		object.setDescription(rec.getStringValue("description"));
 		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
 		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-		object.setYear(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
+		object.setYears(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
 		// TODO: add rights
 		// object.setItemRights(rec.getStringValue("rights"));
 		object.setExternalId(object.getIsShownAt());

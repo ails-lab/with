@@ -48,7 +48,7 @@ public class DNZBasicRecordFormatter extends ExternalBasicRecordReader {
 		// TODO: add years here:
 //		Utils.readArrayAttr(item, "issued",
 				// true);
-//		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 		// TODO: add rights
 //		object.setItemRights(rec.getStringValue("rights_url"));
 		String id = rec.getStringValue("id");

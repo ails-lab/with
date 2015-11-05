@@ -45,7 +45,7 @@ public class DPLAExternalBasicRecordFormatter extends ExternalBasicRecordReader 
 		object.setCreator(rec.getStringValue("sourceResource.creator"));
 		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
 		// TODO: add years
-//		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 		// TODO: add rights
 //		object.setItemRights(rec.getStringValue("sourceResource.rights"));
 		String id = rec.getStringValue("id");

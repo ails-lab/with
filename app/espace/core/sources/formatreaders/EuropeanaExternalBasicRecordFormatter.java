@@ -46,7 +46,7 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 		object.setDescription(rec.getStringValue("dcDescription"));
 		object.setCreator(rec.getStringValue("dcCreator"));
 		object.setContributors(rec.getStringArrayValue("dcContributor"));
-		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 //		object.setItemRights(rec.getStringValue("rights"));
 		Provider recordProvider = new Provider(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid"));
 		object.addProvider(recordProvider);

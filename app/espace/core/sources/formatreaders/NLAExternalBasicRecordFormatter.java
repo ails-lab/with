@@ -42,7 +42,7 @@ public class NLAExternalBasicRecordFormatter extends ExternalBasicRecordReader {
 		object.setCreator(rec.getStringValue("contributor"));
 		// object.setContributors(rec.getStringArrayValue("contributor"));
 		// TODO: add years
-		object.setYear(StringUtils.getYears(rec.getStringArrayValue("issued")));
+		object.setYears(StringUtils.getYears(rec.getStringArrayValue("issued")));
 		// TODO: add rights
 		// object.setItemRights(rec.getStringValue("sourceResource.rights"));
 		String id = rec.getStringValue("id");

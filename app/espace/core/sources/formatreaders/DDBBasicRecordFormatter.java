@@ -41,7 +41,7 @@ public class DDBBasicRecordFormatter extends ExternalBasicRecordReader {
 		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
 //		object.setContributors(rec.getStringArrayValue("contributor"));
 		// TODO: add years
-//		object.setYear(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 		// TODO: add rights
 //		object.setItemRights(rec.getStringValue("rights"));
 		String id = rec.getStringValue("id");

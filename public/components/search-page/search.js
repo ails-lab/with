@@ -51,10 +51,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			    }
 		};
 		
-		//self.record = ko.mapping.fromJS({"title": "No title", "thumbnail": "images/no_image.jpg", "rights":"", "provider":"",
-			//creator:"", importedFrom:""}, mapping);
-		self.record = ko.mapping.fromJS({}, mapping);
-
+		self.record = ko.mapping.fromJS({"title": "No title", "thumbnail": "images/no_image.jpg", "rights":"", "provider":"",
+			creator:"", importedFrom:""}, mapping);
+		
 		self.isLike=ko.observable(false);
 
 		self.load = function(data) {
