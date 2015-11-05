@@ -206,7 +206,7 @@ public class UserAndGroupManager extends Controller {
 				// notification
 				// In most cases there would be only one user request for
 				// joining
-				if (requests == null) {
+				if (requests.isEmpty()) {
 					// Store notification at the database
 					Notification notification = new Notification();
 					notification.setActivity(Activity.GROUP_INVITE);

@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
@@ -63,6 +64,7 @@ public class Notification {
 	private Timestamp openedAt;
 	private Timestamp closedAt;
 
+	@JsonIgnore
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -84,7 +86,11 @@ public class Notification {
 	}
 
 	public String getSenderName() {
-		return DB.getUserDAO().get(this.sender).getUsername();
+		if (this.sender == null) {
+			return null;
+		}
+		User user = DB.getUserDAO().get(this.sender);
+		return user.getFirstName() + " " + user.getLastName();
 	}
 
 	public void setSender(ObjectId sender) {
@@ -100,6 +106,9 @@ public class Notification {
 	}
 
 	public String getCollectionName() {
+		if (this.collection == null) {
+			return null;
+		}
 		return DB.getCollectionDAO().get(this.collection).getTitle();
 	}
 
@@ -112,7 +121,10 @@ public class Notification {
 	}
 
 	public String getGroupName() {
-		return DB.getUserGroupDAO().get(this.group).getUsername();
+		if (this.group == null) {
+			return null;
+		}
+		return DB.getUserGroupDAO().get(this.group).getFriendlyName();
 	}
 
 	public String getMessage() {
@@ -123,6 +135,7 @@ public class Notification {
 		this.message = message;
 	}
 
+	@JsonIgnore
 	public boolean isOpen() {
 		return open;
 	}
@@ -139,6 +152,7 @@ public class Notification {
 		this.openedAt = openedAt;
 	}
 
+	@JsonIgnore
 	public Timestamp getClosedAt() {
 		return closedAt;
 	}
