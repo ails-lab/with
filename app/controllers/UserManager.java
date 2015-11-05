@@ -806,6 +806,7 @@ public class UserManager extends Controller {
 		} catch (EmailException e) {
 			error.put("email", "Email server error");
 			result.put("error", error);
+			result.put("description", e.toString());
 			return badRequest(result); // maybe change type?
 		}
 
@@ -828,15 +829,16 @@ public class UserManager extends Controller {
 	 */
 	public static void sendEmail(User u, String mailAdress, String message, String subject) throws EmailException {
 		Email email = new SimpleEmail();
-		email.setSmtpPort(587);
-		email.setHostName("smtp.gmail.com");
+		email.setSmtpPort(25);
+		email.setHostName("smtp.image.ece.ntua.gr");
 		email.setDebug(false);
-		// email.setBounceAddress("karonissz@gmail.com");
-		email.setAuthenticator(new DefaultAuthenticator("karonissz@gmail.com", "12345678kostas"));
+		//email.setAuthenticator(new DefaultAuthenticator("mikegiatzi", null));
 		email.setStartTLSEnabled(true);
 		email.setSSLOnConnect(false);
-		email.setFrom("karonissz@gmail.com", "kostas"); // check if this can be
+		email.setFrom("with-no-reply@image.ece.ntua.gr", "WITH"); // check if this can be
 														// whatever
+		email.addBcc("mikegiatzi@image.ece.ntua.gr");
+		email.setBounceAddress("mikegiatzi@image.ece.ntua.gr.com");
 		email.setSubject(subject);
 
 		if (u == null) {
@@ -848,7 +850,9 @@ public class UserManager extends Controller {
 
 		email.setMsg(message);
 
+		
 		email.send();
+		
 	}
 
 	/***
