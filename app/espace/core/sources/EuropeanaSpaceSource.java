@@ -81,11 +81,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	    			put(sourceToFiltersMappings.get(key), key);
 	    		}
 	    	}};
-		filtersSupportedBySource = new ArrayList<CommonFilters>(
-	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
-	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
-	    				CommonFilters.TYPE, CommonFilters.YEAR)
-	    		);
 		for (CommonFilters filterType: filtersSupportedBySource) {
 			addDefaultWriter(filterType.getID(), qfwriter(filtersToSourceMappings.get(filterType)));
 		}

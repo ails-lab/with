@@ -60,34 +60,7 @@ public class CommonFilterLogic implements Cloneable {
 			addValue(string, count);
 		}
 	}
-	/*
-	public static CommonFilterLogic typeFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.TYPE_ID;
-		r.data.filterName = CommonFilters.TYPE_NAME;
-		return r;
-	}
 
-	public static CommonFilterLogic providerFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.PROVIDER_ID;
-		r.data.filterName = CommonFilters.PROVIDER_NAME;
-		return r;
-	}
-	
-	public static CommonFilterLogic dataproviderFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.DATAPROVIDER_ID;
-		r.data.filterName = CommonFilters.DATAPROVIDER_NAME;
-		return r;
-	}
-
-	public static CommonFilterLogic creatorFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.CREATOR_ID;
-		r.data.filterName = CommonFilters.CREATOR_NAME;
-		return r;
-	}*/
 
 	@Override
 	public String toString() {
@@ -110,46 +83,4 @@ public class CommonFilterLogic implements Cloneable {
 	public Collection<ValueCount> values() {
 		return counts.values();
 	}
-
-	/*
-	public static CommonFilterLogic rightsFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.RIGHTS_ID;
-		r.data.filterName = CommonFilters.RIGHTS_NAME;
-		return r;
-	}
-	
-	public static CommonFilterLogic reusabilityFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.REUSABILITY_ID;
-		r.data.filterName = CommonFilters.REUSABILITY_NAME;
-		return r;
-	}
-	
-	public static CommonFilterLogic countryFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.COUNTRY_ID;
-		r.data.filterName = CommonFilters.COUNTRY_NAME;
-		return r;
-	}
-
-	public static CommonFilterLogic yearFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.YEAR_ID;
-		r.data.filterName = CommonFilters.YEAR_NAME;
-		return r;
-	}
-	public static CommonFilterLogic contributorFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.CONTRIBUTOR_ID;
-		r.data.filterName = CommonFilters.CONTRIBUTOR_NAME;
-		return r;
-	}
-	
-	public static CommonFilterLogic availabilityFilter() {
-		CommonFilterLogic r = new CommonFilterLogic();
-		r.data.filterID = CommonFilters.AVAILABILITY_ID;
-		r.data.filterName = CommonFilters.AVAILABILITY_NAME;
-		return r;
-	}*/
 }

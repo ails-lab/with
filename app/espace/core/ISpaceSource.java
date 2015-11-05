@@ -30,11 +30,7 @@ public abstract class ISpaceSource {
 	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
 	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
 	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
-	
-	public ISpaceSource() {
-		super();
-		vmap = new FilterValuesMap();
-	}
+	private FilterValuesMap vmap = new FilterValuesMap();
 
 	public abstract String getSourceName();
 
@@ -62,7 +58,7 @@ public abstract class ISpaceSource {
 		return new ArrayList<RecordJSONMetadata>();
 	}
 	
-	private FilterValuesMap vmap;
+
 
 	protected void countValue(CommonFilterLogic type, String t) {
 		countValue(type, t, true, 1);

@@ -34,7 +34,6 @@ public class FilterValuesMap {
 	private HashMap<String, Function<List<String>, QueryModifier>> writters;
 
 	public FilterValuesMap() {
-		super();
 		specificvalues = new HashMap<String, List<String>>();
 		commonvalues = new HashMap<String, List<String>>();
 		// queryTexts = new HashMap<String, List<Pair<String>>>();
