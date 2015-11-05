@@ -30,6 +30,7 @@ import org.mongodb.morphia.annotations.Entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
 import utils.Serializer;
@@ -273,4 +274,15 @@ public class User extends UserOrGroup {
 		this.exhibitionsCreated++;
 	}
 
+	public List<Notification> getNotifications() {
+		// Get my notifications
+		List<Notification> notifications = DB.getNotificationDAO().getByReceiver(this.getDbId());
+		// Get notifications for the groups I am administrator
+		if (this.adminInGroups != null) {
+			for (ObjectId groupId : this.adminInGroups) {
+				notifications.addAll(DB.getNotificationDAO().getByReceiver(groupId));
+			}
+		}
+		return notifications;
+	}
 }

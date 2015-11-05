@@ -39,12 +39,12 @@ public class NotificationDAO extends DAO<Notification> {
 		return this.findOne(q);
 	}
 
-	public List<Notification> getByReceiver(ObjectId receiverId) {
+	public List<Notification> getAllByReceiver(ObjectId receiverId) {
 		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId);
 		return find(q).asList();
 	}
 
-	public List<Notification> getOpenByReceiver(ObjectId receiverId) {
+	public List<Notification> getByReceiver(ObjectId receiverId) {
 		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId);
 		q.and(q.criteria("open").equal(true));
 		return find(q).asList();
