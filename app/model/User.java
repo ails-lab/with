@@ -70,6 +70,9 @@ public class User extends UserOrGroup {
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private final Set<ObjectId> adminInGroups = new HashSet<ObjectId>();
+
 	/**
 	 * The search should already be stored in the database separately
 	 *
@@ -236,6 +239,14 @@ public class User extends UserOrGroup {
 
 	public Set<ObjectId> getUserGroupsIds() {
 		return userGroupsIds;
+	}
+
+	public void addGroupForAdministration(ObjectId group) {
+		this.adminInGroups.add(group);
+	}
+
+	public void removeGroupForAdministration(ObjectId group) {
+		this.adminInGroups.remove(group);
 	}
 
 	@JsonIgnore

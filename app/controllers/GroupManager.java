@@ -114,6 +114,10 @@ public class GroupManager extends Controller {
 			newGroup.addAdministrator(admin);
 			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
+			User administartor = DB.getUserDAO().get(creator);
+			administartor.addGroupForAdministration(newGroup.getDbId());
+			administartor = DB.getUserDAO().get(admin);
+			administartor.addGroupForAdministration(newGroup.getDbId());
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newGroup);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
