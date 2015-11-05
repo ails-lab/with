@@ -72,23 +72,25 @@ public class StringUtils {
 
 	public static List<Year> getYears(List<String> dates) {
 		ArrayList<Year> res = new ArrayList<Year>();
-		for (String string : dates) {
-			try {
-				long v = Long.parseLong(string);
-				if (v < 9999)
-					res.add(Year.of((int) v));
-				else {
+		if (dates != null) {
+			for (String string : dates) {
+				try {
+					long v = Long.parseLong(string);
+					if (v < 9999)
+						res.add(Year.of((int) v));
+					else {
+						Calendar c = Calendar.getInstance();
+						c.setTimeInMillis(v);
+						res.add(Year.of(c.get(Calendar.YEAR)));
+					}
+	
+				} catch (Exception e) {
+					DateFormat f = DateFormat.getDateInstance();
+					Date d = parseDate(string);
 					Calendar c = Calendar.getInstance();
-					c.setTimeInMillis(v);
+					c.setTime(d);
 					res.add(Year.of(c.get(Calendar.YEAR)));
 				}
-
-			} catch (Exception e) {
-				DateFormat f = DateFormat.getDateInstance();
-				Date d = parseDate(string);
-				Calendar c = Calendar.getInstance();
-				c.setTime(d);
-				res.add(Year.of(c.get(Calendar.YEAR)));
 			}
 		}
 		return res;

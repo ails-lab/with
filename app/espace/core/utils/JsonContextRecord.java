@@ -41,6 +41,7 @@ public class JsonContextRecord {
 	private List<String> context;
 	
 	public JsonContextRecord(JsonNode rootInformation) {
+		this.context = new ArrayList<>();
 		this.rootInformation = rootInformation;
 	}
 	
@@ -59,10 +60,6 @@ public class JsonContextRecord {
 		}
 	}
 	
-	public JsonContextRecord() {
-		context = new ArrayList<>();
-	}
-	
 	public void enterContext(String path){
 		
 	}
@@ -74,12 +71,10 @@ public class JsonContextRecord {
 	protected List<String> buildpaths(String... path){
 		List<String> spath = new ArrayList<>();
 		//TODO: what is context?
-		/*
 		for (String string : context) {
 			String[] singlepaths = string.split("\\.");
 			spath.addAll(Arrays.asList(singlepaths));
 		}
-		*/
 		for (String string : path) {
 			String[] singlepaths = string.split("\\.");
 			spath.addAll(Arrays.asList(singlepaths));
@@ -89,9 +84,10 @@ public class JsonContextRecord {
 	
 	public JsonNode getValue(Collection<String> steps){
 		JsonNode node = rootInformation;
+		//TODO: if one null, return null?
 		for (String string : steps) {
 			node = getPath(node, string);
-			if (node==null)
+			if (node == null)
 				return null;
 		}
 		return node;
@@ -138,7 +134,7 @@ public class JsonContextRecord {
 			return n;
 		}
 	}
-
+	
 	private JsonNode getPath(JsonNode node, String path) {
 		if (path.endsWith("]")){
 			String[] elements = path.split("\\[|\\]");
@@ -174,7 +170,11 @@ public class JsonContextRecord {
 	}
 	
 	public String getStringValue(String... path){
-		return JsonNodeUtils.asString(getValue(buildpaths(path)));
+		JsonNode node = getValue(buildpaths(path));
+		if (node != null)
+			return JsonNodeUtils.asString(node);
+		else 
+			return null;
 	}
 	public List<String> getStringArrayValue(String... path){
 		return JsonNodeUtils.asStringArray(getValue(buildpaths(path)));

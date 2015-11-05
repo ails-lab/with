@@ -26,7 +26,9 @@ public class JsonNodeUtils {
 	public static String asString(JsonNode node) {
 		if (node!=null && !node.isMissingNode()){
 			if (node.isArray()){
-				return node.get(0).asText();
+				JsonNode jsonNode = node.get(0);
+				if (jsonNode!=null)
+				return jsonNode.asText();
 			} else
 				return node.asText();
 		}
