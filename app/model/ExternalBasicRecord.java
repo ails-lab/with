@@ -95,7 +95,7 @@ public class ExternalBasicRecord {
 
 	private List<String> contributors;
 	
-	private List<Year> year;
+	private List<Year> years;
 	
 	private List<Provider> provenanceChain = new ArrayList<Provider>();
 		
@@ -295,8 +295,8 @@ public class ExternalBasicRecord {
 	 * from the original item metadata.
 	 * @return the list of years.
 	 */
-	public List<Year> getYear() {
-		return year;
+	public List<Year> getYears() {
+		return years;
 	}
 
 	/**
@@ -305,8 +305,12 @@ public class ExternalBasicRecord {
 	 * from the original item metadata.
 	 * @param year the new list of years.
 	 */
-	public void setYear(List<Year> year) {
-		this.year = year;
+	public void setYears(List<Year> year) {
+		this.years = years;
+	}
+	
+	public void addYear(Year year) {
+		this.years.add(year);
 	}
 	
 	public String getSubject() {
