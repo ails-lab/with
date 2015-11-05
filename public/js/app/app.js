@@ -9,7 +9,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	};
 	self.notificationSocket.onmessage = self.receiveEvent;
 	self.notificationSocket.onclose = function(evt) { console.log("disconected"); };;
-	
+
 	function waitForConnection(callback, interval) {
 		if (self.notificationSocket.readyState === 1) {
 			callback();
@@ -20,7 +20,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		    }, interval);
 		}
 	}
-	
+
 	self.currentUser = {
 		"_id": ko.observable(),
 		"email": ko.observable(),
@@ -38,7 +38,8 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		"favoritesId": ko.observable(),
 		"usergroups": ko.observableArray(),
 		"organizations": ko.observableArray(),
-		"projects": ko.observableArray()
+		"projects": ko.observableArray(),
+		"notifications": ko.observableArray()
 	};
 	isLogged = ko.observable(false);
 
@@ -59,6 +60,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
+		self.currentUser.notifications(data.notifications);
+
+		console.log(self.currentUser.notifications());
 
 		self.loadFavorites();
 
@@ -70,11 +74,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 				sessionStorage.setItem("User", JSON.stringify(data));
 			}
 		}
-		
+
 		isLogged(true);
 		waitForConnection(function () {
 	        self.notificationSocket.send('{"action":"login","id":"'+data.dbId+'"}');
-	    }, 1000)
+	    }, 1000);
 
 		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
 			return [self.getEditableCollections()]; //[self.getEditableCollections(), self.getUserCollections()];

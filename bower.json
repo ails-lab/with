@@ -34,7 +34,8 @@
     "isotope": "latest",
     "modernizr":"latest",
     "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
-    "knockout-x-editable": "latest"
+    "knockout-x-editable": "latest",
+    "knockout-switch-case": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"
