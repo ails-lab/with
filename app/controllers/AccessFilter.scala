@@ -148,7 +148,11 @@ class AccessFilter extends Filter {
               case None => {
                 fromAuth( rh.headers ) match {
                   case Some(apikey) => access.apikey = apikey
-                  case None => access.ip = rh.remoteAddress 
+//                  case None => access.ip = rh.remoteAddress 
+                  case None => 
+		    log.info( "No KEY! ")
+		    
+                  
                 }
               }  
             }
