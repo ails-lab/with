@@ -116,10 +116,13 @@ public class ApiKeyManager extends UntypedActor  {
 	private void readKeysFromDb() {
 		apiKeys.clear();
 //		ipPatterns.clear();
+//		Logger.info("reading " + DB.getApiKeyDAO().count() + " many keys");
 		for( ApiKey k: DB.getApiKeyDAO().find()) {
-//			if( StringUtils.isEmpty(k.getIpPattern())) {
+			if( StringUtils.isEmpty(k.getIpPattern())) {
 				apiKeys.put( k.getKeyString(), k);
-//			} else {
+//				Logger.info(k.getKeyString());
+			} 
+//				else {
 //				ipPatterns.add( k );
 //			}
 		}
@@ -157,7 +160,7 @@ public class ApiKeyManager extends UntypedActor  {
 	}
 	
 	private void onApiAccess( Access access ) {
-		log.debug( access.toString() );
+//		Logger.debug( access.toString() );
 		ApiKey key = null;
 		
 //		if( !StringUtils.isEmpty(access.ip)) { 
@@ -173,10 +176,9 @@ public class ApiKeyManager extends UntypedActor  {
 				if( !access.update )
 					sender().tell( ApiKey.Response.INVALID_APIKEY, self());
 				return;
-			} 
-/////				else if (key.getKeyString() == "empty"){
-/////				sender().tell( ApiKey.Response.EMPTY_APIKEY, self());
-/////			}
+			} else if (key.getKeyString() == "empty"){
+				sender().tell( ApiKey.Response.EMPTY_APIKEY, self());
+			}
 //		}
 		
 		if( !access.update ) {
@@ -186,6 +188,7 @@ public class ApiKeyManager extends UntypedActor  {
 				sender().tell( key.getProxyUserId(), self());
 			} else 
 				sender().tell( res, self());
+
 		} else
 			key.updateVolume(access.call, access.volume);
 		
