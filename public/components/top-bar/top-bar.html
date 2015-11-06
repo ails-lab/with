@@ -29,12 +29,20 @@
 		  <li data-bind="visible: !isLogged()"><a href="#register"><i class="fa fa-user-plus"></i> Register</a></li>
         <li data-bind="visible: isLogged()"><a href="#mycollections">My collections</a></li>
         <li data-bind="visible: isLogged()"><a href="#myexhibitions">My exhibitions</a></li>
-        <li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="#" id="notifications" data-title="Notifications"><span class="fa fa-2x fa-flag"></span></a><span class="badge danger">2</span></li>
+        <li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="javascript:void(0)" id="notifications" data-title="Notifications" data-toggle="focus"><span class="fa fa-2x fa-flag"></span></a><span class="badge danger"><!-- ko text: noticount --><!-- /ko --></span></li>
         <div id="notifications-content" class="hide">
-          <ul class="notify-list">
-            <li class="new"><a href="">You joined the <em>WITH</em> group!</a></li>
-            <li><a href=""><em>Maria</em> shared the collection <em>Dancers</em> with you</a></li>
-          </ul>
+          <ul class="notify-list" data-bind="foreach: notifications">
+            <li>
+          <!-- ko switch: activity -->
+          <!-- ko case: 'GROUP_INVITE' -->
+              <a data-bind="attr: { href: '#organization/' + group }"><em data-bind="text: senderName"></em> invites you to join <em data-bind="text: groupName">.</em><br /></small></a>
+          <!-- /ko -->
+          <!-- ko case: $default -->
+            Unknown Notification!
+          <!-- /ko -->
+          <!-- /ko -->
+            </li>
+         </ul>
           <div class="notify-all"><a href="">See All</a></div>
         </div>
         <li data-bind="visible: isLogged()" class="dropdown">

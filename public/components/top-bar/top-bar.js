@@ -1,4 +1,4 @@
-define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, template, app, autocomplete) {
+define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-switch-case'], function(ko, template, app, autocomplete) {
 
   function TopBarViewModel(params) {
 
@@ -39,17 +39,21 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 
 		this.route = params.route;
 
-		var self          = this;
-		self.username     = app.currentUser.username;
-		self.profileImage = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
+		var self           = this;
+		self.username      = app.currentUser.username;
+		self.profileImage  = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
 		self.organizations = app.currentUser.organizations;
-		self.projects     = app.currentUser.projects;
-		self.usergroups   = app.currentUser.usergroups;
+		self.projects      = app.currentUser.projects;
+		self.usergroups    = app.currentUser.usergroups;
+		self.noticount     = ko.computed(function() {
+			return app.currentUser.notifications().length > 0 ? app.currentUser.notifications().length : '';
+		});
+		self.notifications = app.currentUser.notifications;
 
-		editProfile       = function() { app.showPopup('edit-profile'); };
-		newOrganization   = function() { app.showPopup('new-organization', { type: 'organization' }); };
-		newProject        = function() { app.showPopup('new-organization', { type: 'project' }); };
-		logout            = function() { app.logout(); };
+		editProfile        = function() { app.showPopup('edit-profile'); };
+		newOrganization    = function() { app.showPopup('new-organization', { type: 'organization' }); };
+		newProject         = function() { app.showPopup('new-organization', { type: 'project' }); };
+		logout             = function() { app.logout(); };
 	}
 
 	return { viewModel: TopBarViewModel, template: template };
