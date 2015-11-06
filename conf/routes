@@ -68,6 +68,8 @@ GET		/group/findByGroupName					controllers.GroupManager.findByGroupName(name, c
 GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="All", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
+PUT		/group/join/:groupId					controllers.UserAndGroupManager.joinGroup(groupId)
+PUT		/grou/leave/:groupId					controllers.UserAndGroupManager.leaveGroup(groupId)
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")

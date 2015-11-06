@@ -241,7 +241,7 @@ public class UserAndGroupManager extends Controller {
 					// acceptance
 					// Notification for the user
 					Notification notification = new Notification();
-					notification.setActivity(Activity.GROUP_INVITE_ACCEPT);
+					notification.setActivity(Activity.GROUP_REQUEST_ACCEPT);
 					notification.setGroup(group.getDbId());
 					notification.setReceiver(user.getDbId());
 					notification.setSender(admin.getDbId());
@@ -261,7 +261,6 @@ public class UserAndGroupManager extends Controller {
 					return ok(result);
 				}
 			}
-
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
@@ -371,6 +370,146 @@ public class UserAndGroupManager extends Controller {
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
 
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+		}
+	}
+
+	public static Result joinGroup(String groupId) {
+		try {
+			ObjectNode result = Json.newObject();
+			String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+			if (userId == null) {
+				result.put("error", "Must specify user for join request");
+				return forbidden(result);
+			}
+			User user = DB.getUserDAO().get(new ObjectId(userId));
+			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			if (group == null || user == null) {
+				result.put("error", "Cannot retrieve object from database");
+				return internalServerError(result);
+			}
+			List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+					group.getDbId(), Activity.GROUP_INVITE);
+			// If the user has not been invited to group a join request is sent
+			// to the group
+			if (requests.isEmpty()) {
+				Notification notification = new Notification();
+				notification.setActivity(Activity.GROUP_REQUEST);
+				notification.setGroup(group.getDbId());
+				notification.setReceiver(group.getDbId());
+				notification.setSender(user.getDbId());
+				notification.setOpen(true);
+				Date now = new Date();
+				notification.setOpenedAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(notification);
+				// Send notification through socket to group administrators
+				NotificationCenter.sendNotification(notification);
+				result.put("message", "Join request was sent for the group");
+				return ok(result);
+			}
+			// If the user has been invited to group he is added to it
+			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
+			ancestorGroups.add(group.getDbId());
+			group.getUsers().add(user.getDbId());
+			user.addUserGroups(ancestorGroups);
+			if (!(DB.getUserDAO().makePermanent(user) == null)
+					&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+				// Mark the invitations from the group as closed with the
+				// appropriate timestamp
+				for (Notification request : requests) {
+					request.setOpen(false);
+					Date now = new Date();
+					request.setClosedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(request);
+				}
+				// Notification for the user join to the group
+				// Notification for the administrators of the group
+				Notification notification = new Notification();
+				notification.setActivity(Activity.GROUP_INVITE_ACCEPT);
+				notification.setGroup(group.getDbId());
+				notification.setReceiver(group.getDbId());
+				notification.setSender(user.getDbId());
+				notification.setOpen(true);
+				Date now = new Date();
+				notification.setOpenedAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(notification);
+				NotificationCenter.sendNotification(notification);
+				// Notification for the user itself
+				notification.setReceiver(user.getDbId());
+				notification.setDbId(null);
+				DB.getNotificationDAO().makePermanent(notification);
+				// Send notification through socket
+				NotificationCenter.sendNotification(notification);
+				result.put("message", "User succesfully added to group");
+				return ok(result);
+			}
+			result.put("error", "Wrong user or group id");
+			return badRequest(result);
+
+		} catch (Exception e) {
+			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+		}
+	}
+
+	public static Result leaveGroup(String groupId) {
+		try {
+			ObjectNode result = Json.newObject();
+			String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+			if (userId == null) {
+				result.put("error", "Must specify user for join request");
+				return forbidden(result);
+			}
+			User user = DB.getUserDAO().get(new ObjectId(userId));
+			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+			if (group == null || user == null) {
+				result.put("error", "Cannot retrieve object from database");
+				return internalServerError(result);
+			}
+			List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+					group.getDbId(), Activity.GROUP_INVITE);
+			if (requests.isEmpty()) {
+				Set<ObjectId> ancestorGroups = group.getAncestorGroups();
+				ancestorGroups.add(group.getDbId());
+				group.removeUser(user.getDbId());
+				user.removeUserGroups(ancestorGroups);
+				if (!(DB.getUserDAO().makePermanent(user) == null)
+						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+					// TODO send notification for the removal
+					result.put("message", "User succesfully removed from group");
+					return ok(result);
+				} else {
+					result.put("error", "Could not remove user from group");
+					return internalServerError(result);
+				}
+			}
+			// If the group has sent an invitation to the user the invitation
+			// gets declined
+			for (Notification request : requests) {
+				request.setOpen(false);
+				Date now = new Date();
+				request.setClosedAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(request);
+			}
+			Notification notification = new Notification();
+			notification.setActivity(Activity.GROUP_INVITE_DECLINED);
+			notification.setGroup(group.getDbId());
+			notification.setReceiver(group.getDbId());
+			notification.setSender(user.getDbId());
+			notification.setOpen(true);
+			Date now = new Date();
+			notification.setOpenedAt(new Timestamp(now.getTime()));
+			DB.getNotificationDAO().makePermanent(notification);
+			// Send notification to the group through socket
+			NotificationCenter.sendNotification(notification);
+			// Send notification to the user
+			notification.setReceiver(user.getDbId());
+			notification.setDbId(null);
+			DB.getNotificationDAO().makePermanent(notification);
+			// Send notification through socket to group administrators
+			NotificationCenter.sendNotification(notification);
+			result.put("message", "User denied invitation from group");
+			return ok(result);
 		} catch (Exception e) {
 			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
 		}
