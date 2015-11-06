@@ -5,10 +5,26 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 	self.notificationSocket = new WS("ws://localhost:9000/notifications/socket");
 
 	self.receiveEvent = function(event) {
-		$.smkAlert({ text: event.data, type: 'info', time: 30 });
+		var notification = JSON.parse(event.data);
+		self.currentUser.notifications.unshift(notification);
+		switch (notification.activity) {
+			case "GROUP_INVITE":
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> invites you to join <strong>' + notification.groupName + '</strong>',
+					type: 'info',
+					time: 10
+				});
+				break;
+			default:
+				$.smkAlert({
+					text: "<strong>Unknown Notification Type:</strong> " + notification.activity,
+					type: 'warning',
+					time: 10
+				});
+		}
 	};
 	self.notificationSocket.onmessage = self.receiveEvent;
-	self.notificationSocket.onclose = function(evt) { console.log("disconected"); };;
+	self.notificationSocket.onclose = function(evt) { console.log("disconected"); };
 
 	function waitForConnection(callback, interval) {
 		if (self.notificationSocket.readyState === 1) {
