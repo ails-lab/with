@@ -1019,7 +1019,7 @@ nav .badge {
   background-color: rgb(238, 43, 51);
 }
 
-.popover {
+.notifications .popover {
   display: block!important;
   max-height: 100%;
   height: auto;
@@ -1027,11 +1027,11 @@ nav .badge {
 
 }
 
-.popover-content {
+.notifications .popover-content {
   padding: 0;
 }
 
-.popover-content > ul {
+.notify-list {
   list-style-type: none;
   margin: 0;
   padding-left: 0;
