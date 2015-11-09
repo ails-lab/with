@@ -89,7 +89,7 @@ public class ApiKey {
 
 //	// a pattern of IP numbers, if matched, this key applies
 //	// usually just for counting
-	private String ipPattern;
+//	private String ipPattern;
 
 	// optional, when a call comes with this key, it has the rights of
 	// this user (and others, if login is an allowed call)
@@ -265,13 +265,13 @@ public class ApiKey {
 		this.expires = expires;
 	}
 
-	public String getIpPattern() {
-		return ipPattern;
-	}
+//	public String getIpPattern() {
+//		return ipPattern;
+//	}
 
-	public void setIpPattern(String ipPattern) {
-		this.ipPattern = ipPattern;
-	}
+//	public void setIpPattern(String ipPattern) {
+//		this.ipPattern = ipPattern;
+//	}
 
 	public String getName() {
 		return name;

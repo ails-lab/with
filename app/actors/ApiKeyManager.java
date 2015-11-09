@@ -118,7 +118,7 @@ public class ApiKeyManager extends UntypedActor  {
 //		ipPatterns.clear();
 //		Logger.info("reading " + DB.getApiKeyDAO().count() + " many keys");
 		for( ApiKey k: DB.getApiKeyDAO().find()) {
-			if( StringUtils.isEmpty(k.getIpPattern())) {
+			if( !StringUtils.isEmpty(k.getKeyString())) {
 				apiKeys.put( k.getKeyString(), k);
 //				Logger.info(k.getKeyString());
 			} 
