@@ -186,28 +186,30 @@ public class User extends UserOrGroup {
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
 	}
+	
+	private String genderToString(Gender gender) {
+		String genderString = String.valueOf(gender);
+		String first = genderString.substring(0, 1).toUpperCase();
+		return first + genderString.substring(1).toLowerCase();
+	}
+	
 
 	public String getGender() {
-		switch (gender) {
-		case FEMALE:
-			return "Female";
-		case MALE:
-			return "Male";
-		default:
-			return "Unspecified";
-
+		if (gender != null) {
+			return genderToString(gender);
 		}
-
+		else {
+			return genderToString(Gender.UNSPECIFIED);
+		}
 	}
 
 	public void setGender(String gender) {
-		if (gender.equalsIgnoreCase("female")) {
-			this.gender = Gender.FEMALE;
-		} else if (gender.equalsIgnoreCase("male")) {
-			this.gender = Gender.MALE;
-		} else {
-			this.gender = Gender.UNSPECIFIED;
-		}
+		 try {
+			 Gender genderType = Gender.valueOf(gender);
+			 this.gender = genderType;
+	    } catch (IllegalArgumentException ex) {  
+	    	this.gender = Gender.UNSPECIFIED;
+	    }
 	}
 
 	public String getGoogleId() {
