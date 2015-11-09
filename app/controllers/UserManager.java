@@ -832,7 +832,7 @@ public class UserManager extends Controller {
 		email.setSmtpPort(25);
 		email.setHostName("smtp.image.ece.ntua.gr");
 		email.setDebug(false);
-		//email.setAuthenticator(new DefaultAuthenticator("mikegiatzi", null));
+		email.setAuthenticator(new DefaultAuthenticator("mikegiatzi", "tempforwith"));
 		email.setStartTLSEnabled(true);
 		email.setSSLOnConnect(false);
 		email.setFrom("with-no-reply@image.ece.ntua.gr", "WITH"); // check if this can be
