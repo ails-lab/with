@@ -200,28 +200,36 @@ public class UserAndGroupManager extends Controller {
 			// Add a user to the group
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
+				if (user.getUserGroupsIds().contains(group.getDbId())) {
+					result.put("error", "User is already member of a group");
+					return badRequest(result);
+				}
 				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
 						group.getDbId(), Activity.GROUP_REQUEST);
 				// If the user has not requested to join to the group, he gets a
 				// notification
-				// In most cases there would be only one user request for
-				// joining
 				if (requests.isEmpty()) {
-					// Store notification at the database
-					Notification notification = new Notification();
-					notification.setActivity(Activity.GROUP_INVITE);
-					notification.setGroup(group.getDbId());
-					notification.setReceiver(user.getDbId());
-					notification.setSender(admin.getDbId());
-					notification.setOpen(true);
-					Date now = new Date();
-					notification.setOpenedAt(new Timestamp(now.getTime()));
-					DB.getNotificationDAO().makePermanent(notification);
-					// Send notification to the user through socket
-					NotificationCenter.sendNotification(notification);
-					;
-					result.put("message", "User succesfully invited to group");
-					return ok(result);
+					List<Notification> invitations = DB.getNotificationDAO()
+							.getGroupRelatedNotifications(user.getDbId(), group.getDbId(), Activity.GROUP_INVITE);
+					if (invitations.isEmpty()) {
+						// Store notification at the database
+						Notification notification = new Notification();
+						notification.setActivity(Activity.GROUP_INVITE);
+						notification.setGroup(group.getDbId());
+						notification.setReceiver(user.getDbId());
+						notification.setSender(admin.getDbId());
+						notification.setOpen(true);
+						Date now = new Date();
+						notification.setOpenedAt(new Timestamp(now.getTime()));
+						DB.getNotificationDAO().makePermanent(notification);
+						// Send notification to the user through socket
+						NotificationCenter.sendNotification(notification);
+						result.put("message", "User succesfully invited to group");
+						return ok(result);
+					} else {
+						result.put("error", "User already invited to group");
+						return badRequest(result);
+					}
 				}
 				// If the user has already requested to join the administrator
 				// adds him
@@ -231,6 +239,8 @@ public class UserAndGroupManager extends Controller {
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 					// Mark the user join requests as closed with the
 					// appropriate timestamp
+					// Note that there should be only one user request but we
+					// implement a for-loop in case of inconsistencies
 					for (Notification request : requests) {
 						request.setOpen(false);
 						Date now = new Date();
@@ -389,24 +399,35 @@ public class UserAndGroupManager extends Controller {
 				result.put("error", "Cannot retrieve object from database");
 				return internalServerError(result);
 			}
-			List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+			if (user.getUserGroupsIds().contains(group.getDbId())) {
+				result.put("error", "User is already member of the group");
+				return badRequest(result);
+			}
+			List<Notification> invites = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
 					group.getDbId(), Activity.GROUP_INVITE);
 			// If the user has not been invited to group a join request is sent
 			// to the group
-			if (requests.isEmpty()) {
-				Notification notification = new Notification();
-				notification.setActivity(Activity.GROUP_REQUEST);
-				notification.setGroup(group.getDbId());
-				notification.setReceiver(group.getDbId());
-				notification.setSender(user.getDbId());
-				notification.setOpen(true);
-				Date now = new Date();
-				notification.setOpenedAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(notification);
-				// Send notification through socket to group administrators
-				NotificationCenter.sendNotification(notification);
-				result.put("message", "Join request was sent for the group");
-				return ok(result);
+			if (invites.isEmpty()) {
+				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+						group.getDbId(), Activity.GROUP_REQUEST);
+				if (requests.isEmpty()) {
+					Notification notification = new Notification();
+					notification.setActivity(Activity.GROUP_REQUEST);
+					notification.setGroup(group.getDbId());
+					notification.setReceiver(group.getDbId());
+					notification.setSender(user.getDbId());
+					notification.setOpen(true);
+					Date now = new Date();
+					notification.setOpenedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					// Send notification through socket to group administrators
+					NotificationCenter.sendNotification(notification);
+					result.put("message", "Join request was sent for the group");
+					return ok(result);
+				} else {
+					result.put("error", "User has already sent join request");
+					return badRequest(result);
+				}
 			}
 			// If the user has been invited to group he is added to it
 			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
@@ -417,7 +438,7 @@ public class UserAndGroupManager extends Controller {
 					&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
 				// Mark the invitations from the group as closed with the
 				// appropriate timestamp
-				for (Notification request : requests) {
+				for (Notification request : invites) {
 					request.setOpen(false);
 					Date now = new Date();
 					request.setClosedAt(new Timestamp(now.getTime()));

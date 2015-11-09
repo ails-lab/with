@@ -69,11 +69,11 @@ GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGro
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 PUT		/group/join/:groupId					controllers.UserAndGroupManager.joinGroup(groupId)
-PUT		/grou/leave/:groupId					controllers.UserAndGroupManager.leaveGroup(groupId)
+PUT		/group/leave/:groupId					controllers.UserAndGroupManager.leaveGroup(groupId)
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
-GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null, email: String ?=null, userId: String ?=null)
+GET 	/rights/:colId/:right					controllers.RightsController.setRights(colId, right, username: String ?=null, email: String ?=null, userOrGroupId: String ?=null)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)
