@@ -20,45 +20,37 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 
 	function Record(data) {
-		/*var self = this;
-	    self.recordId = "";
-		self.title = "";
-		self.description="";
-		self.thumb = "";
-		self.fullres="";
-		self.view_url="";
-		self.source="";
-		self.creator="";
-		self.provider="";
-		self.rights="";
-		self.url="";
-		self.externalId = "";
-		self.cachedThumbnail="";
-		self.isLike=ko.observable(false);*/
-		
+
 		var mapping = {
-				'dbId': {
+				'externalId': {
 					key: function(data) {
-			            return ko.utils.unwrapObservable(data.dbId);
+			            return ko.utils.unwrapObservable(data.extrnalId);
 			        }
 				},
-			    'include': ["title", "thumbnail"],
-				'observe': [],
-				'recordUrl': {
+			    'include': ["title", "thumbnailUrl"],
+				'observe': ["title"],
+				'thumbnailUrl': {
 			        create: function(options) {
-			            return "#item/"+options.data.id;
+			        	setDefaultValue(options.data.thumbnailUrl, "images/no_image.jpg");
 			        }
 			    }
 		};
 		
-		self.record = ko.mapping.fromJS({"title": "No title", "thumbnail": "images/no_image.jpg", "rights":"", "provider":"",
-			creator:"", importedFrom:""}, mapping);
+		setDefaultValue =  function(fieldValue, defaultValue)  {
+			if (fieldValue == null || fieldValue == undefined || fieldValue == "")
+				return defaultValue;
+			else 
+				return fieldValue;
+		};
 		
-		self.isLike=ko.observable(false);
+		self.recordData = ko.mapping.fromJS({title: "No title", "thumbnailUrl": "images/no_image.jpg", "rights":"", "provider":"",
+			"creator":"", "importedFrom":""}, {});
+		
+		self.isLike = ko.observable(false);
 
 		self.load = function(data) {
-			ko.mapping.fromJS(data, mapping, self.record);
-			var likeval=app.isLiked(self.record().externalId);
+			ko.mapping.fromJS(data, mapping, self.recordData);
+			var likeval=app.isLiked(self.recordData.externalId);
 			self.isLike(likeval);
 			/*recordId: result.recordId || result.id,
 			thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
@@ -74,11 +66,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		};
 
 		self.doLike=function(){
-			self.isLike(true);
+			isLike(true);
 		}
 		
 		self.sourceCredits = ko.pureComputed(function() {
-			switch(self.record().importedFrom.providerName) {
+			switch(self.recordData.importedFrom.providerName) {
 			    case "DPLA":
 			    	return "dp.la";
 			    case "Europeana":
@@ -101,11 +93,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
-			distitle=self.record().title;
-			var creator = self.record().creator();
+			distitle=self.recordData.title;
+			var creator = self.recordData.creator;
 			if (creator!==undefined && creator.length>0)
 				distitle+=", by "+ creator;
-			var provider = self.record().provenanceChain[0];
+			var provider = self.recordData.provenanceChain[0];
 			if(provider==undefined && provider.length>0 && provider!=creator)
 				distitle+=", "+ provider;
 			return distitle;
@@ -377,7 +369,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 		self.recordSelect= function (e){
 			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
-				   return record.recordId === e;
+				   return record.recordData.externalId === e;
 				});
 			itemShow(selrecord,true);
 
@@ -552,13 +544,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
         function getItem(record) {
 			var figure='<figure class="masonryitem">';
 			
-
-			figure+='<span class="star" data-bind="css: { active: '+record.isLike()+'},visible:isLogged" id='+record.externalId+'>'+
-						'<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId + '\'); } }">'
+			console.log(JSON.stringify(recordData));
+			figure+='<span class="star" data-bind="css: { active: '+isLike+'},visible:isLogged" id='+recordData.externalId+'>'+
+						'<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + recordData.externalId + '\'); } }">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 						+'</span></span>'
-			+ '<a data-bind="event: { click: function() { recordSelect(\''+record.recordId+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+record.thumb+'" width="211"/></a><figcaption>'+record.displayTitle()+'</figcaption>'
-			+'<div class="sourceCredits"><a href="'+record.view_url+'" target="_new">'+record.sourceCredits()+'</a></figure>';
+			+ '<a data-bind="event: { click: function() { recordSelect(\''+recordData.externalId+'\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="'+recordData.thumbnailUrl+'" width="211"/></a><figcaption>'+displayTitle()+'</figcaption>'
+			+'<div class="sourceCredits"><a href="'+recordData.isShownAt+'" target="_new">'+sourceCredits()+'</a></figure>';
 
 			return figure;
 		}
