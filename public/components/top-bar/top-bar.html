@@ -30,10 +30,22 @@
 						<li>
 							<!-- ko switch: activity -->
 							<!-- ko case: 'GROUP_INVITE' -->
-							<a data-bind="attr: { href: '#organization/' + group }"><em data-bind="text: senderName"></em> invites you to join <em data-bind="text: groupName">.</em><br /></small></a>
+							<a data-bind="attr: { href: '#organization/' + group }"><em data-bind="text: senderName"></em> invites you to join <em data-bind="text: groupName"></em></a>
 							<!-- /ko -->
-							<!-- ko case: $default -->
-							Unknown Notification!
+							<!-- ko case: 'GROUP_INVITE_ACCEPT' -->
+							<em data-bind="text: senderName"></em> joined <em data-bind="text: groupName"></em>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_INVITE_DECLINED' -->
+							<em data-bind="text: senderName"></em> declined your invitation to join <em data-bind="text: groupName"></em>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_REQUEST' -->
+							<em data-bind="text: senderName"></em> wants to join <em data-bind="text: groupName"></em>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_REQUEST_ACCEPT' -->
+							You joined <em data-bind="text: groupName"></em>
+							<!-- /ko -->
+							<!-- ko case: 'GROUP_REQUEST_DENIED' -->
+							Your request to join <em data-bind="text: groupName"></em> was declined
 							<!-- /ko -->
 							<!-- /ko -->
 						</li>

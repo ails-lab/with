@@ -15,6 +15,41 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 					time: 10
 				});
 				break;
+			case "GROUP_INVITE_ACCEPT":
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> joined <strong>' + notification.groupName + '</strong>',
+					type: 'info',
+					time: 10
+				});
+				break;
+			case "GROUP_INVITE_DECLINED":
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> declined your invitation to join <strong>' + notification.groupName + '</strong>',
+					type: 'info',
+					time: 10
+				});
+				break;
+			case "GROUP_REQUEST":
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> wants to join <strong>' + notification.groupName + '</strong>',
+					type: 'info',
+					time: 10
+				});
+				break;
+			case "GROUP_REQUEST_ACCEPT":
+				$.smkAlert({
+					text: 'You joined <strong>' + notification.groupName + '</strong>',
+					type: 'info',
+					time: 10
+				});
+				break;
+			case "GROUP_REQUEST_DENIED":
+				$.smkAlert({
+					text: 'Your request to join <strong>' + notification.groupName + '</strong> was declined',
+					type: 'info',
+					time: 10
+				});
+				break;
 			default:
 				$.smkAlert({
 					text: "<strong>Unknown Notification Type:</strong> " + notification.activity,
