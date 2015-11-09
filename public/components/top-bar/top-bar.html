@@ -24,7 +24,7 @@
 				<li data-bind="visible: !isLogged()"><a href="#register"><i class="fa fa-user-plus"></i> Register</a></li>
 				<li data-bind="visible: isLogged()"><a href="#mycollections">My collections</a></li>
 				<li data-bind="visible: isLogged()"><a href="#myexhibitions">My exhibitions</a></li>
-				<li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="javascript:void(0)" id="notifications" data-title="Notifications" data-toggle="focus" data-template="<div class='popover notifications'><div class='arrow'></div><div class='popover-inner'><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div></div>"><span class="fa fa-2x fa-flag"></span></a><span class="badge danger"><!-- ko text: noticount --><!-- /ko --></span></li>
+				<li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="javascript:void(0)" id="notifications" data-title="Notifications" data-trigger="focus" data-template="<div class='popover notifications'><div class='arrow'></div><div class='popover-inner'><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div></div>"><span class="fa fa-2x fa-flag"></span></a><span class="badge danger"><!-- ko text: noticount --><!-- /ko --></span></li>
 				<div id="notifications-content" class="hide">
 					<ul class="notify-list" data-bind="foreach: notifications">
 						<li>
