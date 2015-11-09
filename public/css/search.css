@@ -1,18 +1,16 @@
 @import url(http://fonts.googleapis.com/css?family=Lato:100,300,400,700);
-
+/*
 html, body {
 	padding-top: 20px;
 	height: 100%;
 
-}
+}*/
 
-body {
-	/*overflow-x: hidden;
-	overflow-y: scroll;*/
+/*body {
 	font-size: 1.2em;
 	overflow-y:auto;
 	background-color:#f1f1f1;
-}
+}*/
 
 .noscroll{
 	overflow-y:hidden;

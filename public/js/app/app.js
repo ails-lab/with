@@ -1,6 +1,167 @@
-define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
+define("app", ['knockout', 'facebook', 'jquery.sticky','imagesloaded','smoke'], function (ko, FB,sticky,imagesLoaded) {
 
 	var self = this;
+	
+	self.WITHApp="";
+	
+	
+	self.settings = $.extend({
+
+		// page
+		page  	  : 'default',
+
+		// masonry
+		mSelector : '.grid',
+		mItem	  : '.item',
+		mSizer	  : '.sizer',
+
+		// mobile menu
+		mobileSelector : '.mobilemenu',
+		mobileMenu 	   : '.main .menu'
+	});
+	self.transDuration = '0.4s';
+	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
+	if (isFirefox) {
+		self.transDuration = 0;
+	}
+	
+	require(["./js/app/plugin"], function(WITHApp) {
+		self.WITHApp=new WITHApp.WITHApp.ui({
+					// page name
+					page  	  : $( 'body' ).attr( 'data-page' ),
+
+					// masonry
+					mSelector : '.grid',
+					mItem	  : '.item',
+					mSizer	  : '.sizer',
+
+					// mobile menu
+					mobileSelector : '.mobilemenu',
+					mobileMenu 	   : '.main .menu'
+		 	})
+
+		 return {
+				WITHApp: self.WITHApp
+			};
+		 
+			});
+	
+		 /* for all isotopes binding */
+		 function initOrUpdate(method) {
+				return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+					function isotopeAppend(ele) {
+						if (ele.nodeType === 1 && ele.className.indexOf ("item")>-1) { // Element type
+							$(ele).css("display","none");
+								
+							$(element).imagesLoaded(function () {
+								if(ko.contextFor(ele).$parent.loading!=undefined){
+								  ko.contextFor(ele).$parent.loading(false);
+								  ko.contextFor(ele).$data.isLoaded(true); 
+								}
+								$(element).isotope('appended', ele).isotope('layout');
+								$(ele).css("display","");
+								
+								
+							});
+							
+						}
+						
+					}
+
+					
+					
+					function attachCallback(valueAccessor) {
+						return function() {
+							return {
+								data: valueAccessor(),
+								afterAdd: isotopeAppend
+							};
+						};
+					}
+
+					var data = ko.utils.unwrapObservable(valueAccessor());
+					//extend foreach binding
+					ko.bindingHandlers.foreach[method](element,
+						 attachCallback(valueAccessor), // attach 'afterAdd' callback
+						 allBindings, viewModel, bindingContext);
+
+					if (method === 'init') {
+						/* this is very important, when hiting back button this makes it scroll to correct position*/
+						var height = $(element).height();
+
+						if( height > 0 ) { // or some other number
+						    $(element).height( height );
+						}
+						
+						/* finished back button fix*/
+						 $(element).imagesLoaded(function () {
+							$(element).isotope({
+								itemSelector: '.item',
+								transitionDuration: transDuration,
+								masonry: {
+									columnWidth		: '.sizer',
+									percentPosition	: true
+								}
+							});
+							
+						});
+
+						ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+							$(element).isotope("destroy");
+						});
+						
+					} 
+					
+				};
+			}
+		 
+		 /* scroll binding for infinite load*/
+		 ko.bindingHandlers.scroll = {
+					updating: true,
+
+					init: function (element, valueAccessor, allBindingsAccessor) {
+						var self = this;
+						self.updating = true;
+						ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+							$(window).off("scroll.ko.scrollHandler");
+							self.updating = false;
+						});
+					},
+
+					update: function (element, valueAccessor, allBindingsAccessor) {
+						var props = allBindingsAccessor().scrollOptions;
+						var offset = props.offset ? props.offset : "0";
+						var loadFunc = props.loadFunc;
+						var load = ko.utils.unwrapObservable(valueAccessor());
+						var self = this;
+
+						if (load) {
+							$(window).on("scroll.ko.scrollHandler", function () {
+								if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+									if (self.updating) {
+										loadFunc();
+										self.updating = false;
+									}
+								} else {
+									self.updating = true;
+								}
+								
+								 if ($(window).scrollTop() > 100) {
+										$('.scroll-top-wrapper').addClass('show');
+									} else {
+										$('.scroll-top-wrapper').removeClass('show');
+									}
+							});
+						} else {
+							element.style.display = "none";
+							$(window).off("scroll.ko.scrollHandler");
+							self.updating = false;
+						}
+					}
+				};
+
+	
+	
 	self.currentUser = {
 		"_id": ko.observable(),
 		"email": ko.observable(),
@@ -326,6 +487,9 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		getEditableCollections: getEditableCollections,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,
-		likeItem: likeItem
+		likeItem: likeItem,
+		WITHApp: WITHApp,
+		initOrUpdate: initOrUpdate,
+		scroll: scroll
 	};
 });

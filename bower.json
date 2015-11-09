@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "components-bootstrap": "~3.3.1",
+    "components-bootstrap": "latest",
     "crossroads": "~0.12.0",
     "hasher": "~1.2.0",
     "requirejs": "~2.1.11",
@@ -34,7 +34,8 @@
     "isotope": "latest",
     "modernizr":"latest",
     "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
-    "knockout-x-editable": "latest"
+    "knockout-x-editable": "latest",
+    "jquery-sticky": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"

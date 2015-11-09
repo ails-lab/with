@@ -51,7 +51,8 @@ var require = {
 		"gmaps"                     : "https://maps.google.com/maps/api/js?v=3&sensor=false",
 		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min",
 		"x-editable"                : "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
-		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min"
+		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min",
+		"jquery.sticky"			    : "bower_modules/jquery-sticky/jquery.sticky"			
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
