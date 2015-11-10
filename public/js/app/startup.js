@@ -27,6 +27,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('exhibition-edit', { require: 'components/exhibition-edit/exhibition-edit' });
 	ko.components.register('popup-exhibition-edit', { require: 'components/exhibition-edit/popup-exhibition-edit' });
 	ko.components.register('api-docu', { require: 'components/api-documentation/api-documentation' });
+	ko.components.register('notifications-page', {
+		viewModel: { require: 'components/notifications/notifications' },
+		template: { require: 'text!components/notifications/notifications-page.html' }
+	});
 
 	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
 
