@@ -33,7 +33,6 @@ import model.Notification.Activity;
 import model.Rights.Access;
 import model.User;
 import model.UserGroup;
-import model.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;

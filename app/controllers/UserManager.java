@@ -449,11 +449,12 @@ public class UserManager extends Controller {
 					return ok(result);
 				}
 			} else {
-				return badRequest(Json.parse("{'error':'User does not exist'}"));
+				return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
-			return internalServerError(
-					Json.parse("{\"error\":\"" + e.getMessage().replaceAll("[\"{},]", " ") + "\"}"));
+			ObjectNode error = Json.newObject();
+			error.put("error", e.getMessage());
+			return internalServerError(error);
 		}
 	}
 

@@ -31,8 +31,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 import utils.NotificationCenter;
-import utils.NotificationCenter.Message;
-import utils.NotificationCenter.UserUpdate;
 
 /**
  * 
@@ -81,9 +79,6 @@ public class NotificationActor extends UntypedActor {
 				}
 			}
 		}
-		if (message instanceof NotificationCenter.Message) {
-			notifyMessage((NotificationCenter.Message) message);
-		}
 		if (message instanceof Notification) {
 			Notification notification = (Notification) message;
 			if (loggedInUser == null) {
@@ -95,26 +90,6 @@ public class NotificationActor extends UntypedActor {
 				UserGroup group = DB.getUserGroupDAO().get(notification.getReceiver());
 				if (group != null && group.getAdminIds().contains(loggedInUser)) {
 					out.tell(Json.toJson(notification), self());
-				}
-			}
-		}
-	}
-
-	/**
-	 * Simple message notification, to be printed on the browser if the user
-	 * matches the given objectId.
-	 * 
-	 * @param mesg
-	 * @param userOrGroup
-	 */
-	public void notifyMessage(Message mesg) {
-		if (mesg.userOrGroup == null) {
-			// public messsage
-			out.tell(Json.toJson(mesg), self());
-		} else {
-			if (loggedInUser != null) {
-				if (loggedInUser.getUserGroupsIds().contains(mesg.userOrGroup)) {
-					out.tell(Json.toJson(mesg), self());
 				}
 			}
 		}
