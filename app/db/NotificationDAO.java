@@ -23,6 +23,7 @@ import org.mongodb.morphia.query.Query;
 
 import model.Notification;
 import model.Notification.Activity;
+import model.Rights.Access;
 import play.Logger;
 import play.Logger.ALogger;
 
@@ -53,6 +54,22 @@ public class NotificationDAO extends DAO<Notification> {
 	public List<Notification> getGroupRelatedNotifications(ObjectId receiverId, ObjectId groupId, Activity activity) {
 		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId);
 		q.and(q.criteria("open").equal(true), q.criteria("group").equal(groupId),
+				q.criteria("activity").equal(activity));
+		return find(q).asList();
+	}
+
+	public List<Notification> getCollectionRelatedNotifications(ObjectId receiverId, ObjectId collectionId,
+			Activity activity, Access access) {
+		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId);
+		q.and(q.criteria("open").equal(true), q.criteria("collection").equal(collectionId),
+				q.criteria("activity").equal(activity), q.criteria("access").equal(access));
+		return find(q).asList();
+	}
+
+	public List<Notification> getCollectionRelatedNotifications(ObjectId receiverId, ObjectId collectionId,
+			Activity activity) {
+		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId);
+		q.and(q.criteria("open").equal(true), q.criteria("collection").equal(collectionId),
 				q.criteria("activity").equal(activity));
 		return find(q).asList();
 	}

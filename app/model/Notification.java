@@ -25,16 +25,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+import model.Rights.Access;
 import utils.Serializer;
 
 public class Notification {
 
 	public enum Activity {
 		// group related
-		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED, GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
+		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED,
+
+		GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
 
 		// collection related
-		COLLECTION_ITEM_ADDED, COLLECTION_ITEM_REMOVED, COLLECTION_SHARED,
+		COLLECTION_ITEM_ADDED, COLLECTION_ITEM_REMOVED,
+
+		COLLECTION_REQUEST_SHARING, COLLECTION_SHARED, COLLECTION_UNSHARED, COLLECTION_REJECTED,
 
 		// messages
 		MESSAGE
@@ -54,6 +59,7 @@ public class Notification {
 	// The collection related with the action (if collection related)
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collection;
+	private Access access;
 
 	// The group that is involved with the action (if group related)
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -167,5 +173,13 @@ public class Notification {
 
 	public void setActivity(Activity activity) {
 		this.activity = activity;
+	}
+
+	public Access getAccess() {
+		return access;
+	}
+
+	public void setAccess(Access access) {
+		this.access = access;
 	}
 }
