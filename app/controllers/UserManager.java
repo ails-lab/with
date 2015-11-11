@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -49,6 +50,7 @@ import elastic.ElasticIndexer;
 import model.ApiKey;
 import model.Collection;
 import model.Media;
+import model.Notification;
 import model.User;
 import model.UserGroup;
 import play.Logger;
@@ -62,6 +64,7 @@ import play.mvc.Result;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
+import utils.AccessManager;
 
 public class UserManager extends Controller {
 
@@ -935,6 +938,20 @@ public class UserManager extends Controller {
 			}
 		}
 		return badRequest(result);
+	}
+
+	public static Result getUserNotifications() {
+		try {
+			ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+			// Get all unread notifications
+			List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(userId);
+			return ok(Json.toJson(notifications));
+		} catch (Exception e) {
+			ObjectNode result = Json.newObject();
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+
+		}
 	}
 
 }
