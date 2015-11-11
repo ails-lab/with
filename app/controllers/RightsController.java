@@ -109,7 +109,7 @@ public class RightsController extends Controller {
 			notification.setReceiver(userOrGroupId);
 			notification.setCollection(collectionId);
 			notification.setSender(owner);
-			notification.setOpen(true);
+			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
@@ -126,9 +126,9 @@ public class RightsController extends Controller {
 			requests = DB.getNotificationDAO().getCollectionRelatedNotifications(userOrGroupId, collectionId,
 					Activity.COLLECTION_REQUEST_SHARING);
 			for (Notification request : requests) {
-				request.setOpen(false);
+				request.setPendingResponse(false);
 				Date now = new Date();
-				request.setClosedAt(new Timestamp(now.getTime()));
+				request.setReadAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(request);
 			}
 			// Make a new request for collection sharing request
@@ -138,7 +138,7 @@ public class RightsController extends Controller {
 			notification.setReceiver(userOrGroupId);
 			notification.setCollection(collectionId);
 			notification.setSender(owner);
-			notification.setOpen(true);
+			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
@@ -170,12 +170,12 @@ public class RightsController extends Controller {
 			notification.setAccess(notification.getAccess());
 			notification.setSender(shareRequest.getReceiver());
 			notification.setReceiver(shareRequest.getSender());
-			notification.setOpen(true);
+			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
-			shareRequest.setOpen(false);
-			shareRequest.setClosedAt(new Timestamp(now.getTime()));
+			shareRequest.setPendingResponse(false);
+			shareRequest.setReadAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(shareRequest);
 			NotificationCenter.sendNotification(notification);
 			result.put("message", "Collection was shared with user/group");
@@ -196,12 +196,12 @@ public class RightsController extends Controller {
 			notification.setActivity(Activity.COLLECTION_REJECTED);
 			notification.setSender(shareRequest.getReceiver());
 			notification.setReceiver(shareRequest.getSender());
-			notification.setOpen(true);
+			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
-			shareRequest.setOpen(false);
-			shareRequest.setClosedAt(new Timestamp(now.getTime()));
+			shareRequest.setPendingResponse(false);
+			shareRequest.setReadAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(shareRequest);
 			NotificationCenter.sendNotification(notification);
 			result.put("message", "Collection was rejected from user/group");

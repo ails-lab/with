@@ -25,6 +25,7 @@ import java.util.function.Function;
 import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -218,7 +219,7 @@ public class UserAndGroupManager extends Controller {
 						notification.setGroup(group.getDbId());
 						notification.setReceiver(user.getDbId());
 						notification.setSender(admin.getDbId());
-						notification.setOpen(true);
+						notification.setPendingResponse(true);
 						Date now = new Date();
 						notification.setOpenedAt(new Timestamp(now.getTime()));
 						DB.getNotificationDAO().makePermanent(notification);
@@ -242,9 +243,9 @@ public class UserAndGroupManager extends Controller {
 					// Note that there should be only one user request but we
 					// implement a for-loop in case of inconsistencies
 					for (Notification request : requests) {
-						request.setOpen(false);
+						request.setPendingResponse(false);
 						Date now = new Date();
-						request.setClosedAt(new Timestamp(now.getTime()));
+						request.setReadAt(new Timestamp(now.getTime()));
 						DB.getNotificationDAO().makePermanent(request);
 					}
 					// Store new notification at the database for the user
@@ -255,7 +256,7 @@ public class UserAndGroupManager extends Controller {
 					notification.setGroup(group.getDbId());
 					notification.setReceiver(user.getDbId());
 					notification.setSender(admin.getDbId());
-					notification.setOpen(true);
+					notification.setPendingResponse(true);
 					Date now = new Date();
 					notification.setOpenedAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
@@ -352,9 +353,9 @@ public class UserAndGroupManager extends Controller {
 				// if the user has made a request to join the group his request
 				// gets declined
 				for (Notification request : requests) {
-					request.setOpen(false);
+					request.setPendingResponse(false);
 					Date now = new Date();
-					request.setClosedAt(new Timestamp(now.getTime()));
+					request.setReadAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(request);
 				}
 				Notification notification = new Notification();
@@ -362,7 +363,7 @@ public class UserAndGroupManager extends Controller {
 				notification.setGroup(group.getDbId());
 				notification.setReceiver(user.getDbId());
 				notification.setSender(admin.getDbId());
-				notification.setOpen(true);
+				notification.setPendingResponse(true);
 				Date now = new Date();
 				notification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(notification);
@@ -416,7 +417,7 @@ public class UserAndGroupManager extends Controller {
 					notification.setGroup(group.getDbId());
 					notification.setReceiver(group.getDbId());
 					notification.setSender(user.getDbId());
-					notification.setOpen(true);
+					notification.setPendingResponse(true);
 					Date now = new Date();
 					notification.setOpenedAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
@@ -439,9 +440,9 @@ public class UserAndGroupManager extends Controller {
 				// Mark the invitations from the group as closed with the
 				// appropriate timestamp
 				for (Notification request : invites) {
-					request.setOpen(false);
+					request.setPendingResponse(false);
 					Date now = new Date();
-					request.setClosedAt(new Timestamp(now.getTime()));
+					request.setReadAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(request);
 				}
 				// Notification for the user join to the group
@@ -451,7 +452,7 @@ public class UserAndGroupManager extends Controller {
 				notification.setGroup(group.getDbId());
 				notification.setReceiver(group.getDbId());
 				notification.setSender(user.getDbId());
-				notification.setOpen(true);
+				notification.setPendingResponse(true);
 				Date now = new Date();
 				notification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(notification);
@@ -507,9 +508,9 @@ public class UserAndGroupManager extends Controller {
 			// If the group has sent an invitation to the user the invitation
 			// gets declined
 			for (Notification request : requests) {
-				request.setOpen(false);
+				request.setPendingResponse(false);
 				Date now = new Date();
-				request.setClosedAt(new Timestamp(now.getTime()));
+				request.setReadAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(request);
 			}
 			Notification notification = new Notification();
@@ -517,7 +518,7 @@ public class UserAndGroupManager extends Controller {
 			notification.setGroup(group.getDbId());
 			notification.setReceiver(group.getDbId());
 			notification.setSender(user.getDbId());
-			notification.setOpen(true);
+			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
@@ -545,5 +546,28 @@ public class UserAndGroupManager extends Controller {
 			return "data:" + photo.getMimeType() + ";base64," + new String(Base64.encodeBase64(photo.getData()));
 		} else
 			return null;
+	}
+
+	public static Result sendMessage(String receiverId) {
+
+		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		JsonNode json = request().body().asJson();
+		if (!json.has("message")) {
+			ObjectNode error = Json.newObject();
+			error.put("error", "Empty message");
+			return badRequest(error);
+		}
+		String message = json.get("messsage").asText();
+		ObjectId receiver = new ObjectId(receiverId);
+		Notification notification = new Notification();
+		notification.setActivity(Activity.MESSAGE);
+		notification.setMessage(message);
+		notification.setSender(sender);
+		notification.setReceiver(receiver);
+		Date now = new Date();
+		notification.setOpenedAt(new Timestamp(now.getTime()));
+		DB.getNotificationDAO().makePermanent(notification);
+		NotificationCenter.sendNotification(notification);
+		return ok();
 	}
 }

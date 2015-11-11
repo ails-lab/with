@@ -66,9 +66,9 @@ public class Notification {
 	private ObjectId group;
 	private String message;
 	// While the notification is pending for an answer, it remains open
-	private boolean open;
+	private boolean pendingResponse;
 	private Timestamp openedAt;
-	private Timestamp closedAt;
+	private Timestamp readAt;
 
 	@JsonIgnore
 	public ObjectId getDbId() {
@@ -142,12 +142,12 @@ public class Notification {
 	}
 
 	@JsonIgnore
-	public boolean isOpen() {
-		return open;
+	public boolean isPendingResponse() {
+		return pendingResponse;
 	}
 
-	public void setOpen(boolean open) {
-		this.open = open;
+	public void setPendingResponse(boolean pendingResponse) {
+		this.pendingResponse = pendingResponse;
 	}
 
 	public Timestamp getOpenedAt() {
@@ -159,12 +159,12 @@ public class Notification {
 	}
 
 	@JsonIgnore
-	public Timestamp getClosedAt() {
-		return closedAt;
+	public Timestamp getReadAt() {
+		return readAt;
 	}
 
-	public void setClosedAt(Timestamp closedAt) {
-		this.closedAt = closedAt;
+	public void setReadAt(Timestamp readAt) {
+		this.readAt = readAt;
 	}
 
 	public Activity getActivity() {

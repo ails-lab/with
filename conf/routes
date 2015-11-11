@@ -101,8 +101,7 @@ DELETE   /user/:id                                 controllers.UserManager.delet
 GET      /user/resetPassword/:emailOrUserName      controllers.UserManager.resetPassword(emailOrUserName: String)
 POST     /user/changePassword                      controllers.UserManager.changePassword()
 GET      /user/apikey/create                       controllers.UserManager.apikey()
-
-
+POST	 /user/sendMessage/:receiverId			   controllers.UserAndGroupManager.sendMessage(receiverId)
 # trigger reindex (for development / admin )
 
 GET      /api/reindex                              controllers.SearchController.reindex()

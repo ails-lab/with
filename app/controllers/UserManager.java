@@ -934,8 +934,7 @@ public class UserManager extends Controller {
 
 			}
 		}
-
 		return badRequest(result);
-
 	}
+
 }
