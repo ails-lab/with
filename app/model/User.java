@@ -276,11 +276,11 @@ public class User extends UserOrGroup {
 
 	public List<Notification> getNotifications() {
 		// Get my notifications
-		List<Notification> notifications = DB.getNotificationDAO().getByReceiver(this.getDbId());
+		List<Notification> notifications = DB.getNotificationDAO().getPendingByReceiver(this.getDbId());
 		// Get notifications for the groups I am administrator
 		if (this.adminInGroups != null) {
 			for (ObjectId groupId : this.adminInGroups) {
-				notifications.addAll(DB.getNotificationDAO().getByReceiver(groupId));
+				notifications.addAll(DB.getNotificationDAO().getPendingByReceiver(groupId));
 			}
 		}
 		return notifications;

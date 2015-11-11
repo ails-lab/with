@@ -155,7 +155,7 @@ public class UserAndGroupManager extends Controller {
 			} else {
 				UserGroup userGroup = DB.getUserGroupDAO().get(new ObjectId(id));
 				if (userGroup != null) {
-					ObjectId photoId = user.getThumbnail();
+					ObjectId photoId = userGroup.getThumbnail();
 					return MediaController.getMetadataOrFile(photoId.toString(), true);
 				} else
 					return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
@@ -177,8 +177,8 @@ public class UserAndGroupManager extends Controller {
 	 * @return success message
 	 */
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
+		ObjectNode result = Json.newObject();
 		try {
-			ObjectNode result = Json.newObject();
 			String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error", "Only administrators of the group have the right to edit the group");
@@ -205,13 +205,13 @@ public class UserAndGroupManager extends Controller {
 					result.put("error", "User is already member of a group");
 					return badRequest(result);
 				}
-				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+				List<Notification> requests = DB.getNotificationDAO().getPendingGroupNotifications(user.getDbId(),
 						group.getDbId(), Activity.GROUP_REQUEST);
 				// If the user has not requested to join to the group, he gets a
 				// notification
 				if (requests.isEmpty()) {
 					List<Notification> invitations = DB.getNotificationDAO()
-							.getGroupRelatedNotifications(user.getDbId(), group.getDbId(), Activity.GROUP_INVITE);
+							.getPendingGroupNotifications(user.getDbId(), group.getDbId(), Activity.GROUP_INVITE);
 					if (invitations.isEmpty()) {
 						// Store notification at the database
 						Notification notification = new Notification();
@@ -256,7 +256,6 @@ public class UserAndGroupManager extends Controller {
 					notification.setGroup(group.getDbId());
 					notification.setReceiver(user.getDbId());
 					notification.setSender(admin.getDbId());
-					notification.setPendingResponse(true);
 					Date now = new Date();
 					notification.setOpenedAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
@@ -288,19 +287,16 @@ public class UserAndGroupManager extends Controller {
 			}
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
-		} catch (
-
-		Exception e)
-
-		{
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 
 	}
 
 	public static Result removeUserOrGroupFromGroup(String id, String groupId) {
+		ObjectNode result = Json.newObject();
 		try {
-			ObjectNode result = Json.newObject();
 			String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 			if ((adminId == null) || (adminId.equals(""))) {
 				result.put("error", "Only creator or administrators of the group have the right to edit the group");
@@ -334,7 +330,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+				List<Notification> requests = DB.getNotificationDAO().getPendingGroupNotifications(user.getDbId(),
 						group.getDbId(), Activity.GROUP_REQUEST);
 				if (requests.isEmpty()) {
 					ancestorGroups.add(group.getDbId());
@@ -351,7 +347,7 @@ public class UserAndGroupManager extends Controller {
 					}
 				}
 				// if the user has made a request to join the group his request
-				// gets declined
+				// gets denied
 				for (Notification request : requests) {
 					request.setPendingResponse(false);
 					Date now = new Date();
@@ -363,7 +359,6 @@ public class UserAndGroupManager extends Controller {
 				notification.setGroup(group.getDbId());
 				notification.setReceiver(user.getDbId());
 				notification.setSender(admin.getDbId());
-				notification.setPendingResponse(true);
 				Date now = new Date();
 				notification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(notification);
@@ -382,13 +377,14 @@ public class UserAndGroupManager extends Controller {
 			return badRequest(result);
 
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 	}
 
 	public static Result joinGroup(String groupId) {
+		ObjectNode result = Json.newObject();
 		try {
-			ObjectNode result = Json.newObject();
 			String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
@@ -404,12 +400,12 @@ public class UserAndGroupManager extends Controller {
 				result.put("error", "User is already member of the group");
 				return badRequest(result);
 			}
-			List<Notification> invites = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+			List<Notification> invites = DB.getNotificationDAO().getPendingGroupNotifications(user.getDbId(),
 					group.getDbId(), Activity.GROUP_INVITE);
 			// If the user has not been invited to group a join request is sent
 			// to the group
 			if (invites.isEmpty()) {
-				List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+				List<Notification> requests = DB.getNotificationDAO().getPendingGroupNotifications(user.getDbId(),
 						group.getDbId(), Activity.GROUP_REQUEST);
 				if (requests.isEmpty()) {
 					Notification notification = new Notification();
@@ -452,7 +448,6 @@ public class UserAndGroupManager extends Controller {
 				notification.setGroup(group.getDbId());
 				notification.setReceiver(group.getDbId());
 				notification.setSender(user.getDbId());
-				notification.setPendingResponse(true);
 				Date now = new Date();
 				notification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(notification);
@@ -468,15 +463,15 @@ public class UserAndGroupManager extends Controller {
 			}
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
-
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 	}
 
 	public static Result leaveGroup(String groupId) {
+		ObjectNode result = Json.newObject();
 		try {
-			ObjectNode result = Json.newObject();
 			String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
 			if (userId == null) {
 				result.put("error", "Must specify user for join request");
@@ -488,7 +483,7 @@ public class UserAndGroupManager extends Controller {
 				result.put("error", "Cannot retrieve object from database");
 				return internalServerError(result);
 			}
-			List<Notification> requests = DB.getNotificationDAO().getGroupRelatedNotifications(user.getDbId(),
+			List<Notification> requests = DB.getNotificationDAO().getPendingGroupNotifications(user.getDbId(),
 					group.getDbId(), Activity.GROUP_INVITE);
 			if (requests.isEmpty()) {
 				Set<ObjectId> ancestorGroups = group.getAncestorGroups();
@@ -518,7 +513,6 @@ public class UserAndGroupManager extends Controller {
 			notification.setGroup(group.getDbId());
 			notification.setReceiver(group.getDbId());
 			notification.setSender(user.getDbId());
-			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
@@ -533,7 +527,8 @@ public class UserAndGroupManager extends Controller {
 			result.put("message", "User denied invitation from group");
 			return ok(result);
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 
 	}

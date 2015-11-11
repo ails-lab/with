@@ -118,12 +118,12 @@ public class RightsController extends Controller {
 			return ok(result);
 		}
 		Access access = Access.valueOf(right);
-		List<Notification> requests = DB.getNotificationDAO().getCollectionRelatedNotifications(userOrGroupId,
+		List<Notification> requests = DB.getNotificationDAO().getPendingCollectionNotifications(userOrGroupId,
 				collectionId, Activity.COLLECTION_REQUEST_SHARING, access);
 		if (requests.isEmpty()) {
 			// Find if there is a request for other type of access and override
 			// it
-			requests = DB.getNotificationDAO().getCollectionRelatedNotifications(userOrGroupId, collectionId,
+			requests = DB.getNotificationDAO().getPendingCollectionNotifications(userOrGroupId, collectionId,
 					Activity.COLLECTION_REQUEST_SHARING);
 			for (Notification request : requests) {
 				request.setPendingResponse(false);
@@ -170,7 +170,6 @@ public class RightsController extends Controller {
 			notification.setAccess(notification.getAccess());
 			notification.setSender(shareRequest.getReceiver());
 			notification.setReceiver(shareRequest.getSender());
-			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
@@ -196,7 +195,6 @@ public class RightsController extends Controller {
 			notification.setActivity(Activity.COLLECTION_REJECTED);
 			notification.setSender(shareRequest.getReceiver());
 			notification.setReceiver(shareRequest.getSender());
-			notification.setPendingResponse(true);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
