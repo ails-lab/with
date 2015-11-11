@@ -113,8 +113,6 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.projects(data.projects);
 		self.currentUser.notifications(data.notifications);
 
-		console.log(self.currentUser.notifications());
-
 		self.loadFavorites();
 
 		// Save to session
