@@ -1,4 +1,4 @@
-define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], function (ko, template, app, KnockoutElse) {
+define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else', 'moment'], function (ko, template, app, KnockoutElse, moment) {
 
 	function NotificationsViewModel(params) {
 		var self = this;
@@ -6,14 +6,9 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 		self.notifications = ko.observableArray();
 		self.groupNotifications = ko.observableArray();
 
-		self.formatDate = function (timestamp) {
-			var d = new Date(timestamp);
-			return d.toTimeString(); //getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
-		};
-
 		self.processNotifications = function (data) {
 			for (var i = 0; i<data.length; i++) {
-				data[i].date = self.formatDate(data[i].openedAt);
+				data[i].date = moment(data[i].openedAt).fromNow();
 				switch (data[i].activity) {
 					case "GROUP_INVITE":
 						data[i].message = '<strong>' + data[i].senderName + '</strong> invites you to join <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong>';
