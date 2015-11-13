@@ -141,7 +141,6 @@ public class Notification {
 		this.message = message;
 	}
 
-	@JsonIgnore
 	public boolean isPendingResponse() {
 		return pendingResponse;
 	}
