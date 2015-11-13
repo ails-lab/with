@@ -306,6 +306,5 @@ public class User extends UserOrGroup {
 			return notifications.subList(0, 9);
 		} else
 			return notifications;
-
 	}
 }

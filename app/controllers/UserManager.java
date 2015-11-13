@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -958,6 +959,32 @@ public class UserManager extends Controller {
 			return internalServerError(result);
 
 		}
+	}
+
+	public static Result readNotifications() {
+		ObjectNode result = Json.newObject();
+		ArrayNode error = Json.newObject().arrayNode();
+		ArrayNode json = (ArrayNode) request().body().asJson();
+		Notification notification;
+		for (JsonNode id : json) {
+			try {
+				notification = DB.getNotificationDAO().get(new ObjectId(id.asText()));
+				if (notification.getReadAt() == null && notification.isPendingResponse() == false) {
+					Date now = new Date();
+					notification.setReadAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+				}
+			} catch (Exception e) {
+				error.add(id.asText());
+			}
+		}
+		if (error.size() > 0) {
+			result.put("error", "Could not mark as read some notifications ");
+			result.put("ids", error);
+			return ok(result);
+		}
+		result.put("message", "All notifications are marked as read");
+		return ok();
 	}
 
 }

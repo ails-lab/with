@@ -95,6 +95,7 @@ GET      /user/loginWithToken                      controllers.UserManager.login
 GET      /user/findByUserOrGroupNameOrEmail        controllers.UserAndGroupManager.findByUserOrGroupNameOrEmail(userOrGroupNameOrEmail: String, collectionId ?= null)
 GET      /user/listNames                           controllers.UserAndGroupManager.listNames(prefix:java.lang.String ?= "", onlyParents: Boolean ?= false)
 GET      /user/:id/photo                           controllers.UserAndGroupManager.getUserOrGroupThumbnail(id)
+PUT		 /user/readNotifications				   controllers.UserManager.readNotifications()
 GET      /user/:id                                 controllers.UserManager.getUser(id)
 PUT      /user/:id                                 controllers.UserManager.editUser(id)
 DELETE   /user/:id                                 controllers.UserManager.deleteUser(id)
