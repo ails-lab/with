@@ -108,6 +108,9 @@ public class ExampleDataModels {
 		Date created;
 		Date lastModified;
 		
+		// last entry of provenance chain hash of provider and recordId
+		String externalId;
+		
 		ObjectId parentResourceId;
 	}
 
@@ -173,19 +176,32 @@ public class ExampleDataModels {
 		ALLFREE, PAY, COMMERCIAL_REUSE, ATTRIBUTION, REMIX   
 	}
 	
+	/**
+	 * Capture accurate and inaccurate dates in a visualisable way. Enable search for year.
+	 * This is a point in time. If you mean a timespan, use different class.
+	 */
 	public static class WithTime {
 		Date isoDate;
 		int year;
 		
-		// controlled expression of an epoch "stone age", "renaissaunce"
+		// controlled expression of an epoch "stone age", "renaissance", "16th century"
 		String epoch;
 		
-		// if the year is nmot there but you want to have timeline function,
-		// give an approximate year where to put the record
-		int approximateYear;
+		// if the year is not accurate, give the inaccuracy here( 0- accurate)
+		int approximation;
 		
 		// any expression that cannot fit into above
 		String free;
+	}
+	
+	/**
+	 * 
+	 * The WithTime might already cover the timespan you mean, but if you need more fields, its meant to be the 
+	 * start of the timespan.
+	 */
+	public static class WithTimespan extends WithTime  {
+		Date isoEndDate;
+		int endYear;
 	}
 	
 	public static class DescriptiveData {
@@ -201,17 +217,22 @@ public class ExampleDataModels {
 		// This are reachable URLs
 		String isShownAt, isShownBy;
 		
-		// simple rights, not the original, the layman excerpt
-		Set<Rights> rightsCategories;
 		
-		// The whole legal bla, unedited
-		LiteralOrResource originalRights;
+		// The whole legal bla, unedited, from the source, mostly cc0
+		LiteralOrResource metadataRights;
 		
 		// rdf  .. Agent, Artist, Painter, Painting, Series
 		String rdfType;
 		
 		// URIs how this Resource is known elsewhere
-		ArrayList<String> sameAs;		
+		ArrayList<String> sameAs;
+		
+		// in a timeline where would this resource appear
+		int year;
+		
+		// media objects, 
+		// ArrayList<MediaObject> media;
+		
 	}
 	
 	public static class RecordData extends DescriptiveData {
@@ -249,6 +270,35 @@ public class ExampleDataModels {
 		String resourceType;
 		
 		HashMap<String, DescriptiveData> model;
+		
+		// All the available content serializations 
+		// all keys in here should be understood by the WITH system
+		HashMap<String, String> content;
+	}
+	
+	
+	public static class EmbeddedMediaObject {
+		ObjectId dbId;
+
+		public static enum Type {
+			VIDEO, IMAGE, TEXT, AUDIO
+		}
+
+		Type type;
+		Set<Rights> withRights;
+
+		// if the thumbnail is externally provided
+		String thumbnailUrl;
+
+		public static enum MimeType {
+			
+		}
+		
+		public static enum Quality {
+			IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
+			
+		}
+		
 	}
 	
 	/**
@@ -256,14 +306,23 @@ public class ExampleDataModels {
 	 * @author Arne Stabenau
 	 *
 	 */
-	public static class MediaObject {
-		// image, sound, video, text
-		// technical metadata
-		// external or internal
-		// access based on collection or public
-		// filedata pointer
+	public static class MediaObject extends EmbeddedMediaObject {		
+		// which collection is this Media part of, this is the access rights restriction
+		// if there is none, the media object is publicly available
+		ArrayList<ObjectId> collection;
 		
-		// maybe rights object
+		int width, height;
+		LiteralOrResource originalRights;
+		
+		MimeType mimeType;
+		
+		// external Url
+		String url;
+		
+		double durationSeconds;
+				
+		byte[] thumbnailBytes;
+		byte[] mediaBytes;
 	}
 	
 	
