@@ -1058,3 +1058,28 @@ nav .badge {
   background-color: #f7f7f7;
   padding: 6px 14px;
 }
+
+/* Notification Page */
+.notification-list  .list-group-item {
+  margin-bottom: 10px;
+  min-height: 60px;
+  font-size: 14px;
+}
+
+.message small {
+  vertical-align: middle;
+  color: #777;
+}
+
+.list-group-item .btn {
+  padding-bottom: 10px!important;
+}
+
+.notification-list  .list-group-item:first-child,
+.notification-list  .list-group-item:last-child
+ {
+  border-radius: 0px 0px 0px 0px;
+  -moz-border-radius: 0px 0px 0px 0px;
+  -webkit-border-radius: 0px 0px 0px 0px;
+}
+
