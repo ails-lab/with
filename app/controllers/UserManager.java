@@ -944,7 +944,13 @@ public class UserManager extends Controller {
 		try {
 			ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
 			// Get all unread notifications
-			List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(userId);
+			List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(userId, 0);
+			Set<ObjectId> groups = DB.getUserDAO().get(userId).getAdminInGroups();
+			if (groups != null && !groups.isEmpty()) {
+				for (ObjectId groupId : groups) {
+					notifications.addAll(DB.getNotificationDAO().getUnreadByReceiver(groupId, 0));
+				}
+			}
 			return ok(Json.toJson(notifications));
 		} catch (Exception e) {
 			ObjectNode result = Json.newObject();

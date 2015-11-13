@@ -251,6 +251,11 @@ public class User extends UserOrGroup {
 	}
 
 	@JsonIgnore
+	public Set<ObjectId> getAdminInGroups() {
+		return this.adminInGroups;
+	}
+
+	@JsonIgnore
 	public boolean isSuperUser() {
 		return superUser;
 	}
@@ -274,15 +279,33 @@ public class User extends UserOrGroup {
 		this.exhibitionsCreated++;
 	}
 
+	public int getNotificationNumber() {
+		return 0;
+	}
+
 	public List<Notification> getNotifications() {
-		// Get my notifications
-		List<Notification> notifications = DB.getNotificationDAO().getPendingByReceiver(this.getDbId());
+		// Get 10 last notifications
+		List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(this.getDbId(), 10);
 		// Get notifications for the groups I am administrator
 		if (this.adminInGroups != null) {
 			for (ObjectId groupId : this.adminInGroups) {
-				notifications.addAll(DB.getNotificationDAO().getPendingByReceiver(groupId));
+				notifications.addAll(DB.getNotificationDAO().getUnreadByReceiver(groupId, 10));
 			}
 		}
-		return notifications;
+		// If the user has less than 10 unread notifications we fill the array
+		// with most recent notifications (either read or unread)
+		if (notifications.size() < 10) {
+			notifications.addAll(DB.getNotificationDAO().getAllByReceiver(this.getDbId(), 10));
+			if (this.adminInGroups != null) {
+				for (ObjectId groupId : this.adminInGroups) {
+					notifications.addAll(DB.getNotificationDAO().getAllByReceiver(groupId, 10));
+				}
+			}
+		}
+		if (notifications.size() > 10) {
+			return notifications.subList(0, 9);
+		} else
+			return notifications;
+
 	}
 }
