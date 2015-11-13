@@ -52,7 +52,8 @@ var require = {
 		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min",
 		"x-editable"                : "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
 		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min",
-		"jquery.sticky"			    : "bower_modules/jquery-sticky/jquery.sticky"			
+		"jquery.sticky"			    : "bower_modules/jquery-sticky/jquery.sticky",
+		"slick"						: "js/slick.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

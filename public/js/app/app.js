@@ -1,4 +1,4 @@
-define("app", ['knockout', 'facebook', 'jquery.sticky','imagesloaded','smoke'], function (ko, FB,sticky,imagesLoaded) {
+define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,imagesLoaded) {
 
 	var self = this;
 	

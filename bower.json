@@ -13,7 +13,7 @@
     "knockout-projections": "~1.1.0",
     "masonry": "~3.2.2",
     "holderjs": "~2.4.1",
-    "imagesloaded": "~3.1.7",
+    "imagesloaded": "latest",
     "jquery-bridget": "latest",
     "knockout-validation": "~2.0.2",
     "knockout-amd-helpers": "~0.7.3",

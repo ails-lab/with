@@ -541,25 +541,27 @@ font-size: 15px;
 }
 
 /* Starred Items */
-figure .star {
+.item .star {
 	font-size: 20px;
-	display: none;
 	position: absolute;
+	display:none;
 	top: 0px;
 	right: 4px;
 	width: 36px;
+	z-index: 1;
 }
 
-figure:hover .star {
+.item:hover .star {
 	color: #dddddd;
 	display: block;
+	cursor: pointer;
 }
 
 .star .fa-inverse {
 	color: #ec5a62;
 }
 
-figure .active, figure:hover .active {
+.star.active{
 	color: #ec5a62;
 	display: block;
 }

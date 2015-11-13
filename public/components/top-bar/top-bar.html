@@ -11,11 +11,10 @@
 					<!-- nav-->
 					<nav>
 						<ul>
-							<li><a href="#" title="Home" class="active">HOME</a></li>
+							<li><a href="#" title="Home">HOME</a></li>
 							<li><a href="#search" title="Explore" onclick="toggleSearch('focus'); return false;">EXPLORE</a></li>
 							<li><a href="#about" title="About">ABOUT</a></li>
-							<li data-bind="visible: !isLogged()"><a href="#register"><i class="fa fa-user-plus"></i> REGISTER</a></li>
-    					    <li data-bind="visible: isLogged()"><a href="#mycollections">MY COLLECTIONS</a></li>
+							<li data-bind="visible: isLogged()"><a href="#mycollections">MY COLLECTIONS</a></li>
     					    <li data-bind="visible: isLogged()"><a href="#myexhibitions">MY EXHIBITIONS</a></li>
     					    <li data-bind="visible: isLogged()" class="dropdown">
 					          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
@@ -57,9 +56,10 @@
 					<!-- sign in -->
 					<section class="login-section">
 						<a data-bind="visible: !isLogged()" href="#login" class="login">SIGN IN</a>
-						<a href="#" class="menu-trigger">
-							<span></span>
-						</a>
+						<a data-bind="visible: !isLogged()" href="#register" class="register">REGISTER</a>
+						<!-- <a href="#" class="menu-trigger">
+							<span></span> 
+						</a> -->
 					</section>
 				</div>
 			</div>

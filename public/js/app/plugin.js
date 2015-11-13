@@ -38,22 +38,35 @@ WITHApp.ui = function( custom ){
 
 		// log
 		logger( 'info','plugins.js / init' );
+		settings.page=$( "body" ).attr( 'data-page' );
+		 
 
 		// init isotope
-		initIsotope();
+		//initIsotope();
 
 		// limit character description
-		initCharacterLimiter();
+		//only applied to home page so moved to maincontent component ->initCharacterLimiter();
 
 		// init filter stick plugin
-		initFilterStick();
+		//only applied to home page so moved to maincontent component ->initFilterStick();
 	};
 	
 	this.initCharacterLimiter=function(){
 		initCharacterLimiter();
 	}
 	
+	this.initCarousel=function(){
+		initCarousel();
+	}
 
+	this.initExpandExhibitionText=function(){
+		initExpandExhibitionText();
+	}
+	
+	this.initImageZoom=function(){
+		initImageZoom();
+		
+	}
 	// method to initialize isotope
 	// dependency: js/vendor/isotope/
 	var initIsotope = function(){
@@ -165,6 +178,7 @@ WITHApp.ui = function( custom ){
 			$( window ).on( 'scroll touchmove', function(){
 
 				// var
+				if( $( "body" ).attr( 'data-page' )=== 'home' ) {
 				var offset = $( '.partners' ).offset(),
 				topPos = offset.top - 74;
 
@@ -178,9 +192,100 @@ WITHApp.ui = function( custom ){
 					$( '.filter' ).removeClass('unstick');
 
 				}
+				}
 			});
 		}
 	}};
+	
+	
+	// method to minimize header on homepage
+	var initCarousel = function(){
+
+		// log
+		logger( 'info','plugins.js / initCarousel' );
+
+		// check
+		if( $( '.carousel' ).length > 0 ) {
+
+			// init
+			$( '.carousel' ).slick({
+				'dots'   : true,
+				'arrows' : false,
+				'autoplay' : true,
+				'autoplayspeed' : 5000
+			});
+		}
+
+		// check
+		if( $( '.carouselexhibition' ).length > 0 ) {
+
+			// init
+			$( '.carouselexhibition' ).slick({
+				'accessibility' : true,
+				'infinite' : false,
+				'dots'   : true,
+				'arrows' : true,
+				'prevArrow' : '<a class="slick-prev"><img src="img/ic-left-arrow.png"></a>',
+				'nextArrow' : '<a class="slick-next"><img src="img/ic-right-arrow.png"></a>'
+			});
+
+			// on btn click
+			$( '.carouselexhibition .main .btn').click( function( e ){
+
+				// prevent
+				e.preventDefault();
+
+				// click
+				$( '.carouselexhibition' ).slick( 'slickNext' );
+			});
+		}
+	};
+
+	// method to expand text on exhibition
+	var initExpandExhibitionText = function(){
+
+		// log
+		logger( 'info','plugins.js / initExpandExhibitionText' );
+
+		// check
+		if( $( '.exhibitionplayer .expand' ).length > 0 ) {
+
+			// each
+			$( '.exhibitionplayer .expand a').on( 'click', function( e ){
+
+				// prevent
+				e.preventDefault();
+
+				// set
+				$( this ).parent().parent().parent().toggleClass( 'expanded' );
+			});
+		}
+	};
+	
+	// method to initialize exhibition image zoom
+	var initImageZoom = function(){
+
+		// log
+		logger( 'info','plugins.js / initImageZoom' );
+
+		// check
+		if( $( '.imagezoom' ).length > 0 ) {
+
+			// init
+			$( '.imagezoom' ).magnificPopup({ type:'image' });
+		}
+
+		// check
+		if( $( '.iframezoom' ).length > 0 ) {
+
+			// init
+			$( '.iframezoom' ).magnificPopup({ type:'iframe' });
+		}
+	};
+
+	
+	
+	
 };
 
 return {
