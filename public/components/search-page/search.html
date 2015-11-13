@@ -12,10 +12,6 @@
 
 				<div id="withsearch-content" class="withsearch-content">
 					 
-					
-					
-
-					
 					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
 					
 					<!-- ko if: noResults -->
@@ -48,27 +44,68 @@
 					</div>
 					<!-- /ko -->
 					
-
-					 <div class="withsearch-content-masonry" data-bind="visible: sourceview()==false">
-					 
-						  <div id="columns" class="columns" data-bind="masonry,visible:mixresults().length>0"></div>
-						  
-	             	</div>
 					
-
-				 <div id="more" data-bind='visible: searching' >
-				   <i class="fa fa-spinner fa-pulse"></i>
-				</div>
-				</div>
-	
-				<span class="withsearch-close"></span>
-				
+					
+						 <!-- wrap spacer-->
+      <div class="spacer double">
+        <!-- listing-->
+        <section class="listing" style="background: none;border:0">
+          <div class="container">
+            <!-- grid-->
 			
-			<div class="scroll-top-wrapper"  data-bind="event:{click: goToTop}">
+            
+			<!-- grid-->
+            <div class="grid" data-bind="visible: sourceview()==false && mixresults().length> 0, searchIsotope: mixresults">
+              <!-- item-->
+               <!-- ko if: $index() === 0 -->
+              <div class="sizer"></div>
+              <!-- /ko -->
+              
+              
+              <div class="item media" data-bind="visible: isLoaded()">
+              <div class="wrap">
+              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged">
+						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</span>
+                <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
+                  <!-- thumbnail-->
+                  <div class="thumb"><img data-bind="attr: {src: thumb}"  onError="this.src='img/content/thumb-empty.png'"></div>
+                  <!-- info-->
+                  <div class="info">
+                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
+                  </div>
+               
+                 <div class="sourceCredits">
+					<!-- ko:if self.access() == "WRITE" || self.access() == "OWN" -->
+					    <span class="glyphicon glyphicon-trash closeButton" data-bind="visible: isLogged, event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
+					<!-- /ko -->
+					<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
+                  </a>
+              </div>
+            </div>
+              
+            
+            </div>
+            </div>
+            <div id="more" data-bind="visible: searching"> <i class="fa fa-spinner fa-pulse"></i></div>
+            <div class="scroll-top-wrapper"  data-bind="event:{click: goToTop}">
 				<span class="scroll-top-inner">
 					<i class="fa fa-2x fa-arrow-circle-up"></i>
 				</span>
 			</div>
+            </section>
+			
+			
+		</div>
+					
+					</div>
+	
+				<span class="withsearch-close"></span>
+				
+			
+			
 				
 			</div>
 

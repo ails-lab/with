@@ -1,5 +1,5 @@
 <div class="container-fluid">
-	<div id="withcollection">
+	   <div id="withcollection">
 		<span class="withmain"><h2><!-- ko text:collname --><!-- /ko --> <span data-bind="visible: itemCount() > -1  " style="text-transform:lowercase">&nbsp;&nbsp;(<!-- ko text:itemCount --><!-- /ko -->  items)</span></h2> </span>
 		<div data-bind="visible: creator().length>0" style="text-transform:lowercase"><i>by <a href="/collectionbyuser"><!-- ko text:creator --><!-- /ko --></a></i></div>
 		<span data-bind="text:desc.display"></span>
@@ -13,10 +13,56 @@
 		 <span class="label label-success">Get</span><code data-bind="text: getAPIUrlRecords()"></code>
 			<br>
 		</div>
-		<div class="withsearch-content-masonry">
-			<div id="collcolumns" class="columns" data-bind="masonrycoll">
-			</div>
 		</div>
-	</div>
-	<div id="more" data-bind="visible: loading ,scroll: citems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
 </div>
+		 <!-- wrap spacer-->
+      <div class="spacer double">
+        <!-- listing-->
+        <section class="listing">
+          <div class="container">
+            <!-- grid-->
+			
+            
+			<!-- grid-->
+            <div class="grid" data-bind="visible: citems().length > 0, collectionIsotope: citems">
+              <!-- item-->
+               <!-- ko if: $index() === 0 -->
+              <div class="sizer"></div>
+              <!-- /ko -->
+              
+              
+              <div class="item media" data-bind="visible: isLoaded()">
+              <div class="wrap">
+              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged">
+						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</span>
+                <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
+                  <!-- thumbnail-->
+                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
+                  <!-- info-->
+                  <div class="info">
+                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
+                  </div>
+               
+                 <div class="sourceCredits">
+					<!-- ko:if self.access() == "WRITE" || self.access() == "OWN" -->
+					    <span class="glyphicon glyphicon-trash closeButton" data-bind="visible: isLogged, event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
+					<!-- /ko -->
+					<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
+                  </a>
+              </div>
+            </div>
+              
+            
+            </div>
+            </div>
+            <div id="more" data-bind="visible: loading ,scroll: citems(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
+            
+            </section>
+			
+			
+		</div>
+	
+	

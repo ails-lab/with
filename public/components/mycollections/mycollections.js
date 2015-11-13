@@ -55,44 +55,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	};
 	
 	
-	ko.bindingHandlers.scroll = {
-			updating: true,
-
-			init: function (element, valueAccessor, allBindingsAccessor) {
-				var self = this;
-				self.updating = true;
-				ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-					$(window).off("scroll.ko.scrollHandler");
-					self.updating = false;
-				});
-			},
-
-			update: function (element, valueAccessor, allBindingsAccessor) {
-				var props = allBindingsAccessor().scrollOptions;
-				var offset = props.offset ? props.offset : "0";
-				var loadFunc = props.loadFunc;
-				var load = ko.utils.unwrapObservable(valueAccessor());
-				var self = this;
-
-				if (load) {
-					$(window).on("scroll.ko.scrollHandler", function () {
-						if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
-							if (self.updating) {
-								loadFunc();
-								self.updating = false;
-							}
-						} else {
-							self.updating = true;
-						}
-					});
-				} else {
-					element.style.display = "none";
-					$(window).off("scroll.ko.scrollHandler");
-					self.updating = false;
-				}
-			}
-		};
-
 
 	function getCollectionsSharedWithMe(isExhibition) {
 		return $.ajax({
@@ -154,6 +116,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
     	self.myUsername = ko.observable(app.currentUser.username());
     	self.moreCollectionData=ko.observable(true);
+    	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
         if (self.myUsername() !== undefined && self.myUsername() !== null) {
         	if (self.showsExhibitions) {
@@ -208,6 +171,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.createCollection = function() {
 			createNewCollection();
+		};
+		
+		self.nextSharedCollections = function() {
+			self.moreShared(false);
+		};
+		
+		self.nextCollections = function() {
+			self.moreCollections(false);
 		};
 		
 		self.createExhibition = function() {
@@ -300,7 +271,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.moreShared=function(isExhibition){
 			
 			if (self.loading === true) {
-				setTimeout(self.moreShared(), 300);
+				setTimeout(self.moreShared(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreSharedCollectionData()===true) {
 				if(self.sharedCollections().length<19){
@@ -319,7 +290,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 							self.loading(false);
 							if(data.collectionsOrExhibitions.length<19){
 								self.moreSharedCollectionData(false);
-							}
+							}else{
+							  self.moreSharedCollectionData(true);}
+							
 						},
 						"error": function (result) {
 							self.loading(false);
@@ -335,7 +308,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.moreCollections=function(isExhibition){
 			
 			if (self.loading === true) {
-				setTimeout(self.moreCollections(), 300);
+				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
 				if(self.myCollections().length<19){

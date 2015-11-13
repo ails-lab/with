@@ -1,65 +1,13 @@
-define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'imagesloaded', 'app', 'smoke'], function (bridget, ko, template, masonry, imagesLoaded, app) {
+define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app', 'smoke'], function (bridget, ko, template, Isotope, imagesLoaded, app) {
 
-	$.bridget('masonry', masonry);
-	var transDuration = '0.4s';
-	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
-	if (isFirefox) {
-		transDuration = 0;
-	}
+	$.bridget('isotope', Isotope);
+		
+		
+		ko.bindingHandlers.collectionIsotope = {
+				init: app.initOrUpdate('init'),
+				update: app.initOrUpdate('update')
+			};
 
-	ko.bindingHandlers.scroll = {
-		updating: true,
-
-		init: function (element, valueAccessor, allBindingsAccessor) {
-			var self = this;
-			self.updating = true;
-			ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-				$(window).off("scroll.ko.scrollHandler");
-				self.updating = false;
-			});
-		},
-
-		update: function (element, valueAccessor, allBindingsAccessor) {
-			var props = allBindingsAccessor().scrollOptions;
-			var offset = props.offset ? props.offset : "0";
-			var loadFunc = props.loadFunc;
-			var load = ko.utils.unwrapObservable(valueAccessor());
-			var self = this;
-
-			if (load) {
-				$(window).on("scroll.ko.scrollHandler", function () {
-					if ($(window).scrollTop() >= $(document).height() - $(window).height()) {
-						if (self.updating) {
-							loadFunc();
-							self.updating = false;
-						}
-					} else {
-						self.updating = true;
-					}
-				});
-			} else {
-				element.style.display = "none";
-				$(window).off("scroll.ko.scrollHandler");
-				self.updating = false;
-			}
-		}
-	};
-
-	ko.bindingHandlers.masonrycoll = {
-		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-			var $element = $(element);
-			$element.masonry({
-				itemSelector: '.masonryitem',
-				gutter: 15,
-				isFitWidth: true,
-				transitionDuration: transDuration
-			});
-
-			ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-				$element.masonry("destroy");
-			});
-		}
-	};
 
 	ko.showMoreLess = function (initialText) {
 
@@ -95,6 +43,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		self.rights="";
 		self.url="";
 		self.externalId = "";
+		self.isLoaded = ko.observable(false);
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
@@ -125,7 +74,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
 			}}
 		   else{
-			   return "images/no_image.jpg";
+			   return "img/content/thumb-empty.png";
 		   }
 		});
 		self.sourceCredits = ko.pureComputed(function() {
@@ -143,8 +92,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			    case "YouTube": {
 			    	return "youtube.com";
 			    }
-			    case "Mint":
+			     case "Mint":
 			    	return "mint";
+			    case "WITHin":
+			    	return "WITHin";
 			    default: return "";
 			 }
 			});
@@ -164,9 +115,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 	}
 
 	function CViewModel(params) {
+		document.body.setAttribute("data-page","collection");
+		
 		var self = this;
 
-		var $container = $("#collcolumns");
+		var $container = $(".grid");
 		self.route = params.route;
 		var counter = 1;
 		self.collname = ko.observable('');
@@ -175,7 +128,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		self.creator = ko.observable('');
 		self.ownerId = ko.observable(-1);
 		self.itemCount = ko.observable(0);
-		self.citems = ko.observableArray([]);
+		self.citems = ko.observableArray();
 
 		self.description = ko.observable('');
 		self.selectedRecord = ko.observable(false);
@@ -185,11 +138,31 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
 		self.showAPICalls = ko.observable(false);
+		self.revealItems = function (data) {
+			if(data.length==0){ self.loading(false);}
+			else{
+				for (var i in data) {
+					var result = data[i];
+					var record = new Record({
+						id: result.dbId,
+						thumb: result.thumbnailUrl,
+						title: result.title,
+						view_url: result.sourceUrl,
+						creator: result.creator,
+						provider: result.provider,
+						source: result.source,
+						rights: result.rights,
+						externalId: result.externalId
+					});
+					self.citems().push(record);
+				}
+				self.citems.valueHasMutated();}
+			
+		};
 
 		self.loadCollection = function (id) {
 			self.loading(true);
-			self.citems([]);
-			$container.empty();
+			
 			$.ajax({
 				"url": "/collection/" + self.id(),
 				"method": "get",
@@ -235,9 +208,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.itemCount);
 						self.revealItems(data.records);
-						self.loading(false);
+						
 					},
 					"error": function (result) {
 						self.loading(false);
@@ -245,39 +217,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 				});
 			}
 		};
+		self.recordSelect= function (e){
+        	$( '.itemview' ).fadeIn();
+			itemShow(e);
 
-		self.masonryImagesReveal = function ($items, $container) {
-			$items.hide();
-			$container.append($items);
-			if (!($container.data('masonry'))) {
+		}
 
-				$container.masonry({
-					itemSelector: '.masonryitem',
-					gutter: 15,
-					isFitWidth: true,
-					transitionDuration: transDuration
-				});
-			}
-
-			$items.imagesLoaded().progress(function (imgLoad, image) {
-				self.loading(true);
-				counter++;
-				var $item = $(image.img).parents(".masonryitem");
-				ko.applyBindings(self, $item[0]);
-				$item.show();
-				$container.masonry('appended', $item, true).masonry('layout', $item);
-
-			}).always(function () {
-				self.loading(false);
-			});
-		};
-
-		self.recordSelect = function (e) {
-			var selrecord = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.recordId === e;
-			});
-			itemShow(selrecord,false);
-		};
+		
 
 		self.addCollectionRecord = function (e) {
 			self.citems.push(e);
@@ -315,78 +261,24 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'masonry', 'images
 			});
 		};
 
-		self.likeRecord = function (id) {
-			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.externalId === id;
-			});
-
+		self.likeRecord = function (rec) {
+			
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$('#' + id).addClass('active');
+					$('#' + rec.recordId).addClass('active');
 				} else {
-					$('#' + id).removeClass('active');
+					$('#' + rec.recordId).removeClass('active');
 				}
 			});
 		};
 
-		function getItem(record,index) {
-			var figure = '<figure class="masonryitem" id="' + record.recordId + '">';
-			if (record.isLiked()) {
-				figure += '<span class="star active" id="' + record.externalId + '" data-bind=visible:isLogged>';
-				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId + '\'); } }">';
-				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
-				figure += '</span></span>';
-			} else {
-				figure += '<span class="star" id="' + record.externalId + '" data-bind=visible:isLogged>';
-				figure += '<span class="fa-stack fa-fw" data-bind="event: { click: function() { likeRecord(\'' + record.externalId + '\'); } }">';
-				figure += '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>';
-				figure += '</span></span>';
-			}
-
-			figure += '<a data-bind="event: { click: function() { recordSelect(\'' + record.recordId + '\')}}"><img onError="this.src=\'images/no_image.jpg\'" src="' + record.cachedThumbnail() + '" width="211"/></a><figcaption>' + record.displayTitle() + '</figcaption>'
-			+ '<div class="sourceCredits">';
-
-			if (self.access() == "WRITE" || self.access() == "OWN") {
-				figure += '<span class="glyphicon glyphicon-trash closeButton" data-bind="event: { click: function(){ removeRecord(\'' + record.recordId + '\','+index+')}}"></span>';
-			}
-			figure+='<a href="' + record.view_url + '" target="_new">' + record.sourceCredits() + '</a></figure>';
-			return figure;
-		}
-
-		function getItems(data) {
-			var items = '';
-			for (var i in data) {
-				items += getItem(data[i]);
-			}
-			return $(items);
-		}
+		
 
 		self.uploadItem = function() {
 			app.showPopup('image-upload', { collectionId: self.id() });
 		};
 
-		self.revealItems = function (data) {
-			var items = [];
-			for (var i in data) {
-				var result = data[i];
-				var record = new Record({
-					id: result.dbId,
-					thumb: result.thumbnailUrl,
-					title: result.title,
-					view_url: result.sourceUrl,
-					creator: result.creator,
-					provider: result.provider,
-					source: result.source,
-					rights: result.rights,
-					externalId: result.externalId
-				});
-				items.push(record);
-			}
-			self.citems.push.apply(self.citems, items);
-			var $newitems = getItems(items);
-
-			self.masonryImagesReveal($newitems, $container);
-		};
+		
 		
 		 self.getAPIUrlCollection = function() {
 				var url   = window.location.href.split("assets")[0];

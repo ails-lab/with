@@ -1,12 +1,54 @@
-define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
+define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app','jquery.sticky'], function(bridget,ko, template,Isotope,imagesLoaded,app,sticky) {
 	
 	
 	$.bridget('isotope', Isotope);
+	
+	
 		
 	ko.bindingHandlers.homeisotope = {
 					init: app.initOrUpdate('init'),
 					update: app.initOrUpdate('update')
 				};
+	
+	
+	// method to initialize filter stick plugin
+	// dependency sticker
+	// moved to here from plugin.js, no need to track scroll on the rest of the pages
+	var initFilterStick = function(){
+
+		// log
+		//logger( 'info','plugins.js / initSticky' );
+ 
+		if ( $( '.filter' ).length !== 0 ){
+
+			// init sticky
+			$( '.filter' ).sticky({
+				topSpacing: 74
+			});
+
+			// on scroll
+			$( window ).on( 'scroll touchmove', function(){
+
+				// var
+				if( $( "body" ).attr( 'data-page' )=== 'home' ) {
+				var offset = $( '.partners' ).offset();
+				if(offset){
+					topPos = offset.top - 74;
+	
+					// set class
+					if ( $( document ).scrollTop() >= topPos ){
+	
+						$( '.filter' ).addClass('unstick');
+	
+					} else {
+	
+						$( '.filter' ).removeClass('unstick');
+	
+					}
+				}}
+			});
+		
+	}};
 	
 					
 	function FeaturedExhibit(data){
@@ -16,11 +58,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  fe.dbId=ko.observable(-1);
 	  fe.thumbs=ko.observableArray();
 	  fe.url=ko.observable("");
-	  
+	 
 	  fe.load=function(data){
-	     fe.title(data.title);
+		 fe.title(data.title);
 	     fe.dbId(data.dbId);
-	     fe.url("#exhibitionview/"+data.dbId);
+	     if(data.isExhibition)
+	      fe.url("#exhibitionview/"+data.dbId);
+	     else{fe.url("#collectionview/"+data.dbId);}
 	     fe.description(data.description);
 		  var i=0;
 		  var j=0;
@@ -110,7 +154,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
   function MainContentModel(params) {
 	  this.route = params.route;
 	  var self = this;
-	  setTimeout(function(){ WITHApp.init(); }, 300);
+	  
+	  $("div[role='main']").toggleClass( "homepage", true );
 	  self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featuredExhibition=ko.observable(null);	
@@ -141,6 +186,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        self.totalCollections(responseCollections.totalCollections);
 			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
+				    initFilterStick();
 					
 			});
 		  var promise2 = self.getFeatured("5624a338569e4959735d8558");
