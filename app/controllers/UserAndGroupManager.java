@@ -338,7 +338,23 @@ public class UserAndGroupManager extends Controller {
 					user.removeUserGroups(ancestorGroups);
 					if (!(DB.getUserDAO().makePermanent(user) == null)
 							&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-						// TODO send notification for the removal
+						Notification notification = new Notification();
+						notification.setActivity(Activity.GROUP_REMOVAL);
+						notification.setGroup(group.getDbId());
+						notification.setReceiver(user.getDbId());
+						notification.setSender(admin.getDbId());
+						Date now = new Date();
+						notification.setOpenedAt(new Timestamp(now.getTime()));
+						DB.getNotificationDAO().makePermanent(notification);
+						// Send notification to the user through socket
+						NotificationCenter.sendNotification(notification);
+						// Notification for the administrators of the group
+						notification.setReceiver(group.getDbId());
+						notification.setDbId(null);
+						DB.getNotificationDAO().makePermanent(notification);
+						// Send notification through socket to group
+						// administrators
+						NotificationCenter.sendNotification(notification);
 						result.put("message", "User succesfully removed from group");
 						return ok(result);
 					} else {
@@ -492,7 +508,20 @@ public class UserAndGroupManager extends Controller {
 				user.removeUserGroups(ancestorGroups);
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-					// TODO send notification for the removal
+					Notification notification = new Notification();
+					notification.setActivity(Activity.GROUP_REMOVAL);
+					notification.setGroup(group.getDbId());
+					notification.setReceiver(group.getDbId());
+					notification.setSender(user.getDbId());
+					Date now = new Date();
+					notification.setOpenedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					// Notification for the administrators of the group
+
+					DB.getNotificationDAO().makePermanent(notification);
+					// Send notification through socket to group
+					// administrators
+					NotificationCenter.sendNotification(notification);
 					result.put("message", "User succesfully removed from group");
 					return ok(result);
 				} else {
