@@ -32,7 +32,7 @@ public class ExampleDataModels {
 	 * @author Arne Stabenau
 	 *
 	 */
-	public static class WithRights extends HashMap<ObjectId, Access> {
+	public static class WithAccess extends HashMap<ObjectId, Access> {
 		
 		public static enum Access {
 			NONE, READ, WRITE, OWN
@@ -89,14 +89,28 @@ public class ExampleDataModels {
 		}
 	}
 	
-	public static class Collection {
-		WithRights rights;
-		ObjectId dbID;
-		LiteralOrResource title;
-		LiteralOrResource description;
-		
-		ExternalCollection externalCollection;
+	// just to have a separate class
+	public static class Collection extends Resource {
 	}
+	
+	public static class CollectionData extends DescriptiveData {
+		
+	}
+	
+	public static class RecordAdmin extends WithAdmin {
+		// last entry of provenance chain hash of provider and recordId
+		String externalId;
+				
+		// if this resource / record is derived (modified) from a different Record.
+		ObjectId parentResourceId;
+	}
+	
+	public static class CollectionAdmin extends WithAdmin {
+		WithAccess access;
+		int entryCount;
+		boolean isExhibition;
+	}
+	
 	
 	public static class WithAdmin {
 		
@@ -107,13 +121,11 @@ public class ExampleDataModels {
 		
 		Date created;
 		Date lastModified;
-		
-		// last entry of provenance chain hash of provider and recordId
-		String externalId;
-		
-		ObjectId parentResourceId;
 	}
 
+	/**
+	 * 
+	 */
 	public static class Usage {
 		// in hoe many favorites is it
 		int likes;
@@ -134,13 +146,16 @@ public class ExampleDataModels {
 		ArrayList<String> tags;
 }
 	
+	/**
+	 * This is how we link records into one or more collections
+	 * @author Arne Stabenau
+	 *
+	 */
 	public static class CollectionInfo {
 		ObjectId collectionId;
 		int position;
 	}
 	
-	public static class WithCollection extends ArrayList<CollectionInfo>{
- 	}
 	
 	/**
 	 * If we know about collections from our sources, the info goes here
@@ -190,6 +205,10 @@ public class ExampleDataModels {
 		// if the year is not accurate, give the inaccuracy here( 0- accurate)
 		int approximation;
 		
+		// ontology based time 
+		String uri;
+		String uriType;
+		
 		// any expression that cannot fit into above
 		String free;
 	}
@@ -230,19 +249,43 @@ public class ExampleDataModels {
 		// in a timeline where would this resource appear
 		int year;
 		
-		// media objects, 
-		// ArrayList<MediaObject> media;
 		
 	}
 	
-	public static class RecordData extends DescriptiveData {
-		// about the creation of the thing
-		Event created;		
-	}
 	
-	public static class CulturalSimpifiedData extends RecordData {
+	public static class CulturalSimpifiedData extends DescriptiveData {
 		
+		// provenance[0].recordId
+		String dcidentifier;
+		
+		// language of object, if it has one. Not related to the metadata.
+		// eg. If the object is a book, its the language it is written in
+		// no language for most paintings, vases, sculptures ... etc
+		ArrayList<Literal> dclanguage;
+		
+		// Painting, Sculpture, Building, Book .... 
+		ArrayList<LiteralOrResource> dctype;
+		
+		// places or times
+		ArrayList<LiteralOrResource> dccoverage;
+		
+		// places are here
+		ArrayList<LiteralOrResource> dcspatial;
+		
+		ArrayList<LiteralOrResource> dccreator;
+
+		ArrayList<WithTime> dccreated;
+		ArrayList<WithTime> dcdate;
+
+		ArrayList<LiteralOrResource> dcformat;
+		ArrayList<LiteralOrResource> dctermsmedium;
+		
+		ArrayList<LiteralOrResource> isRelatedTo;
+		
+		Event create;
 	}
+
+	
 	
 	public static class AgentData extends DescriptiveData {
 		
@@ -253,6 +296,11 @@ public class ExampleDataModels {
 	}
 	
 	public static class Event {
+		public static enum EventType {
+			CREATED, OTHER 
+		}
+		
+		EventType eventType;
 		WithTime time;
 		ArrayList<LiteralOrResource> agent;
 		ArrayList<LiteralOrResource> place;
@@ -260,7 +308,8 @@ public class ExampleDataModels {
 	
 	public static class Resource {
 		WithAdmin administrative;
-		WithCollection collectedIn;
+		ArrayList<CollectionInfo> collectedIn;
+		
 		Usage usage;
 		
 		ArrayList<ExternalCollection> externalCollections;		
@@ -269,11 +318,16 @@ public class ExampleDataModels {
 		// enum of classes that are derived from DescriptiveData
 		String resourceType;
 		
+		// different model descriptive data. The keys need to be interoperable in the system
+		// maybe not all descriptive datas should be subclasses of descriptive data?
 		HashMap<String, DescriptiveData> model;
 		
 		// All the available content serializations 
 		// all keys in here should be understood by the WITH system
 		HashMap<String, String> content;
+		
+		// all attached media Objects (their embedded part)
+		ArrayList<EmbeddedMediaObject> media;
 	}
 	
 	
@@ -290,19 +344,28 @@ public class ExampleDataModels {
 		// if the thumbnail is externally provided
 		String thumbnailUrl;
 
+		// the media objects URL
+		String url;
+		
+		// with urls for embedded or cached objects
+		String withUrl;
+		String withThumbnailUrl;
+		
 		public static enum MimeType {
 			
 		}
 		
-		public static enum Quality {
-			IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
-			
-		}
+		LiteralOrResource originalRights;
+		MimeType mimeType;
 		
+		public static enum Quality {
+			UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
+			AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT			
+		}		
 	}
 	
 	/**
-	 * Goes into its own mongo collection
+	 * Goes into its own mongo collection. Extended characteristics on the media.
 	 * @author Arne Stabenau
 	 *
 	 */
@@ -312,10 +375,6 @@ public class ExampleDataModels {
 		ArrayList<ObjectId> collection;
 		
 		int width, height;
-		LiteralOrResource originalRights;
-		
-		MimeType mimeType;
-		
 		// external Url
 		String url;
 		
