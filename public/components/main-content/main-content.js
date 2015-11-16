@@ -187,6 +187,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 				    initFilterStick();
+				    WITHApp.initIsotope();
 					
 			});
 		  var promise2 = self.getFeatured("5624a338569e4959735d8558");
