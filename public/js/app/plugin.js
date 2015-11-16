@@ -55,6 +55,10 @@ WITHApp.ui = function( custom ){
 		initCharacterLimiter();
 	}
 	
+	this.initIsotope=function(){
+		initIsotope();
+	}
+	
 	this.initCarousel=function(){
 		initCarousel();
 	}
