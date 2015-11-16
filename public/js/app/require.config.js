@@ -52,7 +52,8 @@ var require = {
 		"magnific-popup"			: "bower_modules/magnific-popup/dist/jquery.magnific-popup.min",
 		"x-editable"                : "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
 		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min",
-		"knockout-switch-case"      : "bower_modules/knockout-switch-case/knockout-switch-case.min"
+		"knockout-switch-case"      : "bower_modules/knockout-switch-case/knockout-switch-case.min",
+		"moment"                    : "bower_modules/moment/min/moment.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },
