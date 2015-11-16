@@ -25,7 +25,6 @@ import java.util.function.Function;
 import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -441,44 +440,10 @@ public class UserAndGroupManager extends Controller {
 					result.put("error", "User has already sent join request");
 					return badRequest(result);
 				}
+			} else {
+				result.put("error", "User is already invited to the group");
+				return badRequest(result);
 			}
-			// If the user has been invited to group he is added to it
-			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
-			ancestorGroups.add(group.getDbId());
-			group.getUsers().add(user.getDbId());
-			user.addUserGroups(ancestorGroups);
-			if (!(DB.getUserDAO().makePermanent(user) == null)
-					&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-				// Mark the invitations from the group as closed with the
-				// appropriate timestamp
-				for (Notification request : invites) {
-					request.setPendingResponse(false);
-					Date now = new Date();
-					request.setReadAt(new Timestamp(now.getTime()));
-					DB.getNotificationDAO().makePermanent(request);
-				}
-				// Notification for the user join to the group
-				// Notification for the administrators of the group
-				Notification notification = new Notification();
-				notification.setActivity(Activity.GROUP_INVITE_ACCEPT);
-				notification.setGroup(group.getDbId());
-				notification.setReceiver(group.getDbId());
-				notification.setSender(user.getDbId());
-				Date now = new Date();
-				notification.setOpenedAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(notification);
-				NotificationCenter.sendNotification(notification);
-				// Notification for the user itself
-				notification.setReceiver(user.getDbId());
-				notification.setDbId(null);
-				DB.getNotificationDAO().makePermanent(notification);
-				// Send notification through socket
-				NotificationCenter.sendNotification(notification);
-				result.put("message", "User succesfully added to group");
-				return ok(result);
-			}
-			result.put("error", "Wrong user or group id");
-			return badRequest(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -528,33 +493,10 @@ public class UserAndGroupManager extends Controller {
 					result.put("error", "Could not remove user from group");
 					return internalServerError(result);
 				}
+			} else {
+				result.put("error", "User is invited to the group");
+				return badRequest(result);
 			}
-			// If the group has sent an invitation to the user the invitation
-			// gets declined
-			for (Notification request : requests) {
-				request.setPendingResponse(false);
-				Date now = new Date();
-				request.setReadAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(request);
-			}
-			Notification notification = new Notification();
-			notification.setActivity(Activity.GROUP_INVITE_DECLINED);
-			notification.setGroup(group.getDbId());
-			notification.setReceiver(group.getDbId());
-			notification.setSender(user.getDbId());
-			Date now = new Date();
-			notification.setOpenedAt(new Timestamp(now.getTime()));
-			DB.getNotificationDAO().makePermanent(notification);
-			// Send notification to the group through socket
-			NotificationCenter.sendNotification(notification);
-			// Send notification to the user
-			notification.setReceiver(user.getDbId());
-			notification.setDbId(null);
-			DB.getNotificationDAO().makePermanent(notification);
-			// Send notification through socket to group administrators
-			NotificationCenter.sendNotification(notification);
-			result.put("message", "User denied invitation from group");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -572,26 +514,4 @@ public class UserAndGroupManager extends Controller {
 			return null;
 	}
 
-	public static Result sendMessage(String receiverId) {
-
-		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
-		JsonNode json = request().body().asJson();
-		if (!json.has("message")) {
-			ObjectNode error = Json.newObject();
-			error.put("error", "Empty message");
-			return badRequest(error);
-		}
-		String message = json.get("messsage").asText();
-		ObjectId receiver = new ObjectId(receiverId);
-		Notification notification = new Notification();
-		notification.setActivity(Activity.MESSAGE);
-		notification.setMessage(message);
-		notification.setSender(sender);
-		notification.setReceiver(receiver);
-		Date now = new Date();
-		notification.setOpenedAt(new Timestamp(now.getTime()));
-		DB.getNotificationDAO().makePermanent(notification);
-		NotificationCenter.sendNotification(notification);
-		return ok();
-	}
 }

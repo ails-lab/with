@@ -20,11 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,7 +48,6 @@ import elastic.ElasticIndexer;
 import model.ApiKey;
 import model.Collection;
 import model.Media;
-import model.Notification;
 import model.User;
 import model.UserGroup;
 import play.Logger;
@@ -65,7 +61,6 @@ import play.mvc.Result;
 import scala.concurrent.Await;
 import scala.concurrent.Future;
 import scala.concurrent.duration.Duration;
-import utils.AccessManager;
 
 public class UserManager extends Controller {
 
@@ -589,36 +584,6 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result addUserToGroup(String uid, String gid) {
-		ObjectNode result = Json.newObject();
-
-		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
-		if (group == null) {
-			result.put("message", "Cannot retrieve group from database!");
-			return internalServerError(result);
-		}
-
-		group.getUsers().add(new ObjectId(uid));
-		Set<ObjectId> parentGroups = group.getAncestorGroups();
-
-		User user = DB.getUserDAO().get(new ObjectId(uid));
-		if (user == null) {
-			result.put("message", "Cannot retrieve user from database!");
-			return internalServerError(result);
-		}
-		parentGroups.add(group.getDbId());
-		user.addUserGroups(parentGroups);
-
-		if (!(DB.getUserDAO().makePermanent(user) == null) && !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-			result.put("message", "Group succesfully added to User");
-			return ok(result);
-		}
-
-		result.put("message", "Cannot store to database!");
-		return internalServerError(result);
-
-	}
-
 	public static Result apikey() {
 
 		// need to limit calls like this and reset password to 3 times per day
@@ -939,52 +904,6 @@ public class UserManager extends Controller {
 			}
 		}
 		return badRequest(result);
-	}
-
-	public static Result getUserNotifications() {
-		try {
-			ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
-			// Get all unread notifications
-			List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(userId, 0);
-			Set<ObjectId> groups = DB.getUserDAO().get(userId).getAdminInGroups();
-			if (groups != null && !groups.isEmpty()) {
-				for (ObjectId groupId : groups) {
-					notifications.addAll(DB.getNotificationDAO().getUnreadByReceiver(groupId, 0));
-				}
-			}
-			return ok(Json.toJson(notifications));
-		} catch (Exception e) {
-			ObjectNode result = Json.newObject();
-			result.put("error", e.getMessage());
-			return internalServerError(result);
-
-		}
-	}
-
-	public static Result readNotifications() {
-		ObjectNode result = Json.newObject();
-		ArrayNode error = Json.newObject().arrayNode();
-		ArrayNode json = (ArrayNode) request().body().asJson();
-		Notification notification;
-		for (JsonNode id : json) {
-			try {
-				notification = DB.getNotificationDAO().get(new ObjectId(id.asText()));
-				if (notification.getReadAt() == null && notification.isPendingResponse() == false) {
-					Date now = new Date();
-					notification.setReadAt(new Timestamp(now.getTime()));
-					DB.getNotificationDAO().makePermanent(notification);
-				}
-			} catch (Exception e) {
-				error.add(id.asText());
-			}
-		}
-		if (error.size() > 0) {
-			result.put("error", "Could not mark as read some notifications ");
-			result.put("ids", error);
-			return ok(result);
-		}
-		result.put("message", "All notifications are marked as read");
-		return ok();
 	}
 
 }
