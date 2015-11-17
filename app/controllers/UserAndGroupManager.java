@@ -53,39 +53,50 @@ public class UserAndGroupManager extends Controller {
 	 *
 	 * @param prefix
 	 *            optional prefix of username or groupname
+	 * @param specifyCategory
+	 * 			  0 - return mix Users and UserGroups
+	 * 			  1 - return only Users
+	 * 			  2 - return only Groups
 	 * @return JSON document with an array of matching usernames or groupnames
 	 *         (or all of them)
 	 */
-	public static Result listNames(String prefix, Boolean onlyParents) {
-		List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
-		List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
+	public static Result listNames(String prefix, Boolean onlyParents, Integer specifyCategory) {
+
 		ArrayNode suggestions = Json.newObject().arrayNode();
-		for (User user : users) {
-			ObjectNode node = Json.newObject();
-			ObjectNode data = Json.newObject().objectNode();
-			data.put("category", "user");
-			// costly?
-			node.put("value", user.getUsername());
-			node.put("data", data);
-			suggestions.add(node);
-		}
-		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-		ObjectId userId = new ObjectId(effectiveUserIds.get(0));
-		for (UserGroup group : groups) {
-			if (!onlyParents || (onlyParents && group.getUsers().contains(userId))) {
-				ObjectNode node = Json.newObject().objectNode();
+
+		if((specifyCategory == 0) || (specifyCategory == 1)) {
+			List<User> users = DB.getUserDAO().getByUsernamePrefix(prefix);
+			for (User user : users) {
+				ObjectNode node = Json.newObject();
 				ObjectNode data = Json.newObject().objectNode();
-				data.put("category", "group");
-				node.put("value", group.getUsername());
-				// check if direct ancestor of user
-				/*
-				 * if (group.getUsers().contains(userId)) { data.put("isParent",
-				 * true); } else data.put("isParent", false);
-				 */
-				node.put("value", group.getUsername());
+				data.put("category", "user");
+				// costly?
+				node.put("value", user.getUsername());
 				node.put("data", data);
 				suggestions.add(node);
 			}
+		}
+		if((specifyCategory == 0) || (specifyCategory == 2)) {
+			List<UserGroup> groups = DB.getUserGroupDAO().getByGroupNamePrefix(prefix);
+			List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+			for (UserGroup group : groups) {
+				if (!onlyParents || (onlyParents && group.getUsers().contains(userId))) {
+					ObjectNode node = Json.newObject().objectNode();
+					ObjectNode data = Json.newObject().objectNode();
+					data.put("category", "group");
+					node.put("value", group.getUsername());
+					// check if direct ancestor of user
+					/*
+					 * if (group.getUsers().contains(userId)) { data.put("isParent",
+					 * true); } else data.put("isParent", false);
+					 */
+					node.put("value", group.getUsername());
+					node.put("data", data);
+					suggestions.add(node);
+				}
+			}
+
 		}
 
 		return ok(suggestions);

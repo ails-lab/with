@@ -9,42 +9,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-	    	  $(elem).devbridgeAutocomplete({
-			   		 minChars: 3,
-			   		 lookupLimit: 10,
-			   		 serviceUrl: "/user/listNames",
-			   		 paramName: "prefix",
-			   		 /*params: {
-			   			 onlyParents: true
-			   		 },*/
-			   		 ajaxSettings: {
-			   			 dataType: "json"
-			   		 },
-			   		 transformResult: function(response) {
-			   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-			   			var index = arrayFirstIndexOf(response, function(item) {
-							   return item.value === myUsername;
-						});
-			   			if (index > -1)
-			   				response.splice(index, 1);
-			   			/*var usersAndParents = [];
-			   			$.each(response, function(i, obj) {
-			   				if (obj.data.isParent == undefined || obj.data.isParent == null || obj.data.isParent === true)
-			   					usersAndParents.push(obj);
-					    });*/
-				   		return {"suggestions": response};
-				   	},
-				   	orientation: "auto",    
-				    onSearchComplete: function(query, suggestions) {
-				    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
-			   		 },
-					formatResult: function(suggestion, currentValue) {
-						var s = '<strong>' + currentValue + '</strong>';
-						s    += suggestion.value.substring(currentValue.length);
-						s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
-						return s;
-					}
-			 });
+	    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context);
 	      }
 	 };
 	

@@ -41,6 +41,7 @@ import model.Collection;
 import model.Organization;
 import model.Page;
 import model.Project;
+import model.UserOrGroup;
 import model.Rights.Access;
 import model.User;
 import model.UserGroup;
@@ -145,7 +146,7 @@ public class GroupManager extends Controller {
 	}
 
 	private static boolean uniqueGroupName(String name) {
-		return (DB.getUserGroupDAO().getByName(name) == null && DB.getUserDAO().getByUsername(name) == null);
+		return ((DB.getUserGroupDAO().getByName(name) == null) && (DB.getUserDAO().getByUsername(name) == null));
 	}
 
 	private static String capitalizeFirst(String str) {
@@ -192,7 +193,7 @@ public class GroupManager extends Controller {
 				}
 			}
 			// Update user page
-			if (json.has("page") && (group instanceof Organization || group instanceof Project)) {
+			if (json.has("page") && ((group instanceof Organization) || (group instanceof Project))) {
 				String address = null, city = null, country = null;
 				Page oldPage = null;
 				JsonNode newPage = json.get("page");
@@ -209,8 +210,8 @@ public class GroupManager extends Controller {
 				page = pageUpdator.readValue(newPage);
 				// In case that the location has changed we need to calculate
 				// the new coordinates
-				if ((json.get("page").get("address") != null || json.get("page").get("city") != null
-						|| json.get("page").get("country") != null)) {
+				if (((json.get("page").get("address") != null) || (json.get("page").get("city") != null)
+						|| (json.get("page").get("country") != null))) {
 					address = page.getAddress();
 					city = page.getCity();
 					country = page.getCountry();
@@ -426,5 +427,87 @@ public class GroupManager extends Controller {
 		}
 		else
 			return ok();
+	}
+
+	/**
+	 * This call returns extra info about members of a group either they are
+	 * users or groups.
+	 *
+	 * Category specifies either if we want only users information or groups or both.
+	 *
+	 * @param groupId
+	 * @param category (possible values: 'users', 'groups', 'both'
+	 * @return A json stucture  like the following
+	 * 			{
+	 * 				"users": [ {...}, {...},...],
+	 * 				"groups": [ {...}, {...},...]
+	 * 			}
+	 */
+	public static Result getGroupUsersInfo(String groupId, String category) {
+
+		ObjectNode result = Json.newObject();
+		ArrayNode users = Json.newObject().arrayNode();
+		ArrayNode groups = Json.newObject().arrayNode();
+
+		if(!category.equals("users")
+			&& !category.equals("groups")
+			&& !category.equals("both")) {
+
+			result.put("message", "Invalid category name");
+			log.error("Invalid category name");
+			return badRequest(result);
+			}
+
+		UserGroup group;
+		if( (group = DB.getUserGroupDAO().get(new ObjectId(groupId))) == null) {
+			result.put("message", "There is no such a group");
+			log.error("There is no such a group");
+			return badRequest(result);
+		}
+		if((category.equals("users") || category.equals("both"))
+				&& (group.getUsers().size() > group.getAdminIds().size())) {
+			group.getUsers().removeAll(group.getAdminIds());
+			User u;
+			for(ObjectId oid : group.getUsers()) {
+				if((u = DB.getUserDAO().get(oid)) == null) {
+					log.error("Not a User with dbId: " + oid);
+				}
+				users.add(userOrGroupJson(u));
+			}
+		}
+		if((category.equals("groups") || category.equals("both"))
+				&& (group.getParentGroups().size() > 0)) {
+			UserGroup g;
+			for(ObjectId oid : group.getParentGroups()) {
+				if((g = DB.getUserGroupDAO().get(oid)) == null) {
+					log.error("Not a UserGroup with dbId: " + oid);
+				}
+				groups.add(userOrGroupJson(g));
+			}
+		}
+
+
+
+		result.put("users", users);
+		result.put("groups", groups);
+		return ok(result);
+	}
+
+
+	private static ObjectNode userOrGroupJson(UserOrGroup user) {
+		ObjectNode userJSON = Json.newObject();
+		userJSON.put("userId", user.getDbId().toString());
+		userJSON.put("username", user.getUsername());
+		if (user instanceof User) {
+			userJSON.put("category", "user");
+			userJSON.put("firstName", ((User) user).getFirstName());
+			userJSON.put("lastName", ((User) user).getLastName());
+		} else
+			userJSON.put("category", "group");
+		String image = UserAndGroupManager.getImageBase64(user);
+		if (image != null) {
+			userJSON.put("image", image);
+		}
+		return userJSON;
 	}
 }

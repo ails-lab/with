@@ -89,6 +89,7 @@ public class UserDAO extends DAO<User> {
 		return find(q).get();
 	}
 
+	//Is this fast or should we use ElasticSearch
 	public List<User> getByUsernamePrefix(String prefix) {
 		Query<User> q = this.createQuery().field("username").startsWith(prefix);
 		return find(q).asList();
