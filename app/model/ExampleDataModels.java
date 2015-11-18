@@ -90,12 +90,9 @@ public class ExampleDataModels {
 	}
 	
 	// just to have a separate class
-	public static class Collection extends Resource {
+	public static class Collection extends Resource<CollectionDescriptiveData> {
 	}
 	
-	public static class CollectionData extends DescriptiveData {
-		
-	}
 	
 	public static class RecordAdmin extends WithAdmin {
 		// last entry of provenance chain hash of provider and recordId
@@ -106,15 +103,58 @@ public class ExampleDataModels {
 	}
 	
 	public static class CollectionAdmin extends WithAdmin {
-		WithAccess access;
 		int entryCount;
 		boolean isExhibition;
 	}
 	
 	
+	public static class RecordAnnotation {
+		// 
+		ObjectId recordId;
+		
+		// this extra information is specific to this collection
+		ObjectId collectionId;
+		
+		// in which position in this collection 
+		int position;
+		
+		Annotation[] annotations;
+	}	
+	
+	public static class Annotation {
+		
+		// if the field has a URI semantic (like dc:title or foaf:name or isRelatedTo)
+		// it could be uri://with.image.ntua.gr/ExhibitionRecordDescription
+		String fieldSemantics;
+		
+		// The information should be presented in a general context with this label attached
+		Literal fieldTitle;
+		
+		// this information needs to be indexed under these names
+		String[] indexFieldNames;
+		
+		// the information should go into an existing field
+		String targetField;
+		
+		// the extra information
+		LiteralOrResource value;
+	}
+
+	// maybe like this??
+	public static class ExhibitionAnnotation extends Annotation {
+		// audio url
+		// video url
+		// extra title
+		// extra description
+	}
+	
+	
+	
+	
 	public static class WithAdmin {
 		
 		ObjectId dbId;
+		WithAccess access;
 		
 		// uri that this resource has in the rdf repository
 		String withURI;
@@ -195,12 +235,12 @@ public class ExampleDataModels {
 	 * Capture accurate and inaccurate dates in a visualisable way. Enable search for year.
 	 * This is a point in time. If you mean a timespan, use different class.
 	 */
-	public static class WithTime {
+	public static class WithDate {
 		Date isoDate;
 		int year;
 		
 		// controlled expression of an epoch "stone age", "renaissance", "16th century"
-		String epoch;
+		LiteralOrResource epoch;
 		
 		// if the year is not accurate, give the inaccuracy here( 0- accurate)
 		int approximation;
@@ -218,7 +258,7 @@ public class ExampleDataModels {
 	 * The WithTime might already cover the timespan you mean, but if you need more fields, its meant to be the 
 	 * start of the timespan.
 	 */
-	public static class WithTimespan extends WithTime  {
+	public static class WithPeriod extends WithDate  {
 		Date isoEndDate;
 		int endYear;
 	}
@@ -247,13 +287,30 @@ public class ExampleDataModels {
 		ArrayList<String> sameAs;
 		
 		// in a timeline where would this resource appear
-		int year;
+		int year;	
 		
+		// alternative title or name or placename
+		ArrayList<Literal> alternative;
+	}
+	
+	public static class EUscreendata extends DescriptiveData {
+		// title is filled in with original language title and english title
+		// description dito
+		
+		String broadcastChannel;
+		Date brodcastDate;
+		
+		// in year we keep the production year
+
+		
+	}
+	
+	public class CulturalObject extends Resource<CulturalObjectData> {
 		
 	}
 	
 	
-	public static class CulturalSimpifiedData extends DescriptiveData {
+	public static class CulturalObjectData extends DescriptiveData {
 		
 		// provenance[0].recordId
 		String dcidentifier;
@@ -274,39 +331,79 @@ public class ExampleDataModels {
 		
 		ArrayList<LiteralOrResource> dccreator;
 
-		ArrayList<WithTime> dccreated;
-		ArrayList<WithTime> dcdate;
+		ArrayList<WithDate> dccreated;
+		ArrayList<WithDate> dcdate;
 
 		ArrayList<LiteralOrResource> dcformat;
 		ArrayList<LiteralOrResource> dctermsmedium;
 		
 		ArrayList<LiteralOrResource> isRelatedTo;
 		
-		Event create;
+		ArrayList<CidocEvent> events;
+		
 	}
 
-	
+	public static class CollectionDescriptiveData extends DescriptiveData {
+		ArrayList<LiteralOrResource> dccreator;
+		ArrayList<LiteralOrResource> dctermsaudience;
+		ArrayList<LiteralOrResource> dclanguage;
+	}
 	
 	public static class AgentData extends DescriptiveData {
+		ArrayList<WithDate> birthdate;
+		ArrayList<LiteralOrResource> birthplace;
+		ArrayList<WithDate> deathdate;
+		public static enum Gender {
+			MALE, FEMALE, UNKNOWN
+		}
+		Gender genderEnum;
+		Literal gender;		
+	}
+	
+	public static class Place extends Resource<PlaceData> {
 		
 	}
 	
 	public static class PlaceData extends DescriptiveData {
 		// city, archeological site, area, nature reserve, historical site
+		ArrayList<LiteralOrResource> nation;
+		ArrayList<LiteralOrResource> continent;
+		ArrayList<LiteralOrResource> partOfPlace;
+		
+		Double wgsposlat, wgsposlong, wgsposalt;
+		
+		// in meters how in accurate the position is
+		// also describes the extend of the position
+		Double accuracy;
 	}
 	
-	public static class Event {
+	public static class TimeSpanData extends DescriptiveData {
+		ArrayList<WithPeriod> timespan;
+	}
+	
+	public static class EventData extends DescriptiveData {
+		ArrayList<WithPeriod> period;
+		ArrayList<LiteralOrResource> personsInvolved;
+		ArrayList<LiteralOrResource> placesInvolved;
+		ArrayList<LiteralOrResource> objectsInvolved;
+	}
+	
+	public static class Event extends Resource<EventData> {
+		
+	}
+	
+	public static class CidocEvent {
 		public static enum EventType {
 			CREATED, OTHER 
 		}
 		
 		EventType eventType;
-		WithTime time;
+		WithPeriod timespan;
 		ArrayList<LiteralOrResource> agent;
 		ArrayList<LiteralOrResource> place;
 	}
 	
-	public static class Resource {
+	public static class Resource<T extends DescriptiveData> {
 		WithAdmin administrative;
 		ArrayList<CollectionInfo> collectedIn;
 		
@@ -318,9 +415,7 @@ public class ExampleDataModels {
 		// enum of classes that are derived from DescriptiveData
 		String resourceType;
 		
-		// different model descriptive data. The keys need to be interoperable in the system
-		// maybe not all descriptive datas should be subclasses of descriptive data?
-		HashMap<String, DescriptiveData> model;
+		T model;
 		
 		// All the available content serializations 
 		// all keys in here should be understood by the WITH system
