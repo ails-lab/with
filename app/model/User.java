@@ -46,6 +46,28 @@ public class User extends UserOrGroup {
 		MALE, FEMALE, UNSPECIFIED
 	}
 
+	@SuppressWarnings("unused")
+	private class Notifications {
+		private Set<Notification> userNotifications;
+		private Set<Notification> groupNotifications;
+
+		public Set<Notification> getUserNotifications() {
+			return userNotifications;
+		}
+
+		public void setUserNotifications(Set<Notification> userNotifications) {
+			this.userNotifications = userNotifications;
+		}
+
+		public Set<Notification> getGroupNotifications() {
+			return groupNotifications;
+		}
+
+		public void setGroupNotifications(Set<Notification> groupNotifications) {
+			this.groupNotifications = groupNotifications;
+		}
+	}
+
 	private String email;
 
 	private String firstName;
@@ -283,28 +305,36 @@ public class User extends UserOrGroup {
 		return 0;
 	}
 
-	public List<Notification> getNotifications() {
-		// Get 10 last notifications
-		List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(this.getDbId(), 10);
-		// Get notifications for the groups I am administrator
+	public Notifications getNotifications() {
+		Notifications notifications = new Notifications();
+		Set<Notification> unreadNotifications = new HashSet<Notification>(
+				DB.getNotificationDAO().getUnreadByReceiver(this.getDbId(), 0));
+		Set<Notification> allNotifications = new HashSet<Notification>();
+		if (unreadNotifications.size() < 20) {
+			allNotifications = new HashSet<Notification>(DB.getNotificationDAO().getAllByReceiver(this.getDbId(), 20));
+			allNotifications.addAll(unreadNotifications);
+		} else {
+			allNotifications = unreadNotifications;
+		}
+		notifications.setUserNotifications(allNotifications);
+		unreadNotifications.clear();
+		allNotifications.clear();
 		if (this.adminInGroups != null) {
 			for (ObjectId groupId : this.adminInGroups) {
-				notifications.addAll(DB.getNotificationDAO().getUnreadByReceiver(groupId, 10));
+				unreadNotifications.addAll(DB.getNotificationDAO().getAllByReceiver(groupId, 0));
 			}
-		}
-		// If the user has less than 10 unread notifications we fill the array
-		// with most recent notifications (either read or unread)
-		if (notifications.size() < 10) {
-			notifications.addAll(DB.getNotificationDAO().getAllByReceiver(this.getDbId(), 10));
-			if (this.adminInGroups != null) {
+			if (unreadNotifications.size() < 20) {
 				for (ObjectId groupId : this.adminInGroups) {
-					notifications.addAll(DB.getNotificationDAO().getAllByReceiver(groupId, 10));
+					allNotifications
+							.addAll(new HashSet<Notification>(DB.getNotificationDAO().getAllByReceiver(groupId, 20)));
 				}
+				allNotifications.addAll(unreadNotifications);
+			} else {
+				allNotifications = unreadNotifications;
 			}
 		}
-		if (notifications.size() > 10) {
-			return notifications.subList(0, 9);
-		} else
-			return notifications;
+		notifications.setGroupNotifications(allNotifications);
+		return notifications;
+
 	}
 }
