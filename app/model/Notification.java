@@ -18,6 +18,7 @@ package model;
 
 import java.sql.Timestamp;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 
@@ -181,4 +182,10 @@ public class Notification {
 	public void setAccess(Access access) {
 		this.access = access;
 	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 31).append(this.dbId).toHashCode();
+	}
+
 }

@@ -307,33 +307,20 @@ public class User extends UserOrGroup {
 
 	public Notifications getNotifications() {
 		Notifications notifications = new Notifications();
-		Set<Notification> unreadNotifications = new HashSet<Notification>(
+		Set<Notification> userNotifications = new HashSet<Notification>(
 				DB.getNotificationDAO().getUnreadByReceiver(this.getDbId(), 0));
-		Set<Notification> allNotifications = new HashSet<Notification>();
-		if (unreadNotifications.size() < 20) {
-			allNotifications = new HashSet<Notification>(DB.getNotificationDAO().getAllByReceiver(this.getDbId(), 20));
-			allNotifications.addAll(unreadNotifications);
-		} else {
-			allNotifications = unreadNotifications;
+		if (userNotifications.size() < 20) {
+			userNotifications.addAll(DB.getNotificationDAO().getAllByReceiver(this.getDbId(), 20));
 		}
-		notifications.setUserNotifications(allNotifications);
-		unreadNotifications.clear();
-		allNotifications.clear();
-		if (this.adminInGroups != null) {
-			for (ObjectId groupId : this.adminInGroups) {
-				unreadNotifications.addAll(DB.getNotificationDAO().getAllByReceiver(groupId, 0));
-			}
-			if (unreadNotifications.size() < 20) {
-				for (ObjectId groupId : this.adminInGroups) {
-					allNotifications
-							.addAll(new HashSet<Notification>(DB.getNotificationDAO().getAllByReceiver(groupId, 20)));
-				}
-				allNotifications.addAll(unreadNotifications);
-			} else {
-				allNotifications = unreadNotifications;
+		notifications.setUserNotifications(userNotifications);
+		Set<Notification> groupNotifications = new HashSet<Notification>();
+		if (this.adminInGroups != null && !this.adminInGroups.isEmpty()) {
+			groupNotifications.addAll(DB.getNotificationDAO().getUnreadByReceivers(this.adminInGroups, 0));
+			if (groupNotifications.size() < 20) {
+				groupNotifications.addAll(DB.getNotificationDAO().getAllByReceivers(this.adminInGroups, 20));
 			}
 		}
-		notifications.setGroupNotifications(allNotifications);
+		notifications.setGroupNotifications(groupNotifications);
 		return notifications;
 
 	}

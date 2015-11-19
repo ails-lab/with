@@ -17,8 +17,10 @@
 package db;
 
 import java.util.List;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.Query;
 
 import model.Notification;
@@ -45,9 +47,35 @@ public class NotificationDAO extends DAO<Notification> {
 		return find(q).asList();
 	}
 
+	public List<Notification> getAllByReceivers(Set<ObjectId> receiverIds, int count) {
+		Query<Notification> q = this.createQuery().order("-openedAt").limit(count);
+		if (receiverIds.size() > 0) {
+			Criteria[] criteria = new Criteria[receiverIds.size()];
+			int i = 0;
+			for (ObjectId receiverId : receiverIds) {
+				criteria[i++] = q.criteria("receiver").equal(receiverId);
+			}
+			q.or(criteria);
+		}
+		return find(q).asList();
+	}
+
 	public List<Notification> getUnreadByReceiver(ObjectId receiverId, int count) {
 		Query<Notification> q = this.createQuery().field("receiver").equal(receiverId).order("-openedAt").limit(count);
-		q.and(q.criteria("readAt").doesNotExist());
+		q.field("readAt").doesNotExist();
+		return find(q).asList();
+	}
+
+	public List<Notification> getUnreadByReceivers(Set<ObjectId> receiverIds, int count) {
+		Query<Notification> q = this.createQuery().field("readAt").doesNotExist().order("-openedAt").limit(count);
+		if (receiverIds.size() > 0) {
+			Criteria[] criteria = new Criteria[receiverIds.size()];
+			int i = 0;
+			for (ObjectId receiverId : receiverIds) {
+				criteria[i++] = q.criteria("receiver").equal(receiverId);
+			}
+			q.or(criteria);
+		}
 		return find(q).asList();
 	}
 
