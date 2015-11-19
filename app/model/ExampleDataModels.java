@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 
+import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.Rights.Access;
 
 public class ExampleDataModels {
@@ -47,6 +48,7 @@ public class ExampleDataModels {
 		}
 	}
 
+	//TODO: why is the key a string and not an enum?
 	public static class Literal extends  HashMap<String, String> {
 		// keys are language 2 letter codes, 
 		// "unknown" for unknown language
@@ -107,19 +109,6 @@ public class ExampleDataModels {
 		boolean isExhibition;
 	}
 	
-	
-	public static class RecordAnnotation {
-		// 
-		ObjectId recordId;
-		
-		// this extra information is specific to this collection
-		ObjectId collectionId;
-		
-		// in which position in this collection 
-		int position;
-		
-		Annotation[] annotations;
-	}	
 	
 	public static class Annotation {
 		
@@ -213,9 +202,7 @@ public class ExampleDataModels {
 		String title;
 		String description;
 	}
-	
-	public static class EdmCollection extends ExternalCollection {}
-	
+		
 	public static class ProvenanceInfo {
 		String provider;
 		String uri;
@@ -247,7 +234,7 @@ public class ExampleDataModels {
 		
 		// ontology based time 
 		String uri;
-		String uriType;
+		ResourceType uriType;
 		
 		// any expression that cannot fit into above
 		String free;
@@ -293,7 +280,7 @@ public class ExampleDataModels {
 		ArrayList<Literal> alternative;
 	}
 	
-	public static class EUscreendata extends DescriptiveData {
+	public static class EUscreenData extends DescriptiveData {
 		// title is filled in with original language title and english title
 		// description dito
 		
@@ -302,6 +289,10 @@ public class ExampleDataModels {
 		
 		// in year we keep the production year
 
+		
+	}
+	
+	public static class EUscreenObject extends Resource<EUscreenData> {
 		
 	}
 	
@@ -333,7 +324,8 @@ public class ExampleDataModels {
 
 		ArrayList<WithDate> dccreated;
 		ArrayList<WithDate> dcdate;
-
+		
+		//TODO: do we want multilinguality for dcformat and dctermsmedium?
 		ArrayList<LiteralOrResource> dcformat;
 		ArrayList<LiteralOrResource> dctermsmedium;
 		
@@ -347,6 +339,7 @@ public class ExampleDataModels {
 		ArrayList<LiteralOrResource> dccreator;
 		ArrayList<LiteralOrResource> dctermsaudience;
 		ArrayList<LiteralOrResource> dclanguage;
+		//TODO: add link to external collection
 	}
 	
 	public static class AgentData extends DescriptiveData {
@@ -409,6 +402,7 @@ public class ExampleDataModels {
 		
 		Usage usage;
 		
+		//What is the 
 		ArrayList<ExternalCollection> externalCollections;		
 		ArrayList<ProvenanceInfo> provenance;
 	
@@ -423,7 +417,14 @@ public class ExampleDataModels {
 		
 		// all attached media Objects (their embedded part)
 		ArrayList<EmbeddedMediaObject> media;
+		
+		//each time an annotation is added by a user, a copy of the Resource is made, i.e. colId-posId is removed from the parent record collectedIn array,
+		//and added in the collectedIn array of the copy. The new copy has all annotations of the parent, plus the new ones added by the user.
+		//If a user adds an annotation of an annotationType that already exists in the resource, we edit the annotation entry.
+		ArrayList<Annotation> annotations;
+		
 	}
+	
 	
 	
 	public static class EmbeddedMediaObject {
