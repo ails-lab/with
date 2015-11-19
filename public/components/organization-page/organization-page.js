@@ -366,6 +366,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			friendlyName: self.friendlyName,
 			about: self.about
 		});
+		
 
 		// Page Fields
 		self.page = {
@@ -627,6 +628,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					console.log(error);
 				}
 			});
+		};
+
+		self.manageMembersPopup = function() {
+			app.showPopup('members-popup', params);
 		};
 
 		self.closeWindow = function () {

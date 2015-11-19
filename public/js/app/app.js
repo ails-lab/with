@@ -474,12 +474,57 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		loadUser(storageData, true);
 	}
 
+	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+		var category = allBindingsAccessor.get('category') || 0;
+		$(elem).devbridgeAutocomplete({
+	   		 minChars: 3,
+	   		 lookupLimit: 10,
+	   		 serviceUrl: "/user/listNames",
+	   		 paramName: "prefix",
+	   		 params: {
+	   			 onlyParents: false,
+	   			 specifyCategory: category
+	   		 },
+	   		 ajaxSettings: {
+	   			 dataType: "json"
+	   		 },
+	   		 transformResult: function(response) {
+	   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
+	   			var index = arrayFirstIndexOf(response, function(item) {
+					   return item.value === myUsername;
+				});
+	   			if (index > -1)
+	   				response.splice(index, 1);
+	   			/*var usersAndParents = [];
+	   			$.each(response, function(i, obj) {
+	   				if (obj.data.isParent == undefined || obj.data.isParent == null || obj.data.isParent === true)
+	   					usersAndParents.push(obj);
+			    });*/
+		   		return {"suggestions": response};
+		   	},
+		   	orientation: "auto",    
+		    onSearchComplete: function(query, suggestions) {
+		    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+	   		 },
+			formatResult: function(suggestion, currentValue) {
+				var s = /*'<img class="img-responsive img-circle" src="';
+				s	 += (currentUser.image() ? currentUser.image() : 'images/user.png') + '" />'
+				s	 +=*/ '<strong>' + currentValue + '</strong>';
+				s    += suggestion.value.substring(currentValue.length);
+				s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
+				return s;
+			}
+		});
+	};
+	
+	
 	return {
 		currentUser: currentUser,
 		loadUser: loadUser,
 		reloadUser: reloadUser,
 		showPopup: showPopup,
 		closePopup: closePopup,
+		autoCompleteUserName: autoCompleteUserName,
 		logout: logout,
 		getUserCollections: getUserCollections,
 		getAllUserCollections: getAllUserCollections,
