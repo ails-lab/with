@@ -408,7 +408,15 @@ public class GroupManager extends Controller {
 		return descendantGroups;
 	}
 
-	// TODO check user rights for these groups
+
+	/**
+	 * Return child groups or all descedant groups according to group type.
+	 * @param groupId
+	 * @param groupType
+	 * @param direct
+	 * @param collectionHits
+	 * @return
+	 */
 	public static Result getDescendantGroups(String groupId, String groupType, boolean direct, boolean collectionHits) {
 		List<UserGroup> childrenGroups;
 		List<UserGroup> descendantGroups;
@@ -475,13 +483,10 @@ public class GroupManager extends Controller {
 				users.add(userOrGroupJson(u));
 			}
 		}
-		if((category.equals("groups") || category.equals("both"))
-				&& (group.getParentGroups().size() > 0)) {
-			UserGroup g;
-			for(ObjectId oid : group.getParentGroups()) {
-				if((g = DB.getUserGroupDAO().get(oid)) == null) {
-					log.error("Not a UserGroup with dbId: " + oid);
-				}
+		if((category.equals("groups") || category.equals("both"))) {
+			List<UserGroup> children =
+					DB.getUserGroupDAO().findByParent(new ObjectId(groupId), GroupType.All);
+			for(UserGroup g: children) {
 				groups.add(userOrGroupJson(g));
 			}
 		}
