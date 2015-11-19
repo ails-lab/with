@@ -465,9 +465,9 @@ public class ExampleDataModels {
 	 *
 	 */
 	public static class MediaObject extends EmbeddedMediaObject {		
-		// which collection is this Media part of, this is the access rights restriction
+		// which resource is this Media part of, this is the access rights restriction
 		// if there is none, the media object is publicly available
-		ArrayList<ObjectId> collection;
+		ArrayList<ObjectId> resources;
 		
 		int width, height;
 		// external Url
