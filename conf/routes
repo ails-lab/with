@@ -7,11 +7,11 @@
 GET      /                                         controllers.Default.redirect(to="assets/index.html")
 
 GET      /notifications/socket                     controllers.NotificationController.socket()
-PUT		 /notifications/accept/:notificationId	   controllers.NotificationController.respondToRequest(notificationId, accept: Boolean ?= true)
-PUT		 /notifications/reject/:notificationId	   controllers.NotificationController.respondToRequest(notificationId, accept: Boolean ?= false)
-GET		 /notifications/myNotifications			   controllers.NotificationController.getUserNotifications()
-PUT		 /notifications/read					   controllers.NotificationController.readNotifications()
-POST	 /notifications/send					   controllers.NotificationController.sendMessage(receiverId)
+PUT      /notifications/accept/:notificationId     controllers.NotificationController.respondToRequest(notificationId, accept: Boolean ?= true)
+PUT      /notifications/reject/:notificationId     controllers.NotificationController.respondToRequest(notificationId, accept: Boolean ?= false)
+GET      /notifications/myNotifications            controllers.NotificationController.getUserNotifications()
+PUT      /notifications/read                       controllers.NotificationController.readNotifications()
+POST     /notifications/send                       controllers.NotificationController.sendMessage(receiverId)
 
 POST     /api/advancedsearch                       controllers.SearchController.searchwithfilter()
 POST     /api/search                               controllers.SearchController.search()
@@ -79,8 +79,6 @@ PUT      /group/leave/:groupId                     controllers.UserAndGroupManag
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
 GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null)
-PUT      /rights/accept/:notificationId            controllers.RightsController.acceptCollection(notificationId)
-PUT      /rights/reject/:notificationId            controllers.RightsController.rejectCollection(notificationId)
 
 # Media Controller
 POST     /media/create                             controllers.MediaController.createMedia( file: Boolean ?= true)

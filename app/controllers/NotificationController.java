@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import actors.NotificationActor;
 import db.DB;
+import elastic.ElasticUpdater;
+import model.Collection;
 import model.Notification;
 import model.Notification.Activity;
 import model.User;
@@ -92,7 +94,11 @@ public class NotificationController extends Controller {
 				// Notification for the user join to the group
 				// Notification for the administrators of the group
 				newNotification = new Notification();
-				newNotification.setActivity(Activity.GROUP_INVITE_ACCEPT);
+				if (accept) {
+					newNotification.setActivity(Activity.GROUP_INVITE_ACCEPT);
+				} else {
+					newNotification.setActivity(Activity.GROUP_INVITE_DECLINED);
+				}
 				newNotification.setGroup(group.getDbId());
 				newNotification.setReceiver(group.getDbId());
 				newNotification.setSender(user.getDbId());
@@ -105,7 +111,7 @@ public class NotificationController extends Controller {
 				DB.getNotificationDAO().makePermanent(newNotification);
 				// Send notification through socket
 				NotificationCenter.sendNotification(newNotification);
-				result.put("message", "User succesfully added to group");
+				result.put("message", "User succesfully responded to invitation");
 				return ok(result);
 			case GROUP_REQUEST:
 				groupId = notification.getGroup();
@@ -130,7 +136,11 @@ public class NotificationController extends Controller {
 				// acceptance
 				// Notification for the user
 				newNotification = new Notification();
-				newNotification.setActivity(Activity.GROUP_REQUEST_ACCEPT);
+				if (accept) {
+					newNotification.setActivity(Activity.GROUP_REQUEST_ACCEPT);
+				} else {
+					newNotification.setActivity(Activity.GROUP_REQUEST_DENIED);
+				}
 				newNotification.setGroup(group.getDbId());
 				newNotification.setReceiver(user.getDbId());
 				newNotification.setSender(currentUser.getDbId());
@@ -144,16 +154,42 @@ public class NotificationController extends Controller {
 				// Send notification through socket (to user and group
 				// administrators)
 				NotificationCenter.sendNotification(newNotification);
-				result.put("message", "User succesfully added to group");
+				result.put("message", "Group succesfully reponded to user request");
 				return ok(result);
 			case COLLECTION_REQUEST_SHARING:
-				break;
+				Collection collection = DB.getCollectionDAO().get(notification.getCollection());
+				if (accept) {
+					collection.getRights().put(notification.getReceiver(), notification.getAccess());
+					if (DB.getCollectionDAO().makePermanent(collection) == null) {
+						result.put("error", "Cannot store collection to database!");
+						return internalServerError(result);
+					}
+					// update collection rights in index
+					ElasticUpdater updater = new ElasticUpdater(collection);
+					updater.updateCollectionRights();
+				}
+				notification.setPendingResponse(false);
+				notification.setReadAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(notification);
+				newNotification = new Notification();
+				newNotification.setCollection(notification.getCollection());
+				if (accept) {
+					newNotification.setActivity(Activity.COLLECTION_SHARED);
+				} else {
+					newNotification.setActivity(Activity.COLLECTION_REJECTED);
+				}
+				newNotification.setAccess(notification.getAccess());
+				newNotification.setSender(notification.getReceiver());
+				newNotification.setReceiver(notification.getSender());
+				newNotification.setOpenedAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(newNotification);
+				NotificationCenter.sendNotification(newNotification);
+				result.put("message", "User succesfully responded to collection share request");
+				return ok(result);
 			default:
 				result.put("error", "Notification does not require acceptance");
 				return badRequest(result);
 			}
-			result.put("message", "Notification was accepted");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
