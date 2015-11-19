@@ -1,10 +1,19 @@
 define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-switch-case'], function(ko, template, app, autocomplete) {
 
   function TopBarViewModel(params) {
+		this.route         = params.route;
+		var self           = this;
+		self.notifications = ko.observableArray();
 
 		$("[data-toggle=popover]").popover({
 			html: true,
 			content: function() {
+				var tmp = app.currentUser.notifications.userNotifications().concat(app.currentUser.notifications.groupNotifications());
+				tmp.sort(function(a, b) {
+					return b.openedAt - a.openedAt;
+				});
+				self.notifications(tmp.splice(0, 10));
+
 				return $('#notifications-content').html();
 			}
 		});
@@ -15,7 +24,6 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 				if (event.which === null) {
 					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
 			    	$("#myModal").modal('hide');
-
 
 					var char=String.fromCharCode(event.which);
 					toggleSearch("focus",char);
@@ -37,18 +45,14 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 			}
 		});
 
-		this.route = params.route;
-
-		var self           = this;
 		self.username      = app.currentUser.username;
 		self.profileImage  = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
 		self.organizations = app.currentUser.organizations;
 		self.projects      = app.currentUser.projects;
 		self.usergroups    = app.currentUser.usergroups;
-		self.noticount     = ko.computed(function() {
-			return app.currentUser.notifications().length > 0 ? app.currentUser.notifications().length : '';
+		self.noticount     = ko.pureComputed(function() {
+			return app.currentUser.notifications.unread() === 0 ? '' : app.currentUser.notifications.unread();
 		});
-		self.notifications = app.currentUser.notifications;
 
 		editProfile        = function() { app.showPopup('edit-profile'); };
 		newOrganization    = function() { app.showPopup('new-organization', { type: 'organization' }); };

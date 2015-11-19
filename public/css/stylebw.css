@@ -1071,6 +1071,10 @@ nav .badge {
   color: #777;
 }
 
+.notify-list small {
+  color: #777;
+}
+
 .list-group-item .btn {
   padding-bottom: 10px!important;
 }

@@ -1,45 +1,11 @@
-define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else', 'moment'], function (ko, template, app, KnockoutElse, moment) {
+define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], function (ko, template, app, KnockoutElse) {
 
 	function NotificationsViewModel(params) {
 		var self = this;
 		self.route = params.route;
-		self.notifications = ko.observableArray();
-		self.groupNotifications = ko.observableArray();
 
-		self.processNotifications = function (data) {
-			for (var i = 0; i<data.length; i++) {
-				data[i].date = moment(data[i].openedAt).fromNow();
-				switch (data[i].activity) {
-					case "GROUP_INVITE":
-						data[i].message = '<strong>' + data[i].senderName + '</strong> invites you to join <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong>';
-						self.notifications.push(data[i]);
-						break;
-					case "GROUP_INVITE_ACCEPT":
-						data[i].message = '<strong>' + data[i].senderName + '</strong> joined <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong>';
-						self.groupNotifications.push(data[i]);
-						break;
-					case "GROUP_INVITE_DECLINED":
-						data[i].message = '<strong>' + data[i].senderName + '</strong> declined your invitation to join <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong>';
-						self.groupNotifications.push(data[i]);
-						break;
-					case "GROUP_REQUEST":
-						data[i].message = '<strong>' + data[i].senderName + '</strong> wants to join <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong>';
-						self.groupNotifications.push(data[i]);
-						break;
-					case "GROUP_REQUEST_ACCEPT":
-						data[i].message = 'You joined <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong>';
-						self.notifications.push(data[i]);
-						break;
-					case "GROUP_REQUEST_DENIED":
-						data[i].message = 'Your request to join <strong><a href="#organization/' + data[i].group + '">' + data[i].groupName + '</a></strong> was declined';
-						self.notifications.push(data[i]);
-						break;
-					default:
-						data[i].message = "<strong>Unknown Notification Type:</strong> " + data[i].activity;
-						self.notifications.push(data[i]);
-				}
-			}
-		};
+		self.userNotifications = app.currentUser.notifications.userNotifications;
+		self.groupNotifications = app.currentUser.notifications.groupNotifications;
 
 		self.accept = function (notification) {
 			$.ajax({
@@ -81,23 +47,7 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else', 'm
 			});
 		};
 
-		self.loadNotifications = function () {
-			$.ajax({
-				type: 'GET',
-				url: '/user/notifications',
-				contentType: 'application/json',
-				dataType: 'json'
-			}).done(function (data, textStatus, jqXHR) {
-				console.log(data);
-				self.processNotifications(data);
-			}).fail(function (jqXHR, textStatus, errorThrown) {
-				// TODO: Display error message
-			});
-		};
-
-		if (isLogged()) {
-			self.loadNotifications();
-		} else {
+		if (!isLogged()) {
 			window.location = '#login'; // Redirect to login
 		}
 	}

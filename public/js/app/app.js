@@ -1,4 +1,4 @@
-define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
+define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, moment) {
 
 	var self = this;
 	var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
@@ -6,7 +6,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 
 	self.receiveEvent = function(event) {
 		var notification = JSON.parse(event.data);
-		self.currentUser.notifications.unshift(notification);
+		self.addNotification(notification);
 		switch (notification.activity) {
 			case "GROUP_INVITE":
 				$.smkAlert({
@@ -90,7 +90,11 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		"usergroups": ko.observableArray(),
 		"organizations": ko.observableArray(),
 		"projects": ko.observableArray(),
-		"notifications": ko.observableArray()
+		"notifications": {
+			'unread': ko.observable(0),
+			'userNotifications': ko.observableArray(),
+			'groupNotifications': ko.observableArray()
+		}
 	};
 	isLogged = ko.observable(false);
 
@@ -111,8 +115,8 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
-		self.currentUser.notifications(data.notifications);
 
+		self.loadNotifications(data.notifications);
 		self.loadFavorites();
 
 		// Save to session
@@ -151,6 +155,54 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 				$.smkAlert({text:'Error loading Favorites', type:'danger', time: 10});
 				console.log("Error loading favorites!");
 		});
+	};
+
+	self.loadNotifications = function(data) {
+		for (var i = data.length - 1; i>=0; i--) {
+			self.addNotification(data[i]);
+		}
+	};
+
+	self.addNotification = function(data) {
+		data.date = ko.pureComputed(function() {
+			return moment(data.openedAt).fromNow();
+		});
+
+		if (!data.readAt) {
+			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);
+		}
+
+		switch (data.activity) {
+			case "GROUP_INVITE":
+				data.message = '<strong>' + data.senderName + '</strong> invites you to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+				self.currentUser.notifications.userNotifications.unshift(data);
+				break;
+			case "GROUP_INVITE_ACCEPT":
+				data.message = '<strong>' + data.senderName + '</strong> joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+				self.currentUser.notifications.groupNotifications.unshift(data);
+				break;
+			case "GROUP_INVITE_DECLINED":
+				data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+				self.currentUser.notifications.groupNotifications.unshift(data);
+				break;
+			case "GROUP_REQUEST":
+				data.message = '<strong>' + data.senderName + '</strong> wants to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+				self.currentUser.notifications.groupNotifications.unshift(data);
+				break;
+			case "GROUP_REQUEST_ACCEPT":
+				data.message = 'You joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+				self.currentUser.notifications.userNotifications.unshift(data);
+				break;
+			case "GROUP_REQUEST_DENIED":
+				data.message = 'Your request to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong> was declined';
+				self.currentUser.notifications.userNotifications.unshift(data);
+				break;
+			default:
+				data.message = "<strong>Unknown Notification Type:</strong> " + data.activity;
+				self.currentUser.notifications.userNotifications.unshift(data);
+		}
+
+		return data;
 	};
 
 	likeItem = function (record, update) {
@@ -328,7 +380,7 @@ define("app", ['knockout', 'facebook', 'smoke'], function (ko, FB) {
 			success: function () {
 				waitForConnection(function () {
 			        self.notificationSocket.send('{"action":"logout","id":"'+self.currentUser._id()+'"}');
-			    }, 1000)
+			    }, 1000);
 				self.clearSession();
 				window.location.href = "/assets/index.html";
 			}
