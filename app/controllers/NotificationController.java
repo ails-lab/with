@@ -156,7 +156,8 @@ public class NotificationController extends Controller {
 				result.put("message",
 						"Group succesfully reponded to user request");
 				return ok(result);
-			case COLLECTION_REQUEST_SHARING:
+			case COLLECTION_SHARE:
+			case COLLECTION_SUBMIT:
 				Collection collection = DB.getCollectionDAO().get(
 						notification.getCollection());
 				if (accept) {

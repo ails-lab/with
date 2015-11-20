@@ -57,7 +57,8 @@ public class RightsController extends Controller {
 	 * @return OK or Error with JSON detailing the problem
 	 *
 	 */
-	public static Result shareCollection(String colId, String right, String username) {
+	public static Result shareCollection(String colId, String right,
+			String username) {
 
 		ObjectNode result = Json.newObject();
 		Collection collection = null;
@@ -68,10 +69,13 @@ public class RightsController extends Controller {
 			result.put("message", "Cannot retrieve collection from database!");
 			return internalServerError(result);
 		}
-		List<String> userIds = Arrays.asList(session().get("effectiveUserIds").split(","));
-		if (!AccessManager.checkAccess(collection.getRights(), userIds, Action.DELETE)) {
-			result.put("error", "Sorry! You do not own this collection so you cannot set rights. "
-					+ "Please contact the owner of this collection");
+		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
+				.split(","));
+		if (!AccessManager.checkAccess(collection.getRights(), userIds,
+				Action.DELETE)) {
+			result.put("error",
+					"Sorry! You do not own this collection so you cannot set rights. "
+							+ "Please contact the owner of this collection");
 			return forbidden(result);
 		}
 		ObjectId owner = new ObjectId(userIds.get(0));
@@ -79,10 +83,12 @@ public class RightsController extends Controller {
 		// the receiver can be either a User or a UserGroup
 		// Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
 		ObjectId userOrGroupId = null;
+		boolean userRelated = false;
 		if (username != null) {
 			User user = DB.getUserDAO().getByUsername(username);
 			if (user != null) {
 				userOrGroupId = user.getDbId();
+				userRelated = true;
 			} else {
 				UserGroup userGroup = DB.getUserGroupDAO().getByName(username);
 				if (userGroup != null)
@@ -90,7 +96,8 @@ public class RightsController extends Controller {
 			}
 		}
 		if (userOrGroupId == null) {
-			result.put("error", "No user or userGroup with given username/email");
+			result.put("error",
+					"No user or userGroup with given username/email");
 			return badRequest(result);
 		}
 		ObjectId collectionId = collection.getDbId();
@@ -118,13 +125,15 @@ public class RightsController extends Controller {
 			return ok(result);
 		}
 		Access access = Access.valueOf(right);
-		List<Notification> requests = DB.getNotificationDAO().getPendingCollectionNotifications(userOrGroupId,
-				collectionId, Activity.COLLECTION_REQUEST_SHARING, access);
+		List<Notification> requests = DB.getNotificationDAO()
+				.getPendingCollectionNotifications(userOrGroupId, collectionId,
+						Activity.COLLECTION_SHARE, access);
 		if (requests.isEmpty()) {
 			// Find if there is a request for other type of access and override
 			// it
-			requests = DB.getNotificationDAO().getPendingCollectionNotifications(userOrGroupId, collectionId,
-					Activity.COLLECTION_REQUEST_SHARING);
+			requests = DB.getNotificationDAO()
+					.getPendingCollectionNotifications(userOrGroupId,
+							collectionId, Activity.COLLECTION_SHARE);
 			for (Notification request : requests) {
 				request.setPendingResponse(false);
 				Date now = new Date();
@@ -133,7 +142,11 @@ public class RightsController extends Controller {
 			}
 			// Make a new request for collection sharing request
 			Notification notification = new Notification();
-			notification.setActivity(Activity.COLLECTION_REQUEST_SHARING);
+			if (userRelated) {
+				notification.setActivity(Activity.COLLECTION_SHARE);
+			} else {
+				notification.setActivity(Activity.COLLECTION_SUBMIT);
+			}
 			notification.setAccess(access);
 			notification.setReceiver(userOrGroupId);
 			notification.setCollection(collectionId);
@@ -143,7 +156,8 @@ public class RightsController extends Controller {
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
-			result.put("message", "Request for collection sharing sent to the user");
+			result.put("message",
+					"Request for collection sharing sent to the user");
 			return ok(result);
 		} else {
 			result.put("error", "Request has already been sent to the user");
