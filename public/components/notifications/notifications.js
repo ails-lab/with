@@ -10,9 +10,7 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 		self.accept = function (notification) {
 			$.ajax({
 				type: 'PUT',
-				url: '/user/notifications/' + notification.dbId + '/accept',
-				contentType: 'application/json',
-				dataType: 'json'
+				url: '/notifications/accept/' + notification.dbId,
 			}).done(function (data, textStatus, jqXHR) {
 				// TODO: Update the notification list
 			}).fail(function (jqXHR, textStatus, errorThrown) {
@@ -20,12 +18,10 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 			});
 		};
 
-		self.decline = function (notification) {
+		self.reject = function (notification) {
 			$.ajax({
 				type: 'PUT',
-				url: '/user/notifications/' + notification.dbId + '/decline',
-				contentType: 'application/json',
-				dataType: 'json'
+				url: '/notifications/reject/' + notification.dbId,
 			}).done(function (data, textStatus, jqXHR) {
 				// TODO: Update the notification list
 			}).fail(function (jqXHR, textStatus, errorThrown) {
