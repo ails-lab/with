@@ -24,7 +24,7 @@ import java.util.Set;
 import org.bson.types.ObjectId;
 
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
-import model.WithAccess.Access;
+import model.WithAccess;
 
 public class ExampleDataModels {
 	
@@ -33,28 +33,19 @@ public class ExampleDataModels {
 	 * @author Arne Stabenau
 	 *
 	 */
-	public static class WithAccess extends HashMap<ObjectId, Access> {
-		
-		public static enum Access {
-			NONE, READ, WRITE, OWN
-		}
-		private boolean isPublic;
-		
-		public boolean isPublic() {
-			return isPublic;
-		}
-		public void setPublic(boolean isPublic) {
-			this.isPublic = isPublic;
-		}
-	}
 
 	//TODO: why is the key a string and not an enum?
 	public static class Literal extends  HashMap<String, String> {
 		// keys are language 2 letter codes, 
 		// "unknown" for unknown language
 		// special request for any is "any"
-		public void setLiteral( String val, String lang ) {
-			
+		
+		public static enum Language {
+			en, el, xx, any 
+		}
+		
+		public void setLiteral( String val, Language lang ) {
+			put( lang.toString(), val);
 		}
 		
 		/**
@@ -62,11 +53,11 @@ public class ExampleDataModels {
  		 * @param lang
 		 * @return
 		 */
-		public String getLiteral(String lang ) {
+		public String getLiteral( Language lang ) {
 			if( "any".equals( lang )) {
 				
 			}
-			return get( lang );
+			return get( lang.toString() );
 		}		
 	}
 	
@@ -92,7 +83,7 @@ public class ExampleDataModels {
 	}
 	
 	// just to have a separate class
-	public static class Collection extends Resource<CollectionDescriptiveData> {
+	public static class Collection extends WithResource<CollectionDescriptiveData> {
 	}
 	
 	
@@ -110,7 +101,7 @@ public class ExampleDataModels {
 	}
 	
 	
-	public static class Annotation {
+	public static class ArneAnnotation {
 		
 		// if the field has a URI semantic (like dc:title or foaf:name or isRelatedTo)
 		// it could be uri://with.image.ntua.gr/ExhibitionRecordDescription
@@ -129,15 +120,47 @@ public class ExampleDataModels {
 		LiteralOrResource value;
 	}
 
-	// maybe like this??
-	public static class ExhibitionAnnotation extends Annotation {
-		// audio url
-		// video url
-		// extra title
-		// extra description
+	// marker base class for possible annotations
+	public static class AnnotationBody {
 	}
 	
+	// base class what the annotation references
+	public static class AnnotationTarget {
+	}
 	
+	public static class Annotation {
+		ObjectId dbId;
+		
+		String withUrl;
+		Date created;
+		ObjectId creator; // a with user
+		public static enum Type {
+			EXHIBITION, OTHERS
+		}
+		Type type;
+		
+		// body and target depend on the annotation type
+		AnnotationBody body;
+		AnnotationTarget target;
+	}
+	
+	public static class ContextAnnotationTarget extends AnnotationTarget {
+		ObjectId collectionId;
+		int position;
+	}
+	
+	public static class ExhibitionAnnotationBody extends AnnotationBody {
+		Literal exhibitionDescription;
+		String audioUrl;
+		String videoUrl;
+	}
+	
+	public static class TextAnnotationTarget extends AnnotationTarget {
+		String propertyName;
+		String language;
+		String originalValue;
+		int start, end;
+	}
 	
 	
 	public static class WithAdmin {
@@ -183,6 +206,10 @@ public class ExampleDataModels {
 	public static class CollectionInfo {
 		ObjectId collectionId;
 		int position;
+		
+		public String toString() {
+			return (collectionId+":"+position);
+		}
 	}
 	
 	
@@ -292,11 +319,11 @@ public class ExampleDataModels {
 		
 	}
 	
-	public static class EUscreenObject extends Resource<EUscreenData> {
+	public static class EUscreenObject extends WithResource<EUscreenData> {
 		
 	}
 	
-	public class CulturalObject extends Resource<CulturalObjectData> {
+	public class CulturalObject extends WithResource<CulturalObjectData> {
 		
 	}
 	
@@ -342,6 +369,10 @@ public class ExampleDataModels {
 		//TODO: add link to external collection
 	}
 	
+	public static class Agent extends WithResource<AgentData> {
+		
+	}
+	
 	public static class AgentData extends DescriptiveData {
 		ArrayList<WithDate> birthdate;
 		ArrayList<LiteralOrResource> birthplace;
@@ -353,7 +384,7 @@ public class ExampleDataModels {
 		Literal gender;		
 	}
 	
-	public static class Place extends Resource<PlaceData> {
+	public static class Place extends WithResource<PlaceData> {
 		
 	}
 	
@@ -381,7 +412,7 @@ public class ExampleDataModels {
 		ArrayList<LiteralOrResource> objectsInvolved;
 	}
 	
-	public static class Event extends Resource<EventData> {
+	public static class Event extends WithResource<EventData> {
 		
 	}
 	
@@ -396,7 +427,7 @@ public class ExampleDataModels {
 		ArrayList<LiteralOrResource> place;
 	}
 	
-	public static class Resource<T extends DescriptiveData> {
+	public static class WithResource<T extends DescriptiveData> {
 		WithAdmin administrative;
 		ArrayList<CollectionInfo> collectedIn;
 		
@@ -418,11 +449,11 @@ public class ExampleDataModels {
 		// all attached media Objects (their embedded part)
 		ArrayList<EmbeddedMediaObject> media;
 		
-		//each time an annotation is added by a user, a copy of the Resource is made, i.e. colId-posId is removed from the parent record collectedIn array,
-		//and added in the collectedIn array of the copy. The new copy has all annotations of the parent, plus the new ones added by the user.
-		//If a user adds an annotation of an annotationType that already exists in the resource, we edit the annotation entry.
-		ArrayList<Annotation> annotations;
+		// embedded for some or all, not sure
+		// key is CollectionInfo.toString()
+		HashMap<String, Annotation> contextAnnotation;
 		
+		ArrayList<Annotation> annotations;
 	}
 	
 	
