@@ -158,7 +158,7 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 	};
 
 	self.loadNotifications = function(data) {
-		for (var i = data.length - 1; i>=0; i--) {
+		for (var i = 0; i < data.length; i++) {
 			self.addNotification(data[i]);
 		}
 	};
