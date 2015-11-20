@@ -1,0 +1,170 @@
+<div class="modal-dialog profilePopup">
+	<div class="modal-content text-left">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal"
+				aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			<h4>Manage Members</h4>
+		</div>
+		<div class="modal-body row">
+			<!-- ------------- -->
+
+			<div class="form-group">
+				<div>
+					<ul class="nav nav-tabs" role="tablist">
+						<li role="presentation" class="active"><a href="#addUser"
+							aria-controls="addUser" role="tab" data-toggle="tab">Add a
+								User</a></li>
+						<li role="presentation"><a href="#addUserGroup"
+							aria-controls="addUserGroup" role="tab" data-toggle="tab">Add
+								a User Group</a></li>
+					</ul>
+				</div>
+				<div class="tab-content">
+					<div role="tabpanel" class="tab-pane active" id="addUser">
+						<div class="col-md-12">
+							<div class="form-group form-inline">
+								<div class="spec">
+									<label for="firstName">Select user</label> <br>
+									<div class="input-group input-group-bg col-lg-10">
+										<input type="search" class="form-control" id="userName"
+											placeholder="User name or email"
+											data-bind="autocompleteUsername: myUsername, category:1" />
+									</div>
+									<span style="padding-left: 10px;">
+										<button type="button" class="btn btn-primary btn-xs"
+											title="Add user to Organization"
+											data-bind="click: addToUserGroup.bind($data, 'Add user')">
+											<span class="glyphicon glyphicon-saved" aria-hidden="true"
+												style="cursor: pointer"> </span>
+										</button>
+									</span>
+								</div>
+							</div>
+						</div>
+						<hr>
+					</div>
+					<div role="tabpanel" class="tab-pane fade" id="addUserGroup">
+						<br>
+						<br>
+						<div class="col-md-12">
+							<div class="form-group form-inline">
+								<div class="spec">
+									<label for="firstName">Select group</label> <br>
+									<div class="input-group input-group-bg col-lg-10">
+										<input type="search" class="form-control" id="groupName"
+											placeholder="Group name or email"
+											data-bind="autocompleteUsername: myUsername, category:2" />
+									</div>
+									<span style="padding-left: 10px;">
+										<button type="button" class="btn btn-primary btn-xs"
+											title="Add group to Organization"
+											data-bind="click: addToUserGroup.bind($data, 'Add Group')">
+											<span class="glyphicon glyphicon-saved" aria-hidden="true"
+												style="cursor: pointer"> </span>
+										</button>
+									</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<hr>
+			<div data-bind="visible:  userMembers().length > 0">
+				<h5 align="center">
+					<strong>Users with access to the collection</strong>
+				</h5>
+				<div class="container-fluid">
+					<div class="row text-center" data-bind="foreach: userMembers">
+						<div class="col-md-3">
+							<div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer"
+								data-bind="event: { mouseenter: $parent.showRemoveIcon.bind($data), mouseleave: $parent.hideRemoveIcon.bind($data, userId())}">
+								<!-- ko if: $data.image -->
+								<img class="img-circle img-thumbnail userPhoto"
+									data-bind="attr: {src: image, id: 'image_' + userId()}">
+								<div class="btn-group rightsIcon" role="group"
+									style="display: none" data-bind="attr: {id: 'removeIcon_'+userId()}" area-label="Remove from Organization">
+									<button type="button" class="btn btn-info btn-xs"
+										title="Remove from Organization" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user')">
+										<span class="glyphicon glyphicon-trash"
+											style="cursor: pointer"></span>
+									</button>
+								</div>
+								</img>
+								<!-- /ko -->
+								<!-- ko ifnot: $data.image -->
+								<img src="images/user.png"
+									class="img-circle img-thumbnail img-responsive userPhoto"
+									data-bind="attr: {id: 'image_' + userId()}">
+								<div class="btn-group rightsIcon" role="group"
+									style="display: none" data-bind="attr: {id: 'removeIcon_'+userId()}" area-label="Remove from Organization">
+									<button type="button" class="btn btn-info btn-xs"
+										title="Remove from Organization" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user')">
+										<span class="glyphicon glyphicon-trash"
+											style="cursor: pointer"></span>
+									</button>
+								</div>
+								</img>
+								<!-- /ko -->
+							</div>
+							<span class="overflowText" data-bind="text: username()"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			<hr>
+			<div data-bind="visible:  groupMembers().length > 0">
+				<h5 align="center">
+					<strong>User groups with access to the collection</strong>
+				</h5>
+				<div class="container-fluid">
+					<div class="row text-center" data-bind="foreach: groupMembers">
+						<div class="col-md-3">
+							<div class="userImage col-xs-12 col-sm-12 col-md-12 coll-footer"
+								data-bind="event: { mouseenter: $parent.showRemoveIcon.bind($data), mouseleave: $parent.hideRemoveIcon.bind($data, userId())}">
+								<!-- ko if: $data.image -->
+								<img class="img-circle img-thumbnail userPhoto"
+									data-bind="attr: {src: image, id: 'image_' + userId()}">
+								<div class="btn-group rightsIcon" role="group"
+									style="display: none" data-bind="attr: {id: 'removeIcon_'+userId()}" area-label="Remove from Organization">
+									<button type="button" class="btn btn-info btn-xs"
+										title="Remove from Organization" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group')">
+										<span class="glyphicon glyphicon-trash"
+											style="cursor: pointer"></span>
+									</button>
+								</div>
+								</img>
+								<!-- /ko -->
+								<!-- ko ifnot: $data.image -->
+								<img src="images/user.png"
+									class="img-circle img-thumbnail img-responsive userPhoto"
+									data-bind="attr: {id: 'image_' + userId()}">
+								<div class="btn-group rightsIcon" role="group"
+									style="display: none" data-bind="attr: {id: 'removeIcon_'+userId()}" area-label="Remove from Organization">
+									<button type="button" class="btn btn-info btn-xs"
+										title="Remove from Organization" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group')">
+										<span class="glyphicon glyphicon-trash"
+											style="cursor: pointer"></span>
+									</button>
+								</div>
+								</img>
+								<!-- /ko -->
+							</div>
+							<span class="overflowText" data-bind="text: username()"></span>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- --------------- -->
+		</div>
+		<div class="modal-footer">
+			<button type="button" class="btn btn-default"
+				data-bind="click: closeWindow">Close</button>
+			<!-- <button type="button" class="btn btn-primary" data-bind="click: saveUsers">Save changes</button> -->
+		</div>
+	</div>
+</div>

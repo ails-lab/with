@@ -23,6 +23,7 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 
+import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.Rights.Access;
 
 public class ExampleDataModels {
@@ -47,6 +48,7 @@ public class ExampleDataModels {
 		}
 	}
 
+	//TODO: why is the key a string and not an enum?
 	public static class Literal extends  HashMap<String, String> {
 		// keys are language 2 letter codes, 
 		// "unknown" for unknown language
@@ -111,7 +113,6 @@ public class ExampleDataModels {
 		int entryCount;
 		boolean isExhibition;
 	}
-	
 	
 	
 	public static class ArneAnnotation {
@@ -242,9 +243,7 @@ public class ExampleDataModels {
 		String title;
 		String description;
 	}
-	
-	public static class EdmCollection extends ExternalCollection {}
-	
+		
 	public static class ProvenanceInfo {
 		String provider;
 		String uri;
@@ -276,7 +275,7 @@ public class ExampleDataModels {
 		
 		// ontology based time 
 		String uri;
-		String uriType;
+		ResourceType uriType;
 		
 		// any expression that cannot fit into above
 		String free;
@@ -322,7 +321,7 @@ public class ExampleDataModels {
 		ArrayList<Literal> alternative;
 	}
 	
-	public static class EUscreendata extends DescriptiveData {
+	public static class EUscreenData extends DescriptiveData {
 		// title is filled in with original language title and english title
 		// description dito
 		
@@ -331,6 +330,10 @@ public class ExampleDataModels {
 		
 		// in year we keep the production year
 
+		
+	}
+	
+	public static class EUscreenObject extends Resource<EUscreenData> {
 		
 	}
 	
@@ -362,7 +365,8 @@ public class ExampleDataModels {
 
 		ArrayList<WithDate> dccreated;
 		ArrayList<WithDate> dcdate;
-
+		
+		//TODO: do we want multilinguality for dcformat and dctermsmedium?
 		ArrayList<LiteralOrResource> dcformat;
 		ArrayList<LiteralOrResource> dctermsmedium;
 		
@@ -376,6 +380,7 @@ public class ExampleDataModels {
 		ArrayList<LiteralOrResource> dccreator;
 		ArrayList<LiteralOrResource> dctermsaudience;
 		ArrayList<LiteralOrResource> dclanguage;
+		//TODO: add link to external collection
 	}
 	
 	public static class AgentData extends DescriptiveData {
@@ -438,6 +443,7 @@ public class ExampleDataModels {
 		
 		Usage usage;
 		
+		//What is the 
 		ArrayList<ExternalCollection> externalCollections;		
 		ArrayList<ProvenanceInfo> provenance;
 	
@@ -459,6 +465,7 @@ public class ExampleDataModels {
 		
 		ArrayList<Annotation> annotations;
 	}
+	
 	
 	
 	public static class EmbeddedMediaObject {
@@ -500,9 +507,9 @@ public class ExampleDataModels {
 	 *
 	 */
 	public static class MediaObject extends EmbeddedMediaObject {		
-		// which collection is this Media part of, this is the access rights restriction
+		// which resource is this Media part of, this is the access rights restriction
 		// if there is none, the media object is publicly available
-		ArrayList<ObjectId> collection;
+		ArrayList<ObjectId> resources;
 		
 		int width, height;
 		// external Url
