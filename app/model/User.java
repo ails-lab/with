@@ -27,13 +27,14 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
+import play.Logger;
+import play.Logger.ALogger;
+import utils.Serializer;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
-import play.Logger;
-import play.Logger.ALogger;
-import utils.Serializer;
 
 @Entity
 public class User extends UserOrGroup {
@@ -283,11 +284,16 @@ public class User extends UserOrGroup {
 		Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 		userOrGroupIds.add(this.getDbId());
 		userOrGroupIds.addAll(this.adminInGroups);
-		Set<Notification> notifications = new HashSet<Notification>(DB
+		Set<Notification> unreadNotifications = new HashSet<Notification>(DB
 				.getNotificationDAO().getUnreadByReceivers(userOrGroupIds, 0));
-		if (notifications.size() < 20) {
-			notifications.addAll(DB.getNotificationDAO().getAllByReceivers(
-					userOrGroupIds, 20 - notifications.size()));
+		Set<Notification> notifications;
+		if (unreadNotifications.size() < 20) {
+			notifications = new HashSet<Notification>(DB.getNotificationDAO()
+					.getAllByReceivers(userOrGroupIds,
+							20 - unreadNotifications.size()));
+			notifications.addAll(unreadNotifications);
+		} else {
+			notifications = unreadNotifications;
 		}
 		return notifications;
 	}
