@@ -139,7 +139,7 @@ public class NotificationController extends Controller {
 				newNotification.setSender(currentUser.getDbId());
 				newNotification.setOpenedAt(new Timestamp(now.getTime()));
 				// Notification for the administrators of the group
-				newNotification.setReceiver(group.getDbId());
+				newNotification.setReceiver(user.getDbId());
 				newNotification.setDbId(null);
 				DB.getNotificationDAO().makePermanent(newNotification);
 				// Send notification through socket (to user and group
