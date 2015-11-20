@@ -97,7 +97,7 @@ public class ExampleDataModels {
 	}
 	
 	// just to have a separate class
-	public static class Collection extends Resource<CollectionDescriptiveData> {
+	public static class Collection extends WithResource<CollectionDescriptiveData> {
 	}
 	
 	
@@ -333,11 +333,11 @@ public class ExampleDataModels {
 		
 	}
 	
-	public static class EUscreenObject extends Resource<EUscreenData> {
+	public static class EUscreenObject extends WithResource<EUscreenData> {
 		
 	}
 	
-	public class CulturalObject extends Resource<CulturalObjectData> {
+	public class CulturalObject extends WithResource<CulturalObjectData> {
 		
 	}
 	
@@ -394,7 +394,7 @@ public class ExampleDataModels {
 		Literal gender;		
 	}
 	
-	public static class Place extends Resource<PlaceData> {
+	public static class Place extends WithResource<PlaceData> {
 		
 	}
 	
@@ -422,7 +422,7 @@ public class ExampleDataModels {
 		ArrayList<LiteralOrResource> objectsInvolved;
 	}
 	
-	public static class Event extends Resource<EventData> {
+	public static class Event extends WithResource<EventData> {
 		
 	}
 	
@@ -437,7 +437,7 @@ public class ExampleDataModels {
 		ArrayList<LiteralOrResource> place;
 	}
 	
-	public static class Resource<T extends DescriptiveData> {
+	public static class WithResource<T extends DescriptiveData> {
 		WithAdmin administrative;
 		ArrayList<CollectionInfo> collectedIn;
 		
