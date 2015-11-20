@@ -51,8 +51,13 @@ public class ExampleDataModels {
 		// keys are language 2 letter codes, 
 		// "unknown" for unknown language
 		// special request for any is "any"
-		public void setLiteral( String val, String lang ) {
-			
+		
+		public static enum Language {
+			en, el, xx, any 
+		}
+		
+		public void setLiteral( String val, Language lang ) {
+			put( lang.toString(), val);
 		}
 		
 		/**
@@ -60,11 +65,11 @@ public class ExampleDataModels {
  		 * @param lang
 		 * @return
 		 */
-		public String getLiteral(String lang ) {
+		public String getLiteral( Language lang ) {
 			if( "any".equals( lang )) {
 				
 			}
-			return get( lang );
+			return get( lang.toString() );
 		}		
 	}
 	
@@ -108,20 +113,8 @@ public class ExampleDataModels {
 	}
 	
 	
-	public static class RecordAnnotation {
-		// 
-		ObjectId recordId;
-		
-		// this extra information is specific to this collection
-		ObjectId collectionId;
-		
-		// in which position in this collection 
-		int position;
-		
-		Annotation[] annotations;
-	}	
 	
-	public static class Annotation {
+	public static class ArneAnnotation {
 		
 		// if the field has a URI semantic (like dc:title or foaf:name or isRelatedTo)
 		// it could be uri://with.image.ntua.gr/ExhibitionRecordDescription
@@ -140,15 +133,47 @@ public class ExampleDataModels {
 		LiteralOrResource value;
 	}
 
-	// maybe like this??
-	public static class ExhibitionAnnotation extends Annotation {
-		// audio url
-		// video url
-		// extra title
-		// extra description
+	// marker base class for possible annotations
+	public static class AnnotationBody {
 	}
 	
+	// base class what the annotation references
+	public static class AnnotationTarget {
+	}
 	
+	public static class Annotation {
+		ObjectId dbId;
+		
+		String withUrl;
+		Date created;
+		ObjectId creator; // a with user
+		public static enum Type {
+			EXHIBITION, OTHERS
+		}
+		Type type;
+		
+		// body and target depend on the annotation type
+		AnnotationBody body;
+		AnnotationTarget target;
+	}
+	
+	public static class ContextAnnotationTarget extends AnnotationTarget {
+		ObjectId collectionId;
+		int position;
+	}
+	
+	public static class ExhibitionAnnotationBody extends AnnotationBody {
+		Literal exhibitionDescription;
+		String audioUrl;
+		String videoUrl;
+	}
+	
+	public static class TextAnnotationTarget extends AnnotationTarget {
+		String propertyName;
+		String language;
+		String originalValue;
+		int start, end;
+	}
 	
 	
 	public static class WithAdmin {
@@ -194,6 +219,10 @@ public class ExampleDataModels {
 	public static class CollectionInfo {
 		ObjectId collectionId;
 		int position;
+		
+		public String toString() {
+			return (collectionId+":"+position);
+		}
 	}
 	
 	
@@ -423,6 +452,12 @@ public class ExampleDataModels {
 		
 		// all attached media Objects (their embedded part)
 		ArrayList<EmbeddedMediaObject> media;
+		
+		// embedded for some or all, not sure
+		// key is CollectionInfo.toString()
+		HashMap<String, Annotation> contextAnnotation;
+		
+		ArrayList<Annotation> annotations;
 	}
 	
 	
