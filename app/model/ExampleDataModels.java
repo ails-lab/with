@@ -415,6 +415,11 @@ public class ExampleDataModels {
 		Double accuracy;
 	}
 	
+	
+	public static class TimeSpan extends WithResource<TimeSpanData> {
+		
+	}
+	
 	public static class TimeSpanData extends DescriptiveData {
 		ArrayList<WithPeriod> timespan;
 	}
