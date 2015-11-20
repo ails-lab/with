@@ -46,28 +46,6 @@ public class User extends UserOrGroup {
 		MALE, FEMALE, UNSPECIFIED
 	}
 
-	@SuppressWarnings("unused")
-	private class Notifications {
-		private Set<Notification> userNotifications;
-		private Set<Notification> groupNotifications;
-
-		public Set<Notification> getUserNotifications() {
-			return userNotifications;
-		}
-
-		public void setUserNotifications(Set<Notification> userNotifications) {
-			this.userNotifications = userNotifications;
-		}
-
-		public Set<Notification> getGroupNotifications() {
-			return groupNotifications;
-		}
-
-		public void setGroupNotifications(Set<Notification> groupNotifications) {
-			this.groupNotifications = groupNotifications;
-		}
-	}
-
 	private String email;
 
 	private String firstName;
@@ -301,27 +279,16 @@ public class User extends UserOrGroup {
 		this.exhibitionsCreated++;
 	}
 
-	public int getNotificationNumber() {
-		return 0;
-	}
-
-	public Notifications getNotifications() {
-		Notifications notifications = new Notifications();
-		Set<Notification> userNotifications = new HashSet<Notification>(
-				DB.getNotificationDAO().getUnreadByReceiver(this.getDbId(), 0));
-		if (userNotifications.size() < 20) {
-			userNotifications.addAll(DB.getNotificationDAO().getAllByReceiver(this.getDbId(), 20));
+	public Set<Notification> getNotifications() {
+		Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
+		userOrGroupIds.add(this.getDbId());
+		userOrGroupIds.addAll(this.adminInGroups);
+		Set<Notification> notifications = new HashSet<Notification>(DB
+				.getNotificationDAO().getUnreadByReceivers(userOrGroupIds, 0));
+		if (notifications.size() < 20) {
+			notifications.addAll(DB.getNotificationDAO().getAllByReceivers(
+					userOrGroupIds, 20 - notifications.size()));
 		}
-		notifications.setUserNotifications(userNotifications);
-		Set<Notification> groupNotifications = new HashSet<Notification>();
-		if (this.adminInGroups != null && !this.adminInGroups.isEmpty()) {
-			groupNotifications.addAll(DB.getNotificationDAO().getUnreadByReceivers(this.adminInGroups, 0));
-			if (groupNotifications.size() < 20) {
-				groupNotifications.addAll(DB.getNotificationDAO().getAllByReceivers(this.adminInGroups, 20));
-			}
-		}
-		notifications.setGroupNotifications(groupNotifications);
 		return notifications;
-
 	}
 }

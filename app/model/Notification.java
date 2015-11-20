@@ -184,6 +184,18 @@ public class Notification {
 	}
 
 	@Override
+	public boolean equals(Object other) {
+		if (other == null)
+			return false;
+		if (other == this)
+			return true;
+		if (!(other instanceof Notification))
+			return false;
+		Notification otherNotification = (Notification) other;
+		return (otherNotification.hashCode() == this.hashCode());
+	}
+
+	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 31).append(this.dbId).toHashCode();
 	}
