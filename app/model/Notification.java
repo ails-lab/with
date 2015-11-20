@@ -158,7 +158,6 @@ public class Notification {
 		this.openedAt = openedAt;
 	}
 
-	@JsonIgnore
 	public Timestamp getReadAt() {
 		return readAt;
 	}
