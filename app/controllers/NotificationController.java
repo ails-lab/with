@@ -105,12 +105,6 @@ public class NotificationController extends Controller {
 				newNotification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(newNotification);
 				NotificationCenter.sendNotification(newNotification);
-				// Notification for the user itself
-				newNotification.setReceiver(user.getDbId());
-				newNotification.setDbId(null);
-				DB.getNotificationDAO().makePermanent(newNotification);
-				// Send notification through socket
-				NotificationCenter.sendNotification(newNotification);
 				result.put("message", "User succesfully responded to invitation");
 				return ok(result);
 			case GROUP_REQUEST:
@@ -142,11 +136,8 @@ public class NotificationController extends Controller {
 					newNotification.setActivity(Activity.GROUP_REQUEST_DENIED);
 				}
 				newNotification.setGroup(group.getDbId());
-				newNotification.setReceiver(user.getDbId());
 				newNotification.setSender(currentUser.getDbId());
 				newNotification.setOpenedAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(newNotification);
-				NotificationCenter.sendNotification(newNotification);
 				// Notification for the administrators of the group
 				newNotification.setReceiver(group.getDbId());
 				newNotification.setDbId(null);
