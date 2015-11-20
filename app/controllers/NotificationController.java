@@ -54,15 +54,22 @@ public class NotificationController extends Controller {
 	public static Result respondToRequest(String notificationId, boolean accept) {
 		ObjectNode result = Json.newObject();
 		try {
-			String currentUserId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+			String currentUserId = AccessManager.effectiveUserId(session().get(
+					"effectiveUserIds"));
 			if (currentUserId == null) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
 			}
 			User currentUser = DB.getUserDAO().get(new ObjectId(currentUserId));
-			Notification notification = DB.getNotificationDAO().get(new ObjectId(notificationId));
+			Notification notification = DB.getNotificationDAO().get(
+					new ObjectId(notificationId));
+			if (!notification.isPendingResponse()) {
+				result.put("error", "Notification does not require acceptance");
+				return badRequest(result);
+			}
 			ObjectId receiver = notification.getReceiver();
-			if (!receiver.equals(currentUser.getDbId()) && !currentUser.getAdminInGroups().contains(receiver)) {
+			if (!receiver.equals(currentUser.getDbId())
+					&& !currentUser.getAdminInGroups().contains(receiver)) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
 			}
@@ -105,7 +112,8 @@ public class NotificationController extends Controller {
 				newNotification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(newNotification);
 				NotificationCenter.sendNotification(newNotification);
-				result.put("message", "User succesfully responded to invitation");
+				result.put("message",
+						"User succesfully responded to invitation");
 				return ok(result);
 			case GROUP_REQUEST:
 				groupId = notification.getGroup();
@@ -145,14 +153,18 @@ public class NotificationController extends Controller {
 				// Send notification through socket (to user and group
 				// administrators)
 				NotificationCenter.sendNotification(newNotification);
-				result.put("message", "Group succesfully reponded to user request");
+				result.put("message",
+						"Group succesfully reponded to user request");
 				return ok(result);
 			case COLLECTION_REQUEST_SHARING:
-				Collection collection = DB.getCollectionDAO().get(notification.getCollection());
+				Collection collection = DB.getCollectionDAO().get(
+						notification.getCollection());
 				if (accept) {
-					collection.getRights().put(notification.getReceiver(), notification.getAccess());
+					collection.getRights().put(notification.getReceiver(),
+							notification.getAccess());
 					if (DB.getCollectionDAO().makePermanent(collection) == null) {
-						result.put("error", "Cannot store collection to database!");
+						result.put("error",
+								"Cannot store collection to database!");
 						return internalServerError(result);
 					}
 					// update collection rights in index
@@ -175,7 +187,8 @@ public class NotificationController extends Controller {
 				newNotification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(newNotification);
 				NotificationCenter.sendNotification(newNotification);
-				result.put("message", "User succesfully responded to collection share request");
+				result.put("message",
+						"User succesfully responded to collection share request");
 				return ok(result);
 			default:
 				result.put("error", "Notification does not require acceptance");
@@ -190,13 +203,18 @@ public class NotificationController extends Controller {
 
 	public static Result getUserNotifications() {
 		try {
-			ObjectId userId = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+			ObjectId userId = new ObjectId(
+					AccessManager.effectiveUserId(session().get(
+							"effectiveUserIds")));
 			// Get all unread notifications
-			List<Notification> notifications = DB.getNotificationDAO().getUnreadByReceiver(userId, 0);
-			Set<ObjectId> groups = DB.getUserDAO().get(userId).getAdminInGroups();
+			List<Notification> notifications = DB.getNotificationDAO()
+					.getUnreadByReceiver(userId, 0);
+			Set<ObjectId> groups = DB.getUserDAO().get(userId)
+					.getAdminInGroups();
 			if (groups != null && !groups.isEmpty()) {
 				for (ObjectId groupId : groups) {
-					notifications.addAll(DB.getNotificationDAO().getUnreadByReceiver(groupId, 0));
+					notifications.addAll(DB.getNotificationDAO()
+							.getUnreadByReceiver(groupId, 0));
 				}
 			}
 			return ok(Json.toJson(notifications));
@@ -215,8 +233,10 @@ public class NotificationController extends Controller {
 		Notification notification;
 		for (JsonNode id : json) {
 			try {
-				notification = DB.getNotificationDAO().get(new ObjectId(id.asText()));
-				if (notification.getReadAt() == null && notification.isPendingResponse() == false) {
+				notification = DB.getNotificationDAO().get(
+						new ObjectId(id.asText()));
+				if (notification.getReadAt() == null
+						&& notification.isPendingResponse() == false) {
 					Date now = new Date();
 					notification.setReadAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);
@@ -235,7 +255,8 @@ public class NotificationController extends Controller {
 	}
 
 	public static Result sendMessage(String receiverId) {
-		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+		ObjectId sender = new ObjectId(AccessManager.effectiveUserId(session()
+				.get("effectiveUserIds")));
 		JsonNode json = request().body().asJson();
 		if (!json.has("message")) {
 			ObjectNode error = Json.newObject();
