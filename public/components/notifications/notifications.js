@@ -12,7 +12,8 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 				type: 'PUT',
 				url: '/notifications/accept/' + notification.dbId,
 			}).done(function (data, textStatus, jqXHR) {
-				// TODO: Update the notification list
+				notification.pending(false);
+				app.currentUser.notificatios.unread(app.currentUser.notification.unread() - 1);
 			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// TODO: Display error message
 			});
@@ -23,7 +24,8 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 				type: 'PUT',
 				url: '/notifications/reject/' + notification.dbId,
 			}).done(function (data, textStatus, jqXHR) {
-				// TODO: Update the notification list
+				notification.pending(false);
+				app.currentUser.notificatios.unread(app.currentUser.notification.unread() - 1);
 			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// TODO: Display error message
 			});
