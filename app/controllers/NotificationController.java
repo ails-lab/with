@@ -157,7 +157,6 @@ public class NotificationController extends Controller {
 						"Group succesfully reponded to user request");
 				return ok(result);
 			case COLLECTION_SHARE:
-			case COLLECTION_SUBMIT:
 				Collection collection = DB.getCollectionDAO().get(
 						notification.getCollection());
 				if (accept) {
@@ -181,6 +180,9 @@ public class NotificationController extends Controller {
 					newNotification.setActivity(Activity.COLLECTION_SHARED);
 				} else {
 					newNotification.setActivity(Activity.COLLECTION_REJECTED);
+				}
+				if (notification.getGroup() != null) {
+					newNotification.setGroup(notification.getGroup());
 				}
 				newNotification.setAccess(notification.getAccess());
 				newNotification.setSender(notification.getReceiver());

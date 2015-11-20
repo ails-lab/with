@@ -83,16 +83,17 @@ public class RightsController extends Controller {
 		// the receiver can be either a User or a UserGroup
 		// Map<ObjectId, Access> rightsMap = new HashMap<ObjectId, Access>();
 		ObjectId userOrGroupId = null;
-		boolean userRelated = false;
+		boolean groupRelated = false;
 		if (username != null) {
 			User user = DB.getUserDAO().getByUsername(username);
 			if (user != null) {
 				userOrGroupId = user.getDbId();
-				userRelated = true;
 			} else {
 				UserGroup userGroup = DB.getUserGroupDAO().getByName(username);
-				if (userGroup != null)
+				if (userGroup != null) {
 					userOrGroupId = userGroup.getDbId();
+				}
+				groupRelated = true;
 			}
 		}
 		if (userOrGroupId == null) {
@@ -113,6 +114,9 @@ public class RightsController extends Controller {
 			// Inform user or group for the unsharing
 			Notification notification = new Notification();
 			notification.setActivity(Activity.COLLECTION_UNSHARED);
+			if (groupRelated) {
+				notification.setGroup(userOrGroupId);
+			}
 			notification.setReceiver(userOrGroupId);
 			notification.setCollection(collectionId);
 			notification.setSender(owner);
@@ -142,10 +146,9 @@ public class RightsController extends Controller {
 			}
 			// Make a new request for collection sharing request
 			Notification notification = new Notification();
-			if (userRelated) {
-				notification.setActivity(Activity.COLLECTION_SHARE);
-			} else {
-				notification.setActivity(Activity.COLLECTION_SUBMIT);
+			notification.setActivity(Activity.COLLECTION_SHARE);
+			if (groupRelated) {
+				notification.setGroup(userOrGroupId);
 			}
 			notification.setAccess(access);
 			notification.setReceiver(userOrGroupId);
