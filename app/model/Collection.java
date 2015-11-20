@@ -39,7 +39,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
-import model.Rights.Access;
+import model.WithAccess.Access;
 import utils.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
@@ -89,7 +89,7 @@ public class Collection {
 	@JsonSerialize(using = Serializer.RightsSerializer.class)
 	@JsonDeserialize(using = Deserializer.RightsDeserializer.class)
 	@Embedded
-	private final Rights rights = new Rights();
+	private final WithAccess rights = new WithAccess();
 	
 	@Embedded
 	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
@@ -231,12 +231,12 @@ public class Collection {
 		this.itemCount--;
 	}
 
-	public Rights getRights() {
+	public WithAccess getRights() {
 		return rights;
 	}
 
 	@JsonIgnore
-	public void setRights(Rights r) {
+	public void setRights(WithAccess r) {
 	}
 
 	public boolean getIsExhibition() {

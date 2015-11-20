@@ -73,7 +73,7 @@ public class Media {
 
 	private String filename;
 
-	private Rights rights = new Rights();
+	private WithAccess rights = new WithAccess();
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -219,11 +219,11 @@ public class Media {
 		return getAccessCount() != 0;
 	}
 
-	public Rights getRights() {
+	public WithAccess getRights() {
 		return rights;
 	}
 
-	public void setRights(Rights rights) {
+	public void setRights(WithAccess rights) {
 		this.rights = rights;
 	}
 }

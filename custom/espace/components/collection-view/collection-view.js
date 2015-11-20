@@ -1,93 +1,11 @@
 define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app','smoke'], function (bridget, ko, template, Isotope, imagesLoaded,app) {
 
 	$.bridget('isotope', Isotope);
-	
-
-	 function initOrUpdate(method) {
-			return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-				function isotopeAppend(ele) {
-					if (ele.nodeType === 1) { // Element type
-						$(element).imagesLoaded(function () {
-							$(element).isotope('appended', ele).isotope('layout');
-						});
-					}
-				}
-
-				function attachCallback(valueAccessor) {
-					return function() {
-						return {
-							data: valueAccessor(),
-							afterAdd: isotopeAppend,
-						};
-					};
-				}
-
-				var data = ko.utils.unwrapObservable(valueAccessor());
-				//extend foreach binding
-				ko.bindingHandlers.foreach[method](element,
-					 attachCallback(valueAccessor), // attach 'afterAdd' callback
-					 allBindings, viewModel, bindingContext);
-
-				if (method === 'init') {
-					$(element).isotope({
-						itemSelector: '.item',
-						transitionDuration: transDuration,
-						masonry: {
-							columnWidth		: '.sizer',
-							percentPosition	: true
-						}
-					});
-
-					ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-						$(element).isotope("destroy");
-					});
-					
-				} 
-			};
-		}
 		
-		ko.bindingHandlers.scroll = {
-				updating: true,
-
-				init: function (element, valueAccessor, allBindingsAccessor) {
-					var self = this;
-					self.updating = true;
-					ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-						$(window).off("scroll.ko.scrollHandler");
-						self.updating = false;
-					});
-				},
-
-				update: function (element, valueAccessor, allBindingsAccessor) {
-					var props = allBindingsAccessor().scrollOptions;
-					var offset = props.offset ? props.offset : "0";
-					var loadFunc = props.loadFunc;
-					var load = ko.utils.unwrapObservable(valueAccessor());
-					var self = this;
-
-					if (load) {
-						$(window).on("scroll.ko.scrollHandler", function () {
-							if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
-								if (self.updating) {
-									loadFunc();
-									self.updating = false;
-								}
-							} else {
-								self.updating = true;
-							}
-						});
-					} else {
-						element.style.display = "none";
-						$(window).off("scroll.ko.scrollHandler");
-						self.updating = false;
-					}
-				}
-			};
-
-
+		
 		ko.bindingHandlers.collectionIsotope = {
-				init: initOrUpdate('init'),
-				update: initOrUpdate('update')
+				init: app.initOrUpdate('init'),
+				update: app.initOrUpdate('update')
 			};
 
 	ko.showMoreLess = function (initialText) {
@@ -193,6 +111,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 	function CViewModel(params) {
 		document.body.setAttribute("data-page","collection");
+		
+		setTimeout(function(){ EUSpaceUI.init(); }, 1000);
+	       
 		var self = this;
 
 		var $container = $(".grid");
@@ -205,9 +126,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.ownerId = ko.observable(-1);
 		self.itemCount = ko.observable(0);
 		self.citems = ko.observableArray();
-
-		
-	   
 		self.description = ko.observable('');
 		self.selectedRecord = ko.observable(false);
 
@@ -217,23 +135,25 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.desc = ko.showMoreLess('');
 		
 		self.revealItems = function (data) {
-			for (var i in data) {
-				var result = data[i];
-				var record = new Record({
-					id: result.dbId,
-					thumb: result.thumbnailUrl,
-					title: result.title,
-					view_url: result.sourceUrl,
-					creator: result.creator,
-					provider: result.provider,
-					source: result.source,
-					rights: result.rights,
-					externalId: result.externalId
-				});
-				
-				self.citems().push(record);
-			}
-			self.citems.valueHasMutated();
+			if(data.length==0){ self.loading(false);}
+			else{
+				for (var i in data) {
+					var result = data[i];
+					var record = new Record({
+						id: result.dbId,
+						thumb: result.thumbnailUrl,
+						title: result.title,
+						view_url: result.sourceUrl,
+						creator: result.creator,
+						provider: result.provider,
+						source: result.source,
+						rights: result.rights,
+						externalId: result.externalId
+					});
+					self.citems().push(record);
+				}
+				self.citems.valueHasMutated();}
+			
 		};
 		
 	
@@ -252,8 +172,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					self.itemCount(data.itemCount);
 					self.access(data.access);
 					self.revealItems(data.firstEntries);
-					self.loading(false);
-					window.EUSpaceUI.initTooltip();
+					//self.loading(false);
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
@@ -261,6 +180,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			});
 		};
+
 		self.loadCollection();
 		self.isOwner = ko.pureComputed(function () {
 			if (app.currentUser._id() == self.ownerId()) {
@@ -276,7 +196,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 		self.moreItems = function () {
 			if (self.loading === true) {
-				setTimeout(self.moreItems(), 300);
+				setTimeout(self.moreItems(), 1000);
 			}
 			if (self.loading() === false) {
 				self.loading(true);
@@ -287,7 +207,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					"contentType": "application/json",
 					"success": function (data) {
 						self.revealItems(data.records);
-						self.loading(false);
 					},
 					"error": function (result) {
 						self.loading(false);

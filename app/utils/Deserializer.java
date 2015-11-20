@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
-import model.Rights;
-import model.Rights.Access;
+import model.WithAccess;
+import model.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 
@@ -60,12 +60,12 @@ public class Deserializer {
 		}
 	}
 	
-	public static class RightsDeserializer extends JsonDeserializer<Rights> {
+	public static class RightsDeserializer extends JsonDeserializer<WithAccess> {
 		
 		@Override
-		public Rights deserialize(JsonParser rightsString, DeserializationContext arg1)
+		public WithAccess deserialize(JsonParser rightsString, DeserializationContext arg1)
 				throws IOException, JsonProcessingException {
-			Rights rights = new Rights();
+			WithAccess rights = new WithAccess();
 			TreeNode treeNode = rightsString.readValueAsTree();
 			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
 			if (isPublic != null) {

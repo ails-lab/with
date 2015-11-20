@@ -32,10 +32,10 @@
   padding-top:10px
 }
 
-.logo{
+/*.logo{
 
 padding-bottom:1.3em;
-}
+}*/
 
 .truncate {
     width: 95%;
@@ -55,7 +55,7 @@ color: #fff;
 margin-left: 8px;
 }
 
-h1{
+/*h1{
  font-size:4.9em;
  color:white;
  word-spacing:-10px;
@@ -72,7 +72,7 @@ h1 span{
  padding-left:10px;
 }
 
-
+*/
 
 .col-centered{
     float: none;
@@ -287,7 +287,7 @@ padding-right: 0;
 
 
 
-.grid {
+/*.grid {
   position: relative;
   margin: 0 auto;
   padding: 1em 0 4em;
@@ -313,7 +313,6 @@ padding-right: 0;
   max-width: 320px;
   max-height:360px;
   width: 30%;
- /*background-color: #17819c;*/
   text-align: center;
   cursor: pointer;
   color: #fff;
@@ -325,8 +324,8 @@ padding-right: 0;
 
 }
 
+
 .grid figure figcaption {
-/*  padding: 2em;*/
   color: #fff;
   text-transform: uppercase;
   font-size: 1.25em;
@@ -335,7 +334,7 @@ padding-right: 0;
 }
 
 
-
+*/
 
 .landFlip{
 

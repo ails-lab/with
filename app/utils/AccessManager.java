@@ -25,7 +25,7 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 
 import db.DB;
-import model.Rights.Access;
+import model.WithAccess.Access;
 import model.User;
 import play.Logger;
 import play.Logger.ALogger;

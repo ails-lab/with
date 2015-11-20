@@ -27,7 +27,7 @@ import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
-import model.Rights.Access;
+import model.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;

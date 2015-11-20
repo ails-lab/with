@@ -1,94 +1,11 @@
 define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded','app'], function(bridget,ko, template,Isotope,imagesLoaded,app) {
 	
 	
-		$.bridget('isotope', Isotope);
+	$.bridget('isotope', Isotope);
 		
-
-		 function initOrUpdate(method) {
-				return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-					function isotopeAppend(ele) {
-						if (ele.nodeType === 1) { // Element type
-							$(element).imagesLoaded(function () {
-								$(element).isotope('appended', ele).isotope('layout');
-							});
-						}
-					}
-
-					function attachCallback(valueAccessor) {
-						return function() {
-							return {
-								data: valueAccessor(),
-								afterAdd: isotopeAppend,
-							};
-						};
-					}
-
-					var data = ko.utils.unwrapObservable(valueAccessor());
-					//extend foreach binding
-					ko.bindingHandlers.foreach[method](element,
-						 attachCallback(valueAccessor), // attach 'afterAdd' callback
-						 allBindings, viewModel, bindingContext);
-
-					if (method === 'init') {
-						$(element).isotope({
-							itemSelector: '.item',
-							transitionDuration: transDuration,
-							masonry: {
-								columnWidth		: '.sizer',
-								percentPosition	: true
-							}
-						});
-
-						ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-							$(element).isotope("destroy");
-						});
-						
-					}
-				};
-			}
-			
-			ko.bindingHandlers.scroll = {
-					updating: true,
-
-					init: function (element, valueAccessor, allBindingsAccessor) {
-						var self = this;
-						self.updating = true;
-						ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-							$(window).off("scroll.ko.scrollHandler");
-							self.updating = false;
-						});
-					},
-
-					update: function (element, valueAccessor, allBindingsAccessor) {
-						var props = allBindingsAccessor().scrollOptions;
-						var offset = props.offset ? props.offset : "0";
-						var loadFunc = props.loadFunc;
-						var load = ko.utils.unwrapObservable(valueAccessor());
-						var self = this;
-
-						if (load) {
-							$(window).on("scroll.ko.scrollHandler", function () {
-								if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
-									if (self.updating) {
-										loadFunc();
-										self.updating = false;
-									}
-								} else {
-									self.updating = true;
-								}
-							});
-						} else {
-							element.style.display = "none";
-							$(window).off("scroll.ko.scrollHandler");
-							self.updating = false;
-						}
-					}
-				};
-
-
-			ko.bindingHandlers.homeisotope = {
-					init: initOrUpdate('init'),
-					update: initOrUpdate('update')
+	ko.bindingHandlers.homeisotope = {
+					init: app.initOrUpdate('init'),
+					update: app.initOrUpdate('update')
 				};
 	
 					
@@ -166,17 +83,17 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
-		
-
-	  /*---*/
+	  setTimeout(function(){ EUSpaceUI.init(); }, 300);
 	  self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featured=ko.observable(null);	
 	  self.homecollections=ko.observableArray();
 	  self.totalCollections=ko.observable(0);
 	  self.totalExhibitions=ko.observable(0);
-    
+	 	
 	  self.revealItems = function (data) {
+		  if(data.length==0){ self.loading(false);}
+			
 			for (var i in data) {
 				var c=new Collection(
 						data[i]
@@ -189,10 +106,14 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
-		  
+		   self.loading(true);
+		 
 		  var promiseCollections = self.getSpaceCollections();
 		  $.when(promiseCollections).done(function(responseCollections) {
+			        self.totalCollections(responseCollections.totalCollections);
+			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
+					
 			});
 		  var promise2 = self.getFeaturedExhibition();
           $.when(promise2).done(function (data) {
@@ -201,6 +122,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	  self.featured(new FeaturedExhibit(data));
         	  $("#featuredExhibit").css('background-image','url('+self.featured().thumbs()[0].url+')');    
         	  self.exhibitloaded(true);
+        	  EUSpaceUI.initCharacterLimiter();
           });
           
 		  
@@ -214,7 +136,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:window.pname,rights:"READ"}]),
 			}).success (function(){
 			});
 		};
@@ -237,18 +159,18 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 
 		self.moreCollections = function () {
 			if (self.loading === true) {
-				setTimeout(self.moreCollections(), 300);
+				setTimeout(self.moreCollections(), 1000);
 			}
 			if (self.loading() === false) {
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:"EUscreenXL",rights:"READ"}]),
+					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:window.pname,rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
 						self.revealItems(data['collectionsOrExhibitions']);
-						self.loading(false);
+						
 					},
 					"error": function (result) {
 						self.loading(false);
@@ -260,10 +182,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadCollectionOrExhibition = function(item) {
 		  if (item.isExhibition) {
 			  window.location = 'index.html#exhibitionview/'+ item.id;
+			  
 		  }
 		  else {
 			  window.location = 'index.html#collectionview/' + item.id;
 		  }
+		  return false;
 	  };
 		
       self.loadAll();	  

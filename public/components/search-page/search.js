@@ -1,26 +1,16 @@
-define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 'app'], function (bridget, ko, template, masonry, imagesLoaded, app) {
+define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 'app'], function (bridget, ko, template, Isotope, imagesLoaded, app) {
 
-	 $.bridget( 'masonry', masonry );
-	 var transDuration='0.4s';
-	 var isFirefox = typeof InstallTrigger !== 'undefined';   // Firefox 1.0+
-	 if(isFirefox){transDuration=0;}
-
-    ko.bindingHandlers.masonry = { init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-    	var $element = $(element);
-    	    $element.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-
-		    ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-
-		        $element.masonry("destroy");
-		    });
-
-    }
-    };
+	 $.bridget('isotope', Isotope);
+	
+	 
+	ko.bindingHandlers.searchIsotope = {
+				init: app.initOrUpdate('init'),
+				update: app.initOrUpdate('update')
+			};
 
 
 
 	function Record(data) {
-
 		var mapping = {
 				'externalId': {
 					key: function(data) {
@@ -152,15 +142,16 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 
 	function SearchModel(params) {
 		var self = this;
+		document.body.setAttribute("data-page","search");
+		
 
-
-		var $container = $('#columns');
+		var $container = $('.grid');
 		var $request;
 		self.filterselect=ko.observable(false);
 		self.filterselection=ko.observableArray([]);
 		self.route = params.route;
 		self.term = ko.observable("");
-		self.sourceview=ko.observable(false);
+		self.sourceview=ko.observable(true);
 		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "Rijksmuseum", "WITHin", "The British Library"]);
 		self.mixresults=ko.observableArray([]);
 		
@@ -197,9 +188,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 		self.toggleSourceview = function () { self.sourceview(!self.sourceview());
 		if(self.sourceview()==false){
 			$('.withsearch-content').css({'overflow-x': 'hidden'});
-			$container.masonry({
-			    itemSelector: '.masonryitem',
-			    gutter:15,isFitWidth: true,transitionDuration:transDuration
+			$container.isotope({
+				itemSelector: '.item',
+				transitionDuration: transDuration,
+				masonry: {
+					columnWidth		: '.sizer',
+					percentPosition	: true
+				}
 			  });
 
 
@@ -223,9 +218,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.results([]);
 			self.searching(false);
 			ko.dataFor(searchfacets).initFacets();
-			if ($container.data('masonry')){
-			 $container.masonry( 'remove', $container.find('.masonryitem') );
-			 }
+			/*if ($container.data('isotope')){
+			 $container.isotope( 'remove', $container.find('.item') );
+			 }*/
 		}
 		app.getEditableCollections();//TODO: update the storages for the collect it select- fix properly
 		self._search = function(facetinit,facetrecacl) {
@@ -272,28 +267,27 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 							 var $newitems=getItems(items);
 						     self.mixresults.push.apply(self.mixresults, items);
 						     self.masonryImagesReveal($newitems,$container);
+
 							}
 						var srcCat=new SourceCategory({
 							source:source,
 							items:items
 						});
 						var found=false;
+						var idx=k;
 						if(self.results().length>0)
 						  for(var k in self.results()){
 							var inCat=self.results()[k];
+							idx=k;
 							if(inCat.source==srcCat.source){
 								found=true;
-								inCat.append(srcCat.items);
-								self.results.splice(k,1,new SourceCategory({
-									source:inCat.source,
-									items:inCat.items,
-									consoleurl:inCat.consoleurl
-								}))
+								self.results()[idx].items.push.apply(self.results()[idx].items,items);
+								
 								break;
 							}
 
 						  }
-						if(srcCat.items.length>0 && (!found || self.results().length==0)){
+						if(srcCat.items().length>0 && (!found || self.results().length==0)){
 							self.results.push(srcCat);
 						}
 
@@ -334,12 +328,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
-			if ($container.data('masonry')){
-		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
-			}else{
-				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-
-			}
+			
 			self._search(false,true);
 			
 			
@@ -356,12 +345,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
-			if ($container.data('masonry')){
-		  	     $container.masonry( 'remove', $container.find('.masonryitem') );
-			}else{
-				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-
-			}
 			self.filterselect(false);
 			self._search(facetinit,facetrecacl);
 			
@@ -372,8 +355,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 				   return record.recordData.externalId === e;
 				});
 			itemShow(selrecord,true);
-
 		}
+
+		
 
         self.columnRecordSelect= function (e){
 
@@ -429,11 +413,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 	   		 //width: "600",
 	   		 orientation: "auto",
 		     onSearchComplete: function(query, suggestions) {
+		     if(self.searching()){ $(".searchinput").devbridgeAutocomplete("hide");}
+		    	 else{
 		    	 $(".autocomplete-suggestions").addClass("autocomplete-suggestions-extra");
 		    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
 		    	 for (var i in suggestions) {
 		    		 var category = suggestions[i].data.category;
 		    		 var s = $(".autocomplete-suggestion").get(i);
+		    	 }
 		    	 }
 		     },
 			 formatResult: function(suggestion, currentValue) {
@@ -444,26 +431,32 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
 			 }
 	 });
 
-	  self.masonryImagesReveal = function( $items,$container ) {
-		  $items.hide();
-		  $container.append( $items );
-		  if (!($container.data('masonry'))){
-
-				$container.masonry( {itemSelector: '.masonryitem',gutter:15,isFitWidth: true,transitionDuration:transDuration});
-
+	  
+		self.revealItems = function (data) {
+			var items=[];
+			for (var i in data) {
+				var result = data[i];
+				 if(result !=null ){
+						
+			        var record = new Record({
+						recordId: result.recordId || result.id,
+						thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
+						fullres: result.fullresolution!=null ? result.fullresolution : "",
+						title: result.title!=null? result.title:"",
+						view_url: result.url.fromSourceAPI,
+						creator: result.creator!==undefined && result.creator!==null? result.creator : "",
+						provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+						rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
+						externalId: result.externalId,
+						source: result.comesFrom!=null ? result.comesFrom : source
+					  });
+					  
+					 
+				  items.push(record);
+				 self.mixresults().push(record);}
 			}
-		  $items.imagesLoaded().progress( function( imgLoad, image ) {
-
-		    var $item = $( image.img ).parents(".masonryitem" );
-		    ko.applyBindings(self, $item[ 0 ] );
-		    $item.show();
-		    $container.masonry( 'appended', $item, true ).masonry( 'layout', $item );
-
-		  });/*.always(
-				  self.searching(false)
-				  );
-         */
-
+			self.mixresults.valueHasMutated();
+			return items;
 		};
 
 
@@ -518,6 +511,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
     		}
     	);
         
+        
+        
+        
+        
         self.goToTop= function () {
         	if($request!==undefined)$request.abort();
         	verticalOffset = typeof(verticalOffset) != 'undefined' ? verticalOffset : 0;
@@ -527,20 +524,17 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
         	element.animate({scrollTop: offsetTop}, 100, 'linear');
         }
 
-		self.likeRecord = function (id) {
-			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.externalId=== id;
-			});
-
+       self.likeRecord = function (rec) {
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$('#' + id).addClass('active');
+					$('#' + rec.recordId).addClass('active');
 				} else {
-					$('#' + id).removeClass('active');
+					$('#' + rec.recordId).removeClass('active');
 				}
 			});
 		};
 
+<<<<<<< HEAD
         function getItem(record) {
 			var figure='<figure class="masonryitem">';
 			
@@ -563,8 +557,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'masonry', 'imagesloaded', 
         	  // return jQuery object
         	  return $( items );
         	}
-
-
 
   }
 

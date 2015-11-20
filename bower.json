@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "components-bootstrap": "~3.3.1",
+    "components-bootstrap": "latest",
     "crossroads": "~0.12.0",
     "hasher": "~1.2.0",
     "requirejs": "~2.1.11",
@@ -13,7 +13,7 @@
     "knockout-projections": "~1.1.0",
     "masonry": "~3.2.2",
     "holderjs": "~2.4.1",
-    "imagesloaded": "~3.1.7",
+    "imagesloaded": "latest",
     "jquery-bridget": "latest",
     "knockout-validation": "~2.0.2",
     "knockout-amd-helpers": "~0.7.3",
@@ -33,7 +33,9 @@
     "horizontal-chart":"https://github.com/eriku/horizontal-chart/archive/master.zip",
     "isotope": "latest",
     "modernizr":"latest",
-    "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip"
+    "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
+    "knockout-x-editable": "latest",
+    "jquery-sticky": "latest"
   },
   "resolutions": {
     "knockout": "~3.2.0"

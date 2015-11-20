@@ -1049,9 +1049,16 @@
 
 
 						// img
-						img {
+						.imagewrapper {
 							height: 180px;
-							max-width: 180px;
+							width: 180px;
+							overflow: auto;
+
+							// img
+							img {
+								width: 180px;
+								height: auto;
+							}
 						}
 
 						// title
@@ -1384,6 +1391,30 @@
 				}
 			}
 
+			// media details
+			.mediadetails {
+
+				// media thumb
+				.mediathumb {
+					height: 100%;
+				}
+
+				// info
+				.mediainfo {
+					height: 100%;
+
+					// infowrap
+					.infowrap {
+						height: 75%;
+					}
+				}
+			}
+
+			// item
+			.itemview {
+				overflow: hidden;
+			}
+
 			// featured
 			.featured {
 
@@ -1399,9 +1430,16 @@
 					.thumbnails {
 
 						// img
-						img {
+						.imagewrapper {
+							width: 219px;
 							height: 219px;
-							max-width: 219px;
+							overflow: auto;
+
+							// image
+							img {
+								width: 219px;
+								height: auto;
+							}
 						}
 
 						// title

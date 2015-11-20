@@ -21,6 +21,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
 			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } },
+			{ url: 'exhibitionview/{id}',     params: { page: 'exhibition-view',    title: 'Exhibition View' } },
 			{ url: 'reset/{token}', params: { page: 'new-password', title: 'Reset Password' } },
 			{ url: 'exhibition-edit',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
 			{ url: 'exhibition-edit/{id}',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
@@ -29,7 +30,6 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } },
 			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } },
 			{ url: 'organization/{id}', params: { page: 'organization-page', title: 'Organization', 'type': 'organization' } },
-			{ url: 'organization-view/{id}',     params: { page: 'organization-view',    title: 'Content Provider' } },
 			{ url: 'project/{id}', params: { page: 'organization-page', title: 'Project', 'type': 'project' } }
 		]
 	});
@@ -47,10 +47,16 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	}
 
 	function activateCrossroads() {
+		//temp fix: scrollbar moves to top when route changes
+		function resetScroll(){document.body.scrollTop = document.documentElement.scrollTop = 0;}
 		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+		
+		crossroads.ignoreState= true; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
+		hasher.changed.add(resetScroll);
+		
 		hasher.init();
 	}
 });

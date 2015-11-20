@@ -279,7 +279,6 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 	function ItemViewModel(params) {
 		var self = this;
-		
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
@@ -289,6 +288,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			data = ko.toJS(e);
 			$('.nav-tabs a[href="#information"]').tab('show');
 			$(".mediathumb > img").attr("src","");
+			
 			self.open();
 			self.record(new Record(data));
 			
@@ -299,11 +299,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				document.body.setAttribute("data-page","media");	
 				
 			}
+			$("div[role='main']").addClass("itemopen");
+			
 			
 		};
 
 		self.close = function () {
 			//self.record(new Record());
+			$("div[role='main']").removeClass("itemopen");
 			$( '.itemview' ).fadeOut();
 			
 		};

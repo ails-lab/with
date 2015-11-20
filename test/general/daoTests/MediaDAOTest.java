@@ -23,7 +23,7 @@ import java.io.FileInputStream;
 import java.net.URL;
 
 import model.Media;
-import model.Rights;
+import model.WithAccess;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -61,8 +61,8 @@ public class MediaDAOTest {
 		thumb.setWidth(755);
 
 		thumb.getRights().setPublic( true );
-		thumb.getRights().put( new ObjectId() ,Rights.Access.OWN);
-		thumb.getRights().put( new ObjectId() ,Rights.Access.WRITE);
+		thumb.getRights().put( new ObjectId() ,WithAccess.Access.OWN);
+		thumb.getRights().put( new ObjectId() ,WithAccess.Access.WRITE);
 		
 		DB.getMediaDAO().makePermanent(thumb);
 		//test succesful storage

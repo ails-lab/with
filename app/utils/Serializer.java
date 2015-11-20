@@ -20,17 +20,19 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
+import org.bson.types.ObjectId;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import model.Rights;
-import model.Rights.Access;
+import model.WithAccess;
+import model.WithAccess.Access;
 
-import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -38,33 +40,44 @@ import play.libs.Json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+
+
 public class Serializer {
 	public static final ALogger log = Logger.of(Serializer.class);
 
-
 	public static class ObjectIdSerializer extends JsonSerializer<Object> {
 		@Override
-		public void serialize(Object oid, JsonGenerator jsonGen,
-				SerializerProvider provider) throws IOException,
-				JsonProcessingException {
+		public void serialize(Object oid, JsonGenerator jsonGen, SerializerProvider provider)
+				throws IOException, JsonProcessingException {
 			jsonGen.writeString(oid.toString());
+		}
+
+	}
+
+	public static class ObjectIdArraySerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object objectIds, JsonGenerator jsonGen, SerializerProvider provider)
+				throws IOException, JsonProcessingException {
+			HashSet<String> ids = new HashSet<String>();
+			for (ObjectId e : ((Set<ObjectId>) objectIds)) {
+				ids.add(e.toString());
+			}
+			jsonGen.writeObject(Json.toJson(ids));
 		}
 
 	}
 
 	public static class DateSerializer extends JsonSerializer<Object> {
 		@Override
-		public void serialize(Object date, JsonGenerator jsonGen,
-				SerializerProvider provider) throws IOException,
-				JsonProcessingException {
+		public void serialize(Object date, JsonGenerator jsonGen, SerializerProvider provider)
+				throws IOException, JsonProcessingException {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
-			jsonGen.writeString(sdf.format((Date)date));
+			jsonGen.writeString(sdf.format((Date) date));
 		}
 
 	}
@@ -74,7 +87,7 @@ public class Serializer {
 		public void serialize(Object rights, JsonGenerator jsonGen,
 				SerializerProvider arg2) throws IOException,
 				JsonProcessingException {
-			boolean isPublic = ((Rights) rights).isPublic();
+			boolean isPublic = ((WithAccess) rights).isPublic();
 			Map<String, Integer> rightsMap = new HashMap<String, Integer>();
 			for(Entry<ObjectId, Access> e: ((Map<ObjectId, Access>)rights).entrySet()) {
 				rightsMap.put(e.getKey().toString(), e.getValue().ordinal());
@@ -89,11 +102,10 @@ public class Serializer {
 
 	public static class CustomMapSerializer extends JsonSerializer<Object> {
 		@Override
-		public void serialize(Object map, JsonGenerator jsonGen,
-				SerializerProvider arg2) throws IOException,
-				JsonProcessingException {
-			Map<String, Integer>	 rights = new HashMap<String, Integer>();
-			for(Entry<ObjectId, Access> e: ((Map<ObjectId, Access>)map).entrySet()) {
+		public void serialize(Object map, JsonGenerator jsonGen, SerializerProvider arg2)
+				throws IOException, JsonProcessingException {
+			Map<String, Integer> rights = new HashMap<String, Integer>();
+			for (Entry<ObjectId, Access> e : ((Map<ObjectId, Access>) map).entrySet()) {
 				rights.put(e.getKey().toString(), e.getValue().ordinal());
 			}
 			jsonGen.writeObject(Json.toJson(rights));
@@ -102,8 +114,7 @@ public class Serializer {
 	}
 
 	public static String serializeXML(Document doc) {
-		DOMImplementationLS domImplementation = (DOMImplementationLS) doc
-				.getImplementation();
+		DOMImplementationLS domImplementation = (DOMImplementationLS) doc.getImplementation();
 		LSSerializer lsSerializer = domImplementation.createLSSerializer();
 		return lsSerializer.writeToString(doc);
 	}

@@ -27,8 +27,7 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('exhibition-edit', { require: 'components/exhibition-edit/exhibition-edit' });
 	ko.components.register('popup-exhibition-edit', { require: 'components/exhibition-edit/popup-exhibition-edit' });
 	ko.components.register('api-docu', { require: 'components/api-documentation/api-documentation' });
-	ko.components.register('organization-view', { require: 'components/organization-view/org-view' });
-	
+
 	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
 
 	ko.components.register('popup-login', {
@@ -63,6 +62,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('new-organization', {
 		viewModel: { require: 'components/organization-page/organization-page' },
 		template: { require: 'text!components/organization-page/new-organization.html' }
+	});
+	ko.components.register('members-popup', {
+		viewModel: { require: 'components/members/members' },
+		template: { require: 'text!components/members/members-popup.html' }
 	});
 
 	// ... or for template-only components, you can just point to a .html file directly:

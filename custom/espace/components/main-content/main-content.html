@@ -24,11 +24,13 @@
               <div class="thumbnails">
                 <!-- left-->
                 
-                <div class="left"><img data-bind="attr: { src: thumbs()[0].url}">
+                <div class="left">
+                <div class="imagewrapper"><img data-bind="attr: { src: thumbs()[0].url}"></div>
                   <div class="title" data-bind="text: thumbs()[0].title"></div>
                 </div>
                 <!-- right-->
-                <div class="right"><img data-bind="attr: { src: thumbs()[1].url}">
+                <div class="right">
+                <div class="imagewrapper"><img data-bind="attr: { src: thumbs()[1].url}"></div>
                   <div class="title" data-bind="text: thumbs()[1].title"></div>
                 </div>
               </div>
@@ -59,11 +61,13 @@
         <div class="container">
           <!-- grid-->
           <div class="grid" id="homemasonry" data-bind="homeisotope: homecollections">
-            <div class="sizer"></div>
-            <div data-bind="visible: isLoaded(), css: itemcss">
+             <!-- ko if: $index() === 0 -->
+              <div class="sizer"></div>
+              <!-- /ko -->
+               <div data-bind="visible: isLoaded(), css: itemcss">
               <div class="wrap">
-                <!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
-                  <!-- thumbnail-->
+                <!-- anchor--><a href="#" data-bind="click: $parent.loadCollectionOrExhibition"  title="view">
+                <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
                   <!-- info-->
                   <div class="info"><span class="type" data-bind="text:type"></span>

@@ -16,7 +16,7 @@
 
 package db;
 
-import model.Rights;
+import model.WithAccess;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.converters.TypeConverter;
@@ -29,25 +29,25 @@ import com.mongodb.DBObject;
 public class RightsConverter extends TypeConverter {
 
 	public RightsConverter( ) {
-		super( Rights.class );
+		super( WithAccess.class );
 	}
 	
 	@Override
 	public Object decode(Class<?> arg0, Object fromDbObject, MappedField arg2) {
-		Rights r= new Rights();
+		WithAccess r= new WithAccess();
 		DBObject dbObj = (DBObject) fromDbObject;
 		for( String k: dbObj.keySet() ) {
 			if( k.equals("isPublic"))
 				r.setPublic((Boolean) dbObj.get("isPublic"));
 			else
 				r.put( new ObjectId(k),  
-					Rights.Access.values()[(int)dbObj.get(k)]);
+					WithAccess.Access.values()[(int)dbObj.get(k)]);
 		}
 		return r;
 	}
 
     public Object encode(final Object value, final MappedField optionalExtraInfo) {
-    	Rights r = (Rights) value;
+    	WithAccess r = (WithAccess) value;
     	BasicDBObject dbObj = new BasicDBObject(); 
 
     	dbObj.put("isPublic", r.isPublic());

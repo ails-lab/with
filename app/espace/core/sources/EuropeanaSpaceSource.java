@@ -274,7 +274,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				
 				res.items = getItems(response);
 				res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
@@ -335,7 +334,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 //				not added before
-				it.type = Utils.readArrayAttr(item, "type", true);
+				it.type = Utils.readAttr(item, "type", true);
 				it.title = Utils.readArrayAttr(item, "title", false).get(0);
 				it.year = Utils.readArrayAttr(item, "year", false);
 				it.creator = Utils.readArrayAttr(item.path("europeanaAggregation"), "dcCreator", false).get(0);

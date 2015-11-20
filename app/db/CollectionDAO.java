@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
-import model.Rights.Access;
+import model.WithAccess.Access;
 import model.User;
 
 import org.bson.types.ObjectId;

@@ -5,20 +5,11 @@
 	 right:40px;
 	 padding: 5px;
      position: fixed;
-     z-index:1032;
+     z-index:999;
      font-size:25px;
 	    }
 
-.bootstrap-tagsinput {
-  display: block;
-  padding: 4px 6px 0px 6.5em;
-  color: #555;
-  vertical-align: middle;
-  border-radius: 4px;
-  max-width: 100%;
-  line-height: 22px;
-  cursor: text;
-}
+
 .bootstrap-tagsinput input {
   border: none;
   box-shadow: none;

@@ -38,7 +38,7 @@ import model.Organization;
 import model.Page;
 import model.Project;
 import model.User;
-import model.Rights.Access;
+import model.WithAccess.Access;
 import model.UserGroup;
 import model.UserOrGroup;
 

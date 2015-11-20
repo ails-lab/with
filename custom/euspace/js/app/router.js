@@ -31,6 +31,10 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'apidoc', params: { page: 'api-docu', title: 'API Documentation' } },
 			{ url: 'testsearch', params: { page: 'testsearch', title: 'testsearch' } },
 			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } },
+			{ url: 'about',     params: { page: 'about',  title: 'About' } },
+			{ url: 'contact',     params: { page: 'contact',  title: 'Contact' } },
+			{ url: 'terms',     params: { page: 'terms',  title: 'Terms' } },
+			{ url: 'privacy',     params: { page: 'privacy',  title: 'Privacy' } },
 			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } }
 		]
 	});
@@ -46,12 +50,33 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 
 		activateCrossroads();
 	}
+	
+	
+	
 
 	function activateCrossroads() {
+		function resetMenu(){
+			/*in case we changed from item view without closing */
+			$("div[role='main']").removeClass("itemopen");
+			//now reset mobile menu
+			var $menu = $( '.main .menu');
+			
+	          if($menu.hasClass("visible")){
+	        	  $menu.toggleClass( 'visible' );
+
+					// toggle button
+					$( '.mobilemenu' ).toggleClass( 'active' );
+	          }
+		}
 		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+		crossroads.ignoreState= true; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
+		hasher.changed.add(resetMenu);
+		
 		hasher.init();
 	}
+	
+	
 });

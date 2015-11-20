@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import model.Rights.Access;
+import model.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;

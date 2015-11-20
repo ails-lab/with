@@ -1,99 +1,419 @@
-			<div class="main-content">
-			<div class="container-fluid">
-			     <div class="row">
-			     <div class="col-lg-12">
-		 					<span class="withmain"><h2>Collections</h2></span>
-							   <div class="withsearch-content-masonry" style="padding-top:0;">
-								  <div id="publiccolumns" data-bind="foreach: collections, masonrypc">
-								  
-										<figure class="masonryitem">
-										
-										<a data-bind="attr: {href: 'index.html#collectionview/'+id()}"><img data-bind="attr: {src: thumbnail()}" /></a><figcaption data-bind="text: collname()"></figcaption></figure></div>
-							       </div>
-							      
-							  </div> 
-						 
-							  
-					 </div>
-			
-						
-						<div class="row">
-			  			<span class="withmain"><h2>Featured Exhibitions</h2></span>
-							
-							<div style="overflow-x:scroll;">
-							   
-							   <div class="row-fluid" style="width:2000px;">
-							   <div class="outlay">
-							   <h2>Dance
-							   <div> <p>The beauty of the human body in movement</p>
-							  </div>
-							   </h2>
-							      <div class="containermason">
-								    <div class="square bigsquare"><img src="images/dance.jpg" class="img-responsive desaturate"></div>
-								    <div class="square littlesquare"><img src="images/collections/dance/dance2.jpg" class="img-responsive"></div>
-								     <div class="square littlesquare"><img src="images/collections/dance/dance4.jpg" class="img-responsive"></div>
-								   
-								    <div class="square littlesquare"><img src="images/collections/dance/dance9.jpg" class="img-responsive"></div>
-								        <div class="square littlesquare"><img src="images/collections/dance/dance6.jpg" class="img-responsive"></div>
-								   
-								</div>
-							
-							   </div>
-							   
-							    <div class="outlay">
-							   <h2>Photography
-							   <div><p>All our yesterdays </p>
-							   </div></h2>
-							      <div class="containermason">
-								    <div class="square bigsquare" id="omeka"><img src="images/collections/photo/ph5.jpg" class="img-responsive desaturate"></div>
-								    <div class="square littlesquare"><img src="images/collections/photo/ph2.jpg" class="img-responsive"></div>
-								     <div class="square littlesquare"><img src="images/collections/photo/ph3.jpg" class="img-responsive"></div>
-								   
-								    <div class="square littlesquare"><img src="images/collections/photo/ph4.jpg" class="img-responsive"></div>
-								        <div class="square littlesquare"><img src="images/collections/photo/ph6.jpg" class="img-responsive"></div>
-								   
-								</div>
-								
-							   </div>
-							   <div class="outlay">
-							   <h2>Egypt<div><p>Ancient Egypt</p></div>
-							   </h2>
-							      <div class="containermason">
-								    <div class="square bigsquare"><img src="images/collections/egypt/egypt1.jpg" class="img-responsive desaturate"></div>
-								    <div class="square littlesquare"><img src="images/collections/egypt/egypt2.jpg" class="img-responsive"></div>
-								     <div class="square littlesquare"><img src="images/collections/egypt/egypt6.jpg" class="img-responsive"></div>
-								   
-								    <div class="square littlesquare"><img src="images/collections/egypt/egypt4.jpg" class="img-responsive"></div>
-								        <div class="square littlesquare"><img src="images/collections/egypt/egypt3.jpg" class="img-responsive"></div>
-								   
-								</div>
-								
-							   </div>
-							    </div>
-							
-							   
-		 						</div>
-		 						</div>
-		 						
-		 				 <!-- 	<div class="row" style="padding-top:20px;">
-			             	<span class="withmain"><h2>3D Galleries</h2></span>
-		 					 <div class="galleries">
-		 					 <div style="float:left;width:300px;">
-							   <div class="gr-gallery2">
-							      <figure><div><a href="#gallery/55b747c3569e1b44eeac72b3/2"><img src="images/gallery/portrait1.jpg" width="200"/></a></div><figcaption style="font-size: 1.3em;cursor: auto;">Female Portraits</figcaption></figure>
-							    </div> 
-							 </div>
-							 <div style="float:right;width:300px;">   
-							    <div class="gr-gallery">
-							      <figure><div><a href="#gallery/55b74e5b569e1b44eeac72c0/1"><img src="images/gallery/streetart1.jpg" width="200"/></a></div><figcaption style="font-size: 1.3em;cursor: auto;">Street art</figcaption></figure>
-							    </div>
-							  </div> 
-							   </div>
+      
+
+			<!-- hero -->
+			<section class="hero">
+				<div class="container">
+					<img class="hero-img" src="img/ui/logo-hero.png">
+					<div class="hero-heading">WELCOME TO <b>WITH</b></div>
+					<p class="hero-desc">Where culture meets creativity
+					</p>
+				</div>
+			</section>
+
+			<!-- selection -->
+			<section class="selection">
+				<div class="container">
+					<ul>
+
+						<!-- selection item 1 -->
+						<li>
+							<!-- hover -->
+							<div class="select-hover">
+								<p>Discover cultural content from around the world</p>
+								<a href="#">
+									Learn More
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+							<!-- idle -->
+							<div class="select-idle">
+								<img src="img/ui/ic-discover.png" class="icon">
+								<div class="select-heading">Discover</div>
+							</div>
+						</li>
+
+						<!-- selection item 2 -->
+						<li>
+							<!-- hover -->
+							<div class="select-hover">
+								<p>Build using data exposed by the WITH API</p>
+								<a href="#">
+									Learn More
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+							<!-- idle -->
+							<div class="select-idle">
+								<img src="img/ui/icon-2.png" class="icon">
+								<div class="select-heading">Build</div>
+							</div>
+						</li>
+
+						<!-- selection item 3 -->
+						<li>
+							<!-- hover -->
+							<div class="select-hover">
+								<p>Create stories, collections and exhibitions</p>
+								<a href="#">
+									Learn More
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+							<!-- idle -->
+							<div class="select-idle">
+								<img src="img/ui/icon-3.png" class="icon">
+								<div class="select-heading">Create</div>
+							</div>
+						</li>
+
+						<!-- selection item 4 -->
+						<li>
+							<!-- hover -->
+							<div class="select-hover">
+								<p>Link &amp; Enrich with LoD sources</p>
+								<a href="#">
+									Learn More
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+							<!-- idle -->
+							<div class="select-idle">
+								<img src="img/ui/icon-4.png" class="icon">
+								<div class="select-heading">Annotate</div>
+							</div>
+						</li>
+
+						<!-- selection item 5 -->
+						<li>
+							<!-- hover -->
+							<div class="select-hover">
+								<p>Upload, map, transform and publish</p>
+								<a href="#">
+									Learn More
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+							<!-- idle -->
+							<div class="select-idle">
+								<img src="img/ui/icon-5.png" class="icon">
+								<div class="select-heading">Aggregate</div>
+							</div>
+						</li>
+
+						<!-- selection item 6 -->
+						<li>
+							<!-- hover -->
+							<div class="select-hover">
+								<p>Tag, follow, discuss, moderate WITH</p>
+								<a href="#">
+									Learn More
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+							<!-- idle -->
+							<div class="select-idle">
+								<img src="img/ui/icon-6.png" class="icon">
+								<div class="select-heading">Participate</div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</section>
+
+			<!-- featured-->
+			<section class="featured">
+				<div class="container">
+
+					<!-- featured box -->
+					<div class="featured-box space">
+						<div class="wrap">
+
+							<!-- thumbnail -->
+							<div class="featured-hero">
+								<img src="img/content/space.jpg">
+							</div>
+
+							<!-- meta -->
+							<div class="featured-meta">
+								<p class="category">Featured space</p>
+								<h2 class="title"><b>EUScreen:</b> build your own stories</h2>
+								<p class="desc">Discover diverse art collections from around the world. Explore artworks at incredible detail, view exhibitions, and take virtual tours.</p>
+
+								<!-- view -->
+								<a href="../custom/euspace/index.html" class="view">
+									view space <span> ></span>
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
 						</div>
-						<div class="row"> <div style="padding-bottom:100px;"></div></div>	
-		 						</div>
-		 					 -->	 
-		 			</div>			
+					</div>
+
+
+       
+
+					<!-- featured box -->
+					<div class="featured-box exhibition" data-bind="with: featuredExhibition">
+						<div class="wrap">
+
+							<!-- anchor -->
+							<a data-bind="attr: {href: url}" title="VIEW EXHIBITION">
+
+								<!-- thumbnail -->
+								<div class="featured-hero">
+									<img src="">
+								</div>
+
+								<!-- meta -->
+								<div class="featured-meta">
+
+								
+									<p class="category">Featured exhibition</p>
+									<h2 class="title"><b><!-- ko text:title --><!-- /ko --></b></h2>
+									<ul class="img-exhibition">
+										<li>
+											<img data-bind="attr: { src: thumbs()[0].url}" alt="exb 1" title="exb 1">
+											<p><!-- ko text:thumbs()[0].title --><!-- /ko --></p>
+										</li>
+										<li>
+											<img data-bind="attr: { src: thumbs()[1].url}" alt="exb 1" title="exb 1">
+											<p><!-- ko text:thumbs()[1].title --><!-- /ko --></p>
+										</li>
+										<li>
+											<img data-bind="attr: { src: thumbs()[2].url}" alt="exb 1" title="exb 1">
+											<p><!-- ko text:thumbs()[2].title --><!-- /ko --></p>
+										</li>
+									</ul>
+								</div>
+							</a>
+						</div>
+					</div>
+
+					<!-- featured box -->
+					<div class="featured-box collection"  data-bind="with: featuredCollection">
+						<div class="wrap">
+
+							<!-- anchor -->
+							<a data-bind="attr: {href: url}"  title="VIEW COLLECTION">
+
+								<!-- thumbnail -->
+								<div class="featured-hero">
+									<img data-bind="attr: { src: thumbs()[0].url}">
+								</div>
+								<div class="featured-hero">
+									<img data-bind="attr: { src: thumbs()[1].url}">
+								</div>
+								<div class="featured-hero">
+									<img data-bind="attr: { src: thumbs()[2].url}">
+								</div>
+								<div class="featured-hero">
+									<img data-bind="attr: { src: thumbs()[3].url}">
+								</div>
+								
+								<!-- meta -->
+								<div class="featured-meta">
+									<p class="category">Featured collection</p>
+									<h2 class="title"><b><!-- ko text:title --><!-- /ko --></b></h2>
+								</div>
+							</a>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- filter-->
+			<section class="filter">
+				<div class="container">
+					<div class="wrap">
+
+						<!-- menu-->
+						<ul class="nav">
+							<li data-filter="*" class="active"><a href="#" title="ALL">All</a></li>
+							<li data-filter=".collection"><a href="#" title="ALL">Collections</a></li>
+							<li data-filter=".exhibition"><a href="#" title="EXHIBITION">Exhibitions</a></li>
+							<li data-filter=".spaces"><a href="#" title="COLLECTION">Spaces</a></li>
+						</ul>
+
+						<!-- menu-->
+						<div href="#" class="dropdown">
+							<a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Featured <span></span></a>
+							<ul class="dropdown-menu">
+								<li><a href="#">Recently Updated</a></li>
+								<li><a href="#">Most liked</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<!-- listing-->
+			<section class="listing">
+				<div class="container">
+
+                 <div class="grid" id="homemasonry" data-bind="homeisotope: homecollections">
+	             <!-- ko if: $index() === 0 -->
+	              <div class="sizer"></div>
+	              <!-- /ko -->
+	               <div data-bind=" css: itemcss">
+	              <div class="wrap">
+	                <!-- anchor--><a href="#" data-bind="click: $parent.loadCollectionOrExhibition"  title="view">
+	                <!-- thumbnail-->
+	                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"></div>
+	                  <!-- info-->
+	                  <div class="info"><span class="type" data-bind="text:type"></span>
+	                    <h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
+	                  </div>
+	                  </a>
+	              </div>
+	            </div>
+	            
+	          </div>
+
+
+
+					<!-- load more -->
+					<a href="#" class="loadmore" data-bind="event: {click: loadNext}">
+						Load more
+						<div class="left"></div>
+						<div class="right"></div>
+						<div class="top"></div>
+						<div class="bot"></div>
+					</a>
+					<div id="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+                  </div>
+				
+			</section>
+
+			<!-- partners -->
+			<section class="partners">
+				<div class="container">
+
+					<!-- section heading -->
+					<h2 class="section-heading">
+						Partners using <b>with</b>
+					</h2>
+
+					<!-- section description -->
+					<p class="section-desc">
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua. 
+					</p>
+
+					<!-- list partners logo -->
+					<ul>
+						<li>
+							<img src="img/ui/partners-1.png">
+						</li>
+						<li>
+							<img src="img/ui/partners-2.png">
+						</li>
+						<li>
+							<img src="img/ui/partners-3.png">
+						</li>
+						<li>
+							<img src="img/ui/partners-4.png">
+						</li>
+						<li>
+							<img src="img/ui/partners-5.png">
+						</li>
+					</ul>
+				</div>
+			</section>
+
+			<!-- api -->
+			<section class="api">
+				<div class="container">
+
+					<!-- section heading -->
+					<h2 class="section-heading">apps built using <b>with api</b></h2>
+
+					<!-- section description -->
+					<p class="section-desc">
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod temporincididunt ut labore et dolore magna aliqua. 
+					</p>
+					<ul>
+						<li>
+							<img src="img/ui/api-1.png">
+							<div class="overlay">
+								<a href="#">museum tour
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+						</li>
+						<li>
+							<img src="img/ui/api-2.png">
+							<div class="overlay">
+								<a href="#">museum tour
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+						</li>
+						<li>
+							<img src="img/ui/api-3.png">
+							<div class="overlay">
+								<a href="#">museum tour
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+						</li>
+						<li>
+							<img src="img/ui/api-4.png">
+							<div class="overlay">
+								<a href="#">museum tour
+									<div class="left"></div>
+									<div class="right"></div>
+									<div class="top"></div>
+									<div class="bot"></div>
+								</a>
+							</div>
+						</li>
+					</ul>
+
+					<!-- register now -->
+					<a href="#" class="register">
+						register now
+						<div class="left"></div>
+						<div class="right"></div>
+						<div class="top"></div>
+						<div class="bot"></div>
+					</a>
+				</div>
+			</section>
+
+					
+			
+			
+			
+			
+				
 		 						
 		 					
 		 

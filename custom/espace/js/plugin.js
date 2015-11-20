@@ -1,13 +1,12 @@
 
 define(function () {
  
-  
- 
- 
 //  vars
 var EUSpaceApp = EUSpaceApp || {};
 var console = (window.console = window.console || {}),
 	debug = true;
+
+var inited=false;
 
 // logger method
 function logger( type, data ) {
@@ -38,70 +37,88 @@ EUSpaceApp.ui = function( custom ){
 
 	// this
 	this.init = function(){
-        
+     settings.page=$( "body" ).attr( 'data-page' );
+	 if(!inited){	
+		inited=true;
+		
 		// log
 		logger( 'info','plugins.js / init' );
 
 		// init mobile menu
 		initMobileMenu();
 
-		// init masonry
-		//initIsotope();
+				// initialize media tooltip
+		initTooltip();
+		
+		
+		// initialize inline viewer for item
+		initInlineViewer();
 
-		// initialize script on homepage only
+		
+	 }
+	// initialize script on homepage only
 		if( settings.page === 'home' ) {
 
 			// initialize homepage header minimisation
 			initHomeScroll();
+			initIsotope();
 		}
 
+		else if(settings.page === 'about') {
+
+			// init carousel
+			initCarousel();
+		}
+		else if( settings.page === 'exhibition') {
+
+			// init carousel
+			/*initCarousel();
+
+			// init expand on exhibition
+			initExpandExhibitionText();
+
+			
+			// init search setting bar
+			//initSearchSetting();
+
+			// initialize media tooltip
+			initTooltip();
+				// init exhibition image zoom
+			initImageZoom();*/
+			
+			
+			
+		}
 		// initialize script on homepage only
-		if( settings.page === 'profile' ) {
+		else if( settings.page === 'profile' ) {
 
 			// initialize homepage header minimisation
 			initProfileScroll();
+			initIsotope();
 		}
 
-		// init carousel
-		initCarousel();
+		
+		else if( settings.page === 'search' ) {
 
-		// init expand on exhibition
-		initExpandExhibitionText();
+			// initialize homepage header minimisation
+			initSearchViewToggle();
+			initIsotope();
+		}
+		
+		else if( settings.page === 'collection' ) {
 
-		// init collection titlebar shrink
-		initCollectionScroll();
-
-		// init search setting bar
-		initSearchSetting();
-
-		// initialize media tooltip
-		initTooltip();
-			// init exhibition image zoom
-		initImageZoom();
-
-		// initialize search view toggle button
-		initSearchViewToggle();
-
-		// initialize inline viewer for item
-		initInlineViewer();
-
-		// init adjustment for search column view
-		initSearchColumnAdjustment();
+			// initialize homepage header minimisation
+			initCollectionScroll();
+			initIsotope();
+		}
+	 
 	};
 
 	this.initSearch=function(){
 		/*these are needed after search page has been loaded*/
 		// init search setting bar
-		initSearchSetting();
-
-		// initialize media tooltip
-		initTooltip();
-		
-		// initialize search view toggle button
+			// initialize search view toggle button
 		initSearchViewToggle();
-
-		// initialize inline viewer for item
-		initInlineViewer();
 
 		// init adjustment for search column view
 		initSearchColumnAdjustment();
@@ -109,6 +126,24 @@ EUSpaceApp.ui = function( custom ){
 	
 	this.initTooltip=function(){
 		initTooltip();
+	}
+	
+	this.initSearchColumnAdjustment=function(){
+		initSearchColumnAdjustment();
+	}
+	
+	
+	this.resetMobileMenu=function(){
+		var $menu = $( settings.mobileMenu );
+		
+          if($menu.hasClass("visible")){
+        	  $menu.toggleClass( 'visible' );
+
+				// toggle button
+				$( settings.mobileSelector ).toggleClass( 'active' );
+        	  
+          }
+		
 	}
 	
 	this.initProfile=function(){
@@ -123,12 +158,28 @@ EUSpaceApp.ui = function( custom ){
 		initCarousel();
 	}
 
+	this.initCharacterLimiter=function(){
+		initCharacterLimiter();
+	}
+	
 	this.initExpandExhibitionText=function(){
 		initExpandExhibitionText();
 	}
 
+	this.initMobileMenu=function(){
+		initMobileMenu();
+	}
+
 	this.initImageZoom=function(){
 		initImageZoom();
+	}
+	
+	this.initInlineViewer=function(){
+		initInlineViewer();
+	}
+	
+	this.initHomeScroll=function(){
+		this.initHomeScroll();
 	}
 	
 	// method to initialize isotope
@@ -136,16 +187,18 @@ EUSpaceApp.ui = function( custom ){
 	var initIsotope = function(){
 
 		// log
-		logger( 'info','plugins.js / initIsotope' );
+		//logger( 'info','plugins.js / initIsotope' );
 
 		// initialize masonry after window.load
 		// safari seems to have problem when initialize on dom ready
-		$( window ).load(function(){
-
+		$(document).ready(function(){
+		
 			// check if grid exist
 			if( $( settings.mSelector ).length > 0 ) {
 
 				// init
+				$( settings.mSelector ).imagesLoaded(function(){	
+					
 				$( settings.mSelector ).isotope({
 
 					// options
@@ -153,6 +206,7 @@ EUSpaceApp.ui = function( custom ){
 					itemSelector	: settings.mItem,
 					percentPosition	: true
 				});
+			});
 			}
 		});
 
@@ -259,6 +313,8 @@ EUSpaceApp.ui = function( custom ){
 
 		// set on init
 		toggleHomeClasses();
+		// limit character description
+		
 	};
 
 	// method to minimize header on collection
@@ -491,11 +547,11 @@ EUSpaceApp.ui = function( custom ){
 				$( this ).parent().addClass( 'active' );
 
 				// check
-				/*if( view === 'grid' ) {
+				if( view === 'grid' ) {
 
 					// reload
 					$( settings.mSelector ).isotope();
-				}*/
+				}
 			});
 		}
 	};
@@ -510,9 +566,10 @@ EUSpaceApp.ui = function( custom ){
 		$( '[data-view="inline"]' ).each(function(){
 
 			// click
-			$( this ).on( 'click', function(){
+			$( this ).on( 'click', function(e){
 
 				// show 
+				e.preventDefault();
 				$( '.itemview' ).fadeIn();
 			});
 		});
@@ -526,6 +583,38 @@ EUSpaceApp.ui = function( custom ){
 			// show 
 			$( '.itemview' ).fadeOut();
 		});
+	  
+
+		// close event
+		$( '.itemview .menubar .action .close a' ).on( 'click', function( e ){
+
+			// e
+			e.preventDefault();
+
+			// show 
+			$( '.itemview' ).fadeOut();
+
+			// enable scroll on main
+			$('[role="main"]').removeClass('itemopen');
+		});
+
+		// function
+		function adjustHeight() {
+
+			// vars 
+			var wHeight = $( window ).height(),
+				wWidth = $( window ).width(),
+				itemHeight = wHeight - 70;
+
+			// check
+			if( wWidth >= 1200 ) {
+
+				// set height
+				$( '.itemopen .itemview' ).css({
+					height : itemHeight+"px"
+				});
+			}
+		}
 	};
 
 	// method to initialize search column width
@@ -565,10 +654,29 @@ EUSpaceApp.ui = function( custom ){
 			adjustColumnSize();
 		});
 	};
+	
+	// method to limit character description
+	var initCharacterLimiter = function(){
+
+		// log
+		logger( 'info','plugins.js / initCharacterLimiter' );
+
+		// check
+		if( $( '.featured .exhibition .description' ).length > 0 ) {
+
+			// elem
+			var $texts = $( '.featured .exhibition .description .text' );
+			if ( $texts.text().length > 240 ) {
+				var tmp = $texts.text().substr(0,240)+'...';
+				$texts.text( tmp );
+			}
+		}
+	};
 };
 
 return {
     
 	EUSpaceApp: EUSpaceApp
+	
   }
 });

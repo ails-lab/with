@@ -28,7 +28,12 @@
             <input id="facet_tags" type="text" data-role="tagsinput">
         </div>
       </section>
-     
+      <!-- search filter-->
+      <section class="searchfilter">
+        <select class="form-control providerselection" data-bind="options: sources,value: selectedSource, event:{ change: columnChanged}">
+          
+        </select>
+      </section>
       <!-- search result-->
      <div id="gridlist" class="spacer search gridlist searchlist" data-bind="visible: sourceview()==false">
       <!-- ko if: noResults -->
@@ -41,12 +46,12 @@
             <!-- grid-->
             <div class="grid" data-bind="searchIsotope:mixresults, visible: mixresults().length>0">
               <!-- item-->
-              <!-- ko if: $index()===0 -->
+              <!-- ko if: $index() === 0 -->
               <div class="sizer"></div>
               <!-- /ko -->
-              <div class="item media" data-bind="visible: isLoaded()">
+               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
-                <!-- anchor--><a data-bind="event: { click: $parent.columnRecordSelect}">
+                <!-- anchor--><a href="#" data-bind="event: { click: $parent.columnRecordSelect}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: thumb}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->
@@ -82,7 +87,7 @@
 			<!-- /ko -->
 			<!-- ko if: results().length > 0 -->
             <!-- ko foreach: results -->
-            <div class="column selected">
+            <div data-bind="attr: {'id': source+'_result'}, css: $parent.selectedSource()==source? 'column selected' : 'column'">
               <!-- wrap-->
               <div class="wrap">
                 <div class="header"><a data-bind="attr: { href:consoleurl}" target="_blank" title="API console">
@@ -92,7 +97,7 @@
                 <div class="result" data-bind="foreach: items, event: { scroll: $parents[0].scrolled }">
                 
                   <!-- item-->
-                  <div class="item"><a data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline">
+                  <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline">
                       <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
                   <!-- item-->
                   

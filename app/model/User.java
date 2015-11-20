@@ -28,11 +28,11 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import controllers.GroupManager.GroupType;
-import db.DB;
 import play.Logger;
 import play.Logger.ALogger;
+import utils.Serializer;
 
 @Entity
 public class User extends UserOrGroup {
@@ -67,6 +67,7 @@ public class User extends UserOrGroup {
 
 	private int exhibitionsCreated;
 
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
 
 	/**
@@ -128,20 +129,6 @@ public class User extends UserOrGroup {
 		return "";
 	}
 
-	public void recalculateGroups() {
-		Set<ObjectId> groupAcc = new HashSet<ObjectId>();
-		// get all groups I'm in
-		List<UserGroup> gr = DB.getUserGroupDAO().findByUserIdAll(this.getDbId(), GroupType.All);
-		for (UserGroup ug : gr) {
-			groupAcc.add(ug.getDbId());
-			ug.accumulateGroups(groupAcc);
-		}
-		getUserGroupsIds().clear();
-		getUserGroupsIds().addAll(groupAcc);
-	}
-
-	// getter setter
-
 	public String getEmail() {
 		return email;
 	}
@@ -199,28 +186,30 @@ public class User extends UserOrGroup {
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
 	}
+	
+	private String genderToString(Gender gender) {
+		String genderString = String.valueOf(gender);
+		String first = genderString.substring(0, 1).toUpperCase();
+		return first + genderString.substring(1).toLowerCase();
+	}
+	
 
 	public String getGender() {
-		switch (gender) {
-		case FEMALE:
-			return "Female";
-		case MALE:
-			return "Male";
-		default:
-			return "Unspecified";
-
+		if (gender != null) {
+			return genderToString(gender);
 		}
-
+		else {
+			return genderToString(Gender.UNSPECIFIED);
+		}
 	}
 
 	public void setGender(String gender) {
-		if (gender.equalsIgnoreCase("female")) {
-			this.gender = Gender.FEMALE;
-		} else if (gender.equalsIgnoreCase("male")) {
-			this.gender = Gender.MALE;
-		} else {
-			this.gender = Gender.UNSPECIFIED;
-		}
+		 try {
+			 Gender genderType = Gender.valueOf(gender);
+			 this.gender = genderType;
+	    } catch (IllegalArgumentException ex) {  
+	    	this.gender = Gender.UNSPECIFIED;
+	    }
 	}
 
 	public String getGoogleId() {
@@ -250,7 +239,7 @@ public class User extends UserOrGroup {
 	public Set<ObjectId> getUserGroupsIds() {
 		return userGroupsIds;
 	}
-	
+
 	@JsonIgnore
 	public boolean isSuperUser() {
 		return superUser;
@@ -260,7 +249,7 @@ public class User extends UserOrGroup {
 	public void setSuperUser(boolean isSuperUser) {
 		this.superUser = isSuperUser;
 	}
-	
+
 	@JsonIgnore
 	public int getExhibitionsCreated() {
 		return exhibitionsCreated;

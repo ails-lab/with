@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import model.Collection;
 import model.CollectionRecord;
-import model.Rights.Access;
+import model.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;

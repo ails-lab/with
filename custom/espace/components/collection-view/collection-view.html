@@ -27,12 +27,14 @@
             <!-- grid-->
             <div class="grid" data-bind="collectionIsotope: citems">
               <!-- item-->
+               <!-- ko if: $index() === 0 -->
               <div class="sizer"></div>
+              <!-- /ko -->
               
               
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
-                <!-- anchor--><a data-bind="event: {click: function(){$parent.recordSelect($data)}}">
+                <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->

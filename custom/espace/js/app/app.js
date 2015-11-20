@@ -2,7 +2,35 @@ define("app", ['knockout'], function (ko) {
 
 	// overwrite default settings*/
 	var self = this;
+	
+	require(["./js/plugin","js/vendor/slick.js/slick/slick.min"], function(EUSpaceApp,slick) {
+		 window.EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
+
+		 		// page name
+		 		page  	  : $( 'body' ).attr( 'data-page' ),
+
+		 		// masonry
+		 		mSelector : '.grid',
+		 		mItem	  : '.item',
+		 		mSizer	  : '.sizer',
+
+		 		// mobile menu
+		 		mobileSelector : '.mobilemenu',
+		 		mobileMenu 	   : '.main .menu'
+		 	})
+
+		// window.EUSpaceUI.init();
+		 return {
+				EUSpaceUI: window.EUSpaceUI
+			};
+		 
+			});
+	
+	
 	//project id goes here
+	
+	
+	
 	
 	self.settings = $.extend({
 
@@ -70,43 +98,125 @@ define("app", ['knockout'], function (ko) {
 	} 
 	
 	
-	 require(["./js/plugin"], function(EUSpaceApp) {
-		 window.EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
-
-		 		// page name
-		 		page  	  : $( 'body' ).attr( 'data-page' ),
-
-		 		// masonry
-		 		mSelector : '.grid',
-		 		mItem	  : '.item',
-		 		mSizer	  : '.sizer',
-
-		 		// mobile menu
-		 		mobileSelector : '.mobilemenu',
-		 		mobileMenu 	   : '.main .menu'
-		 	})
-
-		 window.EUSpaceUI.init();
-			});
 	
-    require(["js/vendor/slick.js/slick/slick.min","js/plugin"], function(slick,EUSpaceApp) {
-		 var EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
+    
+	 /* for all isotopes binding */
+	 function initOrUpdate(method) {
+			return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+				function isotopeAppend(ele) {
+					if (ele.nodeType === 1 && ele.className.indexOf ("item")>-1) { // Element type
+						$(ele).css("display","none");
+							
+						$(element).imagesLoaded(function () {
+							if(ko.contextFor(ele).$parent.loading!=undefined)
+							  ko.contextFor(ele).$parent.loading(false);
+							$(element).isotope('appended', ele).isotope('layout');
+							
+						});
+						
+					}
+					
+				}
 
-		 		// page name
-		 		page  	  : document.body.getAttribute("data-page"),
+				
+				
+				function attachCallback(valueAccessor) {
+					return function() {
+						return {
+							data: valueAccessor(),
+							afterAdd: isotopeAppend
+						};
+					};
+				}
 
-		 		// masonry
-		 		mSelector : '.grid',
-		 		mItem	  : '.item',
-		 		mSizer	  : '.sizer',
+				var data = ko.utils.unwrapObservable(valueAccessor());
+				//extend foreach binding
+				ko.bindingHandlers.foreach[method](element,
+					 attachCallback(valueAccessor), // attach 'afterAdd' callback
+					 allBindings, viewModel, bindingContext);
 
-		 		// mobile menu
-		 		mobileSelector : '.mobilemenu',
-		 		mobileMenu 	   : '.main .menu'
-		 	})
+				if (method === 'init') {
+					/* this is very important, when hiting back button this makes it scroll to correct position*/
+					var height = $(element).height();
 
-		 EUSpaceUI.init();
-			});
-  
+					if( height > 0 ) { // or some other number
+					    $(element).height( height );
+					}
+					
+					/* finished back button fix*/
+					 $(element).imagesLoaded(function () {
+						$(element).isotope({
+							itemSelector: '.item',
+							transitionDuration: transDuration,
+							masonry: {
+								columnWidth		: '.sizer',
+								percentPosition	: true
+							}
+						});
+						
+					});
+
+					ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
+						$(element).isotope("destroy");
+					});
+					
+				} 
+				
+			};
+		}
+	 
+	 /* scroll binding for infinite load*/
+	 ko.bindingHandlers.scroll = {
+				updating: true,
+
+				init: function (element, valueAccessor, allBindingsAccessor) {
+					var self = this;
+					self.updating = true;
+					ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+						$(window).off("scroll.ko.scrollHandler");
+						self.updating = false;
+					});
+				},
+
+				update: function (element, valueAccessor, allBindingsAccessor) {
+					var props = allBindingsAccessor().scrollOptions;
+					var offset = props.offset ? props.offset : "0";
+					var loadFunc = props.loadFunc;
+					var load = ko.utils.unwrapObservable(valueAccessor());
+					var self = this;
+
+					if (load) {
+						$(window).on("scroll.ko.scrollHandler", function () {
+							if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+								if (self.updating) {
+									loadFunc();
+									self.updating = false;
+								}
+							} else {
+								self.updating = true;
+							}
+							
+							 if ($(window).scrollTop() > 100) {
+									$('.scroll-top-wrapper').addClass('show');
+								} else {
+									$('.scroll-top-wrapper').removeClass('show');
+								}
+						});
+					} else {
+						element.style.display = "none";
+						$(window).off("scroll.ko.scrollHandler");
+						self.updating = false;
+					}
+				}
+			};
+
+
+	 
+	 return {
+			initOrUpdate: initOrUpdate,
+			scroll: scroll
+	 }
+	 
+	 
 	
 });
