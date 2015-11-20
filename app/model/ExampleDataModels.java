@@ -383,6 +383,10 @@ public class ExampleDataModels {
 		//TODO: add link to external collection
 	}
 	
+	public static class Agent extends WithResource<AgentData> {
+		
+	}
+	
 	public static class AgentData extends DescriptiveData {
 		ArrayList<WithDate> birthdate;
 		ArrayList<LiteralOrResource> birthplace;
