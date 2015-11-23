@@ -13,7 +13,7 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 				url: '/notifications/accept/' + notification.dbId,
 			}).done(function (data, textStatus, jqXHR) {
 				notification.pending(false);
-				notification.read(Date.now());
+				notification.unread(false);
 				app.currentUser.notificatios.unread(app.currentUser.notification.unread() - 1);
 			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// TODO: Display error message
@@ -26,7 +26,7 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 				url: '/notifications/reject/' + notification.dbId,
 			}).done(function (data, textStatus, jqXHR) {
 				notification.pending(false);
-				notification.read(Date.now());
+				notification.unread(false);
 				app.currentUser.notificatios.unread(app.currentUser.notification.unread() - 1);
 			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// TODO: Display error message
