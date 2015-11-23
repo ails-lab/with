@@ -120,7 +120,7 @@ public class RightsController extends Controller {
 			notification.setReceiver(userOrGroupId);
 			notification.setCollection(collectionId);
 			notification.setSender(owner);
-			notification.setPendingResponse(true);
+			notification.setPendingResponse(false);
 			Date now = new Date();
 			notification.setOpenedAt(new Timestamp(now.getTime()));
 			DB.getNotificationDAO().makePermanent(notification);
