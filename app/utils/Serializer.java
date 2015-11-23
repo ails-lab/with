@@ -82,7 +82,7 @@ public class Serializer {
 
 	}
 	
-	public static class RightsSerializer extends JsonSerializer<Object> {
+	public static class WithAccessSerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object rights, JsonGenerator jsonGen,
 				SerializerProvider arg2) throws IOException,

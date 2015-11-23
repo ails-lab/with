@@ -18,9 +18,14 @@ package model;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DescriptiveData {
 	
 	// one line content description with identifiable characteristic

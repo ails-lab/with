@@ -32,7 +32,7 @@ public class CulturalObjectDAO extends DAO<CulturalObject> {
 	public static final ALogger log = Logger.of(CulturalObject.class);
 
 	public CulturalObjectDAO() {
-		super(CollectionRecord.class);
+		super(CulturalObject.class);
 	}
 
 	public CulturalObject getById(ObjectId id) {

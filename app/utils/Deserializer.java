@@ -60,7 +60,7 @@ public class Deserializer {
 		}
 	}
 	
-	public static class RightsDeserializer extends JsonDeserializer<WithAccess> {
+	public static class WithAccessDeserializer extends JsonDeserializer<WithAccess> {
 		
 		@Override
 		public WithAccess deserialize(JsonParser rightsString, DeserializationContext arg1)

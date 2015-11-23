@@ -87,8 +87,8 @@ public class Collection {
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
-	@JsonSerialize(using = Serializer.RightsSerializer.class)
-	@JsonDeserialize(using = Deserializer.RightsDeserializer.class)
+	@JsonSerialize(using = Serializer.WithAccessSerializer.class)
+	@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 	@Embedded
 	private final WithAccess rights = new WithAccess();
 	
