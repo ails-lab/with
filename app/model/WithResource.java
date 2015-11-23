@@ -19,11 +19,13 @@ package model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.bson.types.ObjectId;
 
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
+import model.ExampleDataModels.WithAccess;
 import model.annotations.Annotation;
 
 public class WithResource<T extends DescriptiveData> {
@@ -43,6 +45,7 @@ public class WithResource<T extends DescriptiveData> {
 		
 		Date created;
 		Date lastModified;
+		private final Map<ObjectId, WithAccess> underModeration = new HashMap<ObjectId, WithAccess>();
 	}
 	
 	public static class Usage {
