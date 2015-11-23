@@ -22,8 +22,7 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionRecord;
-import model.Search;
-import model.SearchResult;
+import model.resources.CulturalObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -51,11 +50,11 @@ public class DB {
 	static private final Logger.ALogger log = Logger.of(DB.class);
 
 	public static GridFS getGridFs() {
-		if(gridfs == null) {
+		if (gridfs == null) {
 			try {
-				String dbname = getConf().getString( "mongo.dbname");
+				String dbname = getConf().getString("mongo.dbname");
 				gridfs = new GridFS(getMongo().getDB(dbname));
-			} catch(Exception e) {
+			} catch (Exception e) {
 				log.error("Cannot create GridFS!", e);
 			}
 		}
@@ -63,52 +62,55 @@ public class DB {
 	}
 
 	public static Config getConf() {
-		if( conf == null ) {
+		if (conf == null) {
 			conf = ConfigFactory.load();
 		}
 		return conf;
 	}
 
 	public static MongoClient getMongo() {
-		if( mongo == null ) {
+		if (mongo == null) {
 			try {
 				String host = getConf().getString("mongo.host");
 				int port = getConf().getInt("mongo.port");
 				mongo = new MongoClient(host, port);
-				if( getConf().hasPath("mongo.erase") && getConf().getBoolean("mongo.erase")) {
-					mongo.dropDatabase(getConf().getString( "mongo.dbname"));
+				if (getConf().hasPath("mongo.erase")
+						&& getConf().getBoolean("mongo.erase")) {
+					mongo.dropDatabase(getConf().getString("mongo.dbname"));
 				}
-			} catch( Exception e ) {
-				log.error( "Cannot create Mongo client", e );
+			} catch (Exception e) {
+				log.error("Cannot create Mongo client", e);
 			}
 		}
 		return mongo;
 	}
 
 	public static Morphia getMorphia() {
-		if( morphia == null ) {
-			 morphia = new Morphia();
-			//this method is not working, have to find why!!
-			//morphia.mapPackage("model");
-			 morphia.getMapper().getConverters().addConverter(new RightsConverter());
+		if (morphia == null) {
+			morphia = new Morphia();
+			// this method is not working, have to find why!!
+			// morphia.mapPackage("model");
+			morphia.getMapper().getConverters()
+					.addConverter(new RightsConverter());
 		}
 		return morphia;
 	}
 
 	public static Datastore getDs() {
-		if(ds == null) {
+		if (ds == null) {
 			try {
-				ds = getMorphia().createDatastore(getMongo(), getConf().getString("mongo.dbname"));
+				ds = getMorphia().createDatastore(getMongo(),
+						getConf().getString("mongo.dbname"));
 				ds.ensureIndexes(Collection.class);
 
-			} catch(Exception e) {
+			} catch (Exception e) {
 				log.error("Cannot create Datastore!", e);
 			}
 		}
 		return ds;
 	}
 
-	public static String getJson( Object o ) {
+	public static String getJson(Object o) {
 		return getMorphia().getMapper().toDBObject(o).toString();
 	}
 
@@ -125,17 +127,21 @@ public class DB {
 	}
 
 	public static MediaDAO getMediaDAO() {
-		if( mediaDAO == null )
-			 mediaDAO = new MediaDAO();
+		if (mediaDAO == null)
+			mediaDAO = new MediaDAO();
 		return mediaDAO;
 	}
 
-	public static SearchDAO getSearchDAO() {
-		return (SearchDAO) getDAO(Search.class);
-	}
+	/*
+	 * public static SearchDAO getSearchDAO() { return (SearchDAO)
+	 * getDAO(Search.class); }
+	 * 
+	 * public static SearchResultDAO getSearchResultDAO() { return
+	 * (SearchResultDAO) getDAO(SearchResult.class); }
+	 */
 
-	public static SearchResultDAO getSearchResultDAO() {
-		return (SearchResultDAO) getDAO(SearchResult.class);
+	public static CulturalObjectDAO getCulturalObjectDAO() {
+		return (CulturalObjectDAO) getDAO(CulturalObject.class);
 	}
 
 	public static CollectionRecordDAO getCollectionRecordDAO() {
@@ -148,19 +154,20 @@ public class DB {
 
 	/**
 	 * Singleton DAO class for all the models
+	 * 
 	 * @param clazz
 	 * @return
 	 */
-	private static DAO<?> getDAO( Class<?> clazz ) {
-		DAO<?> dao = daos.get( clazz.getSimpleName());
-		if( dao == null ) {
+	private static DAO<?> getDAO(Class<?> clazz) {
+		DAO<?> dao = daos.get(clazz.getSimpleName());
+		if (dao == null) {
 			try {
-				String daoClassName = "db."+clazz.getSimpleName()+"DAO";
-				Class<?> daoClass = Class.forName(daoClassName );
+				String daoClassName = "db." + clazz.getSimpleName() + "DAO";
+				Class<?> daoClass = Class.forName(daoClassName);
 				dao = (DAO<?>) daoClass.newInstance();
-				daos.put( clazz.getSimpleName(), dao);
-			} catch( Exception e ) {
-				log.error( "Can't instantiate DAO for "+ clazz.getName(), e );
+				daos.put(clazz.getSimpleName(), dao);
+			} catch (Exception e) {
+				log.error("Can't instantiate DAO for " + clazz.getName(), e);
 			}
 		}
 		return dao;
