@@ -214,6 +214,11 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 		self.currentUser.notifications.groupNotifications.removeAll();
 		self.currentUser.notifications.unread(0);
 
+		// Sort notification array
+		data.sort(function (a, b) {
+			return a.openedAt - b.openedAt;
+		});
+
 		// Load notifications
 		for (var i = 0; i < data.length; i++) {
 			self.addNotification(data[i]);
