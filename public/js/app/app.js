@@ -226,6 +226,7 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 		});
 
 		data.pending = ko.observable(data.pendingResponse);
+		data.unread = ko.observable(data.readAt === null);
 
 		if (!data.readAt) {
 			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);

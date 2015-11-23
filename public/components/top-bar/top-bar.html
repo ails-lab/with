@@ -27,7 +27,7 @@
 				<li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="javascript:void(0)" id="notifications" data-title="Notifications" data-trigger="focus" data-template="<div class='popover notifications'><div class='arrow'></div><div class='popover-inner'><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div></div>"><span class="fa fa-2x fa-flag"></span></a><span class="badge danger"><!-- ko text: noticount --><!-- /ko --></span></li>
 				<div id="notifications-content" class="hide">
 					<ul class="notify-list" data-bind="foreach: notifications">
-						<li>
+						<li data-bind="css: { 'unread': unread }">
 							<!-- ko switch: activity -->
 							<!-- ko case: 'GROUP_INVITE' -->
 							<a data-bind="attr: { href: '#organization/' + group }"><em data-bind="text: senderName"></em> invites you to join <em data-bind="text: groupName"></em></a>
