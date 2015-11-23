@@ -19,6 +19,7 @@ package db;
 import java.util.List;
 
 import model.CollectionRecord;
+import model.resources.CulturalObject;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -27,15 +28,15 @@ import org.mongodb.morphia.query.UpdateOperations;
 import play.Logger;
 import play.Logger.ALogger;
 
-public class CollectionRecordDAO extends DAO<CollectionRecord> {
-	public static final ALogger log = Logger.of(CollectionRecord.class);
+public class CulturalObjectDAO extends DAO<CulturalObject> {
+	public static final ALogger log = Logger.of(CulturalObject.class);
 
-	public CollectionRecordDAO() {
+	public CulturalObjectDAO() {
 		super(CollectionRecord.class);
 	}
 
-	public CollectionRecord getById(ObjectId id) {
-		Query<CollectionRecord> q = this.createQuery().field("_id").equal(id);
+	public CulturalObject getById(ObjectId id) {
+		Query<CulturalObject> q = this.createQuery().field("_id").equal(id);
 		return this.findOne(q);
 	}
 
@@ -45,7 +46,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	 * @param colId
 	 * @return
 	 */
-	public List<CollectionRecord> getByCollection(ObjectId colId) {
+	public List<CulturalObject> getByCollection(ObjectId colId) {
 		return getByCollectionOffsetCount(colId, 0, -1);
 	}
 
@@ -56,83 +57,74 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	 *            , offset, count
 	 * @return
 	 */
-	public List<CollectionRecord> getByCollectionOffsetCount(ObjectId colId,
+	public List<CulturalObject> getByCollectionOffsetCount(ObjectId colId,
 			int offset, int count) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+		Query<CulturalObject> q = this.createQuery().field("")
 				.equal(colId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
-	/**
-	 * Retrieve the total amount of records within a collection
-	 */
-	public long getItemCount(ObjectId colId) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
-				.equal(colId);
-		return this.find(q).countAll();
-	}
-
-	public List<CollectionRecord> getBySource(String sourceId) {
-		Query<CollectionRecord> q = this.createQuery()
+	public List<CulturalObject> getBySource(String sourceId) {
+		Query<CulturalObject> q = this.createQuery()
 		// .field("source").equal(source)
 				.field("sourceId").equal(sourceId);
 		return this.find(q).asList();
 	}
 
-	public List<CollectionRecord> getByExternalId(ObjectId colId, String extId) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+	public List<CulturalObject> getByExternalId(ObjectId colId, String extId) {
+		Query<CulturalObject> q = this.createQuery().field("collectionId")
 				.equal(colId).field("externalId").equal(extId);
 		return this.find(q).asList();
 	}
 
 	public int getTotalLikes(String extId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId")
+		Query<CulturalObject> q = this.createQuery().field("externalId")
 				.equal(extId).limit(1);
-		List<CollectionRecord> list = this.find(q).asList();
+		List<CulturalObject> list = this.find(q).asList();
 		if (list.size() > 0)
-			return 0;//list.get(0).getTotalLikes();
+			return list.get(0).getTotalLikes();
 		else
 			return 0;
 	}
 
 	public long countBySource(String sourceId) {
-		Query<CollectionRecord> q = this.createQuery()
+		Query<CulturalObject> q = this.createQuery()
 		// .field("source").equal(source)
 				.field("sourceId").equal(sourceId);
 		return this.find(q).countAll();
 	}
 
-	public List<CollectionRecord> getByExternalId(String extId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId")
+	public List<CulturalObject> getByExternalId(String extId) {
+		Query<CulturalObject> q = this.createQuery().field("externalId")
 				.equal(extId);
 		return this.find(q).asList();
 	}
 
 	public long countByExternalId(String extId) {
-		Query<CollectionRecord> q = this.createQuery()
+		Query<CulturalObject> q = this.createQuery()
 		// .field("source").equal(source)
 				.field("externalId").equal(extId);
 		return this.find(q).countAll();
 	}
 
 	public int deleteByCollection(ObjectId colId) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+		Query<CulturalObject> q = this.createQuery().field("collectionId")
 				.equal(colId);
 		return this.deleteByQuery(q).getN();
 	}
 
-	public void shiftRecordsToRight(ObjectId colId, int position) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+	public void CulturalObject(ObjectId colId, int position) {
+		Query<CulturalObject> q = this.createQuery().field("collectionId")
 				.equal(colId).field("position").greaterThanOrEq(position);
-		UpdateOperations<CollectionRecord> updateOps = this
+		UpdateOperations<CulturalObject> updateOps = this
 				.createUpdateOperations().inc("position");
 		this.update(q, updateOps);
 	}
 
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+		Query<CulturalObject> q = this.createQuery().field("collectionId")
 				.equal(colId).field("position").greaterThan(position);
-		UpdateOperations<CollectionRecord> updateOps = this
+		UpdateOperations<CulturalObject> updateOps = this
 				.createUpdateOperations().dec("position");
 		this.update(q, updateOps);
 	}
@@ -145,18 +137,18 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	 **/
 	public void setSpecificRecordField(ObjectId colId, String fieldName,
 			String value) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
+		Query<CulturalObject> q = this.createQuery().field("collectionId")
 				.equal(colId);
-		UpdateOperations<CollectionRecord> updateOps = this
+		UpdateOperations<CulturalObject> updateOps = this
 				.createUpdateOperations();
 		updateOps.set(fieldName, value);
 		this.update(q, updateOps);
 	}
 
 	public void updateContent(ObjectId recId, String format, String content) {
-		Query<CollectionRecord> q = this.createQuery().field("_id")
+		Query<CulturalObject> q = this.createQuery().field("_id")
 				.equal(recId);
-		UpdateOperations<CollectionRecord> updateOps = this
+		UpdateOperations<CulturalObject> updateOps = this
 				.createUpdateOperations();
 		updateOps.set("content."+format, content);
 		this.update(q, updateOps);
@@ -164,27 +156,27 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	}
 
 	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
-		List<CollectionRecord> mergedRecord = getByExternalId(extId);
-		for (CollectionRecord mr : mergedRecord) {
-			if (mr.getCollection().getIsPublic() && !mr.getDbId().equals(dbId))
+		List<CulturalObject> mergedRecord = getByExternalId(extId);
+		for (CulturalObject mr : mergedRecord) {
+			//if (mr.getCollection().getIsPublic() && !mr.getDbId().equals(dbId))
 				return true;
 		}
 		return false;
 	}
 
 	public void incrementLikes(String externalId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId")
+		Query<CulturalObject> q = this.createQuery().field("externalId")
 				.equal(externalId);
-		UpdateOperations<CollectionRecord> updateOps = this
+		UpdateOperations<CulturalObject> updateOps = this
 				.createUpdateOperations();
 		updateOps.inc("totalLikes");
 		this.update(q, updateOps);
 	}
 
 	public void decrementLikes(String externalId) {
-		Query<CollectionRecord> q = this.createQuery().field("externalId")
+		Query<CulturalObject> q = this.createQuery().field("externalId")
 				.equal(externalId);
-		UpdateOperations<CollectionRecord> updateOps = this
+		UpdateOperations<CulturalObject> updateOps = this
 				.createUpdateOperations();
 		updateOps.dec("totalLikes");
 		this.update(q, updateOps);

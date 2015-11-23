@@ -49,5 +49,5 @@ public class DescriptiveData {
 	int year;	
 	
 	// alternative title or name or placename
-	ArrayList<Literal> altLabel;
+	ArrayList<Literal> altLabels;
 }
