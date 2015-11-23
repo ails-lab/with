@@ -177,6 +177,18 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 		}
 	};
 
+	self.reloadUser = function() {
+		if (self.currentUser._id === undefined) { return; }
+
+		$.ajax({
+			url: '/user/' + self.currentUser._id(),
+			type: 'GET',
+			success: function(data, text) {
+				loadUser(data, false, false);
+			}
+		});
+	};
+
 	self.loadFavorites = function () {
 		$.ajax({
 				url: "/collection/favorites",
@@ -197,6 +209,12 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 	};
 
 	self.loadNotifications = function(data) {
+		// Reset previous notification instances
+		self.currentUser.notifications.userNotifications.removeAll();
+		self.currentUser.notifications.groupNotifications.removeAll();
+		self.currentUser.notifications.unread(0);
+
+		// Load notifications
 		for (var i = 0; i < data.length; i++) {
 			self.addNotification(data[i]);
 		}
@@ -502,9 +520,12 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 		loadUser(storageData, true);
 	}
 
+	self.reloadUser();	// Reloads the user on refresh
+
 	return {
 		currentUser: currentUser,
 		loadUser: loadUser,
+		reloadUser: reloadUser,
 		showPopup: showPopup,
 		closePopup: closePopup,
 		logout: logout,
