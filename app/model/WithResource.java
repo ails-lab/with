@@ -28,6 +28,7 @@ import org.mongodb.morphia.annotations.Id;
 import utils.Deserializer;
 import utils.Serializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -38,60 +39,158 @@ import model.BasicDataTypes.LiteralOrResource;
 import model.ExampleDataModels.WithAccess;
 import model.WithAccess.Access;
 import model.annotations.Annotation;
+import model.annotations.ContextAnnotation;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class WithResource<T extends DescriptiveData> {
 	
 	public static class CollectionInfo {
-		ObjectId collectionId;
-		int position;
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+		private ObjectId collectionId;
+		private int position;
+		
+		public ObjectId getCollectionId() {
+			return collectionId;
+		}
+		public void setCollectionId(ObjectId collectionId) {
+			this.collectionId = collectionId;
+		}
+		public int getPosition() {
+			return position;
+		}
+		public void setPosition(int position) {
+			this.position = position;
+		}
 	}
 	
 	public static class WithAdmin {
 		@Id
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		ObjectId dbId;
-		
+		private ObjectId dbId;
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
-		WithAccess access;
+		private WithAccess access;
 		
 		// uri that this resource has in the rdf repository
-		String withURI;
+		private String withURI;
 		
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-		Date created;
+		private Date created;
 		
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-		Date lastModified;
+		private Date lastModified;
 		
 		@Embedded
 		@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
+		
+		public ObjectId getDbId() {
+			return dbId;
+		}
+
+		public void setDbId(ObjectId dbId) {
+			this.dbId = dbId;
+		}
+
+		public WithAccess getAccess() {
+			return access;
+		}
+		
+		@JsonIgnore
+		public void setAccess(WithAccess access) {
+			this.access = access;
+		}
+
+		public String getWithURI() {
+			return withURI;
+		}
+
+		public void setWithURI(String withURI) {
+			this.withURI = withURI;
+		}
+
+		public Date getCreated() {
+			return created;
+		}
+
+		public void setCreated(Date created) {
+			this.created = created;
+		}
+
+		public Date getLastModified() {
+			return lastModified;
+		}
+
+		public void addForModeration(ObjectId groupId, Access access) {
+			this.underModeration.put(groupId, access);
+		}
+
+		public Access removeFromModeration(ObjectId groupId) {
+			return this.underModeration.remove(groupId);
+		}
 	}
 	
 	public static class Usage {
 		// in how many favorites is it
-		int likes;
+		private int likes;
 		
 		// in how many user collections is it
-		int collected;
-		
+		private int collected;
 		// how many modified versions exist
-		int annotated;
+		private int annotated;
 		
 		// how often is it viewed, don't count count api calls,
 		// count UI messages for viewing
-		int viewCount;
+		private int viewCount;
 
 		// implementation detail, put any tag on the record twice, 
 		// with userID prepended and without. This will allow for people to look
 		// for their own tags.
-		ArrayList<String> tags;
+		private ArrayList<String> tags;
+		
+		public int getLikes() {
+			return likes;
+		}
+
+		public void setLikes(int likes) {
+			this.likes = likes;
+		}
+
+		public int getCollected() {
+			return collected;
+		}
+
+		public void setCollected(int collected) {
+			this.collected = collected;
+		}
+
+		public int getAnnotated() {
+			return annotated;
+		}
+
+		public void setAnnotated(int annotated) {
+			this.annotated = annotated;
+		}
+
+		public int getViewCount() {
+			return viewCount;
+		}
+
+		public void setViewCount(int viewCount) {
+			this.viewCount = viewCount;
+		}
+
+		public ArrayList<String> getTags() {
+			return tags;
+		}
+
+		public void setTags(ArrayList<String> tags) {
+			this.tags = tags;
+		}
 	}
 	
 	/**
@@ -102,52 +201,204 @@ public class WithResource<T extends DescriptiveData> {
 	 */
 	public static class ExternalCollection {
 		// known sources only
-		String source;
+		private String source;
+		private String collectionUri;
+		private String nextInSequenceUri;
+		private int position;
+		private String title;
+		private String description;
 		
-		String collectionUri;
-		String nextInSequenceUri;
-		int position;
-		String title;
-		String description;
+		public String getSource() {
+			return source;
+		}
+		public void setSource(String source) {
+			this.source = source;
+		}
+		public String getCollectionUri() {
+			return collectionUri;
+		}
+		public void setCollectionUri(String collectionUri) {
+			this.collectionUri = collectionUri;
+		}
+		public String getNextInSequenceUri() {
+			return nextInSequenceUri;
+		}
+		public void setNextInSequenceUri(String nextInSequenceUri) {
+			this.nextInSequenceUri = nextInSequenceUri;
+		}
+		public int getPosition() {
+			return position;
+		}
+		public void setPosition(int position) {
+			this.position = position;
+		}
+		public String getTitle() {
+			return title;
+		}
+		public void setTitle(String title) {
+			this.title = title;
+		}
+		public String getDescription() {
+			return description;
+		}
+		public void setDescription(String description) {
+			this.description = description;
+		}
 	}
 	
 	
 	public static class ProvenanceInfo {
-		String provider;
-		String uri;
-		String recordId;
+		private String provider;
+		private String uri;
+		private String recordId;
+		public String getProvider() {
+			return provider;
+		}
+		public void setProvider(String provider) {
+			this.provider = provider;
+		}
+		public String getUri() {
+			return uri;
+		}
+		public void setUri(String uri) {
+			this.uri = uri;
+		}
+		public String getRecordId() {
+			return recordId;
+		}
+		public void setRecordId(String recordId) {
+			this.recordId = recordId;
+		}
 		
 		// you can have entries for WITH records with provider "WITH" and
 		// recordId the ObjectId of the annotated Record
 	}
 
 	
-	WithAdmin administrative;
-	ArrayList<CollectionInfo> collectedIn;
+	private WithAdmin administrative;
 	
-	Usage usage;
+	private ArrayList<CollectionInfo> collectedIn;
 	
-	//What is the 
-	ArrayList<ExternalCollection> externalCollections;		
-	ArrayList<ProvenanceInfo> provenance;
+	private Usage usage;
+	
+	//external collections to which the resource may belong to
+	private ArrayList<ExternalCollection> externalCollections;		
+	private ArrayList<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
-	String resourceType;
+	private String resourceType;
 	
-	T model;
+	private T model;
 	
 	// All the available content serializations 
 	// all keys in here should be understood by the WITH system
-	HashMap<String, String> content;
+	private HashMap<String, String> content;
 	
 	// all attached media Objects (their embedded part)
-	ArrayList<EmbeddedMediaObject> media;
+	private ArrayList<EmbeddedMediaObject> media;
 	
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
-	HashMap<String, ContextAnnotation> contextAnnotation;
+	private HashMap<String, ContextAnnotation> contextAnnotation;
 	
-	ArrayList<Annotation> annotations;
+	private ArrayList<Annotation> annotations;
 	
+	public WithAdmin getAdministrative() {
+		return administrative;
+	}
+
+	public void setAdministrative(WithAdmin administrative) {
+		this.administrative = administrative;
+	}
+
+	public ArrayList<CollectionInfo> getCollectedIn() {
+		return collectedIn;
+	}
+
+	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
+		this.collectedIn = collectedIn;
+	}
+
+	public Usage getUsage() {
+		return usage;
+	}
+
+	public void setUsage(Usage usage) {
+		this.usage = usage;
+	}
+
+	public ArrayList<ExternalCollection> getExternalCollections() {
+		return externalCollections;
+	}
+
+	public void setExternalCollections(
+			ArrayList<ExternalCollection> externalCollections) {
+		this.externalCollections = externalCollections;
+	}
+
+	public ArrayList<ProvenanceInfo> getProvenance() {
+		return provenance;
+	}
+
+	public void setProvenance(ArrayList<ProvenanceInfo> provenance) {
+		this.provenance = provenance;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public void setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+	}
+
+	public T getModel() {
+		return model;
+	}
+
+	public void setModel(T model) {
+		this.model = model;
+	}
+
+	public HashMap<String, String> getContent() {
+		return content;
+	}
+
+	public void setContent(HashMap<String, String> content) {
+		this.content = content;
+	}
+
+	public ArrayList<EmbeddedMediaObject> getMedia() {
+		return media;
+	}
+
+	public void setMedia(ArrayList<EmbeddedMediaObject> media) {
+		this.media = media;
+	}
+
+	public HashMap<String, ContextAnnotation> getContextAnnotation() {
+		return contextAnnotation;
+	}
+
+	public void setContextAnnotation(
+			HashMap<String, ContextAnnotation> contextAnnotation) {
+		this.contextAnnotation = contextAnnotation;
+	}
+
+	public ArrayList<Annotation> getAnnotations() {
+		return annotations;
+	}
+
+	public void setAnnotations(ArrayList<Annotation> annotations) {
+		this.annotations = annotations;
+	}
+	
+	public boolean getIsPublic() {
+		return administrative.access.isPublic();
+	}
+
+	public void setIsPublic(boolean isPublic) {
+		administrative.access.setPublic(isPublic);
+	}
 
 }

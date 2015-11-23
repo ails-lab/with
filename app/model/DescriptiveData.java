@@ -29,30 +29,109 @@ import model.BasicDataTypes.LiteralOrResource;
 public class DescriptiveData {
 	
 	// one line content description with identifiable characteristic
-	Literal label;
+	private Literal label;
 	
 	// arbitrary length content description
-	Literal description;
+	private Literal description;
 	
 	// an indexers dream !! They can be literal concepts and enriched easily
-	ArrayList<LiteralOrResource> keywords;
+	private ArrayList<LiteralOrResource> keywords;
 	
 	// This are reachable URLs
-	String isShownAt, isShownBy;
-	
+	private String isShownAt, isShownBy;
 	
 	// The whole legal bla, unedited, from the source, mostly cc0
-	LiteralOrResource metadataRights;
+	private LiteralOrResource metadataRights;
 	
 	// rdf  .. Agent, Artist, Painter, Painting, Series
-	String rdfType;
+	private String rdfType;
 	
 	// URIs how this Resource is known elsewhere
-	ArrayList<String> sameAs;
+	private ArrayList<String> sameAs;
 	
 	// in a timeline where would this resource appear
-	int year;	
+	private int year;	
 	
 	// alternative title or name or placename
-	ArrayList<Literal> altLabels;
+	private ArrayList<Literal> altLabels;
+
+	public Literal getLabel() {
+		return label;
+	}
+
+	public void setLabel(Literal label) {
+		this.label = label;
+	}
+
+	public Literal getDescription() {
+		return description;
+	}
+
+	public void setDescription(Literal description) {
+		this.description = description;
+	}
+
+	public ArrayList<LiteralOrResource> getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(ArrayList<LiteralOrResource> keywords) {
+		this.keywords = keywords;
+	}
+
+	public String getIsShownAt() {
+		return isShownAt;
+	}
+
+	public void setIsShownAt(String isShownAt) {
+		this.isShownAt = isShownAt;
+	}
+
+	public String getIsShownBy() {
+		return isShownBy;
+	}
+
+	public void setIsShownBy(String isShownBy) {
+		this.isShownBy = isShownBy;
+	}
+
+	public LiteralOrResource getMetadataRights() {
+		return metadataRights;
+	}
+
+	public void setMetadataRights(LiteralOrResource metadataRights) {
+		this.metadataRights = metadataRights;
+	}
+
+	public String getRdfType() {
+		return rdfType;
+	}
+
+	public void setRdfType(String rdfType) {
+		this.rdfType = rdfType;
+	}
+
+	public ArrayList<String> getSameAs() {
+		return sameAs;
+	}
+
+	public void setSameAs(ArrayList<String> sameAs) {
+		this.sameAs = sameAs;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public ArrayList<Literal> getAltLabels() {
+		return altLabels;
+	}
+
+	public void setAltLabels(ArrayList<Literal> altLabels) {
+		this.altLabels = altLabels;
+	}
 }

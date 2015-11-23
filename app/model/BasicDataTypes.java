@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import model.ExampleDataModels.LiteralOrResource;
 import model.ExampleDataModels.WithPeriod;
 import model.ExampleDataModels.CidocEvent.EventType;

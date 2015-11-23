@@ -20,11 +20,13 @@ import java.util.ArrayList;
 
 import org.bson.types.ObjectId;
 
+import db.DB;
 import model.BasicDataTypes.CidocEvent;
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
+import model.BasicDataTypes.LiteralOrResource.ResourceType;
 import model.BasicDataTypes.WithDate;
-import model.ExampleDataModels.WithAdmin;
+import model.usersAndGroups.User;
 import model.DescriptiveData;
 import model.WithResource;
 
@@ -36,6 +38,23 @@ public class CulturalObject extends WithResource<CulturalObject.CulturalObjectDa
 				
 		// if this resource / record is derived (modified) from a different Record.
 		private ObjectId parentResourceId;
+
+		public String getExternalId() {
+			return externalId;
+		}
+
+		public void setExternalId(String externalId) {
+			this.externalId = externalId;
+		}
+
+		public ObjectId getParentResourceId() {
+			return parentResourceId;
+		}
+
+		public void setParentResourceId(ObjectId parentResourceId) {
+			this.parentResourceId = parentResourceId;
+		}
+		
 	}
 	
 	
@@ -70,6 +89,107 @@ public class CulturalObject extends WithResource<CulturalObject.CulturalObjectDa
 		private ArrayList<LiteralOrResource> isRelatedTo;
 		
 		private ArrayList<CidocEvent> events;
+
+		public String getDcidentifier() {
+			return dcidentifier;
+		}
+
+		public void setDcidentifier(String dcidentifier) {
+			this.dcidentifier = dcidentifier;
+		}
+
+		public ArrayList<Literal> getDclanguage() {
+			return dclanguage;
+		}
+
+		public void setDclanguage(ArrayList<Literal> dclanguage) {
+			this.dclanguage = dclanguage;
+		}
+
+		public ArrayList<LiteralOrResource> getDctype() {
+			return dctype;
+		}
+
+		public void setDctype(ArrayList<LiteralOrResource> dctype) {
+			this.dctype = dctype;
+		}
+
+		public ArrayList<LiteralOrResource> getDccoverage() {
+			return dccoverage;
+		}
+
+		public void setDccoverage(ArrayList<LiteralOrResource> dccoverage) {
+			this.dccoverage = dccoverage;
+		}
+
+		public ArrayList<LiteralOrResource> getDcspatial() {
+			return dcspatial;
+		}
+
+		public void setDcspatial(ArrayList<LiteralOrResource> dcspatial) {
+			this.dcspatial = dcspatial;
+		}
+
+		public ArrayList<LiteralOrResource> getDccreator() {
+			return dccreator;
+		}
+
+		public void setDccreator(ArrayList<LiteralOrResource> dccreator) {
+			this.dccreator = dccreator;
+		}
+
+		public ArrayList<WithDate> getDccreated() {
+			return dccreated;
+		}
+
+		public void setDccreated(ArrayList<WithDate> dccreated) {
+			this.dccreated = dccreated;
+		}
+
+		public ArrayList<WithDate> getDcdate() {
+			return dcdate;
+		}
+
+		public void setDcdate(ArrayList<WithDate> dcdate) {
+			this.dcdate = dcdate;
+		}
+
+		public ArrayList<LiteralOrResource> getDcformat() {
+			return dcformat;
+		}
+
+		public void setDcformat(ArrayList<LiteralOrResource> dcformat) {
+			this.dcformat = dcformat;
+		}
+
+		public ArrayList<LiteralOrResource> getDctermsmedium() {
+			return dctermsmedium;
+		}
+
+		public void setDctermsmedium(ArrayList<LiteralOrResource> dctermsmedium) {
+			this.dctermsmedium = dctermsmedium;
+		}
+
+		public ArrayList<LiteralOrResource> getIsRelatedTo() {
+			return isRelatedTo;
+		}
+
+		public void setIsRelatedTo(ArrayList<LiteralOrResource> isRelatedTo) {
+			this.isRelatedTo = isRelatedTo;
+		}
+
+		public ArrayList<CidocEvent> getEvents() {
+			return events;
+		}
+
+		public void setEvents(ArrayList<CidocEvent> events) {
+			this.events = events;
+		}
+		
+		//assume that the last entry of dccreator is always the With creator (i.e. if the resource was uploaded by a user via with)
+		public User retrieveCreator() {
+			return DB.getUserDAO().getById(new ObjectId(this.dccreator.get(dccreator.size()-1).getResource(ResourceType.withRepository)), null);
+		}
 		
 	}
 

@@ -33,6 +33,20 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	public static class CollectionAdmin extends WithAdmin {
 		private int entryCount;
 		private boolean isExhibition;
+		
+		public int getEntryCount() {
+			return entryCount;
+		}
+		public void setEntryCount(int entryCount) {
+			this.entryCount = entryCount;
+		}
+		public boolean isExhibition() {
+			return isExhibition;
+		}
+		public void setExhibition(boolean isExhibition) {
+			this.isExhibition = isExhibition;
+		}
+		
 	}
 	
 	public static class CollectionDescriptiveData extends DescriptiveData {
@@ -40,6 +54,25 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		private ArrayList<LiteralOrResource> dctermsaudience;
 		private ArrayList<LiteralOrResource> dclanguage;
 		//TODO: add link to external collection
+		public ArrayList<LiteralOrResource> getDccreator() {
+			return dccreator;
+		}
+		public void setDccreator(ArrayList<LiteralOrResource> dccreator) {
+			this.dccreator = dccreator;
+		}
+		public ArrayList<LiteralOrResource> getDctermsaudience() {
+			return dctermsaudience;
+		}
+		public void setDctermsaudience(ArrayList<LiteralOrResource> dctermsaudience) {
+			this.dctermsaudience = dctermsaudience;
+		}
+		public ArrayList<LiteralOrResource> getDclanguage() {
+			return dclanguage;
+		}
+		public void setDclanguage(ArrayList<LiteralOrResource> dclanguage) {
+			this.dclanguage = dclanguage;
+		}
+		
 	}
 
 }
