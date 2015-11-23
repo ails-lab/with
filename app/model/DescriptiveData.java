@@ -24,7 +24,7 @@ import model.BasicDataTypes.LiteralOrResource;
 public class DescriptiveData {
 	
 	// one line content description with identifiable characteristic
-	Literal title;
+	Literal label;
 	
 	// arbitrary length content description
 	Literal description;
@@ -49,5 +49,5 @@ public class DescriptiveData {
 	int year;	
 	
 	// alternative title or name or placename
-	ArrayList<Literal> alternative;
+	ArrayList<Literal> altLabel;
 }
