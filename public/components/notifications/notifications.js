@@ -34,14 +34,29 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 		};
 
 		self.markRead = function (notifications) {
+			var ids = [];
+			for (var i = 0; i < notifications().length; i++) {
+				if (!notifications()[i].pendingResponse && notifications()[i].unread()) {
+					ids.push(notifications()[i].dbId);
+				}
+			}
+
+			if (ids.length === 0) {
+				return;
+			}
+
 			$.ajax({
 				type: 'PUT',
-				url: '/user/readNotifications',
-				data: ids,
+				url: '/notifications/read',
+				data: JSON.stringify(ids),
 				contentType: 'application/json',
 				dataType: 'json'
 			}).done(function (data, textStatus, jqXHR) {
-				// TODO: Update list
+				for (var i = 0; i < notifications.length; i++) {
+					if (!notifications[i].pendingResponse) {
+						notifications[i].unread(false);
+					}
+				}
 			}).fail(function (jqXHR, textStatus, error) {
 				// TODO: Show error message
 			});
@@ -50,6 +65,9 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 		if (!isLogged()) {
 			window.location = '#login'; // Redirect to login
 		}
+
+		self.markRead(app.currentUser.notifications.userNotifications);
+		self.markRead(app.currentUser.notifications.groupNotifications);
 	}
 
 	return {
