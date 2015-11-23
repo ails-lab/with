@@ -24,7 +24,7 @@ import java.util.Set;
 import org.bson.types.ObjectId;
 
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
-import model.WithAccess;
+import model.Rights.Access;
 
 public class ExampleDataModels {
 	
@@ -33,6 +33,20 @@ public class ExampleDataModels {
 	 * @author Arne Stabenau
 	 *
 	 */
+	public static class WithAccess extends HashMap<ObjectId, Access> {
+		
+		public static enum Access {
+			NONE, READ, WRITE, OWN
+		}
+		private boolean isPublic;
+		
+		public boolean isPublic() {
+			return isPublic;
+		}
+		public void setPublic(boolean isPublic) {
+			this.isPublic = isPublic;
+		}
+	}
 
 	//TODO: why is the key a string and not an enum?
 	public static class Literal extends  HashMap<String, String> {
@@ -399,6 +413,11 @@ public class ExampleDataModels {
 		// in meters how in accurate the position is
 		// also describes the extend of the position
 		Double accuracy;
+	}
+	
+	
+	public static class TimeSpan extends WithResource<TimeSpanData> {
+		
 	}
 	
 	public static class TimeSpanData extends DescriptiveData {
