@@ -18,23 +18,17 @@ package controllers;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
-import org.bson.types.ObjectId;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import actors.NotificationActor;
-import db.DB;
-import elastic.ElasticUpdater;
 import model.Collection;
 import model.Notification;
 import model.Notification.Activity;
 import model.User;
 import model.UserGroup;
+
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -43,6 +37,14 @@ import play.mvc.Result;
 import play.mvc.WebSocket;
 import utils.AccessManager;
 import utils.NotificationCenter;
+import actors.NotificationActor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
+import elastic.ElasticUpdater;
 
 public class NotificationController extends Controller {
 	public static final ALogger log = Logger.of(NotificationController.class);
@@ -209,16 +211,22 @@ public class NotificationController extends Controller {
 			ObjectId userId = new ObjectId(
 					AccessManager.effectiveUserId(session().get(
 							"effectiveUserIds")));
-			// Get all unread notifications
-			List<Notification> notifications = DB.getNotificationDAO()
-					.getUnreadByReceiver(userId, 0);
+			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
 			Set<ObjectId> groups = DB.getUserDAO().get(userId)
 					.getAdminInGroups();
-			if (groups != null && !groups.isEmpty()) {
-				for (ObjectId groupId : groups) {
-					notifications.addAll(DB.getNotificationDAO()
-							.getUnreadByReceiver(groupId, 0));
-				}
+			userOrGroupIds.add(userId);
+			userOrGroupIds.addAll(groups);
+			Set<Notification> unreadNotifications = new HashSet<Notification>(
+					DB.getNotificationDAO().getUnreadByReceivers(
+							userOrGroupIds, 0));
+			Set<Notification> notifications;
+			if (unreadNotifications.size() < 20) {
+				notifications = new HashSet<Notification>(DB
+						.getNotificationDAO().getAllByReceivers(userOrGroupIds,
+								20 - unreadNotifications.size()));
+				notifications.addAll(unreadNotifications);
+			} else {
+				notifications = unreadNotifications;
 			}
 			return ok(Json.toJson(notifications));
 		} catch (Exception e) {
