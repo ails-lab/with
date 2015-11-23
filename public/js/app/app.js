@@ -50,6 +50,45 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 					time: 5
 				});
 				break;
+			case "COLLECTION_SHARE":
+				if (notification.groupname) {
+					$.smkAlert({
+						text: '<strong>' + notification.senderName + '</strong> wants to share collection: <strong>' + notification.collectionName + '</strong> with <strong>' + notification.groupName + '</strong>',
+						type: 'info',
+						time: 5
+					});
+				} else {
+					$.smkAlert({
+						text: '<strong>' + notification.senderName + '</strong> wants to share collection: <strong>' + notification.collectionName + '</strong> with you',
+						type: 'info',
+						time: 5
+					});
+				}
+				break;
+			case "COLLECTION_SHARED":
+				var senderName = notification.groupName ? notification.groupName : notification.senderName;
+				$.smkAlert({
+					text: '<strong>' + notification.collectionName + '</strong> is now shared with <strong>' + senderName + '</strong>',
+					type: 'info',
+					time: 5
+				});
+				break;
+			case "COLLECTION_UNSHARED":
+				senderName = notification.groupName ? notification.groupName : notification.senderName;
+				$.smkAlert({
+					text: '<strong>' + notification.collectionName + '</strong> is no longer shared with <strong>' + senderName + '</strong>',
+					type: 'info',
+					time: 5
+				});
+				break;
+			case "COLLECTION_REJECTED":
+				senderName = notification.groupName ? notification.groupName : notification.senderName;
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> is not interested in collection: <strong>' + collectionName + '</strong>',
+					type: 'info',
+					time: 5
+				});
+				break;
 			default:
 				$.smkAlert({
 					text: "Unknown Notification Type: <strong>" + notification.activity + "</strong>",
@@ -197,6 +236,38 @@ define("app", ['knockout', 'facebook', 'moment', 'smoke'], function (ko, FB, mom
 				break;
 			case "GROUP_REQUEST_DENIED":
 				data.message = 'Your request to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong> was declined';
+				self.currentUser.notifications.userNotifications.unshift(data);
+				break;
+			case "COLLECTION_SHARE":
+				if (data.groupName) {
+					data.message = '<strong>' + data.senderName + '</strong> wants to share collection: <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with <strong>' + data.groupName + '</strong>';
+					self.currentUser.notifications.groupNotifications.unshift(data);
+				}
+				else {
+					data.message = '<strong>' + data.senderName + '</strong> wants to share collection: <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with you';
+					self.currentUser.notifications.userNotifications.unshift(data);
+			}
+				break;
+			case "COLLECTION_SHARED":
+				if (data.groupName) {
+					data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.groupName + '</strong>';
+				} else {
+					data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
+				}
+				self.currentUser.notifications.userNotifications.unshift(data);
+				break;
+			case "COLLECTION_UNSHARED":
+				if (data.groupName) {
+					data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with <strong>' + data.groupName + '</strong>';
+					self.currentUser.notifications.groupNotifications.unshift(data);
+				} else {
+					data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with you';
+					self.currentUser.notifications.userNotifications.unshift(data);
+				}
+				break;
+			case "COLLECTION_REJECTED":
+				var senderName = data.groupName ? data.groupName : data.senderName;
+				data.message ='<strong>' + senderName + '</strong> is not interested in collection: <strong>' + collectionName + '</strong>';
 				self.currentUser.notifications.userNotifications.unshift(data);
 				break;
 			default:
