@@ -23,9 +23,9 @@ import java.util.function.Function;
 import model.Collection;
 import model.Media;
 import model.WithAccess.Access;
-import model.User;
-import model.UserGroup;
-import model.UserOrGroup;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import model.usersAndGroups.UserOrGroup;
 
 import org.apache.commons.codec.binary.Base64;
 import org.bson.types.ObjectId;

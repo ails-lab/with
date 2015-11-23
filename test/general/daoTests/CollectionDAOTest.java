@@ -25,7 +25,7 @@ import model.Collection;
 import model.CollectionMetadata;
 import model.CollectionRecord;
 import model.Media;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;

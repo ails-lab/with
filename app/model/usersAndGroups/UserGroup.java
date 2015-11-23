@@ -14,7 +14,7 @@
  */
 
 
-package model;
+package model.usersAndGroups;
 
 import java.util.HashSet;
 import java.util.Set;

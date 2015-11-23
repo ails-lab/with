@@ -23,7 +23,7 @@ import java.util.List;
 
 import model.Search;
 import model.SearchResult;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;

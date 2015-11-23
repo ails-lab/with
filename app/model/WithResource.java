@@ -24,12 +24,7 @@ import org.bson.types.ObjectId;
 
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
-import model.ExampleDataModels.Annotation;
-import model.ExampleDataModels.EmbeddedMediaObject;
-import model.ExampleDataModels.ExternalCollection;
-import model.ExampleDataModels.ProvenanceInfo;
-import model.ExampleDataModels.Usage;
-import model.ExampleDataModels.WithAccess;
+import model.annotations.Annotation;
 
 public class WithResource<T extends DescriptiveData> {
 	
@@ -38,7 +33,7 @@ public class WithResource<T extends DescriptiveData> {
 		int position;
 	}
 	
-	public class WithAdmin {
+	public static class WithAdmin {
 		
 		ObjectId dbId;
 		WithAccess access;
@@ -48,6 +43,53 @@ public class WithResource<T extends DescriptiveData> {
 		
 		Date created;
 		Date lastModified;
+	}
+	
+	public static class Usage {
+		// in how many favorites is it
+		int likes;
+		
+		// in how many user collections is it
+		int collected;
+		
+		// how many modified versions exist
+		int annotated;
+		
+		// how often is it viewed, don't count count api calls,
+		// count UI messages for viewing
+		int viewCount;
+
+		// implementation detail, put any tag on the record twice, 
+		// with userID prepended and without. This will allow for people to look
+		// for their own tags.
+		ArrayList<String> tags;
+	}
+	
+	/**
+	 * If we know about collections from our sources, the info goes here
+	 * For single records, fill in the position or next in sequence, for 
+	 * general collection linking, omit it. 
+	 *
+	 */
+	public static class ExternalCollection {
+		// known sources only
+		String source;
+		
+		String collectionUri;
+		String nextInSequenceUri;
+		int position;
+		String title;
+		String description;
+	}
+	
+	
+	public static class ProvenanceInfo {
+		String provider;
+		String uri;
+		String recordId;
+		
+		// you can have entries for WITH records with provider "WITH" and
+		// recordId the ObjectId of the annotated Record
 	}
 
 	
@@ -72,9 +114,10 @@ public class WithResource<T extends DescriptiveData> {
 	// all attached media Objects (their embedded part)
 	ArrayList<EmbeddedMediaObject> media;
 	
-	//each time an annotation is added by a user, a copy of the Resource is made, i.e. colId-posId is removed from the parent record collectedIn array,
-	//and added in the collectedIn array of the copy. The new copy has all annotations of the parent, plus the new ones added by the user.
-	//If a user adds an annotation of an annotationType that already exists in the resource, we edit the annotation entry.
+	// embedded for some or all, not sure
+	// key is CollectionInfo.toString()
+	HashMap<String, ContextAnnotation> contextAnnotation;
+	
 	ArrayList<Annotation> annotations;
 	
 

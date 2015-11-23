@@ -14,12 +14,10 @@
  */
 
 
-package model;
+package model.usersAndGroups;
 
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
@@ -38,8 +36,6 @@ import utils.Serializer;
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
-
-	private static final int EMBEDDED_CAP = 20;
 
 	private enum Gender {
 		MALE, FEMALE, UNSPECIFIED
@@ -60,8 +56,8 @@ public class User extends UserOrGroup {
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
-	@Embedded
-	private List<Search> searchHistory = new ArrayList<Search>();
+	/*@Embedded
+	private List<Search> searchHistory = new ArrayList<Search>();*/
 	@Embedded
 	private Page page;
 
@@ -75,7 +71,7 @@ public class User extends UserOrGroup {
 	 *
 	 * @param search
 	 */
-	public void addToHistory(Search search) {
+	/*public void addToHistory(Search search) {
 		if (search.getDbID() == null) {
 			log.error("Search is  not saved!");
 			return;
@@ -85,7 +81,7 @@ public class User extends UserOrGroup {
 		if (searchHistory.size() > EMBEDDED_CAP) {
 			searchHistory.remove(0);
 		}
-	}
+	}*/
 
 	/**
 	 * md5 the password and set it in the right field
@@ -163,13 +159,13 @@ public class User extends UserOrGroup {
 		this.md5Password = md5Password;
 	}
 
-	public List<Search> getSearchHistory() {
+	/*public List<Search> getSearchHistory() {
 		return searchHistory;
 	}
 
 	public void setSearchHistory(List<Search> searcHistory) {
 		this.searchHistory = searcHistory;
-	}
+	}*/
 
 	public Page getPage() {
 		return page;

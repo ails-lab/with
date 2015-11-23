@@ -14,23 +14,19 @@
  */
 
 
-package model;
+package model.annotations;
 
-import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
-import java.util.List;
+import model.annotations.Annotation.AnnotationTarget;
+import model.annotations.Annotation.AnnotationBody;
 
-@Entity("UserGroup")
-public class Organization extends UserGroup {
 
-	@Embedded
-	private Page page;
+public class TextAnnotation extends Annotation<AnnotationBody, TextAnnotation.TextAnnotationTarget>{
 	
-	public Page getPage() {
-		return page;
+	public static class TextAnnotationTarget extends AnnotationTarget {
+		String propertyName;
+		String language;
+		String originalValue;
+		int start, end;
 	}
 
-	public void setPage(Page page) {
-		this.page = page;
-	}
 }

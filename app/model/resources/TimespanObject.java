@@ -14,24 +14,19 @@
  */
 
 
-package model;
+package model.resources;
 
-import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
+import java.util.ArrayList;
 
-@Entity("UserGroup")
-public class Project extends UserGroup {
+import model.BasicDataTypes.WithPeriod;
+import model.DescriptiveData;
+import model.WithResource;
 
-	@Embedded
-	private Page page;
-
-	public Page getPage() {
-		return page;
+public class TimespanObject extends WithResource<TimespanObject.TimespanData>{
+	
+	public static class TimespanData extends DescriptiveData {
+		ArrayList<WithPeriod> timespan;
 	}
-
-	public void setPage(Page page) {
-		this.page = page;
-	}
-
+	
 
 }

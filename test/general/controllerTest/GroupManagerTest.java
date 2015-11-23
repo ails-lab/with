@@ -28,8 +28,8 @@ import static play.test.Helpers.status;
 import general.TestUtils;
 import general.daoTests.UserDAOTest;
 import general.daoTests.UserGroupDAOTest;
-import model.User;
-import model.UserGroup;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 
 import org.bson.types.ObjectId;
 import org.junit.Assert;

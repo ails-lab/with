@@ -26,7 +26,7 @@ import org.mongodb.morphia.annotations.Converters;
 
 import db.DB;
 import model.WithAccess.Access;
-import model.User;
+import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
 

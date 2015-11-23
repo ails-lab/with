@@ -21,7 +21,7 @@ import java.util.List;
 
 import model.Collection;
 import model.Search;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;

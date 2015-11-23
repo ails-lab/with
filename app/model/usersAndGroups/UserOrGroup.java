@@ -14,7 +14,9 @@
  */
 
 
-package model;
+package model.usersAndGroups;
+
+import model.Media;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;

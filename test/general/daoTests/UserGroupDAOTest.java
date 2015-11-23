@@ -21,9 +21,9 @@ import general.TestUtils;
 import java.util.List;
 
 import junit.framework.TestCase;
-import model.Organization;
-import model.Project;
-import model.UserGroup;
+import model.usersAndGroups.Organization;
+import model.usersAndGroups.Project;
+import model.usersAndGroups.UserGroup;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;

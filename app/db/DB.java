@@ -24,8 +24,8 @@ import model.Collection;
 import model.CollectionRecord;
 import model.Search;
 import model.SearchResult;
-import model.User;
-import model.UserGroup;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;

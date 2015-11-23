@@ -22,8 +22,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import model.WithAccess.Access;
-import model.User;
-import model.UserGroup;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 
 import org.bson.types.ObjectId;
 

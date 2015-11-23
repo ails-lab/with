@@ -33,7 +33,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import model.Media;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

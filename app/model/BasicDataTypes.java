@@ -16,7 +16,14 @@
 
 package model;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+
+import model.ExampleDataModels.LiteralOrResource;
+import model.ExampleDataModels.WithPeriod;
+import model.ExampleDataModels.CidocEvent.EventType;
+import model.ExampleDataModels.LiteralOrResource.ResourceType;
 
 public class BasicDataTypes {
 	//TODO: why is the key a string and not an enum?
@@ -60,5 +67,48 @@ public class BasicDataTypes {
 				put( "uriType", resourceType.toString());
 				put( "uri", uri );
 			}
+		}
+		
+		/**
+		 * Capture accurate and inaccurate dates in a visualisable way. Enable search for year.
+		 * This is a point in time. If you mean a timespan, use different class.
+		 */
+		public static class WithDate {
+			Date isoDate;
+			int year;
+			
+			// controlled expression of an epoch "stone age", "renaissance", "16th century"
+			LiteralOrResource epoch;
+			
+			// if the year is not accurate, give the inaccuracy here( 0- accurate)
+			int approximation;
+			
+			// ontology based time 
+			String uri;
+			ResourceType uriType;
+			
+			// any expression that cannot fit into above
+			String free;
+		}
+		
+		/**
+		 * 
+		 * The WithTime might already cover the timespan you mean, but if you need more fields, its meant to be the 
+		 * start of the timespan.
+		 */
+		public static class WithPeriod extends WithDate  {
+			Date isoEndDate;
+			int endYear;
+		}
+		
+		public static class CidocEvent {
+			public static enum EventType {
+				CREATED, OTHER 
+			}
+			
+			EventType eventType;
+			WithPeriod timespan;
+			ArrayList<LiteralOrResource> agent;
+			ArrayList<LiteralOrResource> place;
 		}
 }

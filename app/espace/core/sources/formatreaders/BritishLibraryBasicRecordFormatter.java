@@ -24,7 +24,7 @@ import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.utils.JsonContextRecord;
 import espace.core.utils.StringUtils;
 import model.ExternalBasicRecord;
-import model.Provider;
+import model.usersAndGroups.Provider;
 
 public class BritishLibraryBasicRecordFormatter extends ExternalBasicRecordReader {
 

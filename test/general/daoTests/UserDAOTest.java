@@ -22,7 +22,7 @@ import general.TestUtils;
 import java.util.List;
 import java.util.Random;
 
-import model.User;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;

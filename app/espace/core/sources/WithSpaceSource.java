@@ -25,8 +25,8 @@ import java.util.Set;
 
 import model.Collection;
 import model.WithAccess;
-import model.User;
 import model.WithAccess.Access;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;

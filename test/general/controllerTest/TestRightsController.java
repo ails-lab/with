@@ -34,7 +34,7 @@ import java.util.Date;
 
 import model.Collection;
 import model.CollectionRecord;
-import model.User;
+import model.usersAndGroups.User;
 
 import org.junit.Assert;
 import org.junit.Test;

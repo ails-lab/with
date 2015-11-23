@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 import model.WithAccess.Access;
+import model.usersAndGroups.User;
 import utils.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;

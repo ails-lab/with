@@ -18,7 +18,7 @@ package db;
 
 import java.util.List;
 
-import model.UserGroup;
+import model.usersAndGroups.UserGroup;
 import controllers.GroupManager.GroupType;
 
 import org.bson.types.ObjectId;

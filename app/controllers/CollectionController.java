@@ -34,13 +34,13 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
-import model.Organization;
-import model.Page;
-import model.Project;
-import model.User;
 import model.WithAccess.Access;
-import model.UserGroup;
-import model.UserOrGroup;
+import model.usersAndGroups.Organization;
+import model.usersAndGroups.Page;
+import model.usersAndGroups.Project;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import model.usersAndGroups.UserOrGroup;
 
 import org.bson.types.ObjectId;
 

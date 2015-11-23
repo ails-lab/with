@@ -23,7 +23,7 @@ import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.DDBSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
-import model.Provider;
+import model.usersAndGroups.Provider;
 
 public class DDBBasicRecordFormatter extends ExternalBasicRecordReader {
 

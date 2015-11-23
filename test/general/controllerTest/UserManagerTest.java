@@ -31,8 +31,8 @@ import static play.test.Helpers.status;
 
 import java.io.IOException;
 
-import model.User;
-import model.UserGroup;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 
 import org.junit.Assert;
 import org.junit.Test;

@@ -16,25 +16,21 @@
 
 package model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.ArrayList;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class Provider {
-	
-	public String providerName;
-	public String recordId;
-	public String recordUrl;
-	
-	public Provider(String providerName) {
-		this.providerName = providerName;
-	}
-	
-	public Provider(String providerName, String recordId, String recordUrl) {
-		this.providerName = providerName;
-		this.recordId = recordId;
-		this.recordUrl = recordUrl;
-	}
+import model.ExampleDataModels.EmbeddedMediaObject;
 
+import org.bson.types.ObjectId;
+
+public class MediaObject extends EmbeddedMediaObject {		
+	// which resource is this Media part of, this is the access rights restriction
+	// if there is none, the media object is publicly available
+	private ArrayList<ObjectId> resources;
+	
+	private int width, height;
+	
+	private double durationSeconds;
+			
+	private byte[] thumbnailBytes;
+	private byte[] mediaBytes;
 }

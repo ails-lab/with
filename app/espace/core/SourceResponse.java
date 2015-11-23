@@ -21,7 +21,7 @@ import java.util.List;
 
 import model.CollectionRecord;
 import model.ExternalBasicRecord;
-import model.Provider;
+import model.usersAndGroups.Provider;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;

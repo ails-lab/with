@@ -26,8 +26,8 @@ import java.util.function.Function;
 
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
-import model.Provider;
 import model.ExternalBasicRecord.RecordType;
+import model.usersAndGroups.Provider;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;

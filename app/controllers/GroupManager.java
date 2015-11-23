@@ -38,13 +38,14 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import espace.core.HttpConnector;
 import model.Collection;
-import model.Organization;
-import model.Page;
-import model.Project;
-import model.UserOrGroup;
 import model.WithAccess.Access;
-import model.User;
-import model.UserGroup;
+import model.usersAndGroups.Organization;
+import model.usersAndGroups.Page;
+import model.usersAndGroups.Project;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
+import model.usersAndGroups.UserOrGroup;
+import model.usersAndGroups.Page.Point;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -53,7 +54,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
 import utils.Tuple;
-import model.Page.Point;
 
 public class GroupManager extends Controller {
 
