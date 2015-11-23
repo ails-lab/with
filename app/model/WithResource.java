@@ -22,12 +22,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Id;
+
+import utils.Deserializer;
+import utils.Serializer;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
 import model.ExampleDataModels.WithAccess;
+import model.WithAccess.Access;
 import model.annotations.Annotation;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class WithResource<T extends DescriptiveData> {
 	
 	public static class CollectionInfo {
@@ -36,16 +49,29 @@ public class WithResource<T extends DescriptiveData> {
 	}
 	
 	public static class WithAdmin {
-		
+		@Id
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		ObjectId dbId;
+		
+		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
+		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
+		@Embedded
 		WithAccess access;
 		
 		// uri that this resource has in the rdf repository
 		String withURI;
 		
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		Date created;
+		
+		@JsonSerialize(using = Serializer.DateSerializer.class)
+		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		Date lastModified;
-		private final Map<ObjectId, WithAccess> underModeration = new HashMap<ObjectId, WithAccess>();
+		
+		@Embedded
+		@JsonSerialize(using = Serializer.CustomMapSerializer.class)
+		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
 	}
 	
 	public static class Usage {
