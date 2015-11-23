@@ -19,9 +19,14 @@ package model;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.bson.types.ObjectId;
+
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.Rights.Access;
@@ -112,6 +117,8 @@ public class ExampleDataModels {
 	public static class CollectionAdmin extends WithAdmin {
 		int entryCount;
 		boolean isExhibition;
+		private final Map<ObjectId, WithAccess> underModerationInGroups = new HashMap<ObjectId, WithAccess>();
+
 	}
 	
 	

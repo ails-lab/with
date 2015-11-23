@@ -18,46 +18,58 @@ package model.resources;
 
 import java.util.ArrayList;
 
+import org.bson.types.ObjectId;
+
 import model.BasicDataTypes.CidocEvent;
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
 import model.BasicDataTypes.WithDate;
+import model.ExampleDataModels.WithAdmin;
 import model.DescriptiveData;
 import model.WithResource;
 
 public class CulturalObject extends WithResource<CulturalObject.CulturalObjectData>{
 	
+	public static class RecordAdmin extends WithAdmin {
+		// last entry of provenance chain hash of provider and recordId
+		private String externalId;
+				
+		// if this resource / record is derived (modified) from a different Record.
+		private ObjectId parentResourceId;
+	}
+	
+	
 	public static class CulturalObjectData extends DescriptiveData {
 		
 		// provenance[0].recordId
-		String dcidentifier;
+		private String dcidentifier;
 		
 		// language of object, if it has one. Not related to the metadata.
 		// eg. If the object is a book, its the language it is written in
 		// no language for most paintings, vases, sculptures ... etc
-		ArrayList<Literal> dclanguage;
+		private ArrayList<Literal> dclanguage;
 		
 		// Painting, Sculpture, Building, Book .... 
-		ArrayList<LiteralOrResource> dctype;
+		private ArrayList<LiteralOrResource> dctype;
 		
 		// places or times
-		ArrayList<LiteralOrResource> dccoverage;
+		private ArrayList<LiteralOrResource> dccoverage;
 		
 		// places are here
-		ArrayList<LiteralOrResource> dcspatial;
+		private ArrayList<LiteralOrResource> dcspatial;
 		
-		ArrayList<LiteralOrResource> dccreator;
+		private ArrayList<LiteralOrResource> dccreator;
 
-		ArrayList<WithDate> dccreated;
-		ArrayList<WithDate> dcdate;
+		private ArrayList<WithDate> dccreated;
+		private ArrayList<WithDate> dcdate;
 		
 		//TODO: do we want multilinguality for dcformat and dctermsmedium?
-		ArrayList<LiteralOrResource> dcformat;
-		ArrayList<LiteralOrResource> dctermsmedium;
+		private ArrayList<LiteralOrResource> dcformat;
+		private ArrayList<LiteralOrResource> dctermsmedium;
 		
-		ArrayList<LiteralOrResource> isRelatedTo;
+		private ArrayList<LiteralOrResource> isRelatedTo;
 		
-		ArrayList<CidocEvent> events;
+		private ArrayList<CidocEvent> events;
 		
 	}
 

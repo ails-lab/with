@@ -17,17 +17,28 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bson.types.ObjectId;
 
 import model.BasicDataTypes.LiteralOrResource;
+import model.ExampleDataModels.WithAccess;
+import model.ExampleDataModels.WithAdmin;
 import model.DescriptiveData;
 import model.WithResource;
 
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
 	
+	public static class CollectionAdmin extends WithAdmin {
+		private int entryCount;
+		private boolean isExhibition;
+	}
+	
 	public static class CollectionDescriptiveData extends DescriptiveData {
-		ArrayList<LiteralOrResource> dccreator;
-		ArrayList<LiteralOrResource> dctermsaudience;
-		ArrayList<LiteralOrResource> dclanguage;
+		private ArrayList<LiteralOrResource> dccreator;
+		private ArrayList<LiteralOrResource> dctermsaudience;
+		private ArrayList<LiteralOrResource> dclanguage;
 		//TODO: add link to external collection
 	}
 
