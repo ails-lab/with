@@ -13,7 +13,9 @@
 				<li><a href="#about" title="About">ABOUT</a></li>
 				<li data-bind="visible: isLogged()"><a href="#mycollections">MY COLLECTIONS</a></li>
 				<li data-bind="visible: isLogged()"><a href="#myexhibitions">MY EXHIBITIONS</a></li>
-				<li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="javascript:void(0)" id="notifications" data-title="Notifications" data-trigger="focus" data-template="<div class='popover notifications'><div class='arrow'></div><div class='popover-inner'><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div></div>"><span class="fa fa-2x fa-flag"></span></a><span class="badge danger"><!-- ko text: noticount --><!-- /ko --></span></li>
+			</ul>
+			<ul class="pull-right">
+				<li data-bind="visible: isLogged()"><a data-placement="bottom" data-toggle="popover" data-container="body" tabindex="0" type="button" data-html="true" href="javascript:void(0)" id="notifications" data-title="Notifications" data-trigger="focus" data-template="<div class='popover notifications'><div class='arrow'></div><div class='popover-inner'><h3 class='popover-title'></h3><div class='popover-content'><p></p></div></div></div>"><span class="fa fa-2x fa-flag"></span><span class="badge danger">1<!-- ko text: noticount --><!-- /ko --></span></a></li>
 				<div id="notifications-content" class="hide">
 					<ul class="notify-list" data-bind="foreach: notifications">
 						<li data-bind="css: { 'unread': unread }">
@@ -76,7 +78,7 @@
 				</div>
 				<li data-bind="visible: isLogged()" class="dropdown">
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-					<img class="img-circle img-thumbnail" data-bind="attr: { src: profileImage }" style="max-height: 20px;" />
+					<img class="img-circle img-thumbnail" data-bind="attr: { src: profileImage }" style="max-height: 40px;" />
 					<span data-bind="text: username"></span> <span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu" role="menu">

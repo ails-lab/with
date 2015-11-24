@@ -620,10 +620,21 @@ img.desaturate { -webkit-filter: grayscale(100%); filter: grayscale(100%); }
 }
 
 /* Navbar Profile Image */
-.navbar-nav .img-thumbnail {
+nav .img-thumbnail {
   max-height: 32px;
   padding: 0;
   margin-right: 8px;
+}
+
+nav .dropdown > a {
+  padding: 0;
+  margin: -3px 0 0 0;
+  text-transform: uppercase;
+}
+
+nav #notifications {
+  margin-top: -3px;
+  margin-bottom: 0;
 }
 
 .navbar-nav > li > a {
@@ -1013,8 +1024,8 @@ a {
 /* Notification System */
 nav .badge {
   position: absolute;
-  right: 2px;
-  top: 5px;
+  left: 15px;
+  top: 0px;
   background-color: rgb(238, 43, 51);
 }
 
