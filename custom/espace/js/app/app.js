@@ -58,7 +58,7 @@ define("app", ['knockout'], function (ko) {
 	
 	
 	self.currentUser = {
-			"_id": ko.observable(),
+			"_id": ko.observable(""),
 			"email": ko.observable(),
 			"username": ko.observable(),
 			"firstName": ko.observable(),

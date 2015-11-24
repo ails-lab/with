@@ -85,7 +85,7 @@ define("app", ['knockout'], function (ko) {
 		usercookie.replace(/\"/g, "");
 		if(usercookie!=null){
 		   var keys=ExtractQueryString(usercookie);	
-		   if(self.currentUser._id().length==0){
+		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
 		     if(keys["user"]){self.currentUser._id(keys["user"]);console.log(self.currentUser._id());self.getUser();}}
 		    return (keys["user"]==undefined ? false : true);
 		}else{return false;}
@@ -391,7 +391,8 @@ define("app", ['knockout'], function (ko) {
 			initOrUpdate: initOrUpdate,
 			scroll: scroll,
 			likeItem: likeItem,
-			isLiked: isLiked
+			isLiked: isLiked,
+			isLogged: isLogged
 	 }
 	 
 	 
