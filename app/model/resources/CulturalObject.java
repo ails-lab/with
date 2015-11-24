@@ -186,18 +186,6 @@ public class CulturalObject extends WithResource<CulturalObject.CulturalObjectDa
 			this.events = events;
 		}
 		
-		//assume that the last entry of dccreator is always the With creator (i.e. if the resource was uploaded by a user via with)
-		public User retrieveCreator() {
-			if (this.dccreator != null) {
-				LiteralOrResource withCreator = this.dccreator.get(dccreator.size()-1);
-				String objectId;
-				if (withCreator != null && (objectId = withCreator.getResource(ResourceType.withRepository)) != null)
-					return DB.getUserDAO().getById(new ObjectId(objectId), null);
-				else return null;
-			}
-			else return null;
-		}
-		
 	}
-
+	
 }

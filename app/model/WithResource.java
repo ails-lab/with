@@ -31,15 +31,17 @@ import utils.Serializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import db.DB;
 import model.BasicDataTypes.Literal;
 import model.BasicDataTypes.LiteralOrResource;
-import model.ExampleDataModels.WithAccess;
 import model.WithAccess.Access;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
+import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -141,6 +143,33 @@ public class WithResource<T extends DescriptiveData> {
 		public Access removeFromModeration(ObjectId groupId) {
 			return this.underModeration.remove(groupId);
 		}
+
+		public ObjectId getWithCreator() {
+			return withCreator;
+		}
+		
+		@JsonProperty
+		public void setWithCreator(ObjectId creatorId) {
+			// Set owner for first time
+			if (this.withCreator == null) {
+				this.withCreator = creatorId;
+				this.access.put(creatorId, Access.OWN);
+				// Owner has changed
+			} else if (!this.withCreator.equals(creatorId)) {
+				// Remove rights for old owner
+				access.remove(this.withCreator, Access.OWN);
+				withCreator = null;
+				setWithCreator(creatorId);
+			}
+		}
+		
+		public User retrieveWithCreator() {
+			ObjectId userId = getWithCreator() ;
+			if (userId != null)
+				return DB.getUserDAO().getById(userId, null);
+			else return null;
+		}
+		
 	}
 	
 	public static class Usage {
@@ -410,5 +439,4 @@ public class WithResource<T extends DescriptiveData> {
 	public void setIsPublic(boolean isPublic) {
 		administrative.access.setPublic(isPublic);
 	}
-
 }
