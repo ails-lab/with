@@ -21,14 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import model.WithAccess;
+import model.WithAccess.Access;
+import model.usersAndGroups.User;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 
-import db.DB;
-import model.WithAccess.Access;
-import model.usersAndGroups.User;
 import play.Logger;
 import play.Logger.ALogger;
+import db.DB;
 
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
@@ -38,26 +40,59 @@ public class AccessManager {
 		READ, EDIT, DELETE
 	};
 
-	public static boolean checkAccess(Map<ObjectId, Access> rights, List<String> userIds, Action action) {
+	public static boolean checkAccess(WithAccess withAccess,
+			String effectiveUserIds, Action action) {
+		if (withAccess.isPublic() == true) {
+			return true;
+		}
+		if (effectiveUserIds == null || effectiveUserIds.equals("")) {
+			return false;
+		}
+		List<ObjectId> userOrGroupIds = new ArrayList<ObjectId>();
+		for (String ui : effectiveUserIds.split(",")) {
+			if (ui.trim().length() > 0)
+				userOrGroupIds.add(new ObjectId(ui));
+		}
+		User user = DB.getUserDAO().getById(userOrGroupIds.get(0),
+				new ArrayList<String>(Arrays.asList("superUser")));
+		if (user != null && user.isSuperUser()) {
+			return true;
+		}
+		for (ObjectId id : userOrGroupIds) {
+			if (withAccess.containsKey(id)
+					&& (withAccess.get(id).ordinal() > action.ordinal())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static boolean checkAccess(Map<ObjectId, Access> rights,
+			List<String> userIds, Action action) {
 		for (String id : userIds) {
-			User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>(Arrays.asList("superUser")));
+			User user = DB.getUserDAO().getById(new ObjectId(id),
+					new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
 				return true;
 			else if (rights.containsKey(new ObjectId(id))
-					&& (rights.get(new ObjectId(id)).ordinal() > action.ordinal()))
+					&& (rights.get(new ObjectId(id)).ordinal() > action
+							.ordinal()))
 				return true;
 		}
 		return false;
 	}
 
-	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights, ObjectId groupId) {
+	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights,
+			ObjectId groupId) {
 		return false;
 	}
 
-	public static Access getMaxAccess(Map<ObjectId, Access> rights, List<String> userIds) {
+	public static Access getMaxAccess(Map<ObjectId, Access> rights,
+			List<String> userIds) {
 		Access maxAccess = Access.NONE;
 		for (String id : userIds) {
-			User user = DB.getUserDAO().getById(new ObjectId(id), new ArrayList<String>(Arrays.asList("superUser")));
+			User user = DB.getUserDAO().getById(new ObjectId(id),
+					new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
 				return Access.OWN;
 			else if (rights.containsKey(new ObjectId(id))) {
