@@ -1,11 +1,10 @@
-define(['knockout', 'text!./statichtml.html','app'], function(ko, template,app) {
+define(['knockout', 'text!./statichtml.html','app','slick'], function(ko, template,app,slick) {
 
 
 function staticHtmlViewModel(params) { 
 	var self=this;
 	self.route = params.route;
 	self.templateName = ko.observable(params.page);
-	console.log(self.templateName());
 	
 	switch (self.templateName()) {
 	  case 'about':
@@ -24,8 +23,7 @@ function staticHtmlViewModel(params) {
 		  document.body.setAttribute("data-page","about");
 	    break;
 	}
-	setTimeout(function(){ EUSpaceUI.init(); }, 200);
-
+	
 
     self.animatePageChange= function() { $('div[role="main"]').hide(); $('div[role="main"]').fadeIn(3000); }
 };

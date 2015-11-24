@@ -67,6 +67,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 					// toggle button
 					$( '.mobilemenu' ).toggleClass( 'active' );
 	          }
+	            setTimeout(function(){ WITHApp.init(); }, 300); 
 		}
 		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
 		crossroads.ignoreState= true; 

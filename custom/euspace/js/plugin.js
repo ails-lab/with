@@ -32,6 +32,7 @@ EUSpaceApp.ui = function( custom ){
 		// mobile menu
 		mobileSelector : '.mobilemenu',
 		mobileMenu 	   : '.main .menu'
+
 	}, 
 	custom || {});
 
@@ -52,7 +53,7 @@ EUSpaceApp.ui = function( custom ){
 		
 		
 		// initialize inline viewer for item
-		initInlineViewer();
+		//initInlineViewer();
 
 		
 	 }
@@ -101,15 +102,18 @@ EUSpaceApp.ui = function( custom ){
 		else if( settings.page === 'search' ) {
 
 			// initialize homepage header minimisation
-			initSearchViewToggle();
+			//initSearchViewToggle();
 			initIsotope();
+			//initInlineViewer();
 		}
+		
 		
 		else if( settings.page === 'collection' ) {
 
 			// initialize homepage header minimisation
 			initCollectionScroll();
 			initIsotope();
+			//initInlineViewer();
 		}
 	 
 	};
@@ -118,7 +122,7 @@ EUSpaceApp.ui = function( custom ){
 		/*these are needed after search page has been loaded*/
 		// init search setting bar
 			// initialize search view toggle button
-		initSearchViewToggle();
+		//initSearchViewToggle();
 
 		// init adjustment for search column view
 		initSearchColumnAdjustment();
@@ -571,31 +575,25 @@ EUSpaceApp.ui = function( custom ){
 				// show 
 				e.preventDefault();
 				$( '.itemview' ).fadeIn();
+				$('[role="main"]').addClass('itemopen');
+				//$('body').css('overflow','hidden');
+				adjustHeight();
 			});
 		});
 
-		// close event
-		$( '.itemview .menubar .action .close a' ).on( 'click', function( e ){
-
-			// e
-			e.preventDefault();
-
-			// show 
-			$( '.itemview' ).fadeOut();
-		});
-	  
+		
 
 		// close event
 		$( '.itemview .menubar .action .close a' ).on( 'click', function( e ){
 
-			// e
-			e.preventDefault();
-
+			
 			// show 
 			$( '.itemview' ).fadeOut();
 
+			$('body').css('overflow','visible');
+		
 			// enable scroll on main
-			$('[role="main"]').removeClass('itemopen');
+			//$('[role="main"]').removeClass('itemopen');
 		});
 
 		// function

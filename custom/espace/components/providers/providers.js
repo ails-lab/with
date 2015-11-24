@@ -54,7 +54,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 	function ProvidersViewModel(params) {
 		this.route = params.route;
 	    document.body.setAttribute("data-page","contentproviders");
-	    setTimeout(function(){ EUSpaceUI.init(); }, 300);
+	    //setTimeout(function(){ EUSpaceUI.init(); }, 300);
 		var self = this;
 
 		var $container = $(".grid");
@@ -95,7 +95,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			// replace with group/descendantOrganizations/:projectId
 			self.loading(true);
 			$.ajax({
-				"url": "/group/descendantOrganizations/" + projectId+"?collectionHits=true",
+				"url": "/group/descendantOrganizations/" + WITHApp.projectId+"?collectionHits=true",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
