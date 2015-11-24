@@ -15,11 +15,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  fe.description=ko.observable();
 	  fe.dbId=ko.observable(-1);
 	  fe.thumbs=ko.observableArray();
+	  fe.url=ko.observable();
 	  
 	  fe.load=function(data){
 	     fe.title(data.title);
 	     fe.dbId(data.dbId);
 	     fe.description(data.description);
+	     fe.url="#exhibitionview/"+fe.dbId();
 		  var i=0;
 		  var j=0;
 		  
@@ -83,7 +85,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
-	  setTimeout(function(){ EUSpaceUI.init(); }, 300);
+	  //setTimeout(function(){ WITHApp.init(); }, 300);
 	  self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featured=ko.observable(null);	
@@ -115,14 +117,14 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 					
 			});
-		  var promise2 = self.getFeaturedExhibition();
+		  var promise2 = self.getFeaturedExhibition(WITHApp.featuredExhibition);
           $.when(promise2).done(function (data) {
         	  
         	 
         	  self.featured(new FeaturedExhibit(data));
         	  $("#featuredExhibit").css('background-image','url('+self.featured().thumbs()[0].url+')');    
         	  self.exhibitloaded(true);
-        	  EUSpaceUI.initCharacterLimiter();
+        	  WITHApp.initCharacterLimiter();
           });
           
 		  
@@ -136,17 +138,17 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:window.pname,rights:"READ"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 			}).success (function(){
 			});
 		};
 		
-         self.getFeaturedExhibition=function() {
+         self.getFeaturedExhibition=function(id) {
 			
 			/*call must change to get featured exhibition for space*/
 	        return $.ajax({
 	            type: "GET",
-	            url: "/collection/5624a338569e4959735d8558",
+	            url: "/collection/"+id,
 	            success: function () {
 
 	            }
@@ -165,7 +167,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				self.loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
-					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:window.pname,rights:"READ"}]),
+					"url": "/collection/list?count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {

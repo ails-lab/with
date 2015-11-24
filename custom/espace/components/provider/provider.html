@@ -73,10 +73,10 @@
         <div class="container">
           <!-- grid-->
           <div class="grid" id="homemasonry" data-bind="profileisotope: collections">
-             <!-- ko if: $index() === 0 -->
+            <!-- ko if: $index() === 0 -->
               <div class="sizer"></div>
               <!-- /ko -->
-           <div data-bind="css: itemcss">
+              <div data-bind="visible: isLoaded(), css: itemcss">
               <div class="wrap">
                 <!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
                   <!-- thumbnail-->

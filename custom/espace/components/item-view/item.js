@@ -279,6 +279,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 	function ItemViewModel(params) {
 		var self = this;
+		document.body.setAttribute("data-page","item");
+		   
 		self.route = params.route;
 		self.from=window.location.href;	
 		var thumb = "";
@@ -299,14 +301,20 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				document.body.setAttribute("data-page","media");	
 				
 			}
-			$("div[role='main']").addClass("itemopen");
+			document.body.setAttribute("data-page","item");
 			
+			//e.preventDefault();
+			$( '.itemview' ).fadeIn();
+			//$('[role="main"]').addClass('itemopen');
+			//$("div[role='main']").addClass("itemopen");
+			$('body').css('overflow','hidden');
+			adjustHeight();
 			
 		};
 
 		self.close = function () {
 			//self.record(new Record());
-			$("div[role='main']").removeClass("itemopen");
+			$('body').css('overflow','visible');
 			$( '.itemview' ).fadeOut();
 			
 		};
@@ -362,6 +370,23 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		if(self.id()!=undefined){
 			
 			self.loadItem();
+		}
+		
+		function adjustHeight() {
+
+			// vars 
+			var wHeight = $( window ).height(),
+				wWidth = $( window ).width(),
+				itemHeight = wHeight - 70;
+
+			// check
+			if( wWidth >= 1200 ) {
+
+				// set height
+				$( '.itemopen .itemview' ).css({
+					height : itemHeight+"px"
+				});
+			}
 		}
 		
 	}

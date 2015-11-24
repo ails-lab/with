@@ -43,7 +43,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.url="";
 		self.externalId = "";
 		 self.isLoaded = ko.observable(false);
-		 
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
+		}); 
 		self.load = function(data) {
 			if(data.title==undefined){
 				self.title="No title";
@@ -89,6 +91,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			    case "YouTube": {
 			    	return "youtube.com";
 			    }
+			    case "Mint":
+			    	return "mint";
 			    case "WITHin":
 			    	return "WITHin";
 			    default: return "";
@@ -112,7 +116,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	function CViewModel(params) {
 		document.body.setAttribute("data-page","collection");
 		
-		setTimeout(function(){ EUSpaceUI.init(); }, 1000);
 	       
 		var self = this;
 
@@ -130,7 +133,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.selectedRecord = ko.observable(false);
 
 		self.loading = ko.observable(false);
-
+        self.loggedUser=app.isLogged();
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
 		
@@ -167,7 +170,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				"success": function (data) {
 					self.collname(data.title);
 					self.desc(data.description);
-					self.owner(data.owner);
+					self.owner(data.creator);
 					self.ownerId(data.ownerId);
 					self.itemCount(data.itemCount);
 					self.access(data.access);
@@ -222,8 +225,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			itemShow(e);
 
 		}
-	
 		
+	    self.likeRecord = function (rec) {
+			
+			app.likeItem(rec, function (status) {
+				if (status) {
+					$('#' + rec.recordId).addClass('active');
+				} else {
+					$('#' + rec.recordId).removeClass('active');
+				}
+			});
+		};
 
 		
 	}

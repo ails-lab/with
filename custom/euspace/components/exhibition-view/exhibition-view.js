@@ -1,17 +1,7 @@
-define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], function (ko, template, app, magnificPopup) {
+define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slick'], function (ko, template, app, magnificPopup,slick) {
 
 
-    function initCarousel (){
-
-        require(["js/vendor/slick.js/slick/slick.min","js/plugin"], function(slick,EUSpaceApp) {
-            var EUSpaceUI=new EUSpaceApp.EUSpaceApp.ui({
-
-            });
-            EUSpaceUI.initCarousel();
-            EUSpaceUI.initExpandExhibitionText();
-            EUSpaceUI.initImageZoom();
-        });
-    };
+   
 
     ko.bindingHandlers.backgroundImage = {
         update: function(element, valueAccessor) {
@@ -81,8 +71,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
 
     function EViewModel(params) {
         document.body.setAttribute("data-page","collection");
-        setTimeout(function(){ EUSpaceUI.init(); }, 300);
-	    
+        
         var self = this;
 
         var $container = $(".grid");
@@ -98,6 +87,14 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
         self.desc = ko.observable('');
         self.loading = ko.observable(false);
         self.showCarousel = ko.observable(false);
+
+		 self.initCarousel=function(){
+        	 WITHApp.initCarousel();
+             WITHApp.initExpandExhibitionText();
+             WITHApp.initImageZoom();
+        }
+        
+
 
         self.revealItems = function (data) {
             for (var i in data) {
@@ -132,7 +129,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup'], fun
                 self.exhItems().push(record);
             }
             self.exhItems.valueHasMutated();
-            initCarousel();
+             setTimeout(function(){  self.initCarousel(); }, 1000);
         };
 
         self.loadExhibition = function (id) {

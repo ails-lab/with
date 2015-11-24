@@ -12,11 +12,9 @@
             <!-- title-->
             <div class="title"><a href="javascript:void(null);" data-placement="bottom" data-toggle="popover" data-trigger="focus" data-bind=" attr: { 'data-content': desc() }">i</a><!-- ko text:collname --><!-- /ko --></div>
             <!-- owner-->
-            <div class="owner"><a href="#" title="#"><span class="name" data-bind="text: owner"></span><img src="img/content/img-profilepicture.png" alt="" class="profilepicture"></a></div>
+            <div class="owner"><a title="#"><span class="name" data-bind="text: owner"></span><img src="img/user.png" alt="" class="profilepicture"></a></div>
           
-          
-		
-		  </div>
+   	  </div>
         </div>
       </nav>
       <!-- wrap spacer-->
@@ -34,6 +32,11 @@
               
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
+               <span class="star" data-bind="css: { active: isLiked }, visible: $parent.loggedUser">
+						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</span>
                 <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>

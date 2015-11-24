@@ -8,7 +8,7 @@
             	<facets id="search-facets" params="name:'search-filters',params: {}"></facets>	
 				
             <!-- input-->
-            <div class="searchbox" id="withsearchid"><img alt="Search" class="icon"  data-bind="attr: {src: searching()==true ? 'img/ic-loading.gif' : 'img/ic-search-green.png'}, click: function() { search(true,true); }">
+            <div class="searchbox" id="withsearchid"><img alt="Search" class="icon"  data-bind="attr: {src: searching()==true ? 'img/ic-loading.gif' : 'img/ic-search-blue.png'}, click: function() { search(true,true); }">
               <input type="text"  data-bind="value: term" placeholder="Search..." class="searchinput">
             </div>
             <!-- view setting-->
@@ -31,10 +31,11 @@
       <!-- search filter-->
       <section class="searchfilter">
         <select class="form-control providerselection" data-bind="options: sources,value: selectedSource, event:{ change: columnChanged}">
-     
+          
         </select>
       </section>
       <!-- search result-->
+      
      <div id="gridlist" class="spacer search gridlist searchlist" data-bind="visible: sourceview()==false">
       <!-- ko if: noResults -->
 			<div>
@@ -44,26 +45,8 @@
         <section class="listing">
           <div class="container">
             <!-- grid-->
-            <div class="grid" data-bind="searchIsotope:mixresults, visible: mixresults().length>0">
-              <!-- item-->
-              <!-- ko if: $index()===0 -->
+            <div class="grid">
               <div class="sizer"></div>
-              <!-- /ko -->
-              <div class="item media" data-bind="visible: isLoaded()">
-              <div class="wrap">
-                  <!-- anchor--><a href="#" data-bind="event: { click: $parent.columnRecordSelect}">
-                <!-- thumbnail-->
-                  <div class="thumb"><img data-bind="attr: {src: thumb}"  onError="this.src='img/content/thumb-empty.png'"></div>
-                  <!-- info-->
-                  <div class="info">
-                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
-                  </div>
-                 <span class="rights" data-bind="text: sourceCredits()"></span>
-                  <!-- pointer-->
-                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
-              </div>
-            </div>
-              
             </div>
           </div>
         </section>
@@ -97,8 +80,8 @@
                 <div class="result" data-bind="foreach: items, event: { scroll: $parents[0].scrolled }">
                 
                   <!-- item-->
-                 <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline">
-                       <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
+                  <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline">
+                      <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
                   <!-- item-->
                   
                  </div>

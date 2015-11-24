@@ -64,7 +64,6 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","profile");
-	  setTimeout(function(){ EUSpaceUI.init(); }, 300);
 	  self.id = ko.observable(params.id);	
 
 	  /*---*/
@@ -137,7 +136,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				url: "/collection/list",
 				processData: false,
 				//TODO:add parent project filter
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:window.pname,rights:"READ"}]),
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:WITHApp.projectName,rights:"READ"}]),
 			}).success (function(){
 			});
 		};
@@ -171,7 +170,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				var offset = self.collections().length+1;
 				$.ajax({
 					"url": '/collection/list',
-					data: "count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:window.pname,rights:"READ"}]),
+					data: "count=20&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:WITHApp.projectName,rights:"READ"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
