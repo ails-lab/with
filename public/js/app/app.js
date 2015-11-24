@@ -1,167 +1,265 @@
-define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,imagesLoaded) {
+define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], function (ko, FB, imagesLoaded, moment) {
 
 	var self = this;
-	
-	self.WITHApp="";
-	
-	
-	self.settings = $.extend({
+	self.WITHApp = "";
 
+	self.settings = $.extend({
 		// page
-		page  	  : 'default',
+		page: 'default',
 
 		// masonry
-		mSelector : '.grid',
-		mItem	  : '.item',
-		mSizer	  : '.sizer',
+		mSelector: '.grid',
+		mItem: '.item',
+		mSizer: '.sizer',
 
 		// mobile menu
-		mobileSelector : '.mobilemenu',
-		mobileMenu 	   : '.main .menu'
+		mobileSelector: '.mobilemenu',
+		mobileMenu: '.main .menu'
 	});
+
 	self.transDuration = '0.4s';
 	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
-	
-	require(["./js/app/plugin"], function(WITHApp) {
-		self.WITHApp=new WITHApp.WITHApp.ui({
-					// page name
-					page  	  : $( 'body' ).attr( 'data-page' ),
 
-					// masonry
-					mSelector : '.grid',
-					mItem	  : '.item',
-					mSizer	  : '.sizer',
+	require(["./js/app/plugin"], function (WITHApp) {
+		self.WITHApp = new WITHApp.WITHApp.ui({
+			// page name
+			page: $('body').attr('data-page'),
 
-					// mobile menu
-					mobileSelector : '.mobilemenu',
-					mobileMenu 	   : '.main .menu'
-		 	})
+			// masonry
+			mSelector: '.grid',
+			mItem: '.item',
+			mSizer: '.sizer',
 
-		 return {
-				WITHApp: self.WITHApp
-			};
-		 
-			});
-	
-		 /* for all isotopes binding */
-		 function initOrUpdate(method) {
-				return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-					function isotopeAppend(ele) {
-						if (ele.nodeType === 1 && ele.className.indexOf ("item")>-1) { // Element type
-							$(ele).css("display","none");
-								
-							$(element).imagesLoaded(function () {
-								if(ko.contextFor(ele).$parent.loading!=undefined){
-								  ko.contextFor(ele).$parent.loading(false);
-								  ko.contextFor(ele).$data.isLoaded(true); 
-								}
-								$(element).isotope('appended', ele).isotope('layout');
-								$(ele).css("display","");
-								
-								
-							});
-							
+			// mobile menu
+			mobileSelector: '.mobilemenu',
+			mobileMenu: '.main .menu'
+		});
+
+		return {
+			WITHApp: self.WITHApp
+		};
+	});
+
+	/* for all isotopes binding */
+	function initOrUpdate(method) {
+		return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+			function isotopeAppend(ele) {
+				if (ele.nodeType === 1 && ele.className.indexOf("item") > -1) { // Element type
+					$(ele).css("display", "none");
+
+					$(element).imagesLoaded(function () {
+						if (ko.contextFor(ele).$parent.loading !== undefined) {
+							ko.contextFor(ele).$parent.loading(false);
+							ko.contextFor(ele).$data.isLoaded(true);
 						}
-						
-					}
+						$(element).isotope('appended', ele).isotope('layout');
+						$(ele).css("display", "");
+					});
+				}
+			}
 
-					
-					
-					function attachCallback(valueAccessor) {
-						return function() {
-							return {
-								data: valueAccessor(),
-								afterAdd: isotopeAppend
-							};
-						};
-					}
-
-					var data = ko.utils.unwrapObservable(valueAccessor());
-					//extend foreach binding
-					ko.bindingHandlers.foreach[method](element,
-						 attachCallback(valueAccessor), // attach 'afterAdd' callback
-						 allBindings, viewModel, bindingContext);
-
-					if (method === 'init') {
-						/* this is very important, when hiting back button this makes it scroll to correct position*/
-						var height = $(element).height();
-
-						if( height > 0 ) { // or some other number
-						    $(element).height( height );
-						}
-						
-						/* finished back button fix*/
-						 $(element).imagesLoaded(function () {
-							$(element).isotope({
-								itemSelector: '.item',
-								transitionDuration: transDuration,
-								masonry: {
-									columnWidth		: '.sizer',
-									percentPosition	: true
-								}
-							});
-							
-						});
-
-						ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-							$(element).isotope("destroy");
-						});
-						
-					} 
-					
+			function attachCallback(valueAccessor) {
+				return function () {
+					return {
+						data: valueAccessor(),
+						afterAdd: isotopeAppend
+					};
 				};
 			}
-		 
-		 /* scroll binding for infinite load*/
-		 ko.bindingHandlers.scroll = {
-					updating: true,
 
-					init: function (element, valueAccessor, allBindingsAccessor) {
-						var self = this;
-						self.updating = true;
-						ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
-							$(window).off("scroll.ko.scrollHandler");
-							self.updating = false;
-						});
-					},
+			var data = ko.utils.unwrapObservable(valueAccessor());
+			//extend foreach binding
+			ko.bindingHandlers.foreach[method](element,
+				attachCallback(valueAccessor), // attach 'afterAdd' callback
+				allBindings, viewModel, bindingContext);
 
-					update: function (element, valueAccessor, allBindingsAccessor) {
-						var props = allBindingsAccessor().scrollOptions;
-						var offset = props.offset ? props.offset : "0";
-						var loadFunc = props.loadFunc;
-						var load = ko.utils.unwrapObservable(valueAccessor());
-						var self = this;
+			if (method === 'init') {
+				/* this is very important, when hiting back button this makes it scroll to correct position*/
+				var height = $(element).height();
 
-						if (load) {
-							$(window).on("scroll.ko.scrollHandler", function () {
-								if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
-									if (self.updating) {
-										loadFunc();
-										self.updating = false;
-									}
-								} else {
-									self.updating = true;
-								}
-								
-								 if ($(window).scrollTop() > 100) {
-										$('.scroll-top-wrapper').addClass('show');
-									} else {
-										$('.scroll-top-wrapper').removeClass('show');
-									}
-							});
-						} else {
-							element.style.display = "none";
-							$(window).off("scroll.ko.scrollHandler");
+				if (height > 0) { // or some other number
+					$(element).height(height);
+				}
+
+				/* finished back button fix*/
+				$(element).imagesLoaded(function () {
+					$(element).isotope({
+						itemSelector: '.item',
+						transitionDuration: transDuration,
+						masonry: {
+							columnWidth: '.sizer',
+							percentPosition: true
+						}
+					});
+				});
+
+				ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+					$(element).isotope("destroy");
+				});
+			}
+		};
+	}
+
+	/* scroll binding for infinite load*/
+	ko.bindingHandlers.scroll = {
+		updating: true,
+
+		init: function (element, valueAccessor, allBindingsAccessor) {
+			var self = this;
+			self.updating = true;
+			ko.utils.domNodeDisposal.addDisposeCallback(element, function () {
+				$(window).off("scroll.ko.scrollHandler");
+				self.updating = false;
+			});
+		},
+
+		update: function (element, valueAccessor, allBindingsAccessor) {
+			var props = allBindingsAccessor().scrollOptions;
+			var offset = props.offset ? props.offset : "0";
+			var loadFunc = props.loadFunc;
+			var load = ko.utils.unwrapObservable(valueAccessor());
+			var self = this;
+
+			if (load) {
+				$(window).on("scroll.ko.scrollHandler", function () {
+					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
+						if (self.updating) {
+							loadFunc();
 							self.updating = false;
 						}
+					} else {
+						self.updating = true;
 					}
-				};
 
-	
-	
+					if ($(window).scrollTop() > 100) {
+						$('.scroll-top-wrapper').addClass('show');
+					} else {
+						$('.scroll-top-wrapper').removeClass('show');
+					}
+				});
+			} else {
+				element.style.display = "none";
+				$(window).off("scroll.ko.scrollHandler");
+				self.updating = false;
+			}
+		}
+	};
+
+	var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
+	self.notificationSocket = new WS("ws://localhost:9000/notifications/socket");
+
+	self.receiveEvent = function (event) {
+		var notification = JSON.parse(event.data);
+		self.addNotification(notification);
+		switch (notification.activity) {
+		case "GROUP_INVITE":
+			$.smkAlert({
+				text: '<strong>' + notification.senderName + '</strong> invites you to join <strong>' + notification.groupName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "GROUP_INVITE_ACCEPT":
+			$.smkAlert({
+				text: '<strong>' + notification.senderName + '</strong> joined <strong>' + notification.groupName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "GROUP_INVITE_DECLINED":
+			$.smkAlert({
+				text: '<strong>' + notification.senderName + '</strong> declined your invitation to join <strong>' + notification.groupName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "GROUP_REQUEST":
+			$.smkAlert({
+				text: '<strong>' + notification.senderName + '</strong> wants to join <strong>' + notification.groupName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "GROUP_REQUEST_ACCEPT":
+			$.smkAlert({
+				text: 'You joined <strong>' + notification.groupName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "GROUP_REQUEST_DENIED":
+			$.smkAlert({
+				text: 'Your request to join <strong>' + notification.groupName + '</strong> was declined',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "COLLECTION_SHARE":
+			if (notification.groupname) {
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.collectionName + '</strong> with <strong>' + notification.groupName + '</strong>',
+					type: 'info',
+					time: 5
+				});
+			} else {
+				$.smkAlert({
+					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.collectionName + '</strong> with you',
+					type: 'info',
+					time: 5
+				});
+			}
+			break;
+		case "COLLECTION_SHARED":
+			var senderName = notification.groupName ? notification.groupName : notification.senderName;
+			$.smkAlert({
+				text: '<strong>' + notification.collectionName + '</strong> is now shared with <strong>' + senderName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "COLLECTION_UNSHARED":
+			senderName = notification.groupName ? notification.groupName : 'you';
+			$.smkAlert({
+				text: '<strong>' + notification.collectionName + '</strong> is no longer shared with <strong>' + senderName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		case "COLLECTION_REJECTED":
+			senderName = notification.groupName ? notification.groupName : notification.senderName;
+			$.smkAlert({
+				text: '<strong>' + notification.senderName + '</strong> is not interested in collection <strong>' + collectionName + '</strong>',
+				type: 'info',
+				time: 5
+			});
+			break;
+		default:
+			$.smkAlert({
+				text: "Unknown Notification Type: <strong>" + notification.activity + "</strong>",
+				type: 'warning',
+				time: 5
+			});
+		}
+	};
+	self.notificationSocket.onmessage = self.receiveEvent;
+	self.notificationSocket.onclose = function (evt) {
+		console.log("disconected");
+	};
+
+	function waitForConnection(callback, interval) {
+		if (self.notificationSocket.readyState === 1) {
+			callback();
+		} else {
+			// optional: implement backoff for interval here
+			setTimeout(function () {
+				waitForConnection(callback, interval);
+			}, interval);
+		}
+	}
+
 	self.currentUser = {
 		"_id": ko.observable(),
 		"email": ko.observable(),
@@ -179,7 +277,12 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		"favoritesId": ko.observable(),
 		"usergroups": ko.observableArray(),
 		"organizations": ko.observableArray(),
-		"projects": ko.observableArray()
+		"projects": ko.observableArray(),
+		"notifications": {
+			'unread': ko.observable(0),
+			'userNotifications': ko.observableArray(),
+			'groupNotifications': ko.observableArray()
+		}
 	};
 	isLogged = ko.observable(false);
 
@@ -201,6 +304,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
 
+		self.loadNotifications(data.notifications);
 		self.loadFavorites();
 
 		// Save to session
@@ -213,19 +317,24 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		}
 
 		isLogged(true);
+		waitForConnection(function () {
+			self.notificationSocket.send('{"action":"login","id":"' + data.dbId + '"}');
+		}, 1000);
 
 		if (typeof (loadCollections) === 'undefined' || loadCollections === true) {
 			return [self.getEditableCollections()]; //[self.getEditableCollections(), self.getUserCollections()];
 		}
 	};
 
-	self.reloadUser = function() {
-		if (self.currentUser._id === undefined) { return; }
+	self.reloadUser = function () {
+		if (self.currentUser._id === undefined) {
+			return;
+		}
 
 		$.ajax({
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
-			success: function(data, text) {
+			success: function (data, text) {
 				loadUser(data, false, false);
 			}
 		});
@@ -238,16 +347,113 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
-				for(var i in data) {
-					if($("#" + data[i])){
+				for (var i in data) {
+					if ($("#" + data[i])) {
 						$("#" + data[i]).addClass('active');
 					}
 				}
 			})
 			.fail(function (jqXHR, textStatus, errorThrown) {
-				$.smkAlert({text:'Error loading Favorites', type:'danger', time: 10});
+				$.smkAlert({
+					text: 'Error loading Favorites',
+					type: 'danger',
+					time: 10
+				});
 				console.log("Error loading favorites!");
+			});
+	};
+
+	self.loadNotifications = function (data) {
+		// Reset previous notification instances
+		self.currentUser.notifications.userNotifications.removeAll();
+		self.currentUser.notifications.groupNotifications.removeAll();
+		self.currentUser.notifications.unread(0);
+
+		// Sort notification array
+		data.sort(function (a, b) {
+			return a.openedAt - b.openedAt;
 		});
+
+		// Load notifications
+		for (var i = 0; i < data.length; i++) {
+			self.addNotification(data[i]);
+		}
+	};
+
+	self.addNotification = function (data) {
+		data.date = ko.pureComputed(function () {
+			return moment(data.openedAt).fromNow();
+		});
+
+		data.pending = ko.observable(data.pendingResponse);
+		data.unread = ko.observable(data.readAt === null);
+
+		if (data.unread()) {
+			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);
+		}
+
+		switch (data.activity) {
+		case "GROUP_INVITE":
+			data.message = '<strong>' + data.senderName + '</strong> invites you to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			self.currentUser.notifications.userNotifications.unshift(data);
+			break;
+		case "GROUP_INVITE_ACCEPT":
+			data.message = '<strong>' + data.senderName + '</strong> joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			self.currentUser.notifications.groupNotifications.unshift(data);
+			break;
+		case "GROUP_INVITE_DECLINED":
+			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			self.currentUser.notifications.groupNotifications.unshift(data);
+			break;
+		case "GROUP_REQUEST":
+			data.message = '<strong>' + data.senderName + '</strong> wants to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			self.currentUser.notifications.groupNotifications.unshift(data);
+			break;
+		case "GROUP_REQUEST_ACCEPT":
+			data.message = 'You joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			self.currentUser.notifications.userNotifications.unshift(data);
+			break;
+		case "GROUP_REQUEST_DENIED":
+			data.message = 'Your request to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong> was declined';
+			self.currentUser.notifications.userNotifications.unshift(data);
+			break;
+		case "COLLECTION_SHARE":
+			if (data.groupName) {
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with <strong>' + data.groupName + '</strong>';
+				self.currentUser.notifications.groupNotifications.unshift(data);
+			} else {
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with you';
+				self.currentUser.notifications.userNotifications.unshift(data);
+			}
+			break;
+		case "COLLECTION_SHARED":
+			if (data.groupName) {
+				data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.groupName + '</strong>';
+			} else {
+				data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
+			}
+			self.currentUser.notifications.userNotifications.unshift(data);
+			break;
+		case "COLLECTION_UNSHARED":
+			if (data.groupName) {
+				data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with <strong>' + data.groupName + '</strong>';
+				self.currentUser.notifications.groupNotifications.unshift(data);
+			} else {
+				data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with you';
+				self.currentUser.notifications.userNotifications.unshift(data);
+			}
+			break;
+		case "COLLECTION_REJECTED":
+			var senderName = data.groupName ? data.groupName : data.senderName;
+			data.message = '<strong>' + senderName + '</strong> is not interested in collection <strong>' + data.collectionName + '</strong>';
+			self.currentUser.notifications.userNotifications.unshift(data);
+			break;
+		default:
+			data.message = "<strong>Unknown Notification Type:</strong> " + data.activity;
+			self.currentUser.notifications.userNotifications.unshift(data);
+		}
+
+		return data;
 	};
 
 	likeItem = function (record, update) {
@@ -268,8 +474,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 				collectionId: self.currentUser.favoritesId(),
 				externalId: record.externalId()
 			};
-		}
-		else {
+		} else {
 			id = record.externalId;
 			data = {
 				source: record.source,
@@ -286,7 +491,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 				externalId: record.externalId
 			};
 		}
-		if (!self.isLiked(id)) {	// Like
+		if (!self.isLiked(id)) { // Like
 			$.ajax({
 				type: "POST",
 				url: "/collection/liked",
@@ -297,11 +502,15 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 					update(true);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					$.smkAlert({text:'An error has occured. Please try again.', type:'danger', time: 10});
+					$.smkAlert({
+						text: 'An error has occured. Please try again.',
+						type: 'danger',
+						time: 10
+					});
 					console.log(errorThrown);
 				}
 			});
-		} else {	// Unlike
+		} else { // Unlike
 			$.ajax({
 				type: "DELETE",
 				url: "/collection/unliked/" + id,
@@ -310,7 +519,11 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 					update(false);
 				},
 				error: function (jqXHR, textStatus, errorThrown) {
-					$.smkAlert({text:'An error has occured. Please try again.', type:'danger', time: 10});
+					$.smkAlert({
+						text: 'An error has occured. Please try again.',
+						type: 'danger',
+						time: 10
+					});
 					console.log(errorThrown);
 				}
 			});
@@ -324,7 +537,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "isPublic=true&offset=0&count=20"//&isExhibition=false"
+			data: "isPublic=true&offset=0&count=20" //&isExhibition=false"
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -347,7 +560,10 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName="+JSON.stringify([{user:self.currentUser.username(),rights:"WRITE"}]),
+			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName=" + JSON.stringify([{
+				user: self.currentUser.username(),
+				rights: "WRITE"
+			}]),
 		}).done(
 			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
 			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
@@ -367,8 +583,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 					sessionStorage.setItem("EditableCollections", JSON.stringify(editables));
 				else if (localStorage.getItem('User') !== null)
 					localStorage.setItem("EditableCollections", JSON.stringify(editables));
-			}).fail(function (request, status, error) {
-		});
+			}).fail(function (request, status, error) {});
 	};
 
 	self.getUserCollections = function (isExhibition) {
@@ -379,7 +594,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator="+self.currentUser.username()+"&offset=0&count=20&isExhibition="+isExhibition+"&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset=0&count=20&isExhibition=" + isExhibition + "&totalHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -401,7 +616,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator="+self.currentUser.username()+"&offset=0&count=1000&isExhibition=false&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset=0&count=1000&isExhibition=false&totalHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));
@@ -424,6 +639,9 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 			type: "GET",
 			url: "/user/logout",
 			success: function () {
+				waitForConnection(function () {
+					self.notificationSocket.send('{"action":"logout","id":"' + self.currentUser._id() + '"}');
+				}, 1000);
 				self.clearSession();
 				window.location.href = "/assets/index.html";
 				//update custom spaces
@@ -432,7 +650,7 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		});
 	};
 
-	self.clearSession = function() {
+	self.clearSession = function () {
 		sessionStorage.removeItem('User');
 		localStorage.removeItem('User');
 		sessionStorage.removeItem('EditableCollections');
@@ -447,7 +665,6 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		$("#myModal").find("div.modal-body").html('');
 		$("#myModal").find("h4").html("");
 		$("#myModal").find("div.modal-footer").html('');
-
 	});
 
 	showPopup = function (name, params) {
@@ -465,6 +682,53 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		popupParams("{}");
 	};
 
+	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+		var category = allBindingsAccessor.get('category') || 0;
+		$(elem).devbridgeAutocomplete({
+			minChars: 3,
+			lookupLimit: 10,
+			serviceUrl: "/user/listNames",
+			paramName: "prefix",
+			params: {
+				onlyParents: false,
+				specifyCategory: category
+			},
+			ajaxSettings: {
+				dataType: "json"
+			},
+			transformResult: function (response) {
+				var myUsername = ko.utils.unwrapObservable(valueAccessor());
+				var index = arrayFirstIndexOf(response, function (item) {
+					return item.value === myUsername;
+				});
+				if (index > -1)
+					response.splice(index, 1);
+				/*var usersAndParents = [];
+	   			$.each(response, function(i, obj) {
+	   				if (obj.data.isParent == undefined || obj.data.isParent == null || obj.data.isParent === true)
+	   					usersAndParents.push(obj);
+			    });*/
+				return {
+					"suggestions": response
+				};
+			},
+			orientation: "auto",
+			onSearchComplete: function (query, suggestions) {
+				$(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
+			},
+			formatResult: function (suggestion, currentValue) {
+				var s =
+					/*'<img class="img-responsive img-circle" src="';
+				s	 += (currentUser.image() ? currentUser.image() : 'images/user.png') + '" />'
+				s	 +=*/
+					'<strong>' + currentValue + '</strong>';
+				s += suggestion.value.substring(currentValue.length);
+				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
+				return s;
+			}
+		});
+	};
+
 	// Check if user information already exist in session
 	if (sessionStorage.getItem('User') !== null) {
 		var sessionData = JSON.parse(sessionStorage.getItem('User'));
@@ -474,50 +738,8 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		loadUser(storageData, true);
 	}
 
-	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-		var category = allBindingsAccessor.get('category') || 0;
-		$(elem).devbridgeAutocomplete({
-	   		 minChars: 3,
-	   		 lookupLimit: 10,
-	   		 serviceUrl: "/user/listNames",
-	   		 paramName: "prefix",
-	   		 params: {
-	   			 onlyParents: false,
-	   			 specifyCategory: category
-	   		 },
-	   		 ajaxSettings: {
-	   			 dataType: "json"
-	   		 },
-	   		 transformResult: function(response) {
-	   			var myUsername = ko.utils.unwrapObservable(valueAccessor());
-	   			var index = arrayFirstIndexOf(response, function(item) {
-					   return item.value === myUsername;
-				});
-	   			if (index > -1)
-	   				response.splice(index, 1);
-	   			/*var usersAndParents = [];
-	   			$.each(response, function(i, obj) {
-	   				if (obj.data.isParent == undefined || obj.data.isParent == null || obj.data.isParent === true)
-	   					usersAndParents.push(obj);
-			    });*/
-		   		return {"suggestions": response};
-		   	},
-		   	orientation: "auto",    
-		    onSearchComplete: function(query, suggestions) {
-		    	 $(".autocomplete-suggestion").addClass("autocomplete-suggestion-extra");
-	   		 },
-			formatResult: function(suggestion, currentValue) {
-				var s = /*'<img class="img-responsive img-circle" src="';
-				s	 += (currentUser.image() ? currentUser.image() : 'images/user.png') + '" />'
-				s	 +=*/ '<strong>' + currentValue + '</strong>';
-				s    += suggestion.value.substring(currentValue.length);
-				s    += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
-				return s;
-			}
-		});
-	};
-	
-	
+	self.reloadUser(); // Reloads the user on refresh
+
 	return {
 		currentUser: currentUser,
 		loadUser: loadUser,
@@ -533,7 +755,6 @@ define("app", ['knockout', 'facebook','imagesloaded','smoke'], function (ko, FB,
 		isLiked: isLiked,
 		loadFavorites: loadFavorites,
 		likeItem: likeItem,
-		WITHApp: WITHApp,
 		initOrUpdate: initOrUpdate,
 		scroll: scroll
 	};

@@ -1009,3 +1009,80 @@ div#publiccolumns figure figcaption {
 a {
   outline: 0!important;
 }
+
+/* Notification System */
+nav .badge {
+  position: absolute;
+  right: 2px;
+  top: 5px;
+  background-color: rgb(238, 43, 51);
+}
+
+.notifications .popover {
+  display: block!important;
+  max-height: 100%;
+  height: auto;
+  font-size: 12px;
+
+}
+
+.notifications .popover-content {
+  padding: 0;
+}
+
+.notify-list {
+  list-style-type: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.notify-list li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #ebebeb;
+}
+
+.notify-list .unread {
+  background-color: #f6f7f8;
+}
+
+.notify-list em {
+  color: #f36e6c;
+}
+
+.notify-all {
+  border-radius: 0 0 5px 5px;
+  position: relative;
+  font-weight: 700;
+  text-align: center;
+  background-color: #f7f7f7;
+  padding: 6px 14px;
+}
+
+/* Notification Page */
+.notification-list  .list-group-item {
+  margin-bottom: 10px;
+  min-height: 60px;
+  font-size: 14px;
+}
+
+.message small {
+  vertical-align: middle;
+  color: #777;
+}
+
+.notify-list small {
+  color: #777;
+}
+
+.list-group-item .btn {
+  padding-bottom: 10px!important;
+}
+
+.notification-list  .list-group-item:first-child,
+.notification-list  .list-group-item:last-child
+ {
+  border-radius: 0px 0px 0px 0px;
+  -moz-border-radius: 0px 0px 0px 0px;
+  -webkit-border-radius: 0px 0px 0px 0px;
+}
+

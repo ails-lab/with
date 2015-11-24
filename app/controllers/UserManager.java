@@ -22,7 +22,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 import java.util.Random;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -452,7 +451,9 @@ public class UserManager extends Controller {
 				return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+			ObjectNode error = Json.newObject();
+			error.put("error", e.getMessage());
+			return internalServerError(error);
 		}
 	}
 
@@ -581,36 +582,6 @@ public class UserManager extends Controller {
 		} catch (IllegalArgumentException e) {
 			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 		}
-	}
-
-	public static Result addUserToGroup(String uid, String gid) {
-		ObjectNode result = Json.newObject();
-
-		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
-		if (group == null) {
-			result.put("message", "Cannot retrieve group from database!");
-			return internalServerError(result);
-		}
-
-		group.getUsers().add(new ObjectId(uid));
-		Set<ObjectId> parentGroups = group.getAncestorGroups();
-
-		User user = DB.getUserDAO().get(new ObjectId(uid));
-		if (user == null) {
-			result.put("message", "Cannot retrieve user from database!");
-			return internalServerError(result);
-		}
-		parentGroups.add(group.getDbId());
-		user.addUserGroups(parentGroups);
-
-		if (!(DB.getUserDAO().makePermanent(user) == null) && !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-			result.put("message", "Group succesfully added to User");
-			return ok(result);
-		}
-
-		result.put("message", "Cannot store to database!");
-		return internalServerError(result);
-
 	}
 
 	public static Result apikey() {
@@ -936,8 +907,7 @@ public class UserManager extends Controller {
 
 			}
 		}
-
 		return badRequest(result);
-
 	}
+
 }

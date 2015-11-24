@@ -27,12 +27,14 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 import play.Logger;
 import play.Logger.ALogger;
 import utils.Serializer;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import db.DB;
 
 @Entity
 public class User extends UserOrGroup {
@@ -69,6 +71,9 @@ public class User extends UserOrGroup {
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
+
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private final Set<ObjectId> adminInGroups = new HashSet<ObjectId>();
 
 	/**
 	 * The search should already be stored in the database separately
@@ -240,6 +245,19 @@ public class User extends UserOrGroup {
 		return userGroupsIds;
 	}
 
+	public void addGroupForAdministration(ObjectId group) {
+		this.adminInGroups.add(group);
+	}
+
+	public void removeGroupForAdministration(ObjectId group) {
+		this.adminInGroups.remove(group);
+	}
+
+	@JsonIgnore
+	public Set<ObjectId> getAdminInGroups() {
+		return this.adminInGroups;
+	}
+
 	@JsonIgnore
 	public boolean isSuperUser() {
 		return superUser;
@@ -264,4 +282,21 @@ public class User extends UserOrGroup {
 		this.exhibitionsCreated++;
 	}
 
+	public Set<Notification> getNotifications() {
+		Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
+		userOrGroupIds.add(this.getDbId());
+		userOrGroupIds.addAll(this.adminInGroups);
+		Set<Notification> unreadNotifications = new HashSet<Notification>(DB
+				.getNotificationDAO().getUnreadByReceivers(userOrGroupIds, 0));
+		Set<Notification> notifications;
+		if (unreadNotifications.size() < 20) {
+			notifications = new HashSet<Notification>(DB.getNotificationDAO()
+					.getAllByReceivers(userOrGroupIds,
+							20 - unreadNotifications.size()));
+			notifications.addAll(unreadNotifications);
+		} else {
+			notifications = unreadNotifications;
+		}
+		return notifications;
+	}
 }
