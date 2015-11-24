@@ -29,7 +29,6 @@ import utils.Serializer;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
-import model.Rights.Access;
 
 public class ExampleDataModels {
 	
@@ -38,7 +37,7 @@ public class ExampleDataModels {
 	 * @author Arne Stabenau
 	 *
 	 */
-	public static class WithAccess extends HashMap<ObjectId, Access> {
+	public static class WithAccess extends HashMap<ObjectId, WithAccess.Access> {
 		
 		public static enum Access {
 			NONE, READ, WRITE, OWN
