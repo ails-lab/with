@@ -12,7 +12,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 				tmp.sort(function(a, b) {
 					return b.openedAt - a.openedAt;
 				});
-				self.notifications(tmp.splice(0, 10));
+				self.notifications(tmp.splice(0, 5));
 
 				return $('#notifications-content').html();
 			}
