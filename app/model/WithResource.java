@@ -73,6 +73,13 @@ public class WithResource<T extends DescriptiveData> {
 		@Embedded
 		private WithAccess access;
 		
+		/*
+		 * withCreator is empty in cases of records imported from external resources.
+		 * For resources uploaded by a user, it links to the userId who uploaded that resource.
+		 * For collections, it links to the userId who created the collection.
+		 */
+		private ObjectId withCreator; 
+		
 		// uri that this resource has in the rdf repository
 		private String withURI;
 		
@@ -87,6 +94,8 @@ public class WithResource<T extends DescriptiveData> {
 		@Embedded
 		@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
+		
+		
 		
 		public ObjectId getDbId() {
 			return dbId;
@@ -196,7 +205,8 @@ public class WithResource<T extends DescriptiveData> {
 	/**
 	 * If we know about collections from our sources, the info goes here
 	 * For single records, fill in the position or next in sequence, for 
-	 * general collection linking, omit it. 
+	 * general collection linking, omit it (i.e. if the resource is of type 
+	 * collection, the colletionUri refers to the external "equivalent" collection). 
 	 *
 	 */
 	public static class ExternalCollection {

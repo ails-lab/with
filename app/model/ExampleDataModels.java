@@ -448,7 +448,7 @@ public class ExampleDataModels {
 		}
 		
 		EventType eventType;
-		WithPeriod timespan;
+		TimeSpan timespan;
 		ArrayList<LiteralOrResource> agent;
 		ArrayList<LiteralOrResource> place;
 	}
