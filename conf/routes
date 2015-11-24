@@ -75,6 +75,7 @@ GET      /group/descendantOrganizations/:groupId   controllers.GroupManager.getD
 GET      /group/descendantProjects/:groupId        controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 PUT      /group/join/:groupId                      controllers.UserAndGroupManager.joinGroup(groupId)
 PUT      /group/leave/:groupId                     controllers.UserAndGroupManager.leaveGroup(groupId)
+GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 
 # Rights Controller
 #GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
