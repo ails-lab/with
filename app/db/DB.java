@@ -154,8 +154,8 @@ public class DB {
 	public static UserGroupDAO getUserGroupDAO() {
 		return (UserGroupDAO) getDAO(UserGroup.class);
 	}
-	
-	public static HashMap<ObjectId, Access> getWithResourceDAO() {
+
+	public static WithResourceDAO getWithResourceDAO() {
 		return (WithResourceDAO) getDAO(WithResource.class);
 	}
 
