@@ -43,6 +43,7 @@ import model.EmbeddedMediaObject;
 import model.Provider;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
+import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 
@@ -270,35 +271,7 @@ public class WithResource<T extends DescriptiveData> {
 			this.description = description;
 		}
 	}
-
-
-	public static class ProvenanceInfo {
-		private String provider;
-		private String uri;
-		private String recordId;
-		public String getProvider() {
-			return provider;
-		}
-		public void setProvider(String provider) {
-			this.provider = provider;
-		}
-		public String getUri() {
-			return uri;
-		}
-		public void setUri(String uri) {
-			this.uri = uri;
-		}
-		public String getRecordId() {
-			return recordId;
-		}
-		public void setRecordId(String recordId) {
-			this.recordId = recordId;
-		}
-
-		// you can have entries for WITH records with provider "WITH" and
-		// recordId the ObjectId of the annotated Record
-	}
-
+	
 	public static enum WithResourceType {
 		 WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
 	}
