@@ -16,7 +16,7 @@
 
 package db;
 
-import model.WithResource;
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;

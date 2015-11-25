@@ -16,12 +16,17 @@
 
 package controllers;
 
-import model.WithResource;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
+
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -29,6 +34,8 @@ import play.mvc.Result;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -83,6 +90,7 @@ public class WithResourceController extends Controller {
 	 *            the resource serialization
 	 * @return success message
 	 */
+	// TODO: cascaded delete (if needed)
 	public static Result deleteWithResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
@@ -113,6 +121,42 @@ public class WithResourceController extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+
+	// TODO check restrictions (unique fields e.t.c)
+	public static Result createWithResource() {
+
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+		try {
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest(error);
+			}
+			if (session().get("user") == null) {
+				error.put("error", "No rights for WITH resource creation");
+				return forbidden(error);
+			}
+			ObjectId creator = new ObjectId(session().get("user"));
+			String resourceType = json.get("resourceType").asText();
+			Class<?> clazz = Class.forName("model.resources." + resourceType);
+			WithResource resource = (WithResource) Json.fromJson(json, clazz);
+			Set<ConstraintViolation<WithResource>> violations = Validation
+					.getValidator().validate(resource);
+			if (!violations.isEmpty()) {
+				ArrayNode properties = Json.newObject().arrayNode();
+				for (ConstraintViolation<WithResource> cv : violations) {
+					properties.add(Json.parse("{\"" + cv.getPropertyPath()
+							+ "\":\"" + cv.getMessage() + "\"}"));
+				}
+				error.put("error", properties);
+				return badRequest(error);
+			}
+		} catch (Exception e) {
+			error.put("error", e.getMessage());
+			return internalServerError(error);
+		}
+		return TODO;
 	}
 
 }

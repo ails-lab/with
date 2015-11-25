@@ -22,13 +22,11 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionRecord;
-import model.WithAccess.Access;
-import model.WithResource;
 import model.resources.CulturalObject;
+import model.resources.WithResource;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
