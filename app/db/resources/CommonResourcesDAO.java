@@ -26,7 +26,10 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import com.mongodb.BasicDBObject;
+
 import db.DAO;
+import db.DB;
 
 public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	
@@ -89,8 +92,9 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 */
 	public List<T> getByCollectionPosition(ObjectId colId,
 			int lowerBound, int upperBound) {
-		//TODO: q AND contain in collectedIn.collId an entry geq than lowerBound and lower than upperBound
-		Query<T> q = this.createQuery().field("collectedIn."+colId.toString()).exists();
+		Query<T> q = this.createQuery();
+		String colField = "collectedIn."+colId;
+		q.and(q.criteria(colField).exists(), q.criteria(colField).greaterThanOrEq(lowerBound), q.criteria(colField).lessThan(upperBound));
 		List<T> Ts = this.find(q).asList();
 		List<T> repeatedResources = new ArrayList<T>();
 		for (T T: Ts) {
@@ -156,10 +160,11 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 
 	//TODO:Mongo query!
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
-		Query<T> q = this.createQuery().field("collectedIn."+colId).exists();
-		List<T> resources = this.find(q).asList();
+		Query<T> q = this.createQuery();
+		String colField = "collectedIn."+colId;
+		q.and(q.criteria(colField).exists(), q.criteria(colField).greaterThanOrEq(position));
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		for (T resource: resources) {
+		/*for (T resource: resources) {
 			HashMap<ObjectId, ArrayList<Integer>> collectedIn = resource.getCollectedIn();
 			ArrayList<Integer> positions = collectedIn.get(colId);
 			for (Integer pos: positions) {
@@ -169,9 +174,25 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 				}
 			}
 		}
-				//field("collectedIn."+colId).hasThisElement(position);
-				//.field("position").greaterThan(position);
 		this.update(q, updateOps);
+		 */
+		/*{	
+		 	collectedIn.colId: {$exists: true},
+		     collectedIn.colId: { $elemMatch: { $gte: position} }
+		   },
+		   { $dec: { "collectedIn."+colId+".$" : 1 } }*/
+		BasicDBObject colIdQuery = new BasicDBObject();
+		BasicDBObject existsField = new BasicDBObject();
+		existsField.put("$exists", true);
+		colIdQuery.put("collectedIn.collId", existsField);
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$geq", position);
+		colIdQuery.append("$elemMatch", geq);
+		BasicDBObject update = new BasicDBObject();
+		BasicDBObject entrySpec = new BasicDBObject();
+		entrySpec.put("collectedIn."+colId+".$", 1);
+		update.put("$dec", entrySpec);
+		this.getDs().getCollection(entityClass.getSimpleName()).find(colIdQuery, update);
 	}
 
 	/**

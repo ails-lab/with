@@ -24,6 +24,7 @@ import model.Collection;
 import model.CollectionRecord;
 import model.resources.CulturalObject;
 import model.resources.WithResource;
+import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
