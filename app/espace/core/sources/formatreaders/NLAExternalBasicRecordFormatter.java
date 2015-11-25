@@ -24,7 +24,7 @@ import espace.core.sources.NLASpaceSource;
 import espace.core.utils.JsonContextRecord;
 import espace.core.utils.StringUtils;
 import model.ExternalBasicRecord;
-import model.usersAndGroups.Provider;
+import model.Provider;
 
 public class NLAExternalBasicRecordFormatter extends ExternalBasicRecordReader {
 

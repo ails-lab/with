@@ -26,7 +26,7 @@ import espace.core.sources.NLASpaceSource;
 import espace.core.sources.RijksmuseumSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
-import model.usersAndGroups.Provider;
+import model.Provider;
 import utils.ListUtils;
 
 public class RijksmuseumBasicRecordFormatter extends ExternalBasicRecordReader {

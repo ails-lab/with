@@ -23,7 +23,7 @@ import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
-import model.usersAndGroups.Provider;
+import model.Provider;
 
 public class DNZBasicRecordFormatter extends ExternalBasicRecordReader {
 

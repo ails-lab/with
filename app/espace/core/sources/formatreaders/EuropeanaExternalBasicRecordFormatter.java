@@ -25,7 +25,7 @@ import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
-import model.usersAndGroups.Provider;
+import model.Provider;
 import utils.ListUtils;
 
 public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordReader {
