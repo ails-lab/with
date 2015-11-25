@@ -37,6 +37,8 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -169,4 +171,59 @@ public class WithResourceController extends Controller {
 		}
 	}
 
+	/**
+	 * Edits the WITH resource according to the JSON body. For every field
+	 * mentioned in the JSON body it either edits the existing one or it adds it
+	 * (in case it doesn't exist)
+	 *
+	 * @return the edited resource
+	 */
+	// TODO check restrictions (unique fields e.t.c)
+	public static Result editWithResource(String id) {
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+		try {
+			if (json == null) {
+				error.put("error", "Invalid JSON");
+				return badRequest(error);
+			}
+			WithResource oldResource = DB.getWithResourceDAO().get(
+					new ObjectId(id));
+			if (oldResource == null) {
+				log.error("Cannot retrieve resource from database");
+				error.put("error", "Cannot retrieve resource from database");
+				return internalServerError(error);
+			}
+			if (!AccessManager.checkAccess(oldResource.getAdministrative()
+					.getAccess(), session().get("effectiveUserIds"),
+					Action.EDIT)) {
+				error.put("error",
+						"User does not have the right to edit the resource");
+				return forbidden(error);
+			}
+			Class<?> clazz = Class.forName("model.resources."
+					+ oldResource.getResourceType().toString());
+			// TODO change JSON at all its depth
+			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectReader updator = objectMapper.readerForUpdating(oldResource);
+			WithResource newResource;
+			newResource = updator.readValue(json);
+			Set<ConstraintViolation<WithResource>> violations = Validation
+					.getValidator().validate(newResource);
+			if (!violations.isEmpty()) {
+				ArrayNode properties = Json.newObject().arrayNode();
+				for (ConstraintViolation<WithResource> cv : violations) {
+					properties.add(Json.parse("{\"" + cv.getPropertyPath()
+							+ "\":\"" + cv.getMessage() + "\"}"));
+				}
+				error.put("error", properties);
+				return badRequest(error);
+			}
+			DB.getWithResourceDAO().makePermanent(newResource);
+			return ok(Json.toJson(newResource));
+		} catch (Exception e) {
+			error.put("error", e.getMessage());
+			return internalServerError(error);
+		}
+	}
 }
