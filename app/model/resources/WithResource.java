@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.Provider;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
 import model.basicDataTypes.WithAccess;
@@ -375,6 +376,14 @@ public class WithResource<T extends DescriptiveData> {
 
 	public void setProvenance(ArrayList<ProvenanceInfo> provenance) {
 		this.provenance = provenance;
+	}
+	
+	public void addToProvenance(ProvenanceInfo provInfo) {
+		this.provenance.add(provInfo);
+	}
+	
+	public void addToProvenance(ProvenanceInfo provInfo, int position) {
+		provenance.add(position, provInfo);
 	}
 
 	public WithResourceType getResourceType() {
