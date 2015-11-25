@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import elastic.ElasticUpdater;
 import model.Collection;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 import play.Logger;

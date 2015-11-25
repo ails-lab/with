@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 import espace.core.HttpConnector;
 import model.Collection;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;

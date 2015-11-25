@@ -14,15 +14,17 @@
  */
 
 
-package model;
+package model.resources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
 import utils.Deserializer;
@@ -36,35 +38,18 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
-import model.BasicDataTypes.Literal;
-import model.BasicDataTypes.LiteralOrResource;
-import model.WithAccess.Access;
+import model.DescriptiveData;
+import model.EmbeddedMediaObject;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Entity
 public class WithResource<T extends DescriptiveData> {
-	
-	public static class CollectionInfo {
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		private ObjectId collectionId;
-		private int position;
-		
-		public ObjectId getCollectionId() {
-			return collectionId;
-		}
-		public void setCollectionId(ObjectId collectionId) {
-			this.collectionId = collectionId;
-		}
-		public int getPosition() {
-			return position;
-		}
-		public void setPosition(int position) {
-			this.position = position;
-		}
-	}
 	
 	public static class WithAdmin {
 		@Id
@@ -148,7 +133,6 @@ public class WithResource<T extends DescriptiveData> {
 			return withCreator;
 		}
 		
-		@JsonProperty
 		public void setWithCreator(ObjectId creatorId) {
 			// Set owner for first time
 			if (this.withCreator == null) {
@@ -313,10 +297,14 @@ public class WithResource<T extends DescriptiveData> {
 		// recordId the ObjectId of the annotated Record
 	}
 
+	public static enum WithResourceType {
+		 WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
+	}
 	
 	private WithAdmin administrative;
 	
-	private ArrayList<CollectionInfo> collectedIn;
+	@Embedded
+	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
 	
 	private Usage usage;
 	
@@ -325,7 +313,7 @@ public class WithResource<T extends DescriptiveData> {
 	private ArrayList<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
-	private String resourceType;
+	private WithResourceType resourceType;
 	
 	private T model;
 	
@@ -350,14 +338,14 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public ArrayList<CollectionInfo> getCollectedIn() {
+	public HashMap<ObjectId, ArrayList<Integer>> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
+	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
-
+	
 	public Usage getUsage() {
 		return usage;
 	}
@@ -383,11 +371,11 @@ public class WithResource<T extends DescriptiveData> {
 		this.provenance = provenance;
 	}
 
-	public String getResourceType() {
+	public WithResourceType getResourceType() {
 		return resourceType;
 	}
 
-	public void setResourceType(String resourceType) {
+	public void setResourceType(WithResourceType resourceType) {
 		this.resourceType = resourceType;
 	}
 

@@ -30,10 +30,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import model.WithAccess;
-import model.WithAccess.Access;
-
-
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;

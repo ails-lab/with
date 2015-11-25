@@ -14,36 +14,27 @@
  */
 
 
-package model;
+package model.basicDataTypes;
 
 import java.util.HashMap;
 
-import model.WithAccess.Access;
-
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Converters;
-
-import db.RightsConverter;
-
-/**
- * 
- * @author Arne Stabenau
- *
- * So that Model objects can have a proper type for rights embedded
- */
-@Converters( RightsConverter.class )
-public class WithAccess extends HashMap<ObjectId, Access> {
+public class Literal extends  HashMap<String, String> {
+	// keys are language 2 letter codes, 
+	// "unknown" for unknown language
+	// special request for any is "any"
+	public void setLiteral( String val, String lang ) {
+		
+	}
 	
-	public static enum Access {
-		NONE, READ, WRITE, OWN
-	}
-	private boolean isPublic;
-
-	public boolean isPublic() {
-		return isPublic;
-	}
-
-	public void setPublic(boolean isPublic) {
-		this.isPublic = isPublic;
-	}
+	/**
+	 * Dont request the "unknown" language, request "any" if you don't care
+		 * @param lang
+	 * @return
+	 */
+	public String getLiteral(String lang ) {
+		if( "any".equals( lang )) {
+			
+		}
+		return get( lang );
+	}		
 }

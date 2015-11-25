@@ -14,23 +14,15 @@
  */
 
 
-package model.resources;
+package db.resources;
+import model.resources.WithResource;
+import play.Logger;
+import play.Logger.ALogger;
 
-import java.util.Date;
+public class WithResourceDAO extends CommonResourcesDAO<WithResource> {
+	public static final ALogger log = Logger.of(WithResource.class);
 
-import model.DescriptiveData;
-
-public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
-	
-	public static class EUscreenData extends DescriptiveData { 
-		// title is filled in with original language title and english title
-		// description dito
-		
-		String broadcastChannel;
-		Date brodcastDate;
-		
-		// in year we keep the production year
-		
+	public WithResourceDAO() {
+		super(WithResource.class);
 	}
-
 }

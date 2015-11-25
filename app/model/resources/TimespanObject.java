@@ -18,9 +18,8 @@ package model.resources;
 
 import java.util.ArrayList;
 
-import model.BasicDataTypes.WithPeriod;
+import model.basicDataTypes.WithPeriod;
 import model.DescriptiveData;
-import model.WithResource;
 
 public class TimespanObject extends WithResource<TimespanObject.TimespanData>{
 	

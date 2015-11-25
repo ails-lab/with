@@ -18,10 +18,9 @@ package model.resources;
 
 import java.util.ArrayList;
 
-import model.BasicDataTypes.LiteralOrResource;
-import model.BasicDataTypes.WithPeriod;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.WithPeriod;
 import model.DescriptiveData;
-import model.WithResource;
 
 public class EventObject extends WithResource<EventObject.EventData> {
 	

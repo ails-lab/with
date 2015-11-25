@@ -39,7 +39,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 import utils.AccessEnumConverter;
 import utils.Deserializer;

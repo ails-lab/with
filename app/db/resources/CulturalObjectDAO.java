@@ -14,7 +14,7 @@
  */
 
 
-package db;
+package db.resources;
 
 import java.util.List;
 
@@ -25,10 +25,11 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import db.DAO;
 import play.Logger;
 import play.Logger.ALogger;
 
-public class CulturalObjectDAO extends DAO<CulturalObject> {
+public class CulturalObjectDAO extends CommonResourcesDAO<CulturalObject> {
 	public static final ALogger log = Logger.of(CulturalObject.class);
 
 	public CulturalObjectDAO() {
@@ -82,7 +83,7 @@ public class CulturalObjectDAO extends DAO<CulturalObject> {
 				.equal(extId).limit(1);
 		List<CulturalObject> list = this.find(q).asList();
 		if (list.size() > 0)
-			return list.get(0).getTotalLikes();
+			return list.get(0).getUsage().getLikes();
 		else
 			return 0;
 	}

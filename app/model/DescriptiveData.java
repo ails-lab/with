@@ -18,17 +18,23 @@ package model;
 
 import java.util.ArrayList;
 
+import javax.validation.constraints.NotNull;
+
+import org.hibernate.validator.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import model.BasicDataTypes.Literal;
-import model.BasicDataTypes.LiteralOrResource;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DescriptiveData {
 	
 	// one line content description with identifiable characteristic
+	@NotNull
+	@NotBlank
 	private Literal label;
 	
 	// arbitrary length content description

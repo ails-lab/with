@@ -14,23 +14,17 @@
  */
 
 
-package model.resources;
+package model.basicDataTypes;
 
 import java.util.Date;
 
-import model.DescriptiveData;
 
-public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
-	
-	public static class EUscreenData extends DescriptiveData { 
-		// title is filled in with original language title and english title
-		// description dito
-		
-		String broadcastChannel;
-		Date brodcastDate;
-		
-		// in year we keep the production year
-		
-	}
-
+/**
+ * 
+ * The WithTime might already cover the timespan you mean, but if you need more fields, its meant to be the 
+ * start of the timespan.
+ */
+public class WithPeriod extends WithDate  {
+	Date isoEndDate;
+	int endYear;
 }

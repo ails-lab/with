@@ -23,7 +23,7 @@ import java.io.FileInputStream;
 import java.net.URL;
 
 import model.Media;
-import model.WithAccess;
+import model.basicDataTypes.WithAccess;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;

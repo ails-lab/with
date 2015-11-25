@@ -16,7 +16,7 @@
 
 package utils;
 
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;

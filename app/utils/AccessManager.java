@@ -21,16 +21,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import model.WithAccess;
-import model.WithAccess.Access;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 
+import db.DB;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import play.Logger;
 import play.Logger.ALogger;
-import db.DB;
 
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);

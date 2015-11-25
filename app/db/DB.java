@@ -39,6 +39,8 @@ import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import db.resources.CulturalObjectDAO;
+
 // get the DAOs from here
 // the EntityManagerFactory is here
 public class DB {

@@ -21,7 +21,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 

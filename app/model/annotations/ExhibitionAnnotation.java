@@ -16,7 +16,7 @@
 
 package model.annotations;
 
-import model.BasicDataTypes.Literal;
+import model.basicDataTypes.BasicDataTypes.Literal;
 
 public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation.ExhibitionAnnotationBody> {
 	

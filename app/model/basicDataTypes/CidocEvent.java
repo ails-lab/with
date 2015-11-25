@@ -14,23 +14,16 @@
  */
 
 
-package model.resources;
+package model.basicDataTypes;
 
-import java.util.Date;
-
-import model.DescriptiveData;
-
-public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
-	
-	public static class EUscreenData extends DescriptiveData { 
-		// title is filled in with original language title and english title
-		// description dito
-		
-		String broadcastChannel;
-		Date brodcastDate;
-		
-		// in year we keep the production year
-		
+import java.util.ArrayList;
+public class CidocEvent {
+	public static enum EventType {
+		CREATED, OTHER 
 	}
-
+	
+	EventType eventType;
+	WithPeriod timespan;
+	ArrayList<LiteralOrResource> agent;
+	ArrayList<LiteralOrResource> place;
 }

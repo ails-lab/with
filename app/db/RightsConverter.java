@@ -16,7 +16,7 @@
 
 package db;
 
-import model.WithAccess;
+import model.basicDataTypes.WithAccess;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.converters.TypeConverter;

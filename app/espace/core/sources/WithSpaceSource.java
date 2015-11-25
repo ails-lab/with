@@ -24,8 +24,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.Collection;
-import model.WithAccess;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;

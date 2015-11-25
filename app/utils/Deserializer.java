@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
-import model.WithAccess;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 

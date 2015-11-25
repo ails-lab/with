@@ -25,7 +25,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;

@@ -18,11 +18,10 @@ package model.resources;
 
 import java.util.ArrayList;
 
-import model.BasicDataTypes.Literal;
-import model.BasicDataTypes.LiteralOrResource;
-import model.BasicDataTypes.WithDate;
+import model.basicDataTypes.BasicDataTypes.Literal;
+import model.basicDataTypes.BasicDataTypes.LiteralOrResource;
+import model.basicDataTypes.BasicDataTypes.WithDate;
 import model.DescriptiveData;
-import model.WithResource;
 
 
 public class AgentObject extends WithResource<AgentObject.AgentData> {

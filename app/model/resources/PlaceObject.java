@@ -18,9 +18,8 @@ package model.resources;
 
 import java.util.ArrayList;
 
-import model.BasicDataTypes.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
-import model.WithResource;
 
 public class PlaceObject extends WithResource<PlaceObject.PlaceData> {
 

@@ -18,21 +18,24 @@ package model.resources;
 
 import java.util.ArrayList;
 
+import javax.validation.constraints.NotNull;
+
 import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.NotBlank;
 
 import db.DB;
-import model.BasicDataTypes.CidocEvent;
-import model.BasicDataTypes.Literal;
-import model.BasicDataTypes.LiteralOrResource;
-import model.BasicDataTypes.LiteralOrResource.ResourceType;
-import model.BasicDataTypes.WithDate;
+import model.basicDataTypes.CidocEvent;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.WithDate;
+import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.usersAndGroups.User;
 import model.DescriptiveData;
-import model.WithResource;
 
 public class CulturalObject extends WithResource<CulturalObject.CulturalObjectData>{
 	
 	public static class RecordAdmin extends WithAdmin {
+		
 		// last entry of provenance chain hash of provider and recordId
 		private String externalId;
 				

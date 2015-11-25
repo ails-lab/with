@@ -25,7 +25,7 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;

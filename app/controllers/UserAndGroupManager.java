@@ -22,7 +22,7 @@ import java.util.function.Function;
 
 import model.Collection;
 import model.Media;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;

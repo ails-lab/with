@@ -19,7 +19,7 @@ package model;
 import java.util.ArrayList;
 import java.util.Set;
 
-import model.BasicDataTypes.LiteralOrResource;
+import model.basicDataTypes.BasicDataTypes.LiteralOrResource;
 
 import org.bson.types.ObjectId;
 

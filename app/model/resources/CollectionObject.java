@@ -22,11 +22,10 @@ import java.util.Map;
 
 import org.bson.types.ObjectId;
 
-import model.BasicDataTypes.LiteralOrResource;
 import model.ExampleDataModels.WithAccess;
 import model.ExampleDataModels.WithAdmin;
+import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
-import model.WithResource;
 
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
 	
