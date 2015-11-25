@@ -45,6 +45,7 @@ import db.resources.CulturalObjectDAO;
 public class DB {
 	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
 	private static MediaDAO mediaDAO;
+	private static MediaObjectDAO mediaObjectDAO;
 	private static MongoClient mongo;
 	private static Datastore ds;
 	private static Morphia morphia;
@@ -130,6 +131,12 @@ public class DB {
 		return (CollectionDAO) getDAO(Collection.class);
 	}
 
+	public static MediaObjectDAO getMediaObjectDAO() {
+		if (mediaObjectDAO == null)
+			mediaObjectDAO = new MediaObjectDAO();
+		return mediaObjectDAO;
+	}
+
 	public static MediaDAO getMediaDAO() {
 		if (mediaDAO == null)
 			mediaDAO = new MediaDAO();
@@ -139,7 +146,7 @@ public class DB {
 	/*
 	 * public static SearchDAO getSearchDAO() { return (SearchDAO)
 	 * getDAO(Search.class); }
-	 * 
+	 *
 	 * public static SearchResultDAO getSearchResultDAO() { return
 	 * (SearchResultDAO) getDAO(SearchResult.class); }
 	 */
@@ -162,7 +169,7 @@ public class DB {
 
 	/**
 	 * Singleton DAO class for all the models
-	 * 
+	 *
 	 * @param clazz
 	 * @return
 	 */

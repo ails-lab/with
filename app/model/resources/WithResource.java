@@ -44,13 +44,14 @@ import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+
 import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Entity
 public class WithResource<T extends DescriptiveData> {
-	
+
 	public static class WithAdmin {
 		@Id
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -59,31 +60,31 @@ public class WithResource<T extends DescriptiveData> {
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
 		private WithAccess access;
-		
+
 		/*
 		 * withCreator is empty in cases of records imported from external resources.
 		 * For resources uploaded by a user, it links to the userId who uploaded that resource.
 		 * For collections, it links to the userId who created the collection.
 		 */
-		private ObjectId withCreator; 
-		
+		private ObjectId withCreator;
+
 		// uri that this resource has in the rdf repository
 		private String withURI;
-		
+
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date created;
-		
+
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date lastModified;
-		
+
 		@Embedded
 		@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
-		
-		
-		
+
+
+
 		public ObjectId getDbId() {
 			return dbId;
 		}
@@ -95,7 +96,7 @@ public class WithResource<T extends DescriptiveData> {
 		public WithAccess getAccess() {
 			return access;
 		}
-		
+
 		@JsonIgnore
 		public void setAccess(WithAccess access) {
 			this.access = access;
@@ -132,7 +133,7 @@ public class WithResource<T extends DescriptiveData> {
 		public ObjectId getWithCreator() {
 			return withCreator;
 		}
-		
+
 		public void setWithCreator(ObjectId creatorId) {
 			// Set owner for first time
 			if (this.withCreator == null) {
@@ -146,34 +147,34 @@ public class WithResource<T extends DescriptiveData> {
 				setWithCreator(creatorId);
 			}
 		}
-		
+
 		public User retrieveWithCreator() {
 			ObjectId userId = getWithCreator() ;
 			if (userId != null)
 				return DB.getUserDAO().getById(userId, null);
 			else return null;
 		}
-		
+
 	}
-	
+
 	public static class Usage {
 		// in how many favorites is it
 		private int likes;
-		
+
 		// in how many user collections is it
 		private int collected;
 		// how many modified versions exist
 		private int annotated;
-		
+
 		// how often is it viewed, don't count count api calls,
 		// count UI messages for viewing
 		private int viewCount;
 
-		// implementation detail, put any tag on the record twice, 
+		// implementation detail, put any tag on the record twice,
 		// with userID prepended and without. This will allow for people to look
 		// for their own tags.
 		private ArrayList<String> tags;
-		
+
 		public int getLikes() {
 			return likes;
 		}
@@ -214,12 +215,12 @@ public class WithResource<T extends DescriptiveData> {
 			this.tags = tags;
 		}
 	}
-	
+
 	/**
 	 * If we know about collections from our sources, the info goes here
-	 * For single records, fill in the position or next in sequence, for 
-	 * general collection linking, omit it (i.e. if the resource is of type 
-	 * collection, the colletionUri refers to the external "equivalent" collection). 
+	 * For single records, fill in the position or next in sequence, for
+	 * general collection linking, omit it (i.e. if the resource is of type
+	 * collection, the colletionUri refers to the external "equivalent" collection).
 	 *
 	 */
 	public static class ExternalCollection {
@@ -230,7 +231,7 @@ public class WithResource<T extends DescriptiveData> {
 		private int position;
 		private String title;
 		private String description;
-		
+
 		public String getSource() {
 			return source;
 		}
@@ -268,8 +269,8 @@ public class WithResource<T extends DescriptiveData> {
 			this.description = description;
 		}
 	}
-	
-	
+
+
 	public static class ProvenanceInfo {
 		private String provider;
 		private String uri;
@@ -292,7 +293,7 @@ public class WithResource<T extends DescriptiveData> {
 		public void setRecordId(String recordId) {
 			this.recordId = recordId;
 		}
-		
+
 		// you can have entries for WITH records with provider "WITH" and
 		// recordId the ObjectId of the annotated Record
 	}
@@ -300,36 +301,41 @@ public class WithResource<T extends DescriptiveData> {
 	public static enum WithResourceType {
 		 WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
 	}
-	
+
 	private WithAdmin administrative;
-	
+
 	@Embedded
 	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
-	
+
+
 	private Usage usage;
-	
+
 	//external collections to which the resource may belong to
-	private ArrayList<ExternalCollection> externalCollections;		
+	private ArrayList<ExternalCollection> externalCollections;
 	private ArrayList<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
 	private WithResourceType resourceType;
-	
+
 	private T model;
-	
-	// All the available content serializations 
+
+	// All the available content serializations
 	// all keys in here should be understood by the WITH system
 	private HashMap<String, String> content;
-	
+
 	// all attached media Objects (their embedded part)
 	private ArrayList<EmbeddedMediaObject> media;
-	
+
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
 	private HashMap<String, ContextAnnotation> contextAnnotation;
-	
+
 	private ArrayList<Annotation> annotations;
-	
+
+
+	/*
+	 * Getters/Setters
+	 */
 	public WithAdmin getAdministrative() {
 		return administrative;
 	}
@@ -345,7 +351,7 @@ public class WithResource<T extends DescriptiveData> {
 	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
-	
+
 	public Usage getUsage() {
 		return usage;
 	}
@@ -419,12 +425,19 @@ public class WithResource<T extends DescriptiveData> {
 	public void setAnnotations(ArrayList<Annotation> annotations) {
 		this.annotations = annotations;
 	}
-	
+
 	public boolean getIsPublic() {
 		return administrative.access.isPublic();
 	}
 
 	public void setIsPublic(boolean isPublic) {
 		administrative.access.setPublic(isPublic);
+	}
+
+	/*
+	 * CollectionObject embedded logic
+	 */
+	public User retrieveCreator() {
+		return DB.getUserDAO().getById(this.administrative.withCreator, null);
 	}
 }

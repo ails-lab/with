@@ -17,22 +17,18 @@
 package model.resources;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.bson.types.ObjectId;
-
-import model.ExampleDataModels.WithAccess;
-import model.ExampleDataModels.WithAdmin;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
-	
+
 	public static class CollectionAdmin extends WithAdmin {
+
 		private int entryCount;
 		private boolean isExhibition;
-		
+
+
 		public int getEntryCount() {
 			return entryCount;
 		}
@@ -45,13 +41,19 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		public void setExhibition(boolean isExhibition) {
 			this.isExhibition = isExhibition;
 		}
-		
+
 	}
-	
+
 	public static class CollectionDescriptiveData extends DescriptiveData {
+
+		//start day or possible start days
 		private ArrayList<LiteralOrResource> dccreator;
+		//for whom the resource is intended or useful
 		private ArrayList<LiteralOrResource> dctermsaudience;
+		//additional views of the timespan
 		private ArrayList<LiteralOrResource> dclanguage;
+
+
 		//TODO: add link to external collection
 		public ArrayList<LiteralOrResource> getDccreator() {
 			return dccreator;
@@ -71,7 +73,9 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		public void setDclanguage(ArrayList<LiteralOrResource> dclanguage) {
 			this.dclanguage = dclanguage;
 		}
-		
+
 	}
+
+
 
 }

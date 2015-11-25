@@ -22,16 +22,20 @@ import java.util.Set;
 import model.basicDataTypes.LiteralOrResource;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Id;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.net.MediaType;
 
 public class EmbeddedMediaObject {
+	@Id
+	@JsonIgnore
 	private ObjectId dbId;
 
 	public static enum WithMediaType {
 		VIDEO, IMAGE, TEXT, AUDIO
 	}
-	
+
 	// this needs work
 	public static enum WithMediaRights {
 		Public("Attribution Alone"), Restricted("Restricted"),
@@ -70,18 +74,98 @@ public class EmbeddedMediaObject {
 
 	// the media objects URL
 	private String url;
-	
+
 	// with urls for embedded or cached objects
 	private String withUrl;
 	private String withThumbnailUrl;
-	
-	
+
+
 	private LiteralOrResource originalRights;
+	/*
+	 *  file name type values specified here:
+	 *  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/MediaType.html
+	 */
 	private MediaType mimeType;
-	
+
 	public static enum Quality {
 		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
-		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT			
-	}		
+		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
+	}
 
+
+	/*
+	 * Getters/Setters
+	 */
+
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+
+	public WithMediaType getType() {
+		return type;
+	}
+
+	public void setType(WithMediaType type) {
+		this.type = type;
+	}
+
+	public Set<WithMediaRights> getWithRights() {
+		return withRights;
+	}
+
+	public void setWithRights(Set<WithMediaRights> withRights) {
+		this.withRights = withRights;
+	}
+
+	public String getThumbnailUrl() {
+		return thumbnailUrl;
+	}
+
+	public void setThumbnailUrl(String thumbnailUrl) {
+		this.thumbnailUrl = thumbnailUrl;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getWithUrl() {
+		return withUrl;
+	}
+
+	public void setWithUrl(String withUrl) {
+		this.withUrl = withUrl;
+	}
+
+	public String getWithThumbnailUrl() {
+		return withThumbnailUrl;
+	}
+
+	public void setWithThumbnailUrl(String withThumbnailUrl) {
+		this.withThumbnailUrl = withThumbnailUrl;
+	}
+
+	public LiteralOrResource getOriginalRights() {
+		return originalRights;
+	}
+
+	public void setOriginalRights(LiteralOrResource originalRights) {
+		this.originalRights = originalRights;
+	}
+
+	public MediaType getMimeType() {
+		return mimeType;
+	}
+
+	public void setMimeType(MediaType mimeType) {
+		this.mimeType = mimeType;
+	}
 }

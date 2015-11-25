@@ -18,19 +18,83 @@ package model;
 
 import java.util.ArrayList;
 
-import model.ExampleDataModels.EmbeddedMediaObject;
+import utils.MediaTypeConverter;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Converters;
+import org.mongodb.morphia.annotations.Entity;
 
-public class MediaObject extends EmbeddedMediaObject {		
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+/**
+ * A class to represent media, merge of all the interesting attributes and
+ * access to the byte[] that is the data for it
+ *
+ * @author stabenau
+ *
+ */
+
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Converters(MediaTypeConverter.class)
+public class MediaObject extends EmbeddedMediaObject {
 	// which resource is this Media part of, this is the access rights restriction
 	// if there is none, the media object is publicly available
 	private ArrayList<ObjectId> resources;
-	
+
 	private int width, height;
-	
+
 	private double durationSeconds;
-			
+
+	@JsonIgnore
 	private byte[] thumbnailBytes;
+	@JsonIgnore
 	private byte[] mediaBytes;
+
+
+	/*
+	 * Getters/Setters
+	 */
+	public ArrayList<ObjectId> getResources() {
+		return resources;
+	}
+	public void setResources(ArrayList<ObjectId> resources) {
+		this.resources = resources;
+	}
+	public int getWidth() {
+		return width;
+	}
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	public int getHeight() {
+		return height;
+	}
+	public void setHeight(int height) {
+		this.height = height;
+	}
+	public double getDurationSeconds() {
+		return durationSeconds;
+	}
+	public void setDurationSeconds(double durationSeconds) {
+		this.durationSeconds = durationSeconds;
+	}
+	public byte[] getThumbnailBytes() {
+		return thumbnailBytes;
+	}
+	public void setThumbnailBytes(byte[] thumbnailBytes) {
+		this.thumbnailBytes = thumbnailBytes;
+	}
+	public byte[] getMediaBytes() {
+		return mediaBytes;
+	}
+	public void setMediaBytes(byte[] mediaBytes) {
+		this.mediaBytes = mediaBytes;
+	}
+
+
+
 }

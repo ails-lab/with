@@ -52,8 +52,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	/**
 	 * Retrieve records from specific collection by offset and count
 	 *
-	 * @param colId
-	 *            , offset, count
+	 * @param colId, offset, count
 	 * @return
 	 */
 	public List<CollectionRecord> getByCollectionOffsetCount(ObjectId colId,
