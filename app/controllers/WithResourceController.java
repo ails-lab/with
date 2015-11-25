@@ -20,6 +20,8 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
@@ -123,9 +125,13 @@ public class WithResourceController extends Controller {
 		}
 	}
 
+	/**
+	 * Creates a new WITH resource from the JSON body
+	 *
+	 * @return the newly created resource
+	 */
 	// TODO check restrictions (unique fields e.t.c)
 	public static Result createWithResource() {
-
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
 		try {
@@ -152,11 +158,15 @@ public class WithResourceController extends Controller {
 				error.put("error", properties);
 				return badRequest(error);
 			}
+			WithAccess withAccess = new WithAccess();
+			withAccess.put(creator, Access.OWN);
+			resource.getAdministrative().setAccess(new WithAccess());
+			DB.getWithResourceDAO().makePermanent(resource);
+			return ok(Json.toJson(resource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
-		return TODO;
 	}
 
 }
