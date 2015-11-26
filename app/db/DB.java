@@ -171,6 +171,10 @@ public class DB {
 	public static WithResourceDAO getWithResourceDAO() {
 		return (WithResourceDAO) getDAO(WithResource.class);
 	}
+	
+	public static <T extends WithResource> DAO<T> getResourceByType(Class<T> clazz) {
+		return (DAO<T>) getDAO(clazz);
+	}
 
 	/**
 	 * Singleton DAO class for all the models
