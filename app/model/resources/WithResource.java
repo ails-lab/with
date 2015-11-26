@@ -39,30 +39,18 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-
 import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Entity
 public class WithResource<T extends DescriptiveData> {
-
-	@Id
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId dbId;
-
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
 
 	public static class WithAdmin {
 
@@ -280,7 +268,19 @@ public class WithResource<T extends DescriptiveData> {
 	public static enum WithResourceType {
 		 WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
 	}
+	
+	@Id
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId dbId;
 
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+	
 	private WithAdmin administrative;
 
 	@Embedded
@@ -311,8 +311,20 @@ public class WithResource<T extends DescriptiveData> {
 	private HashMap<String, ContextAnnotation> contextAnnotation;
 
 	private ArrayList<Annotation> annotations;
-
-
+	
+	public WithResource() {
+		this.usage = new Usage();
+		this.administrative = new WithAdmin();
+		this.provenance = new ArrayList<ProvenanceInfo>();
+	}
+	
+	public WithResource(Class<?> clazz) {
+		this.usage = new Usage();
+		this.administrative = new WithAdmin();
+		this.provenance = new ArrayList<ProvenanceInfo>();
+		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
+	}
+	
 	/*
 	 * Getters/Setters
 	 */

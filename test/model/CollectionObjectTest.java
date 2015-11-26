@@ -37,6 +37,7 @@ import javax.imageio.stream.ImageInputStream;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.basicDataTypes.ProvenanceInfo;
@@ -98,15 +99,10 @@ public class CollectionObjectTest {
 		co.setResourceType(WithResourceType.CollectionObject);
 
 		// type: metadata specific for a collection
-		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
-		Literal desc = new Literal();
-		desc.put("en", "This is a description");
+		Literal label = new Literal(Language.EN, "This is a title");
+		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData(label);
+		Literal desc = new Literal(Language.EN, "This is a description");
 		cdd.setDescription(desc);
-
-		Literal label = new Literal();
-		label.put("en", "This is the title");
-		cdd.setLabel(label);
-
 		co.setModel(cdd);
 
 		/*
@@ -174,8 +170,7 @@ public class CollectionObjectTest {
 		mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource();
-		lor.setResource(ResourceType.uri, url.toString());
+		LiteralOrResource lor = new LiteralOrResource(ResourceType.uri, url.toString());
 		mo.setOriginalRights(lor);
 		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
 		set.add(WithMediaRights.Creative);

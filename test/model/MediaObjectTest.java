@@ -16,25 +16,21 @@
 
 package model;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
-import model.BasicDataTypes.LiteralOrResource;
-import model.BasicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.resources.CollectionObject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -90,8 +86,7 @@ public class MediaObjectTest {
 		mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource();
-		lor.setResource(ResourceType.uri, url.toString());
+		LiteralOrResource lor = new LiteralOrResource(ResourceType.uri, url.toString());
 		mo.setOriginalRights(lor);
 		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
 		set.add(WithMediaRights.Creative);

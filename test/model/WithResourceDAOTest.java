@@ -14,28 +14,19 @@
  */
 
 
-package general.daoTests;
-
-import static org.fest.assertions.Assertions.assertThat;
-
+package model;
 import java.util.Date;
 
-import general.TestUtils;
-import model.Collection;
-import model.CollectionRecord;
 import model.DescriptiveData;
-import model.Media;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.resources.CulturalObject;
 import model.resources.WithResource;
-import model.usersAndGroups.User;
+import static org.fest.assertions.Assertions.assertThat;
 
-import org.bson.types.ObjectId;
 import org.junit.Test;
-import org.mongodb.morphia.Key;
 
 import db.DB;
 
@@ -48,7 +39,8 @@ public class WithResourceDAOTest {
 		for (int i = 0; i < 10; i++) {
 
 			// a user creates a new collection
-			WithResource withResource = new WithResource();
+			WithResource withResource = new WithResource(WithResource.class);
+			withResource.setUsage(new WithResource.Usage());
 			withResource.getUsage().setLikes(i);
 			withResource.addToProvenance(new ProvenanceInfo("provider0"));
 			WithAccess access = new WithAccess();
@@ -60,7 +52,7 @@ public class WithResourceDAOTest {
 			DescriptiveData description = new DescriptiveData(new Literal(Language.EN, "TestWebResource" + i));
 			description.setDescription(new Literal(Language.EN, "Some description"));
 			/*CulturalObject c = new CulturalObject();*/
-			DB.getResourceByType(WithResource.class).makePermanent(withResource);
+			assertThat(DB.getResourceByType(WithResource.class).makePermanent(withResource)).isNotEqualTo(null);
 		}
 	}
 
