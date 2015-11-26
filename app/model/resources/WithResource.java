@@ -33,14 +33,12 @@ import utils.Serializer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
-import model.Provider;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
 import model.basicDataTypes.ProvenanceInfo;
@@ -125,6 +123,11 @@ public class WithResource<T extends DescriptiveData> {
 		public Date getLastModified() {
 			return lastModified;
 		}
+		
+		public void setLastModified(Date lastModified) {
+			this.lastModified = lastModified;
+		}
+
 
 		public void addForModeration(ObjectId groupId, Access access) {
 			this.underModeration.put(groupId, access);
