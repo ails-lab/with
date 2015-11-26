@@ -28,9 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.net.MediaType;
 
 public class EmbeddedMediaObject {
-	@Id
-	@JsonIgnore
-	private ObjectId dbId;
+
 
 	public static enum WithMediaType {
 		VIDEO, IMAGE, TEXT, AUDIO
@@ -71,13 +69,16 @@ public class EmbeddedMediaObject {
 
 	// if the thumbnail is externally provided
 	private String thumbnailUrl;
-
 	// the media objects URL
 	private String url;
-
+    
+	/*These do not have to be saved in the db
+	 just returned in the json, i.e. the json has 
+	 a field withThumbnailUrl computed based on 
+	 whether there exists a MediaObject in the db* *
 	// with urls for embedded or cached objects
 	private String withUrl;
-	private String withThumbnailUrl;
+	private String withThumbnailUrl;*/
 
 
 	private LiteralOrResource originalRights;
@@ -90,19 +91,6 @@ public class EmbeddedMediaObject {
 	public static enum Quality {
 		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
 		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
-	}
-
-
-	/*
-	 * Getters/Setters
-	 */
-
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
 	}
 
 	public WithMediaType getType() {
@@ -136,7 +124,7 @@ public class EmbeddedMediaObject {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-
+	/*
 	public String getWithUrl() {
 		return withUrl;
 	}
@@ -151,7 +139,7 @@ public class EmbeddedMediaObject {
 
 	public void setWithThumbnailUrl(String withThumbnailUrl) {
 		this.withThumbnailUrl = withThumbnailUrl;
-	}
+	}*/
 
 	public LiteralOrResource getOriginalRights() {
 		return originalRights;

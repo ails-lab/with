@@ -23,6 +23,7 @@ import utils.MediaTypeConverter;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -41,6 +42,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Converters(MediaTypeConverter.class)
 public class MediaObject extends EmbeddedMediaObject {
+	
+	@Id
+	@JsonIgnore
+	private ObjectId dbId;
+	
 	// which resource is this Media part of, this is the access rights restriction
 	// if there is none, the media object is publicly available
 	private ArrayList<ObjectId> resources;
@@ -54,10 +60,14 @@ public class MediaObject extends EmbeddedMediaObject {
 	@JsonIgnore
 	private byte[] mediaBytes;
 
+	public ObjectId getDbId() {
+		return dbId;
+	}
 
-	/*
-	 * Getters/Setters
-	 */
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+	
 	public ArrayList<ObjectId> getResources() {
 		return resources;
 	}
