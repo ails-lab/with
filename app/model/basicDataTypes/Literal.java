@@ -17,24 +17,38 @@
 package model.basicDataTypes;
 
 import java.util.HashMap;
+import java.util.Locale;
 
-public class Literal extends  HashMap<String, String> {
+public class Literal extends HashMap<Literal.Language, String> {
+	
+	public static enum Language {
+		EN, UNKNOWN, ANY;
+	}
+	
+	public Literal(String label) {
+		this.put(Language.UNKNOWN, label);
+	}
+	
+	public Literal(Language lang, String label) {
+		this.put(lang, label);
+	}
+	
 	// keys are language 2 letter codes, 
 	// "unknown" for unknown language
 	// special request for any is "any"
-	public void setLiteral( String val, String lang ) {
-		
+	public void setLiteral(Language val, String lang) {
+		this.put(val, lang);
 	}
-	
 	/**
-	 * Dont request the "unknown" language, request "any" if you don't care
+	 * Don't request the "unknown" language, request "any" if you don't care
 		 * @param lang
 	 * @return
 	 */
-	public String getLiteral(String lang ) {
-		if( "any".equals( lang )) {
-			
+	public String getLiteral(String lang) {
+		if(Language.ANY.equals(lang)) {
+			return this.get(this.keySet().toArray()[0]);
 		}
-		return get( lang );
+		else
+			return get(lang);
 	}		
 }
