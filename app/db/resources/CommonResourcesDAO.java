@@ -122,12 +122,9 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		return this.find(q).asList();
 	}
 
-	public int getTotalLikes(String extId) {
-		List<T> list = getByExternalId(extId);
-		if (list.size() > 0)
-			return list.get(0).getUsage().getLikes();
-		else
-			return 0;
+	public int getTotalLikes(ObjectId id) {
+		T resource = getById(id);
+		return resource.getUsage().getLikes();
 	}
 
 	/*

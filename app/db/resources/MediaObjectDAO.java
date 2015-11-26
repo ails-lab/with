@@ -14,7 +14,7 @@
  */
 
 
-package db;
+package db.resources;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,6 +32,7 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
+import db.DB;
 import model.MediaObject;
 
 public class MediaObjectDAO {
