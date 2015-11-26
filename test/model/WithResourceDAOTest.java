@@ -22,7 +22,6 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
-import model.resources.CulturalObject;
 import model.resources.WithResource;
 import static org.fest.assertions.Assertions.assertThat;
 
