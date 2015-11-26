@@ -27,6 +27,9 @@ import model.basicDataTypes.WithDate;
 public class AgentObject extends WithResource<AgentObject.AgentData> {
 
 	public static class AgentData extends DescriptiveData {
+		public AgentData(Literal label) {
+			super(label);
+		}
 		ArrayList<WithDate> birthdate;
 		ArrayList<LiteralOrResource> birthplace;
 		ArrayList<WithDate> deathdate;

@@ -63,6 +63,10 @@ public class CulturalObject extends WithResource<CulturalObject.CulturalObjectDa
 	
 	public static class CulturalObjectData extends DescriptiveData {
 		
+		public CulturalObjectData(Literal label) {
+			super(label);
+		}
+
 		// provenance[0].recordId
 		private String dcidentifier;
 		

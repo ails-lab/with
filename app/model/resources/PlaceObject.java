@@ -18,12 +18,17 @@ package model.resources;
 
 import java.util.ArrayList;
 
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
 public class PlaceObject extends WithResource<PlaceObject.PlaceData> {
 
 	public static class PlaceData extends DescriptiveData {
+		public PlaceData(Literal label) {
+			super(label);
+		}
+
 		// city, archeological site, area, nature reserve, historical site
 		ArrayList<LiteralOrResource> nation;
 		ArrayList<LiteralOrResource> continent;

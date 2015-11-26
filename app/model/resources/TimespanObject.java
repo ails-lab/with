@@ -18,12 +18,17 @@ package model.resources;
 
 import java.util.ArrayList;
 
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.WithPeriod;
 import model.DescriptiveData;
 
 public class TimespanObject extends WithResource<TimespanObject.TimespanData>{
 	
 	public static class TimespanData extends DescriptiveData {
+		public TimespanData(Literal label) {
+			super(label);
+		}
+
 		ArrayList<WithPeriod> timespan;
 	}
 	

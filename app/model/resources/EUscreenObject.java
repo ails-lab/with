@@ -19,6 +19,7 @@ package model.resources;
 import java.util.Date;
 
 import model.DescriptiveData;
+import model.basicDataTypes.Literal;
 
 public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
 	
@@ -26,6 +27,10 @@ public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
 		// title is filled in with original language title and english title
 		// description dito
 		
+
+		public EUscreenData(Literal label) {
+			super(label);
+		}
 		String broadcastChannel;
 		Date brodcastDate;
 		
