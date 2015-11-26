@@ -162,43 +162,43 @@ public class MediaObjectDAO {
 	 * @param thumbnail
 	 * @return
 	 */
-	public MediaObject getByExternalUrl(String externalUrl) {
+	public MediaObject getByThumbnailUrl(String withThumbUrl) {
 		GridFSDBFile media = null;
 		try {
 			// here I have to ask where we will use 'url' or 'withUrl' or both
-			BasicDBObject query = new BasicDBObject("url", externalUrl);
+			BasicDBObject query = new BasicDBObject("withThumbnailUrl", withThumbUrl);
 			media = DB.getGridFs().findOne(query);
+			if(media.containsField("mediaBytes"))
+				media.removeField("mediaBytes");
 			return gridFsDbFileToMediaObj(media);
 		} catch (Exception e) {
-			log.error("Problem in find file from GridFS " + externalUrl);
+			log.error("Problem in find file from GridFS " + withThumbUrl);
 			return null;
 		}
 	}
 
+
 	/**
-	 * ?????? PROBABLY WE WANT NEED THIS ??????????
-	 * @param ownerId
+	 * Retrive a MediaObject from GridFS according to it's external url.
+	 * According to the value specified, we return either the thumbnail
+	 * or the original media.
+	 * @param externalUrl
+	 * @param thumbnail
 	 * @return
 	 */
-	public ArrayList<MediaObject> findByOwnerId(ObjectId ownerId) {
-		List<GridFSDBFile> files = new ArrayList<GridFSDBFile>();
+	public MediaObject getByUrl(String withUrl) {
+		GridFSDBFile media = null;
 		try {
-			//?????????????????
-			BasicDBObject query = new BasicDBObject("ownerId", ownerId);
-			files = DB.getGridFs().find(query);
+			// here I have to ask where we will use 'url' or 'withUrl' or both
+			BasicDBObject query = new BasicDBObject("withlUrl", withUrl);
+			media = DB.getGridFs().findOne(query);
+			if(media.containsField("thumbnailBytes"))
+				media.removeField("thumbnailBytes");
+			return gridFsDbFileToMediaObj(media);
 		} catch (Exception e) {
-			log.error("Problem in find file from GridFS " + ownerId);
+			log.error("Problem in find file from GridFS " + withUrl);
+			return null;
 		}
-
-		if (files == null)
-			log.debug("Cannot find Media document with owner ID: " + ownerId);
-		else
-			log.debug("Succesfully found Media GridFS document");
-		ArrayList<MediaObject> media = new ArrayList<MediaObject>();
-		for (GridFSDBFile file : files) {
-			media.add(gridFsDbFileToMediaObj(file));
-		}
-		return media;
 	}
 
 	/**

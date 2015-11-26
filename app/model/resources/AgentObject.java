@@ -18,10 +18,10 @@ package model.resources;
 
 import java.util.ArrayList;
 
-import model.basicDataTypes.BasicDataTypes.Literal;
-import model.basicDataTypes.BasicDataTypes.LiteralOrResource;
-import model.basicDataTypes.BasicDataTypes.WithDate;
 import model.DescriptiveData;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.WithDate;
 
 
 public class AgentObject extends WithResource<AgentObject.AgentData> {
@@ -34,6 +34,6 @@ public class AgentObject extends WithResource<AgentObject.AgentData> {
 			MALE, FEMALE, UNKNOWN
 		}
 		Gender genderEnum;
-		Literal gender;		
+		Literal gender;
 	}
 }

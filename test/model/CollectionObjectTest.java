@@ -17,16 +17,180 @@
 package model;
 
 import static org.junit.Assert.*;
-import model.resources.CollectionObject;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
+
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
+import model.resources.CollectionObject;
+import model.resources.CollectionObject.CollectionDescriptiveData;
+import model.resources.WithResource.ExternalCollection;
+import model.resources.WithResource.WithAdmin;
+import model.resources.WithResource.WithResourceType;
+import model.MediaObject;
+import model.usersAndGroups.User;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.bson.types.ObjectId;
 import org.junit.Test;
+
+import com.google.common.net.MediaType;
+
+import db.DB;
 
 public class CollectionObjectTest {
 
 	@Test
-	public void jacksonSerialization() {
+	public void modelCollection() {
 		CollectionObject co = new CollectionObject();
 
+		/*
+		 * Owner of the CollectionObject
+		 */
+		User u = DB.getUserDAO().getByUsername("qwerty");
+		if(u == null) return;
+
+		/*
+		 * Administative metadata
+		 */
+		WithAdmin wa = new WithAdmin();
+		wa.setCreated(new Date());
+		//wa.setWithCreator(u.getDbId());
+		WithAccess waccess = new WithAccess();
+		waccess.put(u.getDbId(), Access.OWN);
+		wa.setAccess(waccess);
+		co.setAdministrative(wa);
+
+		/*
+		 * This models a collection so there's no need to provide this
+		 */
+		Map<ObjectId, ArrayList<Integer>> colIn =
+				new HashMap<ObjectId, ArrayList<Integer>>();
+
+		//no externalCollections
+		List<ExternalCollection> ec;
+
+		//no provenance
+		List<ProvenanceInfo> prov;
+
+		//resourceType is collectionObject
+		co.setResourceType(WithResourceType.CollectionObject);
+
+		// type: metadata specific for a collection
+		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
+		Literal desc = new Literal();
+		desc.put("en", "This is a description");
+		cdd.setDescription(desc);
+
+		Literal label = new Literal();
+		label.put("en", "This is the title");
+		cdd.setLabel(label);
+
+		co.setModel(cdd);
+
+		/*
+		 * no content for the collection
+		 */
+		Map<String, String> content;
+
+
+		/*
+		 * media thumbnail for collection
+		 */
+		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
+		EmbeddedMediaObject emo = new EmbeddedMediaObject();
+		medias.add(getMediaObject());
+		co.setMedia(medias);
+
+		if(DB.getCollectionObjectDAO().makePermanent(co) == null) System.out.println("No storage!");
+		System.out.println("Stored!");
+		if(co.getDbId() != null) System.out.println("The first CollectionObject presenting a collection was saved!");
+
+		if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 	}
 
+
+	private MediaObject getMediaObject() {
+
+		MediaObject mo = new MediaObject();
+		byte[] rawbytes = null;
+		URL url = null;
+		try {
+			url = new URL("http://www.ntua.gr/schools/ece.jpg");
+			File file = new File("test_java.txt");
+			ImageInputStream iis = ImageIO.createImageInputStream(file);
+			Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
+
+			if (readers.hasNext()) {
+
+                // pick the first available ImageReader
+                ImageReader reader = readers.next();
+
+                // attach source to the reader
+                reader.setInput(iis, true);
+
+                // read metadata of first image
+                IIOMetadata metadata = reader.getImageMetadata(0);
+
+                String[] names = metadata.getMetadataFormatNames();
+                int length = names.length;
+                for (int i = 0; i < length; i++) {
+                    System.out.println( "Format name: " + names[ i ] );
+                }
+            }
+
+			FileUtils.copyURLToFile(url, file);
+			FileInputStream fileStream = new FileInputStream(
+					file);
+
+			rawbytes = IOUtils.toByteArray(fileStream);
+		} catch(Exception e) {
+			System.out.println(e);
+			System.exit(-1);
+		}
+
+		mo.setMediaBytes(rawbytes);
+		mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
+		mo.setHeight(875);
+		mo.setWidth(1230);
+		LiteralOrResource lor = new LiteralOrResource();
+		lor.setResource(ResourceType.uri, url.toString());
+		mo.setOriginalRights(lor);
+		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
+		set.add(WithMediaRights.Creative);
+		mo.setWithRights(set);
+		mo.setType(WithMediaType.IMAGE);
+		mo.setUrl(url.toString());
+
+		try {
+			DB.getMediaObjectDAO().makePermanent(mo);
+			System.out.println("Media succesfully saved!");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return mo;
+	}
 }

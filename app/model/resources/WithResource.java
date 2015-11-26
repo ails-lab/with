@@ -54,10 +54,20 @@ import model.usersAndGroups.User;
 @Entity
 public class WithResource<T extends DescriptiveData> {
 
+	@Id
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId dbId;
+
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+
 	public static class WithAdmin {
-		@Id
-		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		private ObjectId dbId;
+
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
@@ -86,14 +96,6 @@ public class WithResource<T extends DescriptiveData> {
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
 
 
-
-		public ObjectId getDbId() {
-			return dbId;
-		}
-
-		public void setDbId(ObjectId dbId) {
-			this.dbId = dbId;
-		}
 
 		public WithAccess getAccess() {
 			return access;
@@ -271,7 +273,7 @@ public class WithResource<T extends DescriptiveData> {
 			this.description = description;
 		}
 	}
-	
+
 	public static enum WithResourceType {
 		 WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
 	}
@@ -291,6 +293,7 @@ public class WithResource<T extends DescriptiveData> {
 	// enum of classes that are derived from DescriptiveData
 	private WithResourceType resourceType;
 
+	// metadata
 	private T model;
 
 	// All the available content serializations
@@ -350,11 +353,11 @@ public class WithResource<T extends DescriptiveData> {
 	public void setProvenance(ArrayList<ProvenanceInfo> provenance) {
 		this.provenance = provenance;
 	}
-	
+
 	public void addToProvenance(ProvenanceInfo provInfo) {
 		this.provenance.add(provInfo);
 	}
-	
+
 	public void addToProvenance(ProvenanceInfo provInfo, int position) {
 		provenance.add(position, provInfo);
 	}

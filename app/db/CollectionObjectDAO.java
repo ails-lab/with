@@ -29,7 +29,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import utils.Tuple;
 import model.Collection;
-import model.WithAccess.Access;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 

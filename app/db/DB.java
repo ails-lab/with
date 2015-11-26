@@ -22,6 +22,7 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionRecord;
+import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
@@ -129,6 +130,10 @@ public class DB {
 
 	public static CollectionDAO getCollectionDAO() {
 		return (CollectionDAO) getDAO(Collection.class);
+	}
+
+	public static CollectionObjectDAO getCollectionObjectDAO() {
+		return (CollectionObjectDAO) getDAO(CollectionObject.class);
 	}
 
 	public static MediaObjectDAO getMediaObjectDAO() {

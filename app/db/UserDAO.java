@@ -19,7 +19,6 @@ package db;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Collection;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;

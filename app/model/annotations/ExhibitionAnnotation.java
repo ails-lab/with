@@ -16,15 +16,16 @@
 
 package model.annotations;
 
-import model.basicDataTypes.BasicDataTypes.Literal;
+import model.basicDataTypes.Literal;
+
 
 public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation.ExhibitionAnnotationBody> {
-	
+
 	public static class ExhibitionAnnotationBody extends Annotation.AnnotationBody {
 		Literal exhibitionDescription;
 		String audioUrl;
 		String videoUrl;
 	}
-	
+
 
 }
