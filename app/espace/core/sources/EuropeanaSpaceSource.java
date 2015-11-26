@@ -27,7 +27,7 @@ import java.util.function.Function;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
-import model.usersAndGroups.Provider;
+import model.Provider;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
@@ -60,14 +60,14 @@ import espace.core.sources.formatreaders.EuropeanaExternalBasicRecordFormatter;
 public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public static final String LABEL = "Europeana";
-	private String europeanaKey = "SECRET_KEY";
-	private EuropeanaExternalBasicRecordFormatter formatreader;
+	private final String europeanaKey = "SECRET_KEY";
+	private final EuropeanaExternalBasicRecordFormatter formatreader;
 
 	public EuropeanaSpaceSource() {
 		super();
 		formatreader = new EuropeanaExternalBasicRecordFormatter();
 	    filtersSupportedBySource = new ArrayList<CommonFilters>(
-	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
+	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR,
 	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
 	    				CommonFilters.TYPE, CommonFilters.YEAR)
 	    		);
@@ -195,7 +195,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		builder.addQuery("query", q.searchTerm);
 
-		builder.addSearchParam("start", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
+		builder.addSearchParam("start", "" + (((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)) + 1));
 
 		builder.addSearchParam("rows", "" + q.pageSize);
 		builder.addSearchParam("profile", "rich%20facets");
@@ -219,7 +219,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public String getSourceName() {
 		return LABEL;
 	}
-	
+
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
 //		for (JsonNode facet : response.path("facets")) {
@@ -231,11 +231,11 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 //					String label = jsonNode.path("label").asText();
 //					int count = jsonNode.path("count").asInt();
 //					switch (filterType) {
-//						case "TYPE": 
+//						case "TYPE":
 //						case "RIGHTS":
 //							countValue(filter, label, count);
 //							break;
-//						case "DATA_PROVIDER": 
+//						case "DATA_PROVIDER":
 //						case "PROVIDER":
 //						case "proxy_dc_creator":
 //						case "COUNTRY":
@@ -251,7 +251,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 //		}
 		return filters;
 	}
-	
+
 	public ArrayList<ExternalBasicRecord> getItems(JsonNode response) {
 		ArrayList<ExternalBasicRecord> items = new ArrayList<ExternalBasicRecord>();
 		if (response.path("success").asBoolean()) {
@@ -293,7 +293,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	public AutocompleteResponse autocompleteResponse(String response) {
 		try {
 			JSONObject jsonResp = new JSONObject(response);
-			if (jsonResp == null || !jsonResp.getBoolean("success") || jsonResp.getJSONArray("items") == null)
+			if ((jsonResp == null) || !jsonResp.getBoolean("success") || (jsonResp.getJSONArray("items") == null))
 				return new AutocompleteResponse();
 			else {
 				JSONArray items = jsonResp.getJSONArray("items");
@@ -330,7 +330,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 			    /*
 				JsonNode item = record;
-				
+
 				ItemsResponse it = new ItemsResponse();
 				it.id = Utils.readAttr(item, "id", true);
 //				not added before
@@ -343,14 +343,14 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 								.path("proxies"), new Pair<String>("europeanaProxy",
 								"false"))
 						, "dcDescription", false).get(0);
-				
+
 				it.dataProvider = Utils.readArrayAttr(item.get("aggregations").get(0), "edmDataProvider", false).get(0);
-				
-				
-				
+
+
+
 				it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
 				it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
-				
+
 				it.url = new MyURL();
 				it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
 				it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
@@ -359,7 +359,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				if (it.externalId == null || it.externalId == "")
 					it.externalId = it.url.original.get(0);
 				it.externalId = DigestUtils.md5Hex(it.externalId);*/
-			
+
 			}
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
@@ -367,7 +367,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				record = response;
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_EDM, record.toString()));
 			}
-			
+
 			return jsonMetadata;
 		} catch (Exception e) {
 			return jsonMetadata;

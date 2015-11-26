@@ -21,7 +21,7 @@ import java.util.List;
 
 import model.CollectionRecord;
 import model.ExternalBasicRecord;
-import model.usersAndGroups.Provider;
+import model.Provider;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import elastic.ElasticUtils;
 
 public class SourceResponse {
-	
+
 	public String query;
 	public int totalCount;
 	public int startIndex;
@@ -64,7 +64,7 @@ public class SourceResponse {
 		for (CollectionRecord r : elasticrecords) {
 			ExternalBasicRecord item = new ExternalBasicRecord();
 			Provider provider = new Provider(source);
-			provider.providerName = source; 
+			provider.providerName = source;
 			item.addProvider(provider);
 			item.setTitle(r.getTitle());
 			item.setDescription(r.getDescription());
@@ -94,7 +94,7 @@ public class SourceResponse {
 		}
 		return res;
 	}
-	
+
 	public void addItem(ExternalBasicRecord record) {
 		if (record!=null)
 			items.add(record);
