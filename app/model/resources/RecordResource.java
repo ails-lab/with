@@ -14,16 +14,8 @@
  */
 
 
-package db.resources;
-import model.resources.RecordResource;
-import model.resources.WithResource;
-import play.Logger;
-import play.Logger.ALogger;
+package model.resources;
 
-public class WithResourceDAO extends CommonResourcesDAO<WithResource> {
-	public static final ALogger log = Logger.of(RecordResource.class);
+public class RecordResource extends WithResource {
 
-	public WithResourceDAO() {
-		super(RecordResource.class);
-	}
 }

@@ -31,9 +31,8 @@ import play.Logger;
 import play.Logger.ALogger;
 
 public class CulturalObjectDAO extends CommonResourcesDAO<CulturalObject> {
-	public static final ALogger log = Logger.of(CulturalObject.class);
 
 	public CulturalObjectDAO() {
-		super(WithResource.class);
+		super(RecordResourceDAO.class);
 	}
 }
