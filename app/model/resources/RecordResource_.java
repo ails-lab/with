@@ -14,25 +14,6 @@
  */
 
 
-package db.resources;
+package model.resources;
 
-import java.util.List;
-
-import model.CollectionRecord;
-import model.resources.CulturalObject;
-import model.resources.WithResource;
-
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
-
-import db.DAO;
-import play.Logger;
-import play.Logger.ALogger;
-
-public class CulturalObjectDAO extends CommonResourcesDAO<CulturalObject> {
-
-	public CulturalObjectDAO() {
-		super(RecordResourceDAO.class);
-	}
-}
+public abstract class RecordResource_ extends RecordResource {}

@@ -23,7 +23,7 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithPeriod;
 import model.DescriptiveData;
 
-public class EventObject extends WithResource<EventObject.EventData> {
+public class EventObject extends RecordResource<EventObject.EventData> {
 	
 	public static class EventData extends DescriptiveData {
 		public EventData(Literal label) {

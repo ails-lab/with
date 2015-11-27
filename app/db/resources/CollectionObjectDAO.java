@@ -35,8 +35,12 @@ import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 
-public class CollectionObjectDAO extends DAO<CollectionObject> {
+public class CollectionObjectDAO extends CommonResourcesDAO<CollectionObject> {
 
+	/*
+	 * The constructor is optional becuse the explicit 
+	 * type is passed through generics.
+	 */
 	public CollectionObjectDAO() {
 		super(CollectionObject.class);
 	}

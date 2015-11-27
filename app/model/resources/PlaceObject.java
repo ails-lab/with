@@ -22,7 +22,7 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
-public class PlaceObject extends WithResource<PlaceObject.PlaceData> {
+public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
 
 	public static class PlaceData extends DescriptiveData {
 		public PlaceData(Literal label) {

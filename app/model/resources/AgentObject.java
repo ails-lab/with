@@ -24,7 +24,7 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
 
 
-public class AgentObject extends WithResource<AgentObject.AgentData> {
+public class AgentObject extends RecordResource<AgentObject.AgentData> {
 
 	public static class AgentData extends DescriptiveData {
 		public AgentData(Literal label) {

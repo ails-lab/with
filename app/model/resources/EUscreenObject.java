@@ -21,7 +21,7 @@ import java.util.Date;
 import model.DescriptiveData;
 import model.basicDataTypes.Literal;
 
-public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
+public class EUscreenObject extends RecordResource<EUscreenObject.EUscreenData> {
 	
 	public static class EUscreenData extends DescriptiveData { 
 		// title is filled in with original language title and english title

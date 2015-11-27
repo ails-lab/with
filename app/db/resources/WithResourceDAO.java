@@ -15,12 +15,12 @@
 
 
 package db.resources;
+import model.resources.RecordResource_;
 import model.resources.RecordResource;
-import model.resources.WithResource;
 import play.Logger;
 import play.Logger.ALogger;
 
-public class WithResourceDAO extends CommonResourcesDAO<WithResource> {
+public class WithResourceDAO extends CommonResourcesDAO<RecordResource_> {
 	public static final ALogger log = Logger.of(RecordResource.class);
 
 	public WithResourceDAO() {

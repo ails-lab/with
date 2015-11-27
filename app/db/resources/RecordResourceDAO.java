@@ -17,11 +17,82 @@
 package db.resources;
 
 import model.resources.RecordResource;
+import model.resources.RecordResource_;
 
+
+/*
+ * This class is the aggregator of methods
+ * generically referring to *Object entities. We may assume
+ * that these entities represent a Record of a Collection more or less.
+ */
 public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 
 	public RecordResourceDAO(Class<?> entityClass) {
 		super(RecordResource.class);
 	}
+
+	/*
+	 * These are embedded classes for very specific queries
+	 * in the far future.
+	 */
+	public class WithResourceDAO extends RecordResourceDAO {
+
+		public WithResourceDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+		
+	}
+
+	public class AgentObjectDAO extends RecordResourceDAO {
+
+		public AgentObjectDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+		
+	}
+	
+	public class CulturalObjectDAO extends RecordResourceDAO {
+
+		public CulturalObjectDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+		
+	}
+
+	public class EuscreenObjectDAO extends RecordResourceDAO {
+
+		public EuscreenObjectDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+		
+	}
+	
+	public class EventObjectDAO extends RecordResourceDAO {
+
+		public EventObjectDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+		
+	}
+	
+	public class PlaceObjectDAO extends RecordResourceDAO {
+
+		public PlaceObjectDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+		
+	}
+
+	public class TimespanObjectDAO extends RecordResourceDAO {
+
+		public TimespanObjectDAO(Class<?> entityClass) {
+			super(entityClass);
+		}
+
+	}
+	/*
+	 * End of embedded D
+	 */
+
 
 }

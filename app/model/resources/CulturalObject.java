@@ -32,7 +32,7 @@ import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.usersAndGroups.User;
 import model.DescriptiveData;
 
-public class CulturalObject extends WithResource<CulturalObject.CulturalObjectData>{
+public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
 	
 	public static class RecordAdmin extends WithAdmin {
 		

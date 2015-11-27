@@ -22,7 +22,7 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
-import model.resources.WithResource;
+import model.resources.RecordResource;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
@@ -38,20 +38,20 @@ public class WithResourceDAOTest {
 		for (int i = 0; i < 10; i++) {
 
 			// a user creates a new collection
-			WithResource withResource = new WithResource(WithResource.class);
-			withResource.setUsage(new WithResource.Usage());
-			withResource.getUsage().setLikes(i);
-			withResource.addToProvenance(new ProvenanceInfo("provider0"));
+			RecordResource recordResource = new RecordResource(RecordResource.class);
+			recordResource.setUsage(new RecordResource.Usage());
+			recordResource.getUsage().setLikes(i);
+			recordResource.addToProvenance(new ProvenanceInfo("provider0"));
 			WithAccess access = new WithAccess();
 			//access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
-			withResource.getAdministrative().setAccess(access);
-			withResource.getAdministrative().setCreated(new Date());
-			withResource.getAdministrative().setLastModified(new Date());
+			recordResource.getAdministrative().setAccess(access);
+			recordResource.getAdministrative().setCreated(new Date());
+			recordResource.getAdministrative().setLastModified(new Date());
 			DescriptiveData description = new DescriptiveData(new Literal(Language.EN, "TestWebResource" + i));
 			description.setDescription(new Literal(Language.EN, "Some description"));
 			/*CulturalObject c = new CulturalObject();*/
-			assertThat(DB.getResourceByType(WithResource.class).makePermanent(withResource)).isNotEqualTo(null);
+			assertThat(DB.getResourceByType(RecordResource.class).makePermanent(recordResource)).isNotEqualTo(null);
 		}
 	}
 

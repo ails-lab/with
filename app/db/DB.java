@@ -22,10 +22,15 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionRecord;
+import model.resources.AgentObject;
 import model.resources.CollectionObject;
 import model.resources.CulturalObject;
-import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
+import model.resources.EventObject;
+import model.resources.PlaceObject;
+import model.resources.RecordResource_;
+import model.resources.TimespanObject;
+import model.resources.RecordResource;
+import model.resources.RecordResource.WithResourceType;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -40,8 +45,15 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.resources.CollectionObjectDAO;
-import db.resources.CulturalObjectDAO;
 import db.resources.MediaObjectDAO;
+import db.resources.RecordResourceDAO;
+import db.resources.RecordResourceDAO.AgentObjectDAO;
+import db.resources.RecordResourceDAO.CulturalObjectDAO;
+import db.resources.RecordResourceDAO.EuscreenObjectDAO;
+import db.resources.RecordResourceDAO.EventObjectDAO;
+import db.resources.RecordResourceDAO.PlaceObjectDAO;
+import db.resources.RecordResourceDAO.TimespanObjectDAO;
+import db.resources.RecordResourceDAO.WithResourceDAO;
 
 // get the DAOs from here
 // the EntityManagerFactory is here
@@ -134,50 +146,109 @@ public class DB {
 		return (CollectionDAO) getDAO(Collection.class);
 	}
 
-	public static CollectionObjectDAO getCollectionObjectDAO() {
-		return (CollectionObjectDAO) getDAO(CollectionObject.class);
+	public static UserGroupDAO getUserGroupDAO() {
+		return (UserGroupDAO) getDAO(UserGroup.class);
 	}
-
-	public static MediaObjectDAO getMediaObjectDAO() {
-		if (mediaObjectDAO == null)
-			mediaObjectDAO = new MediaObjectDAO();
-		return mediaObjectDAO;
+	
+	public static CollectionRecordDAO getCollectionRecordDAO() {
+		return (CollectionRecordDAO) getDAO(CollectionRecord.class);
 	}
-
+	
 	public static MediaDAO getMediaDAO() {
 		if (mediaDAO == null)
 			mediaDAO = new MediaDAO();
 		return mediaDAO;
 	}
 
-	/*
-	 * public static SearchDAO getSearchDAO() { return (SearchDAO)
-	 * getDAO(Search.class); }
-	 *
-	 * public static SearchResultDAO getSearchResultDAO() { return
-	 * (SearchResultDAO) getDAO(SearchResult.class); }
-	 */
-
-	public static CulturalObjectDAO getCulturalObjectDAO() {
-		return (CulturalObjectDAO) getDAO(CulturalObject.class);
-	}
-
-	public static CollectionRecordDAO getCollectionRecordDAO() {
-		return (CollectionRecordDAO) getDAO(CollectionRecord.class);
-	}
-
-	public static UserGroupDAO getUserGroupDAO() {
-		return (UserGroupDAO) getDAO(UserGroup.class);
-	}
-
-	/*public static WithResourceDAO getWithResourceDAO() {
-		return (WithResourceDAO) getDAO(WithResource.class);
-	}*/
 	
-	public static <T extends WithResource> DAO<T> getResourceByType(Class<T> clazz) {
+	/*
+	 * Implementation of the new model DAO classes
+	 */
+	
+	public static CollectionObjectDAO getCollectionObjectDAO() {
+		return (CollectionObjectDAO) getDao(CollectionObject.class, null);
+	}
+	
+	public static RecordResourceDAO getRecordResourceDAO() {
+		return (RecordResourceDAO) getDao(RecordResource.class, null);
+	}
+	
+	public static MediaObjectDAO getMediaObjectDAO() {
+		if (mediaObjectDAO == null)
+			mediaObjectDAO = new MediaObjectDAO();
+		return mediaObjectDAO;
+	}
+
+	
+	/*
+	 * The rest are going to be used in very special cases
+	 * in the far future.
+	 */
+	
+	public static WithResourceDAO getWithResourceDAO() {
+		return (WithResourceDAO) getDao(RecordResource.class, RecordResource.class);
+	}
+
+	public static AgentObjectDAO getAgentObjectDAO() {
+		return (AgentObjectDAO) getDao(AgentObject.class, RecordResource.class);
+	}
+	
+	public static CulturalObjectDAO getCulturalObjectDAO() {
+		return (CulturalObjectDAO) getDao(CulturalObject.class, RecordResource.class);
+	}
+	
+	public static EuscreenObjectDAO getEuscreenObjectDAO() {
+		return (EuscreenObjectDAO) getDao(CulturalObject.class, RecordResource.class);
+	}
+
+	public static EventObjectDAO getEventObjectDAO() {
+		return (EventObjectDAO) getDao(EventObject.class, RecordResource.class);
+	}
+	
+	public static PlaceObjectDAO getPlaceObjectDAO() {
+		return (PlaceObjectDAO) getDao(PlaceObject.class, RecordResource.class);
+	}
+	
+	public static TimespanObjectDAO getTimespanObjectDAO() {
+		return (TimespanObjectDAO) getDao(TimespanObject.class, RecordResource.class);
+	}
+	
+	/*
+	 * Parametrized DAO class retrieval - 
+	 * under consideration
+	 */
+	public static <T extends RecordResource> DAO<T> getResourceByType(Class<T> clazz) {
 		return (DAO<T>) getDAO(clazz);
 	}
+	
+	
 
+	/**
+	 * Signleton DAO for all the entities
+	 * Parametrized for embedded DAO classes.
+	 * @param clazz
+	 * @return
+	 */
+	private static DAO<?> getDao(Class<?> clazz, Class<?> parentClazz) {
+		DAO<?> dao = daos.get(clazz.getSimpleName());
+		if(dao == null)  {
+			try {
+				String daoClassName;
+				if(parentClazz == null)
+					daoClassName = "db.resources." + clazz.getSimpleName() + "DAO";
+				else
+					daoClassName = "db.resources." + parentClazz.getSimpleName() + "DAO." 
+									+ clazz.getSimpleName() + "DAO";
+				Class<?> daoClass = Class.forName(daoClassName);
+				dao = (DAO<?>) daoClass.newInstance();
+				daos.put(clazz.getSimpleName(), dao);
+			} catch(Exception e) {
+				log.error("Can't instantiate DAO for " + clazz.getName(), e);
+			}
+		}
+		return dao;
+	}
+	
 	/**
 	 * Singleton DAO class for all the models
 	 *

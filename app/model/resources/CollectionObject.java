@@ -22,7 +22,7 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
-public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
+public class CollectionObject extends RecordResource<CollectionObject.CollectionDescriptiveData> {
 
 	public static class CollectionAdmin extends WithAdmin {
 

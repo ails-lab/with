@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import model.resources.WithResource;
+import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -31,12 +31,31 @@ import com.mongodb.BasicDBObject;
 import db.DAO;
 import db.DB;
 
-public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
-	
+/*
+ * The class consists of methods that can be both query 
+ * a CollectionObject or a RecordResource_ (CollectionObject, 
+ * CulturalObject, RecordResource etc).
+ * 
+ * Special methods referring to one of these entities go to the 
+ * specific DAO class.
+ */
+public abstract class CommonResourcesDAO<T extends RecordResource> extends DAO<T>{
+		
+	/*
+	 * The value of the entity class is either 
+	 * CollectionObject.class or RecordResource_.class
+	 */
 	public CommonResourcesDAO(Class<?> entityClass) {
 		super(entityClass);
 	}
 
+	
+	
+	/**
+	 * Retrieve an Object from DB using its dbId 
+	 * @param id
+	 * @return
+	 */
 	public T getById(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		return this.findOne(q);
