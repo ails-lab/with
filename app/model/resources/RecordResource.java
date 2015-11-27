@@ -16,30 +16,16 @@
 
 package model.resources;
 
-import java.util.ArrayList;
-
-import org.mongodb.morphia.annotations.Entity;
-
 import model.DescriptiveData;
 import model.basicDataTypes.Literal;
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.WithDate;
-import model.resources.RecordResource.RecordDescriptiveData;
 
-@Entity("RecordResource")
-public class AgentObject extends RecordResource<AgentObject.AgentData> {
+public class RecordResource<T extends RecordResource.RecordDescriptiveData> extends WithResource<RecordResource.RecordDescriptiveData> {
+	
+	public static class RecordDescriptiveData extends DescriptiveData {
 
-	public static class AgentData extends RecordDescriptiveData {
-		public AgentData(Literal label) {
+		public RecordDescriptiveData(Literal label) {
 			super(label);
 		}
-		ArrayList<WithDate> birthdate;
-		ArrayList<LiteralOrResource> birthplace;
-		ArrayList<WithDate> deathdate;
-		public static enum Gender {
-			MALE, FEMALE, UNKNOWN
-		}
-		Gender genderEnum;
-		Literal gender;
 	}
+
 }
