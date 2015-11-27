@@ -26,23 +26,38 @@ import db.resources.RecordResourceDAO;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.AgentObject;
-import model.resources.RecordResource;
-import model.resources.RecordResource.WithAdmin;
+import model.resources.CulturalObject;
+import model.resources.WithResource;
+import model.resources.WithResource.WithAdmin;
 
 public class RecordResourceDAOTest {
 
 	@Test
 	public void testDAOPolymorphism() {
-		RecordResourceDAO dao = new RecordResourceDAO(RecordResource.class);
+		RecordResourceDAO<WithResource> dao = new RecordResourceDAO<WithResource>(WithResource.class);
 		WithAdmin wa = new WithAdmin();
 		wa.setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
 		waccess.put(new ObjectId(), Access.OWN);
 		wa.setAccess(waccess);
-		RecordResource ao = new AgentObject();
-		RecordResource wr = new RecordResource();
+		AgentObject ao = new AgentObject();
 		ao.setAdministrative(wa);
-		dao.makePermanent((RecordResource)ao);
+		dao.makePermanent(ao);
+		
+		
+		
+		CulturalObject co = new CulturalObject();
+		
+		co.setAdministrative(wa);
+		dao.makePermanent(co);
+		
+		WithResource ao2 = dao.getById(ao.getDbId());
+		System.out.println(ao2.getClass().getSimpleName());
+		
+		
+		
+		//set as generic type
+		//done
 	}
 }

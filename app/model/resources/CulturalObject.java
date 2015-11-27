@@ -22,6 +22,7 @@ import javax.validation.constraints.NotNull;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
+import org.mongodb.morphia.annotations.Entity;
 
 import db.DB;
 import model.basicDataTypes.CidocEvent;
@@ -32,7 +33,8 @@ import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.usersAndGroups.User;
 import model.DescriptiveData;
 
-public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
+@Entity("RecordResource")
+public class CulturalObject extends WithResource<CulturalObject.CulturalObjectData>{
 	
 	public static class RecordAdmin extends WithAdmin {
 		

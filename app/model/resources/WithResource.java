@@ -49,8 +49,8 @@ import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-@Entity
-public class RecordResource<T extends DescriptiveData> {
+@Entity("RecordResource")
+public class WithResource<T extends DescriptiveData> {
 
 	public static class WithAdmin {
 
@@ -312,13 +312,13 @@ public class RecordResource<T extends DescriptiveData> {
 
 	private ArrayList<Annotation> annotations;
 	
-	public RecordResource() {
+	public WithResource() {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 	}
 	
-	public RecordResource(Class<?> clazz) {
+	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();

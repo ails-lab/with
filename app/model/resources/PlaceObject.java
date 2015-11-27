@@ -18,11 +18,14 @@ package model.resources;
 
 import java.util.ArrayList;
 
+import org.mongodb.morphia.annotations.Entity;
+
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
-public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
+@Entity("RecordResource")
+public class PlaceObject extends WithResource<PlaceObject.PlaceData> {
 
 	public static class PlaceData extends DescriptiveData {
 		public PlaceData(Literal label) {

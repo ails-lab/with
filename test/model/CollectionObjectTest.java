@@ -45,9 +45,9 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionDescriptiveData;
-import model.resources.RecordResource.ExternalCollection;
-import model.resources.RecordResource.WithAdmin;
-import model.resources.RecordResource.WithResourceType;
+import model.resources.WithResource.ExternalCollection;
+import model.resources.WithResource.WithAdmin;
+import model.resources.WithResource.WithResourceType;
 import model.MediaObject;
 import model.usersAndGroups.User;
 

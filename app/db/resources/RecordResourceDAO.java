@@ -16,26 +16,40 @@
 
 package db.resources;
 
-import model.resources.RecordResource;
-import model.resources.RecordResource_;
+import model.resources.AgentObject;
+import model.resources.CulturalObject;
+import model.resources.EUscreenObject;
+import model.resources.EventObject;
+import model.resources.PlaceObject;
+import model.resources.TimespanObject;
+import model.resources.WithResource;
 
 
 /*
  * This class is the aggregator of methods
  * generically referring to *Object entities. We may assume
  * that these entities represent a Record of a Collection more or less.
+ * 
+ * Type T is used in order for Morphia to know in which type is going
+ * deserialize the object retrieved fro Mongo. So we have to options
+ * 
+ * 1. Either pass WithResource when instansiating so that all entities 
+ * handled as WithResources.
+ *  
+ * 2. Every time create a new DAO class associated with the explicit class
+ * that I want to retieve.
  */
-public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
+public class RecordResourceDAO<T extends WithResource> extends CommonResourcesDAO<T> {
 
 	public RecordResourceDAO(Class<?> entityClass) {
-		super(RecordResource.class);
+		super(entityClass);
 	}
 
 	/*
 	 * These are embedded classes for very specific queries
 	 * in the far future.
 	 */
-	public class WithResourceDAO extends RecordResourceDAO {
+	public class WithResourceDAO extends RecordResourceDAO<WithResource> {
 
 		public WithResourceDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -43,7 +57,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 		
 	}
 
-	public class AgentObjectDAO extends RecordResourceDAO {
+	public class AgentObjectDAO extends RecordResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -51,7 +65,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 		
 	}
 	
-	public class CulturalObjectDAO extends RecordResourceDAO {
+	public class CulturalObjectDAO extends RecordResourceDAO<CulturalObject> {
 
 		public CulturalObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -59,7 +73,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 		
 	}
 
-	public class EuscreenObjectDAO extends RecordResourceDAO {
+	public class EuscreenObjectDAO extends RecordResourceDAO<EUscreenObject> {
 
 		public EuscreenObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -67,7 +81,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 		
 	}
 	
-	public class EventObjectDAO extends RecordResourceDAO {
+	public class EventObjectDAO extends RecordResourceDAO<EventObject> {
 
 		public EventObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -75,7 +89,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 		
 	}
 	
-	public class PlaceObjectDAO extends RecordResourceDAO {
+	public class PlaceObjectDAO extends RecordResourceDAO<PlaceObject> {
 
 		public PlaceObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -83,7 +97,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource>{
 		
 	}
 
-	public class TimespanObjectDAO extends RecordResourceDAO {
+	public class TimespanObjectDAO extends RecordResourceDAO<TimespanObject> {
 
 		public TimespanObjectDAO(Class<?> entityClass) {
 			super(entityClass);

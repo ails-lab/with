@@ -25,12 +25,12 @@ import model.CollectionRecord;
 import model.resources.AgentObject;
 import model.resources.CollectionObject;
 import model.resources.CulturalObject;
+import model.resources.EUscreenObject;
 import model.resources.EventObject;
 import model.resources.PlaceObject;
-import model.resources.RecordResource_;
 import model.resources.TimespanObject;
-import model.resources.RecordResource;
-import model.resources.RecordResource.WithResourceType;
+import model.resources.WithResource;
+import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -170,7 +170,7 @@ public class DB {
 	}
 	
 	public static RecordResourceDAO getRecordResourceDAO() {
-		return (RecordResourceDAO) getDao(RecordResource.class, null);
+		return (RecordResourceDAO) getDao(WithResource.class, null);
 	}
 	
 	public static MediaObjectDAO getMediaObjectDAO() {
@@ -185,39 +185,46 @@ public class DB {
 	 * in the far future.
 	 */
 	
-	public static WithResourceDAO getWithResourceDAO() {
-		return (WithResourceDAO) getDao(RecordResource.class, RecordResource.class);
+	public static RecordResourceDAO<WithResource>.WithResourceDAO getWithResourceDAO() {
+		return (RecordResourceDAO<WithResource>.WithResourceDAO) 
+				getDao(WithResource.class, WithResource.class);
 	}
 
-	public static AgentObjectDAO getAgentObjectDAO() {
-		return (AgentObjectDAO) getDao(AgentObject.class, RecordResource.class);
+	public static RecordResourceDAO<AgentObject>.AgentObjectDAO getAgentObjectDAO() {
+		return (RecordResourceDAO<AgentObject>.AgentObjectDAO) 
+				getDao(AgentObject.class, WithResource.class);
 	}
 	
-	public static CulturalObjectDAO getCulturalObjectDAO() {
-		return (CulturalObjectDAO) getDao(CulturalObject.class, RecordResource.class);
+	public static RecordResourceDAO<CulturalObject>.CulturalObjectDAO getCulturalObjectDAO() {
+		return (RecordResourceDAO<CulturalObject>.CulturalObjectDAO) 
+				getDao(CulturalObject.class, WithResource.class);
 	}
 	
-	public static EuscreenObjectDAO getEuscreenObjectDAO() {
-		return (EuscreenObjectDAO) getDao(CulturalObject.class, RecordResource.class);
+	public static RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO getEuscreenObjectDAO() {
+		return (RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO) 
+				getDao(CulturalObject.class, WithResource.class);
 	}
 
-	public static EventObjectDAO getEventObjectDAO() {
-		return (EventObjectDAO) getDao(EventObject.class, RecordResource.class);
+	public static RecordResourceDAO<EventObject>.EventObjectDAO getEventObjectDAO() {
+		return (RecordResourceDAO<EventObject>.EventObjectDAO) 
+				getDao(EventObject.class, WithResource.class);
 	}
 	
-	public static PlaceObjectDAO getPlaceObjectDAO() {
-		return (PlaceObjectDAO) getDao(PlaceObject.class, RecordResource.class);
+	public static RecordResourceDAO<PlaceObject>.PlaceObjectDAO getPlaceObjectDAO() {
+		return (RecordResourceDAO<PlaceObject>.PlaceObjectDAO) 
+				getDao(PlaceObject.class, WithResource.class);
 	}
 	
-	public static TimespanObjectDAO getTimespanObjectDAO() {
-		return (TimespanObjectDAO) getDao(TimespanObject.class, RecordResource.class);
+	public static RecordResourceDAO<TimespanObject>.TimespanObjectDAO getTimespanObjectDAO() {
+		return (RecordResourceDAO<TimespanObject>.TimespanObjectDAO) 
+				getDao(TimespanObject.class, WithResource.class);
 	}
 	
 	/*
 	 * Parametrized DAO class retrieval - 
 	 * under consideration
 	 */
-	public static <T extends RecordResource> DAO<T> getResourceByType(Class<T> clazz) {
+	public static <T extends WithResource> DAO<T> getResourceByType(Class<T> clazz) {
 		return (DAO<T>) getDAO(clazz);
 	}
 	
@@ -226,10 +233,12 @@ public class DB {
 	/**
 	 * Signleton DAO for all the entities
 	 * Parametrized for embedded DAO classes.
+	 * @param <T>
+	 * @param <T>
 	 * @param clazz
 	 * @return
 	 */
-	private static DAO<?> getDao(Class<?> clazz, Class<?> parentClazz) {
+	private static <T> DAO<?> getDao(Class<T> clazz, Class<?> parentClazz) {
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if(dao == null)  {
 			try {
@@ -240,7 +249,7 @@ public class DB {
 					daoClassName = "db.resources." + parentClazz.getSimpleName() + "DAO." 
 									+ clazz.getSimpleName() + "DAO";
 				Class<?> daoClass = Class.forName(daoClassName);
-				dao = (DAO<?>) daoClass.newInstance();
+				dao = (DAO<T>) daoClass.newInstance();
 				daos.put(clazz.getSimpleName(), dao);
 			} catch(Exception e) {
 				log.error("Can't instantiate DAO for " + clazz.getName(), e);

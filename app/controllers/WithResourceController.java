@@ -22,7 +22,7 @@ import javax.validation.ConstraintViolation;
 
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 
@@ -60,7 +60,7 @@ public class WithResourceController extends Controller {
 	public static Result getWithResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource resource = DB.getWithResourceDAO().get(
+			WithResource resource = DB.getWithResourceDAO().get(
 					new ObjectId(id));
 			if (resource == null) {
 				log.error("Cannot retrieve resource from database");
@@ -98,7 +98,7 @@ public class WithResourceController extends Controller {
 	public static Result deleteWithResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource resource = DB.getWithResourceDAO().get(
+			WithResource resource = DB.getWithResourceDAO().get(
 					new ObjectId(id));
 			if (resource == null) {
 				log.error("Cannot retrieve resource from database");
@@ -148,12 +148,12 @@ public class WithResourceController extends Controller {
 			ObjectId creator = new ObjectId(session().get("user"));
 			String resourceType = json.get("resourceType").asText();
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			RecordResource resource = (RecordResource) Json.fromJson(json, clazz);
-			Set<ConstraintViolation<RecordResource>> violations = Validation
+			WithResource resource = (WithResource) Json.fromJson(json, clazz);
+			Set<ConstraintViolation<WithResource>> violations = Validation
 					.getValidator().validate(resource);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<RecordResource> cv : violations) {
+				for (ConstraintViolation<WithResource> cv : violations) {
 					properties.add(Json.parse("{\"" + cv.getPropertyPath()
 							+ "\":\"" + cv.getMessage() + "\"}"));
 				}
@@ -187,7 +187,7 @@ public class WithResourceController extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			RecordResource oldResource = DB.getWithResourceDAO().get(
+			WithResource oldResource = DB.getWithResourceDAO().get(
 					new ObjectId(id));
 			if (oldResource == null) {
 				log.error("Cannot retrieve resource from database");
@@ -206,13 +206,13 @@ public class WithResourceController extends Controller {
 			// TODO change JSON at all its depth
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectReader updator = objectMapper.readerForUpdating(oldResource);
-			RecordResource newResource;
+			WithResource newResource;
 			newResource = updator.readValue(json);
-			Set<ConstraintViolation<RecordResource>> violations = Validation
+			Set<ConstraintViolation<WithResource>> violations = Validation
 					.getValidator().validate(newResource);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<RecordResource> cv : violations) {
+				for (ConstraintViolation<WithResource> cv : violations) {
 					properties.add(Json.parse("{\"" + cv.getPropertyPath()
 							+ "\":\"" + cv.getMessage() + "\"}"));
 				}

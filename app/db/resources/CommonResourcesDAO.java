@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import model.resources.RecordResource;
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
@@ -34,16 +34,16 @@ import db.DB;
 /*
  * The class consists of methods that can be both query 
  * a CollectionObject or a RecordResource_ (CollectionObject, 
- * CulturalObject, RecordResource etc).
+ * CulturalObject, WithResource etc).
  * 
  * Special methods referring to one of these entities go to the 
  * specific DAO class.
  */
-public abstract class CommonResourcesDAO<T extends RecordResource> extends DAO<T>{
+public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		
 	/*
 	 * The value of the entity class is either 
-	 * CollectionObject.class or RecordResource_.class
+	 * CollectionObject.class or RecordResource.class
 	 */
 	public CommonResourcesDAO(Class<?> entityClass) {
 		super(entityClass);

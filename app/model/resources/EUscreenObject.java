@@ -18,10 +18,13 @@ package model.resources;
 
 import java.util.Date;
 
+import org.mongodb.morphia.annotations.Entity;
+
 import model.DescriptiveData;
 import model.basicDataTypes.Literal;
 
-public class EUscreenObject extends RecordResource<EUscreenObject.EUscreenData> {
+@Entity("RecordResource")
+public class EUscreenObject extends WithResource<EUscreenObject.EUscreenData> {
 	
 	public static class EUscreenData extends DescriptiveData { 
 		// title is filled in with original language title and english title
