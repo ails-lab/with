@@ -24,11 +24,12 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithPeriod;
 import model.DescriptiveData;
+import model.resources.RecordResource.RecordDescriptiveData;
 
 @Entity("RecordResource")
-public class EventObject extends WithResource<EventObject.EventData> {
+public class EventObject extends RecordResource<EventObject.EventData> {
 	
-	public static class EventData extends DescriptiveData {
+	public static class EventData extends RecordDescriptiveData {
 		public EventData(Literal label) {
 			super(label);
 		}

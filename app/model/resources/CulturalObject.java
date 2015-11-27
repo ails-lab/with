@@ -17,24 +17,16 @@
 package model.resources;
 
 import java.util.ArrayList;
-
-import javax.validation.constraints.NotNull;
-
 import org.bson.types.ObjectId;
-import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Entity;
-
-import db.DB;
 import model.basicDataTypes.CidocEvent;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
-import model.basicDataTypes.LiteralOrResource.ResourceType;
-import model.usersAndGroups.User;
-import model.DescriptiveData;
+import model.resources.RecordResource.RecordDescriptiveData;
 
 @Entity("RecordResource")
-public class CulturalObject extends WithResource<CulturalObject.CulturalObjectData>{
+public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
 	
 	public static class RecordAdmin extends WithAdmin {
 		
@@ -63,7 +55,7 @@ public class CulturalObject extends WithResource<CulturalObject.CulturalObjectDa
 	}
 	
 	
-	public static class CulturalObjectData extends DescriptiveData {
+	public static class CulturalObjectData extends RecordDescriptiveData {
 		
 		public CulturalObjectData(Literal label) {
 			super(label);

@@ -23,11 +23,12 @@ import org.mongodb.morphia.annotations.Entity;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
+import model.resources.RecordResource.RecordDescriptiveData;
 
 @Entity("RecordResource")
-public class PlaceObject extends WithResource<PlaceObject.PlaceData> {
+public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
 
-	public static class PlaceData extends DescriptiveData {
+	public static class PlaceData extends RecordDescriptiveData {
 		public PlaceData(Literal label) {
 			super(label);
 		}
