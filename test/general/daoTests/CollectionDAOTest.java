@@ -22,7 +22,6 @@ import general.TestUtils;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.CollectionRecord;
 import model.Media;
 import model.usersAndGroups.User;
@@ -54,13 +53,10 @@ public class CollectionDAOTest {
 		}
 		collection.setThumbnail(thumb);
 
-		// metadata for connection with user
-		CollectionMetadata colMeta = new CollectionMetadata();
-		colMeta.setDescription(collection.getDescription());
-		colMeta.setTitle(collection.getTitle());
+		
 
 		User user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-		collection.setOwnerId(user);
+		collection.setCreatorId(user);
 
 		// save the new created collection
 		Key<Collection> colKey = DB.getCollectionDAO()
@@ -137,10 +133,10 @@ public class CollectionDAOTest {
 
 			if (i == 42) {
 				user = DB.getUserDAO().getByEmail("heres42@mongo.gr");
-				collection.setOwnerId(user);
+				collection.setCreatorId(user);
 			} else {
 				user = DB.getUserDAO().find().asList().get(i);
-				collection.setOwnerId(user);
+				collection.setCreatorId(user);
 			}
 
 			// save the new created collection

@@ -45,8 +45,6 @@ public class RecordResourceDAOTest {
 		ao.setAdministrative(wa);
 		dao.makePermanent(ao);
 		
-		
-		
 		CulturalObject co = new CulturalObject();
 		
 		co.setAdministrative(wa);

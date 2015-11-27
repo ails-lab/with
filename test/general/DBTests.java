@@ -17,7 +17,7 @@
 package general;
 
 import general.daoTests.CollectionDAOTest;
-import general.daoTests.SearchAndSearchResultDAOTest;
+
 import general.daoTests.UserDAOTest;
 
 import java.util.ArrayList;
@@ -48,12 +48,12 @@ public class DBTests {
 	// @Test
 	public void createMockupDB() {
 		UserDAOTest userDAO = new UserDAOTest();
-		SearchAndSearchResultDAOTest searchesDAO = new SearchAndSearchResultDAOTest();
+		
 		CollectionDAOTest colDAO = new CollectionDAOTest();
 
 		// create a whole dummy database
 		userDAO.massStorage();
-		searchesDAO.storeSearchesWithSearchResults();
+		
 		colDAO.storeCollection();
 	}
 
@@ -65,7 +65,7 @@ public class DBTests {
 			@Override
 			public void invoke(Collection collection) throws Throwable {
 				if (collection.getTitle().equals("_favorites")) {
-					usersWithFav.add(collection.getOwnerId());
+					usersWithFav.add(collection.getCreatorId());
 				}
 			}
 		};
@@ -76,7 +76,7 @@ public class DBTests {
 			favCollection = new Collection();
 			favCollection.setTitle("_favorites");
 			favCollection.setCreated(new Date());
-			favCollection.setOwnerId(userId);
+			favCollection.setCreatorId(userId);
 			DB.getCollectionDAO().makePermanent(favCollection);
 			System.out.println("Successfully created favorites for userId "
 					+ userId.toString());

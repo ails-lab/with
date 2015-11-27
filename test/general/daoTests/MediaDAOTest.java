@@ -30,7 +30,6 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import com.sun.media.jfxmedia.MediaError;
 
 import db.DB;
 
