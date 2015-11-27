@@ -36,10 +36,7 @@ public class WithResourceDAOTest {
 	@Test
 	public void storeWithResource() {
 
-		// store Collection
-		for (int i = 0; i < 5; i++) {
-
-			// a user creates a new collection
+		/*for (int i = 0; i < 5; i++) {
 			RecordResource withResource = new RecordResource();
 			withResource.setUsage(new WithResource.Usage());
 			withResource.getUsage().setLikes(i);
@@ -52,9 +49,9 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setLastModified(new Date());
 			DescriptiveData description = new RecordResource.RecordDescriptiveData(new Literal(Language.EN, "TestWebResource" + i));
 			description.setDescription(new Literal(Language.EN, "Some description"));
-			/*CulturalObject c = new CulturalObject();*/
+			//CulturalObject c = new CulturalObject();
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-		}
+		}*/
 		
 		for (int i = 0; i < 5; i++) {
 
