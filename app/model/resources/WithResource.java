@@ -281,22 +281,26 @@ public class WithResource<T extends DescriptiveData> {
 		this.dbId = dbId;
 	}
 	
+	@Embedded
 	private WithAdmin administrative;
 
 	@Embedded
 	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
 
-
+	@Embedded
 	private Usage usage;
 
+	@Embedded
 	//external collections to which the resource may belong to
 	private ArrayList<ExternalCollection> externalCollections;
+	@Embedded
 	private ArrayList<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
 	private WithResourceType resourceType;
 
 	// metadata
+	@Embedded
 	private T model;
 
 	// All the available content serializations

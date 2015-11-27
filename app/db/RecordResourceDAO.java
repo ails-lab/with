@@ -14,8 +14,9 @@
  */
 
 
-package db.resources;
+package db;
 
+import db.resources.CommonResourcesDAO;
 import model.resources.AgentObject;
 import model.resources.CulturalObject;
 import model.resources.EUscreenObject;
@@ -40,17 +41,17 @@ import model.resources.WithResource;
  * 2. Every time create a new DAO class associated with the explicit class
  * that I want to retieve.
  */
-public class RecordResourceDAO<T extends RecordResource> extends CommonResourcesDAO<T> {
+public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 
-	public RecordResourceDAO(Class<?> entityClass) {
-		super(entityClass);
+	public RecordResourceDAO() {
+		super(RecordResource.class);
 	}
 
 	/*
 	 * These are embedded classes for very specific queries
 	 * in the far future.
 	 */
-
+/*
 	public class AgentObjectDAO extends RecordResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
@@ -98,9 +99,7 @@ public class RecordResourceDAO<T extends RecordResource> extends CommonResources
 		}
 
 	}
-	/*
-	 * End of embedded D
-	 */
 
+*/
 
 }

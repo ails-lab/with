@@ -22,7 +22,7 @@ import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import db.DB;
-import db.resources.RecordResourceDAO;
+import db.RecordResourceDAO;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.AgentObject;

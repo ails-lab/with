@@ -16,6 +16,13 @@
 
 package model.basicDataTypes;
 
+import org.mongodb.morphia.annotations.Converters;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import db.converters.ProvenanceInfoConverter;
+
+@Converters(ProvenanceInfoConverter.class)
 public class ProvenanceInfo {
 	private String provider;
 	private String uri;

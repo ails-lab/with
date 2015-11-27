@@ -14,7 +14,7 @@
  */
 
 
-package db;
+package db.converters;
 
 import model.basicDataTypes.WithAccess;
 

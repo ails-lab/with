@@ -28,6 +28,10 @@ import model.resources.RecordResource.RecordDescriptiveData;
 @Entity("RecordResource")
 public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
 	
+	public CulturalObject() {
+		super();
+	}
+	
 	public static class RecordAdmin extends WithAdmin {
 		
 		// last entry of provenance chain hash of provider and recordId

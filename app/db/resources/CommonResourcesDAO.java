@@ -20,10 +20,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import model.Collection;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.Literal.Language;
 import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
@@ -49,8 +53,6 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		super(entityClass);
 	}
 
-	
-	
 	/**
 	 * Retrieve an Object from DB using its dbId 
 	 * @param id
@@ -59,6 +61,11 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	public T getById(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		return this.findOne(q);
+	}
+	
+	public List<T> getByLabel(Literal label) {
+		Query<T> q = this.createQuery().field("model.label").equal(label);
+		return this.find(q).asList();
 	}
 	
 	//TODO: limit to return only some fields (?)
