@@ -239,13 +239,17 @@ public class DB {
 	 * @return
 	 */
 	private static <T> DAO<?> getDao(Class<T> clazz, Class<?> parentClazz) {
+		if(clazz.getSimpleName().equals("WithResource")
+			|| parentClazz.equals("WithResource")) {
+			
+		}
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if(dao == null)  {
 			try {
 				String daoClassName;
 				if(parentClazz == null)
 					daoClassName = "db.resources." + clazz.getSimpleName() + "DAO";
-				else
+				else 
 					daoClassName = "db.resources." + parentClazz.getSimpleName() + "DAO." 
 									+ clazz.getSimpleName() + "DAO";
 				Class<?> daoClass = Class.forName(daoClassName);
