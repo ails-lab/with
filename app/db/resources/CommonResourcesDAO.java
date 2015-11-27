@@ -136,8 +136,8 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 
 	public List<T> getBySource(String sourceName) {
 		//TODO: faster if could query on last entry of provenance array. Mongo query!
-		Query<T> q = this.createQuery()
-				.field("provenance.provider").equal(sourceName);
+		Query<T> q = this.createQuery();
+		q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
 		return this.find(q).asList();
 	}
 
@@ -176,10 +176,14 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 
 	//TODO:Mongo query!
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
-		Query<T> q = this.createQuery();
 		String colField = "collectedIn."+colId;
-		q.and(q.criteria(colField).exists(), q.criteria(colField).greaterThanOrEq(position));
+		/* TODO: check if the query can be expressed in morphia
+		Query<T> q = this.createQuery();
+		q.and(q.criteria(colField).exists(), q.criteria(colField).hasThisElement(q.field("position").greaterThanOrEq(position)));
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
+		updateOps.dec(colField+".$");
+		this.update(q,  updateOps);
+		*/
 		/*for (T resource: resources) {
 			HashMap<ObjectId, ArrayList<Integer>> collectedIn = resource.getCollectedIn();
 			ArrayList<Integer> positions = collectedIn.get(colId);
@@ -200,13 +204,13 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		BasicDBObject colIdQuery = new BasicDBObject();
 		BasicDBObject existsField = new BasicDBObject();
 		existsField.put("$exists", true);
-		colIdQuery.put("collectedIn.collId", existsField);
+		colIdQuery.put(colField, existsField);
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$geq", position);
 		colIdQuery.append("$elemMatch", geq);
 		BasicDBObject update = new BasicDBObject();
 		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put("collectedIn."+colId+".$", 1);
+		entrySpec.put(colField+".$", 1);
 		update.put("$dec", entrySpec);
 		this.getDs().getCollection(entityClass.getSimpleName()).find(colIdQuery, update);
 	}

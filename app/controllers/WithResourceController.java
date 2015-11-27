@@ -22,6 +22,7 @@ import javax.validation.ConstraintViolation;
 
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
@@ -60,7 +61,7 @@ public class WithResourceController extends Controller {
 	public static Result getWithResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			WithResource resource = DB.getWithResourceDAO().get(
+			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
 			if (resource == null) {
 				log.error("Cannot retrieve resource from database");
@@ -98,7 +99,7 @@ public class WithResourceController extends Controller {
 	public static Result deleteWithResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			WithResource resource = DB.getWithResourceDAO().get(
+			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
 			if (resource == null) {
 				log.error("Cannot retrieve resource from database");
@@ -118,7 +119,7 @@ public class WithResourceController extends Controller {
 						"Serialization of resource was deleted successfully");
 				return ok(result);
 			}
-			DB.getWithResourceDAO().makeTransient(resource);
+			DB.getRecordResourceDAO().makeTransient(resource);
 			result.put("message", "Resource was deleted successfully");
 			return ok(result);
 		} catch (Exception e) {
@@ -148,12 +149,12 @@ public class WithResourceController extends Controller {
 			ObjectId creator = new ObjectId(session().get("user"));
 			String resourceType = json.get("resourceType").asText();
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			WithResource resource = (WithResource) Json.fromJson(json, clazz);
-			Set<ConstraintViolation<WithResource>> violations = Validation
+			RecordResource resource = (RecordResource) Json.fromJson(json, clazz);
+			Set<ConstraintViolation<RecordResource>> violations = Validation
 					.getValidator().validate(resource);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<WithResource> cv : violations) {
+				for (ConstraintViolation<RecordResource> cv : violations) {
 					properties.add(Json.parse("{\"" + cv.getPropertyPath()
 							+ "\":\"" + cv.getMessage() + "\"}"));
 				}
@@ -163,7 +164,7 @@ public class WithResourceController extends Controller {
 			WithAccess withAccess = new WithAccess();
 			withAccess.put(creator, Access.OWN);
 			resource.getAdministrative().setAccess(new WithAccess());
-			DB.getWithResourceDAO().makePermanent(resource);
+			DB.getRecordResourceDAO().makePermanent(resource);
 			return ok(Json.toJson(resource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
@@ -187,7 +188,7 @@ public class WithResourceController extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			WithResource oldResource = DB.getWithResourceDAO().get(
+			RecordResource oldResource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
 			if (oldResource == null) {
 				log.error("Cannot retrieve resource from database");
@@ -206,20 +207,20 @@ public class WithResourceController extends Controller {
 			// TODO change JSON at all its depth
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectReader updator = objectMapper.readerForUpdating(oldResource);
-			WithResource newResource;
+			RecordResource newResource;
 			newResource = updator.readValue(json);
-			Set<ConstraintViolation<WithResource>> violations = Validation
+			Set<ConstraintViolation<RecordResource>> violations = Validation
 					.getValidator().validate(newResource);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<WithResource> cv : violations) {
+				for (ConstraintViolation<RecordResource> cv : violations) {
 					properties.add(Json.parse("{\"" + cv.getPropertyPath()
 							+ "\":\"" + cv.getMessage() + "\"}"));
 				}
 				error.put("error", properties);
 				return badRequest(error);
 			}
-			DB.getWithResourceDAO().makePermanent(newResource);
+			DB.getRecordResourceDAO().makePermanent(newResource);
 			return ok(Json.toJson(newResource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
