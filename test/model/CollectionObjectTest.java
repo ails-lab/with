@@ -64,13 +64,17 @@ public class CollectionObjectTest {
 
 	@Test
 	public void modelCollection() {
+		
 		CollectionObject co = new CollectionObject();
 
 		/*
 		 * Owner of the CollectionObject
 		 */
-		User u = DB.getUserDAO().getByUsername("qwerty");
-		if(u == null) return;
+		/*User u = DB.getUserDAO().getByUsername("qwerty");
+		if(u == null) {
+			System.out.println("No user found");
+			return;
+		}*/
 
 		/*
 		 * Administative metadata
@@ -79,7 +83,7 @@ public class CollectionObjectTest {
 		wa.setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
-		waccess.put(u.getDbId(), Access.OWN);
+		//waccess.put(u.getDbId(), Access.OWN);
 		wa.setAccess(waccess);
 		co.setAdministrative(wa);
 
@@ -97,9 +101,8 @@ public class CollectionObjectTest {
 
 		//resourceType is collectionObject
 		co.setResourceType(WithResourceType.CollectionObject);
-
 		// type: metadata specific for a collection
-		Literal label = new Literal(Language.EN, "This is a title");
+		Literal label = new Literal(Language.EN, "MyTitle");
 		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
 		cdd.setLabel(label);
 		Literal desc = new Literal(Language.EN, "This is a description");
@@ -111,20 +114,21 @@ public class CollectionObjectTest {
 		 */
 		Map<String, String> content;
 
-
 		/*
 		 * media thumbnail for collection
 		 */
 		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
-		medias.add(getMediaObject());
+		medias.add(emo);
 		co.setMedia(medias);
 
 		if(DB.getCollectionObjectDAO().makePermanent(co) == null) System.out.println("No storage!");
 		System.out.println("Stored!");
 		if(co.getDbId() != null) System.out.println("The first CollectionObject presenting a collection was saved!");
 
-		if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
+		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
+		
+		System.out.println(DB.getCollectionObjectDAO().getByLabel(new Literal(Language.EN, "MyTitle")));
 	}
 
 

@@ -46,7 +46,6 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.converters.RightsConverter;
-import db.resources.MediaObjectDAO;
 
 // get the DAOs from here
 // the EntityManagerFactory is here
@@ -159,7 +158,7 @@ public class DB {
 	 */
 	
 	public static CollectionObjectDAO getCollectionObjectDAO() {
-		return (CollectionObjectDAO) getDao(CollectionObject.class, null);
+		return (CollectionObjectDAO) getDAO(CollectionObject.class);
 	}
 	
 	public static MediaObjectDAO getMediaObjectDAO() {
@@ -222,9 +221,9 @@ public class DB {
 			try {
 				String daoClassName;
 				if (parentClazz == null)
-					daoClassName = "db.resources." + clazz.getSimpleName() + "DAO";
+					daoClassName = "db." + clazz.getSimpleName() + "DAO";
 				else
-					daoClassName = "db.resources." + parentClazz.getSimpleName() + "DAO." 
+					daoClassName = "db." + parentClazz.getSimpleName() + "DAO." 
 									+ clazz.getSimpleName() + "DAO";
 				Class<?> daoClass = Class.forName(daoClassName);
 				dao = (DAO<?>) daoClass.newInstance();
