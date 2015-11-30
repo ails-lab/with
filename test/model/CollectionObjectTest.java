@@ -100,7 +100,8 @@ public class CollectionObjectTest {
 
 		// type: metadata specific for a collection
 		Literal label = new Literal(Language.EN, "This is a title");
-		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData(label);
+		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
+		cdd.setLabel(label);
 		Literal desc = new Literal(Language.EN, "This is a description");
 		cdd.setDescription(desc);
 		co.setModel(cdd);

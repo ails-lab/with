@@ -29,9 +29,6 @@ import model.resources.RecordResource.RecordDescriptiveData;
 public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
 
 	public static class PlaceData extends RecordDescriptiveData {
-		public PlaceData(Literal label) {
-			super(label);
-		}
 
 		// city, archeological site, area, nature reserve, historical site
 		ArrayList<LiteralOrResource> nation;

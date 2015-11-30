@@ -56,16 +56,18 @@ public class WithResourceDAOTest {
 		}*/
 		
 		for (int i = 0; i < 5; i++) {
+			System.out.println(i);
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
-			//withResource.addToProvenance(new ProvenanceInfo("provider0"));
+			withResource.addToProvenance(new ProvenanceInfo("provider0"));
 			WithAccess access = new WithAccess();
 			//access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
-			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData(new Literal(Language.EN, "TestWithResource" + i));
+			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
+			model.setLabel(new Literal(Language.EN, "TestWithResource" + i));
 			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setModel(model);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);

@@ -32,9 +32,9 @@ import model.basicDataTypes.LiteralOrResource;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DescriptiveData {
 	
-	public DescriptiveData(Literal label) {
+	/*public DescriptiveData(Literal label) {
 		this.label = label;
-	}
+	}*/
 	// one line content description with identifiable characteristic
 	@NotNull
 	@NotBlank

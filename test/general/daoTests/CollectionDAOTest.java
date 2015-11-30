@@ -22,7 +22,6 @@ import general.TestUtils;
 import java.util.List;
 
 import model.Collection;
-import model.CollectionMetadata;
 import model.CollectionRecord;
 import model.Media;
 import model.usersAndGroups.User;

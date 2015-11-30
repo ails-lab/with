@@ -29,9 +29,6 @@ import model.resources.RecordResource.RecordDescriptiveData;
 public class TimespanObject extends RecordResource<TimespanObject.TimespanData>{
 	
 	public static class TimespanData extends RecordDescriptiveData {
-		public TimespanData(Literal label) {
-			super(label);
-		}
 
 		ArrayList<WithPeriod> timespan;
 	}

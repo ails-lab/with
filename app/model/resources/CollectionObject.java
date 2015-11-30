@@ -47,9 +47,6 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 
 	public static class CollectionDescriptiveData extends DescriptiveData {
 
-		public CollectionDescriptiveData(Literal label) {
-			super(label);
-		}
 		//start day or possible start days
 		private ArrayList<LiteralOrResource> dccreator;
 		//for whom the resource is intended or useful
