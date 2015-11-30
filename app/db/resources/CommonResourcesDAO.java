@@ -72,7 +72,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	
 	/**
 	 * Get a CollectionObject by the dbId and retrieve
-	 * only a bounch of fields from the whole document
+	 * only a bunch of fields from the whole document
 	 * @param id
 	 * @param retrievedFields
 	 * @return
@@ -161,11 +161,16 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<T> getByCollectionPosition(ObjectId colId,
-			int lowerBound, int upperBound) {
+	public List<T> getByCollectionPosition(ObjectId colId, int lowerBound, int upperBound) {
 		Query<T> q = this.createQuery();
 		String colField = "collectedIn."+colId;
-		q.and(q.criteria(colField).exists(), q.criteria(colField).greaterThanOrEq(lowerBound), q.criteria(colField).lessThan(upperBound));
+		q.filter(colField + " >", lowerBound).filter(colField + " <", upperBound);
+		/*
+		q.field(colField).exists();
+		q.and(q.criteria(colField).exists(), 
+			q.filter("colField >", lowerBound)., 
+			q.filter("colField <", upperBound));
+		*/
 		List<T> Ts = this.find(q).asList();
 		List<T> repeatedResources = new ArrayList<T>();
 		for (T T: Ts) {
@@ -229,7 +234,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param title
 	 * @return
 	 */
-	public T getByOwnerAndTitle(ObjectId creatorId, String title, String lang) {
+	public T getByOwnerAndLabel(ObjectId creatorId, String title, String lang) {
 		if(lang == null) lang = "en";
 		Query<T> q = this.createQuery().field("administative.withCreator")
 				.equal(creatorId).field("model.label." + lang).equal(title);
@@ -246,8 +251,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 */
 	public List<T> getByOwner(ObjectId creatorId, int offset, int count) {
 		Query<T> q = this.createQuery().field("administative.withCreator")
-				.equal(creatorId).field("isExhibition").equal(false)
-				.offset(offset).limit(count);
+				.equal(creatorId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
@@ -258,7 +262,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param id
 	 * @return
 	 */
-	public List<T> getByOwner(ObjectId id) {
+	public List<T> getFirstResourceByOwner(ObjectId id) {
 		return getByOwner(id, 0, 1);
 	}
 	
@@ -279,7 +283,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param sourceName
 	 * @return
 	 */
-	public List<T> getBySource(String sourceName) {
+	public List<T> getByProvider(String sourceName) {
 		//TODO: faster if could query on last entry of provenance array. Mongo query!
 		Query<T> q = this.createQuery();
 		q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
@@ -353,7 +357,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param isExhibition
 	 * @return
 	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>> getCollectionsAndHits(Query<T> q,
+	public Tuple<List<T>, Tuple<Integer, Integer>> getResourcesWithCount(Query<T> q,
 			Boolean isExhibition) {
 
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
@@ -386,7 +390,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param isExhibition
 	 * @return
 	 */
-	public Tuple<Integer, Integer> getHits(Query<T> q, Boolean isExhibition) {
+	public Tuple<Integer, Integer> getResourceCount(Query<T> q, Boolean isExhibition) {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
 			Query<T> q2 = q.cloneQuery();
@@ -416,7 +420,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param count
 	 * @return
 	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+	public Tuple<List<T>, Tuple<Integer, Integer>>  getByACL(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition, boolean totalHits, int offset, int count) {
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
@@ -424,7 +428,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		}
 		Query<T> q = formBasicQuery(criteria, creator, isExhibition, offset, count);
 		if (totalHits) {
-			return getCollectionsAndHits(q, isExhibition);
+			return getResourcesWithCount(q, isExhibition);
 		}
 		else {
 			if (isExhibition != null)
@@ -446,7 +450,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param count
 	 * @return
 	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>>  getByAccess(List<ObjectId> loggeInEffIds,
+	public Tuple<List<T>, Tuple<Integer, Integer>>  getUsersAccessibleWithACL(List<ObjectId> loggeInEffIds,
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition, boolean totalHits, int offset, int count) {
 
@@ -457,7 +461,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		}
 		Query<T> q = formBasicQuery(criteria, creator, isExhibition, offset, count);
 		if (totalHits) {
-			return getCollectionsAndHits(q, isExhibition);
+			return getResourcesWithCount(q, isExhibition);
 		}
 		else {
 			if (isExhibition != null)
@@ -478,7 +482,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param count
 	 * @return
 	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
+	public Tuple<List<T>, Tuple<Integer, Integer>> getSharedWithACL(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 
 		Query<T> q = this.createQuery().offset(offset).limit(count+1);
@@ -490,7 +494,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		if (criteria.length > 0)
 			q.and(criteria);
 		if (totalHits) {
-			return getCollectionsAndHits(q, isExhibition);
+			return getResourcesWithCount(q, isExhibition);
 		}
 		else {
 			if (isExhibition != null)
@@ -510,7 +514,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param count
 	 * @return
 	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+	public Tuple<List<T>, Tuple<Integer, Integer>> getPublicWithACL(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 
 		Query<T> q = this.createQuery().offset(offset).limit(count+1);
@@ -523,7 +527,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		if (criteria.length > 0)
 			q.and(criteria);
 		if (totalHits) {
-			return getCollectionsAndHits(q, isExhibition);
+			return getResourcesWithCount(q, isExhibition);
 		}
 		else {
 			if (isExhibition != null)
@@ -599,6 +603,9 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 */
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
 		String colField = "collectedIn."+colId;
+		Query<T> q = this.createQuery().field(colField).exists();
+		UpdateOperations<T> ops = this.createUpdateOperations().inc(colField);
+		this.update(q, ops);
 		/* TODO: check if the query can be expressed in morphia
 		Query<T> q = this.createQuery();
 		q.and(q.criteria(colField).exists(), q.criteria(colField).hasThisElement(q.field("position").greaterThanOrEq(position)));
@@ -623,7 +630,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		     collectedIn.colId: { $elemMatch: { $gte: position} }
 		   },
 		   { $dec: { "collectedIn."+colId+".$" : 1 } }*/
-		BasicDBObject colIdQuery = new BasicDBObject();
+		/*BasicDBObject colIdQuery = new BasicDBObject();
 		BasicDBObject existsField = new BasicDBObject();
 		existsField.put("$exists", true);
 		colIdQuery.put(colField, existsField);
@@ -634,7 +641,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		BasicDBObject entrySpec = new BasicDBObject();
 		entrySpec.put(colField+".$", 1);
 		update.put("$dec", entrySpec);
-		this.getDs().getCollection(entityClass.getSimpleName()).find(colIdQuery, update);
+		this.getDs().getCollection(entityClass.getSimpleName()).find(colIdQuery, update);*/
 	}
 
 	/**
@@ -643,7 +650,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * collection.
 	 *
 	 **/
-	public void setSpecificRecordField(ObjectId colId, String fieldName,
+	public void setFieldValueOfCollectedResource(ObjectId colId, String fieldName,
 			String value) {
 		Query<T> q = this.createQuery().field("collectedIn."+colId).exists();
 		UpdateOperations<T> updateOps = this
@@ -662,6 +669,9 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 
 	}
 
+	/*
+	 * What is this ???????????/ ASK EIRINI
+	 */
 	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
 		List<T> mergedRecord = getByExternalId(extId);
 		for (T mr : mergedRecord) {

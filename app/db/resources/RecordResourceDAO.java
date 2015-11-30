@@ -58,9 +58,11 @@ public class RecordResourceDAO<T extends RecordResource> extends CommonResources
 		return this.deleteByQuery(q).getN();
 	}
 	
-	/*
-	 * These are embedded classes for very specific queries
-	 * in the far future.
+	/* 
+	 * ********************************************************
+	 * These are embedded classes for very specific queries   *
+	 * in the far future.                                     *
+	 * ********************************************************
 	 */
 
 	public class AgentObjectDAO extends RecordResourceDAO<AgentObject> {
@@ -110,8 +112,9 @@ public class RecordResourceDAO<T extends RecordResource> extends CommonResources
 		}
 
 	}
-	/*
-	 * End of embedded D
+	/* ********************************************
+	 * End of embedded DAO classes                *
+	 * ********************************************
 	 */
 
 

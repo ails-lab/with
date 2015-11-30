@@ -27,14 +27,20 @@ import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.AgentObject;
 import model.resources.CulturalObject;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithAdmin;
 
-public class RecordResourceDAOTest {
+public class DAOsTests {
 
 	@Test
-	public void testDAOPolymorphism() {
-		RecordResourceDAO<WithResource> dao = new RecordResourceDAO<WithResource>(WithResource.class);
+	public void testCommonResourceDAO() {
+		
+	}
+	
+	@Test
+	public void testRecordResourceDAOPolymorphism() {
+		RecordResourceDAO<RecordResource> dao = new RecordResourceDAO<RecordResource>(WithResource.class);
 		WithAdmin wa = new WithAdmin();
 		wa.setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
