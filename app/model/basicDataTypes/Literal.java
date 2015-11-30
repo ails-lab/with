@@ -25,7 +25,10 @@ public class Literal extends HashMap<String, String> {
 		EN, UNKNOWN, ANY;
 	}
 	
-	/*public Literal(String label) {
+	public Literal() {
+	}
+	
+	public Literal(String label) {
 		this.put(Language.UNKNOWN.toString(), label);
 	}
 	
@@ -35,7 +38,7 @@ public class Literal extends HashMap<String, String> {
 	
 	public Literal(String lang, String label) {
 		this.put(lang, label);
-	}*/
+	}
 	
 	// keys are language 2 letter codes, 
 	// "unknown" for unknown language

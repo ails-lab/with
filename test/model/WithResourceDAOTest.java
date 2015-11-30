@@ -56,29 +56,24 @@ public class WithResourceDAOTest {
 		}*/
 		
 		for (int i = 0; i < 1; i++) {
-			System.out.println(i);
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
-			//withResource.addToProvenance(new ProvenanceInfo("provider0"));
+			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
 			WithAccess access = new WithAccess();
-			//access.put(new ObjectId(), WithAccess.Access.READ);
+			access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			Literal label  = new Literal();
-			label.setLiteral(Language.EN, "TestWithResourceDD" + i);
-			model.setLabel(label);
-			Literal description = new Literal();
-			description.setLiteral(Language.EN, "Some description");
-			model.setDescription(description);
+			model.setLabel(new Literal(Language.EN, "TestWithResourceX" + i));
+			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setModel(model);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(label);
-			System.out.println(resources);
-			/*System.out.println(resources.get(0) instanceof CulturalObject);
-			System.out.println(resources.get(1) instanceof CulturalObject);*/
+			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(new Literal(Language.EN, "TestWithResourceX" + i));
+			CulturalObject o = (CulturalObject) resources.get(0);
+			System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
+			//System.out.println(resources.get(1) instanceof CulturalObject);
 		}
 	}
 
