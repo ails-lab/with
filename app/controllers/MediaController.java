@@ -20,12 +20,22 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
+import model.EmbeddedMediaObject.Quality;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Media;
+import model.MediaObject;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource.ResourceType;
 
 import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
@@ -42,6 +52,7 @@ import utils.AccessManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.net.MediaType;
 
 import db.DB;
 
@@ -53,21 +64,24 @@ public class MediaController extends Controller {
 	 */
 	public static Result getMetadataOrFile(String mediaId, boolean file) {
 
-		Media media = null;
+		MediaObject media = null;
 		try {
-			media = DB.getMediaDAO().findById(new ObjectId(mediaId));
+			media = DB.getMediaObjectDAO().findById(new ObjectId(mediaId));
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
 			return internalServerError("Cannot retrieve media document from database");
 		}
 
 		if (file) {
-			return ok(media.getData()).as(media.getMimeType());
+//			confirm this is right! .as Changes the Content-Type header for this result. 
+			//Logger.info(media.getMimeType().toString());
+			return ok(media.getMediaBytes()).as(media.getMimeType().toString());
 		} else {
+			Logger.info("boom");
+			//Logger.info(media.getMimeType().toString());
 			JsonNode result = Json.toJson(media);
 			return ok(result);
 		}
-
 	}
 
 	/**
@@ -85,26 +99,33 @@ public class MediaController extends Controller {
 		if (file) {
 			return ok(Json.newObject().put("message", "not implemeted yet!"));
 		} else {
-			Media newMedia = null;
+			MediaObject newMedia = null;
 			try {
-				newMedia = DB.getMediaDAO().findById(new ObjectId(id));
+				newMedia = DB.getMediaObjectDAO().findById(new ObjectId(id));
 
 				// set metadata
-
+				
+//				//why should these be set by a user if we can extract them automatically?
+//				//is this just a workaround for videos?
 				if (json.has("width"))
 					newMedia.setWidth(json.get("width").asInt());
 				if (json.has("height"))
 					newMedia.setHeight(json.get("height").asInt());
+				//how to check if it's in seconds?
 				if (json.has("duration"))
-					newMedia.setDuration((float) json.get("duration")
+					newMedia.setDurationSeconds((float) json.get("duration")
 							.asDouble());
 				if (json.has("mimeType"))
-					newMedia.setMimeType(json.get("mimeType").asText());
-				if (json.has("type"))
-					newMedia.setType(Media.BaseType.valueOf(json.get("type")
-							.asText()));
+					newMedia.setMimeType(MediaType.parse(json.get("mimeType").asText()));
 
-				DB.getMediaDAO().makePermanent(newMedia);
+//				MAKE custom parser like above or just delete this option? maybe just put
+//				it as a string like marios said?				
+//								
+//				if (json.has("type"))
+//					newMedia.setType(Media.BaseType.valueOf(json.get("type")
+//							.asText()));
+
+				DB.getMediaObjectDAO().makePermanent(newMedia);
 			} catch (Exception e) {
 				log.error("Cannot store Media object to database!", e);
 				result.put("message", "Cannot store Media object to database");
@@ -123,7 +144,7 @@ public class MediaController extends Controller {
 		ObjectNode result = Json.newObject();
 
 		try {
-			DB.getMediaDAO().deleteById(new ObjectId(id));
+			DB.getMediaObjectDAO().deleteById(new ObjectId(id));
 		} catch (Exception e) {
 			result.put("message", "Cannot delete media object from database");
 			return internalServerError(result);
@@ -142,6 +163,219 @@ public class MediaController extends Controller {
 	 * @return
 	 */
 	public static Result createMedia(boolean fileData) {
+		ObjectNode result = Json.newObject();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		//if (userIds.isEmpty())
+		//	return forbidden();
+		if (fileData) {
+			final Http.MultipartFormData multipartBody = request().body()
+					.asMultipartFormData();
+			if (multipartBody != null) {
+				ArrayNode allRes = result.arrayNode();
+				for (FilePart fp : multipartBody.getFiles()) {
+					try {
+						ObjectNode singleRes = Json.newObject();
+						MediaObject med = new MediaObject();
+						
+						med.setMimeType(MediaType.parse(fp.getContentType()));
+						Logger.info(med.getMimeType().toString());
+						
+						// in KB!
+						med.setSize(fp.getFile().length()/1024);
+						
+						Map<String, String[]> formData = multipartBody.asFormUrlEncoded();
+						
+//						//make them nested ifs? i mean if there is no image url can there be thumb url?
+						
+						if(formData.containsKey("url")){
+							med.setUrl(formData.get("url")[0]);
+						}
+						
+						if(formData.containsKey("thumbnailUrl")){
+							med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
+						}
+						
+//						//how do we get these? :/ is it possible to post a json array in multipartform?
+//						a function to withmediarights from string :(								
+						//String[] withMediaRights = formData.get("withMediaRights");
+						
+						if(formData.containsKey("resourceType")){
+							if(formData.containsKey("uri")){
+								LiteralOrResource lit = new LiteralOrResource();
+//								ASKOASKASKASK	
+//								a function to parse resourcetype from string :(								
+								//String x = formData.get("resourceType")[0];
+								// if they upload a new resource...
+								lit.setResource(ResourceType.withRepository, formData.get("uri")[0]);
+								med.setOriginalRights(lit);
+							}
+						}
+						
+						if(med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)){
+							med.setType(WithMediaType.IMAGE);
+							BufferedImage image = ImageIO.read(fp.getFile());
+							int height = image.getHeight();
+							int width = image.getWidth();
+							med.setHeight(height);
+							med.setWidth(width);
+							
+//							//PROBABLY WRONG!
+							long size = med.getSize();
+							
+							if(size<1){
+								med.setQuality(Quality.IMAGE_SMALL);
+							} else if(size<500){
+								med.setQuality(Quality.IMAGE_500k);
+							} else if(size<1000) {
+								med.setQuality(Quality.IMAGE_1);
+							} else {
+								med.setQuality(Quality.IMAGE_4);
+							}
+
+							//thumbnail
+							
+							
+							if(!formData.containsKey("thumbnailUrl")){
+								Image ithumb = image.getScaledInstance(211, -1,
+										Image.SCALE_SMOOTH);
+								// Create a buffered image with transparency
+								BufferedImage thumb = new BufferedImage(
+										ithumb.getWidth(null),
+										ithumb.getHeight(null), image.getType());
+								// Draw the image on to the buffered image
+								Graphics2D bGr = thumb.createGraphics();
+								bGr.drawImage(ithumb, 0, 0, null);
+								bGr.dispose();
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								ImageIO.write(thumb, "jpg", baos);
+								baos.flush();
+								byte[] thumbByte = baos.toByteArray();
+								baos.close();
+								med.setThumbnailBytes(thumbByte);
+							} else { //cache thumb from the url!
+								URL url = new URL(med.getThumbnailUrl());
+								Image ithumb = ImageIO.read(url);
+							    
+								BufferedImage thumb = new BufferedImage(
+										ithumb.getWidth(null),
+										ithumb.getHeight(null), image.getType());
+								// Draw the image on to the buffered image
+								Graphics2D bGr = thumb.createGraphics();
+								bGr.drawImage(ithumb, 0, 0, null);
+								bGr.dispose();
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								ImageIO.write(thumb, "jpg", baos);
+								baos.flush();
+								byte[] thumbByte = baos.toByteArray();
+								baos.close();
+								med.setThumbnailBytes(thumbByte);							    
+							}
+							//endimage
+							
+							
+//						} else if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
+//							med.setType(WithMediaType.VIDEO);
+//							//durationSeconds
+//							//width, height
+//							//thumbnailBytes
+							//Quality
+//							
+							//
+							
+//						} else if(med.getMimeType().is(MediaType.ANY_TEXT_TYPE)){
+//							med.setType(WithMediaType.TEXT);
+//
+//						} else if(med.getMimeType().is(MediaType.ANY_AUDIO_TYPE)){
+//							med.setType(WithMediaType.AUDIO);
+//							//durationSeconds
+//							//Quality
+
+						} else {
+							
+							Logger.info("OHNO");
+							//impossible!? (ANY_APPLICATION_TYPE) (reject)
+							singleRes.put("error", "Unsupported media type "
+									+ fp.getFilename());
+							allRes.add(singleRes);
+							log.error("Media create error", "Unsupported media type");
+						}
+						
+						med.setMediaBytes(FileUtils.readFileToByteArray(fp.getFile()));						
+						med.setDbId(null);
+						DB.getMediaObjectDAO().makePermanent(med);
+						
+						singleRes.put("isShownBy", "/media/"
+								+ med.getDbId().toString());
+						singleRes.put("externalId", med.getDbId().toString());
+						allRes.add(singleRes);
+					} catch (Exception e) {
+						ObjectNode singleRes = Json.newObject();
+						singleRes.put("error", "Couldn't create from file "
+								+ fp.getFilename());
+						allRes.add(singleRes);
+						log.error("Media create error", e);
+					}
+				}
+				
+				
+//				med.setUrl() //how should the call be changed if the user wants to provide this?
+//							 //also this needs to be made permanent first and then get its dbid
+//							 //to set the internalurl.... see your friend the user manager !
+
+				result.put("results", allRes);
+			} else {
+				final Map<String, String[]> req = request().body()
+						.asFormUrlEncoded();
+				Logger.info("whosp");
+				if (req != null) {
+					// this should be rare for file data
+				} else {
+					final JsonNode jsonBody = request().body().asJson();
+					if (jsonBody != null) {
+						// we extract the media and maybe some metadata from the
+						// json body
+
+					} else {
+						// raw body to file upload
+						// problem, there is absolutely no metadata, so don't
+						// know what to put in the Media Object
+						try {
+							MediaObject med = new MediaObject();
+							med.setMediaBytes(request().body().asRaw().asBytes());
+							DB.getMediaObjectDAO().makePermanent(med);
+							result.put("Success", "Media object created!");
+							result.put("mediaId", med.getDbId().toString());
+						} catch (Exception e) {
+							result.put("error", "Couldn't create Media object");
+							log.error("Media create error", e);
+						}
+					}
+				}
+			}
+		} else {
+			// metadata based media creation
+			
+			//does this mean we have to connect to the uri and get the media?
+			System.out.println("whops!");
+
+		}
+		return ok(result);
+	}
+	
+	
+	///delete?
+
+	/**
+	 * Allow media create with two different methods, by first supplying
+	 * metadata or a file File data can arrive in different ways. Whole body is
+	 * file content, form based file upload, or json field with encoded file
+	 * data.
+	 * 
+	 * @param fileData
+	 * @return
+	 */
+	public static Result oldCreateMedia(boolean fileData) {
 		ObjectNode result = Json.newObject();
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
@@ -282,4 +516,7 @@ public class MediaController extends Controller {
 		}
 		return ok(result);
 	}
+	
+	
+	
 }

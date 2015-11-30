@@ -20,13 +20,22 @@ import java.util.ArrayList;
 import java.util.Set;
 
 import model.basicDataTypes.LiteralOrResource;
+import utils.MediaTypeConverter;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Converters;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
 
+@Entity
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Converters(MediaTypeConverter.class)
 public class EmbeddedMediaObject {
 
 
@@ -63,13 +72,22 @@ public class EmbeddedMediaObject {
 	        return text;
 	    }
 	}
+	
+	private int width, height;
+	
+	
+	// I understood we also want these right?
+//	private int thumbWidth, thumbHeight;
 
+	
+	
 	private WithMediaType type;
 	private Set<WithMediaRights> withRights;
-
+	
 	// if the thumbnail is externally provided
 	private String thumbnailUrl;
 	// the media objects URL
+	
 	private String url;
     
 	/*These do not have to be saved in the db
@@ -79,20 +97,47 @@ public class EmbeddedMediaObject {
 	// with urls for embedded or cached objects
 	private String withUrl;
 	private String withThumbnailUrl;*/
-
-
+	
+	
 	private LiteralOrResource originalRights;
 	/*
 	 *  file name type values specified here:
 	 *  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/MediaType.html
 	 */
+	
 	private MediaType mimeType;
-
+	
 	public static enum Quality {
 		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
 		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
+	
+	
+	//added by mike
+	
+	//in KB
+	private long size;
+	
+	private Quality quality;
+	
+	public long getSize() {
+		return size;
+	}
 
+	public void setSize(long size) {
+		this.size = size;
+	}
+
+	
+	public Quality getQuality() {
+		return quality;
+	}
+
+	public void setQuality(Quality quality) {
+		this.quality = quality;
+	}
+
+	
 	public WithMediaType getType() {
 		return type;
 	}
@@ -156,4 +201,18 @@ public class EmbeddedMediaObject {
 	public void setMimeType(MediaType mimeType) {
 		this.mimeType = mimeType;
 	}
+	
+	public int getWidth() {
+		return width;
+	}
+	public void setWidth(int width) {
+		this.width = width;
+	}
+	public int getHeight() {
+		return height;
+	}
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
 }

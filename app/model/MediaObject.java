@@ -51,15 +51,16 @@ public class MediaObject extends EmbeddedMediaObject {
 	// if there is none, the media object is publicly available
 	private ArrayList<ObjectId> resources;
 
-	private int width, height;
-
 	private double durationSeconds;
 
 	@JsonIgnore
 	private byte[] thumbnailBytes;
 	@JsonIgnore
 	private byte[] mediaBytes;
-
+	
+	
+	
+	
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -73,18 +74,6 @@ public class MediaObject extends EmbeddedMediaObject {
 	}
 	public void setResources(ArrayList<ObjectId> resources) {
 		this.resources = resources;
-	}
-	public int getWidth() {
-		return width;
-	}
-	public void setWidth(int width) {
-		this.width = width;
-	}
-	public int getHeight() {
-		return height;
-	}
-	public void setHeight(int height) {
-		this.height = height;
 	}
 	public double getDurationSeconds() {
 		return durationSeconds;
