@@ -28,6 +28,10 @@ public class ProvenanceInfo {
 	private String uri;
 	private String recordId;
 	
+	
+	public ProvenanceInfo() {
+	}
+	
 	public ProvenanceInfo(String provider) {
 		this.provider = provider;
 	}

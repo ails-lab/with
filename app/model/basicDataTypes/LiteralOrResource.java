@@ -18,10 +18,14 @@ package model.basicDataTypes;
 
 public class LiteralOrResource extends Literal {
 	
-	/*public LiteralOrResource(ResourceType type, String uri) {
+	public LiteralOrResource() {
+		super();
+	}
+	
+	public LiteralOrResource(ResourceType type, String uri) {
 		super("uriType", type.toString());
 		put("uri", uri);
-	}*/
+	}
 
 	// resources we do understand about and can process further (or not)
 	// uri being general and difficult to process

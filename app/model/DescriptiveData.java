@@ -31,9 +31,12 @@ import model.basicDataTypes.LiteralOrResource;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DescriptiveData {
 	
-	/*public DescriptiveData(Literal label) {
+	public DescriptiveData() {
+	}
+	
+	public DescriptiveData(Literal label) {
 		this.label = label;
-	}*/
+	}
 	// one line content description with identifiable characteristic
 	@NotNull
 	@NotBlank

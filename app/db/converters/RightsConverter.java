@@ -28,7 +28,7 @@ import com.mongodb.DBObject;
 
 public class RightsConverter extends TypeConverter {
 
-	public RightsConverter( ) {
+	public RightsConverter() {
 		super( WithAccess.class );
 	}
 	
