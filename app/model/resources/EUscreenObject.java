@@ -30,10 +30,6 @@ public class EUscreenObject extends RecordResource<EUscreenObject.EUscreenData> 
 		// title is filled in with original language title and english title
 		// description dito
 		
-
-		public EUscreenData(Literal label) {
-			super(label);
-		}
 		String broadcastChannel;
 		Date brodcastDate;
 		

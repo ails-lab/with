@@ -25,6 +25,9 @@ public class Literal extends HashMap<String, String> {
 		EN, UNKNOWN, ANY;
 	}
 	
+	public Literal() {
+	}
+	
 	public Literal(String label) {
 		this.put(Language.UNKNOWN.toString(), label);
 	}

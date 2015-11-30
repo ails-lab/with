@@ -14,7 +14,7 @@
  */
 
 
-package db.resources;
+package db;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,6 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import db.DAO;
-import db.DB;
 import utils.Tuple;
 import model.Collection;
 import model.basicDataTypes.WithAccess.Access;

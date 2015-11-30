@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.util.Date;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
@@ -148,7 +149,8 @@ public class RecordResourceController extends Controller {
 			ObjectId creator = new ObjectId(session().get("user"));
 			String resourceType = json.get("resourceType").asText();
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			RecordResource resource = (RecordResource) Json.fromJson(json, clazz);
+			RecordResource resource = (RecordResource) Json.fromJson(json,
+					clazz);
 			Set<ConstraintViolation<RecordResource>> violations = Validation
 					.getValidator().validate(resource);
 			if (!violations.isEmpty()) {
@@ -160,9 +162,12 @@ public class RecordResourceController extends Controller {
 				error.put("error", properties);
 				return badRequest(error);
 			}
-			WithAccess withAccess = new WithAccess();
-			withAccess.put(creator, Access.OWN);
-			resource.getAdministrative().setAccess(new WithAccess());
+			// Fill with all the administrative metadata
+			resource.getAdministrative().setWithCreator(creator);
+			resource.getAdministrative().setCreated(new Date());
+			resource.getAdministrative().setLastModified(new Date());
+			// TODO: withURI?
+			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
 			return ok(Json.toJson(resource));
 		} catch (Exception e) {
@@ -201,8 +206,6 @@ public class RecordResourceController extends Controller {
 						"User does not have the right to edit the resource");
 				return forbidden(error);
 			}
-			Class<?> clazz = Class.forName("model.resources."
-					+ oldResource.getResourceType().toString());
 			// TODO change JSON at all its depth
 			ObjectMapper objectMapper = new ObjectMapper();
 			ObjectReader updator = objectMapper.readerForUpdating(oldResource);
@@ -219,6 +222,7 @@ public class RecordResourceController extends Controller {
 				error.put("error", properties);
 				return badRequest(error);
 			}
+			newResource.getAdministrative().setLastModified(new Date());
 			DB.getRecordResourceDAO().makePermanent(newResource);
 			return ok(Json.toJson(newResource));
 		} catch (Exception e) {

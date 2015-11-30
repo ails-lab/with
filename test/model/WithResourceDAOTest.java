@@ -16,6 +16,7 @@
 
 package model;
 import java.util.Date;
+import java.util.List;
 
 import model.DescriptiveData;
 import model.basicDataTypes.Literal;
@@ -27,6 +28,7 @@ import model.resources.RecordResource;
 import model.resources.WithResource;
 import static org.fest.assertions.Assertions.assertThat;
 
+import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import db.DB;
@@ -47,29 +49,31 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
-			DescriptiveData description = new RecordResource.RecordDescriptiveData(new Literal(Language.EN, "TestWebResource" + i));
-			description.setDescription(new Literal(Language.EN, "Some description"));
-			//CulturalObject c = new CulturalObject();
+			DescriptiveData model = new RecordResource.RecordDescriptiveData(new Literal(Language.EN, "TestWithResource" + i));
+			model.setDescription(new Literal(Language.EN, "Some description"));
+			withResource.setModel(model);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 		}*/
 		
-		for (int i = 0; i < 5; i++) {
-
-			// a user creates a new collection
+		for (int i = 0; i < 1; i++) {
 			CulturalObject withResource = new CulturalObject();
-			withResource.setUsage(new WithResource.Usage());
 			withResource.getUsage().setLikes(i);
-			withResource.addToProvenance(new ProvenanceInfo("provider0"));
+			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
 			WithAccess access = new WithAccess();
-			//access.put(new ObjectId(), WithAccess.Access.READ);
+			access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
-			DescriptiveData description = new RecordResource.RecordDescriptiveData(new Literal(Language.EN, "TestWebResource" + i));
-			description.setDescription(new Literal(Language.EN, "Some description"));
-			/*CulturalObject c = new CulturalObject();*/
-			assertThat(DB.getCulturalObjectDAO().makePermanent(withResource)).isNotEqualTo(null);
+			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
+			model.setLabel(new Literal(Language.EN, "TestWithResourceX" + i));
+			model.setDescription(new Literal(Language.EN, "Some description"));
+			withResource.setModel(model);
+			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
+			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(new Literal(Language.EN, "TestWithResourceX" + i));
+			CulturalObject o = (CulturalObject) resources.get(0);
+			System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
+			//System.out.println(resources.get(1) instanceof CulturalObject);
 		}
 	}
 

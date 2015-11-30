@@ -14,7 +14,7 @@
  */
 
 
-package db;
+package db.converters;
 
 import model.basicDataTypes.WithAccess;
 
@@ -28,7 +28,7 @@ import com.mongodb.DBObject;
 
 public class RightsConverter extends TypeConverter {
 
-	public RightsConverter( ) {
+	public RightsConverter() {
 		super( WithAccess.class );
 	}
 	

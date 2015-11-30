@@ -18,6 +18,10 @@ package model.basicDataTypes;
 
 public class LiteralOrResource extends Literal {
 	
+	public LiteralOrResource() {
+		super();
+	}
+	
 	public LiteralOrResource(ResourceType type, String uri) {
 		super("uriType", type.toString());
 		put("uri", uri);

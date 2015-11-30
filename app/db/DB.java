@@ -45,9 +45,7 @@ import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
-import db.resources.CollectionObjectDAO;
-import db.resources.MediaObjectDAO;
-import db.resources.RecordResourceDAO;
+import db.converters.RightsConverter;
 
 // get the DAOs from here
 // the EntityManagerFactory is here
@@ -160,7 +158,7 @@ public class DB {
 	 */
 	
 	public static CollectionObjectDAO getCollectionObjectDAO() {
-		return (CollectionObjectDAO) getDao(CollectionObject.class, null);
+		return (CollectionObjectDAO) getDAO(CollectionObject.class);
 	}
 	
 	public static MediaObjectDAO getMediaObjectDAO() {
@@ -175,11 +173,10 @@ public class DB {
 	 * in the far future.
 	 */
 	
-	public static RecordResourceDAO<RecordResource> getRecordResourceDAO() {
-		return (RecordResourceDAO<RecordResource>) 
-				getDao(RecordResource.class, null);
+	public static RecordResourceDAO getRecordResourceDAO() {
+		return (RecordResourceDAO) getDAO(RecordResource.class);
 	}
-
+/*
 	public static RecordResourceDAO<AgentObject>.AgentObjectDAO getAgentObjectDAO() {
 		return (RecordResourceDAO<AgentObject>.AgentObjectDAO) 
 				getDao(AgentObject.class, RecordResource.class);
@@ -209,7 +206,7 @@ public class DB {
 		return (RecordResourceDAO<TimespanObject>.TimespanObjectDAO) 
 				getDao(TimespanObject.class, RecordResource.class);
 	}
-	
+*/	
 
 	/**
 	 * Signleton DAO for all the entities
@@ -227,13 +224,13 @@ public class DB {
 		if(dao == null)  {
 			try {
 				String daoClassName;
-				if(parentClazz == null)
-					daoClassName = "db.resources." + clazz.getSimpleName() + "DAO";
-				else 
-					daoClassName = "db.resources." + parentClazz.getSimpleName() + "DAO." 
+				if (parentClazz == null)
+					daoClassName = "db." + clazz.getSimpleName() + "DAO";
+				else
+					daoClassName = "db." + parentClazz.getSimpleName() + "DAO." 
 									+ clazz.getSimpleName() + "DAO";
 				Class<?> daoClass = Class.forName(daoClassName);
-				dao = (DAO<T>) daoClass.newInstance();
+				dao = (DAO<?>) daoClass.newInstance();
 				daos.put(clazz.getSimpleName(), dao);
 			} catch(Exception e) {
 				log.error("Can't instantiate DAO for " + clazz.getName(), e);

@@ -30,9 +30,6 @@ import model.resources.RecordResource.RecordDescriptiveData;
 public class EventObject extends RecordResource<EventObject.EventData> {
 	
 	public static class EventData extends RecordDescriptiveData {
-		public EventData(Literal label) {
-			super(label);
-		}
 		ArrayList<WithPeriod> period;
 		ArrayList<LiteralOrResource> personsInvolved;
 		ArrayList<LiteralOrResource> placesInvolved;

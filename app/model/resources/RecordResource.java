@@ -23,9 +23,6 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData> exte
 	
 	public static class RecordDescriptiveData extends DescriptiveData {
 
-		public RecordDescriptiveData(Literal label) {
-			super(label);
-		}
 	}
 
 }

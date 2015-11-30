@@ -29,8 +29,10 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DescriptiveData {
+	
+	public DescriptiveData() {
+	}
 	
 	public DescriptiveData(Literal label) {
 		this.label = label;

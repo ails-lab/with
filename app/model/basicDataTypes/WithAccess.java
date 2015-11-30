@@ -23,7 +23,7 @@ import model.basicDataTypes.WithAccess.Access;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 
-import db.RightsConverter;
+import db.converters.RightsConverter;
 
 /**
  * 

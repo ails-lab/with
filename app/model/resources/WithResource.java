@@ -57,13 +57,15 @@ public class WithResource<T extends DescriptiveData> {
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
-		private WithAccess access;
+		private WithAccess access = new WithAccess();
 
 		/*
-		 * withCreator is empty in cases of records imported from external resources.
-		 * For resources uploaded by a user, it links to the userId who uploaded that resource.
-		 * For collections, it links to the userId who created the collection.
+		 * withCreator is empty in cases of records imported from external
+		 * resources. For resources uploaded by a user, it links to the userId
+		 * who uploaded that resource. For collections, it links to the userId
+		 * who created the collection.
 		 */
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId withCreator;
 
 		// uri that this resource has in the rdf repository
@@ -80,8 +82,6 @@ public class WithResource<T extends DescriptiveData> {
 		@Embedded
 		@JsonSerialize(using = Serializer.CustomMapSerializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
-
-
 
 		public WithAccess getAccess() {
 			return access;
@@ -111,11 +111,10 @@ public class WithResource<T extends DescriptiveData> {
 		public Date getLastModified() {
 			return lastModified;
 		}
-		
+
 		public void setLastModified(Date lastModified) {
 			this.lastModified = lastModified;
 		}
-
 
 		public void addForModeration(ObjectId groupId, Access access) {
 			this.underModeration.put(groupId, access);
@@ -144,10 +143,11 @@ public class WithResource<T extends DescriptiveData> {
 		}
 
 		public User retrieveWithCreator() {
-			ObjectId userId = getWithCreator() ;
+			ObjectId userId = getWithCreator();
 			if (userId != null)
 				return DB.getUserDAO().getById(userId, null);
-			else return null;
+			else
+				return null;
 		}
 
 	}
@@ -212,10 +212,10 @@ public class WithResource<T extends DescriptiveData> {
 	}
 
 	/**
-	 * If we know about collections from our sources, the info goes here
-	 * For single records, fill in the position or next in sequence, for
-	 * general collection linking, omit it (i.e. if the resource is of type
-	 * collection, the colletionUri refers to the external "equivalent" collection).
+	 * If we know about collections from our sources, the info goes here For
+	 * single records, fill in the position or next in sequence, for general
+	 * collection linking, omit it (i.e. if the resource is of type collection,
+	 * the colletionUri refers to the external "equivalent" collection).
 	 *
 	 */
 	public static class ExternalCollection {
@@ -230,45 +230,56 @@ public class WithResource<T extends DescriptiveData> {
 		public String getSource() {
 			return source;
 		}
+
 		public void setSource(String source) {
 			this.source = source;
 		}
+
 		public String getCollectionUri() {
 			return collectionUri;
 		}
+
 		public void setCollectionUri(String collectionUri) {
 			this.collectionUri = collectionUri;
 		}
+
 		public String getNextInSequenceUri() {
 			return nextInSequenceUri;
 		}
+
 		public void setNextInSequenceUri(String nextInSequenceUri) {
 			this.nextInSequenceUri = nextInSequenceUri;
 		}
+
 		public int getPosition() {
 			return position;
 		}
+
 		public void setPosition(int position) {
 			this.position = position;
 		}
+
 		public String getTitle() {
 			return title;
 		}
+
 		public void setTitle(String title) {
 			this.title = title;
 		}
+
 		public String getDescription() {
 			return description;
 		}
+
 		public void setDescription(String description) {
 			this.description = description;
 		}
 	}
 
 	public static enum WithResourceType {
-		 WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
+		WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
 	}
-	
+
 	@Id
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
@@ -280,23 +291,27 @@ public class WithResource<T extends DescriptiveData> {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-	
+
+	@Embedded
 	private WithAdmin administrative;
 
 	@Embedded
 	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
 
-
+	@Embedded
 	private Usage usage;
 
-	//external collections to which the resource may belong to
+	@Embedded
+	// external collections to which the resource may belong to
 	private ArrayList<ExternalCollection> externalCollections;
+	@Embedded
 	private ArrayList<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
 	private WithResourceType resourceType;
 
 	// metadata
+	@Embedded
 	private T model;
 
 	// All the available content serializations
@@ -311,20 +326,20 @@ public class WithResource<T extends DescriptiveData> {
 	private HashMap<String, ContextAnnotation> contextAnnotation;
 
 	private ArrayList<Annotation> annotations;
-	
+
 	public WithResource() {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 	}
-	
+
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
 	}
-	
+
 	/*
 	 * Getters/Setters
 	 */
@@ -424,14 +439,6 @@ public class WithResource<T extends DescriptiveData> {
 
 	public void setAnnotations(ArrayList<Annotation> annotations) {
 		this.annotations = annotations;
-	}
-
-	public boolean getIsPublic() {
-		return administrative.access.isPublic();
-	}
-
-	public void setIsPublic(boolean isPublic) {
-		administrative.access.setPublic(isPublic);
 	}
 
 	/*

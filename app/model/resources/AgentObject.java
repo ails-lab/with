@@ -30,9 +30,7 @@ import model.resources.RecordResource.RecordDescriptiveData;
 public class AgentObject extends RecordResource<AgentObject.AgentData> {
 
 	public static class AgentData extends RecordDescriptiveData {
-		public AgentData(Literal label) {
-			super(label);
-		}
+
 		ArrayList<WithDate> birthdate;
 		ArrayList<LiteralOrResource> birthplace;
 		ArrayList<WithDate> deathdate;
