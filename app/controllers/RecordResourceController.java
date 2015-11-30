@@ -148,7 +148,8 @@ public class RecordResourceController extends Controller {
 			ObjectId creator = new ObjectId(session().get("user"));
 			String resourceType = json.get("resourceType").asText();
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			RecordResource resource = (RecordResource) Json.fromJson(json, clazz);
+			RecordResource resource = (RecordResource) Json.fromJson(json,
+					clazz);
 			Set<ConstraintViolation<RecordResource>> violations = Validation
 					.getValidator().validate(resource);
 			if (!violations.isEmpty()) {
@@ -162,7 +163,7 @@ public class RecordResourceController extends Controller {
 			}
 			WithAccess withAccess = new WithAccess();
 			withAccess.put(creator, Access.OWN);
-			resource.getAdministrative().setAccess(new WithAccess());
+			resource.getAdministrative().setAccess(withAccess);
 			DB.getRecordResourceDAO().makePermanent(resource);
 			return ok(Json.toJson(resource));
 		} catch (Exception e) {
