@@ -16,7 +16,6 @@
 
 package db;
 
-import db.resources.CommonResourcesDAO;
 import model.resources.AgentObject;
 import model.resources.CulturalObject;
 import model.resources.EUscreenObject;

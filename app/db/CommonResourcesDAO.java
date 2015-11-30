@@ -14,7 +14,7 @@
  */
 
 
-package db.resources;
+package db;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,9 +31,6 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
-
-import db.DAO;
-import db.DB;
 
 /*
  * The class consists of methods that can be both query 
