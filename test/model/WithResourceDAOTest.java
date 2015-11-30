@@ -55,11 +55,11 @@ public class WithResourceDAOTest {
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 		}*/
 		
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 1; i++) {
 			System.out.println(i);
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
-			withResource.addToProvenance(new ProvenanceInfo("provider0"));
+			//withResource.addToProvenance(new ProvenanceInfo("provider0"));
 			WithAccess access = new WithAccess();
 			//access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
@@ -67,11 +67,15 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResource" + i));
-			model.setDescription(new Literal(Language.EN, "Some description"));
+			Literal label  = new Literal();
+			label.setLiteral(Language.EN, "TestWithResourceDD" + i);
+			model.setLabel(label);
+			Literal description = new Literal();
+			description.setLiteral(Language.EN, "Some description");
+			model.setDescription(description);
 			withResource.setModel(model);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(new Literal(Language.EN, "TestWithResource" + i));
+			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(label);
 			System.out.println(resources);
 			/*System.out.println(resources.get(0) instanceof CulturalObject);
 			System.out.println(resources.get(1) instanceof CulturalObject);*/
