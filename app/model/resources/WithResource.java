@@ -57,7 +57,7 @@ public class WithResource<T extends DescriptiveData> {
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
-		private WithAccess access;
+		private WithAccess access = new WithAccess();
 
 		/*
 		 * withCreator is empty in cases of records imported from external
@@ -65,6 +65,7 @@ public class WithResource<T extends DescriptiveData> {
 		 * who uploaded that resource. For collections, it links to the userId
 		 * who created the collection.
 		 */
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId withCreator;
 
 		// uri that this resource has in the rdf repository
