@@ -81,7 +81,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user1);
+		col.setCreatorId(user1);
 		DB.getCollectionDAO().makePermanent(col);
 
 		running(fakeApplication(), new Runnable() {
@@ -99,7 +99,7 @@ public class TestCollectionController {
 				assertThat(status(result)).isEqualTo(FORBIDDEN);
 				// Check that change of owner for the collection updates the
 				// rights correctly
-				col.setOwnerId(user2.getDbId());
+				col.setCreatorId(user2.getDbId());
 				DB.getCollectionDAO().makePermanent(col);
 				result = route(fakeRequest("GET",
 						"/collection/" + col.getDbId()).withSession("user",
@@ -137,7 +137,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user1);
+		col.setCreatorId(user1);
 		DB.getCollectionDAO().makePermanent(col);
 
 		running(fakeApplication(), new Runnable() {
@@ -147,7 +147,7 @@ public class TestCollectionController {
 						"/collection/" + col.getDbId()).withSession("user",
 						user1.getDbId().toHexString()));
 				assertThat(status(result)).isEqualTo(OK);
-				col.setOwnerId(user2);
+				col.setCreatorId(user2);
 				DB.getCollectionDAO().makePermanent(col);
 				result = route(fakeRequest("DELETE",
 						"/collection/" + col.getDbId()).withSession("user",
@@ -176,7 +176,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		running(fakeApplication(), new Runnable() {
@@ -259,7 +259,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		Collection col1 = new Collection();
@@ -269,7 +269,7 @@ public class TestCollectionController {
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
 		col1.setIsPublic(false);
-		col1.setOwnerId(user);
+		col1.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col1);
 
 		running(fakeApplication(), new Runnable() {
@@ -322,7 +322,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		col.getFirstEntries().add(record);
 		DB.getCollectionDAO().makePermanent(col);
 
@@ -333,7 +333,7 @@ public class TestCollectionController {
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
 		col1.setIsPublic(false);
-		col1.setOwnerId(user);
+		col1.setCreatorId(user);
 		col1.getFirstEntries().add(record);
 		DB.getCollectionDAO().makePermanent(col1);
 
@@ -377,7 +377,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(false);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 
 		for (int i = 0; i < 30; i++) {
@@ -438,7 +438,7 @@ public class TestCollectionController {
 		col.setCreated(new Date());
 		col.setLastModified(new Date());
 		col.setIsPublic(true);
-		col.setOwnerId(user);
+		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
 		ElasticIndexer indexer = new ElasticIndexer(col);
 		indexer.indexCollectionMetadata();
@@ -449,7 +449,7 @@ public class TestCollectionController {
 		col1.setCreated(new Date());
 		col1.setLastModified(new Date());
 		col1.setIsPublic(true);
-		col1.setOwnerId(user);
+		col1.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col1);
 
 		running(fakeApplication(), new Runnable() {

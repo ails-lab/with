@@ -216,6 +216,10 @@ public class DB {
 	 * @return
 	 */
 	private static <T> DAO<?> getDao(Class<T> clazz, Class<?> parentClazz) {
+		if(clazz.getSimpleName().equals("WithResource")
+			|| parentClazz.equals("WithResource")) {
+			
+		}
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if(dao == null)  {
 			try {

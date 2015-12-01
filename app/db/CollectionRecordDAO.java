@@ -34,11 +34,13 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		super(CollectionRecord.class);
 	}
 
+	//added
 	public CollectionRecord getById(ObjectId id) {
 		Query<CollectionRecord> q = this.createQuery().field("_id").equal(id);
 		return this.findOne(q);
 	}
 
+	//added
 	/**
 	 * Retrieve records from specific collection
 	 *
@@ -48,7 +50,9 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	public List<CollectionRecord> getByCollection(ObjectId colId) {
 		return getByCollectionOffsetCount(colId, 0, -1);
 	}
+	
 
+	//added
 	/**
 	 * Retrieve records from specific collection by offset and count
 	 *
@@ -62,6 +66,8 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).asList();
 	}
 
+	
+	//added - not used like this
 	/**
 	 * Retrieve the total amount of records within a collection
 	 */
@@ -71,6 +77,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
+	//added
 	public List<CollectionRecord> getBySource(String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
 		// .field("source").equal(source)
@@ -78,12 +85,14 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).asList();
 	}
 
+	//added
 	public List<CollectionRecord> getByExternalId(ObjectId colId, String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId).field("externalId").equal(extId);
 		return this.find(q).asList();
 	}
 
+	//added
 	public int getTotalLikes(String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("externalId")
 				.equal(extId).limit(1);
@@ -94,6 +103,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 			return 0;
 	}
 
+	//added
 	public long countBySource(String sourceId) {
 		Query<CollectionRecord> q = this.createQuery()
 		// .field("source").equal(source)
@@ -101,12 +111,14 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
+	//added
 	public List<CollectionRecord> getByExternalId(String extId) {
 		Query<CollectionRecord> q = this.createQuery().field("externalId")
 				.equal(extId);
 		return this.find(q).asList();
 	}
 
+	//added
 	public long countByExternalId(String extId) {
 		Query<CollectionRecord> q = this.createQuery()
 		// .field("source").equal(source)
@@ -114,12 +126,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return this.find(q).countAll();
 	}
 
-	public int deleteByCollection(ObjectId colId) {
-		Query<CollectionRecord> q = this.createQuery().field("collectionId")
-				.equal(colId);
-		return this.deleteByQuery(q).getN();
-	}
-
+	//added
 	public void shiftRecordsToRight(ObjectId colId, int position) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId).field("position").greaterThanOrEq(position);
@@ -128,6 +135,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		this.update(q, updateOps);
 	}
 
+	//added
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
 				.equal(colId).field("position").greaterThan(position);
@@ -136,6 +144,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		this.update(q, updateOps);
 	}
 
+	//added
 	/**
 	 * This method is to update the 'public' field on all the records of a
 	 * collection. By default update method is invoked to all documents of a
@@ -152,6 +161,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		this.update(q, updateOps);
 	}
 
+	//added
 	public void updateContent(ObjectId recId, String format, String content) {
 		Query<CollectionRecord> q = this.createQuery().field("_id")
 				.equal(recId);
@@ -162,6 +172,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 
 	}
 
+	//added
 	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
 		List<CollectionRecord> mergedRecord = getByExternalId(extId);
 		for (CollectionRecord mr : mergedRecord) {
@@ -171,6 +182,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		return false;
 	}
 
+	//added
 	public void incrementLikes(String externalId) {
 		Query<CollectionRecord> q = this.createQuery().field("externalId")
 				.equal(externalId);
@@ -180,6 +192,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 		this.update(q, updateOps);
 	}
 
+	//added
 	public void decrementLikes(String externalId) {
 		Query<CollectionRecord> q = this.createQuery().field("externalId")
 				.equal(externalId);

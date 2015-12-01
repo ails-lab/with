@@ -16,6 +16,10 @@
 
 package db;
 
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+
+import model.CollectionRecord;
 import model.resources.AgentObject;
 import model.resources.CulturalObject;
 import model.resources.EUscreenObject;
@@ -47,10 +51,19 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 	}
 
 	/*
-	 * These are embedded classes for very specific queries
-	 * in the far future.
+	 * DAO Methods
 	 */
-/*
+	public int deleteByCollection(ObjectId colId) {
+		Query<T> q = this.createQuery().field("collectedIn.coldId").exists();
+		return this.deleteByQuery(q).getN();
+	}
+	
+	/* 
+	 * ********************************************************
+	 * These are embedded classes for very specific queries   *
+	 * in the far future.                                     *
+	 * ********************************************************
+	 */
 	public class AgentObjectDAO extends RecordResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
@@ -98,7 +111,9 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 		}
 
 	}
-
-*/
+	/* ********************************************
+	 * End of embedded DAO classes                *
+	 * ********************************************
+	 */
 
 }
