@@ -8,18 +8,16 @@
             </ul>
             <!-- action-->
             <ul class="action">
-               <li class="close"> 
-					<a href="#" title="collect" data-bind="visible: loggedUser, event: { click: function(data,event) { collect(record(),event); } }"><img src="images/logos/wsmall.png" width="20"></a></li>
+            	<li class="close"><span class="fa-stack fa-fw"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close.png"></a></span></li>
          
               <li class="close"> <span class="star" data-bind="css: { active: isLiked(record().externalId()) }, visible: loggedUser">
-						<span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
+			 <span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span></li>
-			<li class="close"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close.png"></a></li>
-              
-			 
-            </ul>
+			 <li class="close" title="collect"><span class="fa-stack fa-fw" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"><i class="fa fa-download fa-stack-1x"></i>
+						</span></li>
+             </ul>
           </div>
         </nav>
         <!-- section media details-->

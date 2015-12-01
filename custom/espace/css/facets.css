@@ -19,8 +19,8 @@
 	font-size: 20px;
 	position: absolute;
 	display:none;
-	top: 0px;
-	right: 18px;
+	 top: 3px;
+    right: 25px;
 	width: 36px;
 	z-index: 1;
 }

@@ -2,12 +2,9 @@
 			<div class="md-content">
 			    <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
 				<h3 class="truncate">
-				 <span class="withcollect" data-bind="event: {click: collect}">
-				 
-				 
- 						 <img src="images/logos/wsmall.png" width="20">
-				
-				<span class="collectit"> collect it</span>				
+				 <span class="withcollect">
+						<a class="btn btn-default btn-sm" data-bind="event: {click: collect}">
+                   <i class="fa fa-download"></i> Collect it</a>
 				</span>
 				<!-- ko text: record().title() --><!-- /ko --> 
 				</h3>

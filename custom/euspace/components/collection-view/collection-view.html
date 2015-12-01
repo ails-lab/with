@@ -32,13 +32,14 @@
               
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
-               <span class="star" data-bind="css: { active: isLiked }, visible: $parent.loggedUser">
+                       <span class="star" data-bind="css: { active: isLiked }, visible: $parent.loggedUser" title="add to favorites">
 						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
+						<span class="collect" title="collect" data-bind="visible: $parent.loggedUser, event: { click: function() { $parent.collect($data); } }"><i class="fa fa-download fa-stack-1x fa-inverse"></i>
+						</span>
 					</span>
-					<span class="collect"><a href="#" title="collect" data-bind="visible: $parent.loggedUser, event: { click: function() { $parent.collect($data); } }"><img src="images/logos/wsmall.png" width="20"></a></span>
-                <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
+		        <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->
