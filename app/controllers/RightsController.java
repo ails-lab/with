@@ -71,8 +71,10 @@ public class RightsController extends Controller {
 		}
 		List<String> userIds = Arrays.asList(session().get("effectiveUserIds")
 				.split(","));
+		ObjectId userId = new ObjectId(session().get("user"));
+		User admin = DB.getUserDAO().get(userId);
 		if (!AccessManager.checkAccess(collection.getRights(), userIds,
-				Action.DELETE)) {
+				Action.DELETE) && !admin.isSuperUser()) {
 			result.put("error",
 					"Sorry! You do not own this collection so you cannot set rights. "
 							+ "Please contact the owner of this collection");
@@ -127,44 +129,57 @@ public class RightsController extends Controller {
 			NotificationCenter.sendNotification(notification);
 			result.put("mesage", "Collection unshared with user or group");
 			return ok(result);
-		}
-		Access access = Access.valueOf(right);
-		List<Notification> requests = DB.getNotificationDAO()
-				.getPendingCollectionNotifications(userOrGroupId, collectionId,
-						Activity.COLLECTION_SHARE, access);
-		if (requests.isEmpty()) {
-			// Find if there is a request for other type of access and override
-			// it
-			requests = DB.getNotificationDAO()
-					.getPendingCollectionNotifications(userOrGroupId,
-							collectionId, Activity.COLLECTION_SHARE);
-			for (Notification request : requests) {
-				request.setPendingResponse(false);
-				Date now = new Date();
-				request.setReadAt(new Timestamp(now.getTime()));
-				DB.getNotificationDAO().makePermanent(request);
+		} else if (admin.isSuperUser()) {
+			collection.getRights().put(userOrGroupId, Access.valueOf(right));
+			if (DB.getCollectionDAO().makePermanent(collection) == null) {
+				result.put("error", "Cannot store collection to database!");
+				return internalServerError(result);
 			}
-			// Make a new request for collection sharing request
-			Notification notification = new Notification();
-			notification.setActivity(Activity.COLLECTION_SHARE);
-			if (groupRelated) {
-				notification.setGroup(userOrGroupId);
-			}
-			notification.setAccess(access);
-			notification.setReceiver(userOrGroupId);
-			notification.setCollection(collectionId);
-			notification.setSender(owner);
-			notification.setPendingResponse(true);
-			Date now = new Date();
-			notification.setOpenedAt(new Timestamp(now.getTime()));
-			DB.getNotificationDAO().makePermanent(notification);
-			NotificationCenter.sendNotification(notification);
-			result.put("message",
-					"Request for collection sharing sent to the user");
+			// update collection rights in index
+			ElasticUpdater updater = new ElasticUpdater(collection);
+			updater.updateCollectionRights();
+			result.put("message", "Collection shared");
 			return ok(result);
 		} else {
-			result.put("error", "Request has already been sent to the user");
-			return badRequest(result);
+			Access access = Access.valueOf(right);
+			List<Notification> requests = DB.getNotificationDAO()
+					.getPendingCollectionNotifications(userOrGroupId,
+							collectionId, Activity.COLLECTION_SHARE, access);
+			if (requests.isEmpty()) {
+				// Find if there is a request for other type of access and
+				// override
+				// it
+				requests = DB.getNotificationDAO()
+						.getPendingCollectionNotifications(userOrGroupId,
+								collectionId, Activity.COLLECTION_SHARE);
+				for (Notification request : requests) {
+					request.setPendingResponse(false);
+					Date now = new Date();
+					request.setReadAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(request);
+				}
+				// Make a new request for collection sharing request
+				Notification notification = new Notification();
+				notification.setActivity(Activity.COLLECTION_SHARE);
+				if (groupRelated) {
+					notification.setGroup(userOrGroupId);
+				}
+				notification.setAccess(access);
+				notification.setReceiver(userOrGroupId);
+				notification.setCollection(collectionId);
+				notification.setSender(owner);
+				notification.setPendingResponse(true);
+				Date now = new Date();
+				notification.setOpenedAt(new Timestamp(now.getTime()));
+				DB.getNotificationDAO().makePermanent(notification);
+				NotificationCenter.sendNotification(notification);
+				result.put("message",
+						"Request for collection sharing sent to the user");
+				return ok(result);
+			} else {
+				result.put("error", "Request has already been sent to the user");
+				return badRequest(result);
+			}
 		}
 	}
 }

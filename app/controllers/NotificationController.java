@@ -71,7 +71,8 @@ public class NotificationController extends Controller {
 			}
 			ObjectId receiver = notification.getReceiver();
 			if (!receiver.equals(currentUser.getDbId())
-					&& !currentUser.getAdminInGroups().contains(receiver)) {
+					&& !currentUser.getAdminInGroups().contains(receiver)
+					&& !currentUser.isSuperUser()) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
 			}
