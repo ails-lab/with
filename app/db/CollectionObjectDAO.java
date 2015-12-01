@@ -28,7 +28,6 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import utils.Tuple;
-import model.Collection;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.User;
@@ -36,7 +35,7 @@ import model.usersAndGroups.User;
 public class CollectionObjectDAO extends CommonResourcesDAO<CollectionObject> {
 
 	/*
-	 * The constructor is optional becuse the explicit 
+	 * The constructor is optional becuse the explicit
 	 * type is passed through generics.
 	 */
 	public CollectionObjectDAO() {

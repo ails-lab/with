@@ -54,6 +54,7 @@ import model.usersAndGroups.User;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
+import org.eclipse.jetty.util.ajax.JSON;
 import org.junit.Test;
 
 import com.google.common.net.MediaType;
@@ -64,11 +65,12 @@ public class CollectionObjectTest {
 
 	@Test
 	public void modelCollection() {
-		
+
 		CollectionObject co = new CollectionObject();
 
 		/*
 		 * Owner of the CollectionObject
+		 *
 		 */
 		/*User u = DB.getUserDAO().getByUsername("qwerty");
 		if(u == null) {
@@ -122,13 +124,14 @@ public class CollectionObjectTest {
 		medias.add(emo);
 		co.setMedia(medias);
 
-		if(DB.getCollectionObjectDAO().makePermanent(co) == null) System.out.println("No storage!");
+		if(DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 		if(co.getDbId() != null) System.out.println("The first CollectionObject presenting a collection was saved!");
 
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
-		
+
 		System.out.println(DB.getCollectionObjectDAO().getByLabel(new Literal(Language.EN, "MyTitle")));
+
 	}
 
 
