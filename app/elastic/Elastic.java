@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 
 import model.Collection;
+import model.CollectionRecord;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
@@ -242,6 +243,25 @@ public class Elastic {
 		} catch( Exception e ) {
 			log.error( "ReIndexing problem", e );
 		}
+	}
+
+	public static void reindex_records() {
+		// hopefully delete index and reput it in place
+				getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
+				putMapping();
+
+				Callback<CollectionRecord> callback = new Callback<CollectionRecord>() {
+				@Override
+					public void invoke(CollectionRecord r ) throws Throwable {
+						ElasticIndexer ei = new ElasticIndexer( r );
+						ei.index();
+					}
+				};
+				try {
+					DB.getCollectionRecordDAO().onAll( callback, false );
+				} catch( Exception e ) {
+					log.error( "ReIndexing problem", e );
+				}
 	}
 
 }

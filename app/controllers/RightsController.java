@@ -138,6 +138,19 @@ public class RightsController extends Controller {
 			// update collection rights in index
 			ElasticUpdater updater = new ElasticUpdater(collection);
 			updater.updateCollectionRights();
+			Notification newNotification = new Notification();
+			newNotification.setActivity(Activity.COLLECTION_SHARED);
+			if (groupRelated) {
+				newNotification.setGroup(userOrGroupId);
+			}
+			newNotification.setReceiver(userOrGroupId);
+			newNotification.setCollection(collectionId);
+			newNotification.setSender(owner);
+			newNotification.setPendingResponse(false);
+			Date now = new Date();
+			newNotification.setOpenedAt(new Timestamp(now.getTime()));
+			DB.getNotificationDAO().makePermanent(newNotification);
+			NotificationCenter.sendNotification(newNotification);
 			result.put("message", "Collection shared");
 			return ok(result);
 		} else {
