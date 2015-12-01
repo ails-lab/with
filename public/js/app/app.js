@@ -149,7 +149,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 	};
 
 	var WS = window['MozWebSocket'] ? MozWebSocket : WebSocket;
-	self.notificationSocket = new WS("ws://localhost:9000/notifications/socket");
+	self.notificationSocket = new WS("ws://" + window.location.host + "/notifications/socket");
 
 	self.receiveEvent = function (event) {
 		var notification = JSON.parse(event.data);
