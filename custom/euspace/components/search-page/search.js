@@ -637,6 +637,17 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				}
 			});
 		};
+		
+		collect = function (id,event) {
+			event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
+				return record.externalId=== id;
+			});
+			console.log(rec);
+			
+			collectionShow(rec);
+		};
+
  
         function getItem(record) {
 			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
@@ -647,7 +658,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				    else{tile+='<span class="star"  id='+record.externalId+'>';}
 					tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
-						+'</span></span>';}
+						+'</span></span>';
+						//+'<span class="collect"><a href="#" title="collect" onclick="collect(\'' + record.externalId + '\',event)"><img src="images/logos/wsmall.png" width="20"></a></span>';
+					}
                      tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
                       +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                       +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
