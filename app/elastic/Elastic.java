@@ -228,8 +228,8 @@ public class Elastic {
 
 	public static void reindex() {
 		// hopefully delete index and reput it in place
-		getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
-		putMapping();
+		//getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
+		//putMapping();
 
 		Callback<Collection> callback = new Callback<Collection>() {
 		@Override
@@ -247,8 +247,8 @@ public class Elastic {
 
 	public static void reindex_records() {
 		// hopefully delete index and reput it in place
-				getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
-				putMapping();
+		//getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
+		//putMapping();
 
 				Callback<CollectionRecord> callback = new Callback<CollectionRecord>() {
 				@Override
