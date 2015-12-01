@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import utils.MediaTypeConverter;
 
+import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
@@ -43,6 +44,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @Converters(MediaTypeConverter.class)
 public class MediaObject extends EmbeddedMediaObject {
 	
+	public static enum Orientation {
+		PORTRAIT, LANDSCAPE
+	}
+
+	
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
@@ -51,16 +57,48 @@ public class MediaObject extends EmbeddedMediaObject {
 	// if there is none, the media object is publicly available
 	private ArrayList<ObjectId> resources;
 
-	private double durationSeconds;
-
 	@JsonIgnore
 	private byte[] thumbnailBytes;
 	@JsonIgnore
 	private byte[] mediaBytes;
 	
 	
+	//extended stuff
+	
+//	//is an Enum but i leave it here till we decide upon the libraries to use
+	private String codec;
+	
+	private double durationSeconds;
+	
+	//pdf only
+	private int spatialResolution;
+	
+	private int sampleSize;
+	
+	private int sampleRate;
+	
+	private int bitRate;
+	
+	private int frameRate;
+	
+//	//also an Enum!
+	private String colorSpace;
+	
+//	//use different Hex?
+	private Hex componentColor;
+	
+	private Orientation orientation;
+	
+	private int audioChannelNumber;
 	
 	
+	
+	
+	
+	
+	
+	// Setters/Getters
+		
 	public ObjectId getDbId() {
 		return dbId;
 	}
@@ -94,6 +132,93 @@ public class MediaObject extends EmbeddedMediaObject {
 		this.mediaBytes = mediaBytes;
 	}
 
+	public String getCodec() {
+		return codec;
+	}
+
+	public void setCodec(String codec) {
+		this.codec = codec;
+	}
+
+	public int getSpatialResolution() {
+		return spatialResolution;
+	}
+
+	public void setSpatialResolution(int spatialResolution) {
+		this.spatialResolution = spatialResolution;
+	}
+
+	public int getSampleSize() {
+		return sampleSize;
+	}
+
+	public void setSampleSize(int sampleSize) {
+		this.sampleSize = sampleSize;
+	}
+
+	public int getSampleRate() {
+		return sampleRate;
+	}
+
+	public void setSampleRate(int sampleRate) {
+		this.sampleRate = sampleRate;
+	}
+
+	public int getBitRate() {
+		return bitRate;
+	}
+
+	public void setBitRate(int bitRate) {
+		this.bitRate = bitRate;
+	}
+
+	public int getFrameRate() {
+		return frameRate;
+	}
+
+	public void setFrameRate(int frameRate) {
+		this.frameRate = frameRate;
+	}
+
+	public String getColorSpace() {
+		return colorSpace;
+	}
+
+	public void setColorSpace(String colorSpace) {
+		this.colorSpace = colorSpace;
+	}
+
+	public Hex getComponentColor() {
+		return componentColor;
+	}
+
+	public void setComponentColor(Hex componentColor) {
+		this.componentColor = componentColor;
+	}
+
+	public Orientation getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(Orientation orientation) {
+		this.orientation = orientation;
+	}
+	
+	public void setOrientation(){
+		if(this.getWidth()>=this.getHeight()){
+			this.orientation = Orientation.LANDSCAPE;
+		} else {
+			this.orientation = Orientation.PORTRAIT;
+		}
+	}
+
+	public int getAudioChannelNumber() {
+		return audioChannelNumber;
+	}
+
+	public void setAudioChannelNumber(int audioChannelNumber) {
+		this.audioChannelNumber = audioChannelNumber;
+	}
 
 
 }

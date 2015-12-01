@@ -21,6 +21,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -164,42 +165,36 @@ public class MediaController extends Controller {
 	 */
 	public static Result createMedia(boolean fileData) {
 		ObjectNode result = Json.newObject();
+		ArrayNode allRes = result.arrayNode();
+
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		//if (userIds.isEmpty())
 		//	return forbidden();
+		ObjectNode singleRes = Json.newObject();
+		MediaObject med = new MediaObject();
+
 		if (fileData) {
 			final Http.MultipartFormData multipartBody = request().body()
 					.asMultipartFormData();
 			if (multipartBody != null) {
-				ArrayNode allRes = result.arrayNode();
 				for (FilePart fp : multipartBody.getFiles()) {
 					try {
-						ObjectNode singleRes = Json.newObject();
-						MediaObject med = new MediaObject();
-						
 						med.setMimeType(MediaType.parse(fp.getContentType()));
-						Logger.info(med.getMimeType().toString());
-						
 						// in KB!
 						med.setSize(fp.getFile().length()/1024);
 						
+						//get data from multipartBody
 						Map<String, String[]> formData = multipartBody.asFormUrlEncoded();
 						
-//						//make them nested ifs? i mean if there is no image url can there be thumb url?
-						
 						if(formData.containsKey("url")){
-							med.setUrl(formData.get("url")[0]);
+							singleRes.put("warn", "External url is ignored when uploading files");
+							allRes.add(singleRes);
 						}
 						
-						if(formData.containsKey("thumbnailUrl")){
-							med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
-						}
+//						String[] withMediaRights = formData.get("withMediaRights");
 						
-//						//how do we get these? :/ is it possible to post a json array in multipartform?
-//						a function to withmediarights from string :(								
-						//String[] withMediaRights = formData.get("withMediaRights");
-						
+//						name keys accordignly?						
 						if(formData.containsKey("resourceType")){
 							if(formData.containsKey("uri")){
 								LiteralOrResource lit = new LiteralOrResource();
@@ -213,88 +208,19 @@ public class MediaController extends Controller {
 						}
 						
 						if(med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)){
-							med.setType(WithMediaType.IMAGE);
-							BufferedImage image = ImageIO.read(fp.getFile());
-							int height = image.getHeight();
-							int width = image.getWidth();
-							med.setHeight(height);
-							med.setWidth(width);
-							
-//							//PROBABLY WRONG!
-							long size = med.getSize();
-							
-							if(size<1){
-								med.setQuality(Quality.IMAGE_SMALL);
-							} else if(size<500){
-								med.setQuality(Quality.IMAGE_500k);
-							} else if(size<1000) {
-								med.setQuality(Quality.IMAGE_1);
-							} else {
-								med.setQuality(Quality.IMAGE_4);
-							}
-
-							//thumbnail
-							
-							
-							if(!formData.containsKey("thumbnailUrl")){
-								Image ithumb = image.getScaledInstance(211, -1,
-										Image.SCALE_SMOOTH);
-								// Create a buffered image with transparency
-								BufferedImage thumb = new BufferedImage(
-										ithumb.getWidth(null),
-										ithumb.getHeight(null), image.getType());
-								// Draw the image on to the buffered image
-								Graphics2D bGr = thumb.createGraphics();
-								bGr.drawImage(ithumb, 0, 0, null);
-								bGr.dispose();
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-								ImageIO.write(thumb, "jpg", baos);
-								baos.flush();
-								byte[] thumbByte = baos.toByteArray();
-								baos.close();
-								med.setThumbnailBytes(thumbByte);
-							} else { //cache thumb from the url!
-								URL url = new URL(med.getThumbnailUrl());
-								Image ithumb = ImageIO.read(url);
-							    
-								BufferedImage thumb = new BufferedImage(
-										ithumb.getWidth(null),
-										ithumb.getHeight(null), image.getType());
-								// Draw the image on to the buffered image
-								Graphics2D bGr = thumb.createGraphics();
-								bGr.drawImage(ithumb, 0, 0, null);
-								bGr.dispose();
-								ByteArrayOutputStream baos = new ByteArrayOutputStream();
-								ImageIO.write(thumb, "jpg", baos);
-								baos.flush();
-								byte[] thumbByte = baos.toByteArray();
-								baos.close();
-								med.setThumbnailBytes(thumbByte);							    
-							}
-							//endimage
-							
+							imageUpload(allRes, singleRes, med, fp, formData);
 							
 //						} else if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
-//							med.setType(WithMediaType.VIDEO);
-//							//durationSeconds
-//							//width, height
-//							//thumbnailBytes
-							//Quality
-//							
-							//
-							
+//							med.setType(WithMediaType.VIDEO);//durationSeconds //width, height //thumbnailBytes //Quality						
+//						
 //						} else if(med.getMimeType().is(MediaType.ANY_TEXT_TYPE)){
 //							med.setType(WithMediaType.TEXT);
 //
 //						} else if(med.getMimeType().is(MediaType.ANY_AUDIO_TYPE)){
-//							med.setType(WithMediaType.AUDIO);
-//							//durationSeconds
-//							//Quality
+//							med.setType(WithMediaType.AUDIO); //durationSeconds	//Quality
 
 						} else {
-							
-							Logger.info("OHNO");
-							//impossible!? (ANY_APPLICATION_TYPE) (reject)
+							//(ANY_APPLICATION_TYPE?)
 							singleRes.put("error", "Unsupported media type "
 									+ fp.getFilename());
 							allRes.add(singleRes);
@@ -310,19 +236,13 @@ public class MediaController extends Controller {
 						singleRes.put("externalId", med.getDbId().toString());
 						allRes.add(singleRes);
 					} catch (Exception e) {
-						ObjectNode singleRes = Json.newObject();
+						singleRes = Json.newObject();
 						singleRes.put("error", "Couldn't create from file "
 								+ fp.getFilename());
 						allRes.add(singleRes);
 						log.error("Media create error", e);
 					}
 				}
-				
-				
-//				med.setUrl() //how should the call be changed if the user wants to provide this?
-//							 //also this needs to be made permanent first and then get its dbid
-//							 //to set the internalurl.... see your friend the user manager !
-
 				result.put("results", allRes);
 			} else {
 				final Map<String, String[]> req = request().body()
@@ -341,7 +261,7 @@ public class MediaController extends Controller {
 						// problem, there is absolutely no metadata, so don't
 						// know what to put in the Media Object
 						try {
-							MediaObject med = new MediaObject();
+							med = new MediaObject();
 							med.setMediaBytes(request().body().asRaw().asBytes());
 							DB.getMediaObjectDAO().makePermanent(med);
 							result.put("Success", "Media object created!");
@@ -354,13 +274,172 @@ public class MediaController extends Controller {
 				}
 			}
 		} else {
+			
 			// metadata based media creation
 			
-			//does this mean we have to connect to the uri and get the media?
-			System.out.println("whops!");
+			JsonNode json = null;
+			json = request().body().asJson();
+			if(json==null){
+				result.put("error", "Empty Json Body (file parameter is false)");
+				return badRequest(result);
+			}
+			
+			if(json.has("url")){
+				med.setUrl(json.get("url").asText());
+			} else {
+				result.put("error", "You need to provide an external url for the media object");
+				return badRequest(result);
+			}
+			
+			String type = null;
+			if(json.has("type")){
+				type = json.get("type").asText();
+			} else {
+				//maybe after we can extract this by connecting to the url
+				result.put("error", "Type is a mandatory field that needs to be provided");
+				return badRequest(result);
+			}
+			
+			if(type.toLowerCase().contains("image")){
+				med.setType(WithMediaType.IMAGE);
+				
+				if(json.has("height")&&json.has("width")){
+					if(json.get("height").canConvertToInt() && json.get("width").canConvertToInt()){
+						med.setHeight(json.get("height").asInt());
+						med.setWidth(json.get("width").asInt());
+					} else {
+						result.put("error", "Height and width need to be integers");
+						return badRequest(result);
+					}
+				} else {
+					if(json.has("height")||json.has("width")){
+						result.put("error", "You need to provide both height and width");
+						return badRequest(result);
+					}
+				}
+			
+				//make thumb if empty?
+				if(json.has("thumbnail")){
+					med.setThumbnailUrl(json.get("thumbnail").asText());
+					
+					if(json.has("thumbHeight")&&json.has("thumbWidth")){
+						if(json.get("thumbHeight").canConvertToInt() && json.get("thumbWidth").canConvertToInt()){
+							med.setThumbHeight(json.get("thumbHeight").asInt());
+							med.setThumbWidth(json.get("thumbWidth").asInt());
+						} else {
+							result.put("error", "Thumbnail height and width need to be integers");
+							return badRequest(result);
+						}
+					} else
+						if(json.has("height")||json.has("width")){
+							result.put("error", "You need to provide both thumbnail height and width");
+							return badRequest(result);
+						}
+					}
 
+				
+				
+//				} else if(type.toLowerCase().contains("video")){
+//						med.setType(WithMediaType.VIDEO);//durationSeconds //width, height //thumbnailBytes //Quality						
+//					
+//				} else if(type.toLowerCase().contains("text")){
+//						med.setType(WithMediaType.TEXT);
+//
+//				} else if(type.toLowerCase().contains("audio")){
+//						med.setType(WithMediaType.AUDIO); //durationSeconds	//Quality
+					
+				} else { 
+					result.put("error", "Wrong or unsupported media type");
+					return badRequest(result);
+				}
+				
+				
 		}
 		return ok(result);
+	}
+
+	private static void imageUpload(ArrayNode allRes, ObjectNode singleRes, MediaObject med, FilePart fp,
+			Map<String, String[]> formData) throws IOException {
+		med.setType(WithMediaType.IMAGE);
+		BufferedImage image = ImageIO.read(fp.getFile());
+		int height = image.getHeight();
+		int width = image.getWidth();
+		med.setHeight(height);
+		med.setWidth(width);
+		
+		//thumbnail
+		
+		if(!formData.containsKey("thumbnailUrl")){
+			makeThumb(med, image);
+		} else {
+			String thumbURL = med.getThumbnailUrl();
+			String param = "thumbnail";
+			BufferedImage ithumb = null;
+			//just a warning that the thumb won't work
+			//should we create it then?
+			checkImageURL(allRes, singleRes, thumbURL, param, ithumb);
+			med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
+		}
+		
+//		Discuss quality enumeration!
+//		long size = med.getSize();
+//				
+//		if(size<1){
+//			med.setQuality(Quality.IMAGE_SMALL);
+//		} else if(size<500){
+//			med.setQuality(Quality.IMAGE_500k);
+//		} else if(size<1000) {
+//			med.setQuality(Quality.IMAGE_1);
+//		} else {
+//			med.setQuality(Quality.IMAGE_4);
+//		}
+		
+	}
+
+	//this method checks if the url is an image or not 
+	//it returns true or false based on that
+	//and also gives a warning in the JSON results
+	private static boolean checkImageURL(ArrayNode allRes, ObjectNode singleRes, String inputURL,
+			String stringParam, Image img) {
+		if(stringParam==null){
+			stringParam = "an image";
+		}
+		try{
+			//url = new URL(med.getUrl());
+			//ithumb = ImageIO.read(url);
+			URL url = new URL(inputURL);
+			img = ImageIO.read(url);
+		} catch (Exception e){
+			//maybe we dont want to exclude them from adding bad urls (temporary 404s?)
+			singleRes.put("warn", "Cannot read " + stringParam + " from URL: "
+					+ inputURL);
+			allRes.add(singleRes);
+			return false;
+		}
+		return true;
+	}
+
+//	use the libraries we will use for video editing!
+	private static void makeThumb(MediaObject med, BufferedImage image) throws IOException {
+		Image ithumb = image.getScaledInstance(211, -1,
+				Image.SCALE_SMOOTH);
+		// Create a buffered image with transparency
+		BufferedImage thumb = new BufferedImage(
+				ithumb.getWidth(null),
+				ithumb.getHeight(null), image.getType());
+		// Draw the image on to the buffered image
+		Graphics2D bGr = thumb.createGraphics();
+		bGr.drawImage(ithumb, 0, 0, null);
+		bGr.dispose();
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(thumb, "jpg", baos);
+		baos.flush();
+		byte[] thumbByte = baos.toByteArray();
+		baos.close();
+		med.setThumbnailBytes(thumbByte);
+		
+		med.setThumbWidth(thumb.getWidth());
+		med.setThumbHeight(thumb.getHeight());
 	}
 	
 	

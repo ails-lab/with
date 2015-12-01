@@ -76,18 +76,17 @@ public class EmbeddedMediaObject {
 	private int width, height;
 	
 	
-	// I understood we also want these right?
-//	private int thumbWidth, thumbHeight;
-
+//	// I understood we also want these right?
+	private int thumbWidth, thumbHeight;
 	
 	
 	private WithMediaType type;
+	
 	private Set<WithMediaRights> withRights;
 	
 	// if the thumbnail is externally provided
 	private String thumbnailUrl;
 	// the media objects URL
-	
 	private String url;
     
 	/*These do not have to be saved in the db
@@ -193,7 +192,7 @@ public class EmbeddedMediaObject {
 	public void setOriginalRights(LiteralOrResource originalRights) {
 		this.originalRights = originalRights;
 	}
-
+	
 	public MediaType getMimeType() {
 		return mimeType;
 	}
@@ -213,6 +212,23 @@ public class EmbeddedMediaObject {
 	}
 	public void setHeight(int height) {
 		this.height = height;
+	}
+	
+
+	public int getThumbWidth() {
+		return thumbWidth;
+	}
+
+	public void setThumbWidth(int thumbWidth) {
+		this.thumbWidth = thumbWidth;
+	}
+
+	public int getThumbHeight() {
+		return thumbHeight;
+	}
+
+	public void setThumbHeight(int thumbHeight) {
+		this.thumbHeight = thumbHeight;
 	}
 
 }
