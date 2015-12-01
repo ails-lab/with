@@ -14,7 +14,7 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 			}).done(function (data, textStatus, jqXHR) {
 				notification.pending(false);
 				notification.unread(false);
-				app.currentUser.notificatios.unread(app.currentUser.notification.unread() - 1);
+				app.currentUser.notifications.unread(app.currentUser.notifications.unread() - 1);
 			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// TODO: Display error message
 			});
@@ -27,7 +27,7 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 			}).done(function (data, textStatus, jqXHR) {
 				notification.pending(false);
 				notification.unread(false);
-				app.currentUser.notificatios.unread(app.currentUser.notification.unread() - 1);
+				app.currentUser.notifications.unread(app.currentUser.notifications.unread() - 1);
 			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// TODO: Display error message
 			});
