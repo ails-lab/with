@@ -10,7 +10,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.view_url = ko.observable(false);
 		self.source = ko.observable(false);
 		self.creator = ko.observable("");
-		self.dataprovider=ko.observable("");
+		self.dataProvider=ko.observable("");
 		self.provider = ko.observable("");
 		self.rights = ko.observable("");
 		self.url = ko.observable("");
@@ -72,8 +72,8 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			if (data.provider) {
 				self.provider(data.provider);
 			}
-			if (data.dataprovider) {
-				self.dataprovider(data.dataprovider);
+			if (data.dataProvider) {
+				self.dataProvider(data.dataProvider);
 			}
 			if (data.rights) {
 				self.rights(data.rights);
@@ -153,8 +153,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			distitle = self.title();
 			if (self.creator() && self.creator().length > 0)
 				distitle += ", by " + self.creator();
-			if (self.dataprovider() && self.dataprovider().length > 0 && self.dataprovider() != self.creator())
-				distitle += ", " + self.dataprovider();
+			
 			return distitle;
 		});
 

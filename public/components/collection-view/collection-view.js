@@ -41,7 +41,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.creator="";
 		self.provider="";
 		self.rights="";
-		self.dataprovider="";
+		self.dataProvider="";
 		self.url="";
 		self.externalId = "";
 		self.isLoaded = ko.observable(false);
@@ -57,7 +57,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.thumb=data.thumb;
 			self.fullres=data.fullres;
 			self.description=data.description;
-			self.dataprovider=data.dataprovider;
+			self.dataProvider=data.dataProvider;
 			self.source=data.source;
 			self.creator=data.creator;
 			self.provider=data.provider;
@@ -153,7 +153,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						view_url: result.sourceUrl,
 						creator: result.creator,
 						provider: result.provider,
-						dataprovider: result.dataProvider,
+						dataProvider: result.dataProvider,
 						source: result.source,
 						rights: result.rights,
 						externalId: result.externalId

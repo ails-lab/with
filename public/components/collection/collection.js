@@ -311,7 +311,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				sourceId: self.record().recordId(),
 				title: self.record().title(),
 				provider: self.record().provider(),
-				dataprovider: self.record().dataprovider(),
+				dataProvider: self.record().dataProvider(),
 				creator: self.record().creator(),
 				description: self.record().description(),
 				rights: self.record().rights(),
