@@ -32,7 +32,13 @@
 					      
 					      </div>
 					    </div>
-					  
+					  <div class="spec" data-bind="if: record().dataprovider()">
+					      <div class="itemlabel">Data Provider
+					      </div>
+					      <div class="value" data-bind="text:record().dataprovider()">
+					      
+					      </div>
+					    </div>
 					   <div class="spec" data-bind="if: record().provider()">
 					      <div class="itemlabel">Provider
 					      </div>

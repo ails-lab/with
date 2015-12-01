@@ -38,6 +38,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.source="";
 		self.creator="";
 		self.provider="";
+		self.dataProvider="";
 		self.rights="";
 		self.url="";
 		self.externalId = "";
@@ -59,6 +60,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.source=data.source;
 			self.creator=data.creator;
 			self.provider=data.provider;
+			self.dataProvider=data.dataProvider;
 			self.rights=data.rights;
 			self.recordId=data.recordId;
 			self.externalId=data.externalId;
@@ -98,8 +100,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			distitle=self.title;
 			if(self.creator!==undefined && self.creator.length>0)
 				distitle+=", by "+self.creator;
-			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
-				distitle+=", "+self.provider;
+			
 			return distitle;
 		});
 
@@ -400,9 +401,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 								thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
 								fullres: result.fullresolution!=null ? result.fullresolution : "",
 								title: result.title!=null? result.title:"",
+								description: result.description!=null ?result.description: result.title,		
 								view_url: result.url.fromSourceAPI,
 								creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-								provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+								dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+								provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
 								rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 								externalId: result.externalId,
 								source: source
@@ -583,9 +586,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
 						fullres: result.fullresolution!=null ? result.fullresolution : "",
 						title: result.title!=null? result.title:"",
+						description: result.description!=null ? result.description : result.title,
 						view_url: result.url.fromSourceAPI,
 						creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-						provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+						provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
+						dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
 						rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 						externalId: result.externalId,
 						source: source
@@ -645,7 +650,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						+'</span></span>';}
                      tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
                       +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
-                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.provider+'</span></div>'
+                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
                       +'<span class="rights">'+record.sourceCredits()+'</span>'
                      +'</a></div> </div>';
 			return tile;

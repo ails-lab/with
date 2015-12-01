@@ -37,12 +37,13 @@
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
+					<span class="collect"><a href="#" title="collect" data-bind="visible: $parent.loggedUser, event: { click: function() { $parent.collect($data); } }"><img src="images/logos/wsmall.png" width="20"></a></span>
                 <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->
                   <div class="info">
-                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
+                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: dataProvider"></span>
                   </div>
                  <span class="rights" data-bind="text: sourceCredits()"></span>
                   <!-- pointer-->

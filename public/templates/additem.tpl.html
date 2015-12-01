@@ -10,14 +10,14 @@
 					      <div class="itemlabel">Collection
 					      </div>
 					       <div class="value">
-							      <select  class="form-control input-sm xxs" data-bind="selectize:  collectionlist, selectedOptions: selected_items2, options: {maxItems: null,create: true,closeAfterSelect: true,persist:false}" multiple></select>
+							      <select  class="form-control input-sm xxs" id="select_col" data-bind="selectize: collectionlist, selectedOptions: selected_items2, options: {maxItems: null,create: true,closeAfterSelect: true,persist:false}" multiple></select>
 							    </div>
 					   </div>
 					  <div class="spec">
 					      <div class="itemlabel">Description
 					      </div>
 					       <div class="value">
-					      <textarea class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" data-bind="textInput: $parent.record().description()" disabled></textarea>
+					      <textarea class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" data-bind="textInput: record().description" disabled></textarea>
 					      </div>
 					      
 					 </div>
@@ -30,7 +30,7 @@
 					      </div>
 					  </div>
 				 </div>
-				  <div class="col-md-3"><img data-bind="attr: { src:$parent.record().thumb(), alt: $parent.record().title() }" class="img-responsive"/></div>
+				  <div class="col-md-3"><img data-bind="attr: { src:record().thumb, alt: record().title }" class="img-responsive"/></div>
 					  
 		     </div>
 </div>

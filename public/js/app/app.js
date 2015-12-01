@@ -51,7 +51,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 					$(ele).css("display", "none");
 
 					$(element).imagesLoaded(function () {
-						if (ko.contextFor(ele).$parent.loading !== undefined) {
+						if (ko.contextFor(ele).$parent.loading) {
 							ko.contextFor(ele).$parent.loading(false);
 							ko.contextFor(ele).$data.isLoaded(true);
 						}
@@ -278,6 +278,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		"usergroups": ko.observableArray(),
 		"organizations": ko.observableArray(),
 		"projects": ko.observableArray(),
+		"editables":ko.observableArray([]),
 		"notifications": {
 			'unread': ko.observable(0),
 			'userNotifications': ko.observableArray(),
@@ -327,7 +328,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 	};
 
 	self.reloadUser = function () {
-		if (self.currentUser._id === undefined) {
+		if (self.currentUser._id() === undefined) {
 			return;
 		}
 
@@ -369,6 +370,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		self.currentUser.notifications.groupNotifications.removeAll();
 		self.currentUser.notifications.unread(0);
 
+		if(data){
 		// Sort notification array
 		data.sort(function (a, b) {
 			return a.openedAt - b.openedAt;
@@ -377,6 +379,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		// Load notifications
 		for (var i = 0; i < data.length; i++) {
 			self.addNotification(data[i]);
+		}
 		}
 	};
 
@@ -572,17 +575,16 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 
 			function (data) {
 				var array = JSON.parse(JSON.stringify(data.collectionsOrExhibitions));
-				var editables = [];
+				self.currentUser.editables.removeAll();
+				var temparray=[];
 				array.forEach(function (item) {
-					editables.push({
+					temparray.push({
 						title: item.title,
 						dbId: item.dbId
 					});
 				});
-				if (sessionStorage.getItem('User') !== null)
-					sessionStorage.setItem("EditableCollections", JSON.stringify(editables));
-				else if (localStorage.getItem('User') !== null)
-					localStorage.setItem("EditableCollections", JSON.stringify(editables));
+				self.currentUser.editables.push.apply(self.currentUser.editables,temparray);
+				return (self.currentUser.editables());
 			}).fail(function (request, status, error) {});
 	};
 

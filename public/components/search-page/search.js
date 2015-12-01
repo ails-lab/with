@@ -21,6 +21,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.source="";
 		self.creator="";
 		self.provider="";
+		self.dataprovider="";
 		self.rights="";
 		self.url="";
 		self.externalId = "";
@@ -43,6 +44,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.source=data.source;
 			self.creator=data.creator;
 			self.provider=data.provider;
+			self.dataprovider=data.dataprovider;
 			self.rights=data.rights;
 			self.recordId=data.recordId;
 			self.externalId=data.externalId;
@@ -456,9 +458,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
 						fullres: result.fullresolution!=null ? result.fullresolution : "",
 						title: result.title!=null? result.title:"",
+						description: result.description!=null ? result.description: result.title,
 						view_url: result.url.fromSourceAPI,
 						creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-						provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+						dataprovider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+						provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
 						rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 						externalId: result.externalId,
 						source: result.comesFrom!=null ? result.comesFrom : source

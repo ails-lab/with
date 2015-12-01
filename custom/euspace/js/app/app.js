@@ -94,7 +94,7 @@ define("app", ['knockout'], function (ko) {
 	
 	
 	self.gotoWith=function(){
-		    window.childwith=window.open('../assets/index.html#mycollections', 'with');
+		    window.childwith=window.open('../../assets/index.html#mycollections', 'with');
 		    window.childwith.focus();
 	}
 	
@@ -194,7 +194,8 @@ define("app", ['knockout'], function (ko) {
 						dbId: item.dbId
 					});
 				});
-				console.log(self.currentUser.editables());
+				return (self.currentUser.editables());
+				//console.log(self.currentUser.editables());
 			}).fail(function (request, status, error) {
 		});
 	};
@@ -392,7 +393,8 @@ define("app", ['knockout'], function (ko) {
 			scroll: scroll,
 			likeItem: likeItem,
 			isLiked: isLiked,
-			isLogged: isLogged
+			isLogged: isLogged,
+			getEditableCollections: getEditableCollections
 	 }
 	 
 	 

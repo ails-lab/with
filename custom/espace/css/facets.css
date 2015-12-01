@@ -15,6 +15,32 @@
 	cursor: pointer;
 }
 
+.item .collect {
+	font-size: 20px;
+	position: absolute;
+	display:none;
+	top: 0px;
+	right: 18px;
+	width: 36px;
+	z-index: 1;
+}
+
+.item:hover .collect {
+	color: #dddddd;
+	display: block;
+	cursor: pointer;
+}
+
+
+body [role='main'] .menubar.media .action li .star {
+	text-shadow:none;
+	}
+
+body [role='main'] .menubar.media .action li a {
+    padding: 0px;
+    line-height: 1.5;
+}
+
 .star .fa-inverse {
 	color: #ec5a62;
 }

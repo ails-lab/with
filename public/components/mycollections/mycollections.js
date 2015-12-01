@@ -189,24 +189,20 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.getEditableFromStorage = function () {
-			var collections = sessionStorage.getItem('EditableCollections');
-			if (collections == undefined) {
-				collections = localStorage.getItem('EditableCollections');
-			}
-			if (collections != undefined)
-				return JSON.parse(collections);
-			else
+			
+			var collections = [];
+			if (currentUser!== null){
+				collections = currentUser.editables();
+			    return collections;}
+			else {
+				$.smkAlert({text:'An error has occured. You are no longer logged in', type:'danger', permanent: true});
 				return [];
+			}
+			
+			
 		}
 
-	    //Storage needs to be updated, because collection.js gets user collections from there
-		self.saveCollectionsToStorage = function(collections) {
-			if (sessionStorage.getItem('EditableCollections') != null)
-				sessionStorage.setItem('EditableCollections', JSON.stringify(collections));
-			if (localStorage.getItem('EditableCollections') != null)
-				localStorage.setItem('EditableCollections', JSON.stringify(collections));
-		};
-
+	    
 
 		deleteCollection = function(collectionId) {
 			$.ajax({
@@ -219,12 +215,16 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.sharedCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
-					var collections = self.getEditableFromStorage();
-					var index = arrayFirstIndexOf(collections, function(item) {
-						   return item.dbId === collectionId;
-					});
-					collections.splice(index, 1);
-					self.saveCollectionsToStorage(collections);
+					
+					
+					var theitem= ko.utils.arrayFirst(currentUser.editables(), function(item) {
+						return item.dbId===collectionId;
+			           
+			        });
+
+					currentUser.editables.remove(theitem);
+					//currentUser.editables.splice(index,1);
+					
 				}
 			});
 		};
@@ -239,9 +239,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				setTimeout(self.moreShared(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreSharedCollectionData()===true) {
-				if(self.sharedCollections().length<19){
+				/*if(self.sharedCollections().length<19){
 					self.moreSharedCollectionData(false);
-				}else{
+				}else{*/
 					self.loading(true);
 					var offset = self.sharedCollections().length;
 					$.ajax({
@@ -263,7 +263,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 							self.loading(false);
 						}
 					});
-				}
+				/*}*/
 			}
 			
 			
@@ -512,12 +512,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						else if (self.collectionSet == "shared") {
 							self.updateCollectionData(self.sharedCollections(), collIndex);
 						}
-						var editables = self.getEditableFromStorage();
-						var editIndex = arrayFirstIndexOf(editables, function(item) {
-							   return item.dbId === collId;
-						});
-						editables[editIndex].title = self.titleToEdit();
-						self.saveCollectionsToStorage(editables);
+						
+						var editItem= ko.utils.arrayFirst(currentUser.editables(), function(item) {
+							return item.dbId===collId;
+				           
+				        });
+						editItem.title=self.titleToEdit();
 					},
 					error: function(error) {
 						var r = JSON.parse(error.responseText);
@@ -579,9 +579,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				ko.mapping.fromJS(data, newCollection);
 				self.sharedCollections.unshift(newCollection);
 			}
-			var editables = self.getEditableFromStorage();
-			editables.unshift({title: newCollection.title, dbId:newCollection.dbId});
-			self.saveCollectionsToStorage(editables);
+			//currentUser.editables.unshift({title: newCollection.title, dbId:newCollection.dbId});
+		
 		}
 
 		

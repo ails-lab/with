@@ -1,4 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'], function ($, ko, router, kom) {
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header','./app'], function ($, ko, router, kom,app) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
@@ -23,7 +23,13 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('contact', { require: 'components/statichtml/statichtml' });
 	ko.components.register('privacy', { require: 'components/statichtml/statichtml' });
 	ko.components.register('terms', { require: 'components/statichtml/statichtml' });
+	ko.components.register('login-page', { require: 'components/login-register-page/login-register' });
 	
+	
+	ko.components.register('popup-login', {
+		viewModel: { require: 'components/login-register-page/login-register' },
+		template: { require: 'text!components/login-register-page/popup-login.html' }
+	});
 	// ... or for template-only components, you can just point to a .html file directly:
 	
 	

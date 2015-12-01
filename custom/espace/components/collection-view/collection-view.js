@@ -39,6 +39,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.source="";
 		self.creator="";
 		self.provider="";
+		self.dataProvider="";
 		self.rights="";
 		self.url="";
 		self.externalId = "";
@@ -58,6 +59,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.source=data.source;
 			self.creator=data.creator;
 			self.provider=data.provider;
+			self.dataProvider=data.dataProvider;
 			self.rights=data.rights;
 			self.recordId=data.id;
 			self.externalId=data.externalId;
@@ -104,8 +106,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			distitle=self.title;
 			if(self.creator!==undefined && self.creator.length>0)
 				distitle+=", by "+self.creator;
-			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
-				distitle+=", "+self.provider;
+			
 			return distitle;
 		});
 
@@ -144,7 +145,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					var result = data[i];
 					var record = new Record({
 						id: result.dbId,
+						description: result.description,
 						thumb: result.thumbnailUrl,
+						dataProvider: result.dataProvider,
 						title: result.title,
 						view_url: result.sourceUrl,
 						creator: result.creator,
@@ -235,6 +238,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					$('#' + rec.recordId).removeClass('active');
 				}
 			});
+		};
+
+		self.collect = function (rec) {
+			console.log(rec);
+			collectionShow(rec);
 		};
 
 		

@@ -10,6 +10,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.view_url = ko.observable(false);
 		self.source = ko.observable(false);
 		self.creator = ko.observable("");
+		self.dataprovider=ko.observable("");
 		self.provider = ko.observable("");
 		self.rights = ko.observable("");
 		self.url = ko.observable("");
@@ -34,10 +35,11 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			   }
 			});
 		self.load = function (data) {
-			if (data.title == undefined) {
-				self.title("No title");
-			} else {
+			if (data.title) {
 				self.title(data.title);
+				
+			} else {
+				self.title("No title");
 			}
 
 			if (data.id) {
@@ -50,27 +52,30 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.view_url(data.view_url);
 			self.thumb(data.thumb);
 
-			if (data.source!="Rijksmuseum" && data.fullres !== undefined && data.fullres != null && data.fullres[0].length > 0 && data.fullres != "null") {
+			if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0].length > 0 && data.fullres != "null") {
 				self.fullres(data.fullres[0]);
 			} else {
 				self.fullres(self.cachedThumbnail());
 			}
 
-			if (data.description == undefined) {
-				self.description(data.title);
-			} else {
+			if (data.description) {
 				self.description(data.description);
+				
+			} else {
+				self.description(data.title);
 			}
 
-			if (data.creator !== undefined) {
+			if (data.creator) {
 				self.creator(data.creator);
 			}
 
-			if (data.provider !== undefined) {
+			if (data.provider) {
 				self.provider(data.provider);
 			}
-
-			if (data.rights !== undefined) {
+			if (data.dataprovider) {
+				self.dataprovider(data.dataprovider);
+			}
+			if (data.rights) {
 				self.rights(data.rights);
 			}
 
@@ -116,7 +121,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			case "Rijksmuseum":
 				return "images/logos/Rijksmuseum.png";
 			default:
-				return "";
+				return "images/logos/mint_logo.png";
 			}
 		});
 
@@ -146,14 +151,14 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.displayTitle = ko.pureComputed(function () {
 			var distitle = "";
 			distitle = self.title();
-			if (self.creator() !== undefined && self.creator().length > 0)
+			if (self.creator() && self.creator().length > 0)
 				distitle += ", by " + self.creator();
-			if (self.provider() !== undefined && self.provider().length > 0 && self.provider() != self.creator())
-				distitle += ", " + self.provider();
+			if (self.dataprovider() && self.dataprovider().length > 0 && self.dataprovider() != self.creator())
+				distitle += ", " + self.dataprovider();
 			return distitle;
 		});
 
-		if (data !== undefined) self.load(data);
+		if (data) self.load(data);
 	}
 
 	function ItemViewModel(params) {

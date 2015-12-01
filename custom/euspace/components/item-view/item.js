@@ -11,12 +11,14 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.source = ko.observable(false);
 		self.creator = ko.observable("");
 		self.provider = ko.observable("");
+		self.dataProvider = ko.observable("");
 		self.rights = ko.observable("");
 		self.url = ko.observable("");
 		self.id = ko.observable("");
 		self.externalId = ko.observable("");
 		self.collectedCount = ko.observable("");
 		self.liked = ko.observable("");
+		self.isLike=ko.observable(false);
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -86,12 +88,16 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				self.description(data.description);
 			}
 
+			
 			if (data.creator !== undefined) {
 				self.creator(data.creator);
 			}
 
 			if (data.provider !== undefined) {
 				self.provider(data.provider);
+			}
+			if (data.dataProvider !== undefined) {
+				self.dataProvider(data.dataProvider);
 			}
 
 			if (data.rights !== undefined) {
@@ -103,7 +109,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.facebook='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(self.loc());
 			self.twitter='https://twitter.com/share?url='+encodeURIComponent(self.loc())+'&text='+encodeURIComponent(self.title()+" on "+window.location.host)+'"';
 			self.mail="mailto:?subject="+self.title()+"&body="+encodeURIComponent(self.loc());
-			
+			var likeval=app.isLiked(self.externalId());
+			self.isLike(likeval);
 			self.loading(false);
 	
 			
@@ -142,7 +149,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 									title: result.title!=null? result.title:"",
 									view_url: result.url.fromSourceAPI,
 									creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-									provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+									dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+									provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
 									rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 									externalId: result.externalId,
 									source: self.source()
@@ -193,7 +201,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 										title: result.title!=null? result.title:"",
 										view_url: result.url.fromSourceAPI,
 										creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-										provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+										dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+										provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
 										rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 										externalId: result.externalId,
 										source: self.source()
@@ -282,8 +291,10 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		document.body.setAttribute("data-page","item");
 		   
 		self.route = params.route;
+		self.loggedUser=app.isLogged();
 		self.from=window.location.href;	
 		var thumb = "";
+		self.loggedUser=app.isLogged();
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
 		itemShow = function (e) {
@@ -324,18 +335,36 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 
 		self.collect = function (item) {
-			if (!isLogged()) {
-				showLoginPopup(self.record());
-			} else {
 				collectionShow(self.record());
-			}
 		};
 
 		self.recordSelect = function (e) {
 			itemShow(e);
 		};
 		
+		self.likeRecord = function (rec,event) {
+        	event.preventDefault();
+        	var $star=$(event.target.parentNode).parent();
+			app.likeItem(rec, function (status) {
+				if (status) {
+					$star.addClass('active');
+					if($('#' + rec.externalId()))
+						$('#' + rec.externalId()).addClass('active');
+				} else {
+					$star.removeClass('active');
+					if($('#' + rec.externalId()))
+						$('#' + rec.externalId()).removeClass('active');
+				}
+			});
+		};
 		
+		self.collect = function (rec,event) {
+				event.preventDefault();
+				collectionShow(rec);
+		};
+		
+		
+	
 		
 		self.loadItem = function () {
 			$.ajax({
@@ -350,7 +379,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 							title: result.title!=null? result.title:"",
 							view_url: result.sourceUrl,
 							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-							provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+							dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+							provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
 							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 							externalId: result.externalId,
 							source: result.source
