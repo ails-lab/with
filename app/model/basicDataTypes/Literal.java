@@ -25,7 +25,7 @@ import org.mongodb.morphia.annotations.Embedded;
 public class Literal extends HashMap<String, String> {
 
 	public static enum Language {
-		EN, UNKNOWN, ANY;
+		EN, UNKNOWN, DEFAULT;
 	}
 
 	public Literal() {
@@ -37,6 +37,8 @@ public class Literal extends HashMap<String, String> {
 
 	public Literal(Language lang, String label) {
 		this.put(lang.toString(), label);
+		if (lang.equals(Language.EN))
+			this.put(Language.DEFAULT.toString(), label);
 	}
 
 	public Literal(String lang, String label) {
@@ -55,10 +57,10 @@ public class Literal extends HashMap<String, String> {
 	 * @return
 	 */
 	public String getLiteral(Language lang) {
-		if(Language.ANY.equals(lang)) {
+		/*if(Language.ANY.equals(lang)) {
 			return this.get(this.keySet().toArray()[0]);
 		}
-		else
+		else*/
 			return get(lang.toString());
 	}
 }
