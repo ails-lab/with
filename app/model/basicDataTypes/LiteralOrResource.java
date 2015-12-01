@@ -16,15 +16,23 @@
 
 package model.basicDataTypes;
 
+import org.mongodb.morphia.annotations.Embedded;
+
+@Embedded
 public class LiteralOrResource extends Literal {
-	
+
 	public LiteralOrResource() {
 		super();
 	}
-	
+
 	public LiteralOrResource(ResourceType type, String uri) {
 		super("uriType", type.toString());
 		put("uri", uri);
+	}
+
+	public LiteralOrResource(String label) {
+		super(label);
+		// TODO Auto-generated constructor stub
 	}
 
 	// resources we do understand about and can process further (or not)
@@ -34,15 +42,15 @@ public class LiteralOrResource extends Literal {
 	public static enum ResourceType {
 		uri, skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
 	}
-			
-	// etc etc		
+
+	// etc etc
 	public String getResource(ResourceType resourceType) {
-		if (get("uriType").equals(resourceType.toString())) 
+		if (get("uriType").equals(resourceType.toString()))
 			return get("uri");
-		else 
+		else
 			return "";
 	}
-	
+
 	public void setResource(ResourceType resourceType, String uri ) {
 		put( "uriType", resourceType.toString());
 		put( "uri", uri );

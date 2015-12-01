@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.mongodb.morphia.annotations.Embedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -29,40 +30,42 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DescriptiveData {
-	
+
 	public DescriptiveData() {
 	}
-	
+
 	public DescriptiveData(Literal label) {
 		this.label = label;
 	}
+
 	// one line content description with identifiable characteristic
 	@NotNull
 	@NotBlank
 	private Literal label;
-	
+
 	// arbitrary length content description
 	private Literal description;
-	
+
 	// an indexers dream !! They can be literal concepts and enriched easily
 	private ArrayList<LiteralOrResource> keywords;
-	
+
 	// This are reachable URLs
 	private String isShownAt, isShownBy;
-	
+
 	// The whole legal bla, unedited, from the source, mostly cc0
 	private LiteralOrResource metadataRights;
-	
+
 	// rdf  .. Agent, Artist, Painter, Painting, Series
 	private String rdfType;
-	
+
 	// URIs how this Resource is known elsewhere
 	private ArrayList<String> sameAs;
-	
+
 	// in a timeline where would this resource appear
-	private int year;	
-	
+	private int year;
+
 	// alternative title or name or placename
 	private ArrayList<Literal> altLabels;
 

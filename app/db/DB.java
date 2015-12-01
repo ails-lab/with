@@ -101,7 +101,9 @@ public class DB {
 		if (morphia == null) {
 			morphia = new Morphia();
 			// this method is not working, have to find why!!
-			// morphia.mapPackage("model");
+			//morphia.mapPackage("model");
+			//morphia.mapPackage("model.resources");
+			//morphia.mapPackage("model.basicDataTypes");
 			morphia.getMapper().getConverters()
 					.addConverter(new RightsConverter());
 		}
@@ -141,72 +143,72 @@ public class DB {
 	public static UserGroupDAO getUserGroupDAO() {
 		return (UserGroupDAO) getDAO(UserGroup.class);
 	}
-	
+
 	public static CollectionRecordDAO getCollectionRecordDAO() {
 		return (CollectionRecordDAO) getDAO(CollectionRecord.class);
 	}
-	
+
 	public static MediaDAO getMediaDAO() {
 		if (mediaDAO == null)
 			mediaDAO = new MediaDAO();
 		return mediaDAO;
 	}
 
-	
+
 	/*
 	 * Implementation of the new model DAO classes
 	 */
-	
+
 	public static CollectionObjectDAO getCollectionObjectDAO() {
 		return (CollectionObjectDAO) getDAO(CollectionObject.class);
 	}
-	
+
 	public static MediaObjectDAO getMediaObjectDAO() {
 		if (mediaObjectDAO == null)
 			mediaObjectDAO = new MediaObjectDAO();
 		return mediaObjectDAO;
 	}
 
-	
+
 	/*
 	 * The rest are going to be used in very special cases
 	 * in the far future.
 	 */
-	
+
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO) getDAO(RecordResource.class);
 	}
 /*
 	public static RecordResourceDAO<AgentObject>.AgentObjectDAO getAgentObjectDAO() {
-		return (RecordResourceDAO<AgentObject>.AgentObjectDAO) 
+		return (RecordResourceDAO<AgentObject>.AgentObjectDAO)
 				getDao(AgentObject.class, RecordResource.class);
 	}
-	
+
 	public static RecordResourceDAO<CulturalObject>.CulturalObjectDAO getCulturalObjectDAO() {
-		return (RecordResourceDAO<CulturalObject>.CulturalObjectDAO) 
+		return (RecordResourceDAO<CulturalObject>.CulturalObjectDAO)
 				getDao(CulturalObject.class, RecordResource.class);
 	}
-	
+
 	public static RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO getEuscreenObjectDAO() {
-		return (RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO) 
+		return (RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO)
 				getDao(CulturalObject.class, RecordResource.class);
 	}
 
 	public static RecordResourceDAO<EventObject>.EventObjectDAO getEventObjectDAO() {
-		return (RecordResourceDAO<EventObject>.EventObjectDAO) 
+		return (RecordResourceDAO<EventObject>.EventObjectDAO)
 				getDao(EventObject.class, RecordResource.class);
 	}
-	
+
 	public static RecordResourceDAO<PlaceObject>.PlaceObjectDAO getPlaceObjectDAO() {
-		return (RecordResourceDAO<PlaceObject>.PlaceObjectDAO) 
+		return (RecordResourceDAO<PlaceObject>.PlaceObjectDAO)
 				getDao(PlaceObject.class, RecordResource.class);
 	}
-	
+
 	public static RecordResourceDAO<TimespanObject>.TimespanObjectDAO getTimespanObjectDAO() {
-		return (RecordResourceDAO<TimespanObject>.TimespanObjectDAO) 
+		return (RecordResourceDAO<TimespanObject>.TimespanObjectDAO)
 				getDao(TimespanObject.class, RecordResource.class);
 	}
-*/	
+*/
 
 	/**
 	 * Signleton DAO for all the entities
@@ -227,7 +229,7 @@ public class DB {
 				if (parentClazz == null)
 					daoClassName = "db." + clazz.getSimpleName() + "DAO";
 				else
-					daoClassName = "db." + parentClazz.getSimpleName() + "DAO." 
+					daoClassName = "db." + parentClazz.getSimpleName() + "DAO."
 									+ clazz.getSimpleName() + "DAO";
 				Class<?> daoClass = Class.forName(daoClassName);
 				dao = (DAO<?>) daoClass.newInstance();
@@ -238,7 +240,7 @@ public class DB {
 		}
 		return dao;
 	}
-	
+
 	/**
 	 * Singleton DAO class for all the models
 	 *

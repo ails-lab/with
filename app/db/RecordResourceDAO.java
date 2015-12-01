@@ -34,19 +34,19 @@ import model.resources.WithResource;
  * This class is the aggregator of methods
  * generically referring to *Object entities. We may assume
  * that these entities represent a Record of a Collection more or less.
- * 
+ *
  * Type T is used in order for Morphia to know in which type is going
  * deserialize the object retrieved fro Mongo. So we have to options
- * 
- * 1. Either pass WithResource when instansiating so that all entities 
+ *
+ * 1. Either pass WithResource when instansiating so that all entities
  * handled as WithResources.
- *  
+ *
  * 2. Every time create a new DAO class associated with the explicit class
  * that I want to retieve.
  */
-public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
+public class RecordResourceDAO<T extends RecordResource> extends CommonResourcesDAO<T> {
 
-	public RecordResourceDAO() {
+	public RecordResourceDAO(Class<?> entityClass) {
 		super(RecordResource.class);
 	}
 
@@ -57,8 +57,8 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 		Query<T> q = this.createQuery().field("collectedIn.coldId").exists();
 		return this.deleteByQuery(q).getN();
 	}
-	
-	/* 
+
+	/*
 	 * ********************************************************
 	 * These are embedded classes for very specific queries   *
 	 * in the far future.                                     *
@@ -69,15 +69,15 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 		public AgentObjectDAO(Class<?> entityClass) {
 			super(entityClass);
 		}
-		
+
 	}
-	
+
 	public class CulturalObjectDAO extends RecordResourceDAO<CulturalObject> {
 
 		public CulturalObjectDAO(Class<?> entityClass) {
 			super(entityClass);
 		}
-		
+
 	}
 
 	public class EuscreenObjectDAO extends RecordResourceDAO<EUscreenObject> {
@@ -85,23 +85,23 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 		public EuscreenObjectDAO(Class<?> entityClass) {
 			super(entityClass);
 		}
-		
+
 	}
-	
+
 	public class EventObjectDAO extends RecordResourceDAO<EventObject> {
 
 		public EventObjectDAO(Class<?> entityClass) {
 			super(entityClass);
 		}
-		
+
 	}
-	
+
 	public class PlaceObjectDAO extends RecordResourceDAO<PlaceObject> {
 
 		public PlaceObjectDAO(Class<?> entityClass) {
 			super(entityClass);
 		}
-		
+
 	}
 
 	public class TimespanObjectDAO extends RecordResourceDAO<TimespanObject> {

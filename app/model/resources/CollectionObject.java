@@ -18,10 +18,14 @@ package model.resources;
 
 import java.util.ArrayList;
 
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
+
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
+@Entity("CollectionObject")
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
 
 	public static class CollectionAdmin extends WithAdmin {
@@ -45,6 +49,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 
 	}
 
+	@Embedded
 	public static class CollectionDescriptiveData extends DescriptiveData {
 
 		//start day or possible start days
