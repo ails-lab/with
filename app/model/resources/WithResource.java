@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+import db.converters.RightsConverter;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
@@ -80,7 +82,8 @@ public class WithResource<T extends DescriptiveData> {
 		private Date lastModified;
 
 		@Embedded
-		@JsonSerialize(using = Serializer.CustomMapSerializer.class)
+		@JsonSerialize(using = Serializer.AccessMapSerializer.class)
+		@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
 
 		public WithAccess getAccess() {
@@ -308,7 +311,7 @@ public class WithResource<T extends DescriptiveData> {
 	private ArrayList<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
-	private WithResourceType resourceType;
+	protected WithResourceType resourceType;
 
 	// metadata
 	@Embedded
@@ -331,12 +334,14 @@ public class WithResource<T extends DescriptiveData> {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
+		this.collectedIn = new HashMap<ObjectId, ArrayList<Integer>>();
 	}
 
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
+		this.collectedIn = new HashMap<ObjectId, ArrayList<Integer>>();
 		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
 	}
 
@@ -351,12 +356,21 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
+	@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 	public HashMap<ObjectId, ArrayList<Integer>> getCollectedIn() {
 		return collectedIn;
 	}
 
 	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
 		this.collectedIn = collectedIn;
+	}
+	
+	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
+		if (collectedIn.containsKey(colId)) {
+			collectedIn.get(colId).add(position);
+		}
+		else
+			collectedIn.put(colId,  new ArrayList<Integer>(Arrays.asList(position)));
 	}
 
 	public Usage getUsage() {

@@ -17,19 +17,23 @@
 package model.resources;
 
 import java.util.ArrayList;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+
 import model.basicDataTypes.CidocEvent;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
 	
 	public CulturalObject() {
 		super();
+		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
 	}
 	
 	public static class RecordAdmin extends WithAdmin {

@@ -69,11 +69,17 @@ public class WithResourceDAOTest {
 			model.setLabel(new Literal(Language.EN, "TestWithResourceX" + i));
 			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setModel(model);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(new Literal(Language.EN, "TestWithResourceX" + i));
+			/*List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(new Literal(Language.EN, "TestWithResourceX" + i));
 			CulturalObject o = (CulturalObject) resources.get(0);
-			System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
+			System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());*/
 			//System.out.println(resources.get(1) instanceof CulturalObject);
+		}
+		List<RecordResource> resources = DB.getRecordResourceDAO().getByCollectionAllInstances(new ObjectId("5656dd6ce4b0b19378e1cb80"));
+		for (RecordResource c: resources) {
+			((CulturalObject) c).getCollectedIn().get(new ObjectId("5656dd6ce4b0b19378e1cb80"));
 		}
 	}
 

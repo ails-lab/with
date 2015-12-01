@@ -19,6 +19,7 @@ package utils;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class Deserializer {
 		}
 	}
 
-	public static class CustomMapDeserializer extends JsonDeserializer<Map<ObjectId, Access>> {
+	public static class AccessMapDeserializer extends JsonDeserializer<Map<ObjectId, Access>> {
 
 		@Override
 		public Map<ObjectId, Access> deserialize(JsonParser rights_string, DeserializationContext arg1)
@@ -93,10 +94,8 @@ public class Deserializer {
 			for(Entry<String, Integer> e : rights_map.entrySet()) {
 				r.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
 			}
-
 			return r;
 		}
-
 	}
 
 	public static class DateDeserializer extends JsonDeserializer<Object> {
