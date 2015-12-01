@@ -315,7 +315,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	// metadata
 	@Embedded
-	private T model;
+	private T descriptiveData;
 
 	// All the available content serializations
 	// all keys in here should be understood by the WITH system
@@ -414,12 +414,12 @@ public class WithResource<T extends DescriptiveData> {
 		this.resourceType = resourceType;
 	}
 
-	public T getModel() {
-		return model;
+	public T getDescriptiveDate() {
+		return descriptiveData;
 	}
 
-	public void setModel(T model) {
-		this.model = model;
+	public void setDescriptiveData(T descriptiveData) {
+		this.descriptiveData = descriptiveData;
 	}
 
 	public HashMap<String, String> getContent() {
