@@ -155,7 +155,7 @@ public class ApiKeyManager extends UntypedActor  {
 	private void onApiAccess( Access access ) {
 
 		// conf disabled api keys
-		if( DB.getConf().getString("apikey.disabled") != null ) {
+		if( DB.getConf().getBoolean("apikey.disabled") ) {
 			sender().tell( ApiKey.Response.ALLOWED, self());
 			return;
 		}
