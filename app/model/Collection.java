@@ -94,7 +94,7 @@ public class Collection {
 	private final WithAccess rights = new WithAccess();
 	
 	@Embedded
-	@JsonSerialize(using = Serializer.CustomMapSerializer.class)
+	@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 	private final Map<ObjectId, Access> underModerationInGroups = new HashMap<ObjectId, Access>();
 
 	public ObjectId getDbId() {

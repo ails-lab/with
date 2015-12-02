@@ -24,37 +24,36 @@ import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 
-public class DNZBasicRecordFormatter extends ExternalBasicRecordReader {
+public class DNZBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
 
-	
-	@Override
-	public void fillInExternalId(JsonContextRecord rec) {
-		object.setIsShownBy(rec.getStringValue("large_thumbnail_url"));
-		object.setIsShownAt(rec.getStringValue("landing_url"));
-	}
 
 	@Override
-	public void fillInValidRecord(JsonContextRecord rec) {
-		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
-		//TODO: add type
-		//TODO: add null checks
-		object.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
-		object.setTitle(rec.getStringValue("title"));
-		object.setDescription(rec.getStringValue("description"));
-		object.setCreator(rec.getStringValue("creator"));
-		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-		// TODO: add years here:
-//		Utils.readArrayAttr(item, "issued",
-				// true);
-//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		// TODO: add rights
-//		object.setItemRights(rec.getStringValue("rights_url"));
-		String id = rec.getStringValue("id");
-		Provider recordProvider = new Provider(DigitalNZSpaceSource.LABEL, id, 
-				"http://www.digitalnz.org/objects/" +id);
-		object.addProvider(recordProvider);
+	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+//		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
+//		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
+//		//TODO: add type
+//		//TODO: add null checks
+//		object.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
+//		object.setTitle(rec.getStringValue("title"));
+//		object.setDescription(rec.getStringValue("description"));
+//		object.setCreator(rec.getStringValue("creator"));
+//		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
+//		// TODO: add years here:
+////		Utils.readArrayAttr(item, "issued",
+//				// true);
+////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		// TODO: add rights
+////		object.setItemRights(rec.getStringValue("rights_url"));
+//		String id = rec.getStringValue("id");
+//		Provider recordProvider = new Provider(DigitalNZSpaceSource.LABEL, id, 
+//				"http://www.digitalnz.org/objects/" +id);
+//		object.addProvider(recordProvider);
+		return object;
 	}
 
 }

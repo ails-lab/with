@@ -16,20 +16,24 @@
 
 package model.resources;
 
-import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+
 import model.basicDataTypes.CidocEvent;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
 	
 	public CulturalObject() {
 		super();
+		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
 	}
 	
 	public static class RecordAdmin extends WithAdmin {
@@ -67,29 +71,29 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		// language of object, if it has one. Not related to the metadata.
 		// eg. If the object is a book, its the language it is written in
 		// no language for most paintings, vases, sculptures ... etc
-		private ArrayList<Literal> dclanguage;
+		private List<Literal> dclanguage;
 		
 		// Painting, Sculpture, Building, Book .... 
-		private ArrayList<LiteralOrResource> dctype;
+		private List<LiteralOrResource> dctype;
 		
 		// places or times
-		private ArrayList<LiteralOrResource> dccoverage;
+		private List<LiteralOrResource> dccoverage;
 		
 		// places are here
-		private ArrayList<LiteralOrResource> dcspatial;
+		private List<LiteralOrResource> dcspatial;
 		
-		private ArrayList<LiteralOrResource> dccreator;
+		private List<LiteralOrResource> dccreator;
 
-		private ArrayList<WithDate> dccreated;
-		private ArrayList<WithDate> dcdate;
+		private List<WithDate> dccreated;
+		private List<WithDate> dcdate;
 		
 		//TODO: do we want multilinguality for dcformat and dctermsmedium?
-		private ArrayList<LiteralOrResource> dcformat;
-		private ArrayList<LiteralOrResource> dctermsmedium;
+		private List<LiteralOrResource> dcformat;
+		private List<LiteralOrResource> dctermsmedium;
 		
-		private ArrayList<LiteralOrResource> isRelatedTo;
+		private List<LiteralOrResource> isRelatedTo;
 		
-		private ArrayList<CidocEvent> events;
+		private List<CidocEvent> events;
 
 		public String getDcidentifier() {
 			return dcidentifier;
@@ -99,91 +103,91 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 			this.dcidentifier = dcidentifier;
 		}
 
-		public ArrayList<Literal> getDclanguage() {
+		public List<Literal> getDclanguage() {
 			return dclanguage;
 		}
 
-		public void setDclanguage(ArrayList<Literal> dclanguage) {
+		public void setDclanguage(List<Literal> dclanguage) {
 			this.dclanguage = dclanguage;
 		}
 
-		public ArrayList<LiteralOrResource> getDctype() {
+		public List<LiteralOrResource> getDctype() {
 			return dctype;
 		}
 
-		public void setDctype(ArrayList<LiteralOrResource> dctype) {
+		public void setDctype(List<LiteralOrResource> dctype) {
 			this.dctype = dctype;
 		}
 
-		public ArrayList<LiteralOrResource> getDccoverage() {
+		public List<LiteralOrResource> getDccoverage() {
 			return dccoverage;
 		}
 
-		public void setDccoverage(ArrayList<LiteralOrResource> dccoverage) {
+		public void setDccoverage(List<LiteralOrResource> dccoverage) {
 			this.dccoverage = dccoverage;
 		}
 
-		public ArrayList<LiteralOrResource> getDcspatial() {
+		public List<LiteralOrResource> getDcspatial() {
 			return dcspatial;
 		}
 
-		public void setDcspatial(ArrayList<LiteralOrResource> dcspatial) {
+		public void setDcspatial(List<LiteralOrResource> dcspatial) {
 			this.dcspatial = dcspatial;
 		}
 
-		public ArrayList<LiteralOrResource> getDccreator() {
+		public List<LiteralOrResource> getDccreator() {
 			return dccreator;
 		}
 
-		public void setDccreator(ArrayList<LiteralOrResource> dccreator) {
+		public void setDccreator(List<LiteralOrResource> dccreator) {
 			this.dccreator = dccreator;
 		}
 
-		public ArrayList<WithDate> getDccreated() {
+		public List<WithDate> getDccreated() {
 			return dccreated;
 		}
 
-		public void setDccreated(ArrayList<WithDate> dccreated) {
+		public void setDccreated(List<WithDate> dccreated) {
 			this.dccreated = dccreated;
 		}
 
-		public ArrayList<WithDate> getDcdate() {
+		public List<WithDate> getDcdate() {
 			return dcdate;
 		}
 
-		public void setDcdate(ArrayList<WithDate> dcdate) {
+		public void setDcdate(List<WithDate> dcdate) {
 			this.dcdate = dcdate;
 		}
 
-		public ArrayList<LiteralOrResource> getDcformat() {
+		public List<LiteralOrResource> getDcformat() {
 			return dcformat;
 		}
 
-		public void setDcformat(ArrayList<LiteralOrResource> dcformat) {
+		public void setDcformat(List<LiteralOrResource> dcformat) {
 			this.dcformat = dcformat;
 		}
 
-		public ArrayList<LiteralOrResource> getDctermsmedium() {
+		public List<LiteralOrResource> getDctermsmedium() {
 			return dctermsmedium;
 		}
 
-		public void setDctermsmedium(ArrayList<LiteralOrResource> dctermsmedium) {
+		public void setDctermsmedium(List<LiteralOrResource> dctermsmedium) {
 			this.dctermsmedium = dctermsmedium;
 		}
 
-		public ArrayList<LiteralOrResource> getIsRelatedTo() {
+		public List<LiteralOrResource> getIsRelatedTo() {
 			return isRelatedTo;
 		}
 
-		public void setIsRelatedTo(ArrayList<LiteralOrResource> isRelatedTo) {
+		public void setIsRelatedTo(List<LiteralOrResource> isRelatedTo) {
 			this.isRelatedTo = isRelatedTo;
 		}
 
-		public ArrayList<CidocEvent> getEvents() {
+		public List<CidocEvent> getEvents() {
 			return events;
 		}
 
-		public void setEvents(ArrayList<CidocEvent> events) {
+		public void setEvents(List<CidocEvent> events) {
 			this.events = events;
 		}
 		

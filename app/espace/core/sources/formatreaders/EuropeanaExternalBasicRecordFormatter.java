@@ -17,6 +17,8 @@
 package espace.core.sources.formatreaders;
 
 import java.time.Year;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -24,33 +26,54 @@ import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.utils.JsonContextRecord;
+import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
+import model.MediaObject;
 import model.Provider;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
+import model.resources.RecordResource.RecordDescriptiveData;
 import utils.ListUtils;
 
-public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordReader {
+public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
+	
+	public EuropeanaExternalBasicRecordFormatter() {
+		object = new CulturalObject();
+	}
 	
 	@Override
-	public void fillInExternalId(JsonContextRecord rec) {
-		object.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		object.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-	}
-
-	@Override
-	public void fillInValidRecord(JsonContextRecord rec) {
-		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		object.addProvider(new Provider(rec.getStringValue("provider")));
-		//TODO: add null checks
-		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-		object.setTitle(rec.getStringValue("title"));
-		object.setDescription(rec.getStringValue("dcDescription"));
-		object.setCreator(rec.getStringValue("dcCreator"));
-		object.setContributors(rec.getStringArrayValue("dcContributor"));
-		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-//		object.setItemRights(rec.getStringValue("rights"));
-		Provider recordProvider = new Provider(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid"));
-		object.addProvider(recordProvider);
+	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+		model.setLabel(rec.getLiteralValue("title"));
+		model.setDescription(rec.getLiteralValue("dcDescription"));
+		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreator"))));
 		
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
+		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));
+		
+		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
+		MediaObject med;
+		media.add(med = new MediaObject());
+		object.setMedia(media);
+		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
+		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		return object;
+		
+		//TODO: add null checks
+//		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
+//		object.setCreator(rec.getStringValue("dcCreator"));
+//		object.setContributors(rec.getStringArrayValue("dcContributor"));
+//		object.setItemRights(rec.getStringValue("rights"));
 	}
+	
 
 }

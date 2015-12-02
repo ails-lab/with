@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.ArrayList;
 
 import org.bson.types.ObjectId;
 import org.w3c.dom.Document;
@@ -100,7 +101,7 @@ public class Serializer {
 		}
 	}
 
-	public static class CustomMapSerializer extends JsonSerializer<Object> {
+	public static class AccessMapSerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object map, JsonGenerator jsonGen,
 				SerializerProvider arg2) throws IOException,

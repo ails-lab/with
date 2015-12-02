@@ -42,6 +42,7 @@ import espace.core.sources.formatreaders.DNZBasicRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.resources.WithResource;
 import utils.ListUtils;
 import utils.Serializer;
 
@@ -162,7 +163,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
 
-				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
+				ArrayList<WithResource<?>> a = new ArrayList<>();
 
 				JsonNode o = response.path("search");
 				// System.out.print(o.path("name").asText() + " ");

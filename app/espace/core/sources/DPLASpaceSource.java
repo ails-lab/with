@@ -38,6 +38,7 @@ import espace.core.sources.formatreaders.DPLAExternalBasicRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.resources.WithResource;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
@@ -171,7 +172,7 @@ public class DPLASpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				res.count = docs.size();
 				res.startIndex = Utils.readIntAttr(response, "start", true);
-				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
+				ArrayList<WithResource<?>> a = new ArrayList<>();
 
 				for (JsonNode item : docs) {
 
@@ -179,8 +180,7 @@ public class DPLASpaceSource extends ISpaceSource {
 					// "type", false);
 					// countValue(type, t);
 
-					ExternalBasicRecord obj = formatreader.readObjectFrom(item);
-					a.add(obj);
+					a.add(formatreader.readObjectFrom(item));
 //					countValue(creator, obj.getCreator());
 					
 				}

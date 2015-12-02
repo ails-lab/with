@@ -109,7 +109,7 @@ public class CollectionObjectTest {
 		cdd.setLabel(label);
 		Literal desc = new Literal(Language.EN, "This is a description");
 		cdd.setDescription(desc);
-		co.setModel(cdd);
+		co.setDescriptiveData(cdd);
 
 		/*
 		 * no content for the collection

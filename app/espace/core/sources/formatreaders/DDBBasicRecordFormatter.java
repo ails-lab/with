@@ -24,31 +24,31 @@ import espace.core.sources.DDBSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 
-public class DDBBasicRecordFormatter extends ExternalBasicRecordReader {
+public class DDBBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
 
-	@Override
-	public void fillInExternalId(JsonContextRecord rec) {
-		object.setIsShownBy(null);
-		object.setIsShownAt(object.getIsShownBy());
-	}
 
 	@Override
-	public void fillInValidRecord(JsonContextRecord rec) {
-		object.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
-		object.setTitle(rec.getStringValue("title"));
-		object.setDescription(rec.getStringValue("description"));
-		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
-//		object.setContributors(rec.getStringArrayValue("contributor"));
-		// TODO: add years
-//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		// TODO: add rights
-//		object.setItemRights(rec.getStringValue("rights"));
-		String id = rec.getStringValue("id");
-		Provider recordProvider = new Provider(DDBSpaceSource.LABEL, id, 
-				"https://www.deutsche-digitale-bibliothek.de/item/"
-						+ id );
-		object.addProvider(recordProvider);
+	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+//		object.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
+//		object.setTitle(rec.getStringValue("title"));
+//		object.setDescription(rec.getStringValue("description"));
+//		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
+////		object.setContributors(rec.getStringArrayValue("contributor"));
+//		// TODO: add years
+////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		// TODO: add rights
+////		object.setItemRights(rec.getStringValue("rights"));
+//		String id = rec.getStringValue("id");
+//		Provider recordProvider = new Provider(DDBSpaceSource.LABEL, id, 
+//				"https://www.deutsche-digitale-bibliothek.de/item/"
+//						+ id );
+//		object.addProvider(recordProvider);
+		return object;
 	}
 
 }

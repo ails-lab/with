@@ -25,29 +25,29 @@ import espace.core.utils.JsonContextRecord;
 import espace.core.utils.StringUtils;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 
-public class NLAExternalBasicRecordFormatter extends ExternalBasicRecordReader {
+public class NLAExternalBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
 
-	@Override
-	public void fillInExternalId(JsonContextRecord rec) {
-		object.setIsShownBy(null);
-		object.setIsShownAt(rec.getStringValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
-	}
 
 	@Override
-	public void fillInValidRecord(JsonContextRecord rec) {
-		object.setThumbnailUrl(rec.getStringValue("identifier[type=url,linktype=thumbnail].value"));
-		object.setTitle(rec.getStringValue("title"));
-		object.setDescription(rec.getStringValue("abstract"));
-		object.setCreator(rec.getStringValue("contributor"));
-		// object.setContributors(rec.getStringArrayValue("contributor"));
-		// TODO: add years
-		object.setYears(StringUtils.getYears(rec.getStringArrayValue("issued")));
-		// TODO: add rights
-		// object.setItemRights(rec.getStringValue("sourceResource.rights"));
-		String id = rec.getStringValue("id");
-		Provider recordProvider = new Provider(NLASpaceSource.LABEL, id, rec.getStringValue("troveUrl"));
-		object.addProvider(recordProvider);
+	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+//		object.setThumbnailUrl(rec.getStringValue("identifier[type=url,linktype=thumbnail].value"));
+//		object.setTitle(rec.getStringValue("title"));
+//		object.setDescription(rec.getStringValue("abstract"));
+//		object.setCreator(rec.getStringValue("contributor"));
+//		// object.setContributors(rec.getStringArrayValue("contributor"));
+//		// TODO: add years
+//		object.setYears(StringUtils.getYears(rec.getStringArrayValue("issued")));
+//		// TODO: add rights
+//		// object.setItemRights(rec.getStringValue("sourceResource.rights"));
+//		String id = rec.getStringValue("id");
+//		Provider recordProvider = new Provider(NLASpaceSource.LABEL, id, rec.getStringValue("troveUrl"));
+//		object.addProvider(recordProvider);
+		return object;
 		
 	}
 

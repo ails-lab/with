@@ -83,7 +83,6 @@ public class RecordResourceController extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
-
 	}
 
 	/**
@@ -99,8 +98,7 @@ public class RecordResourceController extends Controller {
 	public static Result deleteRecordResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource resource = DB.getRecordResourceDAO().get(
-					new ObjectId(id));
+			RecordResource resource = DB.getRecordResourceDAO().get(new ObjectId(id));
 			if (resource == null) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
@@ -192,8 +190,7 @@ public class RecordResourceController extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			RecordResource oldResource = DB.getRecordResourceDAO().get(
-					new ObjectId(id));
+			RecordResource oldResource = DB.getRecordResourceDAO().get(new ObjectId(id));
 			if (oldResource == null) {
 				log.error("Cannot retrieve resource from database");
 				error.put("error", "Cannot retrieve resource from database");

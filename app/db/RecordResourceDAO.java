@@ -54,7 +54,7 @@ public class RecordResourceDAO<T extends RecordResource> extends CommonResources
 	 * DAO Methods
 	 */
 	public int deleteByCollection(ObjectId colId) {
-		Query<T> q = this.createQuery().field("collectedIn.coldId").exists();
+		Query<RecordResource> q = this.createQuery().field("collectedIn.coldId").exists();
 		return this.deleteByQuery(q).getN();
 	}
 
@@ -64,7 +64,7 @@ public class RecordResourceDAO<T extends RecordResource> extends CommonResources
 	 * in the far future.                                     *
 	 * ********************************************************
 	 */
-	public class AgentObjectDAO extends RecordResourceDAO<AgentObject> {
+	/*public class AgentObjectDAO extends RecordResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -110,7 +110,7 @@ public class RecordResourceDAO<T extends RecordResource> extends CommonResources
 			super(entityClass);
 		}
 
-	}
+	}*/
 	/* ********************************************
 	 * End of embedded DAO classes                *
 	 * ********************************************
