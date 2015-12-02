@@ -3,6 +3,7 @@
 		<div class="col-lg-6 col-md-6 col-sm-12">
 			<span class="withmain"><h2>My Notifications</h2></span>
 
+			<div class="pull-right"><a href="javascript:void()" data-bind="click: markUserNotificationsRead">Mark all as read</a></div><br />
 			<ul class="list-group notification-list" data-bind="foreach: userNotifications">
 				<li class="list-group-item" data-bind="css: { 'list-group-item-info': unread }">
 					<div class="message pull-left">
@@ -20,6 +21,7 @@
 		<div class="col-lg-6 col-md-6 col-sm-12">
 			<span class="withmain"><h2>My Groups' Notifications</h2></span>
 
+			<div class="pull-right"><a href="javascript:void()" data-bind="click: markGroupNotificationsRead">Mark all as read</a></div><br />
 			<ul class="list-group notification-list" data-bind="foreach: groupNotifications">
 				<li class="list-group-item" data-bind="css: { 'list-group-item-info': unread }">
 					<div class="message pull-left">
