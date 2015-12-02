@@ -17,6 +17,7 @@
 package espace.core;
 
 import model.ExternalBasicRecord;
+import model.resources.CulturalObject;
 import model.resources.WithResource;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -27,7 +28,14 @@ import espace.core.utils.JsonContextRecord;
 
 public abstract class ExternalBasicRecordReader<T extends WithResource<?> > extends JsonContextRecordFormatReader<T> {
 	
-	//public ExternalBasicRecord record = new ExternalBasicRecord();
+	public void buildObject(){
+		object = (T) new CulturalObject();
+	}
+	@Override
+	public T readObjectFrom(JsonNode text) {
+		buildObject();
+		return super.readObjectFrom(text);
+	}
 
 
 }

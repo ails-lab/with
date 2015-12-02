@@ -16,7 +16,6 @@
 
 package espace.core.sources;
 
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,18 +23,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
-import model.ExternalBasicRecord;
-import model.ExternalBasicRecord.ItemRights;
-import model.ExternalBasicRecord.RecordType;
-import model.Provider;
-import model.resources.WithResource;
-
-import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -57,6 +47,10 @@ import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
 import espace.core.sources.formatreaders.EuropeanaExternalBasicRecordFormatter;
+import model.ExternalBasicRecord.ItemRights;
+import model.ExternalBasicRecord.RecordType;
+import model.resources.WithResource;
+import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
 
@@ -255,11 +249,15 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public ArrayList<WithResource<?>> getItems(JsonNode response) {
 		ArrayList<WithResource<?>> items = new ArrayList<>();
+		try{
 		if (response.path("success").asBoolean()) {
 			for (JsonNode item : response.path("items")) {
 				items.add(formatreader.readObjectFrom(item));
 			}
+		}} catch(Exception e){
+			e.printStackTrace();
 		}
+		
 		return items;
 	}
 

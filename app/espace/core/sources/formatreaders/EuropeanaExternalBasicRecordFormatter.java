@@ -53,13 +53,12 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreator"))));
 		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));
-		
 		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
 		MediaObject med;
 		media.add(med = new MediaObject());
