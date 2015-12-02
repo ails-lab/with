@@ -59,6 +59,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.description=data.description;
 			self.dataProvider=data.dataProvider;
 			self.source=data.source;
+			console.log("source:"+self.source);
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.rights=data.rights;
@@ -91,17 +92,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			    	return "digitalnz.org";
 			    case "EFashion":
 			    	return "europeanafashion.eu";
-			    case "YouTube": {
+			    case "YouTube": 
 			    	return "youtube.com";
-			    }
-			     case "Mint":
+			    case "Mint":
 			    	return "mint";
-			    case "WITHin":
-			    	return "WITHin";
+			    case "Rijksmuseum":
+					return "www.rijksmuseum.nl";
 			    default: return "";
 			 }
 			});
-
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
 			distitle=self.title;
@@ -248,7 +247,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 							self.citems.remove(e);
 							if ($("#" + e)) {
-								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
+								$container.isotope( 'remove', $("#" + e));
+								//$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
 
 							self.itemCount(self.itemCount() - 1);

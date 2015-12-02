@@ -336,7 +336,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"success": function (data) {
 					self.ajaxConnections--;
 					if (self.params.request_ == "collectionview/" + collid ||( self.params.route &&  self.params.route().request_ == "collectionview/" + collid)) {
-						self.params.recordId(data.dbId);
+						//self.params.recordId(data.dbId);
 						ko.contextFor(withcollection).$data.loadNext();
 					} else if (self.params.request_ == "mycollections" ||( self.params.route &&  self.params.route().request_ == "mycollections" )) {
 						var obj = null;

@@ -31,27 +31,28 @@
               <!-- /ko -->
               
               
-              <div class="item media" data-bind="visible: isLoaded()">
+              <div class="item media" data-bind="visible: isLoaded(), attr: { id: recordId}">
               <div class="wrap">
               <span class="star" data-bind="css: { active: isLiked }, visible: isLogged">
-						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+						<span class="fa-stack fa-fw" title="add to favorites" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
-                <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
+				
+					 <span class="collect" title="remove" data-bind="visible: isLogged && ($parent.access()=='WRITE' || $parent.access()=='OWN'), event: { click: function(){ $parent.removeRecord(recordId )}}"><i class="fa fa-trash-o fa-inverse"></i>
+						</span>
+			    <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
                   <!-- thumbnail-->
                   <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
                   <!-- info-->
                   <div class="info">
                     <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
                   </div>
-               
-                 <div class="sourceCredits">
-					<!-- ko:if self.access() == "WRITE" || self.access() == "OWN" -->
-					    <span class="glyphicon glyphicon-trash closeButton" data-bind="visible: isLogged, event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
-					<!-- /ko -->
-					<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
-                  </a>
+                </a>
+               <div class="sourceCredits">
+					
+					<a data-bind="text:sourceCredits(),attr: { href: view_url }" target="_new"></a></div>
+                 
               </div>
             </div>
               
