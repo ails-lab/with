@@ -56,7 +56,8 @@ public class SourceResponse {
 			it.title = r.getTitle();
 			it.description = r.getDescription();
 			it.id = r.getSourceId();
-			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
+			if(r.getThumbnailUrl() != null)
+				it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
 			it.url.fromSourceAPI = r.getSourceUrl();
 			items.add(it);
