@@ -17,14 +17,9 @@
 package db;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
-import model.Collection;
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.Literal.Language;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -37,8 +32,6 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import utils.Tuple;
-
-import com.mongodb.BasicDBObject;
 
 /*
  * The class consists of methods that can be both query 

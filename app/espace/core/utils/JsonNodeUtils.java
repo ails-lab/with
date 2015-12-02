@@ -17,9 +17,13 @@
 package espace.core.utils;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import model.basicDataTypes.Literal;
 
 public class JsonNodeUtils {
 	
@@ -34,6 +38,25 @@ public class JsonNodeUtils {
 		}
 		return null;
 	}
+	
+	public static Literal asLiteral(JsonNode node) {
+		if (node!=null && !node.isMissingNode()){
+			if (node.isArray()){
+				node = node.get(0);
+			} 
+			if (node.isTextual()){
+				return new Literal(node.asText());
+			}
+			Literal res = new Literal();
+			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+				Entry<String, JsonNode> next = iterator.next();
+				res.put(next.getKey(), next.getValue().asText());
+			}
+			return res;
+		}
+		return null;
+	}
+	
 	public static List<String> asStringArray(JsonNode node) {
 		if (node!=null && !node.isMissingNode()){
 			ArrayList<String> res = new ArrayList<>();
