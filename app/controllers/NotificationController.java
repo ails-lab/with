@@ -263,7 +263,7 @@ public class NotificationController extends Controller {
 			return ok(result);
 		}
 		result.put("message", "All notifications are marked as read");
-		return ok();
+		return ok(result);
 	}
 
 	public static Result sendMessage(String receiverId) {
