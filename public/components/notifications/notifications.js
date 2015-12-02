@@ -52,22 +52,29 @@ define(['knockout', 'text!./notifications-page.html', 'app', 'knockout-else'], f
 				contentType: 'application/json',
 				dataType: 'json'
 			}).done(function (data, textStatus, jqXHR) {
-				for (var i = 0; i < notifications.length; i++) {
-					if (!notifications[i].pendingResponse) {
-						notifications[i].unread(false);
+				for (var i = 0; i < notifications().length; i++) {
+					if (!notifications()[i].pendingResponse && notifications()[i].unread()) {
+						notifications()[i].unread(false);
+						app.currentUser.notifications.unread(app.currentUser.notifications.unread() - 1);
 					}
 				}
 			}).fail(function (jqXHR, textStatus, error) {
+				console.log(error);
 				// TODO: Show error message
 			});
+		};
+
+		self.markUserNotificationsRead = function() {
+			self.markRead(app.currentUser.notifications.userNotifications);
+		};
+
+		self.markGroupNotificationsRead = function() {
+			self.markRead(app.currentUser.notifications.groupNotifications);
 		};
 
 		if (!isLogged()) {
 			window.location = '#login'; // Redirect to login
 		}
-
-		self.markRead(app.currentUser.notifications.userNotifications);
-		self.markRead(app.currentUser.notifications.groupNotifications);
 	}
 
 	return {
