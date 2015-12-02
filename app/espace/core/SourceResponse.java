@@ -22,6 +22,7 @@ import java.util.List;
 import model.CollectionRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.WithResource;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
@@ -38,7 +39,7 @@ public class SourceResponse {
 	public int totalCount;
 	public int startIndex;
 	public int count;
-	public List<ExternalBasicRecord> items;
+	public List<WithResource<?>> items;
 	public String source;
 	public JsonNode facets;
 	public List<CommonFilterResponse> filters;
@@ -60,17 +61,19 @@ public class SourceResponse {
 		this.source = "WITHin";
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
-		List<ExternalBasicRecord> items = new ArrayList<ExternalBasicRecord>();
-		for (CollectionRecord r : elasticrecords) {
-			ExternalBasicRecord item = new ExternalBasicRecord();
-			Provider provider = new Provider(source);
-			provider.providerName = source;
-			item.addProvider(provider);
-			item.setTitle(r.getTitle());
-			item.setDescription(r.getDescription());
-			item.setThumbnailUrl(r.getThumbnailUrl().toString());
-			items.add(item);
-		}
+		List<WithResource<?>> items = new ArrayList<>();
+		
+//		TODO make it using the new model...
+//		for (CollectionRecord r : elasticrecords) {
+//			ExternalBasicRecord item = new ExternalBasicRecord();
+//			Provider provider = new Provider(source);
+//			provider.providerName = source;
+//			item.addProvider(provider);
+//			item.setTitle(r.getTitle());
+//			item.setDescription(r.getDescription());
+//			item.setThumbnailUrl(r.getThumbnailUrl().toString());
+//			items.add(item);
+//		}
 		this.items = items;
 	}
 
@@ -95,7 +98,7 @@ public class SourceResponse {
 		return res;
 	}
 
-	public void addItem(ExternalBasicRecord record) {
+	public void addItem(WithResource<?> record) {
 		if (record!=null)
 			items.add(record);
 	}

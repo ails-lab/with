@@ -28,6 +28,7 @@ import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider;
+import model.resources.WithResource;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.json.JSONArray;
@@ -252,8 +253,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return filters;
 	}
 
-	public ArrayList<ExternalBasicRecord> getItems(JsonNode response) {
-		ArrayList<ExternalBasicRecord> items = new ArrayList<ExternalBasicRecord>();
+	public ArrayList<WithResource<?>> getItems(JsonNode response) {
+		ArrayList<WithResource<?>> items = new ArrayList<>();
 		if (response.path("success").asBoolean()) {
 			for (JsonNode item : response.path("items")) {
 				items.add(formatreader.readObjectFrom(item));

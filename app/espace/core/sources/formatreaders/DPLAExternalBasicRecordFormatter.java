@@ -24,34 +24,34 @@ import espace.core.sources.DPLASpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 
-public class DPLAExternalBasicRecordFormatter extends ExternalBasicRecordReader {
+public class DPLAExternalBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
 
-	@Override
-	public void fillInExternalId(JsonContextRecord rec) {
-		object.setIsShownBy(null);
-		object.setIsShownAt(rec.getStringValue("isShownAt"));
-	}
 
 	@Override
-	public void fillInValidRecord(JsonContextRecord rec) {
-		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
-		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
-		//TODO: add type
-		//TODO: add null checks
-		object.setThumbnailUrl(rec.getStringValue("objtect"));
-		object.setTitle(rec.getStringValue("sourceResource.title"));
-		object.setDescription(rec.getStringValue("sourceResource.description"));
-		object.setCreator(rec.getStringValue("sourceResource.creator"));
-		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-		// TODO: add years
-//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		// TODO: add rights
-//		object.setItemRights(rec.getStringValue("sourceResource.rights"));
-		String id = rec.getStringValue("id");
-		Provider recordProvider = new Provider(DPLASpaceSource.LABEL, id, 
-				"http://dp.la/item/"+id);
-		object.addProvider(recordProvider);
+	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+//		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
+//		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
+//		//TODO: add type
+//		//TODO: add null checks
+//		object.setThumbnailUrl(rec.getStringValue("objtect"));
+//		object.setTitle(rec.getStringValue("sourceResource.title"));
+//		object.setDescription(rec.getStringValue("sourceResource.description"));
+//		object.setCreator(rec.getStringValue("sourceResource.creator"));
+//		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
+//		// TODO: add years
+////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		// TODO: add rights
+////		object.setItemRights(rec.getStringValue("sourceResource.rights"));
+//		String id = rec.getStringValue("id");
+//		Provider recordProvider = new Provider(DPLASpaceSource.LABEL, id, 
+//				"http://dp.la/item/"+id);
+//		object.addProvider(recordProvider);
+		return object;
 	}
 
 }

@@ -27,32 +27,32 @@ import espace.core.sources.RijksmuseumSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.CulturalObject;
+import model.resources.CulturalObject.CulturalObjectData;
 import utils.ListUtils;
 
-public class RijksmuseumBasicRecordFormatter extends ExternalBasicRecordReader {
+public class RijksmuseumBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
+
 
 	@Override
-	public void fillInExternalId(JsonContextRecord rec) {
-		object.setIsShownBy(rec.getStringValue("headerImage.url"));
-		object.setIsShownAt(object.getIsShownBy());
-	}
-
-	@Override
-	public void fillInValidRecord(JsonContextRecord rec) {
-		object.setThumbnailUrl(rec.getStringValue("webImage.url"));
-		object.setTitle(rec.getStringValue("title"));
-		object.setDescription(rec.getStringValue("longTitle"));
-		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
-//		record.setContributors(rec.getStringArrayValue("contributor"));
-		// TODO: add years
-		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
-		// TODO: add rights
-//		record.setItemRights(rec.getStringValue("rights"));
-		String id = rec.getStringValue("objectNumber");
-		Provider recordProvider = new Provider(RijksmuseumSpaceSource.LABEL, id, 
-				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/"
-						+ id + ",0");
-		object.addProvider(recordProvider);
+	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+//		object.setThumbnailUrl(rec.getStringValue("webImage.url"));
+//		object.setTitle(rec.getStringValue("title"));
+//		object.setDescription(rec.getStringValue("longTitle"));
+//		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
+////		record.setContributors(rec.getStringArrayValue("contributor"));
+//		// TODO: add years
+//		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		// TODO: add rights
+////		record.setItemRights(rec.getStringValue("rights"));
+//		String id = rec.getStringValue("objectNumber");
+//		Provider recordProvider = new Provider(RijksmuseumSpaceSource.LABEL, id, 
+//				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/"
+//						+ id + ",0");
+//		object.addProvider(recordProvider);
+		return object;
 	}
 
 }

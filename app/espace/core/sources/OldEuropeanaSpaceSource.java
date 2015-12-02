@@ -53,6 +53,7 @@ import espace.core.sources.formatreaders.EuropeanaExternalBasicRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.resources.WithResource;
 
 public class OldEuropeanaSpaceSource extends ISpaceSource {
 
@@ -232,7 +233,7 @@ public class OldEuropeanaSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				System.out.println("europeana got " + res.totalCount);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
+				ArrayList<WithResource<?>> a = new ArrayList<>();
 				if (response.path("success").asBoolean()) {
 					for (JsonNode item : response.path("items")) {
 						a.add(formatreader.readObjectFrom(item));

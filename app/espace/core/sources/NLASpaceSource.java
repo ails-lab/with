@@ -44,6 +44,7 @@ import espace.core.Utils.Pair;
 import espace.core.sources.formatreaders.NLAExternalBasicRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.RecordType;
+import model.resources.WithResource;
 
 
 
@@ -152,7 +153,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 			response = HttpConnector.getURLContent(httpQuery);
 			// System.out.println(response.toString());
 			JsonNode pa = response.path("response").path("zone");
-			ArrayList<ExternalBasicRecord> a = new ArrayList<ExternalBasicRecord>();
+			ArrayList<WithResource<?>> a = new ArrayList<>();
 
 			for (int i = 0; i < pa.size(); i++) {
 				JsonNode o = pa.get(i);
@@ -179,8 +180,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 //						for (String string : v) {
 //							countValue(type, string);
 //						}
-						ExternalBasicRecord it = formatreader.readObjectFrom(item);
-						a.add(it);
+						a.add(formatreader.readObjectFrom(item));
 						
 					}
 					for (JsonNode facet : o.path("facets").path("facet"))

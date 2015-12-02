@@ -76,8 +76,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				// res.count = q.pageSize;
 				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 				for (JsonNode item : response.path("artObjects")) {
-					ExternalBasicRecord record = formatreader.readObjectFrom(item);
-					res.addItem(record);
+					res.addItem(formatreader.readObjectFrom(item));
 				}
 				res.count = a.size();
 

@@ -28,6 +28,7 @@ import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.sources.formatreaders.DDBBasicRecordFormatter;
 import model.ExternalBasicRecord;
+import model.resources.WithResource;
 
 public class DDBSpaceSource extends ISpaceSource {
 
@@ -84,7 +85,7 @@ public class DDBSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
 				// res.startIndex = Utils.readIntAttr(response, "offset", true);
-				ArrayList<ExternalBasicRecord> a = new ArrayList<ExternalBasicRecord>();
+				ArrayList<WithResource<?>> a = new ArrayList<>();
 
 				for (JsonNode item : docs) {
 					a.add(formatreader.readObjectFrom(item));

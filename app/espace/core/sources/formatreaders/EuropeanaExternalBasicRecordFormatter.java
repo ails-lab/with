@@ -45,10 +45,8 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 	
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		
 		CulturalObjectData model = new CulturalObjectData();
-		object.setModel(model);
-		
+		object.setDescriptiveData(model);
 		model.setLabel(rec.getLiteralValue("title"));
 		model.setDescription(rec.getLiteralValue("dcDescription"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
@@ -68,14 +66,13 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 		object.setMedia(media);
 		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		return object;
+		
 		//TODO: add null checks
 //		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
 //		object.setCreator(rec.getStringValue("dcCreator"));
-		object.setContributors(rec.getStringArrayValue("dcContributor"));
-		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		object.setContributors(rec.getStringArrayValue("dcContributor"));
 //		object.setItemRights(rec.getStringValue("rights"));
-		Provider recordProvider = new Provider);
-		object.addProvider(recordProvider);
 	}
 	
 

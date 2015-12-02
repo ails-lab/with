@@ -37,6 +37,7 @@ import espace.core.sources.formatreaders.BritishLibraryBasicRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.resources.WithResource;
 import utils.ListUtils;
 
 public class BritishLibrarySpaceSource extends ISpaceSource {
@@ -180,13 +181,11 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response.path("photos"), "total", true);
 				res.count = Utils.readIntAttr(response.path("photos"), "perpage", true);
-				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
+				ArrayList<WithResource<?>> a = new ArrayList<>();
 				for (JsonNode item : response.path("photos").path("photo")) {
 					// countValue(type, t);
 //					countValue(rights, it.rights, 1);
-					ExternalBasicRecord record = formatreader.readObjectFrom(item);
-					if (record != null)
-						a.add(record);
+				    a.add(formatreader.readObjectFrom(item));
 				}
 				res.items = a;
 				res.count = a.size();
