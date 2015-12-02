@@ -47,14 +47,14 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("title"));
-		model.setDescription(rec.getLiteralValue("dcDescription"));
+		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
+		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreator"))));
+		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
 		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));

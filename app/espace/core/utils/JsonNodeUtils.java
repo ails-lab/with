@@ -50,7 +50,7 @@ public class JsonNodeUtils {
 			Literal res = new Literal();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
-				res.put(next.getKey(), next.getValue().asText());
+				res.put(next.getKey(), next.getValue().get(0).asText());
 			}
 			return res;
 		}
