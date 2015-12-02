@@ -696,8 +696,10 @@ public class CollectionController extends Controller {
 			DB.getCollectionRecordDAO().makePermanent(record);
 			status = addRecordToFirstEntries(record, result, collectionId, position);
 		} else {
+			int position  = c.getItemCount();
+			record.setPosition(position);
 			DB.getCollectionRecordDAO().makePermanent(record);
-			status = addRecordToFirstEntries(record, result, collectionId);
+			status = addRecordToFirstEntries(record, result, collectionId, position);
 		}
 		JsonNode content = json.get("content");
 		if (content != null) {
@@ -864,10 +866,10 @@ public class CollectionController extends Controller {
 		ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
 		itemCountUpdater.decItemCount();
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId(recordId));
-		int position = 0;
-		if (collection.getIsExhibition()) {
-			position = record.getPosition();
-		}
+		//int position = 0;
+		//if (collection.getIsExhibition()) {
+		int position = record.getPosition();
+		//}
 		// decrement likes from records
 		if (collection.getTitle().equals("_favorites")) {
 			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
@@ -884,9 +886,9 @@ public class CollectionController extends Controller {
 		eraser.deleteRecord();
 		eraser.deleteRecordEntryFromMerged();
 
-		if (collection.getIsExhibition()) {
+		//if (collection.getIsExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(new ObjectId(collectionId), position);
-		}
+		//}
 
 		result.put("message", "RecordLink succesfully removed from Collection with id: " + collectionId.toString());
 		return ok(result);

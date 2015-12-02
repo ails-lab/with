@@ -59,7 +59,7 @@ public class CollectionRecordDAO extends DAO<CollectionRecord> {
 	public List<CollectionRecord> getByCollectionOffsetCount(ObjectId colId,
 			int offset, int count) {
 		Query<CollectionRecord> q = this.createQuery().field("collectionId")
-				.equal(colId).offset(offset).limit(count);
+				.equal(colId).order("position").offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
