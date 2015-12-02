@@ -25,13 +25,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 
 import model.EmbeddedMediaObject.Quality;
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.ExternalBasicRecord.ItemRights;
 import model.Media;
 import model.MediaObject;
 import model.basicDataTypes.Literal;
@@ -39,6 +43,7 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.LiteralOrResource.ResourceType;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -105,9 +110,9 @@ public class MediaController extends Controller {
 				newMedia = DB.getMediaObjectDAO().findById(new ObjectId(id));
 
 				// set metadata
+//				//extract method!!! 				
 				
-//				//why should these be set by a user if we can extract them automatically?
-//				//is this just a workaround for videos?
+				
 				if (json.has("width"))
 					newMedia.setWidth(json.get("width").asInt());
 				if (json.has("height"))
@@ -166,7 +171,10 @@ public class MediaController extends Controller {
 	public static Result createMedia(boolean fileData) {
 		ObjectNode result = Json.newObject();
 		ArrayNode allRes = result.arrayNode();
+		
 
+		
+		
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		//if (userIds.isEmpty())
@@ -193,6 +201,7 @@ public class MediaController extends Controller {
 						}
 						
 //						String[] withMediaRights = formData.get("withMediaRights");
+						
 						
 //						name keys accordignly?						
 						if(formData.containsKey("resourceType")){
@@ -247,16 +256,19 @@ public class MediaController extends Controller {
 			} else {
 				final Map<String, String[]> req = request().body()
 						.asFormUrlEncoded();
-				Logger.info("whosp");
 				if (req != null) {
+//					this means we have form data but no file, do we even allow this??
+//					don't we want to force json in this case?					
 					// this should be rare for file data
 				} else {
 					final JsonNode jsonBody = request().body().asJson();
 					if (jsonBody != null) {
+//						then why do we even need the boolean parameter???						
 						// we extract the media and maybe some metadata from the
 						// json body
 
 					} else {
+//						again why should we even allow this?						
 						// raw body to file upload
 						// problem, there is absolutely no metadata, so don't
 						// know what to put in the Media Object
@@ -272,22 +284,26 @@ public class MediaController extends Controller {
 						}
 					}
 				}
-			}
+			}		
 		} else {
 			
 			// metadata based media creation
 			
 			JsonNode json = null;
+			ObjectNode error = Json.newObject();
+			
 			json = request().body().asJson();
 			if(json==null){
-				result.put("error", "Empty Json Body (file parameter is false)");
+				error.put("emptyBody", "Empty Json Body (file parameter is false)");
+				result.put("error", error);
 				return badRequest(result);
 			}
 			
 			if(json.has("url")){
 				med.setUrl(json.get("url").asText());
 			} else {
-				result.put("error", "You need to provide an external url for the media object");
+				error.put("emptyUrl", "Empty url for the media object");
+				result.put("error", error);
 				return badRequest(result);
 			}
 			
@@ -296,66 +312,150 @@ public class MediaController extends Controller {
 				type = json.get("type").asText();
 			} else {
 				//maybe after we can extract this by connecting to the url
-				result.put("error", "Type is a mandatory field that needs to be provided");
+				error.put("emptyType", "Empty mandatory field Type");
+				result.put("error", error);
 				return badRequest(result);
 			}
 			
+//	TESTEST!!			
+			if(json.has("mediaRights")){
+				Set<WithMediaRights> rightsSet = new HashSet<WithMediaRights>();
+				JsonNode rightsArray = json.get("mediaRights");
+				if(rightsArray.isArray()){
+					for(JsonNode rightNode : rightsArray){
+						for(WithMediaRights right: WithMediaRights.values()){
+							if(StringUtils.equals(right.name().toLowerCase(), rightNode.asText())){
+								rightsSet.add(right);
+							}
+						}
+					}
+					med.setWithRights(rightsSet);
+				} else {
+					error.put("JSON", "mediaRights field should be a Json Array");
+					result.put("error", error);
+					return badRequest(result);
+				}
+			} else {
+				error.put("emptyType", "Empty mandatory field mediaRights");
+				result.put("error", error);
+				return badRequest(result);
+			}
+
+			
+			//parse mimeType - this is not a mandatory field right?
+			//maybe there can be a mismatch here with type,
+			//mimeType will override it (good for clean data)
+			if(json.has("mimeType")) {
+				med.setMimeType(MediaType.parse(json.get("mimeType").asText()));
+				if(med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)){
+					type = "image";
+				} else if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
+					type = "video";
+				} else if(med.getMimeType().is(MediaType.ANY_AUDIO_TYPE)){
+					type = "audio";
+				} else if(med.getMimeType().is(MediaType.ANY_TEXT_TYPE)){
+					type = "text";
+				} else{
+					error.put("mimeType", "Unsupported or bad mimeType");
+					result.put("error", error);
+					return badRequest(result);
+				}
+			}
+			
+			//will eventually add all extended model fields
 			if(type.toLowerCase().contains("image")){
 				med.setType(WithMediaType.IMAGE);
-				
-				if(json.has("height")&&json.has("width")){
-					if(json.get("height").canConvertToInt() && json.get("width").canConvertToInt()){
-						med.setHeight(json.get("height").asInt());
-						med.setWidth(json.get("width").asInt());
-					} else {
-						result.put("error", "Height and width need to be integers");
-						return badRequest(result);
-					}
+								
+				if(!parseJsonDimensionsAndThumbnail(med, json, error)){
+					result.put("error", error);
+					//return badRequest(result);
 				} else {
-					if(json.has("height")||json.has("width")){
-						result.put("error", "You need to provide both height and width");
-						return badRequest(result);
-					}
+					med.setOrientation();
 				}
-			
-				//make thumb if empty?
-				if(json.has("thumbnail")){
-					med.setThumbnailUrl(json.get("thumbnail").asText());
-					
-					if(json.has("thumbHeight")&&json.has("thumbWidth")){
-						if(json.get("thumbHeight").canConvertToInt() && json.get("thumbWidth").canConvertToInt()){
-							med.setThumbHeight(json.get("thumbHeight").asInt());
-							med.setThumbWidth(json.get("thumbWidth").asInt());
-						} else {
-							result.put("error", "Thumbnail height and width need to be integers");
-							return badRequest(result);
-						}
-					} else
-						if(json.has("height")||json.has("width")){
-							result.put("error", "You need to provide both thumbnail height and width");
-							return badRequest(result);
-						}
-					}
+				
+			} else if(type.toLowerCase().contains("video")){
+				med.setType(WithMediaType.VIDEO);//durationSeconds //width, height //Quality	
+				
+				if(!parseJsonDimensionsAndThumbnail(med, json, error)){
+					result.put("error", error);
+					//return badRequest(result);
+				} else {
+					med.setOrientation();
+				}
+				
+				if(!parseJsonDuration(med, json, error)){
+					result.put("error", error);
+					//return badRequest(result);
+				}
+				
+				
+			} else if(type.toLowerCase().contains("text")){
+				med.setType(WithMediaType.TEXT);
 
+			} else if(type.toLowerCase().contains("audio")){
+				med.setType(WithMediaType.AUDIO); //Quality
 				
-				
-//				} else if(type.toLowerCase().contains("video")){
-//						med.setType(WithMediaType.VIDEO);//durationSeconds //width, height //thumbnailBytes //Quality						
-//					
-//				} else if(type.toLowerCase().contains("text")){
-//						med.setType(WithMediaType.TEXT);
-//
-//				} else if(type.toLowerCase().contains("audio")){
-//						med.setType(WithMediaType.AUDIO); //durationSeconds	//Quality
-					
-				} else { 
-					result.put("error", "Wrong or unsupported media type");
+				if(!parseJsonDuration(med, json, error)){
+					result.put("error", error);
 					return badRequest(result);
 				}
 				
-				
+			} else { 
+				result.put("error", "Wrong or unsupported media type");
+				return badRequest(result);
+			}
 		}
 		return ok(result);
+	}
+
+	
+	private static boolean parseJsonDuration(MediaObject med, JsonNode json, ObjectNode error) {
+		if(json.has("durationSeconds")){
+			if(json.get("durationSeconds").canConvertToInt()){
+				med.setDurationSeconds(json.get("durationSeconds").asInt());
+			} else {
+				error.put("duration", "Duration needs to be an integer");
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private static boolean parseJsonDimensionsAndThumbnail(MediaObject med, JsonNode json, ObjectNode error) {
+		if(json.has("height")&&json.has("width")){
+			if(json.get("height").canConvertToInt() && json.get("width").canConvertToInt()){
+				med.setHeight(json.get("height").asInt());
+				med.setWidth(json.get("width").asInt());
+			} else {
+				error.put("dimensions", "Height and width need to be integers");
+				return false;
+			}
+		} else {
+			if(json.has("height")||json.has("width")){
+				error.put("dimensions", "You need to provide both height and width");
+				return false;
+			}
+		}
+		
+		//make thumb if empty?
+		if(json.has("thumbnail")){
+			med.setThumbnailUrl(json.get("thumbnail").asText());
+			
+			if(json.has("thumbHeight")&&json.has("thumbWidth")){
+				if(json.get("thumbHeight").canConvertToInt() && json.get("thumbWidth").canConvertToInt()){
+					med.setThumbHeight(json.get("thumbHeight").asInt());
+					med.setThumbWidth(json.get("thumbWidth").asInt());
+				} else {
+					error.put("thumbDimensions", "Thumbnail height and width need to be integers");
+					return false;
+				}
+			} else
+				if(json.has("height")||json.has("width")){
+					error.put("thumbDimensions", "You need to provide both thumbnail height and width");
+					return false;
+				}
+			}
+		return true;
 	}
 
 	private static void imageUpload(ArrayNode allRes, ObjectNode singleRes, MediaObject med, FilePart fp,
@@ -372,12 +472,7 @@ public class MediaController extends Controller {
 		if(!formData.containsKey("thumbnailUrl")){
 			makeThumb(med, image);
 		} else {
-			String thumbURL = med.getThumbnailUrl();
-			String param = "thumbnail";
-			BufferedImage ithumb = null;
-			//just a warning that the thumb won't work
-			//should we create it then?
-			checkImageURL(allRes, singleRes, thumbURL, param, ithumb);
+			//need a method to check if this is a valid url that contains an image! 
 			med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
 		}
 		
@@ -396,28 +491,6 @@ public class MediaController extends Controller {
 		
 	}
 
-	//this method checks if the url is an image or not 
-	//it returns true or false based on that
-	//and also gives a warning in the JSON results
-	private static boolean checkImageURL(ArrayNode allRes, ObjectNode singleRes, String inputURL,
-			String stringParam, Image img) {
-		if(stringParam==null){
-			stringParam = "an image";
-		}
-		try{
-			//url = new URL(med.getUrl());
-			//ithumb = ImageIO.read(url);
-			URL url = new URL(inputURL);
-			img = ImageIO.read(url);
-		} catch (Exception e){
-			//maybe we dont want to exclude them from adding bad urls (temporary 404s?)
-			singleRes.put("warn", "Cannot read " + stringParam + " from URL: "
-					+ inputURL);
-			allRes.add(singleRes);
-			return false;
-		}
-		return true;
-	}
 
 //	use the libraries we will use for video editing!
 	private static void makeThumb(MediaObject med, BufferedImage image) throws IOException {
@@ -595,7 +668,6 @@ public class MediaController extends Controller {
 		}
 		return ok(result);
 	}
-	
 	
 	
 }

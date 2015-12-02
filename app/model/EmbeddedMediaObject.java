@@ -17,6 +17,8 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import model.basicDataTypes.LiteralOrResource;
@@ -45,8 +47,10 @@ public class EmbeddedMediaObject {
 
 	// this needs work
 	public static enum WithMediaRights {
-		Public("Attribution Alone"), Restricted("Restricted"),
-		Permission("Permission"), Modify("Allow re-use and modifications"),
+		Public("Attribution Alone"), 
+		Restricted("Restricted"),
+		Permission("Permission"), 
+		Modify("Allow re-use and modifications"),
 		Commercial("Allow re-use for commercial"),
 		Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
 		Creative_Not_Commercial("NOT Comercial"),
@@ -61,6 +65,7 @@ public class EmbeddedMediaObject {
 		RRFA("Rights Reserved - Free Access"),
 		UNKNOWN("Unknown");
 
+		
 		private final String text;
 
 	    private WithMediaRights(final String text) {
@@ -71,6 +76,7 @@ public class EmbeddedMediaObject {
 	    public String toString() {
 	        return text;
 	    }
+	    
 	}
 	
 	private int width, height;
