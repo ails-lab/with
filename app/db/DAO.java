@@ -16,18 +16,28 @@
 
 package db;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import model.basicDataTypes.WithAccess.Access;
+import model.resources.WithResource;
+import model.usersAndGroups.User;
+
 import org.bson.types.ObjectId;
+import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.dao.BasicDAO;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.libs.F.Callback;
+import utils.Tuple;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
@@ -55,7 +65,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 * Convenience method for retrieving all values for this query on certain
 	 * field. Use if you don't want the morphia treatment (you want values, not
 	 * objects)
-	 * 
+	 *
 	 * @param res
 	 * @param query
 	 * @param field
@@ -91,7 +101,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Execute on all matching entities and optionally write changes back to db.
-	 * 
+	 *
 	 * @param callback
 	 * @param withWriteback
 	 * @throws Exception
@@ -152,7 +162,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Use this method to save and Object to the database
-	 * 
+	 *
 	 * @param record
 	 */
 	public Key<E> makePermanent(E doc) {
@@ -166,7 +176,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Use this method to delete and Object to the database
-	 * 
+	 *
 	 * @param record
 	 */
 	public int makeTransient(E doc) {
@@ -181,7 +191,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	/**
 	 * Condition on the object needs to include the prefix 'obj.'! There is a
 	 * separate entity manager doing the work here.
-	 * 
+	 *
 	 * @param condition
 	 * @return Number of entries deleted
 	 */
@@ -194,10 +204,11 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Careful with this one! Too many results may come back.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<E> getAll() {
 		return find().asList();
 	}
+
 }

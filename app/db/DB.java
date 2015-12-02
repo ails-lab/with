@@ -29,6 +29,7 @@ import model.resources.EUscreenObject;
 import model.resources.EventObject;
 import model.resources.PlaceObject;
 import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.TimespanObject;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
@@ -176,39 +177,40 @@ public class DB {
 	 */
 
 	public static RecordResourceDAO getRecordResourceDAO() {
-		return (RecordResourceDAO) getDAO(RecordResource.class);
+		return (RecordResourceDAO)
+				getDao(RecordResource.class, null);
 	}
-/*
-	public static RecordResourceDAO<AgentObject>.AgentObjectDAO getAgentObjectDAO() {
-		return (RecordResourceDAO<AgentObject>.AgentObjectDAO)
+
+	public static RecordResourceDAO.AgentObjectDAO getAgentObjectDAO() {
+		return (RecordResourceDAO.AgentObjectDAO)
 				getDao(AgentObject.class, RecordResource.class);
 	}
 
-	public static RecordResourceDAO<CulturalObject>.CulturalObjectDAO getCulturalObjectDAO() {
-		return (RecordResourceDAO<CulturalObject>.CulturalObjectDAO)
+	public static RecordResourceDAO.CulturalObjectDAO getCulturalObjectDAO() {
+		return (RecordResourceDAO.CulturalObjectDAO)
 				getDao(CulturalObject.class, RecordResource.class);
 	}
 
-	public static RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO getEuscreenObjectDAO() {
-		return (RecordResourceDAO<EUscreenObject>.EuscreenObjectDAO)
+	public static RecordResourceDAO.EuscreenObjectDAO getEuscreenObjectDAO() {
+		return (RecordResourceDAO.EuscreenObjectDAO)
 				getDao(CulturalObject.class, RecordResource.class);
 	}
 
-	public static RecordResourceDAO<EventObject>.EventObjectDAO getEventObjectDAO() {
-		return (RecordResourceDAO<EventObject>.EventObjectDAO)
+	public static RecordResourceDAO.EventObjectDAO getEventObjectDAO() {
+		return (RecordResourceDAO.EventObjectDAO)
 				getDao(EventObject.class, RecordResource.class);
 	}
 
-	public static RecordResourceDAO<PlaceObject>.PlaceObjectDAO getPlaceObjectDAO() {
-		return (RecordResourceDAO<PlaceObject>.PlaceObjectDAO)
+	public static RecordResourceDAO.PlaceObjectDAO getPlaceObjectDAO() {
+		return (RecordResourceDAO.PlaceObjectDAO)
 				getDao(PlaceObject.class, RecordResource.class);
 	}
 
-	public static RecordResourceDAO<TimespanObject>.TimespanObjectDAO getTimespanObjectDAO() {
-		return (RecordResourceDAO<TimespanObject>.TimespanObjectDAO)
+	public static RecordResourceDAO.TimespanObjectDAO getTimespanObjectDAO() {
+		return (RecordResourceDAO.TimespanObjectDAO)
 				getDao(TimespanObject.class, RecordResource.class);
 	}
-*/
+
 
 	/**
 	 * Signleton DAO for all the entities
@@ -218,10 +220,6 @@ public class DB {
 	 * @return
 	 */
 	private static <T> DAO<?> getDao(Class<T> clazz, Class<?> parentClazz) {
-		if(clazz.getSimpleName().equals("WithResource")
-			|| parentClazz.equals("WithResource")) {
-			
-		}
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if(dao == null)  {
 			try {
