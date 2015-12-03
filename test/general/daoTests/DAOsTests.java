@@ -103,10 +103,10 @@ public class DAOsTests {
 		//resourceType is collectionObject
 		wres.setResourceType(WithResourceType.WithResource);
 		// type: metadata specific for a record
-		Literal label = new Literal(Language.EN, "My record Title");
+		Literal label = new Literal(Language.ENGLISH, "My record Title");
 		RecordDescriptiveData ddata = new RecordDescriptiveData();
 		ddata.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		Literal desc = new Literal(Language.ENGLISH, "This is a description");
 		ddata.setDescription(desc);
 		wres.setDescriptiveData(ddata);
 

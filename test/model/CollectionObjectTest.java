@@ -106,10 +106,10 @@ public class CollectionObjectTest {
 		//resourceType is collectionObject
 		co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		Literal label = new Literal(Language.EN, "MyTitle");
+		Literal label = new Literal(Language.ENGLISH, "MyTitle");
 		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
 		cdd.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		Literal desc = new Literal(Language.ENGLISH, "This is a description");
 		cdd.setDescription(desc);
 		co.setDescriptiveData(cdd);
 

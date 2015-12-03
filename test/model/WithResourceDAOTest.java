@@ -66,8 +66,8 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResourceX" + i));
-			model.setDescription(new Literal(Language.EN, "Some description"));
+			model.setLabel(new Literal(Language.ENGLISH, "TestWithResourceX" + i));
+			model.setDescription(new Literal(Language.ENGLISH, "Some description"));
 			withResource.setDescriptiveData(model);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1);
