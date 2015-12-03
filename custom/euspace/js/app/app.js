@@ -394,7 +394,8 @@ define("app", ['knockout'], function (ko) {
 			likeItem: likeItem,
 			isLiked: isLiked,
 			isLogged: isLogged,
-			getEditableCollections: getEditableCollections
+			getEditableCollections: getEditableCollections,
+			currentUser: currentUser
 	 }
 	 
 	 
