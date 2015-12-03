@@ -69,7 +69,6 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 		
 		//TODO: add null checks
 //		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-//		object.setCreator(rec.getStringValue("dcCreator"));
 //		object.setContributors(rec.getStringArrayValue("dcContributor"));
 //		object.setItemRights(rec.getStringValue("rights"));
 	}
