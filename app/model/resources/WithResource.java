@@ -296,7 +296,7 @@ public class WithResource<T extends DescriptiveData> {
 	}
 
 	@Embedded
-	private WithAdmin administrative;
+	protected WithAdmin administrative;
 
 	@Embedded
 	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;

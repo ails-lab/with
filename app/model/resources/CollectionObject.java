@@ -27,7 +27,13 @@ import model.DescriptiveData;
 
 @Entity("CollectionObject")
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
-
+	
+	public CollectionObject() {
+		super();
+		this.administrative = new CollectionAdmin();
+		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
+	}
+	
 	public static class CollectionAdmin extends WithAdmin {
 
 		private int entryCount;
