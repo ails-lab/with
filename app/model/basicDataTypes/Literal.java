@@ -25,16 +25,27 @@ import org.mongodb.morphia.annotations.Embedded;
 public class Literal extends HashMap<String, String> {
 
 	public static enum Language {
-		ENGLISH("en"),SPANISH("es"), FRENCH("fr"),
-		UNKNOWN("unk"), DEFAULT("def");
-		private String code;
-
-		private Language(String code) {
-			this.code = code;
+		EN, ES, FR,
+		UNKNOWN, DEFAULT;
+		
+		public String toString() {
+	        return name().toLowerCase();
+	    }
+		
+		public Language getLanguage(String str) {
+			for (Language lang : Language.values()) {
+	            if (lang.toString().equals(str.toUpperCase())) {
+	                return lang;
+	            }
+	        }
+	        return null;
 		}
-		public String getCode(){
-			return code;
-		}
+		
+		/*String fullName;
+		
+		public Language(String fullName) {
+			this.fullName = fullName;
+		}*/
 	}
 
 	public Literal() {
@@ -46,7 +57,7 @@ public class Literal extends HashMap<String, String> {
 
 	public Literal(Language lang, String label) {
 		this.put(lang.toString(), label);
-		if (lang.equals(Language.ENGLISH))
+		if (lang.equals(Language.EN))
 			this.put(Language.DEFAULT.toString(), label);
 	}
 
@@ -56,7 +67,6 @@ public class Literal extends HashMap<String, String> {
 
 	// keys are language 2 letter codes,
 	// "unknown" for unknown language
-	// special request for any is "any"
 	public void setLiteral(Language lang, String label) {
 		put(lang.toString(), label);
 	}
