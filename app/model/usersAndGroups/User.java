@@ -24,6 +24,8 @@ import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.Indexes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -33,6 +35,13 @@ import play.Logger.ALogger;
 import utils.Serializer;
 
 @Entity
+@Indexes({
+		@Index("email"),
+		@Index("username"),
+		@Index("facebookId"),
+		@Index("googleId"),
+		@Index("userGroupsIds")
+		})
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
@@ -182,13 +191,13 @@ public class User extends UserOrGroup {
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
 	}
-	
+
 	private String genderToString(Gender gender) {
 		String genderString = String.valueOf(gender);
 		String first = genderString.substring(0, 1).toUpperCase();
 		return first + genderString.substring(1).toLowerCase();
 	}
-	
+
 
 	public String getGender() {
 		if (gender != null) {
@@ -203,7 +212,7 @@ public class User extends UserOrGroup {
 		 try {
 			 Gender genderType = Gender.valueOf(gender);
 			 this.gender = genderType;
-	    } catch (IllegalArgumentException ex) {  
+	    } catch (IllegalArgumentException ex) {
 	    	this.gender = Gender.UNSPECIFIED;
 	    }
 	}

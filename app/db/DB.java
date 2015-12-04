@@ -40,6 +40,7 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
+import sun.rmi.server.UnicastServerRef;
 
 import com.mongodb.MongoClient;
 import com.mongodb.gridfs.GridFS;
@@ -105,6 +106,7 @@ public class DB {
 			//morphia.mapPackage("model");
 			//morphia.mapPackage("model.resources");
 			//morphia.mapPackage("model.basicDataTypes");
+			morphia.mapPackage("model.usersAndGroups");
 			morphia.getMapper().getConverters()
 					.addConverter(new RightsConverter());
 		}
@@ -116,7 +118,7 @@ public class DB {
 			try {
 				ds = getMorphia().createDatastore(getMongo(),
 						getConf().getString("mongo.dbname"));
-				ds.ensureIndexes(Collection.class);
+				ds.ensureIndexes();
 
 			} catch (Exception e) {
 				log.error("Cannot create Datastore!", e);
