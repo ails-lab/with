@@ -34,17 +34,19 @@ import org.mongodb.morphia.query.UpdateOperations;
 import utils.Tuple;
 
 /*
- * The class consists of methods that can be both query 
- * a CollectionObject or a RecordResource_ (CollectionObject, 
+ * The class consists of methods that can be both query
+ * a CollectionObject or a RecordResource_ (CollectionObject,
  * CulturalObject, WithResource etc).
- * 
- * Special methods referring to one of these entities go to the 
+ *
+ * Special methods referring to one of these entities go to the
  * specific DAO class.
  */
-public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
-		
+public abstract class CommonResourcesDAO<T> extends DAO<T>{
+
+	public CommonResourcesDAO() {super(WithResource.class);}
+
 	/*
-	 * The value of the entity class is either 
+	 * The value of the entity class is either
 	 * CollectionObject.class or RecordResource.class
 	 */
 	public CommonResourcesDAO(Class<?> entityClass) {
@@ -52,7 +54,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	}
 
 	/**
-	 * Retrieve an Object from DB using its dbId 
+	 * Retrieve an Object from DB using its dbId
 	 * @param id
 	 * @return
 	 */
@@ -60,7 +62,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		return this.findOne(q);
 	}
-	
+
 	/**
 	 * Get a CollectionObject by the dbId and retrieve
 	 * only a bunch of fields from the whole document
@@ -76,7 +78,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		return this.findOne(q);
 
 	}
-	
+
 	/**
 	 * Remove a CollectionObject and all collected resources using the dbId
 	 * @param id
@@ -85,20 +87,20 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	public int removeById(ObjectId id) {
 		/*
 		 * 0 - no documents returned
-		 * * - number of documents returned 
+		 * * - number of documents returned
 		 */
 		return this.deleteById(id).getN();
 	}
-	
+
 	/**
 	 * Return all resources that belong to a 'collection' throwing
 	 * away duplicate entries in a 'collection'
 	 * This methods is here cause in the future may a collection
 	 * belong to a another collection.
-	 * 
-	 * 
-	 * TODO: Return only some fields for these resources. 
-	 * 
+	 *
+	 *
+	 * TODO: Return only some fields for these resources.
+	 *
 	 * @param colId
 	 * @param offset
 	 * @param count
@@ -133,20 +135,20 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		List<T> Ts = getSingletonCollectedResources(colId, offset, count);
 		List<T> repeatedResources = new ArrayList<T>();
 		for (T T: Ts) {
-			ArrayList<Integer> positions = (ArrayList<Integer>) T.getCollectedIn().get(colId);
+			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) T).getCollectedIn().get(colId);
 			if (positions.size() > 1)
 				for (int pos: positions.subList(1, positions.size()-1)) {
 					repeatedResources.add(T);
 					//Remove last entry from original resources, since add one copy. Have to return (max) count resources.
 					Ts.remove(Ts.size()-1);
-				}		
+				}
 		}
 		Ts.addAll(repeatedResources);
 		return Ts;
 	}
-	
+
 	/**
-	 * Retrieve records from specific collection using position 
+	 * Retrieve records from specific collection using position
 	 * which is between lowerBound and upperBound
 	 *
 	 * @param colId, lowrBound, upperBound
@@ -158,20 +160,20 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		q.filter(colField + " >", lowerBound).filter(colField + " <", upperBound);
 		/*
 		q.field(colField).exists();
-		q.and(q.criteria(colField).exists(), 
-			q.filter("colField >", lowerBound)., 
+		q.and(q.criteria(colField).exists(),
+			q.filter("colField >", lowerBound).,
 			q.filter("colField <", upperBound));
 		*/
 		List<T> Ts = this.find(q).asList();
 		List<T> repeatedResources = new ArrayList<T>();
 		for (T T: Ts) {
-			ArrayList<Integer> positions = (ArrayList<Integer>) T.getCollectedIn().get(colId);
+			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) T).getCollectedIn().get(colId);
 			int firstPosition = -1;
 			for (int pos: positions) {
-				if (lowerBound <= pos && pos < upperBound) {
+				if ((lowerBound <= pos) && (pos < upperBound)) {
 					firstPosition = pos;
 				}
-				if (firstPosition > -1 && lowerBound <= pos && pos < upperBound) {
+				if ((firstPosition > -1) && (lowerBound <= pos) && (pos < upperBound)) {
 					repeatedResources.add(T);
 					//Remove last entry from original resources, since add one copy. Have to return (max) upperBound resources.
 					Ts.remove(Ts.size()-1);
@@ -199,9 +201,9 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @param title
 	 * @return
 	 */
-	public List<T> getByLabel(String title, String lang) {
+	public List<T> getByLabel(String lang, String title) {
 		if(lang == null) lang = "en";
-		Query<T> q = this.createQuery().field("model.label." + lang)
+		Query<T> q = this.createQuery().field("descriptiveData.label." + lang)
 				.equal(title);
 		return this.find(q).asList();
 	}
@@ -227,12 +229,12 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 */
 	public T getByOwnerAndLabel(ObjectId creatorId, String title, String lang) {
 		if(lang == null) lang = "en";
-		Query<T> q = this.createQuery().field("administative.withCreator")
-				.equal(creatorId).field("model.label." + lang).equal(title);
+		Query<T> q = this.createQuery().field("administrative.withCreator")
+				.equal(creatorId).field("descriptiveData.label." + lang).equal(title);
 		return this.findOne(q);
 	}
 
-	
+
 	/**
 	 * Get all CollectionObject using the creator's/owner's id.
 	 * @param creatorId
@@ -241,7 +243,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByOwner(ObjectId creatorId, int offset, int count) {
-		Query<T> q = this.createQuery().field("administative.withCreator")
+		Query<T> q = this.createQuery().field("administrative.withCreator")
 				.equal(creatorId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
@@ -256,7 +258,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	public List<T> getFirstResourceByOwner(ObjectId id) {
 		return getByOwner(id, 0, 1);
 	}
-	
+
 	/**
 	 * Retrieve the owner/creator of a CollectionObject
 	 * using collection's dbId
@@ -265,8 +267,8 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	 */
 	public User getCollectionOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
-				.retrievedFields(true, "administative.withCreator");
-		return findOne(q).retrieveCreator();
+				.retrievedFields(true, "administrative.withCreator");
+		return ((WithResource) findOne(q)).retrieveCreator();
 	}
 
 	/**
@@ -493,7 +495,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
-	
+
 	/**
 	 * Return all public CollectionObjects (usually bounded by a limit) that also satisfy some user access criteria.
 	 * The method can be parametrised to return also the total number of entities for the specified query.
@@ -526,7 +528,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
-	
+
 	/**
 	 * Return the total number of likes for a resource.
 	 * @param id
@@ -535,7 +537,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	public int getTotalLikes(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "usage.likes");
-		return this.findOne(q).getUsage().getLikes();
+		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
 
 	/**
@@ -549,7 +551,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		return this.find(q).countAll();
 	}
 
-	
+
 	/**
 	 * ??????? do we have external Ids ??????
 	 * @param extId
@@ -561,7 +563,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		return this.find(q).asList();
 	}
 
-	
+
 	/**
 	 * ??????? do we have external Ids ??????
 	 * @param extId
@@ -587,7 +589,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	}
 
 	//TODO:Mongo query!
-	/** 
+	/**
 	 * Also wrong implementation
 	 * @param colId
 	 * @param position
@@ -616,7 +618,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 		}
 		this.update(q, updateOps);
 		 */
-		/*{	
+		/*{
 		 	collectedIn.colId: {$exists: true},
 		     collectedIn.colId: { $elemMatch: { $gte: position} }
 		   },
@@ -673,7 +675,7 @@ public abstract class CommonResourcesDAO<T extends WithResource> extends DAO<T>{
 	}
 
 	/**
-	 * Increment likes for this specific resource 
+	 * Increment likes for this specific resource
 	 * @param externalId
 	 */
 	public void incrementLikes(String dbId) {

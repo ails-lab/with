@@ -21,6 +21,8 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.Indexes;
 
 import utils.Serializer;
 
@@ -32,6 +34,11 @@ import db.DB;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Indexes({
+	@Index("username"),
+	@Index("users"),
+	@Index("parentGroups")
+	})
 public class UserGroup extends UserOrGroup {
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)

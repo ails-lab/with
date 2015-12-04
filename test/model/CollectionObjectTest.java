@@ -16,8 +16,6 @@
 
 package model;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
@@ -42,19 +40,17 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
 import model.resources.WithResource.WithAdmin;
 import model.resources.WithResource.WithResourceType;
-import model.MediaObject;
 import model.usersAndGroups.User;
+import model.MediaObject;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
-import org.eclipse.jetty.util.ajax.JSON;
 import org.junit.Test;
 
 import com.google.common.net.MediaType;
@@ -72,11 +68,11 @@ public class CollectionObjectTest {
 		 * Owner of the CollectionObject
 		 *
 		 */
-		/*User u = DB.getUserDAO().getByUsername("qwerty");
+		User u = DB.getUserDAO().getByUsername("qwerty");
 		if(u == null) {
 			System.out.println("No user found");
 			return;
-		}*/
+		}
 
 		/*
 		 * Administative metadata
@@ -92,8 +88,14 @@ public class CollectionObjectTest {
 		/*
 		 * This models a collection so there's no need to provide this
 		 */
-		Map<ObjectId, ArrayList<Integer>> colIn =
+		HashMap<ObjectId, ArrayList<Integer>> colIn =
 				new HashMap<ObjectId, ArrayList<Integer>>();
+		ArrayList<Integer> cols = new ArrayList<Integer>();
+		cols.add(4);
+		cols.add(87);
+		cols.add(33);
+		colIn.put(new ObjectId(), cols);
+		co.setCollectedIn(colIn);
 
 		//no externalCollections
 		List<ExternalCollection> ec;
@@ -104,12 +106,13 @@ public class CollectionObjectTest {
 		//resourceType is collectionObject
 		co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		Literal label = new Literal(Language.EN, "MyTitle");
+		Literal label = new Literal(Language.ENGLISH, "MyTitle");
 		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
 		cdd.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		Literal desc = new Literal(Language.ENGLISH, "This is a description");
 		cdd.setDescription(desc);
 		co.setDescriptiveData(cdd);
+
 
 		/*
 		 * no content for the collection
@@ -130,7 +133,7 @@ public class CollectionObjectTest {
 
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
-		System.out.println(DB.getCollectionObjectDAO().getByLabel(new Literal(Language.EN, "MyTitle")));
+		System.out.println(DB.getCollectionObjectDAO().getByLabel("en", "MyTitle"));
 
 	}
 

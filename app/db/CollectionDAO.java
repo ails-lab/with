@@ -44,6 +44,19 @@ public class CollectionDAO extends DAO<Collection> {
 		super(Collection.class);
 	}
 
+	/**
+	 * Remove a CollectionObject and all collected resources using the dbId
+	 * @param id
+	 * @return
+	 */
+	public int removeById(ObjectId id) {
+		/*
+		 * 0 - no documents returned
+		 * * - number of documents returned
+		 */
+		return this.deleteById(id).getN();
+	}
+
 	public List<Collection> getCollectionsByIds(List<ObjectId> ids) {
 		Query<Collection> colQuery = this.createQuery().field("_id")
 				.hasAnyOf(ids);
@@ -91,7 +104,7 @@ public class CollectionDAO extends DAO<Collection> {
 				.offset(offset).limit(count);
 		return this.find(q).asList();
 	}
-	
+
 	//userId has userAccess if its accessLevel in rights is equal to or greater than userAccess
 	public Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess) {
 		int ordinal = userAccess.y.ordinal();
@@ -101,7 +114,7 @@ public class CollectionDAO extends DAO<Collection> {
 			.equal(Access.values()[i+ordinal].toString());*/
 		return this.createQuery().criteria("rights." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
 	}
-	
+
 	public CriteriaContainer formLoggedInUserQuery(List<ObjectId> loggedInUserEffIds) {
 		int ordinal = Access.READ.ordinal();
 		Criteria[] criteria = new Criteria[loggedInUserEffIds.size()+1];
@@ -111,7 +124,7 @@ public class CollectionDAO extends DAO<Collection> {
 		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("rights.isPublic").equal(true);
 		return this.createQuery().or(criteria);
 	}
-	
+
 	public CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
@@ -119,8 +132,8 @@ public class CollectionDAO extends DAO<Collection> {
 		}
 		return this.createQuery().or(criteria);
 	}
-	
-	public Tuple<List<Collection>, Tuple<Integer, Integer>> getCollectionsAndHits(Query<Collection> q, 
+
+	public Tuple<List<Collection>, Tuple<Integer, Integer>> getCollectionsAndHits(Query<Collection> q,
 			Boolean isExhibition) {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		QueryResults<Collection> result;
@@ -145,7 +158,7 @@ public class CollectionDAO extends DAO<Collection> {
 		}
 		return new Tuple<List<Collection>, Tuple<Integer, Integer>>(collections, hits);
 	}
-	
+
 	public Tuple<Integer, Integer> getHits(Query<Collection> q, Boolean isExhibition) {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
@@ -164,7 +177,7 @@ public class CollectionDAO extends DAO<Collection> {
 		}
 		return hits;
 	}
-	
+
 	public Query<Collection> formBasicQuery(CriteriaContainer[] criteria, ObjectId creator, Boolean isExhibition,  int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		if (creator != null)
@@ -173,7 +186,7 @@ public class CollectionDAO extends DAO<Collection> {
 			q.and(criteria);
 		return q;
 	}
-	
+
 	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition, boolean totalHits, int offset, int count) {
 		CriteriaContainer[] criteria =  new CriteriaContainer[0];
@@ -190,7 +203,7 @@ public class CollectionDAO extends DAO<Collection> {
 			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
-	
+
 	public Tuple<List<Collection>, Tuple<Integer, Integer>>  getByAccess(
 			List<ObjectId> loggeInEffIds, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition, boolean totalHits, int offset, int count) {
@@ -209,8 +222,8 @@ public class CollectionDAO extends DAO<Collection> {
 			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
-	
-	public Tuple<List<Collection>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, 
+
+	public Tuple<List<Collection>, Tuple<Integer, Integer>> getShared(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
 		q.field("creatorId").notEqual(userId);
@@ -232,7 +245,7 @@ public class CollectionDAO extends DAO<Collection> {
 			return new Tuple<List<Collection>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
-	
+
 	public Tuple<List<Collection>, Tuple<Integer, Integer>> getPublic(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		Query<Collection> q = this.createQuery().offset(offset).limit(count+1);
@@ -260,21 +273,6 @@ public class CollectionDAO extends DAO<Collection> {
 		Query<Collection> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "creatorId");
 		return findOne(q).retrieveCreator();
-	}
-
-	public int removeById(ObjectId id) {
-
-		Collection c = get(id);
-
-		/*
-		 * User owner = c.retrieveOwner(); for (ObjectId colId :
-		 * owner.getCollectionIds()) { if (colId.equals(id)) {
-		 * owner.getCollectionIds().remove(colId);
-		 * DB.getUserDAO().makePermanent(owner); break; } }
-		 */
-
-		DB.getCollectionRecordDAO().deleteByCollection(id);
-		return makeTransient(c);
 	}
 
 	/**

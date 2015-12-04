@@ -19,11 +19,13 @@ package espace.core.utils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.Literal.Language;
 
 public class JsonNodeUtils {
 	
@@ -45,12 +47,13 @@ public class JsonNodeUtils {
 				node = node.get(0);
 			} 
 			if (node.isTextual()){
-				return new Literal(node.asText());
+				return new Literal(Language.DEFAULT,node.asText());
 			}
 			Literal res = new Literal();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
-				res.put(next.getKey(), next.getValue().asText());
+				// TODO ask if the key is a language
+				res.put(next.getKey(), next.getValue().get(0).asText());
 			}
 			return res;
 		}
