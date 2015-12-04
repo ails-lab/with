@@ -19,6 +19,8 @@ package db;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
@@ -202,9 +204,14 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByLabel(String lang, String title) {
-		if(lang == null) lang = "en";
+		if (lang == null) lang = "default";
 		Query<T> q = this.createQuery().field("descriptiveData.label." + lang)
 				.equal(title);
+		return this.find(q).asList();
+	}
+	
+	public List<T> getByLabel(Language lang, String title) {
+		Query<T> q = this.createQuery().field("descriptiveData.label." + lang.toString()).equal(title);
 		return this.find(q).asList();
 	}
 

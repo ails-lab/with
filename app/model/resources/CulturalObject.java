@@ -33,6 +33,7 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	
 	public CulturalObject() {
 		super();
+		this.administrative = new RecordAdmin();
 		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
 	}
 	

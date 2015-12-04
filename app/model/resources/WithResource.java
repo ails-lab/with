@@ -296,7 +296,7 @@ public class WithResource<T extends DescriptiveData> {
 	}
 
 	@Embedded
-	private WithAdmin administrative;
+	protected WithAdmin administrative;
 
 	@Embedded
 	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
@@ -356,7 +356,6 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 	public HashMap<ObjectId, ArrayList<Integer>> getCollectedIn() {
 		return collectedIn;
 	}
@@ -364,13 +363,13 @@ public class WithResource<T extends DescriptiveData> {
 	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
-	
+
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
 		if (collectedIn.containsKey(colId)) {
 			collectedIn.get(colId).add(position);
-		}
-		else
-			collectedIn.put(colId,  new ArrayList<Integer>(Arrays.asList(position)));
+		} else
+			collectedIn.put(colId,
+					new ArrayList<Integer>(Arrays.asList(position)));
 	}
 
 	public Usage getUsage() {
@@ -410,6 +409,7 @@ public class WithResource<T extends DescriptiveData> {
 		return resourceType;
 	}
 
+	@JsonIgnore
 	public void setResourceType(WithResourceType resourceType) {
 		this.resourceType = resourceType;
 	}
