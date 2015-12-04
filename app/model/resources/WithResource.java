@@ -356,7 +356,6 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 	public HashMap<ObjectId, ArrayList<Integer>> getCollectedIn() {
 		return collectedIn;
 	}
