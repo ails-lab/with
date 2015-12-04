@@ -24,6 +24,7 @@ import javax.validation.ConstraintViolation;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
+import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 
@@ -46,6 +47,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 public class RecordResourceController extends Controller {
+
 	public static final ALogger log = Logger.of(RecordResourceController.class);
 
 	/**
@@ -98,7 +100,8 @@ public class RecordResourceController extends Controller {
 	public static Result deleteRecordResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource resource = DB.getRecordResourceDAO().get(new ObjectId(id));
+			RecordResource resource = DB.getRecordResourceDAO().get(
+					new ObjectId(id));
 			if (resource == null) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
@@ -161,6 +164,7 @@ public class RecordResourceController extends Controller {
 				return badRequest(error);
 			}
 			// Fill with all the administrative metadata
+			resource.setResourceType(WithResourceType.valueOf(resourceType));
 			resource.getAdministrative().setWithCreator(creator);
 			resource.getAdministrative().setCreated(new Date());
 			resource.getAdministrative().setLastModified(new Date());
@@ -190,7 +194,8 @@ public class RecordResourceController extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			RecordResource oldResource = DB.getRecordResourceDAO().get(new ObjectId(id));
+			RecordResource oldResource = DB.getRecordResourceDAO().get(
+					new ObjectId(id));
 			if (oldResource == null) {
 				log.error("Cannot retrieve resource from database");
 				error.put("error", "Cannot retrieve resource from database");

@@ -21,14 +21,20 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.resources.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 
+import play.Logger;
+import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import utils.AccessManager;
+import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -37,6 +43,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DB;
 
 public class CollectionObjectController extends Controller {
+
+	public static final ALogger log = Logger
+			.of(CollectionObjectController.class);
+
 	/**
 	 * Creates a new WITH resource from the JSON body
 	 *
@@ -56,15 +66,13 @@ public class CollectionObjectController extends Controller {
 				return forbidden(error);
 			}
 			ObjectId creator = new ObjectId(session().get("user"));
-			String resourceType = json.get("resourceType").asText();
-			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			RecordResource resource = (RecordResource) Json.fromJson(json,
-					clazz);
-			Set<ConstraintViolation<RecordResource>> violations = Validation
-					.getValidator().validate(resource);
+			CollectionObject collection = Json.fromJson(json,
+					CollectionObject.class);
+			Set<ConstraintViolation<CollectionObject>> violations = Validation
+					.getValidator().validate(collection);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<RecordResource> cv : violations) {
+				for (ConstraintViolation<CollectionObject> cv : violations) {
 					properties.add(Json.parse("{\"" + cv.getPropertyPath()
 							+ "\":\"" + cv.getMessage() + "\"}"));
 				}
@@ -72,16 +80,83 @@ public class CollectionObjectController extends Controller {
 				return badRequest(error);
 			}
 			// Fill with all the administrative metadata
-			resource.getAdministrative().setWithCreator(creator);
-			resource.getAdministrative().setCreated(new Date());
-			resource.getAdministrative().setLastModified(new Date());
+			collection.setResourceType(WithResourceType.CollectionObject);
+			collection.getAdministrative().setWithCreator(creator);
+			collection.getAdministrative().setCreated(new Date());
+			collection.getAdministrative().setLastModified(new Date());
 			// TODO: withURI?
 			// TODO: maybe moderate usage statistics?
-			DB.getRecordResourceDAO().makePermanent(resource);
-			return ok(Json.toJson(resource));
+			DB.getCollectionObjectDAO().makePermanent(collection);
+			return ok(Json.toJson(collection));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
+		}
+	}
+
+	/**
+	 * Retrieve a resource metadata. If the format is defined the specific
+	 * serialization of the object is returned
+	 *
+	 * @param id
+	 *            the resource id
+	 * @return the resource metadata
+	 */
+	public static Result getCollectionObject(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			CollectionObject collection = DB.getCollectionObjectDAO().get(
+					new ObjectId(id));
+			if (collection == null) {
+				log.error("Cannot retrieve resource from database");
+				result.put("error", "Cannot retrieve resource from database");
+				return internalServerError(result);
+			}
+			if (!AccessManager.checkAccess(collection.getAdministrative()
+					.getAccess(), session().get("effectiveUserIds"),
+					Action.READ)) {
+				result.put("error",
+						"User does not have read-access for the resource");
+				return forbidden(result);
+			}
+			return ok(Json.toJson(collection));
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
+	}
+
+	/**
+	 * Deletes all resource metadata
+	 *
+	 * @param id
+	 *            the resource id
+	 * @return success message
+	 */
+	// TODO: cascaded delete (if needed)
+	public static Result deleteCollectionObject(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			CollectionObject collection = DB.getCollectionObjectDAO().get(
+					new ObjectId(id));
+			if (collection == null) {
+				log.error("Cannot retrieve resource from database");
+				result.put("error", "Cannot retrieve resource from database");
+				return internalServerError(result);
+			}
+			if (!AccessManager.checkAccess(collection.getAdministrative()
+					.getAccess(), session().get("effectiveUserIds"),
+					Action.DELETE)) {
+				result.put("error",
+						"User does not have the right to delete the resource");
+				return forbidden(result);
+			}
+			DB.getCollectionObjectDAO().makeTransient(collection);
+			result.put("message", "Resource was deleted successfully");
+			return ok(result);
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 	}
 }

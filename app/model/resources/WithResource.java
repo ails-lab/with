@@ -364,13 +364,13 @@ public class WithResource<T extends DescriptiveData> {
 	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
-	
+
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
 		if (collectedIn.containsKey(colId)) {
 			collectedIn.get(colId).add(position);
-		}
-		else
-			collectedIn.put(colId,  new ArrayList<Integer>(Arrays.asList(position)));
+		} else
+			collectedIn.put(colId,
+					new ArrayList<Integer>(Arrays.asList(position)));
 	}
 
 	public Usage getUsage() {
@@ -410,6 +410,7 @@ public class WithResource<T extends DescriptiveData> {
 		return resourceType;
 	}
 
+	@JsonIgnore
 	public void setResourceType(WithResourceType resourceType) {
 		this.resourceType = resourceType;
 	}
