@@ -178,7 +178,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					self.itemCount(data.itemCount);
 					self.access(data.access);
 					self.revealItems(data.firstEntries);
-					//self.loading(false);
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
@@ -230,8 +229,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		}
 		
 	    self.likeRecord = function (rec) {
-			
-			app.likeItem(rec, function (status) {
+	   	app.likeItem(rec, function (status) {
 				if (status) {
 					$('#' + rec.recordId).addClass('active');
 				} else {

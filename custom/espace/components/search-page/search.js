@@ -158,7 +158,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
-		self.loggedUser=app.isLogged();
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
@@ -651,7 +650,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
  
         function getItem(record) {
 			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
-			 if(self.loggedUser==true){
+			 if(isLogged()){
 				    if(record.isLike()){
 				    	 tile+='<span class="star active"  id='+record.externalId+'>';
 				    }

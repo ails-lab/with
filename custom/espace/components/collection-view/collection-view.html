@@ -30,7 +30,7 @@
               <!-- /ko -->
               
               
-              <div class="item media" data-bind="visible: isLoaded()">
+              <div class="item media" data-bind="visible: isLoaded(), attr:{id:recordId}">
               <div class="wrap">
                        <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()" title="add to favorites">
 						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
