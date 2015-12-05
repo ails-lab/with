@@ -7,7 +7,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		
 		self.checkLogged=function(){
 			
-		if(isLogged()==false){
+		if(isLogged()==false && window.localStorage.getItem("logged_in")=="false"){
 		  if(window.location.hash!= null && window.location.hash.length>0){
 			window.location='#login';}
 		  else{window.location="#";}

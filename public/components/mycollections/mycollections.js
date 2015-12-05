@@ -87,8 +87,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		
 		self.init=function(){
-			if (self.myUsername() !== undefined && self.myUsername() !== null) {
-		
+			
         	if (self.showsExhibitions) {
 				mapping.title = {
 					create: function(options) {
@@ -120,7 +119,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 				
 			}
-        }
+        
 		}
 		
 		/*self.checkLogged=function(){
