@@ -1,4 +1,4 @@
-define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], function (ko, FB, imagesLoaded, moment) {
+define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugin','./js/app/params','smoke'], function (ko, FB, imagesLoaded, moment,plugin,params) {
 
 	var self = this;
 	self.WITHApp = "";
@@ -16,33 +16,62 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		mobileSelector: '.mobilemenu',
 		mobileMenu: '.main .menu'
 	});
-
+    self.custom=false;
 	self.transDuration = '0.4s';
 	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
 	if (isFirefox) {
 		self.transDuration = 0;
 	}
 
-	require(["./js/app/plugin"], function (WITHApp) {
-		self.WITHApp = new WITHApp.WITHApp.ui({
-			// page name
-			page: $('body').attr('data-page'),
+	self.loadDependancies=function () {
+		/* we are in WITH*/
+		if(plugin.WITHApp){
+			self.WITHApp = new plugin.WITHApp.ui({
+				// page name
+				page: $('body').attr('data-page'),
+	
+				// masonry
+				mSelector: '.grid',
+				mItem: '.item',
+				mSizer: '.sizer',
+	
+				// mobile menu
+				mobileSelector: '.mobilemenu',
+				mobileMenu: '.main .menu'
+			});
+			return {
+				WITHApp: self.WITHApp
+			};
+		}
+		else{
+			self.custom=true;
+			self.WITHApp=new plugin.EUSpaceApp.ui({
 
-			// masonry
-			mSelector: '.grid',
-			mItem: '.item',
-			mSizer: '.sizer',
+		 		// page name
+		 		page  	  : $( 'body' ).attr( 'data-page' ),
 
-			// mobile menu
-			mobileSelector: '.mobilemenu',
-			mobileMenu: '.main .menu'
-		});
+		 		// masonry
+		 		mSelector : '.grid',
+		 		mItem	  : '.item',
+		 		mSizer	  : '.sizer',
 
-		return {
-			WITHApp: self.WITHApp
-		};
-	});
+		 		// mobile menu
+		 		mobileSelector : '.mobilemenu',
+		 		mobileMenu 	   : '.main .menu'	
+		 	})
 
+		 self.WITHApp.projectName = params._args.projectName;
+		 self.WITHApp.projectId = params._args.projectId;
+		 self.WITHApp.featuredExhibition=params._args.featuredExhibition;
+		 setTimeout(function(){ WITHApp.init(); }, 1000);
+		
+		 return {
+				WITHApp: self.WITHApp
+			};
+		}
+	}
+
+	self.loadDependancies();
 	/* for all isotopes binding */
 	function initOrUpdate(method) {
 		return function (element, valueAccessor, allBindings, viewModel, bindingContext) {
@@ -51,7 +80,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 					$(ele).css("display", "none");
 
 					$(element).imagesLoaded(function () {
-						if (ko.contextFor(ele).$parent.loading) {
+						if (ko.contextFor(ele) && ko.contextFor(ele).$parent.loading) {
 							ko.contextFor(ele).$parent.loading(false);
 							ko.contextFor(ele).$data.isLoaded(true);
 						}
@@ -309,15 +338,17 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		self.loadFavorites();
 
 		// Save to session
-		if (typeof (Storage) !== 'undefined') {
+		/*if (typeof (Storage) !== 'undefined') {
 			if (remember) {
 				localStorage.setItem("User", JSON.stringify(data));
 			} else {
 				sessionStorage.setItem("User", JSON.stringify(data));
 			}
-		}
+		}*/
 
 		isLogged(true);
+		
+		window.localStorage.setItem('logged_in', true);
 		waitForConnection(function () {
 			self.notificationSocket.send('{"action":"login","id":"' + data.dbId + '"}');
 		}, 1000);
@@ -645,9 +676,10 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 					self.notificationSocket.send('{"action":"logout","id":"' + self.currentUser._id() + '"}');
 				}, 1000);
 				self.clearSession();
+				window.localStorage.setItem('logged_in', false);
 				window.location.href = "/assets/index.html";
 				//update custom spaces
-				window.opener.location.reload();
+				//window.opener.location.reload();
 			}
 		});
 	};
@@ -731,16 +763,67 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		});
 	};
 
-	// Check if user information already exist in session
+	/* Check if user information already exist in session
 	if (sessionStorage.getItem('User') !== null) {
 		var sessionData = JSON.parse(sessionStorage.getItem('User'));
 		loadUser(sessionData, false);
 	} else if (localStorage.getItem('User') !== null) {
 		var storageData = JSON.parse(localStorage.getItem('User'));
 		loadUser(storageData, true);
-	}
+	}*/
 
-	self.reloadUser(); // Reloads the user on refresh
+	
+	function readCookie(name) {
+	    var nameEQ = encodeURIComponent(name) + "=";
+	    var ca = document.cookie.split(';');
+	    for (var i = 0; i < ca.length; i++) {
+	        var c = ca[i];
+	        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+	        if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
+	    }
+	    return null;
+	}
+	  
+	function ExtractQueryString(cookie) {
+	    var oResult = {};
+	    var aQueryString = cookie.replace(/\"/g, "").split("&");
+	    for (var i = 0; i < aQueryString.length; i++) {
+	        var aTemp = aQueryString[i].split("=");
+	        if (aTemp[1].length > 0) {
+	            oResult[aTemp[0]] = unescape(aTemp[1]);
+	        }
+	    }
+	    return oResult;
+	} 
+	
+	self.checkLogged=function(){
+		var user=null;
+		var usercookie=readCookie("PLAY_SESSION");
+		if(usercookie)
+		usercookie.replace(/\"/g, "");
+		if(usercookie!=null){
+		   var keys=ExtractQueryString(usercookie);	
+		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
+		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
+		    return (keys["user"]==undefined ? false : true);
+		}else{return false;}
+		
+	};
+	
+	self.checkLogged();
+	
+	//self.reloadUser(); // Reloads the user on refresh
+	
+	/* function to alert all tabs on log in changes*/
+	function storageChange(event) {
+		if(event.key == 'logged_in' ) {
+			//console.log("logged in:"+event.newValue);
+			
+				window.location.reload();
+			
+	    }
+	}
+	window.addEventListener('storage', storageChange, false);
 
 	return {
 		currentUser: currentUser,
@@ -755,6 +838,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', 'smoke'], funct
 		getPublicCollections: getPublicCollections,
 		getEditableCollections: getEditableCollections,
 		isLiked: isLiked,
+		isLogged:isLogged,
 		loadFavorites: loadFavorites,
 		likeItem: likeItem,
 		initOrUpdate: initOrUpdate,

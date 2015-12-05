@@ -1,4 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'], function ($, ko, router, kom) {
+define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'], function ($, ko, router,app, kom) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
@@ -78,8 +78,8 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 	popupName = ko.observable('empty');
 	popupParams = ko.observable({});
-
-
+    
+   
 	// Start the application
 	ko.applyBindings({ route: router.currentRoute, popupName: popupName, popupParams: popupParams });
 });

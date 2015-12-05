@@ -32,11 +32,11 @@
               
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
-                       <span class="star" data-bind="css: { active: isLiked }, visible: $parent.loggedUser" title="add to favorites">
+                       <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()" title="add to favorites">
 						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
-						<span class="collect" title="collect" data-bind="visible: $parent.loggedUser, event: { click: function() { $parent.collect($data); } }"><i class="fa fa-download fa-stack-1x fa-inverse"></i>
+						<span class="collect" title="collect" data-bind="visible: isLogged(), event: { click: function() { $parent.collect($data); } }"><i class="fa fa-download fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
 		        <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">

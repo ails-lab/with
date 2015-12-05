@@ -291,10 +291,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		document.body.setAttribute("data-page","item");
 		   
 		self.route = params.route;
-		self.loggedUser=app.isLogged();
 		self.from=window.location.href;	
 		var thumb = "";
-		self.loggedUser=app.isLogged();
+		self.loggedUser=ko.pureComputed(function(){
+			if(app.isLogged())return true;
+			else return false;
+		});
 		self.record = ko.observable(new Record());
 		self.id = ko.observable(params.id);
 		itemShow = function (e) {

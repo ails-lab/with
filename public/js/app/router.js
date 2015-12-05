@@ -59,5 +59,6 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 		hasher.changed.add(resetScroll);
 		
 		hasher.init();
+		
 	}
 });

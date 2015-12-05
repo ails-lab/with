@@ -83,7 +83,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
     	self.moreCollectionData=ko.observable(true);
     	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
-        if (self.myUsername() !== undefined && self.myUsername() !== null) {
+    	
+		
+		
+		self.init=function(){
+			if (self.myUsername() !== undefined && self.myUsername() !== null) {
+		
         	if (self.showsExhibitions) {
 				mapping.title = {
 					create: function(options) {
@@ -116,7 +121,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				
 			}
         }
-	 	
+		}
+		
+		/*self.checkLogged=function(){
+			if(isLogged()==false){
+		
+			window.location='#login';
+			return;
+		  }else{self.init();}
+		}
+		
+		self.checkLogged();*/
+		self.init();
+		
 		convertToRightsMap = function(data) {
 			$.each(data, function(j, c) {
 				var rightsArray = [];

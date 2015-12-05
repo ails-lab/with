@@ -1,4 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header','./app'], function ($, ko, router, kom,app) {
+define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header','./params','./app'], function ($, ko, router, kom,params,app) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';

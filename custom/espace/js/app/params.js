@@ -8,6 +8,6 @@ define(function () {
     _args.featuredCollection='';
     
     return {
-       SPACEPARAMS: _args
+       _args: _args
     };
-}());
+});

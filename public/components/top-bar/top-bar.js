@@ -5,6 +5,15 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		var self           = this;
 		self.notifications = ko.observableArray();
 
+		self.checkLogged=function(){
+			if(isLogged()==false){
+		
+			window.location='#login';
+			return;
+		  }else{self.init();}
+		}
+		
+		self.checkLogged();
 		$("[data-toggle=popover]").popover({
 			html: true,
 			content: function() {

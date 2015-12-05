@@ -164,8 +164,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 
 		self.loadCollection = function (id) {
-			self.loading(true);
 			
+			self.loading(true);
+			if(isLogged()==false){
+				window.location='#login';
+				return;
+			}
 			$.ajax({
 				"url": "/collection/" + self.id(),
 				"method": "get",
@@ -247,7 +251,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 							self.citems.remove(e);
 							if ($("#" + e)) {
-								$container.isotope( 'remove', $("#" + e));
+								$container.isotope( 'remove', $("#" + e)).isotope('layout');
 								//$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
 
