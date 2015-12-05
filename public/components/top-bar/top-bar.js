@@ -4,13 +4,15 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		this.route         = params.route;
 		var self           = this;
 		self.notifications = ko.observableArray();
-
-		self.checkLogged=function(){
-			if(isLogged()==false){
 		
-			window.location='#login';
+		self.checkLogged=function(){
+			
+		if(isLogged()==false){
+		  if(window.location.hash!= null && window.location.hash.length>0){
+			window.location='#login';}
+		  else{window.location="#";}
 			return;
-		  }else{self.init();}
+		  }
 		}
 		
 		self.checkLogged();
