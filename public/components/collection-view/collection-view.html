@@ -33,8 +33,8 @@
               
               <div class="item media" data-bind="visible: isLoaded(), attr: { id: recordId}">
               <div class="wrap">
-              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged() && self.externalId!=null">
-						<span class="fa-stack fa-fw" title="add to favorites" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()">
+						<span class="fa-stack fa-fw" title="add to favorites" data-bind="visible:externalId!=null,event: { click: function() { $parent.likeRecord(this); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
