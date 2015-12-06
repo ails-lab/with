@@ -140,6 +140,17 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
                 "method": "get",
                 "contentType": "application/json",
                 "success": function (data) {
+                	/*if user not logged in and not public redirect*/
+                	if(data.isPublic==false){
+                		
+                		if(isLogged()==false){
+                		
+                			window.location='#login';
+                			return;
+                		  }
+                		
+                		
+                	}
                     self.exhName(data.title);
                     self.desc(data.description);
                     self.owner(data.owner);

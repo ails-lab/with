@@ -655,10 +655,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				    	 tile+='<span class="star active"  id='+record.externalId+'>';
 				    }
 				    else{tile+='<span class="star"  id='+record.externalId+'>';}
-				   tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
+				    if(record.externalId){
+				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
-						+'</span>'
-						+'<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+						+'</span>';}
+						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					}
                      tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
                       +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'

@@ -664,7 +664,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	self.isLiked = function (id) {
+		if(id)
 		return self.currentUser.favorites.indexOf(id) < 0 ? false : true;
+		else return false;
 	};
 
 	logout = function () {

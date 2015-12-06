@@ -122,7 +122,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         
 		}
 		
-		/*self.checkLogged=function(){
+		self.checkLogged=function(){
 			if(isLogged()==false){
 		
 			window.location='#login';
@@ -130,8 +130,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		  }else{self.init();}
 		}
 		
-		self.checkLogged();*/
-		self.init();
+		self.checkLogged();
 		
 		convertToRightsMap = function(data) {
 			$.each(data, function(j, c) {

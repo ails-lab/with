@@ -166,15 +166,22 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.loadCollection = function (id) {
 			
 			self.loading(true);
-			if(isLogged()==false){
-				window.location='#login';
-				return;
-			}
+			
 			$.ajax({
 				"url": "/collection/" + self.id(),
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
+					if(data.isPublic==false){
+                		
+                		if(isLogged()==false){
+                		
+                			window.location='#login';
+                			return;
+                		  }
+                		
+                		
+                	}
 					self.collname(data.title);
 					self.desc(data.description);
 					self.creator(data.creator);
@@ -185,6 +192,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
+					console.log(xhr);
+					if(xhr.status=="403"){
+					window.location='#login';return;}
+					
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});

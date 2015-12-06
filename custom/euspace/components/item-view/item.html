@@ -10,7 +10,7 @@
             <ul class="action">
             	<li class="close"><span class="fa-stack fa-fw"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close.png"></a></span></li>
          
-              <li class="close"> <span class="star" data-bind="css: { active: isLiked(record().externalId()) }, visible: loggedUser">
+              <li class="close"> <span class="star" data-bind="css: { active: isLiked(record().externalId()) }, visible: loggedUser && && record().externalId()!=null">
 			 <span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>

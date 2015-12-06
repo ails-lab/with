@@ -22,6 +22,16 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			lastName  : self.lastName,
 		});
 
+		self.checkLogged=function(){
+			if(isLogged()==false){
+		
+			window.location='#login';
+			return;
+		  }else{self.init();}
+		}
+		
+		self.checkLogged();
+		
 		// Load the User information from the database and initialize the template
 		$.ajax({
 			type    : "get",
