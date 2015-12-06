@@ -192,7 +192,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
-					console.log(xhr);
 					if(xhr.status=="403"){
 					window.location='#login';return;}
 					
