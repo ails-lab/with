@@ -47,12 +47,13 @@ public class JsonNodeUtils {
 				node = node.get(0);
 			} 
 			if (node.isTextual()){
-				return new Literal(Language.DEFAULT,node.asText());
+				return new Literal(Language.DEF,node.asText());
 			}
 			Literal res = new Literal();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				// TODO ask if the key is a language
+				System.out.println(next);
 				res.put(next.getKey(), next.getValue().get(0).asText());
 			}
 			return res;

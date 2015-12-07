@@ -26,7 +26,7 @@ public class Literal extends HashMap<String, String> {
 
 	public static enum Language {
 		EN, ES, FR,
-		UNKNOWN, DEFAULT;
+		UNKNOWN, DEF;
 		
 		public String toString() {
 	        return name().toLowerCase();
@@ -58,7 +58,7 @@ public class Literal extends HashMap<String, String> {
 	public Literal(Language lang, String label) {
 		this.put(lang.toString(), label);
 		if (lang.equals(Language.EN))
-			this.put(Language.DEFAULT.toString(), label);
+			this.put(Language.DEF.toString(), label);
 	}
 
 	public Literal(String lang, String label) {
