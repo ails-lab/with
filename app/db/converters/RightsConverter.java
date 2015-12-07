@@ -19,6 +19,7 @@ package db.converters;
 import model.basicDataTypes.WithAccess;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
@@ -26,13 +27,13 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 
-public class RightsConverter extends TypeConverter {
+public class RightsConverter extends TypeConverter implements SimpleValueConverter {
 
 	public RightsConverter() {
 		super( WithAccess.class );
 	}
 	
-	@Override
+
 	public Object decode(Class<?> arg0, Object fromDbObject, MappedField arg2) {
 		WithAccess r= new WithAccess();
 		DBObject dbObj = (DBObject) fromDbObject;
@@ -45,6 +46,7 @@ public class RightsConverter extends TypeConverter {
 		}
 		return r;
 	}
+
 
     public Object encode(final Object value, final MappedField optionalExtraInfo) {
     	WithAccess r = (WithAccess) value;

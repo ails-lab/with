@@ -78,9 +78,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public T getById(ObjectId id, List<String> retrievedFields) {
 		Query<T> q = this.createQuery().field("_id").equal(id);
-		if (retrievedFields != null)
-			for (int i = 0; i < retrievedFields.size(); i++)
-				q.retrievedFields(true, retrievedFields.get(i));
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
 
 	}
@@ -243,7 +241,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param title
 	 * @return
 	 */
-	public T getByOwnerAndLabel(ObjectId creatorId, String title, String lang) {
+	public T getByOwnerAndLabel(ObjectId creatorId, String lang, String title) {
 		if(lang == null) lang = "en";
 		Query<T> q = this.createQuery().field("administrative.withCreator")
 				.equal(creatorId).field("descriptiveData.label." + lang).equal(title);
@@ -294,7 +292,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public List<T> getByProvider(String sourceName) {
 		//TODO: faster if could query on last entry of provenance array. Mongo query!
+		/*
+		 * We can sort the array in inverted order so to query 
+		 * only the first element of this array directly!
+		 */
 		Query<T> q = this.createQuery();
+		//q.field("provenance").hasThisElement("{\"provider\": \" " + sourceName +" \" }");
 		q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
 		return this.find(q).asList();
 	}
@@ -376,13 +379,13 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 			result = this.find(q);
 			collections = result.asList();
 			Query<T> q2 = q.cloneQuery();
-			q2.field("isExhibition").equal(true);
-			q.field("isExhibition").equal(false);
+			q2.field("administrative.isExhibition").equal(true);
+			q.field("administrative.isExhibition").equal(false);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
 		else {
-			q.field("isExhibition").equal(isExhibition);
+			q.field("administrative.isExhibition").equal(isExhibition);
 			result = this.find(q);
 			collections = result.asList();
 			if (isExhibition)
@@ -403,13 +406,13 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
 			Query<T> q2 = q.cloneQuery();
-			q2.field("isExhibition").equal(true);
-			q.field("isExhibition").equal(false);
+			q2.field("administrative.isExhibition").equal(true);
+			q.field("administrative.isExhibition").equal(false);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
 		else {
-			q.field("isExhibition").equal(isExhibition);
+			q.field("administrative.isExhibition").equal(isExhibition);
 			if (isExhibition)
 				hits.y = (int) this.find(q).countAll();
 			else
@@ -441,7 +444,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
@@ -474,7 +477,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
@@ -507,7 +510,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
@@ -562,8 +565,8 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public long countBySource(String sourceId) {
-		Query<T> q = this.createQuery()
-				.field("provenance.uri").equal(sourceId);
+		Query<T> q = this.createQuery().disableValidation();
+		q.field("provenance.0.uri").equal(sourceId);
 		return this.find(q).countAll();
 	}
 
