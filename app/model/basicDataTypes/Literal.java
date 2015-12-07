@@ -32,6 +32,8 @@ public class Literal extends HashMap<String, String> {
 	        return name().toLowerCase();
 	    }
 		
+		
+		//use this method instead of valueOf
 		public Language getLanguage(String str) {
 			for (Language lang : Language.values()) {
 	            if (lang.toString().equals(str.toUpperCase())) {

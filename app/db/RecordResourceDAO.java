@@ -44,7 +44,7 @@ import model.resources.WithResource;
  * 2. Every time create a new DAO class associated with the explicit class
  * that I want to retieve.
  */
-public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
+public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 
 	public RecordResourceDAO() {super(RecordResource.class);}
 
@@ -66,7 +66,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 	 * in the far future.                                     *
 	 * ********************************************************
 	 */
-	public class AgentObjectDAO extends CommonResourcesDAO<AgentObject> {
+	public class AgentObjectDAO extends CommonResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -74,7 +74,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 
 	}
 
-	public class CulturalObjectDAO extends CommonResourcesDAO<CulturalObject> {
+	public class CulturalObjectDAO extends CommonResourceDAO<CulturalObject> {
 
 		public CulturalObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -82,7 +82,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 
 	}
 
-	public class EuscreenObjectDAO extends CommonResourcesDAO<EUscreenObject> {
+	public class EuscreenObjectDAO extends CommonResourceDAO<EUscreenObject> {
 
 		public EuscreenObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -90,7 +90,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 
 	}
 
-	public class EventObjectDAO extends CommonResourcesDAO<EventObject> {
+	public class EventObjectDAO extends CommonResourceDAO<EventObject> {
 
 		public EventObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -98,7 +98,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 
 	}
 
-	public class PlaceObjectDAO extends CommonResourcesDAO<PlaceObject> {
+	public class PlaceObjectDAO extends CommonResourceDAO<PlaceObject> {
 
 		public PlaceObjectDAO(Class<?> entityClass) {
 			super(entityClass);
@@ -106,7 +106,7 @@ public class RecordResourceDAO extends CommonResourcesDAO<RecordResource> {
 
 	}
 
-	public class TimespanObjectDAO extends CommonResourcesDAO<TimespanObject> {
+	public class TimespanObjectDAO extends CommonResourceDAO<TimespanObject> {
 
 		public TimespanObjectDAO(Class<?> entityClass) {
 			super(entityClass);
