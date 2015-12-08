@@ -26,6 +26,7 @@ import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import play.libs.Json;
+import utils.Tuple;
 import db.DB;
 import db.RecordResourceDAO;
 import model.DescriptiveData;
@@ -37,6 +38,7 @@ import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.AgentObject;
 import model.resources.CollectionObject;
+import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
@@ -57,25 +59,55 @@ public class DAOsTests {
 	@Test
 	public void testRecordResourceDAOPolymorphism() {
 
-		RecordResource<RecordDescriptiveData> wres = new RecordResource<RecordDescriptiveData>();
-
-		User u = DB.getUserDAO().getByUsername("qwerty");
+		//RecordResource<RecordDescriptiveData> wres = new RecordResource<RecordDescriptiveData>();
+		CollectionObject wres = new CollectionObject();
+		
+		User u = DB.getUserDAO().getByUsername("giorgos.m.");
 		if(u == null) {
 			System.out.println("No user found");
 			return;
 		}
 
+		User u1 = DB.getUserDAO().getByUsername("qwerty");
+		User u2 = DB.getUserDAO().getByUsername("yiorgos");
+		
 		/*
 		 * Administative metadata
 		 */
-		WithAdmin wa = new WithAdmin();
+		CollectionAdmin wa = new CollectionObject.CollectionAdmin();
 		wa.setCreated(new Date());
 		wa.setWithCreator(u.getDbId());
+		wa.setExhibition(false);
 		WithAccess waccess = new WithAccess();
 		waccess.put(u.getDbId(), Access.OWN);
+		waccess.put(u1.getDbId(), Access.READ);
+		waccess.put(u2.getDbId(), Access.WRITE);
 		wa.setAccess(waccess);
 		wres.setAdministrative(wa);
 
+		CollectionAdmin wa2 = new CollectionObject.CollectionAdmin();
+		wa2.setCreated(new Date());
+		wa2.setWithCreator(u.getDbId());
+		wa2.setExhibition(false);
+		WithAccess waccess2 = new WithAccess();
+		waccess2.put(u.getDbId(), Access.READ);
+		waccess2.put(u1.getDbId(), Access.OWN);
+		waccess2.put(u2.getDbId(), Access.WRITE);
+		wa.setAccess(waccess2);
+		
+		
+		CollectionAdmin wa3 = new CollectionObject.CollectionAdmin();
+		wa3.setCreated(new Date());
+		wa3.setWithCreator(u.getDbId());
+		wa3.setExhibition(false);
+		WithAccess waccess3 = new WithAccess();
+		waccess3.put(u.getDbId(), Access.WRITE);
+		waccess3.put(u1.getDbId(), Access.READ);
+		waccess3.put(u2.getDbId(), Access.OWN);
+		wa.setAccess(waccess3);
+		
+		
+		
 		/*
 		 * This models a record so there's no need to provide this
 		 */
@@ -86,7 +118,7 @@ public class DAOsTests {
 		cols.add(87);
 		cols.add(33);
 		colIn.put(new ObjectId(), cols);
-		//wres.setCollectedIn(colIn);
+		wres.setCollectedIn(colIn);
 
 		//no externalCollections
 		List<ExternalCollection> ec;
@@ -96,15 +128,22 @@ public class DAOsTests {
 		pinfo.setProvider("Europeana");
 		pinfo.setRecordId("18898");
 		pinfo.setUri("http://the.uri.org/666");
-		ArrayList<ProvenanceInfo> prov = new ArrayList<ProvenanceInfo>();
+		
+		ProvenanceInfo pinfo2 =  new ProvenanceInfo();
+		pinfo2.setProvider("Mint");
+		pinfo2.setRecordId("6627");
+		pinfo2.setUri("http://ming.org/6638");
+		
+		List<ProvenanceInfo> prov = new ArrayList<ProvenanceInfo>();
 		prov.add(pinfo);
-		//wres.setProvenance(prov);
+		prov.add(pinfo2);
+		wres.setProvenance(prov);
 
 		//resourceType is collectionObject
 		wres.setResourceType(WithResourceType.WithResource);
 		// type: metadata specific for a record
-		Literal label = new Literal(Language.ENGLISH, "My record Title");
-		RecordDescriptiveData ddata = new RecordDescriptiveData();
+		Literal label = new Literal(Language.EN, "My record Title");
+		CollectionDescriptiveData ddata = new CollectionDescriptiveData();
 		ddata.setLabel(label);
 		Literal desc = new Literal(Language.ENGLISH, "This is a description");
 		ddata.setDescription(desc);
@@ -124,16 +163,90 @@ public class DAOsTests {
 		medias.add(emo);
 		wres.setMedia(medias);
 
-		if(DB.getRecordResourceDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
+		if(DB.getCollectionObjectDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
+		CollectionObject wres2 = wres;
+		wres2.setAdministrative(wa2);
+		wres2.setDbId(null);
+		if(DB.getCollectionObjectDAO().makePermanent(wres2) == null) { System.out.println("No storage!"); return; }		
+		CollectionObject wres3 = wres;
+		wres3.setAdministrative(wa3);
+		wres3.setDbId(null);
+		if(DB.getCollectionObjectDAO().makePermanent(wres3) == null) { System.out.println("No storage!"); return; }		
 		if(wres.getDbId() != null) System.out.println("The first CollectionObject presenting a collection was saved!");
 
+		
 
-		List<RecordResource> co2 = DB.getRecordResourceDAO().getByLabel("EN", "My record Title");
+		List<CollectionObject> co2 = DB.getCollectionObjectDAO().getByLabel("EN", "My record Title");
 		System.out.println("Retrieved by label: \n" + Json.toJson(co2) );
 
-		List<RecordResource> co3 = DB.getRecordResourceDAO().getByOwner(u.getDbId(), 0, 10);
+		List<CollectionObject> co3 = DB.getCollectionObjectDAO().getByOwner(u.getDbId(), 0, 10);
 		System.out.println("Retrieved by Owner: \n" + Json.toJson(co3) );
+		
+		/*List<String> fields = new ArrayList<String>();
+		fields.add("descriptiveData.description.EN");
+		fields.add("resourceType");
+		RecordResource co4 =  DB.getRecordResourceDAO().getById(wres.getDbId(), fields);
+		System.out.println("Retrieved some fields by Id: \n" + Json.toJson(co4)  
+				+ " resourceType: " + co4.getResourceType());*/
+		
+		CollectionObject co5 = DB.getCollectionObjectDAO().getByOwnerAndLabel(u.getDbId(), 
+				"EN", "My record Title");
+		System.out.println("Retrieved by owner and label: " + Json.toJson(co5));
+		
+		User owner6 = DB.getCollectionObjectDAO().getCollectionOwner(wres.getDbId());
+		System.out.println("The owner of this Resource is: " + Json.toJson(owner6));
+		
+		/*List<RecordResource> cos7 = DB.getRecordResourceDAO().getByProvider("Europeana");
+		System.out.println("retrieved All Resources provided from Europeana: " + Json.toJson(cos7));*/
+		
+		
+		List<List<Tuple<ObjectId, Access>>> access = new ArrayList<List<Tuple<ObjectId,Access>>>();
+		List<Tuple<ObjectId, Access>> or1 = new ArrayList<Tuple<ObjectId,Access>>();
+		or1.add(new Tuple<ObjectId, WithAccess.Access>(u1.getDbId(), Access.READ));
+		List<Tuple<ObjectId, Access>> or2 = new ArrayList<Tuple<ObjectId,Access>>();
+		access.add(or1);
+		//access.add(or2);
+		Tuple<List<CollectionObject>, Tuple<Integer, Integer>> c08 = DB.getCollectionObjectDAO().
+				getByACL(access, u.getDbId(), false, true, 0, 10);
+		System.out.println("Retrieve by ACL " + c08.y.x + " " + c08.y.y + " resources.\n" + Json.toJson(c08.x));
+		
+		
+		/*List<RecordResource> co9 =  DB.getRecordResourceDAO()
+				.getUsersAccessibleWithACL(loggeInEffIds, accessedByUserOrGroup, 
+						creator, isExhibition, totalHits, offset, count);*/
+		
+		
+		/*List<RecordResource> co10 = DB.getRecordResourceDAO()
+				.getSharedWithACL(userId, accessedByUserOrGroup, 
+						isExhibition, totalHits, offset, count);*/
+		
+		
+		/*List<RecordResource> co11 = DB.getRecordResourceDAO()
+				.getPublicWithACL(accessedByUserOrGroup, creator, 
+						isExhibition, totalHits, offset, count);
+*/			
+		
+		System.out.println("Total likes of this Resource are: " + 
+				DB.getCollectionObjectDAO().getTotalLikes(wres.getDbId()));
+		
+		
+		System.out.println("Total Resources from this source are: " +
+				DB.getCollectionObjectDAO().countBySource("Europeana"));
+		
+		
+		System.out.println("If I add another like then we have:");
+		DB.getCollectionObjectDAO().incrementLikes(wres.getDbId().toString());
+		System.out.println(DB.getCollectionObjectDAO().getTotalLikes(wres.getDbId()) + " total likes");
+		
+		
+		if(DB.getCollectionObjectDAO().removeById(wres.getDbId()) == 1)
+			System.out.println("Document deleted succesfully");
 
+		if(DB.getCollectionObjectDAO().removeById(wres2.getDbId()) == 1)
+			System.out.println("Document deleted succesfully");
+		
+		if(DB.getCollectionObjectDAO().removeById(wres3.getDbId()) == 1)
+			System.out.println("Document deleted succesfully");
 	}
 }

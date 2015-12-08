@@ -27,6 +27,9 @@ public class CollectionInfo {
 	private ObjectId collectionId;
 	private Integer position;
 	
+	public CollectionInfo() {
+	}
+	
 	//position is Integer instead of int, so that we can do the null trick with morphia (see CommonResourcesDAO)
 	public CollectionInfo(ObjectId collectionId, Integer position) {
 		this.collectionId = collectionId;

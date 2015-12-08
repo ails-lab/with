@@ -16,8 +16,17 @@
 
 package espace.core.sources.formatreaders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import espace.core.ExternalBasicRecordReader;
+import espace.core.sources.BritishLibrarySpaceSource;
+import espace.core.sources.DPLASpaceSource;
 import espace.core.utils.JsonContextRecord;
+import model.EmbeddedMediaObject;
+import model.MediaObject;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
@@ -28,23 +37,36 @@ public class BritishLibraryBasicRecordFormatter extends ExternalBasicRecordReade
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
+		model.setLabel(rec.getLiteralValue("title"));
+		model.setDescription(rec.getLiteralValue("description._content"));
+//		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+//		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
+		
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		String id = rec.getStringValue("id");
+		object.addToProvenance(new ProvenanceInfo(BritishLibrarySpaceSource.LABEL,
+				  "https://www.flickr.com/photos/britishlibrary/" + id + "/", id));
+		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
+		MediaObject med;
+		media.add(med = new MediaObject());
+		object.setMedia(media);
+		med.setThumbnailUrl(rec.getStringValue("url_s"));
+		med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
+		med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
+//		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		return object;
+		
 //		object.setThumbnailUrl(rec.getStringValue("url_s"));
-//		object.setTitle(rec.getStringValue("title"));
-//		object.setDescription(rec.getStringValue("description"));
-//		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
 //		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
 //		object.setYears(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
 //		// TODO: add rights
 //		// object.setItemRights(rec.getStringValue("rights"));
 //		object.setExternalId(object.getIsShownAt());
-//		if (object.getExternalId() == null || object.getExternalId() == "")
-//			object.setExternalId(object.getIsShownBy());
-//		object.setExternalId(DigestUtils.md5Hex(object.getExternalId()));
-//		String id = rec.getStringValue("id");
-//		Provider recordProvider = new Provider(BritishLibrarySpaceSource.LABEL, id,
-//				"https://www.flickr.com/photos/britishlibrary/" + id + "/");
-//		object.addProvider(recordProvider);
-		return object;
 	}
 
 }

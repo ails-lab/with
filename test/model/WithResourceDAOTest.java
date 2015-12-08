@@ -70,22 +70,26 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResourceZ" + i));
+			model.setLabel(new Literal(Language.EN, "TestWithResourceX" + i));
 			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 2);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 3);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-			List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(Language.EN, "TestWithResourceZ" + i);
-			CulturalObject o = (CulturalObject) resources.get(0);
+			DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb80"), 2);
+			//List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(Language.EN, "TestWithResourceZ" + i);
+			//CulturalObject o = (CulturalObject) resources.get(0);
 			//System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
 			//System.out.println(Json.toJson(o));
-			assertThat(resources.get(1) instanceof CulturalObject);
+			//assertThat(o instanceof CulturalObject);
+			
+			
 		}
-		List<RecordResource> resources = DB.getRecordResourceDAO().getCollectedResources(new ObjectId("5656dd6ce4b0b19378e1cb80"));
-		for (RecordResource c: resources) {
+		/*for (RecordResource c: resources) {
 			((CulturalObject) c).getCollectedIn().get(new ObjectId("5656dd6ce4b0b19378e1cb80"));
-		}
+		}*/
 	}
 
 }
