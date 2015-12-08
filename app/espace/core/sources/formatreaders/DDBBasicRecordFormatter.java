@@ -16,14 +16,22 @@
 
 package espace.core.sources.formatreaders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
+import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.sources.DDBSpaceSource;
 import espace.core.utils.JsonContextRecord;
+import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
+import model.MediaObject;
 import model.Provider;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
@@ -34,20 +42,34 @@ public class DDBBasicRecordFormatter extends ExternalBasicRecordReader<CulturalO
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-//		object.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
-//		object.setTitle(rec.getStringValue("title"));
-//		object.setDescription(rec.getStringValue("description"));
+		model.setLabel(rec.getLiteralValue("title"));
+		model.setDescription(rec.getLiteralValue("subtitle"));
+//		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+//		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+//		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
+		
+//		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+//		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		String id = rec.getStringValue("id");
+		object.addToProvenance(new ProvenanceInfo(DDBSpaceSource.LABEL,  
+				"https://www.deutsche-digitale-bibliothek.de/item/"
+				+ id, id));
+		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
+		MediaObject med;
+		media.add(med = new MediaObject());
+		object.setMedia(media);
+		med.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
+//		med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
+//		med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
 //		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
 ////		object.setContributors(rec.getStringArrayValue("contributor"));
 //		// TODO: add years
 ////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 //		// TODO: add rights
 ////		object.setItemRights(rec.getStringValue("rights"));
-//		String id = rec.getStringValue("id");
-//		Provider recordProvider = new Provider(DDBSpaceSource.LABEL, id, 
-//				"https://www.deutsche-digitale-bibliothek.de/item/"
-//						+ id );
-//		object.addProvider(recordProvider);
 		return object;
 	}
 

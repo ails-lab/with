@@ -274,7 +274,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
 				res.items = getItems(response);
-				res.facets = response.path("facets");
+//				res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
 
 			} catch (Exception e) {

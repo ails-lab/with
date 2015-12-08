@@ -16,14 +16,22 @@
 
 package espace.core.sources.formatreaders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
+import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
 import espace.core.utils.JsonContextRecord;
+import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
+import model.MediaObject;
 import model.Provider;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
@@ -34,14 +42,29 @@ public class DNZBasicRecordFormatter extends ExternalBasicRecordReader<CulturalO
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-//		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
-//		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
+		model.setLabel(rec.getLiteralValue("title"));
+		model.setDescription(rec.getLiteralValue("description"));
+//		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+//		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("creator"))));
+		
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		String id = rec.getStringValue("id");
+		object.addToProvenance(new ProvenanceInfo(DigitalNZSpaceSource.LABEL,  
+				"http://www.digitalnz.org/objects/" +id, id));
+		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
+		MediaObject med;
+		media.add(med = new MediaObject());
+		object.setMedia(media);
+		med.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
+		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		return object;
 //		//TODO: add type
 //		//TODO: add null checks
-//		object.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
-//		object.setTitle(rec.getStringValue("title"));
-//		object.setDescription(rec.getStringValue("description"));
-//		object.setCreator(rec.getStringValue("creator"));
 //		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
 //		// TODO: add years here:
 ////		Utils.readArrayAttr(item, "issued",
@@ -49,11 +72,6 @@ public class DNZBasicRecordFormatter extends ExternalBasicRecordReader<CulturalO
 ////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 //		// TODO: add rights
 ////		object.setItemRights(rec.getStringValue("rights_url"));
-//		String id = rec.getStringValue("id");
-//		Provider recordProvider = new Provider(DigitalNZSpaceSource.LABEL, id, 
-//				"http://www.digitalnz.org/objects/" +id);
-//		object.addProvider(recordProvider);
-		return object;
 	}
 
 }

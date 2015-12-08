@@ -32,7 +32,7 @@ import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 
-public class CollectionObjectDAO extends CommonResourcesDAO<CollectionObject> {
+public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 
 	/*
 	 * The constructor is optional becuse the explicit

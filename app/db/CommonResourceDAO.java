@@ -19,9 +19,11 @@ package db;
 import java.util.ArrayList;
 import java.util.List;
 
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -33,6 +35,8 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import com.mongodb.BasicDBObject;
+
 import utils.Tuple;
 
 /*
@@ -43,15 +47,15 @@ import utils.Tuple;
  * Special methods referring to one of these entities go to the
  * specific DAO class.
  */
-public abstract class CommonResourcesDAO<T> extends DAO<T>{
+public abstract class CommonResourceDAO<T> extends DAO<T>{
 
-	public CommonResourcesDAO() {super(WithResource.class);}
+	public CommonResourceDAO() {super(WithResource.class);}
 
 	/*
 	 * The value of the entity class is either
 	 * CollectionObject.class or RecordResource.class
 	 */
-	public CommonResourcesDAO(Class<?> entityClass) {
+	public CommonResourceDAO(Class<?> entityClass) {
 		super(entityClass);
 	}
 
@@ -74,9 +78,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 */
 	public T getById(ObjectId id, List<String> retrievedFields) {
 		Query<T> q = this.createQuery().field("_id").equal(id);
-		if (retrievedFields != null)
-			for (int i = 0; i < retrievedFields.size(); i++)
-				q.retrievedFields(true, retrievedFields.get(i));
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
 
 	}
@@ -111,6 +113,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	public List<T> getSingletonCollectedResources(ObjectId colId, int offset, int count) {
 		Query<T> q = this.createQuery().field("collectedIn."+colId.toString()).exists()
 				.offset(offset).limit(count);
+		//Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId).offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
@@ -121,10 +124,11 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 * @param colId
 	 * @return
 	 */
-	public List<T> getCollectedResources(ObjectId colId) {
+	
+	public List<T> getByCollection(ObjectId colId) {
 		return getByCollectionOffsetCount(colId, 0, -1);
 	}
-
+	
 	/**
 	 * Retrieve records from specific collection by offset and count
 	 * while restoring duplicate entries.
@@ -132,23 +136,26 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 * @param colId, offset, count
 	 * @return
 	 */
+	
 	public List<T> getByCollectionOffsetCount(ObjectId colId,
 			int offset, int count) {
-		List<T> Ts = getSingletonCollectedResources(colId, offset, count);
+		List<T> ts = getSingletonCollectedResources(colId, offset, count);
 		List<T> repeatedResources = new ArrayList<T>();
-		for (T T: Ts) {
-			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) T).getCollectedIn().get(colId);
+		for (T t: ts) {
+			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) t).getCollectedIn().get(colId);
+			/*ArrayList<CollectionInfo> collectedIn = (ArrayList<CollectionInfo>) ((WithResource) t).getCollectedIn();
+			for (CollectionInfo ci: collectedIn) {
+				if (ci.getCollectionId().equals(colId))
+					repeatedResources.add(t);
+			}*/
 			if (positions.size() > 1)
-				for (int pos: positions.subList(1, positions.size()-1)) {
-					repeatedResources.add(T);
-					//Remove last entry from original resources, since add one copy. Have to return (max) count resources.
-					Ts.remove(Ts.size()-1);
+				for (int pos: positions) {
+					repeatedResources.add(pos, t);
 				}
 		}
-		Ts.addAll(repeatedResources);
-		return Ts;
+		return repeatedResources;
 	}
-
+	 
 	/**
 	 * Retrieve records from specific collection using position
 	 * which is between lowerBound and upperBound
@@ -168,7 +175,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 		*/
 		List<T> Ts = this.find(q).asList();
 		List<T> repeatedResources = new ArrayList<T>();
-		for (T T: Ts) {
+		/*for (T T: Ts) {
 			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) T).getCollectedIn().get(colId);
 			int firstPosition = -1;
 			for (int pos: positions) {
@@ -181,18 +188,18 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 					Ts.remove(Ts.size()-1);
 				}
 			}
-		}
+		}*/
 		Ts.addAll(repeatedResources);
 		return Ts;
 	}
 
 	/**
 	 * Given a list of ObjectId's (dbId's)
-	 * return the specified  CollectionObject's
+	 * return the specified  resources
 	 * @param ids
 	 * @return
 	 */
-	public List<T> getCollectionsByIds(List<ObjectId> ids) {
+	public List<T> getByIds(List<ObjectId> ids) {
 		Query<T> colQuery = this.createQuery().field("_id")
 				.hasAnyOf(ids);
 		return find(colQuery).asList();
@@ -234,7 +241,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 * @param title
 	 * @return
 	 */
-	public T getByOwnerAndLabel(ObjectId creatorId, String title, String lang) {
+	public T getByOwnerAndLabel(ObjectId creatorId, String lang, String title) {
 		if(lang == null) lang = "en";
 		Query<T> q = this.createQuery().field("administrative.withCreator")
 				.equal(creatorId).field("descriptiveData.label." + lang).equal(title);
@@ -285,7 +292,12 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 */
 	public List<T> getByProvider(String sourceName) {
 		//TODO: faster if could query on last entry of provenance array. Mongo query!
+		/*
+		 * We can sort the array in inverted order so to query 
+		 * only the first element of this array directly!
+		 */
 		Query<T> q = this.createQuery();
+		//q.field("provenance").hasThisElement("{\"provider\": \" " + sourceName +" \" }");
 		q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
 		return this.find(q).asList();
 	}
@@ -367,13 +379,13 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 			result = this.find(q);
 			collections = result.asList();
 			Query<T> q2 = q.cloneQuery();
-			q2.field("isExhibition").equal(true);
-			q.field("isExhibition").equal(false);
+			q2.field("administrative.isExhibition").equal(true);
+			q.field("administrative.isExhibition").equal(false);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
 		else {
-			q.field("isExhibition").equal(isExhibition);
+			q.field("administrative.isExhibition").equal(isExhibition);
 			result = this.find(q);
 			collections = result.asList();
 			if (isExhibition)
@@ -394,13 +406,13 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
 			Query<T> q2 = q.cloneQuery();
-			q2.field("isExhibition").equal(true);
-			q.field("isExhibition").equal(false);
+			q2.field("administrative.isExhibition").equal(true);
+			q.field("administrative.isExhibition").equal(false);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
 		else {
-			q.field("isExhibition").equal(isExhibition);
+			q.field("administrative.isExhibition").equal(isExhibition);
 			if (isExhibition)
 				hits.y = (int) this.find(q).countAll();
 			else
@@ -432,7 +444,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
@@ -465,7 +477,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
@@ -498,7 +510,7 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
@@ -553,8 +565,8 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public long countBySource(String sourceId) {
-		Query<T> q = this.createQuery()
-				.field("provenance.uri").equal(sourceId);
+		Query<T> q = this.createQuery().disableValidation();
+		q.field("provenance.0.uri").equal(sourceId);
 		return this.find(q).countAll();
 	}
 
@@ -581,13 +593,6 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 				.field("externalId").equal(extId);
 		return this.find(q).countAll();
 	}
-	
-	// Should only contain one or zero resource
-	public T getByResourceIdAtProvenance(String resourceId) {
-		Query<T> q = this.createQuery()
-				.field("provenance.resourceId").equal(resourceId);
-		return this.findOne(q);
-	}
 
 	/**
 	 * Not a good Idea problably want work
@@ -610,9 +615,9 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 	 */
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
 		String colField = "collectedIn."+colId;
-		Query<T> q = this.createQuery().field(colField).exists();
-		UpdateOperations<T> ops = this.createUpdateOperations().inc(colField);
-		this.update(q, ops);
+		//Query<T> q = this.createQuery().field(colField).exists();
+		//UpdateOperations<T> ops = this.createUpdateOperations().inc(colField);
+		//this.update(q, ops);
 		/* TODO: check if the query can be expressed in morphia
 		Query<T> q = this.createQuery();
 		q.and(q.criteria(colField).exists(), q.criteria(colField).hasThisElement(q.field("position").greaterThanOrEq(position)));
@@ -637,18 +642,38 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 		     collectedIn.colId: { $elemMatch: { $gte: position} }
 		   },
 		   { $dec: { "collectedIn."+colId+".$" : 1 } }*/
-		/*BasicDBObject colIdQuery = new BasicDBObject();
+		BasicDBObject colIdQuery = new BasicDBObject();
 		BasicDBObject existsField = new BasicDBObject();
 		existsField.put("$exists", true);
 		colIdQuery.put(colField, existsField);
 		BasicDBObject geq = new BasicDBObject();
-		geq.put("$geq", position);
-		colIdQuery.append("$elemMatch", geq);
+		geq.put("$gte", position);
+		BasicDBObject geq1 = new BasicDBObject();
+		geq1.put("$elemMatch", geq);
+		colIdQuery.append(colField, geq1);
+		//System.out.println(colIdQuery);
 		BasicDBObject update = new BasicDBObject();
 		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put(colField+".$", 1);
-		update.put("$dec", entrySpec);
-		this.getDs().getCollection(entityClass.getSimpleName()).find(colIdQuery, update);*/
+		entrySpec.put(colField+".$", -1);
+		update.put("$inc", entrySpec);
+		//System.out.println(this.getDs().getCollection(entityClass).find(colIdQuery).count());
+		this.getDs().getCollection(entityClass).update(colIdQuery, update, false, true);
+		/*BasicDBObject query = new BasicDBObject();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", position);
+		colIdQuery.append("position", geq);
+		BasicDBObject elemMatch = new BasicDBObject();
+		elemMatch.put("$elemMatch", colIdQuery);
+		query.put("collectedIn", elemMatch);
+		System.out.println(query);
+		BasicDBObject update = new BasicDBObject();
+		BasicDBObject entrySpec = new BasicDBObject();
+		entrySpec.put("collectedIn.$.position", -1);
+		update.put("$inc", entrySpec);
+		System.out.println(this.getDs().getCollection(entityClass).find(query).count());
+		this.getDs().getCollection(entityClass).update(query, update, false, true);*/
 	}
 
 	/**

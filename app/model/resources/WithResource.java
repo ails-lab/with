@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
@@ -56,6 +57,8 @@ public class WithResource<T extends DescriptiveData> {
 
 	public static class WithAdmin {
 
+		private boolean isExhibition;
+		
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
@@ -153,6 +156,14 @@ public class WithResource<T extends DescriptiveData> {
 				return null;
 		}
 
+		public boolean isExhibition() {
+			return isExhibition;
+		}
+
+		public void setExhibition(boolean isExhibition) {
+			this.isExhibition = isExhibition;
+		}
+
 	}
 
 	public static class Usage {
@@ -180,6 +191,14 @@ public class WithResource<T extends DescriptiveData> {
 		public void setLikes(int likes) {
 			this.likes = likes;
 		}
+		
+		public void incLikes() {
+			this.likes++;
+		}
+		
+		public void decLikes() {
+			this.likes--;
+		}
 
 		public int getCollected() {
 			return collected;
@@ -187,6 +206,14 @@ public class WithResource<T extends DescriptiveData> {
 
 		public void setCollected(int collected) {
 			this.collected = collected;
+		}
+		
+		public void incCollected() {
+			this.collected++;
+		}
+		
+		public void decCollected() {
+			this.collected--;
 		}
 
 		public int getAnnotated() {
@@ -306,9 +333,9 @@ public class WithResource<T extends DescriptiveData> {
 
 	@Embedded
 	// external collections to which the resource may belong to
-	private ArrayList<ExternalCollection> externalCollections;
+	private List<ExternalCollection> externalCollections;
 	@Embedded
-	private ArrayList<ProvenanceInfo> provenance;
+	private List<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
 	protected WithResourceType resourceType;
@@ -380,7 +407,7 @@ public class WithResource<T extends DescriptiveData> {
 		this.usage = usage;
 	}
 
-	public ArrayList<ExternalCollection> getExternalCollections() {
+	public List<ExternalCollection> getExternalCollections() {
 		return externalCollections;
 	}
 
@@ -389,11 +416,11 @@ public class WithResource<T extends DescriptiveData> {
 		this.externalCollections = externalCollections;
 	}
 
-	public ArrayList<ProvenanceInfo> getProvenance() {
+	public List<ProvenanceInfo> getProvenance() {
 		return provenance;
 	}
 
-	public void setProvenance(ArrayList<ProvenanceInfo> provenance) {
+	public void setProvenance(List<ProvenanceInfo> provenance) {
 		this.provenance = provenance;
 	}
 
@@ -414,7 +441,7 @@ public class WithResource<T extends DescriptiveData> {
 		this.resourceType = resourceType;
 	}
 
-	public T getDescriptiveDate() {
+	public T getDescriptiveData() {
 		return descriptiveData;
 	}
 

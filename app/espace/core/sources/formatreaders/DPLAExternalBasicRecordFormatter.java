@@ -16,14 +16,22 @@
 
 package espace.core.sources.formatreaders;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import org.apache.commons.codec.digest.DigestUtils;
 
 import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.DPLASpaceSource;
+import espace.core.sources.EuropeanaSpaceSource;
 import espace.core.utils.JsonContextRecord;
+import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
+import model.MediaObject;
 import model.Provider;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
@@ -34,24 +42,34 @@ public class DPLAExternalBasicRecordFormatter extends ExternalBasicRecordReader<
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-//		object.addProvider(new Provider(rec.getStringValue("dataProvider")));
-//		object.addProvider(new Provider(rec.getStringValue("provider.name"),rec.getStringValue("provider.@id"),rec.getStringValue("provider.@id")));
+		model.setLabel(rec.getLiteralValue("sourceResource.title"));
+		model.setDescription(rec.getLiteralValue("sourceResource.description"));
+		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("sourceResource.creator"))));
+		
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		String id = rec.getStringValue("id");
+		object.addToProvenance(new ProvenanceInfo(DPLASpaceSource.LABEL,  "http://dp.la/item/"+id, id));
+		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
+		MediaObject med;
+		media.add(med = new MediaObject());
+		object.setMedia(media);
+		med.setThumbnailUrl(rec.getStringValue("object"));
+		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		return object;
 //		//TODO: add type
 //		//TODO: add null checks
-//		object.setThumbnailUrl(rec.getStringValue("objtect"));
-//		object.setTitle(rec.getStringValue("sourceResource.title"));
-//		object.setDescription(rec.getStringValue("sourceResource.description"));
-//		object.setCreator(rec.getStringValue("sourceResource.creator"));
+//		object.setDescription(rec.getStringValue("sour	ceResource.description"));
 //		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
 //		// TODO: add years
 ////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
 //		// TODO: add rights
 ////		object.setItemRights(rec.getStringValue("sourceResource.rights"));
-//		String id = rec.getStringValue("id");
-//		Provider recordProvider = new Provider(DPLASpaceSource.LABEL, id, 
-//				"http://dp.la/item/"+id);
-//		object.addProvider(recordProvider);
-		return object;
 	}
 
 }
