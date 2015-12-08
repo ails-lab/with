@@ -274,10 +274,9 @@ public class CollectionObjectController extends Controller {
 						.get(last)).getResourceId();
 				// In case the record already exists we modify the existing
 				// record
-				if (DB.getRecordResourceDAO().getByResourceIdAtProvenance(
-						resourceId) != null) {
-					record = DB.getRecordResourceDAO()
-							.getByResourceIdAtProvenance(resourceId);
+				if (DB.getRecordResourceDAO().getByExternalId(resourceId) != null) {
+					record = (RecordResource) DB.getRecordResourceDAO()
+							.getByExternalId(resourceId);
 				} else {
 					record.getAdministrative().setCreated(new Date());
 				}
