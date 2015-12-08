@@ -26,7 +26,7 @@ import db.converters.ProvenanceInfoConverter;
 public class ProvenanceInfo {
 	private String provider;
 	private String uri;
-	private String recordId;
+	private String resourceId;
 	
 	
 	public ProvenanceInfo() {
@@ -38,7 +38,7 @@ public class ProvenanceInfo {
 	
 	public ProvenanceInfo(String provider, String uri, String recordId) {
 		this.provider = provider;
-		this.recordId = recordId;
+		this.resourceId = recordId;
 		this.uri = uri;
 	}
 	
@@ -54,11 +54,11 @@ public class ProvenanceInfo {
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
-	public String getRecordId() {
-		return recordId;
+	public String getResourceId() {
+		return resourceId;
 	}
-	public void setRecordId(String recordId) {
-		this.recordId = recordId;
+	public void setResourceId(String recordId) {
+		this.resourceId = recordId;
 	}
 	
 	// you can have entries for WITH records with provider "WITH" and

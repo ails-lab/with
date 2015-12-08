@@ -180,6 +180,14 @@ public class WithResource<T extends DescriptiveData> {
 		public void setLikes(int likes) {
 			this.likes = likes;
 		}
+		
+		public void incLikes() {
+			this.likes++;
+		}
+		
+		public void decLikes() {
+			this.likes--;
+		}
 
 		public int getCollected() {
 			return collected;
@@ -187,6 +195,14 @@ public class WithResource<T extends DescriptiveData> {
 
 		public void setCollected(int collected) {
 			this.collected = collected;
+		}
+		
+		public void incCollected() {
+			this.collected++;
+		}
+		
+		public void decCollected() {
+			this.collected--;
 		}
 
 		public int getAnnotated() {
@@ -414,7 +430,7 @@ public class WithResource<T extends DescriptiveData> {
 		this.resourceType = resourceType;
 	}
 
-	public T getDescriptiveDate() {
+	public T getDescriptiveData() {
 		return descriptiveData;
 	}
 

@@ -23,14 +23,16 @@ import javax.validation.ConstraintViolation;
 
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
-import model.resources.WithResource.WithAdmin;
+import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
+import model.basicDataTypes.ProvenanceInfo;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -223,7 +225,93 @@ public class CollectionObjectController extends Controller {
 		}
 	}
 
-	public static Result addRecordToCollection(String collectionId) {
+	public static Result addRecordToCollection(String id,
+			Option<Integer> position, Option<String> recordId) {
+		ObjectNode result = Json.newObject();
+		JsonNode json = request().body().asJson();
+		try {
+			ObjectId collectionDbId = new ObjectId(id);
+			CollectionObject collection = DB.getCollectionObjectDAO().get(
+					collectionDbId);
+			if (collection == null) {
+				log.error("Cannot retrieve resource from database");
+				result.put("error", "Cannot retrieve resource from database");
+				return internalServerError(result);
+			}
+			if (!AccessManager.checkAccess(collection.getAdministrative()
+					.getAccess(), session().get("effectiveUserIds"),
+					Action.EDIT)) {
+				result.put("error",
+						"User does not have the right to edit the resource");
+				return forbidden(result);
+			}
+			RecordResource record;
+			// A stored record from the database is added to the collection
+			if (recordId.isDefined()) {
+				ObjectId recordDbId = new ObjectId(recordId.get());
+				record = DB.getRecordResourceDAO().get(recordDbId);
+			} else if (json == null) {
+				result.put("error", "Invalid JSON");
+				return badRequest(result);
+				// The record to be added is given as input from the JSON body
+			} else {
+				record = Json.fromJson(json, RecordResource.class);
+				Set<ConstraintViolation<RecordResource>> violations = Validation
+						.getValidator().validate(record);
+				if (!violations.isEmpty()) {
+					ArrayNode properties = Json.newObject().arrayNode();
+					for (ConstraintViolation<RecordResource> cv : violations) {
+						properties.add(Json.parse("{\"" + cv.getPropertyPath()
+								+ "\":\"" + cv.getMessage() + "\"}"));
+					}
+					result.put("error", properties);
+					return badRequest(result);
+				}
+				// Check the resourceId of the last entry at provenance
+				// TODO: Maybe check the externalId?
+				int last = record.getProvenance().size() - 1;
+				String resourceId = ((ProvenanceInfo) record.getProvenance()
+						.get(last)).getResourceId();
+				// In case the record already exists we modify the existing
+				// record
+				if (DB.getRecordResourceDAO().getByResourceIdAtProvenance(
+						resourceId) != null) {
+					record = DB.getRecordResourceDAO()
+							.getByResourceIdAtProvenance(resourceId);
+				} else {
+					record.getAdministrative().setCreated(new Date());
+				}
+				record.getAdministrative().setLastModified(new Date());
+				if (position.isDefined()) {
+					record.addPositionToCollectedIn(collectionDbId,
+							position.get());
+				} else {
+					// If the position is not defined the record is added at the
+					// end of the collection
+					record.addPositionToCollectedIn(collectionDbId,
+							((CollectionAdmin) collection.getAdministrative())
+									.getEntryCount());
+				}
+				// TODO modify access
+				if (collection.getDescriptiveData().getLabel()
+						.equals("_favorites")) {
+					record.getUsage().incLikes();
+				} else {
+					record.getUsage().incCollected();
+				}
+				DB.getRecordResourceDAO().makePermanent(record);
+				// Change the collection metadata as well
+				((CollectionAdmin) collection.getAdministrative())
+						.incEntryCount();
+				collection.getAdministrative().setLastModified(new Date());
+				DB.getCollectionObjectDAO().makePermanent(collection);
+				result.put("message", "Record succesfully added to collection");
+				return ok(result);
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
 		return TODO;
 	}
 }

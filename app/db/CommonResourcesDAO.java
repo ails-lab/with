@@ -581,6 +581,13 @@ public abstract class CommonResourcesDAO<T> extends DAO<T>{
 				.field("externalId").equal(extId);
 		return this.find(q).countAll();
 	}
+	
+	// Should only contain one or zero resource
+	public T getByResourceIdAtProvenance(String resourceId) {
+		Query<T> q = this.createQuery()
+				.field("provenance.resourceId").equal(resourceId);
+		return this.findOne(q);
+	}
 
 	/**
 	 * Not a good Idea problably want work
