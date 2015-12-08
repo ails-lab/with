@@ -17,6 +17,7 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import model.basicDataTypes.CollectionInfo;
@@ -36,6 +37,8 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
 
 import utils.Tuple;
 
@@ -615,33 +618,29 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
 		String colField = "collectedIn."+colId;
-		//Query<T> q = this.createQuery().field(colField).exists();
-		//UpdateOperations<T> ops = this.createUpdateOperations().inc(colField);
-		//this.update(q, ops);
-		/* TODO: check if the query can be expressed in morphia
-		Query<T> q = this.createQuery();
-		q.and(q.criteria(colField).exists(), q.criteria(colField).hasThisElement(q.field("position").greaterThanOrEq(position)));
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		updateOps.dec(colField+".$");
-		this.update(q,  updateOps);
-		*/
-		/*for (T resource: resources) {
+		Query<T> q = this.createQuery().field(colField).exists();
+	    UpdateOperations<T> updateOps = this.createUpdateOperations();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", position);
+		BasicDBObject geq1 = new BasicDBObject();
+		geq1.put("$elemMatch", geq);
+		q.filter(colField, geq1);
+		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
+		for (WithResource resource: resources) {
 			HashMap<ObjectId, ArrayList<Integer>> collectedIn = resource.getCollectedIn();
 			ArrayList<Integer> positions = collectedIn.get(colId);
+			int index = 0;
 			for (Integer pos: positions) {
-				if (pos > position) {
-					updateOps.removeAll("collectedIn."+colId, position);
-					updateOps.add("collectedIn."+colId, position-1);
+				if (pos >= position) {
+					updateOps.disableValidation().dec(colField+"."+index);
 				}
+				index+=1;
 			}
 		}
 		this.update(q, updateOps);
-		 */
-		/*{
-		 	collectedIn.colId: {$exists: true},
-		     collectedIn.colId: { $elemMatch: { $gte: position} }
-		   },
-		   { $dec: { "collectedIn."+colId+".$" : 1 } }*/
+		/*attempts to update without retrieving the documents: does not work
+		/*if collectedIn is of type Map
+		 * update only works on first matching element, so discard
 		BasicDBObject colIdQuery = new BasicDBObject();
 		BasicDBObject existsField = new BasicDBObject();
 		existsField.put("$exists", true);
@@ -654,11 +653,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		//System.out.println(colIdQuery);
 		BasicDBObject update = new BasicDBObject();
 		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put(colField+".$", -1);
+		entrySpec.put(colField+".0", -1);
 		update.put("$inc", entrySpec);
-		//System.out.println(this.getDs().getCollection(entityClass).find(colIdQuery).count());
 		this.getDs().getCollection(entityClass).update(colIdQuery, update, false, true);
-		/*BasicDBObject query = new BasicDBObject();
+		*/
+		/* if collectedIn is of type Array<CollectionInfo>
+		 * BasicDBObject query = new BasicDBObject();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
 		BasicDBObject geq = new BasicDBObject();
