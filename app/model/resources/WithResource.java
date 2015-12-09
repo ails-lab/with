@@ -52,7 +52,6 @@ import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-@Entity("RecordResource")
 public class WithResource<T extends DescriptiveData> {
 
 	public static class WithAdmin {
@@ -448,7 +447,6 @@ public class WithResource<T extends DescriptiveData> {
 		return resourceType;
 	}
 
-	@JsonIgnore
 	public void setResourceType(WithResourceType resourceType) {
 		this.resourceType = resourceType;
 	}
