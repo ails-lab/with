@@ -169,8 +169,6 @@ public class RecordResourceController extends Controller {
 			resource.getAdministrative().setWithURI(
 					request().host() + resource.getDbId().toString());
 			DB.getRecordResourceDAO().makePermanent(resource);
-
-			// TODO: withURI?
 			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
 			return ok(Json.toJson(resource));

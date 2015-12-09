@@ -41,7 +41,7 @@ import db.DB;
 public class RecordResourceControllerTest {
 	public static long HOUR = 3600000;
 
-	// @Test
+	@Test
 	public void testCreateRecordResource() {
 		running(fakeApplication(), new Runnable() {
 			@Override
@@ -57,7 +57,7 @@ public class RecordResourceControllerTest {
 		});
 	}
 
-	@Test
+	//@Test
 	public void testGetRecordResource() {
 		running(fakeApplication(), new Runnable() {
 			@Override
