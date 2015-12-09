@@ -9,7 +9,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 	  }
 	  
 	  self.gotoWith=function(){
-		    window.childwith=window.open('../../assets/index.html#mycollections', 'with');
+		    window.childwith=window.open('../../assets/index.html#', 'with');
 		    window.childwith.focus();
 	}
 	
