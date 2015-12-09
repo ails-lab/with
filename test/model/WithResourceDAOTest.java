@@ -59,7 +59,7 @@ public class WithResourceDAOTest {
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 		}*/
 		
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 2; i++) {
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
 			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
@@ -70,26 +70,25 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResourceX" + i));
+			model.setLabel(new Literal(Language.EN, "TestWithResource" + i));
 			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 2);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 3);
+			int j=0;
+			if (i==0) j=i; else j=i+1;
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-			DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb80"), 2);
-			//List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(Language.EN, "TestWithResourceZ" + i);
 			//CulturalObject o = (CulturalObject) resources.get(0);
 			//System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
 			//System.out.println(Json.toJson(o));
-			//assertThat(o instanceof CulturalObject);
-			
-			
+			//assertThat(o instanceof CulturalObject);	
 		}
-		/*for (RecordResource c: resources) {
-			((CulturalObject) c).getCollectedIn().get(new ObjectId("5656dd6ce4b0b19378e1cb80"));
-		}*/
+		List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 10);
+		for (WithResource co: cos) {
+			System.out.println(Json.toJson(co));
+		}
 	}
 
 }
