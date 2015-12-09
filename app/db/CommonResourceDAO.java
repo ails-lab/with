@@ -19,6 +19,8 @@ package db;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal;
@@ -40,6 +42,9 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 
+import espace.core.CommonQuery;
+import espace.core.ISpaceSource;
+import espace.core.SourceResponse;
 import utils.Tuple;
 
 /*
@@ -609,17 +614,11 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		updateOps.removeAll("collectedIn."+colId, position);
 		this.update(q, updateOps);
 	}
-
-	//TODO:Mongo query!
-	/**
-	 * Also wrong implementation
-	 * @param colId
-	 * @param position
-	 */
-	public void shiftRecordsToLeft(ObjectId colId, int position) {
+	
+	public Query<T> shift(ObjectId colId, int position, final Function<String, UpdateOperations> update) {
 		String colField = "collectedIn."+colId;
 		Query<T> q = this.createQuery().field(colField).exists();
-	    UpdateOperations<T> updateOps = this.createUpdateOperations();
+	    //UpdateOperations<T> updateOps = this.createUpdateOperations();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", position);
 		BasicDBObject geq1 = new BasicDBObject();
@@ -632,12 +631,23 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 			int index = 0;
 			for (Integer pos: positions) {
 				if (pos >= position) {
-					updateOps.disableValidation().dec(colField+"."+index);
+					update.apply(colField+"."+index);
 				}
 				index+=1;
 			}
 		}
-		this.update(q, updateOps);
+		return q;
+	}
+
+	/**
+	 * Shift one position left all resources in colId with position equal or greater than position.
+	 * @param colId
+	 * @param position
+	 */
+	public void shiftRecordsToLeft(ObjectId colId, int position) {
+		UpdateOperations<T> updateOps = this.createUpdateOperations();
+		Function<String, UpdateOperations> update = (String field) -> updateOps.disableValidation().dec(field);
+		this.update(shift(colId, position, update), updateOps);
 		/*attempts to update without retrieving the documents: does not work
 		/*if collectedIn is of type Map
 		 * update only works on first matching element, so discard
@@ -674,6 +684,17 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		update.put("$inc", entrySpec);
 		System.out.println(this.getDs().getCollection(entityClass).find(query).count());
 		this.getDs().getCollection(entityClass).update(query, update, false, true);*/
+	}
+	
+	/**
+	 * Shift one position right all resources in colId with position equal or greater than position.
+	 * @param colId
+	 * @param position
+	 */
+	public void shiftRecordsToRight(ObjectId colId, int position) {
+		UpdateOperations<T> updateOps = this.createUpdateOperations();
+		Function<String, UpdateOperations> update = (String field) -> updateOps.disableValidation().inc(field);
+		this.update(shift(colId, position, update), updateOps);
 	}
 
 	/**
