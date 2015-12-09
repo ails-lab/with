@@ -22,9 +22,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
+
+import model.resources.WithResource;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import utils.ListUtils;
 import espace.core.Utils.Pair;
 import espace.core.sources.FilterValuesMap;
+import espace.core.utils.JsonContextRecord;
 
 public abstract class ISpaceSource {
 	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
@@ -93,7 +99,7 @@ public abstract class ISpaceSource {
 	private Function<List<String>, QueryModifier> transformer(Function<List<String>, List<Pair<String>>> old){
 		return (List<String> pars)->{return new ParameterQueryModifier(old.apply(pars));};
 	}
-
+	
 	protected void addDefaultWriter(String filterId, Function<List<String>, Pair<String>> function) {
 		vmap.addDefaultWriter(filterId, transformer((List<String> x)->{return Arrays.asList(function.apply(x));}));
 	}
@@ -101,12 +107,11 @@ public abstract class ISpaceSource {
 	protected void addDefaultComplexWriter(String filterId, Function<List<String>, List<Pair<String>>> function) {
 		vmap.addDefaultWriter(filterId, transformer(function));
 	}
-	
+
 	protected void addDefaultQueryModifier(String filterId, Function<List<String>, QueryModifier> function) {
 		vmap.addDefaultWriter(filterId, function);
 	}
-
-
+	
 	protected void addMapping(String filterID, String commonValue, String... specificValue) {
 		vmap.addMap(filterID, commonValue, specificValue);
 	}
@@ -114,7 +119,7 @@ public abstract class ISpaceSource {
 	protected void addMapping(String filterID, String commonValue, String specificValue) {
 		vmap.addMap(filterID, commonValue, specificValue);
 	}
-
+	
 	protected List<String> translateToSpecific(String filterID, String value) {
 		return vmap.translateToSpecific(filterID, value);
 	}
@@ -122,7 +127,7 @@ public abstract class ISpaceSource {
 	protected List<String> translateToCommon(String filterID, String value) {
 		return vmap.translateToCommon(filterID, value);
 	}
-
+	
 //	protected List<String> translateToQuery(String filterID, String value) {
 //		return vmap.translateToQuery(filterID, value);
 //	}
@@ -156,6 +161,10 @@ public abstract class ISpaceSource {
 
 	public List<CommonQuery> splitFilters(CommonQuery q) {
 		return Arrays.asList(q);
+	}
+	
+	public WithResource fillObjectFrom(JsonNode rec) {
+		return new WithResource();
 	}
 	
 }

@@ -19,14 +19,10 @@ package db;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -39,12 +35,7 @@ import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 
-import espace.core.CommonQuery;
-import espace.core.ISpaceSource;
-import espace.core.SourceResponse;
 import utils.Tuple;
 
 /*
@@ -57,7 +48,9 @@ import utils.Tuple;
  */
 public abstract class CommonResourceDAO<T> extends DAO<T>{
 
-	public CommonResourceDAO() {super(WithResource.class);}
+	public CommonResourceDAO() {
+		super(WithResource.class);
+	}
 
 	/*
 	 * The value of the entity class is either
@@ -134,34 +127,8 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	
 	public List<T> getByCollection(ObjectId colId) {
-		return getByCollectionOffsetCount(colId, 0, -1);
-	}
-	
-	/**
-	 * Retrieve records from specific collection by offset and count
-	 * while restoring duplicate entries.
-	 *
-	 * @param colId, offset, count
-	 * @return
-	 */
-	
-	public List<T> getByCollectionOffsetCount(ObjectId colId,
-			int offset, int count) {
-		List<T> ts = getSingletonCollectedResources(colId, offset, count);
-		List<T> repeatedResources = new ArrayList<T>();
-		for (T t: ts) {
-			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) t).getCollectedIn().get(colId);
-			/*ArrayList<CollectionInfo> collectedIn = (ArrayList<CollectionInfo>) ((WithResource) t).getCollectedIn();
-			for (CollectionInfo ci: collectedIn) {
-				if (ci.getCollectionId().equals(colId))
-					repeatedResources.add(t);
-			}*/
-			if (positions.size() > 1)
-				for (int pos: positions) {
-					repeatedResources.add(pos, t);
-				}
-		}
-		return repeatedResources;
+		int MAX = 10000;
+		return getByCollectionBtwPositions(colId, 0, MAX);
 	}
 	 
 	/**
@@ -171,34 +138,29 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<T> getByCollectionPosition(ObjectId colId, int lowerBound, int upperBound) {
+	public List<T> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
 		Query<T> q = this.createQuery();
 		String colField = "collectedIn."+colId;
-		q.filter(colField + " >", lowerBound).filter(colField + " <", upperBound);
-		/*
 		q.field(colField).exists();
-		q.and(q.criteria(colField).exists(),
-			q.filter("colField >", lowerBound).,
-			q.filter("colField <", upperBound));
-		*/
-		List<T> Ts = this.find(q).asList();
-		List<T> repeatedResources = new ArrayList<T>();
-		/*for (T T: Ts) {
-			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) T).getCollectedIn().get(colId);
-			int firstPosition = -1;
+		q.filter(colField + " >=", lowerBound).filter(colField + " <", upperBound);
+		List<T> ts = this.find(q).asList();
+		List<T> repeatedResources = new ArrayList<T>(upperBound-lowerBound);
+		for (int i=0; i<upperBound - lowerBound; i++) {
+			repeatedResources.add((T) new WithResource());
+		}
+		int maxPosition = 0;
+		for (T t: ts) {
+			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) t).getCollectedIn().get(colId);
 			for (int pos: positions) {
 				if ((lowerBound <= pos) && (pos < upperBound)) {
-					firstPosition = pos;
-				}
-				if ((firstPosition > -1) && (lowerBound <= pos) && (pos < upperBound)) {
-					repeatedResources.add(T);
-					//Remove last entry from original resources, since add one copy. Have to return (max) upperBound resources.
-					Ts.remove(Ts.size()-1);
+					int arrayPosition = pos - lowerBound;
+					if (arrayPosition > maxPosition)
+						maxPosition = arrayPosition;
+					repeatedResources.add(arrayPosition, t);
 				}
 			}
-		}*/
-		Ts.addAll(repeatedResources);
-		return Ts;
+		}
+		return repeatedResources.subList(0, maxPosition+1);
 	}
 
 	/**
