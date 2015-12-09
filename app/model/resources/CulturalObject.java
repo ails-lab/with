@@ -39,7 +39,8 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	
 	public static class RecordAdmin extends WithAdmin {
 		
-		// last entry of provenance chain hash of provider and recordId
+		// recordId of last entry of provenance chain id the resource has been imported from external resource
+		// dbId if uploaded by user
 		private String externalId;
 				
 		// if this resource / record is derived (modified) from a different Record.
