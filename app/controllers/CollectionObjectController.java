@@ -16,16 +16,18 @@
 
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import javax.validation.ConstraintViolation;
 
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
-import model.basicDataTypes.ProvenanceInfo;
 
 import org.bson.types.ObjectId;
 
@@ -46,6 +48,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.ElasticIndexer;
+import espace.core.ISpaceSource;
+import espace.core.ParallelAPICall;
+import espace.core.RecordJSONMetadata;
 
 public class CollectionObjectController extends Controller {
 
@@ -275,6 +281,14 @@ public class CollectionObjectController extends Controller {
 					result.put("error", properties);
 					return badRequest(result);
 				}
+				// Download the content of a record from the source
+				int last = record.getProvenance().size() - 1;
+				String source = ((ProvenanceInfo) record.getProvenance().get(
+						last)).getProvider();
+				String sourceId = ((ProvenanceInfo) record.getProvenance().get(
+						last)).getResourceId();
+				addContentToRecord(record.getDbId(), source, sourceId);
+
 			}
 			record.getAdministrative().setLastModified(new Date());
 			if (position.isDefined()) {
@@ -303,5 +317,35 @@ public class CollectionObjectController extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+
+	private static void addContentToRecord(ObjectId recordId, String source,
+			String sourceId) {
+		BiFunction<RecordResource, String, Boolean> methodQuery = (
+				RecordResource record, String sourceClassName) -> {
+			try {
+				Class<?> sourceClass = Class.forName(sourceClassName);
+				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
+				ArrayList<RecordJSONMetadata> recordsData = s
+						.getRecordFromSource(sourceId);
+				for (RecordJSONMetadata data : recordsData) {
+					DB.getCollectionRecordDAO().updateContent(record.getDbId(),
+							data.getFormat(), data.getJsonContent());
+				}
+				return true;
+			} catch (ClassNotFoundException e) {
+				// my class isn't there!
+				return false;
+			} catch (InstantiationException e) {
+				return false;
+			} catch (IllegalAccessException e) {
+				return false;
+			}
+		};
+
+		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
+		String sourceClassName = "espace.core.sources." + source
+				+ "SpaceSource";
+		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
 }

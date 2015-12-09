@@ -585,7 +585,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByExternalId(String extId) {
-		Query<T> q = this.createQuery().field("externalId")
+		Query<T> q = this.createQuery().field("administrative.externalId")
 				.equal(extId);
 		return this.find(q).asList();
 	}
