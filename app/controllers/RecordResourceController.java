@@ -21,8 +21,6 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
@@ -168,6 +166,10 @@ public class RecordResourceController extends Controller {
 			resource.getAdministrative().setWithCreator(creator);
 			resource.getAdministrative().setCreated(new Date());
 			resource.getAdministrative().setLastModified(new Date());
+			resource.getAdministrative().setWithURI(
+					request().host() + resource.getDbId().toString());
+			DB.getRecordResourceDAO().makePermanent(resource);
+
 			// TODO: withURI?
 			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
