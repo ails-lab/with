@@ -88,6 +88,10 @@ public class WithResource<T extends DescriptiveData> {
 		@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 		@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
+		
+		// recordId of last entry of provenance chain id the resource has been imported from external resource
+		// dbId if uploaded by user
+		private String externalId;
 
 		public WithAccess getAccess() {
 			return access;
@@ -162,6 +166,14 @@ public class WithResource<T extends DescriptiveData> {
 
 		public void setExhibition(boolean isExhibition) {
 			this.isExhibition = isExhibition;
+		}
+		
+		public String getExternalId() {
+			return externalId;
+		}
+
+		public void setExternalId(String externalId) {
+			this.externalId = externalId;
 		}
 
 	}
