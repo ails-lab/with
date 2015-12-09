@@ -40,35 +40,7 @@ public class RecordJSONMetadata {
 	}
 
 	public String getFormat() {
-		switch (format) {
-		case JSON_UNKNOWN:
-			return "JSON-UNKNOWN";
-		case JSONLD_UNKNOWN:
-			return "JSONLD-UNKNOWN";
-		case XML_UNKNOWN:
-			return "XML-UNKNOWN";
-		case JSON_EDM:
-			return "JSON-EDM";
-		case JSONLD_EDM:
-			return "JSONLD-EDM";
-		case XML_EDM:
-			return "XML-EDM";
-		case JSONLD_DPLA:
-			return "JSONLD-DPLA";
-		case JSON_NLA:
-			return "JSON-NLA";
-		case XML_NLA:
-			return "XML-NLA";
-		case JSON_DNZ:
-			return "JSON-DNZ";
-		case XML_DNZ:
-			return "XML-DNZ";
-		case JSON_YOUTUBE:
-			return "JSON-YOUTUBE";
-		default:
-			return "UKNOWN";
-
-		}
+		return (String.valueOf(format).replaceAll("_", "-"));
 	}
 
 }

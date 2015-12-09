@@ -19,19 +19,14 @@ package db;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
-import org.eclipse.jetty.util.ajax.JSON;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
@@ -39,17 +34,9 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import play.libs.Json;
-
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
 
-import espace.core.CommonQuery;
-import espace.core.ISpaceSource;
-import espace.core.SourceResponse;
 import utils.Tuple;
-import model.resources.CulturalObject;
 
 /*
  * The class consists of methods that can be both query
