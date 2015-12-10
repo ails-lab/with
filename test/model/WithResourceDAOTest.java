@@ -70,7 +70,7 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResource" + i));
+			model.setLabel(new Literal(Language.EN, "TestWithResourceN" + i));
 			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 			int j=0;
@@ -85,7 +85,7 @@ public class WithResourceDAOTest {
 			//System.out.println(Json.toJson(o));
 			//assertThat(o instanceof CulturalObject);	
 		}
-		List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 10);
+		List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 3);
 		for (WithResource co: cos) {
 			System.out.println(Json.toJson(co));
 		}

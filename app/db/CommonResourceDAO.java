@@ -16,16 +16,20 @@
 
 package db;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
+import org.bson.io.BasicOutputBuffer;
+import org.bson.io.OutputBuffer;
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
@@ -34,7 +38,15 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import play.libs.Json;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBEncoder;
+import com.mongodb.DBObject;
+import com.mongodb.DefaultDBEncoder;
 
 import utils.Tuple;
 
@@ -139,28 +151,51 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
-		Query<T> q = this.createQuery();
-		String colField = "collectedIn."+colId;
-		q.field(colField).exists();
-		q.filter(colField + " >=", lowerBound).filter(colField + " <", upperBound);
-		List<T> ts = this.find(q).asList();
+		BasicDBObject query = new BasicDBObject();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch2 = new BasicDBObject();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", lowerBound);
+		geq.append("$lt", upperBound);
+		elemMatch2.put("$elemMatch", geq);
+		colIdQuery.append("positions", elemMatch2);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		query.put("collectedIn", elemMatch1);
+		DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
+		List<T> ds = new ArrayList<T>();
+		while (cursor.hasNext()) {
+		   DBObject o = cursor.next();
+		   T d = (T) DB.getMorphia().fromDBObject(entityClass, o);
+		   ds.add(d);
+		}
 		List<T> repeatedResources = new ArrayList<T>(upperBound-lowerBound);
 		for (int i=0; i<upperBound - lowerBound; i++) {
 			repeatedResources.add((T) new WithResource());
 		}
-		int maxPosition = 0;
-		for (T t: ts) {
-			ArrayList<Integer> positions = (ArrayList<Integer>) ((WithResource) t).getCollectedIn().get(colId);
-			for (int pos: positions) {
-				if ((lowerBound <= pos) && (pos < upperBound)) {
-					int arrayPosition = pos - lowerBound;
-					if (arrayPosition > maxPosition)
-						maxPosition = arrayPosition;
-					repeatedResources.add(arrayPosition, t);
+		int maxPosition = -1;
+		for (T d: ds) {
+			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) ((WithResource) d).getCollectedIn();
+			for (CollectionInfo ci: collectionInfos) {
+				ObjectId collectionId = ci.getCollectionId();
+				if (collectionId.equals(colId)) {
+					ArrayList<Integer> positions = ci.getPositions();
+					for (int pos: positions) {
+						if ((lowerBound <= pos) && (pos < upperBound)) {
+							int arrayPosition = pos - lowerBound;
+							if (arrayPosition > maxPosition)
+								maxPosition = arrayPosition;
+							repeatedResources.add(arrayPosition, d);
+						}
+					}
 				}
 			}
 		}
-		return repeatedResources.subList(0, maxPosition+1);
+		if (maxPosition > -1)
+			return repeatedResources.subList(0, maxPosition+1);
+		else 
+			return new ArrayList<T>();
 	}
 
 	/**
@@ -587,7 +622,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		geq1.put("$elemMatch", geq);
 		q.filter(colField, geq1);
 		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
-		for (WithResource resource: resources) {
+		/*for (WithResource resource: resources) {
 			HashMap<ObjectId, ArrayList<Integer>> collectedIn = resource.getCollectedIn();
 			ArrayList<Integer> positions = collectedIn.get(colId);
 			int index = 0;
@@ -597,7 +632,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 				}
 				index+=1;
 			}
-		}
+		}*/
 		return q;
 	}
 
