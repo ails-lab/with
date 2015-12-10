@@ -24,11 +24,13 @@ import java.util.function.BiFunction;
 
 import javax.validation.ConstraintViolation;
 
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 
@@ -65,11 +67,11 @@ public class CollectionObjectController extends Controller {
 	 * @return the newly created resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
-	public static Result createCollectionObject() {
+	public static Result createCollectionObject(boolean exhibition) {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
 		try {
-			if (json == null) {
+			if (exhibition == false && json == null) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
@@ -77,9 +79,18 @@ public class CollectionObjectController extends Controller {
 				error.put("error", "No rights for WITH resource creation");
 				return forbidden(error);
 			}
-			ObjectId creator = new ObjectId(session().get("user"));
+			ObjectId creatorDbId = new ObjectId(session().get("user"));
+			User creator = DB.getUserDAO().get(creatorDbId);
 			CollectionObject collection = Json.fromJson(json,
 					CollectionObject.class);
+			if (exhibition) {
+				collection.getDescriptiveData().setLabel(
+						getAvailableTitle(creator));
+				collection.getDescriptiveData().setDescription(
+						new Literal("Description"));
+				creator.addExhibitionsCreated();
+				DB.getUserDAO().makePermanent(creator);
+			}
 			Set<ConstraintViolation<CollectionObject>> violations = Validation
 					.getValidator().validate(collection);
 			if (!violations.isEmpty()) {
@@ -93,7 +104,7 @@ public class CollectionObjectController extends Controller {
 			}
 			// Fill with all the administrative metadata
 			collection.setResourceType(WithResourceType.CollectionObject);
-			collection.getAdministrative().setWithCreator(creator);
+			collection.getAdministrative().setWithCreator(creatorDbId);
 			collection.getAdministrative().setCreated(new Date());
 			collection.getAdministrative().setLastModified(new Date());
 			if (collection.getAdministrative() instanceof CollectionAdmin) {
@@ -108,6 +119,12 @@ public class CollectionObjectController extends Controller {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+
+	/* Find a unique dummy title for the user exhibition */
+	private static Literal getAvailableTitle(User user) {
+		int exhibitionNum = user.getExhibitionsCreated();
+		return new Literal("DummyTitle" + exhibitionNum);
 	}
 
 	/**
