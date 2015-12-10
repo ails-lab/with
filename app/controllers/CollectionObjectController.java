@@ -18,6 +18,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -319,6 +320,44 @@ public class CollectionObjectController extends Controller {
 		}
 	}
 
+	public static Result addToFavorites() {
+		ObjectId userId = new ObjectId(session().get("user"));
+		String fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+				.toString();
+		return addRecordToCollection(fav, Option.None());
+	}
+
+	// TODO: Remove favorites
+
+	public static Result getFavorites() {
+		ObjectNode result = Json.newObject();
+		ObjectId userId = new ObjectId(session().get("user"));
+		ObjectId fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId();
+		List<RecordResource> records = DB.getRecordResourceDAO()
+				.getByCollection(fav);
+		if (records == null) {
+			result.put("error", "Cannot retrieve records from database");
+			return internalServerError(result);
+		}
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for (RecordResource record : records) {
+			recordsList.add(record.getAdministrative().getExternalId());
+		}
+		return ok(recordsList);
+	}
+
+	public static Result getFavoriteCollection() {
+		ObjectId userId = new ObjectId(session().get("user"));
+		String fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+				.toString();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
+		return getCollectionObject(fav);
+	}
+
 	private static void addContentToRecord(ObjectId recordId, String source,
 			String sourceId) {
 		BiFunction<RecordResource, String, Boolean> methodQuery = (
@@ -348,4 +387,5 @@ public class CollectionObjectController extends Controller {
 				+ "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
+
 }
