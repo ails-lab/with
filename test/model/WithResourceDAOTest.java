@@ -59,10 +59,12 @@ public class WithResourceDAOTest {
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 		}*/
 		
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 1; i++) {
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
 			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
+			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
+			withResource.addToProvenance(new ProvenanceInfo("Mint", "http://myUri", "12345"));
 			WithAccess access = new WithAccess();
 			access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
@@ -89,7 +91,10 @@ public class WithResourceDAOTest {
 		for (WithResource co: cos) {
 			System.out.println(Json.toJson(co));
 		}*/
-		DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
+		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
+		System.out.println(DB.getRecordResourceDAO().getByProvider("Mint"));
+		for (RecordResource r: DB.getRecordResourceDAO().getByProvider("Mint"))
+			System.out.println(Json.toJson(r));
 	}
 
 }

@@ -36,6 +36,4 @@ public abstract class ExternalBasicRecordReader<T extends WithResource<?> > exte
 		buildObject();
 		return super.readObjectFrom(text);
 	}
-
-
 }
