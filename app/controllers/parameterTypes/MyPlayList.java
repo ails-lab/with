@@ -62,10 +62,8 @@ public class MyPlayList implements QueryStringBindable<MyPlayList>{
 				else
 					return Option.None();
 			} catch (JsonProcessingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 	    }

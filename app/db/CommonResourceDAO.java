@@ -157,8 +157,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", lowerBound);
 		geq.append("$lt", upperBound);
-		elemMatch2.put("$elemMatch", geq);
-		colIdQuery.append("positions", elemMatch2);
+		colIdQuery.append("position", geq);
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
@@ -181,16 +180,13 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 			for (CollectionInfo ci: collectionInfos) {
 				ObjectId collectionId = ci.getCollectionId();
 				if (collectionId.equals(colId)) {
-					ArrayList<Integer> positions = ci.getPositions();
-					for (int pos: positions) {
-						if ((lowerBound <= pos) && (pos < upperBound)) {
-							int arrayPosition = pos - lowerBound;
-							if (arrayPosition > maxPosition)
-								maxPosition = arrayPosition;
-							repeatedResources.add(arrayPosition, d);
-						}
+					int pos = ci.getPosition();
+					if ((lowerBound <= pos) && (pos < upperBound)) {
+						int arrayPosition = pos - lowerBound;
+						if (arrayPosition > maxPosition)
+							maxPosition = arrayPosition;
+						repeatedResources.add(arrayPosition, d);
 					}
-					break;
 				}
 			}
 		}
@@ -226,19 +222,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	
 	public List<T> getByLabel(Language lang, String title) {
 		Query<T> q = this.createQuery().field("descriptiveData.label." + lang.toString()).equal(title);
-		return this.find(q).asList();
-	}
-
-	/**
-	 * Return a specific page of CollectionObject
-	 * according to the offset and count provided
-	 * MongoDB's paging infrastructure is used.
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public List<T> getAll(int offset, int count) {
-		Query<T> q = this.createQuery().offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
@@ -281,12 +264,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-	 * Retrieve the owner/creator of a CollectionObject
+	 * Retrieve the owner/creator of a Resource
 	 * using collection's dbId
 	 * @param id
 	 * @return
 	 */
-	public User getCollectionOwner(ObjectId id) {
+	public User getOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "administrative.withCreator");
 		return ((WithResource) findOne(q)).retrieveCreator();
@@ -604,21 +587,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-	 * @param resourceId
-	 * @param colId
-	 * @param position
-		Have to retrieve the whole document, because we do not whether there are many positions or not
-		So, having an array of positions is not efficient for that call
-		but since it is not a very common call, just do it by retrieving the ocument
-	
-	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
-		 UpdateOperations<T> updateOps = this.createUpdateOperations();
-		Query<T> q = this.createQuery().field("_id").equal(resourceId);
-		updateOps.removeAll("collectedIn."+colId, position);
-		this.update(q, updateOps);
-	}
-	 */
-	/**
 	 * This method is to update the 'public' field on all the records of a
 	 * collection. By default update method is invoked to all documents of a
 	 * collection.
@@ -644,26 +612,16 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * Increment likes for this specific resource
 	 * @param externalId
 	 */
-	public void incrementLikes(String dbId) {
-		Query<T> q = this.createQuery().field("_id")
-				.equal(dbId);
-		UpdateOperations<T> updateOps = this
-				.createUpdateOperations();
-		updateOps.inc("usage.likes");
-		this.update(q, updateOps);
+	public void incrementLikes(ObjectId dbId) {
+		incField("usage.likes", dbId);
 	}
 
 	/**
 	 * Decrement likes for this specific resource
 	 * @param dbId
 	 */
-	public void decrementLikes(String dbId) {
-		Query<T> q = this.createQuery().field("dbId")
-				.equal(dbId);
-		UpdateOperations<T> updateOps = this
-				.createUpdateOperations();
-		updateOps.dec("usage.likes");
-		this.update(q, updateOps);
+	public void decrementLikes(ObjectId dbId) {
+		decField("usage.likes", dbId);
 	}
 
 	/**
@@ -671,7 +629,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param dbId
 	 * @param fieldName
 	 */
-	public void incField(ObjectId dbId, String fieldName) {
+	public void incField( String fieldName, ObjectId dbId) {
 		Query<T> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.inc(fieldName);
@@ -683,7 +641,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param dbId
 	 * @param fieldName
 	 */
-	public void decField(ObjectId dbId, String fieldName) {
+	public void decField(String fieldName, ObjectId dbId) {
 		Query<T> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.dec(fieldName);

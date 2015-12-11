@@ -87,13 +87,11 @@ public class WithResourceDAOTest {
 			//System.out.println(Json.toJson(o));
 			//assertThat(o instanceof CulturalObject);	
 		}
-		/*List<WithResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 3);
-		for (WithResource co: cos) {
+		/*List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2);
+		for (RecordResource co: cos) {
 			System.out.println(Json.toJson(co));
 		}*/
-		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		for (RecordResource r: DB.getRecordResourceDAO().getByProvider("Μint"))
-			System.out.println(Json.toJson(r));
+		DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
 	}
 
 }

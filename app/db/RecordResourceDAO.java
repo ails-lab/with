@@ -74,6 +74,7 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 	 * in the far future.                                     *
 	 * ********************************************************
 	 */
+	/*
 	public class AgentObjectDAO extends CommonResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
@@ -121,6 +122,7 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		}
 
 	}
+	*/
 	
 	public void shift(ObjectId colId, int position, BiConsumer<String, UpdateOperations> update) {
 		Query<RecordResource> q = this.createQuery();
@@ -129,8 +131,7 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		BasicDBObject elemMatch2 = new BasicDBObject();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", position);
-		elemMatch2.put("$elemMatch", geq);
-		colIdQuery.append("positions", elemMatch2);
+		colIdQuery.append("position", geq);
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
@@ -141,15 +142,9 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 			int index = 0;
 			for (CollectionInfo ci: collectedIn) {
 				if (ci.getCollectionId().equals(colId)) {
-					ArrayList<Integer> positions = ci.getPositions();
-					int posIndex = 0;
-					for (Integer pos: positions) {
-						if (pos >= position) {
-							update.accept("collectedIn."+index+".positions."+posIndex, updateOps);
-						}
-						posIndex+=1;
-					}
-					break;
+					int pos = ci.getPosition();
+					if (pos >= position)
+						update.accept("collectedIn."+index+".position", updateOps);
 				}
 				index+=1;
 			}
@@ -178,9 +173,17 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		shift(colId, position, update);
 	}
 	
-	/* ********************************************
-	 * End of embedded DAO classes                *
-	 * ********************************************
-	 */
-
+	public void addToCollection(ObjectId resourceId, ObjectId colId, int position) {
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		updateOps.add("collectedIn", new CollectionInfo(colId, position));
+		this.update(q, updateOps);
+	}
+	
+	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
+		this.update(q, updateOps);
+	}
 }

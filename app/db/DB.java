@@ -172,12 +172,12 @@ public class DB {
 	 * The rest are going to be used in very special cases
 	 * in the far future.
 	 */
-
+	
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO)
-				getDao(RecordResource.class, null);
+				getDAO(RecordResource.class);
 	}
-
+	/*
 	public static RecordResourceDAO.AgentObjectDAO getAgentObjectDAO() {
 		return (RecordResourceDAO.AgentObjectDAO)
 				getDao(AgentObject.class, RecordResource.class);
@@ -207,7 +207,7 @@ public class DB {
 		return (RecordResourceDAO.TimespanObjectDAO)
 				getDao(TimespanObject.class, RecordResource.class);
 	}
-
+   */
 
 	/**
 	 * Signleton DAO for all the entities
@@ -216,6 +216,7 @@ public class DB {
 	 * @param clazz
 	 * @return
 	 */
+	/*
 	private static <T> DAO<?> getDao(Class<T> clazz, Class<?> parentClazz) {
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if(dao == null)  {
@@ -235,13 +236,14 @@ public class DB {
 		}
 		return dao;
 	}
-
+	*/
 	/**
 	 * Singleton DAO class for all the models
 	 *
 	 * @param clazz
 	 * @return
 	 */
+	
 	private static DAO<?> getDAO(Class<?> clazz) {
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if (dao == null) {
@@ -256,4 +258,5 @@ public class DB {
 		}
 		return dao;
 	}
+	
 }

@@ -17,6 +17,8 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -26,6 +28,8 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import utils.Tuple;
 import model.basicDataTypes.WithAccess.Access;
@@ -47,7 +51,11 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 	 * @param dbId
 	 */
 	public void incEntryCount(ObjectId dbId) {
-		incField(dbId, "administrative.entryCount");
+		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
+		updateOps.set("administrative.lastModified", new Date());
+		updateOps.inc("administrative.entryCount");
+		this.update(q, updateOps);
 	}
 
 	/**
@@ -55,6 +63,32 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 	 * @param dbId
 	 */
 	public void decEntryCount(ObjectId dbId) {
-		decField(dbId, "administrative.entryCount");
+		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
+		updateOps.set("administrative.lastModified", new Date());
+		updateOps.dec("administrative.entryCount");
+		this.update(q, updateOps);
+	}
+	
+	public void editCollection(ObjectId dbId, JsonNode json) {
+		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
+		updateFields("", json, updateOps);
+		this.update(q,  updateOps);
+	}
+	
+	public void updateFields(String parentField, JsonNode node, UpdateOperations<CollectionObject> updateOps) {
+		Iterator<String> fieldNames = node.fieldNames();
+	     while (fieldNames.hasNext()) {
+	         String fieldName = fieldNames.next();
+	         JsonNode fieldValue = node.get(fieldName);
+        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
+	         if (fieldValue.isObject()) {
+	        	 updateFields(newFieldName, fieldValue, updateOps);
+	         }
+	         else {//value
+	        	 updateOps.set(newFieldName, fieldValue);
+	         }
+	     }
 	}
 }

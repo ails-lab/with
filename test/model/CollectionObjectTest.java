@@ -51,7 +51,11 @@ import model.MediaObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
+
+import play.libs.Json;
 
 import com.google.common.net.MediaType;
 
@@ -68,11 +72,11 @@ public class CollectionObjectTest {
 		 * Owner of the CollectionObject
 		 *
 		 */
-		User u = DB.getUserDAO().getByUsername("qwerty");
+		/*User u = DB.getUserDAO().getByUsername("qwerty");
 		if(u == null) {
 			System.out.println("No user found");
 			return;
-		}
+		}*/
 
 		/*
 		 * Administative metadata
@@ -84,18 +88,6 @@ public class CollectionObjectTest {
 		//waccess.put(u.getDbId(), Access.OWN);
 		wa.setAccess(waccess);
 		co.setAdministrative(wa);
-
-		/*
-		 * This models a collection so there's no need to provide this
-		 */
-		HashMap<ObjectId, ArrayList<Integer>> colIn =
-				new HashMap<ObjectId, ArrayList<Integer>>();
-		ArrayList<Integer> cols = new ArrayList<Integer>();
-		cols.add(4);
-		cols.add(87);
-		cols.add(33);
-		colIn.put(new ObjectId(), cols);
-		co.setCollectedIn(colIn);
 
 		//no externalCollections
 		List<ExternalCollection> ec;
@@ -127,16 +119,31 @@ public class CollectionObjectTest {
 		medias.add(emo);
 		co.setMedia(medias);
 
-		if(DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+		if ( DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
-		if(co.getDbId() != null) System.out.println("The first CollectionObject presenting a collection was saved!");
 
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
-		System.out.println(DB.getCollectionObjectDAO().getByLabel("en", "MyTitle"));
+
+		JSONObject json = new JSONObject();
+		JSONObject labelJson = new JSONObject();
+		JSONObject titleJson = new JSONObject();
+		try {
+			titleJson.put(Language.EN.toString(), "New Title");
+			labelJson.put("label", titleJson);
+			json.put("descriptiveData", labelJson);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/*for (CollectionObject c: DB.getCollectionObjectDAO().getByLabel("en", "MyTitle")) {
+			System.out.println(Json.toJson(c));
+			ObjectId colId = c.getDbId();
+			DB.getCollectionObjectDAO().editCollection(colId, Json.parse(json.toString()));
+		}*/
 
 	}
-
+/*
 
 	private MediaObject getMediaObject() {
 
@@ -199,4 +206,5 @@ public class CollectionObjectTest {
 
 		return mo;
 	}
+	*/
 }

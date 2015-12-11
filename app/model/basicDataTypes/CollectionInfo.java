@@ -27,15 +27,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class CollectionInfo {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
-	private ArrayList<Integer> positions;
+	private Integer position;
 	
 	public CollectionInfo() {
 	}
 	
 	//position is Integer instead of int, so that we can do the null trick with morphia (see CommonResourcesDAO)
-	public CollectionInfo(ObjectId collectionId, ArrayList<Integer> positions) {
+	public CollectionInfo(ObjectId collectionId, Integer position) {
 		this.collectionId = collectionId;
-		this.positions = positions;
+		this.position = position;
 	}
 	
 	public ObjectId getCollectionId() {
@@ -44,14 +44,11 @@ public class CollectionInfo {
 	public void setCollectionId(ObjectId collectionId) {
 		this.collectionId = collectionId;
 	}
-	public ArrayList<Integer> getPositions() {
-		return positions;
+	public Integer getPosition() {
+		return position;
 	}
-	public void setPositions(ArrayList<Integer> positions) {
-		this.positions = positions;
+	public void setPosition(Integer position) {
+		this.position = position;
 	}
 	
-	public void addPosition(int position) {
-		this.positions.add(position);
-	}
 }
