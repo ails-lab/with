@@ -414,14 +414,14 @@ public class WithResource<T extends DescriptiveData> {
 		collectedIn.add(new CollectionInfo(colId, new ArrayList<Integer>(Arrays.asList(position))));
 	}
 
-	public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
+	/*public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
 		if (collectedIn.containsKey(colId)) {
 			collectedIn.get(colId).remove(position);
 			if (collectedIn.get(colId).size() == 0) {
 				collectedIn.remove(colId);
 			}
 		}
-	}
+	}*/
 
 	public Usage getUsage() {
 		return usage;
