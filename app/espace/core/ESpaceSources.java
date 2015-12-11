@@ -46,7 +46,7 @@ public class ESpaceSources {
 		esources.add(new DigitalNZSpaceSource());
 		esources.add(new EuropeanaFashionSpaceSource());
 		esources.add(new YouTubeSpaceSource());
-		esources.add(new ElasticSource());
+		//esources.add(new ElasticSource());
 		esources.add(new WithSpaceSource());
 		esources.add(new RijksmuseumSpaceSource());
 		esources.add(new DDBSpaceSource());
