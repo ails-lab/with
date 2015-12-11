@@ -57,7 +57,7 @@ public class WithResource<T extends DescriptiveData> {
 	public static class WithAdmin {
 
 		private boolean isExhibition;
-		
+
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
@@ -87,8 +87,9 @@ public class WithResource<T extends DescriptiveData> {
 		@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 		@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
-		
-		// recordId of last entry of provenance chain id the resource has been imported from external resource
+
+		// recordId of last entry of provenance chain id the resource has been
+		// imported from external resource
 		// dbId if uploaded by user
 		private String externalId;
 
@@ -166,7 +167,7 @@ public class WithResource<T extends DescriptiveData> {
 		public void setExhibition(boolean isExhibition) {
 			this.isExhibition = isExhibition;
 		}
-		
+
 		public String getExternalId() {
 			return externalId;
 		}
@@ -202,11 +203,11 @@ public class WithResource<T extends DescriptiveData> {
 		public void setLikes(int likes) {
 			this.likes = likes;
 		}
-		
+
 		public void incLikes() {
 			this.likes++;
 		}
-		
+
 		public void decLikes() {
 			this.likes--;
 		}
@@ -218,11 +219,11 @@ public class WithResource<T extends DescriptiveData> {
 		public void setCollected(int collected) {
 			this.collected = collected;
 		}
-		
+
 		public void incCollected() {
 			this.collected++;
 		}
-		
+
 		public void decCollected() {
 			this.collected--;
 		}
@@ -408,6 +409,15 @@ public class WithResource<T extends DescriptiveData> {
 		} else
 			collectedIn.put(colId,
 					new ArrayList<Integer>(Arrays.asList(position)));
+	}
+
+	public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
+		if (collectedIn.containsKey(colId)) {
+			collectedIn.get(colId).remove(position);
+			if (collectedIn.get(colId).size() == 0) {
+				collectedIn.remove(colId);
+			}
+		}
 	}
 
 	public Usage getUsage() {

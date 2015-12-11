@@ -16,19 +16,15 @@
 
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiFunction;
 
 import javax.validation.ConstraintViolation;
 
 import model.basicDataTypes.Literal;
-import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
-import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
 
@@ -37,7 +33,6 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
-import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -51,11 +46,11 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import elastic.ElasticIndexer;
-import espace.core.ISpaceSource;
-import espace.core.ParallelAPICall;
-import espace.core.RecordJSONMetadata;
 
+/**
+ * @author mariaral
+ *
+ */
 public class CollectionObjectController extends Controller {
 
 	public static final ALogger log = Logger
@@ -63,7 +58,7 @@ public class CollectionObjectController extends Controller {
 
 	/**
 	 * Creates a new WITH resource from the JSON body
-	 *
+	 * @param exhibition
 	 * @return the newly created resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
@@ -122,6 +117,10 @@ public class CollectionObjectController extends Controller {
 	}
 
 	/* Find a unique dummy title for the user exhibition */
+	/**
+	 * @param user
+	 * @return
+	 */
 	private static Literal getAvailableTitle(User user) {
 		int exhibitionNum = user.getExhibitionsCreated();
 		return new Literal("DummyTitle" + exhibitionNum);
@@ -197,7 +196,8 @@ public class CollectionObjectController extends Controller {
 	 * Edits the WITH resource according to the JSON body. For every field
 	 * mentioned in the JSON body it either edits the existing one or it adds it
 	 * (in case it doesn't exist)
-	 *
+	 * 
+	 * @param id
 	 * @return the edited resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
@@ -249,122 +249,9 @@ public class CollectionObjectController extends Controller {
 		}
 	}
 
-	public static Result addRecordToCollection(String id,
-			Option<Integer> position) {
-		ObjectNode result = Json.newObject();
-		JsonNode json = request().body().asJson();
-		try {
-			ObjectId collectionDbId = new ObjectId(id);
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					collectionDbId);
-			if (collection == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
-			}
-			if (!AccessManager.checkAccess(collection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.EDIT)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
-			}
-			if (json == null) {
-				result.put("error", "Invalid JSON");
-				return badRequest(result);
-			}
-			if (json.get("externalId") == null) {
-				result.put("error",
-						"Field \"externalId\" is mandatory for the record");
-				return badRequest(result);
-			}
-			RecordResource record;
-			// In case the record already exists we modify the existing
-			// record
-			if (DB.getRecordResourceDAO().getByExternalId(
-					json.get("externalId").asText()) != null) {
-				record = (RecordResource) DB.getRecordResourceDAO()
-						.getByExternalId(json.get("externalId").asText());
-			} else {
-				record = Json.fromJson(json, RecordResource.class);
-				record.getAdministrative().setCreated(new Date());
-				Set<ConstraintViolation<RecordResource>> violations = Validation
-						.getValidator().validate(record);
-				if (!violations.isEmpty()) {
-					ArrayNode properties = Json.newObject().arrayNode();
-					for (ConstraintViolation<RecordResource> cv : violations) {
-						properties.add(Json.parse("{\"" + cv.getPropertyPath()
-								+ "\":\"" + cv.getMessage() + "\"}"));
-					}
-					result.put("error", properties);
-					return badRequest(result);
-				}
-				// Download the content of a record from the source
-				int last = record.getProvenance().size() - 1;
-				String source = ((ProvenanceInfo) record.getProvenance().get(
-						last)).getProvider();
-				String sourceId = ((ProvenanceInfo) record.getProvenance().get(
-						last)).getResourceId();
-				addContentToRecord(record.getDbId(), source, sourceId);
-
-			}
-			record.getAdministrative().setLastModified(new Date());
-			if (position.isDefined()) {
-				record.addPositionToCollectedIn(collectionDbId, position.get());
-			} else {
-				// If the position is not defined the record is added at the
-				// end of the collection
-				record.addPositionToCollectedIn(collectionDbId,
-						((CollectionAdmin) collection.getAdministrative())
-								.getEntryCount());
-			}
-			// TODO modify access
-			if (collection.getDescriptiveData().getLabel().equals("_favorites")) {
-				record.getUsage().incLikes();
-			} else {
-				record.getUsage().incCollected();
-			}
-			DB.getRecordResourceDAO().makePermanent(record);
-			// Change the collection metadata as well
-			((CollectionAdmin) collection.getAdministrative()).incEntryCount();
-			collection.getAdministrative().setLastModified(new Date());
-			DB.getCollectionObjectDAO().makePermanent(collection);
-			result.put("message", "Record succesfully added to collection");
-			return ok(result);
-		} catch (Exception e) {
-			result.put("error", e.getMessage());
-			return internalServerError(result);
-		}
-	}
-
-	public static Result addToFavorites() {
-		ObjectId userId = new ObjectId(session().get("user"));
-		String fav = DB.getCollectionObjectDAO()
-				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
-				.toString();
-		return addRecordToCollection(fav, Option.None());
-	}
-
-	// TODO: Remove favorites
-
-	public static Result getFavorites() {
-		ObjectNode result = Json.newObject();
-		ObjectId userId = new ObjectId(session().get("user"));
-		ObjectId fav = DB.getCollectionObjectDAO()
-				.getByOwnerAndLabel(userId, null, "_favorites").getDbId();
-		List<RecordResource> records = DB.getRecordResourceDAO()
-				.getByCollection(fav);
-		if (records == null) {
-			result.put("error", "Cannot retrieve records from database");
-			return internalServerError(result);
-		}
-		ArrayNode recordsList = Json.newObject().arrayNode();
-		for (RecordResource record : records) {
-			recordsList.add(record.getAdministrative().getExternalId());
-		}
-		return ok(recordsList);
-	}
-
+	/**
+	 * @return
+	 */
 	public static Result getFavoriteCollection() {
 		ObjectId userId = new ObjectId(session().get("user"));
 		String fav = DB.getCollectionObjectDAO()
@@ -373,36 +260,6 @@ public class CollectionObjectController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
 		return getCollectionObject(fav);
+
 	}
-
-	private static void addContentToRecord(ObjectId recordId, String source,
-			String sourceId) {
-		BiFunction<RecordResource, String, Boolean> methodQuery = (
-				RecordResource record, String sourceClassName) -> {
-			try {
-				Class<?> sourceClass = Class.forName(sourceClassName);
-				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-				ArrayList<RecordJSONMetadata> recordsData = s
-						.getRecordFromSource(sourceId);
-				for (RecordJSONMetadata data : recordsData) {
-					DB.getCollectionRecordDAO().updateContent(record.getDbId(),
-							data.getFormat(), data.getJsonContent());
-				}
-				return true;
-			} catch (ClassNotFoundException e) {
-				// my class isn't there!
-				return false;
-			} catch (InstantiationException e) {
-				return false;
-			} catch (IllegalAccessException e) {
-				return false;
-			}
-		};
-
-		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
-		String sourceClassName = "espace.core.sources." + source
-				+ "SpaceSource";
-		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
-	}
-
 }
