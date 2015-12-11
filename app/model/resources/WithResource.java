@@ -45,6 +45,7 @@ import model.EmbeddedMediaObject;
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -52,13 +53,12 @@ import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-@Entity("RecordResource")
 public class WithResource<T extends DescriptiveData> {
 
 	public static class WithAdmin {
 
 		private boolean isExhibition;
-		
+
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
@@ -88,6 +88,11 @@ public class WithResource<T extends DescriptiveData> {
 		@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 		@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
+
+		// recordId of last entry of provenance chain id the resource has been
+		// imported from external resource
+		// dbId if uploaded by user
+		private String externalId;
 
 		public WithAccess getAccess() {
 			return access;
@@ -164,6 +169,14 @@ public class WithResource<T extends DescriptiveData> {
 			this.isExhibition = isExhibition;
 		}
 
+		public String getExternalId() {
+			return externalId;
+		}
+
+		public void setExternalId(String externalId) {
+			this.externalId = externalId;
+		}
+
 	}
 
 	public static class Usage {
@@ -191,11 +204,11 @@ public class WithResource<T extends DescriptiveData> {
 		public void setLikes(int likes) {
 			this.likes = likes;
 		}
-		
+
 		public void incLikes() {
 			this.likes++;
 		}
-		
+
 		public void decLikes() {
 			this.likes--;
 		}
@@ -207,11 +220,11 @@ public class WithResource<T extends DescriptiveData> {
 		public void setCollected(int collected) {
 			this.collected = collected;
 		}
-		
+
 		public void incCollected() {
 			this.collected++;
 		}
-		
+
 		public void decCollected() {
 			this.collected--;
 		}
@@ -326,7 +339,7 @@ public class WithResource<T extends DescriptiveData> {
 	protected WithAdmin administrative;
 
 	@Embedded
-	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
+	private ArrayList<CollectionInfo> collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -353,7 +366,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
-	private HashMap<String, ContextAnnotation> contextAnnotation;
+	private ArrayList<ContextAnnotation> contextAnnotation;
 
 	private ArrayList<Annotation> annotations;
 
@@ -361,14 +374,14 @@ public class WithResource<T extends DescriptiveData> {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new HashMap<ObjectId, ArrayList<Integer>>();
+		this.collectedIn = new ArrayList<CollectionInfo>();
 	}
 
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new HashMap<ObjectId, ArrayList<Integer>>();
+		this.collectedIn = new ArrayList<CollectionInfo>();
 		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
 	}
 
@@ -383,20 +396,31 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public HashMap<ObjectId, ArrayList<Integer>> getCollectedIn() {
+	public ArrayList<CollectionInfo> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
+	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
+		for (CollectionInfo ci: collectedIn) {
+			if (ci.getCollectionId().equals(colId)) {
+				ci.addPosition(position);
+				return;
+			}
+		}
+		collectedIn.add(new CollectionInfo(colId, new ArrayList<Integer>(Arrays.asList(position))));
+	}
+
+	public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
 		if (collectedIn.containsKey(colId)) {
-			collectedIn.get(colId).add(position);
-		} else
-			collectedIn.put(colId,
-					new ArrayList<Integer>(Arrays.asList(position)));
+			collectedIn.get(colId).remove(position);
+			if (collectedIn.get(colId).size() == 0) {
+				collectedIn.remove(colId);
+			}
+		}
 	}
 
 	public Usage getUsage() {
@@ -436,7 +460,6 @@ public class WithResource<T extends DescriptiveData> {
 		return resourceType;
 	}
 
-	@JsonIgnore
 	public void setResourceType(WithResourceType resourceType) {
 		this.resourceType = resourceType;
 	}
@@ -465,12 +488,12 @@ public class WithResource<T extends DescriptiveData> {
 		this.media = media;
 	}
 
-	public HashMap<String, ContextAnnotation> getContextAnnotation() {
+	public ArrayList<ContextAnnotation> getContextAnnotation() {
 		return contextAnnotation;
 	}
 
 	public void setContextAnnotation(
-			HashMap<String, ContextAnnotation> contextAnnotation) {
+			ArrayList<ContextAnnotation> contextAnnotation) {
 		this.contextAnnotation = contextAnnotation;
 	}
 

@@ -25,14 +25,10 @@ import model.CollectionRecord;
 import model.resources.AgentObject;
 import model.resources.CollectionObject;
 import model.resources.CulturalObject;
-import model.resources.EUscreenObject;
 import model.resources.EventObject;
 import model.resources.PlaceObject;
 import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.TimespanObject;
-import model.resources.WithResource;
-import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -40,7 +36,6 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
-import sun.rmi.server.UnicastServerRef;
 
 import com.mongodb.MongoClient;
 import com.mongodb.gridfs.GridFS;

@@ -38,20 +38,9 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	}
 	
 	public static class RecordAdmin extends WithAdmin {
-		
-		// last entry of provenance chain hash of provider and recordId
-		private String externalId;
 				
 		// if this resource / record is derived (modified) from a different Record.
 		private ObjectId parentResourceId;
-
-		public String getExternalId() {
-			return externalId;
-		}
-
-		public void setExternalId(String externalId) {
-			this.externalId = externalId;
-		}
 
 		public ObjectId getParentResourceId() {
 			return parentResourceId;

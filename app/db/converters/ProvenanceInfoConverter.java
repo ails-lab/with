@@ -43,7 +43,7 @@ public class ProvenanceInfoConverter extends TypeConverter{
 			if (!uri.isEmpty())
 				p.setUri(uri);
 			if (!recordId.isEmpty())
-				p.setRecordId(recordId);
+				p.setResourceId(recordId);
 			return p;
 		}
 }

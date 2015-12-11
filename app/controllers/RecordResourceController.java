@@ -17,12 +17,11 @@
 package controllers;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
@@ -46,6 +45,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 
+/**
+ * @author mariaral
+ *
+ */
 public class RecordResourceController extends Controller {
 
 	public static final ALogger log = Logger.of(RecordResourceController.class);
@@ -168,7 +171,9 @@ public class RecordResourceController extends Controller {
 			resource.getAdministrative().setWithCreator(creator);
 			resource.getAdministrative().setCreated(new Date());
 			resource.getAdministrative().setLastModified(new Date());
-			// TODO: withURI?
+			resource.getAdministrative().setWithURI(
+					request().host() + resource.getDbId().toString());
+			DB.getRecordResourceDAO().makePermanent(resource);
 			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
 			return ok(Json.toJson(resource));
@@ -183,6 +188,7 @@ public class RecordResourceController extends Controller {
 	 * mentioned in the JSON body it either edits the existing one or it adds it
 	 * (in case it doesn't exist)
 	 *
+	 * @param id
 	 * @return the edited resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
@@ -231,5 +237,29 @@ public class RecordResourceController extends Controller {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+	
+
+	// TODO: Remove favorites
+
+	/**
+	 * @return
+	 */
+	public static Result getFavorites() {
+		ObjectNode result = Json.newObject();
+		ObjectId userId = new ObjectId(session().get("user"));
+		ObjectId fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId();
+		List<RecordResource> records = DB.getRecordResourceDAO()
+				.getByCollection(fav);
+		if (records == null) {
+			result.put("error", "Cannot retrieve records from database");
+			return internalServerError(result);
+		}
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for (RecordResource record : records) {
+			recordsList.add(record.getAdministrative().getExternalId());
+		}
+		return ok(recordsList);
 	}
 }

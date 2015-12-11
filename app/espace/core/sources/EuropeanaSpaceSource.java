@@ -46,21 +46,25 @@ import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.sources.formatreaders.EuropeanaExternalBasicRecordFormatter;
+import espace.core.utils.JsonContextRecord;
+import model.EmbeddedMediaObject;
+import model.MediaObject;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.ProvenanceInfo;
+import model.resources.CulturalObject;
 import model.resources.WithResource;
+import model.resources.CulturalObject.CulturalObjectData;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public static final String LABEL = "Europeana";
 	private final String europeanaKey = "SECRET_KEY";
-	private final EuropeanaExternalBasicRecordFormatter formatreader;
 
 	public EuropeanaSpaceSource() {
 		super();
-		formatreader = new EuropeanaExternalBasicRecordFormatter();
 	    filtersSupportedBySource = new ArrayList<CommonFilters>(
 	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR,
 	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
@@ -90,19 +94,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.UNKNOWN.name(), ".*unknown.*");
 
 	}
-	/*
-	private Function<List<String>, QueryModifier> qreusabilitywriter() {
-		Function<String, String> function = (String s) -> {
-			return "&REUSABILITY%3A" + s;
-		};
-		return new Function<List<String>, QueryModifier>() {
-			@Override
-			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
-	}
-	*/
+	
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
 		if (parameter.equals(CommonFilters.YEAR.getID())) {
 			return qfwriterYEAR();
@@ -131,13 +123,13 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		};
 	}
 
-	class euroQB extends QueryBuilder {
+	class EuroQB extends QueryBuilder {
 
-		public euroQB() {
+		public EuroQB() {
 			super();
 		}
 
-		public euroQB(String baseUrl) {
+		public EuroQB(String baseUrl) {
 			super(baseUrl);
 		}
 
@@ -185,7 +177,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public String getHttpQuery(CommonQuery q) {
-		QueryBuilder builder = new euroQB("http://europeana.eu/api/v2/search.json");
+		QueryBuilder builder = new EuroQB("http://europeana.eu/api/v2/search.json");
 		builder.addSearchParam("wskey", europeanaKey);
 
 		builder.addQuery("query", q.searchTerm);
@@ -252,7 +244,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		try{
 		if (response.path("success").asBoolean()) {
 			for (JsonNode item : response.path("items")) {
-				items.add(formatreader.readObjectFrom(item));
+				items.add(fillObjectFrom(item));
 			}
 		}} catch(Exception e){
 			e.printStackTrace();
@@ -371,6 +363,39 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		} catch (Exception e) {
 			return jsonMetadata;
 		}
+	}
+	
+	//can it be common for text being a response of search and text being the full json-content 
+	//(edm or ld, the one which is similar to search result)? With null checks.
+	@Override
+	public CulturalObject fillObjectFrom(JsonNode text) {
+		JsonContextRecord rec = new JsonContextRecord(text);
+		CulturalObject object = new CulturalObject();
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
+		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
+		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
+		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));
+		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
+		MediaObject med;
+		media.add(med = new MediaObject());
+		object.setMedia(media);
+		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
+		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		return object;
+		
+		//TODO: add null checks
+//		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
+//		object.setContributors(rec.getStringArrayValue("dcContributor"));
+//		object.setItemRights(rec.getStringValue("rights"));
 	}
 
 }

@@ -16,6 +16,8 @@
 
 package model.basicDataTypes;
 
+import java.util.ArrayList;
+
 import org.bson.types.ObjectId;
 
 import utils.Serializer;
@@ -25,15 +27,15 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class CollectionInfo {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
-	private Integer position;
+	private ArrayList<Integer> positions;
 	
 	public CollectionInfo() {
 	}
 	
 	//position is Integer instead of int, so that we can do the null trick with morphia (see CommonResourcesDAO)
-	public CollectionInfo(ObjectId collectionId, Integer position) {
+	public CollectionInfo(ObjectId collectionId, ArrayList<Integer> positions) {
 		this.collectionId = collectionId;
-		this.position = position;
+		this.positions = positions;
 	}
 	
 	public ObjectId getCollectionId() {
@@ -42,10 +44,14 @@ public class CollectionInfo {
 	public void setCollectionId(ObjectId collectionId) {
 		this.collectionId = collectionId;
 	}
-	public int getPosition() {
-		return position;
+	public ArrayList<Integer> getPositions() {
+		return positions;
 	}
-	public void setPosition(int position) {
-		this.position = position;
+	public void setPositions(ArrayList<Integer> positions) {
+		this.positions = positions;
+	}
+	
+	public void addPosition(int position) {
+		this.positions.add(position);
 	}
 }
