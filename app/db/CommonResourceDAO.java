@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import model.basicDataTypes.CollectionInfo;
@@ -138,7 +139,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	
-	public List<T> getByCollection(ObjectId colId) {
+	public List<WithResource> getByCollection(ObjectId colId) {
 		int MAX = 10000;
 		return getByCollectionBtwPositions(colId, 0, MAX);
 	}
@@ -150,8 +151,8 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<T> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
-		BasicDBObject query = new BasicDBObject();
+	public List<WithResource> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
+		Query<T> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
 		BasicDBObject elemMatch2 = new BasicDBObject();
@@ -162,20 +163,22 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		colIdQuery.append("positions", elemMatch2);
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
-		query.put("collectedIn", elemMatch1);
-		DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
+		q.filter("collectedIn", elemMatch1);
+		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
+		/*DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
 		List<T> ds = new ArrayList<T>();
 		while (cursor.hasNext()) {
 		   DBObject o = cursor.next();
 		   T d = (T) DB.getMorphia().fromDBObject(entityClass, o);
 		   ds.add(d);
-		}
-		List<T> repeatedResources = new ArrayList<T>(upperBound-lowerBound);
+		}*/
+		
+		List<WithResource> repeatedResources = new ArrayList<WithResource>(upperBound-lowerBound);
 		for (int i=0; i<upperBound - lowerBound; i++) {
-			repeatedResources.add((T) new WithResource());
+			repeatedResources.add(new WithResource());
 		}
 		int maxPosition = -1;
-		for (T d: ds) {
+		for (WithResource d: resources) {
 			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) ((WithResource) d).getCollectedIn();
 			for (CollectionInfo ci: collectionInfos) {
 				ObjectId collectionId = ci.getCollectionId();
@@ -195,7 +198,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		if (maxPosition > -1)
 			return repeatedResources.subList(0, maxPosition+1);
 		else 
-			return new ArrayList<T>();
+			return new ArrayList<WithResource>();
 	}
 
 	/**
@@ -612,28 +615,39 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
-	public Query<T> shift(ObjectId colId, int position, final Function<String, UpdateOperations> update) {
-		String colField = "collectedIn."+colId;
-		Query<T> q = this.createQuery().field(colField).exists();
-	    //UpdateOperations<T> updateOps = this.createUpdateOperations();
+	public void shift(ObjectId colId, int position, BiConsumer<String, UpdateOperations> update) {
+		Query<T> q = this.createQuery();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch2 = new BasicDBObject();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", position);
-		BasicDBObject geq1 = new BasicDBObject();
-		geq1.put("$elemMatch", geq);
-		q.filter(colField, geq1);
+		elemMatch2.put("$elemMatch", geq);
+		colIdQuery.append("positions", elemMatch2);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
 		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
-		/*for (WithResource resource: resources) {
-			HashMap<ObjectId, ArrayList<Integer>> collectedIn = resource.getCollectedIn();
-			ArrayList<Integer> positions = collectedIn.get(colId);
+		for (WithResource resource: resources) {
+			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
+			ArrayList<CollectionInfo> collectedIn = resource.getCollectedIn();
 			int index = 0;
-			for (Integer pos: positions) {
-				if (pos >= position) {
-					update.apply(colField+"."+index);
+			for (CollectionInfo ci: collectedIn) {
+				if (ci.getCollectionId().equals(colId)) {
+					ArrayList<Integer> positions = ci.getPositions();
+					int posIndex = 0;
+					for (Integer pos: positions) {
+						if (pos >= position) {
+							update.accept("collectedIn."+index+".positions."+posIndex, updateOps);
+						}
+						posIndex+=1;
+					}
+					break;
 				}
 				index+=1;
 			}
-		}*/
-		return q;
+			this.update(this.createQuery().field("_id").equal(resource.getDbId()), updateOps);
+		}
 	}
 
 	/**
@@ -642,45 +656,9 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param position
 	 */
 	public void shiftRecordsToLeft(ObjectId colId, int position) {
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		Function<String, UpdateOperations> update = (String field) -> updateOps.disableValidation().dec(field);
-		this.update(shift(colId, position, update), updateOps);
-		/*attempts to update without retrieving the documents: does not work
-		/*if collectedIn is of type Map
-		 * update only works on first matching element, so discard
-		BasicDBObject colIdQuery = new BasicDBObject();
-		BasicDBObject existsField = new BasicDBObject();
-		existsField.put("$exists", true);
-		colIdQuery.put(colField, existsField);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		BasicDBObject geq1 = new BasicDBObject();
-		geq1.put("$elemMatch", geq);
-		colIdQuery.append(colField, geq1);
-		//System.out.println(colIdQuery);
-		BasicDBObject update = new BasicDBObject();
-		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put(colField+".0", -1);
-		update.put("$inc", entrySpec);
-		this.getDs().getCollection(entityClass).update(colIdQuery, update, false, true);
-		*/
-		/* if collectedIn is of type Array<CollectionInfo>
-		 * BasicDBObject query = new BasicDBObject();
-		BasicDBObject colIdQuery = new BasicDBObject();
-		colIdQuery.put("collectionId", colId);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		colIdQuery.append("position", geq);
-		BasicDBObject elemMatch = new BasicDBObject();
-		elemMatch.put("$elemMatch", colIdQuery);
-		query.put("collectedIn", elemMatch);
-		System.out.println(query);
-		BasicDBObject update = new BasicDBObject();
-		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put("collectedIn.$.position", -1);
-		update.put("$inc", entrySpec);
-		System.out.println(this.getDs().getCollection(entityClass).find(query).count());
-		this.getDs().getCollection(entityClass).update(query, update, false, true);*/
+		//UpdateOperations updateOps = this.createUpdateOperations();
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.dec(field);
+		shift(colId, position, update);
 	}
 	
 	/**
@@ -689,9 +667,8 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param position
 	 */
 	public void shiftRecordsToRight(ObjectId colId, int position) {
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		Function<String, UpdateOperations> update = (String field) -> updateOps.disableValidation().inc(field);
-		this.update(shift(colId, position, update), updateOps);
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
+		shift(colId, position, update);
 	}
 
 	/**
