@@ -305,11 +305,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		BasicDBObject elemMatch = new BasicDBObject();
 		elemMatch.put("$elemMatch", provQuery);
 		q.filter("provenance", elemMatch);
-		QueryResults qrs= this.find(q);
-		if (qrs != null)
-			return qrs.asList();
-		else
-			return new ArrayList<T>();
+		return this.find(q).asList();
 	}
 	
 	/**
