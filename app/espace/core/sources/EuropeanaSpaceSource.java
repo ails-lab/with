@@ -94,19 +94,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.UNKNOWN.name(), ".*unknown.*");
 
 	}
-	/*
-	private Function<List<String>, QueryModifier> qreusabilitywriter() {
-		Function<String, String> function = (String s) -> {
-			return "&REUSABILITY%3A" + s;
-		};
-		return new Function<List<String>, QueryModifier>() {
-			@Override
-			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
-	}
-	*/
+	
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
 		if (parameter.equals(CommonFilters.YEAR.getID())) {
 			return qfwriterYEAR();
@@ -393,7 +381,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
-		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));

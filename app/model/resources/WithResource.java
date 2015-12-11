@@ -45,6 +45,7 @@ import model.EmbeddedMediaObject;
 import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -338,7 +339,7 @@ public class WithResource<T extends DescriptiveData> {
 	protected WithAdmin administrative;
 
 	@Embedded
-	private HashMap<ObjectId, ArrayList<Integer>> collectedIn;
+	private ArrayList<CollectionInfo> collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -365,7 +366,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
-	private HashMap<String, ContextAnnotation> contextAnnotation;
+	private ArrayList<ContextAnnotation> contextAnnotation;
 
 	private ArrayList<Annotation> annotations;
 
@@ -373,14 +374,14 @@ public class WithResource<T extends DescriptiveData> {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new HashMap<ObjectId, ArrayList<Integer>>();
+		this.collectedIn = new ArrayList<CollectionInfo>();
 	}
 
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new HashMap<ObjectId, ArrayList<Integer>>();
+		this.collectedIn = new ArrayList<CollectionInfo>();
 		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
 	}
 
@@ -395,20 +396,22 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public HashMap<ObjectId, ArrayList<Integer>> getCollectedIn() {
+	public ArrayList<CollectionInfo> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(HashMap<ObjectId, ArrayList<Integer>> collectedIn) {
+	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
-		if (collectedIn.containsKey(colId)) {
-			collectedIn.get(colId).add(position);
-		} else
-			collectedIn.put(colId,
-					new ArrayList<Integer>(Arrays.asList(position)));
+		for (CollectionInfo ci: collectedIn) {
+			if (ci.getCollectionId().equals(colId)) {
+				ci.addPosition(position);
+				return;
+			}
+		}
+		collectedIn.add(new CollectionInfo(colId, new ArrayList<Integer>(Arrays.asList(position))));
 	}
 
 	public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
@@ -485,12 +488,12 @@ public class WithResource<T extends DescriptiveData> {
 		this.media = media;
 	}
 
-	public HashMap<String, ContextAnnotation> getContextAnnotation() {
+	public ArrayList<ContextAnnotation> getContextAnnotation() {
 		return contextAnnotation;
 	}
 
 	public void setContextAnnotation(
-			HashMap<String, ContextAnnotation> contextAnnotation) {
+			ArrayList<ContextAnnotation> contextAnnotation) {
 		this.contextAnnotation = contextAnnotation;
 	}
 
