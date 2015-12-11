@@ -48,7 +48,6 @@ public class MediaObject extends EmbeddedMediaObject {
 		PORTRAIT, LANDSCAPE
 	}
 
-	
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
@@ -62,15 +61,14 @@ public class MediaObject extends EmbeddedMediaObject {
 	@JsonIgnore
 	private byte[] mediaBytes;
 	
+	//extended model fields
 	
-	//extended stuff
-	
-//	//is an Enum but i leave it here till we decide upon the libraries to use
+//	is an Enum but i leave it here till we decide upon the libraries to use
 	private String codec;
 	
 	private double durationSeconds;
 	
-	//pdf only
+//	for pdfs only
 	private int spatialResolution;
 	
 	private int sampleSize;
@@ -81,10 +79,10 @@ public class MediaObject extends EmbeddedMediaObject {
 	
 	private int frameRate;
 	
-//	//also an Enum!
+//	also an Enum!
 	private String colorSpace;
 	
-//	//use different Hex?
+//	use different Hex?
 	private Hex componentColor;
 	
 	private Orientation orientation;

@@ -81,10 +81,7 @@ public class EmbeddedMediaObject {
 	
 	private int width, height;
 	
-	
-//	// I understood we also want these right?
 	private int thumbWidth, thumbHeight;
-	
 	
 	private WithMediaType type;
 	
@@ -109,6 +106,7 @@ public class EmbeddedMediaObject {
 	 *  file name type values specified here:
 	 *  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/MediaType.html
 	 */
+
 	
 	private MediaType mimeType;
 	
@@ -117,13 +115,16 @@ public class EmbeddedMediaObject {
 		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
 	
-	
-	//added by mike
-	
 	//in KB
 	private long size;
 	
 	private Quality quality;
+	
+	
+	
+	
+	
+	
 	
 	public long getSize() {
 		return size;
@@ -132,7 +133,6 @@ public class EmbeddedMediaObject {
 	public void setSize(long size) {
 		this.size = size;
 	}
-
 	
 	public Quality getQuality() {
 		return quality;
