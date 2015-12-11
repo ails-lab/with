@@ -153,6 +153,12 @@ public class WithResourceController extends Controller {
 		}
 	}
 
+	/**
+	 * @param id
+	 * @param recordId
+	 * @param position
+	 * @return
+	 */
 	public static Result removeRecordFromCollection(String id, String recordId,
 			Option<Integer> position) {
 		ObjectNode result = Json.newObject();
@@ -175,8 +181,8 @@ public class WithResourceController extends Controller {
 			RecordResource record = DB.getRecordResourceDAO().get(
 					new ObjectId(recordId));
 			if (position.isDefined()) {
-				record.removePositionFromCollectedIn(collectionDbId,
-						position.get());
+				// record.removePositionFromCollectedIn(collectionDbId,
+				// position.get());
 			}
 			// TODO modify access
 			if (collection.getDescriptiveData().getLabel().equals("_favorites")) {
@@ -241,4 +247,16 @@ public class WithResourceController extends Controller {
 				.toString();
 		return addRecordToCollection(fav, Option.None());
 	}
+
+	/**
+	 * @return
+	 */
+	public static Result removeFromFavorites(String recordId) {
+		ObjectId userId = new ObjectId(session().get("user"));
+		String fav = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
+				.toString();
+		return removeRecordFromCollection(fav, recordId, Option.None());
+	}
+
 }
