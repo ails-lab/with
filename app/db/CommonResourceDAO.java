@@ -16,20 +16,17 @@
 
 package db;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
-import org.bson.io.BasicOutputBuffer;
-import org.bson.io.OutputBuffer;
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
@@ -38,15 +35,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import play.libs.Json;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBEncoder;
-import com.mongodb.DBObject;
-import com.mongodb.DefaultDBEncoder;
 
 import utils.Tuple;
 
@@ -109,6 +98,16 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		return this.deleteById(id).getN();
 	}
 
+	public Query<T> createColIdElemMatchQuery(ObjectId colId) {
+		Query<T> q = this.createQuery();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
+		return q;
+	}
+	
 	/**
 	 * Return all resources that belong to a 'collection' throwing
 	 * away duplicate entries in a 'collection'
@@ -138,7 +137,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	
-	public List<T> getByCollection(ObjectId colId) {
+	public List<RecordResource> getByCollection(ObjectId colId) {
 		int MAX = 10000;
 		return getByCollectionBtwPositions(colId, 0, MAX);
 	}
@@ -150,44 +149,43 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<T> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
-		BasicDBObject query = new BasicDBObject();
+	public List<RecordResource> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
+		Query<T> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
 		BasicDBObject elemMatch2 = new BasicDBObject();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", lowerBound);
 		geq.append("$lt", upperBound);
-		elemMatch2.put("$elemMatch", geq);
-		colIdQuery.append("positions", elemMatch2);
+		colIdQuery.append("position", geq);
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
-		query.put("collectedIn", elemMatch1);
-		DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
+		q.filter("collectedIn", elemMatch1);
+		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
+		/*DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
 		List<T> ds = new ArrayList<T>();
 		while (cursor.hasNext()) {
 		   DBObject o = cursor.next();
 		   T d = (T) DB.getMorphia().fromDBObject(entityClass, o);
 		   ds.add(d);
-		}
-		List<T> repeatedResources = new ArrayList<T>(upperBound-lowerBound);
+		}*/
+		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(upperBound-lowerBound);
 		for (int i=0; i<upperBound - lowerBound; i++) {
-			repeatedResources.add((T) new WithResource());
+			repeatedResources.add(new RecordResource());
 		}
 		int maxPosition = -1;
-		for (T d: ds) {
-			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) ((WithResource) d).getCollectedIn();
+		for (RecordResource d: resources) {
+			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) ((RecordResource) d).getCollectedIn();
+			//May be a long iteration, if a record belongs to many collections
 			for (CollectionInfo ci: collectionInfos) {
 				ObjectId collectionId = ci.getCollectionId();
 				if (collectionId.equals(colId)) {
-					ArrayList<Integer> positions = ci.getPositions();
-					for (int pos: positions) {
-						if ((lowerBound <= pos) && (pos < upperBound)) {
-							int arrayPosition = pos - lowerBound;
-							if (arrayPosition > maxPosition)
-								maxPosition = arrayPosition;
-							repeatedResources.add(arrayPosition, d);
-						}
+					int pos = ci.getPosition();
+					if ((lowerBound <= pos) && (pos < upperBound)) {
+						int arrayPosition = pos - lowerBound;
+						if (arrayPosition > maxPosition)
+							maxPosition = arrayPosition;
+						repeatedResources.add(arrayPosition, d);
 					}
 				}
 			}
@@ -195,7 +193,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		if (maxPosition > -1)
 			return repeatedResources.subList(0, maxPosition+1);
 		else 
-			return new ArrayList<T>();
+			return new ArrayList<RecordResource>();
 	}
 
 	/**
@@ -224,19 +222,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	
 	public List<T> getByLabel(Language lang, String title) {
 		Query<T> q = this.createQuery().field("descriptiveData.label." + lang.toString()).equal(title);
-		return this.find(q).asList();
-	}
-
-	/**
-	 * Return a specific page of CollectionObject
-	 * according to the offset and count provided
-	 * MongoDB's paging infrastructure is used.
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public List<T> getAll(int offset, int count) {
-		Query<T> q = this.createQuery().offset(offset).limit(count);
 		return this.find(q).asList();
 	}
 
@@ -279,12 +264,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-	 * Retrieve the owner/creator of a CollectionObject
+	 * Retrieve the owner/creator of a Resource
 	 * using collection's dbId
 	 * @param id
 	 * @return
 	 */
-	public User getCollectionOwner(ObjectId id) {
+	public User getOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "administrative.withCreator");
 		return ((WithResource) findOne(q)).retrieveCreator();
@@ -296,15 +281,26 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByProvider(String sourceName) {
-		//TODO: faster if could query on last entry of provenance array. Mongo query!
-		/*
-		 * We can sort the array in inverted order so to query 
-		 * only the first element of this array directly!
-		 */
 		Query<T> q = this.createQuery();
-		//q.field("provenance").hasThisElement("{\"provider\": \" " + sourceName +" \" }");
-		q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
+		//q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
+		BasicDBObject provQuery = new BasicDBObject();
+		provQuery.put("provider", sourceName);
+		BasicDBObject elemMatch = new BasicDBObject();
+		elemMatch.put("$elemMatch", provQuery);
+		q.filter("provenance", elemMatch);
 		return this.find(q).asList();
+	}
+	
+	/**
+	 * Return the number of resources that belong to a source
+	 * @param sourceId
+	 * @return
+	 */
+	public long countBySource(String sourceId) {
+		//TODO: faster if could query on last entry of provenance array. Mongo query!
+		Query<T> q = this.createQuery().disableValidation();
+		//q.field("provenance").hasThisElement(q.field("provider").equals(sourceId));
+		return this.find(q).countAll();
 	}
 
 	/**
@@ -564,16 +560,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
 
-	/**
-	 * Return the number of resources that belong to a source
-	 * @param sourceId
-	 * @return
-	 */
-	public long countBySource(String sourceId) {
-		Query<T> q = this.createQuery().disableValidation();
-		q.field("provenance.0.uri").equal(sourceId);
-		return this.find(q).countAll();
-	}
+
 
 
 	/**
@@ -600,101 +587,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-	 * Not a good Idea problably want work
-	 * @param resourceId
-	 * @param colId
-	 * @param position
-	 */
-	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
-		Query<T> q = this.createQuery().field("_id").equal(resourceId);
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		updateOps.removeAll("collectedIn."+colId, position);
-		this.update(q, updateOps);
-	}
-	
-	public Query<T> shift(ObjectId colId, int position, final Function<String, UpdateOperations> update) {
-		String colField = "collectedIn."+colId;
-		Query<T> q = this.createQuery().field(colField).exists();
-	    //UpdateOperations<T> updateOps = this.createUpdateOperations();
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		BasicDBObject geq1 = new BasicDBObject();
-		geq1.put("$elemMatch", geq);
-		q.filter(colField, geq1);
-		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
-		/*for (WithResource resource: resources) {
-			HashMap<ObjectId, ArrayList<Integer>> collectedIn = resource.getCollectedIn();
-			ArrayList<Integer> positions = collectedIn.get(colId);
-			int index = 0;
-			for (Integer pos: positions) {
-				if (pos >= position) {
-					update.apply(colField+"."+index);
-				}
-				index+=1;
-			}
-		}*/
-		return q;
-	}
-
-	/**
-	 * Shift one position left all resources in colId with position equal or greater than position.
-	 * @param colId
-	 * @param position
-	 */
-	public void shiftRecordsToLeft(ObjectId colId, int position) {
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		Function<String, UpdateOperations> update = (String field) -> updateOps.disableValidation().dec(field);
-		this.update(shift(colId, position, update), updateOps);
-		/*attempts to update without retrieving the documents: does not work
-		/*if collectedIn is of type Map
-		 * update only works on first matching element, so discard
-		BasicDBObject colIdQuery = new BasicDBObject();
-		BasicDBObject existsField = new BasicDBObject();
-		existsField.put("$exists", true);
-		colIdQuery.put(colField, existsField);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		BasicDBObject geq1 = new BasicDBObject();
-		geq1.put("$elemMatch", geq);
-		colIdQuery.append(colField, geq1);
-		//System.out.println(colIdQuery);
-		BasicDBObject update = new BasicDBObject();
-		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put(colField+".0", -1);
-		update.put("$inc", entrySpec);
-		this.getDs().getCollection(entityClass).update(colIdQuery, update, false, true);
-		*/
-		/* if collectedIn is of type Array<CollectionInfo>
-		 * BasicDBObject query = new BasicDBObject();
-		BasicDBObject colIdQuery = new BasicDBObject();
-		colIdQuery.put("collectionId", colId);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		colIdQuery.append("position", geq);
-		BasicDBObject elemMatch = new BasicDBObject();
-		elemMatch.put("$elemMatch", colIdQuery);
-		query.put("collectedIn", elemMatch);
-		System.out.println(query);
-		BasicDBObject update = new BasicDBObject();
-		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put("collectedIn.$.position", -1);
-		update.put("$inc", entrySpec);
-		System.out.println(this.getDs().getCollection(entityClass).find(query).count());
-		this.getDs().getCollection(entityClass).update(query, update, false, true);*/
-	}
-	
-	/**
-	 * Shift one position right all resources in colId with position equal or greater than position.
-	 * @param colId
-	 * @param position
-	 */
-	public void shiftRecordsToRight(ObjectId colId, int position) {
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		Function<String, UpdateOperations> update = (String field) -> updateOps.disableValidation().inc(field);
-		this.update(shift(colId, position, update), updateOps);
-	}
-
-	/**
 	 * This method is to update the 'public' field on all the records of a
 	 * collection. By default update method is invoked to all documents of a
 	 * collection.
@@ -702,59 +594,34 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 **/
 	public void setFieldValueOfCollectedResource(ObjectId colId, String fieldName,
 			String value) {
-		Query<T> q = this.createQuery().field("collectedIn."+colId).exists();
-		UpdateOperations<T> updateOps = this
-				.createUpdateOperations();
+		Query<T> q = createColIdElemMatchQuery(colId);
+		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.set(fieldName, value);
 		this.update(q, updateOps);
 	}
 
 	public void updateContent(ObjectId recId, String format, String content) {
-		Query<T> q = this.createQuery().field("_id")
-				.equal(recId);
+		Query<T> q = this.createQuery().field("_id").equal(recId);
 		UpdateOperations<T> updateOps = this
 				.createUpdateOperations();
 		updateOps.set("content."+format, content);
 		this.update(q, updateOps);
-
 	}
-
-	/*
-	 * What is this ???????????/ ASK EIRINI
-	 */
-	public boolean checkMergedRecordVisibility(String extId, ObjectId dbId) {
-		List<T> mergedRecord = getByExternalId(extId);
-		for (T mr : mergedRecord) {
-			//if (mr.getCollection().getIsPublic() && !mr.getDbId().equals(dbId))
-				return true;
-		}
-		return false;
-	}
-
+	
 	/**
 	 * Increment likes for this specific resource
 	 * @param externalId
 	 */
-	public void incrementLikes(String dbId) {
-		Query<T> q = this.createQuery().field("_id")
-				.equal(dbId);
-		UpdateOperations<T> updateOps = this
-				.createUpdateOperations();
-		updateOps.inc("usage.likes");
-		this.update(q, updateOps);
+	public void incrementLikes(ObjectId dbId) {
+		incField("usage.likes", dbId);
 	}
 
 	/**
 	 * Decrement likes for this specific resource
 	 * @param dbId
 	 */
-	public void decrementLikes(String dbId) {
-		Query<T> q = this.createQuery().field("dbId")
-				.equal(dbId);
-		UpdateOperations<T> updateOps = this
-				.createUpdateOperations();
-		updateOps.dec("usage.likes");
-		this.update(q, updateOps);
+	public void decrementLikes(ObjectId dbId) {
+		decField("usage.likes", dbId);
 	}
 
 	/**
@@ -762,7 +629,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param dbId
 	 * @param fieldName
 	 */
-	public void incField(ObjectId dbId, String fieldName) {
+	public void incField( String fieldName, ObjectId dbId) {
 		Query<T> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.inc(fieldName);
@@ -774,7 +641,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param dbId
 	 * @param fieldName
 	 */
-	public void decField(ObjectId dbId, String fieldName) {
+	public void decField(String fieldName, ObjectId dbId) {
 		Query<T> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.dec(fieldName);

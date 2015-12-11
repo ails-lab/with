@@ -46,3 +46,4 @@ public class ExhibitionRecord {
 		this.videoUrl = videoUrl;
 	}
 }
+

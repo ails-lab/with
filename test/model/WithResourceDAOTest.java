@@ -63,6 +63,8 @@ public class WithResourceDAOTest {
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
 			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
+			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
+			withResource.addToProvenance(new ProvenanceInfo("Μint", "http://myUri", "12345"));
 			WithAccess access = new WithAccess();
 			access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
@@ -85,10 +87,11 @@ public class WithResourceDAOTest {
 			//System.out.println(Json.toJson(o));
 			//assertThat(o instanceof CulturalObject);	
 		}
-		List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 3);
-		for (WithResource co: cos) {
+		/*List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2);
+		for (RecordResource co: cos) {
 			System.out.println(Json.toJson(co));
-		}
+		}*/
+		DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
 	}
 
 }

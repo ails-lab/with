@@ -16,10 +16,18 @@
 
 package db;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import com.mongodb.BasicDBObject;
 
 import model.CollectionRecord;
+import model.basicDataTypes.CollectionInfo;
 import model.resources.AgentObject;
 import model.resources.CulturalObject;
 import model.resources.EUscreenObject;
@@ -66,6 +74,7 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 	 * in the far future.                                     *
 	 * ********************************************************
 	 */
+	/*
 	public class AgentObjectDAO extends CommonResourceDAO<AgentObject> {
 
 		public AgentObjectDAO(Class<?> entityClass) {
@@ -113,9 +122,68 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		}
 
 	}
-	/* ********************************************
-	 * End of embedded DAO classes                *
-	 * ********************************************
-	 */
+	*/
+	
+	public void shift(ObjectId colId, int position, BiConsumer<String, UpdateOperations> update) {
+		Query<RecordResource> q = this.createQuery();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch2 = new BasicDBObject();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", position);
+		colIdQuery.append("position", geq);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
+		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
+		for (RecordResource resource: resources) {
+			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
+			ArrayList<CollectionInfo> collectedIn = resource.getCollectedIn();
+			int index = 0;
+			for (CollectionInfo ci: collectedIn) {
+				if (ci.getCollectionId().equals(colId)) {
+					int pos = ci.getPosition();
+					if (pos >= position)
+						update.accept("collectedIn."+index+".position", updateOps);
+				}
+				index+=1;
+			}
+			this.update(this.createQuery().field("_id").equal(resource.getDbId()), updateOps);
+		}
+	}
 
+	/**
+	 * Shift one position left all resources in colId with position equal or greater than position.
+	 * @param colId
+	 * @param position
+	 */
+	public void shiftRecordsToLeft(ObjectId colId, int position) {
+		//UpdateOperations updateOps = this.createUpdateOperations();
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.dec(field);
+		shift(colId, position, update);
+	}
+	
+	/**
+	 * Shift one position right all resources in colId with position equal or greater than position.
+	 * @param colId
+	 * @param position
+	 */
+	public void shiftRecordsToRight(ObjectId colId, int position) {
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
+		shift(colId, position, update);
+	}
+	
+	public void addToCollection(ObjectId resourceId, ObjectId colId, int position) {
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		updateOps.add("collectedIn", new CollectionInfo(colId, position));
+		this.update(q, updateOps);
+	}
+	
+	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
+		this.update(q, updateOps);
+	}
 }

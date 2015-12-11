@@ -405,23 +405,37 @@ public class WithResource<T extends DescriptiveData> {
 	}
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
-		for (CollectionInfo ci: collectedIn) {
+		collectedIn.add(new CollectionInfo(colId, position));
+		/*for (CollectionInfo ci: collectedIn) {
 			if (ci.getCollectionId().equals(colId)) {
 				ci.addPosition(position);
 				return;
 			}
 		}
-		collectedIn.add(new CollectionInfo(colId, new ArrayList<Integer>(Arrays.asList(position))));
+		collectedIn.add(new CollectionInfo(colId, new ArrayList<Integer>(Arrays.asList(position))));*/
 	}
 
-	/*public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
-		if (collectedIn.containsKey(colId)) {
-			collectedIn.get(colId).remove(position);
-			if (collectedIn.get(colId).size() == 0) {
-				collectedIn.remove(colId);
+
+	public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
+		/*if (collectedIn.contains(colId)) {
+			for (int i=0; i<collectedIn.size(); i++) {
+				CollectionInfo ci = collectedIn.get(i);
+				if (ci.getCollectionId().equals(colId)) {
+					ArrayList<Integer> positions = ci.getPositions();
+					if (positions.size() == 1) {
+						if (positions.get(0) == position)
+							collectedIn.remove(i);
+						else 
+							throw new IllegalArgumentException("There is no record in position " + position + "in collection " + colId);
+					}
+					else 
+						positions.remove(position);
+					break;
+				}
 			}
-		}
-	}*/
+		}*/
+		collectedIn.remove(new CollectionInfo(colId, position));
+	}
 
 	public Usage getUsage() {
 		return usage;
