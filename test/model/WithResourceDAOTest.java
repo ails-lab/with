@@ -16,29 +16,21 @@
 
 package model;
 import java.util.Date;
-import java.util.List;
-
-import model.DescriptiveData;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
-import model.resources.WithResource;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
-import play.libs.Json;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-
 import db.DB;
 
 public class WithResourceDAOTest {
-	
+
 	@Test
 	public void storeWithResource() {
 
@@ -58,13 +50,21 @@ public class WithResourceDAOTest {
 			withResource.setModel(model);
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 		}*/
-		
+
 		for (int i = 0; i < 2; i++) {
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
 			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("Μint", "http://myUri", "12345"));
+/*
+		for (int i = 0; i < 1; i++) {
+			CulturalObject withResource = new CulturalObject();
+			withResource.getUsage().setLikes(i);
+			withResource.addToProvenance(new ProvenanceInfo("Mint", "http://myUri", "12345"));
+			withResource.addToProvenance(new ProvenanceInfo("WITH", "http://myUri", "12345"));
+			withResource.addToProvenance(new ProvenanceInfo("dpla", "http://myUri", "12345"));
+*/
 			WithAccess access = new WithAccess();
 			access.put(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
@@ -75,6 +75,7 @@ public class WithResourceDAOTest {
 			model.setLabel(new Literal(Language.EN, "TestWithResourceN" + i));
 			model.setDescription(new Literal(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
+
 			int j=0;
 			if (i==0) j=i; else j=i+1;
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0+j);
@@ -85,7 +86,23 @@ public class WithResourceDAOTest {
 			//CulturalObject o = (CulturalObject) resources.get(0);
 			//System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
 			//System.out.println(Json.toJson(o));
-			//assertThat(o instanceof CulturalObject);	
+			//assertThat(o instanceof CulturalObject);
+/*
+			withResource.addPositionToCollectedIn(new ObjectId("5666bea55cf494714b7a71c6"), 0);
+			withResource.addPositionToCollectedIn(new ObjectId("5666bea55cf494714b7a71c6"), 1);
+			withResource.addPositionToCollectedIn(new ObjectId("5666bea55cf494714b7a71c6"), 2);
+			withResource.addPositionToCollectedIn(new ObjectId("5666bea55cf494714b7a71c6"), 3);
+			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
+			if(DB.getRecordResourceDAO().removeFromCollection(withResource.getDbId(), new ObjectId("5666bea55cf494714b7a71c6"), 3))
+				System.out.println("Position removed correclty!");
+			//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb80"), 2);
+			//List<RecordResource> resources = DB.getRecordResourceDAO().getByLabel(Language.EN, "TestWithResourceZ" + i);
+			//CulturalObject o = (CulturalObject) resources.get(0);
+			//System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
+			//System.out.println(Json.toJson(o));
+			//assertThat(o instanceof CulturalObject);
+
+*/
 		}
 		/*List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2);
 		for (RecordResource co: cos) {

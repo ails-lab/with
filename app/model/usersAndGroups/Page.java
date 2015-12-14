@@ -20,11 +20,19 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import utils.Serializer;
 
+@Indexes({
+	@Index(fields = @Field(value = "coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background=true))
+	})
 public class Page {
 
 	private String address;
@@ -52,7 +60,9 @@ public class Page {
 		}
 
 	}
-	private Point coordinates;
+
+	//HAVE TO TEST
+	private org.mongodb.morphia.geo.Point coordinates;
 	private String city;
 	private String country;
 	private String url;
@@ -114,11 +124,11 @@ public class Page {
 		this.city = city;
 	}
 
-	public Point getCoordinates() {
+	public org.mongodb.morphia.geo.Point getCoordinates() {
 		return coordinates;
 	}
 
-	public void setCoordinates(Point coordinates) {
+	public void setCoordinates(org.mongodb.morphia.geo.Point coordinates) {
 		this.coordinates = coordinates;
 	}
 
@@ -129,7 +139,7 @@ public class Page {
 	public void setFeaturedCollections(List<ObjectId> featuredCollections) {
 		this.featuredCollections = featuredCollections;
 	}
-	
+
 	public void addFeaturedCollection(ObjectId featuredCollection) {
 		this.featuredCollections.add(featuredCollection);
 	}
@@ -141,7 +151,7 @@ public class Page {
 	public void setFeaturedExhibitions(List<ObjectId> featuredExhibitions) {
 		this.featuredExhibitions = featuredExhibitions;
 	}
-	
+
 	public void addFeaturedExhibition(ObjectId featuredExhibition) {
 		this.featuredExhibitions.add(featuredExhibition);
 	}

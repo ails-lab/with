@@ -20,14 +20,17 @@ import java.util.ArrayList;
 
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
-import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.DescriptiveData;
 
 @Entity("CollectionObject")
-public class CollectionObject extends
-		WithResource<CollectionObject.CollectionDescriptiveData> {
+public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
 
 	public CollectionObject() {
 		super();
@@ -48,7 +51,7 @@ public class CollectionObject extends
 		public void setEntryCount(int entryCount) {
 			this.entryCount = entryCount;
 		}
-		
+
 		public void incEntryCount() {
 			this.entryCount++;
 		}

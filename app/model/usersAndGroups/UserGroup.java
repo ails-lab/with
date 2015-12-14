@@ -21,8 +21,11 @@ import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import utils.Serializer;
 
@@ -35,9 +38,10 @@ import db.DB;
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Indexes({
-	@Index("username"),
-	@Index("users"),
-	@Index("parentGroups")
+	@Index(fields = @Field(value = "username", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "username", type = IndexType.TEXT), options = @IndexOptions(background=true, name="username_text")),
+	@Index(fields = @Field(value = "users", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "parentGroups", type = IndexType.ASC), options = @IndexOptions())
 	})
 public class UserGroup extends UserOrGroup {
 

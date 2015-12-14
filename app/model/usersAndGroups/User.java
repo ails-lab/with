@@ -24,8 +24,11 @@ import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -36,11 +39,12 @@ import utils.Serializer;
 
 @Entity
 @Indexes({
-		@Index("email"),
-		@Index("username"),
-		@Index("facebookId"),
-		@Index("googleId"),
-		@Index("userGroupsIds")
+		@Index(fields = @Field(value = "email", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "username", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "username", type = IndexType.TEXT), options = @IndexOptions(background=true, name="username_text")),
+		@Index(fields = @Field(value = "facebookId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions())
 		})
 public class User extends UserOrGroup {
 

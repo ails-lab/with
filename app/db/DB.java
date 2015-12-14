@@ -22,13 +22,8 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionRecord;
-import model.resources.AgentObject;
 import model.resources.CollectionObject;
-import model.resources.CulturalObject;
-import model.resources.EventObject;
-import model.resources.PlaceObject;
 import model.resources.RecordResource;
-import model.resources.TimespanObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -38,6 +33,7 @@ import org.mongodb.morphia.Morphia;
 import play.Logger;
 
 import com.mongodb.MongoClient;
+import com.mongodb.WriteConcern;
 import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -113,8 +109,7 @@ public class DB {
 			try {
 				ds = getMorphia().createDatastore(getMongo(),
 						getConf().getString("mongo.dbname"));
-				ds.ensureIndexes();
-
+				ds.setDefaultWriteConcern(WriteConcern.ACKNOWLEDGED);
 			} catch (Exception e) {
 				log.error("Cannot create Datastore!", e);
 			}
@@ -172,7 +167,7 @@ public class DB {
 	 * The rest are going to be used in very special cases
 	 * in the far future.
 	 */
-	
+
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO)
 				getDAO(RecordResource.class);
@@ -243,7 +238,7 @@ public class DB {
 	 * @param clazz
 	 * @return
 	 */
-	
+
 	private static DAO<?> getDAO(Class<?> clazz) {
 		DAO<?> dao = daos.get(clazz.getSimpleName());
 		if (dao == null) {
@@ -258,5 +253,5 @@ public class DB {
 		}
 		return dao;
 	}
-	
+
 }

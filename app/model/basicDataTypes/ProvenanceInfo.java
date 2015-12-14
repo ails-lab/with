@@ -17,31 +17,38 @@
 package model.basicDataTypes;
 
 import org.mongodb.morphia.annotations.Converters;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import db.converters.ProvenanceInfoConverter;
 
 @Converters(ProvenanceInfoConverter.class)
+@Indexes({
+	@Index(fields = @Field(value = "provider", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "resourceId", type = IndexType.ASC), options = @IndexOptions())
+})
 public class ProvenanceInfo {
 	private String provider;
 	private String uri;
 	private String resourceId;
-	
-	
+
+
 	public ProvenanceInfo() {
 	}
-	
+
 	public ProvenanceInfo(String provider) {
 		this.provider = provider;
 	}
-	
+
 	public ProvenanceInfo(String provider, String uri, String recordId) {
 		this.provider = provider;
 		this.resourceId = recordId;
 		this.uri = uri;
 	}
-	
+
 	public String getProvider() {
 		return provider;
 	}
@@ -60,7 +67,7 @@ public class ProvenanceInfo {
 	public void setResourceId(String recordId) {
 		this.resourceId = recordId;
 	}
-	
+
 	// you can have entries for WITH records with provider "WITH" and
 	// recordId the ObjectId of the annotated Record
 }

@@ -26,6 +26,8 @@ import java.util.function.Function;
 import javax.validation.ConstraintViolation;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 
@@ -45,7 +47,6 @@ import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
-import model.usersAndGroups.Page.Point;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -221,11 +222,13 @@ public class GroupManager extends Controller {
 					try {
 						JsonNode response = HttpConnector.getURLContent(
 								"https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
-						Point coordinates = new Point();
-						coordinates.setLatitude(
+						Point coordinates = GeoJson.point(
+								response.get("results").get(0).get("geometry").get("location").get("lat").asDouble(),
+								response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());
+						/*coordinates.setLatitude(
 								response.get("results").get(0).get("geometry").get("location").get("lat").asDouble());
 						coordinates.setLongitude(
-								response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());
+								response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());*/
 						page.setCoordinates(coordinates);
 					} catch (Exception e) {
 						log.error("Cannot update coordinates of group Page", e);
