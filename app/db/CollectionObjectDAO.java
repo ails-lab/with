@@ -16,31 +16,26 @@
 
 package db;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import model.basicDataTypes.WithAccess.Access;
+import model.resources.CollectionObject;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
-import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import utils.Tuple;
-import model.basicDataTypes.WithAccess.Access;
-import model.resources.CollectionObject;
-import model.usersAndGroups.User;
-
 public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 
 	/*
-	 * The constructor is optional becuse the explicit
-	 * type is passed through generics.
+	 * The constructor is optional becuse the explicit type is passed through
+	 * generics.
 	 */
 	public CollectionObjectDAO() {
 		super(CollectionObject.class);
@@ -48,11 +43,13 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 
 	/**
 	 * Increment entryCount (number of entries collected) in a CollectionObject
+	 * 
 	 * @param dbId
 	 */
 	public void incEntryCount(ObjectId dbId) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
+		UpdateOperations<CollectionObject> updateOps = this
+				.createUpdateOperations();
 		updateOps.set("administrative.lastModified", new Date());
 		updateOps.inc("administrative.entryCount");
 		this.update(q, updateOps);
@@ -60,35 +57,123 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 
 	/**
 	 * Decrement entryCount (number of entries collected) in a CollectionObject
+	 * 
 	 * @param dbId
 	 */
 	public void decEntryCount(ObjectId dbId) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
+		UpdateOperations<CollectionObject> updateOps = this
+				.createUpdateOperations();
 		updateOps.set("administrative.lastModified", new Date());
 		updateOps.dec("administrative.entryCount");
 		this.update(q, updateOps);
 	}
-	
+
 	public void editCollection(ObjectId dbId, JsonNode json) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
+		UpdateOperations<CollectionObject> updateOps = this
+				.createUpdateOperations();
 		updateFields("", json, updateOps);
-		this.update(q,  updateOps);
+		this.update(q, updateOps);
 	}
-	
-	public void updateFields(String parentField, JsonNode node, UpdateOperations<CollectionObject> updateOps) {
+
+	public void updateFields(String parentField, JsonNode node,
+			UpdateOperations<CollectionObject> updateOps) {
 		Iterator<String> fieldNames = node.fieldNames();
-	     while (fieldNames.hasNext()) {
-	         String fieldName = fieldNames.next();
-	         JsonNode fieldValue = node.get(fieldName);
-        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
-	         if (fieldValue.isObject()) {
-	        	 updateFields(newFieldName, fieldValue, updateOps);
-	         }
-	         else {//value
-	        	 updateOps.set(newFieldName, fieldValue);
-	         }
-	     }
+		while (fieldNames.hasNext()) {
+			String fieldName = fieldNames.next();
+			JsonNode fieldValue = node.get(fieldName);
+			String newFieldName = parentField.isEmpty() ? fieldName
+					: parentField + "." + fieldName;
+			if (fieldValue.isObject()) {
+				updateFields(newFieldName, fieldValue, updateOps);
+			} else {// value
+				updateOps.set(newFieldName, fieldValue);
+			}
+		}
+	}
+
+	/**
+	 * Gets the union of the collections/exhibitions for a list of users and
+	 * groups for a specific right
+	 * 
+	 * @param effectiveIds
+	 * @param access
+	 * @param isExhibition
+	 * @param offset
+	 * @param count
+	 * @return the list of these collections
+	 */
+	public List<CollectionObject> getBySpecificAccess(
+			List<ObjectId> effectiveIds, Access access, Boolean isExhibition,
+			int offset, int count) {
+		Query<CollectionObject> q = this.createQuery()
+				.field("administrative.isExhibition").equal(isExhibition)
+				.order("-administrative.lastModified").offset(offset)
+				.limit(count);
+		CriteriaContainer[] criteria = new CriteriaContainer[effectiveIds
+				.size()];
+		for (int i = 0; i < effectiveIds.size(); i++) {
+			criteria[i] = this.createQuery()
+					.criteria("administrative.access." + effectiveIds.get(i))
+					.equal(access);
+		}
+		q.or(criteria);
+		return this.find(q).asList();
+	}
+
+	public List<CollectionObject> getByMaxAccess(List<ObjectId> effectiveIds,
+			Access access, Boolean isExhibition, int offset, int count) {
+		Query<CollectionObject> q = this.createQuery()
+				.order("-administrative.lastModified").offset(offset)
+				.limit(count);
+		CriteriaContainer[] criteria = new CriteriaContainer[effectiveIds
+				.size()];
+		for (int i = 0; i < effectiveIds.size(); i++) {
+			criteria[i] = this.createQuery()
+					.criteria("administrative.access." + effectiveIds.get(i))
+					.equal(access);
+		}
+		q.field("administrative.isExhibition").equal(isExhibition);
+		q.or(criteria);
+		return this.find(q).asList();
+	}
+
+	public List<CollectionObject> getPublic(Boolean isExhibition, int offset,
+			int count) {
+		Query<CollectionObject> q = this.createQuery()
+				.field("administrative.access.isPublic").equal(true)
+				.order("-administrative.lastModified").offset(offset)
+				.limit(count);
+		q.field("administrative.isExhibition").equal(isExhibition);
+		return this.find(q).asList();
+	}
+
+	public List<CollectionObject> getBySpecificAccessIntersection(
+			List<ObjectId> effectiveIds, Access access,
+			Map<ObjectId, Access> restrictions, Boolean isExhibition,
+			int offset, int count) {
+		Query<CollectionObject> q = this.createQuery()
+				.field("administrative.isExhibition").equal(isExhibition)
+				.order("-administrative.lastModified").offset(offset)
+				.limit(count);
+		CriteriaContainer[] criteriaOr = new CriteriaContainer[effectiveIds
+				.size()];
+		for (int i = 0; i < effectiveIds.size(); i++) {
+			criteriaOr[i] = this.createQuery()
+					.criteria("administrative.access." + effectiveIds.get(i))
+					.equal(access);
+		}
+		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
+				.size()];
+		int i = 0;
+		for (ObjectId id : restrictions.keySet()) {
+			criteriaOr[i++] = this.createQuery()
+					.criteria("administrative.access." + id)
+					.equal(restrictions.get(id));
+		}
+		q.or(criteriaOr);
+		q.and(criteriaAnd);
+		return this.find(q).asList();
 	}
 }
