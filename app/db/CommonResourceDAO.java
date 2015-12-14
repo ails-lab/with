@@ -132,10 +132,8 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getSingletonCollectedResources(ObjectId colId, int offset, int count) {
-		Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId)
-				.offset(offset).limit(count);
 		//Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId).offset(offset).limit(count);
-		return this.find(q).asList();
+		return this.find(createColIdElemMatchQuery(colId).offset(offset).limit(count)).asList();
 	}
 
 	/**
@@ -147,8 +145,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public List<RecordResource> getByCollection(ObjectId colId) {
 		int MAX = 10000;
-		return getByCollectionBtwPositions(colId, 0, MAX);
-
+		return getByCollectionBtwnPositions(colId, 0, MAX);
 	}
 
 	/**
@@ -158,7 +155,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<RecordResource> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
+	public List<RecordResource> getByCollectionBtwnPositions(ObjectId colId, int lowerBound, int upperBound) {
 		Query<T> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
@@ -602,23 +599,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-<<<<<<< HEAD
-=======
 	 * Not a good Idea problably want work
 	 * @param resourceId
 	 * @param colId
 	 * @param position
 	 */
 	public boolean removeFromCollection(ObjectId dbId, ObjectId colId, int position) {
-		/*uery<T> q = this.createQuery().field("_id").equal(dbId);
-		WithResource r = (WithResource) findOne(q);
-
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		updateOps.set("collectedIn." + colId, positions);
-		WriteResult wr = this.update(q, updateOps).getWriteResult();
-		if(wr.wasAcknowledged())
-			return true;
-		return false;*/
 		return false;
 	}
 
