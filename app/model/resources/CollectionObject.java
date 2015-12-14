@@ -27,6 +27,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.DescriptiveData;
 
 @Entity("CollectionObject")
@@ -70,35 +71,35 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	public static class CollectionDescriptiveData extends DescriptiveData {
 
 		// start day or possible start days
-		private ArrayList<LiteralOrResource> dccreator;
+		private MultiLiteralOrResource dccreator;
 		// for whom the resource is intended or useful
-		private ArrayList<LiteralOrResource> dctermsaudience;
+		private MultiLiteralOrResource dctermsaudience;
 		// additional views of the timespan
-		private ArrayList<LiteralOrResource> dclanguage;
+		private MultiLiteralOrResource dclanguage;
 
 		// TODO: add link to external collection
-		public ArrayList<LiteralOrResource> getDccreator() {
+		public MultiLiteralOrResource getDccreator() {
 			return dccreator;
 		}
 
-		public void setDccreator(ArrayList<LiteralOrResource> dccreator) {
+		public void setDccreator(MultiLiteralOrResource dccreator) {
 			this.dccreator = dccreator;
 		}
 
-		public ArrayList<LiteralOrResource> getDctermsaudience() {
+		public MultiLiteralOrResource getDctermsaudience() {
 			return dctermsaudience;
 		}
 
 		public void setDctermsaudience(
-				ArrayList<LiteralOrResource> dctermsaudience) {
+				MultiLiteralOrResource dctermsaudience) {
 			this.dctermsaudience = dctermsaudience;
 		}
 
-		public ArrayList<LiteralOrResource> getDclanguage() {
+		public MultiLiteralOrResource getDclanguage() {
 			return dclanguage;
 		}
 
-		public void setDclanguage(ArrayList<LiteralOrResource> dclanguage) {
+		public void setDclanguage(MultiLiteralOrResource dclanguage) {
 			this.dclanguage = dclanguage;
 		}
 

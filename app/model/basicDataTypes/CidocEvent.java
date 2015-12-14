@@ -24,6 +24,6 @@ public class CidocEvent {
 	
 	EventType eventType;
 	WithPeriod timespan;
-	ArrayList<LiteralOrResource> agent;
-	ArrayList<LiteralOrResource> place;
+	MultiLiteralOrResource agent;
+	MultiLiteralOrResource place;
 }

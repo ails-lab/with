@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,7 +52,7 @@ public class DescriptiveData {
 	private Literal description;
 
 	// an indexers dream !! They can be literal concepts and enriched easily
-	private ArrayList<LiteralOrResource> keywords;
+	private MultiLiteralOrResource keywords;
 
 	// This are reachable URLs
 	private String isShownAt, isShownBy;
@@ -68,7 +70,7 @@ public class DescriptiveData {
 	private ArrayList<WithDate> dates;
 
 	// alternative title or name or placename
-	private ArrayList<Literal> altLabels;
+	private MultiLiteral altLabels;
 
 	public Literal getLabel() {
 		return label;
@@ -86,11 +88,11 @@ public class DescriptiveData {
 		this.description = description;
 	}
 
-	public ArrayList<LiteralOrResource> getKeywords() {
+	public MultiLiteralOrResource getKeywords() {
 		return keywords;
 	}
 
-	public void setKeywords(ArrayList<LiteralOrResource> keywords) {
+	public void setKeywords(MultiLiteralOrResource keywords) {
 		this.keywords = keywords;
 	}
 
@@ -142,11 +144,11 @@ public class DescriptiveData {
 		this.dates = dates;
 	}
 
-	public ArrayList<Literal> getAltLabels() {
+	public MultiLiteral getAltLabels() {
 		return altLabels;
 	}
 
-	public void setAltLabels(ArrayList<Literal> altLabels) {
+	public void setAltLabels(MultiLiteral altLabels) {
 		this.altLabels = altLabels;
 	}
 }
