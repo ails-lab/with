@@ -350,7 +350,7 @@ public class WithResource<T extends DescriptiveData> {
 	protected WithAdmin administrative;
 
 	@Embedded
-	private List<CollectionInfo > collectedIn;
+	private ArrayList<CollectionInfo > collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -409,11 +409,11 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public List<CollectionInfo> getCollectedIn() {
+	public ArrayList<CollectionInfo> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(List<CollectionInfo> collectedIn) {
+	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
