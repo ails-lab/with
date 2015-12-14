@@ -19,25 +19,35 @@ package model.basicDataTypes;
 import java.util.ArrayList;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@Indexes({
+	@Index(fields = @Field(value = "collectionId", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "position", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = { @Field(value = "collectionId", type = IndexType.ASC), @Field(value = "position", type = IndexType.DESC)}, options = @IndexOptions())
+})
 public class CollectionInfo {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
 	private Integer position;
-	
+
 	public CollectionInfo() {
 	}
-	
+
 	//position is Integer instead of int, so that we can do the null trick with morphia (see CommonResourcesDAO)
 	public CollectionInfo(ObjectId collectionId, Integer position) {
 		this.collectionId = collectionId;
 		this.position = position;
 	}
-	
+
 	public ObjectId getCollectionId() {
 		return collectionId;
 	}

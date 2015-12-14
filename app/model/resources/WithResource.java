@@ -17,17 +17,20 @@
 package model.resources;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import utils.Deserializer;
 import utils.Serializer;
@@ -39,22 +42,28 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
-import db.converters.RightsConverter;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
-import model.ExampleDataModels.LiteralOrResource.ResourceType;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
+@Entity("RecordResource")
+@Indexes({
+	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions())
+	})
 public class WithResource<T extends DescriptiveData> {
 
+	@Indexes({
+		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions())
+	})
 	public static class WithAdmin {
 
 		private boolean isExhibition;
@@ -143,13 +152,20 @@ public class WithResource<T extends DescriptiveData> {
 			// Set owner for first time
 			if (this.withCreator == null) {
 				this.withCreator = creatorId;
-				this.access.put(creatorId, Access.OWN);
+				WithAccess creatorAccess = new WithAccess();
+				AccessEntry e = new AccessEntry(creatorId, Access.OWN);
+				creatorAccess.getAcl().add(e);
+				this.access = creatorAccess;
 				// Owner has changed
 			} else if (!this.withCreator.equals(creatorId)) {
 				// Remove rights for old owner
-				access.remove(this.withCreator, Access.OWN);
-				withCreator = null;
-				setWithCreator(creatorId);
+				for(AccessEntry ae: access.getAcl()) {
+					if(ae.getLevel().equals(Access.OWN)); {
+						ae.setUser(creatorId);
+						withCreator = creatorId;
+						break;
+					}
+				}
 			}
 		}
 
@@ -169,15 +185,8 @@ public class WithResource<T extends DescriptiveData> {
 			this.isExhibition = isExhibition;
 		}
 
-		public String getExternalId() {
-			return externalId;
-		}
-
-		public void setExternalId(String externalId) {
-			this.externalId = externalId;
-		}
-
 	}
+
 
 	public static class Usage {
 		// in how many favorites is it
@@ -339,7 +348,7 @@ public class WithResource<T extends DescriptiveData> {
 	protected WithAdmin administrative;
 
 	@Embedded
-	private ArrayList<CollectionInfo> collectedIn;
+	private List<CollectionInfo > collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -396,23 +405,17 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public ArrayList<CollectionInfo> getCollectedIn() {
+	public List<CollectionInfo> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
+	public void setCollectedIn(List<CollectionInfo> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
-		collectedIn.add(new CollectionInfo(colId, position));
-		/*for (CollectionInfo ci: collectedIn) {
-			if (ci.getCollectionId().equals(colId)) {
-				ci.addPosition(position);
-				return;
-			}
-		}
-		collectedIn.add(new CollectionInfo(colId, new ArrayList<Integer>(Arrays.asList(position))));*/
+		CollectionInfo entry = new CollectionInfo(colId, position);
+		collectedIn.add(entry);
 	}
 
 
@@ -425,10 +428,10 @@ public class WithResource<T extends DescriptiveData> {
 					if (positions.size() == 1) {
 						if (positions.get(0) == position)
 							collectedIn.remove(i);
-						else 
+						else
 							throw new IllegalArgumentException("There is no record in position " + position + "in collection " + colId);
 					}
-					else 
+					else
 						positions.remove(position);
 					break;
 				}

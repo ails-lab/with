@@ -31,6 +31,7 @@ import db.DB;
 import db.RecordResourceDAO;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
@@ -61,16 +62,16 @@ public class DAOsTests {
 
 		//RecordResource<RecordDescriptiveData> wres = new RecordResource<RecordDescriptiveData>();
 		CollectionObject wres = new CollectionObject();
-		
-		User u = DB.getUserDAO().getByUsername("giorgos.m.");
+
+		User u = DB.getUserDAO().getByUsername("eirini1");
 		if(u == null) {
 			System.out.println("No user found");
 			return;
 		}
 
 		User u1 = DB.getUserDAO().getByUsername("qwerty");
-		User u2 = DB.getUserDAO().getByUsername("yiorgos");
-		
+		User u2 = DB.getUserDAO().getByUsername("annac");
+
 		/*
 		 * Administative metadata
 		 */
@@ -94,8 +95,8 @@ public class DAOsTests {
 		waccess2.put(u1.getDbId(), Access.OWN);
 		waccess2.put(u2.getDbId(), Access.WRITE);
 		wa.setAccess(waccess2);
-		
-		
+
+
 		CollectionAdmin wa3 = new CollectionObject.CollectionAdmin();
 		wa3.setCreated(new Date());
 		wa3.setWithCreator(u.getDbId());
@@ -105,20 +106,18 @@ public class DAOsTests {
 		waccess3.put(u1.getDbId(), Access.READ);
 		waccess3.put(u2.getDbId(), Access.OWN);
 		wa.setAccess(waccess3);
-		
-		
-		
+
+
+
 		/*
 		 * This models a record so there's no need to provide this
 		 */
-		HashMap<ObjectId, ArrayList<Integer>> colIn =
-				new HashMap<ObjectId, ArrayList<Integer>>();
-		ArrayList<Integer> cols = new ArrayList<Integer>();
-		cols.add(4);
-		cols.add(87);
-		cols.add(33);
-		colIn.put(new ObjectId(), cols);
-		wres.setCollectedIn(colIn);
+		CollectionInfo ci = new CollectionInfo();
+		ci.setCollectionId(new ObjectId());
+		ci.setPosition(6);
+		List<CollectionInfo> ents = new ArrayList<CollectionInfo>();
+		ents.add(ci);
+		wres.setCollectedIn(ents);
 
 		//no externalCollections
 		List<ExternalCollection> ec;
@@ -126,14 +125,14 @@ public class DAOsTests {
 		//no provenance
 		ProvenanceInfo pinfo = new ProvenanceInfo();
 		pinfo.setProvider("Europeana");
-		pinfo.setRecordId("18898");
+		pinfo.setResourceId("18898");
 		pinfo.setUri("http://the.uri.org/666");
-		
+
 		ProvenanceInfo pinfo2 =  new ProvenanceInfo();
 		pinfo2.setProvider("Mint");
-		pinfo2.setRecordId("6627");
+		pinfo2.setResourceId("6627");
 		pinfo2.setUri("http://ming.org/6638");
-		
+
 		List<ProvenanceInfo> prov = new ArrayList<ProvenanceInfo>();
 		prov.add(pinfo);
 		prov.add(pinfo2);
@@ -145,7 +144,7 @@ public class DAOsTests {
 		Literal label = new Literal(Language.EN, "My record Title");
 		CollectionDescriptiveData ddata = new CollectionDescriptiveData();
 		ddata.setLabel(label);
-		Literal desc = new Literal(Language.ENGLISH, "This is a description");
+		Literal desc = new Literal(Language.EN, "This is a description");
 		ddata.setDescription(desc);
 		wres.setDescriptiveData(ddata);
 
@@ -164,43 +163,46 @@ public class DAOsTests {
 		wres.setMedia(medias);
 
 		if(DB.getCollectionObjectDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
-		System.out.println("Stored!");
+		System.out.println("Stored! 1");
 		CollectionObject wres2 = wres;
 		wres2.setAdministrative(wa2);
 		wres2.setDbId(null);
-		if(DB.getCollectionObjectDAO().makePermanent(wres2) == null) { System.out.println("No storage!"); return; }		
+		if(DB.getCollectionObjectDAO().makePermanent(wres2) == null) { System.out.println("No storage!"); return; }
+		System.out.println("Stored! 2");
 		CollectionObject wres3 = wres;
 		wres3.setAdministrative(wa3);
 		wres3.setDbId(null);
-		if(DB.getCollectionObjectDAO().makePermanent(wres3) == null) { System.out.println("No storage!"); return; }		
-		if(wres.getDbId() != null) System.out.println("The first CollectionObject presenting a collection was saved!");
+		if(DB.getCollectionObjectDAO().makePermanent(wres3) == null) { System.out.println("No storage!"); return; }
+		System.out.println("Stored! 3");
+		if((wres.getDbId() != null) && (wres2.getDbId() != null)
+				&& (wres3.getDbId() != null)) System.out.println("The first CollectionObject presenting a collection was saved!");
 
-		
+
 
 		List<CollectionObject> co2 = DB.getCollectionObjectDAO().getByLabel("EN", "My record Title");
 		System.out.println("Retrieved by label: \n" + Json.toJson(co2) );
 
 		List<CollectionObject> co3 = DB.getCollectionObjectDAO().getByOwner(u.getDbId(), 0, 10);
 		System.out.println("Retrieved by Owner: \n" + Json.toJson(co3) );
-		
+
 		/*List<String> fields = new ArrayList<String>();
 		fields.add("descriptiveData.description.EN");
 		fields.add("resourceType");
 		RecordResource co4 =  DB.getRecordResourceDAO().getById(wres.getDbId(), fields);
-		System.out.println("Retrieved some fields by Id: \n" + Json.toJson(co4)  
+		System.out.println("Retrieved some fields by Id: \n" + Json.toJson(co4)
 				+ " resourceType: " + co4.getResourceType());*/
-		
-		CollectionObject co5 = DB.getCollectionObjectDAO().getByOwnerAndLabel(u.getDbId(), 
+
+		CollectionObject co5 = DB.getCollectionObjectDAO().getByOwnerAndLabel(u.getDbId(),
 				"EN", "My record Title");
 		System.out.println("Retrieved by owner and label: " + Json.toJson(co5));
-		
+
 		User owner6 = DB.getCollectionObjectDAO().getCollectionOwner(wres.getDbId());
 		System.out.println("The owner of this Resource is: " + Json.toJson(owner6));
-		
+
 		/*List<RecordResource> cos7 = DB.getRecordResourceDAO().getByProvider("Europeana");
 		System.out.println("retrieved All Resources provided from Europeana: " + Json.toJson(cos7));*/
-		
-		
+
+
 		List<List<Tuple<ObjectId, Access>>> access = new ArrayList<List<Tuple<ObjectId,Access>>>();
 		List<Tuple<ObjectId, Access>> or1 = new ArrayList<Tuple<ObjectId,Access>>();
 		or1.add(new Tuple<ObjectId, WithAccess.Access>(u1.getDbId(), Access.READ));
@@ -210,43 +212,51 @@ public class DAOsTests {
 		Tuple<List<CollectionObject>, Tuple<Integer, Integer>> c08 = DB.getCollectionObjectDAO().
 				getByACL(access, u.getDbId(), false, true, 0, 10);
 		System.out.println("Retrieve by ACL " + c08.y.x + " " + c08.y.y + " resources.\n" + Json.toJson(c08.x));
-		
-		
+
+
 		/*List<RecordResource> co9 =  DB.getRecordResourceDAO()
-				.getUsersAccessibleWithACL(loggeInEffIds, accessedByUserOrGroup, 
+				.getUsersAccessibleWithACL(loggeInEffIds, accessedByUserOrGroup,
 						creator, isExhibition, totalHits, offset, count);*/
-		
-		
+
+
 		/*List<RecordResource> co10 = DB.getRecordResourceDAO()
-				.getSharedWithACL(userId, accessedByUserOrGroup, 
+				.getSharedWithACL(userId, accessedByUserOrGroup,
 						isExhibition, totalHits, offset, count);*/
-		
-		
+
+
 		/*List<RecordResource> co11 = DB.getRecordResourceDAO()
-				.getPublicWithACL(accessedByUserOrGroup, creator, 
+				.getPublicWithACL(accessedByUserOrGroup, creator,
 						isExhibition, totalHits, offset, count);
-*/			
-		
-		System.out.println("Total likes of this Resource are: " + 
+*/
+
+		System.out.println("Total likes of this Resource are: " +
 				DB.getCollectionObjectDAO().getTotalLikes(wres.getDbId()));
-		
-		
+
+
 		System.out.println("Total Resources from this source are: " +
 				DB.getCollectionObjectDAO().countBySource("Europeana"));
-		
-		
+
+
 		System.out.println("If I add another like then we have:");
 		DB.getCollectionObjectDAO().incrementLikes(wres.getDbId().toString());
 		System.out.println(DB.getCollectionObjectDAO().getTotalLikes(wres.getDbId()) + " total likes");
-		
-		
+
+
 		if(DB.getCollectionObjectDAO().removeById(wres.getDbId()) == 1)
-			System.out.println("Document deleted succesfully");
+			System.out.println("Document deleted succesfully 1");
 
 		if(DB.getCollectionObjectDAO().removeById(wres2.getDbId()) == 1)
-			System.out.println("Document deleted succesfully");
-		
+			System.out.println("Document deleted succesfully 2");
+
 		if(DB.getCollectionObjectDAO().removeById(wres3.getDbId()) == 1)
-			System.out.println("Document deleted succesfully");
+			System.out.println("Document deleted succesfully 3");
+
+		//if(DB.getCollectionObjectDAO().removeFromCollection(wres.getDbId(), , ));
+	}
+
+	@Test
+	public void ensureIndexes() {
+
+		DB.getDs();
 	}
 }

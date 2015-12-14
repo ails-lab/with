@@ -17,10 +17,10 @@
 package model.resources;
 
 import model.DescriptiveData;
-import model.basicDataTypes.Literal;
+
 
 public class RecordResource<T extends RecordResource.RecordDescriptiveData> extends WithResource<RecordResource.RecordDescriptiveData> {
-	
+
 	public static class RecordDescriptiveData extends DescriptiveData {
 
 	}

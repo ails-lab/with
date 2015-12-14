@@ -17,6 +17,8 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -29,13 +31,20 @@ import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
+import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import ch.qos.logback.core.util.AggregationType;
+
+import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 
 import utils.Tuple;
 
@@ -107,7 +116,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		q.filter("collectedIn", elemMatch1);
 		return q;
 	}
-	
+
 	/**
 	 * Return all resources that belong to a 'collection' throwing
 	 * away duplicate entries in a 'collection'
@@ -123,7 +132,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getSingletonCollectedResources(ObjectId colId, int offset, int count) {
-		Query<T> q = this.createQuery().field("collectedIn."+colId.toString()).exists()
+		Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId)
 				.offset(offset).limit(count);
 		//Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId).offset(offset).limit(count);
 		return this.find(q).asList();
@@ -136,12 +145,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId
 	 * @return
 	 */
-	
 	public List<RecordResource> getByCollection(ObjectId colId) {
 		int MAX = 10000;
 		return getByCollectionBtwPositions(colId, 0, MAX);
+
 	}
-	 
+
 	/**
 	 * Retrieve records from specific collection using position
 	 * which is between lowerBound and upperBound
@@ -170,12 +179,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		   ds.add(d);
 		}*/
 		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(upperBound-lowerBound);
-		for (int i=0; i<upperBound - lowerBound; i++) {
+		for (int i=0; i<(upperBound - lowerBound); i++) {
 			repeatedResources.add(new RecordResource());
 		}
 		int maxPosition = -1;
 		for (RecordResource d: resources) {
-			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) ((RecordResource) d).getCollectedIn();
+			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) d.getCollectedIn();
 			//May be a long iteration, if a record belongs to many collections
 			for (CollectionInfo ci: collectionInfos) {
 				ObjectId collectionId = ci.getCollectionId();
@@ -192,7 +201,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		}
 		if (maxPosition > -1)
 			return repeatedResources.subList(0, maxPosition+1);
-		else 
+		else
 			return new ArrayList<RecordResource>();
 	}
 
@@ -219,7 +228,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 				.equal(title);
 		return this.find(q).asList();
 	}
-	
+
 	public List<T> getByLabel(Language lang, String title) {
 		Query<T> q = this.createQuery().field("descriptiveData.label." + lang.toString()).equal(title);
 		return this.find(q).asList();
@@ -281,6 +290,12 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByProvider(String sourceName) {
+
+		//TODO: faster if could query on last entry of provenance array. Mongo query!
+		/*
+		 * We can sort the array in inverted order so to query
+		 * only the first element of this array directly!
+		 */
 		Query<T> q = this.createQuery();
 		//q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
 		BasicDBObject provQuery = new BasicDBObject();
@@ -290,7 +305,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		q.filter("provenance", elemMatch);
 		return this.find(q).asList();
 	}
-	
+
 	/**
 	 * Return the number of resources that belong to a source
 	 * @param sourceId
@@ -587,6 +602,94 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
+<<<<<<< HEAD
+=======
+	 * Not a good Idea problably want work
+	 * @param resourceId
+	 * @param colId
+	 * @param position
+	 */
+	public boolean removeFromCollection(ObjectId dbId, ObjectId colId, int position) {
+		/*uery<T> q = this.createQuery().field("_id").equal(dbId);
+		WithResource r = (WithResource) findOne(q);
+
+		UpdateOperations<T> updateOps = this.createUpdateOperations();
+		updateOps.set("collectedIn." + colId, positions);
+		WriteResult wr = this.update(q, updateOps).getWriteResult();
+		if(wr.wasAcknowledged())
+			return true;
+		return false;*/
+		return false;
+	}
+
+	//TODO:Mongo query!
+	/**
+	 * Also wrong implementation
+	 * @param colId
+	 * @param position
+	 */
+	public void shiftRecordsToLeft(ObjectId colId, int position) {
+		String colField = "collectedIn."+colId;
+		Query<T> q = this.createQuery().field(colField).exists();
+	    UpdateOperations<T> updateOps = this.createUpdateOperations();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", position);
+		BasicDBObject geq1 = new BasicDBObject();
+		geq1.put("$elemMatch", geq);
+		q.filter(colField, geq1);
+		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
+		for (WithResource resource: resources) {
+			/*List<CollectionInfo> collectedIn = resource.getCollectedIn();
+			ArrayList<Integer> positions = collectedIn.get(colId);
+			int index = 0;
+			for (Integer pos: positions) {
+				if (pos >= position) {
+					updateOps.disableValidation().dec(colField+"."+index);
+				}
+				index+=1;
+			}*/
+		}
+		this.update(q, updateOps);
+		/*attempts to update without retrieving the documents: does not work
+		/*if collectedIn is of type Map
+		 * update only works on first matching element, so discard
+		BasicDBObject colIdQuery = new BasicDBObject();
+		BasicDBObject existsField = new BasicDBObject();
+		existsField.put("$exists", true);
+		colIdQuery.put(colField, existsField);
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", position);
+		BasicDBObject geq1 = new BasicDBObject();
+		geq1.put("$elemMatch", geq);
+		colIdQuery.append(colField, geq1);
+		//System.out.println(colIdQuery);
+		BasicDBObject update = new BasicDBObject();
+		BasicDBObject entrySpec = new BasicDBObject();
+		entrySpec.put(colField+".0", -1);
+		update.put("$inc", entrySpec);
+		this.getDs().getCollection(entityClass).update(colIdQuery, update, false, true);
+		*/
+		/* if collectedIn is of type Array<CollectionInfo>
+		 * BasicDBObject query = new BasicDBObject();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", position);
+		colIdQuery.append("position", geq);
+		BasicDBObject elemMatch = new BasicDBObject();
+		elemMatch.put("$elemMatch", colIdQuery);
+		query.put("collectedIn", elemMatch);
+		System.out.println(query);
+		BasicDBObject update = new BasicDBObject();
+		BasicDBObject entrySpec = new BasicDBObject();
+		entrySpec.put("collectedIn.$.position", -1);
+		update.put("$inc", entrySpec);
+		System.out.println(this.getDs().getCollection(entityClass).find(query).count());
+		this.getDs().getCollection(entityClass).update(query, update, false, true);*/
+	}
+
+	/**
+>>>>>>> changing of structures and indexing off mongo fields
 	 * This method is to update the 'public' field on all the records of a
 	 * collection. By default update method is invoked to all documents of a
 	 * collection.
@@ -607,7 +710,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		updateOps.set("content."+format, content);
 		this.update(q, updateOps);
 	}
-	
+
 	/**
 	 * Increment likes for this specific resource
 	 * @param externalId

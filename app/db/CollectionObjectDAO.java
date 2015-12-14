@@ -16,25 +16,15 @@
 
 package db;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
-
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import utils.Tuple;
-import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
-import model.usersAndGroups.User;
 
 public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 
@@ -69,14 +59,14 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		updateOps.dec("administrative.entryCount");
 		this.update(q, updateOps);
 	}
-	
+
 	public void editCollection(ObjectId dbId, JsonNode json) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<CollectionObject> updateOps = this.createUpdateOperations();
 		updateFields("", json, updateOps);
 		this.update(q,  updateOps);
 	}
-	
+
 	public void updateFields(String parentField, JsonNode node, UpdateOperations<CollectionObject> updateOps) {
 		Iterator<String> fieldNames = node.fieldNames();
 	     while (fieldNames.hasNext()) {
