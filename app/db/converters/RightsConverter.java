@@ -19,7 +19,6 @@ package db.converters;
 import model.basicDataTypes.WithAccess;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
@@ -27,31 +26,30 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 
-public class RightsConverter extends TypeConverter implements SimpleValueConverter {
+public class RightsConverter extends TypeConverter {//implements SimpleValueConverter {
 
 	public RightsConverter() {
 		super( WithAccess.class );
 	}
 	
-
+	@Override
 	public Object decode(Class<?> arg0, Object fromDbObject, MappedField arg2) {
-		WithAccess r= new WithAccess();
+		WithAccess r = new WithAccess();
 		DBObject dbObj = (DBObject) fromDbObject;
-		for( String k: dbObj.keySet() ) {
+		for(String k: dbObj.keySet() ) {
 			if( k.equals("isPublic"))
 				r.setPublic((Boolean) dbObj.get("isPublic"));
 			else
-				r.put( new ObjectId(k),  
-					WithAccess.Access.values()[(int)dbObj.get(k)]);
+				r.put(new ObjectId(k),  
+					WithAccess.Access.values()[(int) dbObj.get(k)]);
 		}
 		return r;
 	}
 
-
+	@Override
     public Object encode(final Object value, final MappedField optionalExtraInfo) {
     	WithAccess r = (WithAccess) value;
     	BasicDBObject dbObj = new BasicDBObject(); 
-
     	dbObj.put("isPublic", r.isPublic());
     	for( ObjectId k: r.keySet()) {
     		dbObj.put( k.toString(), r.get(k).ordinal());

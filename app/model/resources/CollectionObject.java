@@ -42,8 +42,8 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 
 	public static class CollectionAdmin extends WithAdmin {
 
-		private int entryCount;
-		private boolean isExhibition;
+		private int entryCount = 0;
+		private boolean isExhibition = false;
 
 		public int getEntryCount() {
 			return entryCount;

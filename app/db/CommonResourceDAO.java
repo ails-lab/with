@@ -586,18 +586,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		return this.find(q).asList();
 	}
 
-
-	/**
-	 * ??????? do we have external Ids ??????
-	 * @param extId
-	 * @return
-	 */
-	public long countByExternalId(String extId) {
-		Query<T> q = this.createQuery()
-				.field("externalId").equal(extId);
-		return this.find(q).countAll();
-	}
-
 	/**
 	 * Not a good Idea problably want work
 	 * @param resourceId
@@ -720,7 +708,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public void incField( String fieldName, ObjectId dbId) {
 		Query<T> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
 		updateOps.inc(fieldName);
 		this.update(q, updateOps);
 	}

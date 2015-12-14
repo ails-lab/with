@@ -97,7 +97,8 @@ public class DB {
 			//morphia.mapPackage("model");
 			//morphia.mapPackage("model.resources");
 			//morphia.mapPackage("model.basicDataTypes");
-			morphia.mapPackage("model.usersAndGroups");
+			//morphia.mapPackage("model.usersAndGroups");
+			//morphia.map(User.class);
 			morphia.getMapper().getConverters()
 					.addConverter(new RightsConverter());
 		}
@@ -169,8 +170,7 @@ public class DB {
 	 */
 
 	public static RecordResourceDAO getRecordResourceDAO() {
-		return (RecordResourceDAO)
-				getDAO(RecordResource.class);
+		return (RecordResourceDAO) getDAO(RecordResource.class);
 	}
 	/*
 	public static RecordResourceDAO.AgentObjectDAO getAgentObjectDAO() {

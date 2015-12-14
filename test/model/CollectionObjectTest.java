@@ -40,7 +40,9 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
+import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
 import model.resources.WithResource.WithAdmin;
@@ -57,6 +59,8 @@ import org.junit.Test;
 
 import play.libs.Json;
 
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
 import db.DB;
@@ -72,22 +76,20 @@ public class CollectionObjectTest {
 		 * Owner of the CollectionObject
 		 *
 		 */
-		/*User u = DB.getUserDAO().getByUsername("qwerty");
+		User u = DB.getUserDAO().getByUsername("qwerty");
 		if(u == null) {
 			System.out.println("No user found");
 			return;
-		}*/
+		}
 
 		/*
 		 * Administative metadata
 		 */
-		WithAdmin wa = new WithAdmin();
-		wa.setCreated(new Date());
+		co.getAdministrative().setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
-		//waccess.put(u.getDbId(), Access.OWN);
-		wa.setAccess(waccess);
-		co.setAdministrative(wa);
+		waccess.put(u.getDbId(), Access.OWN);
+		co.getAdministrative().setAccess(waccess);
 
 		//no externalCollections
 		List<ExternalCollection> ec;
@@ -96,7 +98,7 @@ public class CollectionObjectTest {
 		List<ProvenanceInfo> prov;
 
 		//resourceType is collectionObject
-		co.setResourceType(WithResourceType.CollectionObject);
+		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
 		Literal label = new Literal(Language.EN, "MyTitle");
 		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
@@ -118,29 +120,25 @@ public class CollectionObjectTest {
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
 		medias.add(emo);
 		co.setMedia(medias);
-
-		if ( DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
-
-		JSONObject json = new JSONObject();
-		JSONObject labelJson = new JSONObject();
-		JSONObject titleJson = new JSONObject();
-		try {
-			titleJson.put(Language.EN.toString(), "New Title");
-			labelJson.put("label", titleJson);
-			json.put("descriptiveData", labelJson);
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		/*for (CollectionObject c: DB.getCollectionObjectDAO().getByLabel("en", "MyTitle")) {
+		JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
+		ObjectNode json = new ObjectNode(nodeFactory);
+		ObjectNode labelJson = nodeFactory.objectNode();
+		ObjectNode titleJson = nodeFactory.objectNode();
+		labelJson.put(Language.EN.toString(), "New Title");
+		titleJson.put("label", labelJson);
+		json.put("descriptiveData", titleJson);
+		/*titleJson.put("isExhibition", true);
+		json.put("administrative", titleJson);*/
+		for (CollectionObject c: DB.getCollectionObjectDAO().getByLabel("en", "MyTitle")) {
 			System.out.println(Json.toJson(c));
 			ObjectId colId = c.getDbId();
-			DB.getCollectionObjectDAO().editCollection(colId, Json.parse(json.toString()));
-		}*/
+			DB.getCollectionObjectDAO().editCollection(colId, json);
+		}
 
 	}
 /*
