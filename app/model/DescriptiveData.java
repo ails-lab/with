@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.WithDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
@@ -64,7 +65,7 @@ public class DescriptiveData {
 	private ArrayList<String> sameAs;
 
 	// in a timeline where would this resource appear
-	private int year;
+	private ArrayList<WithDate> dates;
 
 	// alternative title or name or placename
 	private ArrayList<Literal> altLabels;
@@ -133,12 +134,12 @@ public class DescriptiveData {
 		this.sameAs = sameAs;
 	}
 
-	public int getYear() {
-		return year;
+	public ArrayList<WithDate> getDates() {
+		return dates;
 	}
 
-	public void setYear(int year) {
-		this.year = year;
+	public void setDates(ArrayList<WithDate> dates) {
+		this.dates = dates;
 	}
 
 	public ArrayList<Literal> getAltLabels() {
