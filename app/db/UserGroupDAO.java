@@ -43,7 +43,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
-		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
 		return find(q).asList();
 	}
 
@@ -55,7 +55,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
-		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
 		return find(q).asList();
 	}
 
@@ -67,7 +67,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
-		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
 		return find(q).asList();
 	}
 
@@ -77,7 +77,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
-		q.and(q.criteria("className").equal("model." + groupType.toString()));
+		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
 		return find(q).asList();
 	}
 

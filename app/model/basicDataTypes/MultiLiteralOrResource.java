@@ -16,43 +16,25 @@
 
 package model.basicDataTypes;
 
+import model.basicDataTypes.LiteralOrResource.ResourceType;
+
 import org.mongodb.morphia.annotations.Embedded;
 
 @Embedded
-public class LiteralOrResource extends Literal {
+public class MultiLiteralOrResource extends MultiLiteral {
 	
-	// resources we do understand about and can process further (or not)
-	// uri being general and difficult to process
-	//TODO: don't we want multiple urls (resources) to refer to the same Literal?
-	public static enum ResourceType {
-		uri, skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
-	}
-	
-	public static class Resource {
-		ResourceType uriType;
-		String uri;
-		
-		public Resource() {
-		}
-		
-		public Resource(ResourceType uriType, String uri) {
-			this.uriType = uriType;
-			this.uri = uri;
-		}
-	}
-	
-	private Resource resource;
+	private LiteralOrResource.Resource resource;
 	
 
-	public LiteralOrResource() {
+	public MultiLiteralOrResource() {
 		super();
 	}
 
-	public LiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new Resource(resourceType, uri);
+	public MultiLiteralOrResource(ResourceType resourceType, String uri) {
+		this.resource = new LiteralOrResource.Resource(resourceType, uri);
 	}
 
-	public LiteralOrResource(String label) {
+	public MultiLiteralOrResource(String label) {
 		super(label);
 	}
 
@@ -65,7 +47,7 @@ public class LiteralOrResource extends Literal {
 	}
 
 	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new Resource(resourceType, uri);
+		this.resource = new LiteralOrResource.Resource(resourceType, uri);
 
 	}
 }

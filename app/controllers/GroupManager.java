@@ -102,7 +102,7 @@ public class GroupManager extends Controller {
 				error.put("error", "Group name already exists! Please specify another name");
 				return badRequest(error);
 			}
-			Class<?> clazz = Class.forName("model." + groupType);
+			Class<?> clazz = Class.forName("model.usersAndGroups" + groupType);
 			newGroup = (UserGroup) Json.fromJson(json, clazz);
 			if (adminId != null) {
 				admin = new ObjectId(adminId);

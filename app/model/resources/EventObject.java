@@ -22,6 +22,7 @@ import org.mongodb.morphia.annotations.Entity;
 
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithPeriod;
 import model.DescriptiveData;
 import model.resources.RecordResource.RecordDescriptiveData;
@@ -31,8 +32,8 @@ public class EventObject extends RecordResource<EventObject.EventData> {
 	
 	public static class EventData extends RecordDescriptiveData {
 		ArrayList<WithPeriod> period;
-		ArrayList<LiteralOrResource> personsInvolved;
-		ArrayList<LiteralOrResource> placesInvolved;
-		ArrayList<LiteralOrResource> objectsInvolved;
+		MultiLiteralOrResource personsInvolved;
+		MultiLiteralOrResource placesInvolved;
+		MultiLiteralOrResource objectsInvolved;
 	}
 }

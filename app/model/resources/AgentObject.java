@@ -23,6 +23,7 @@ import org.mongodb.morphia.annotations.Entity;
 import model.DescriptiveData;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
 
@@ -32,7 +33,7 @@ public class AgentObject extends RecordResource<AgentObject.AgentData> {
 	public static class AgentData extends RecordDescriptiveData {
 
 		ArrayList<WithDate> birthdate;
-		ArrayList<LiteralOrResource> birthplace;
+		MultiLiteralOrResource birthplace;
 		ArrayList<WithDate> deathdate;
 		public static enum Gender {
 			MALE, FEMALE, UNKNOWN

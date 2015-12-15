@@ -22,6 +22,7 @@ import org.mongodb.morphia.annotations.Entity;
 
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.DescriptiveData;
 import model.resources.RecordResource.RecordDescriptiveData;
 
@@ -31,9 +32,9 @@ public class PlaceObject extends RecordResource<PlaceObject.PlaceData> {
 	public static class PlaceData extends RecordDescriptiveData {
 
 		// city, archeological site, area, nature reserve, historical site
-		ArrayList<LiteralOrResource> nation;
-		ArrayList<LiteralOrResource> continent;
-		ArrayList<LiteralOrResource> partOfPlace;
+		MultiLiteralOrResource nation;
+		MultiLiteralOrResource continent;
+		MultiLiteralOrResource partOfPlace;
 		
 		Double wgsposlat, wgsposlong, wgsposalt;
 		

@@ -16,6 +16,7 @@
 
 package db;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 
@@ -80,17 +82,23 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 	public void updateFields(String parentField, JsonNode node,
 			UpdateOperations<CollectionObject> updateOps) {
 		Iterator<String> fieldNames = node.fieldNames();
-		while (fieldNames.hasNext()) {
-			String fieldName = fieldNames.next();
-			JsonNode fieldValue = node.get(fieldName);
-			String newFieldName = parentField.isEmpty() ? fieldName
-					: parentField + "." + fieldName;
-			if (fieldValue.isObject()) {
-				updateFields(newFieldName, fieldValue, updateOps);
-			} else {// value
-				updateOps.set(newFieldName, fieldValue);
-			}
-		}
+		  while (fieldNames.hasNext()) {
+	         String fieldName = fieldNames.next();
+	         JsonNode fieldValue = node.get(fieldName);
+        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
+	         if (fieldValue.isObject()) {
+	        	 updateFields(newFieldName, fieldValue, updateOps);
+	         }
+	         else {//value
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					Object value = mapper.treeToValue(fieldValue, newFieldName.getClass());
+					updateOps.disableValidation().set(newFieldName, value);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}	 
+	         }
+	     }
 	}
 
 	/**

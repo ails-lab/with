@@ -27,6 +27,9 @@ import model.ExampleDataModels.LiteralOrResource.ResourceType;
  */
 public class WithDate {
 	Date isoDate;
+	//facet
+	//year should be filled in whenever possible
+	//100 bc is translated to -100
 	int year;
 	
 	// controlled expression of an epoch "stone age", "renaissance", "16th century"
@@ -39,6 +42,6 @@ public class WithDate {
 	String uri;
 	ResourceType uriType;
 	
-	// any expression that cannot fit into above
+	//mandatory, other fields are extracted from that
 	String free;
 }

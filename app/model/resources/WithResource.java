@@ -68,6 +68,7 @@ public class WithResource<T extends DescriptiveData> {
 
 		private boolean isExhibition;
 
+		//index
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
@@ -79,12 +80,13 @@ public class WithResource<T extends DescriptiveData> {
 		 * who uploaded that resource. For collections, it links to the userId
 		 * who created the collection.
 		 */
+		//index
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId withCreator;
 
 		// uri that this resource has in the rdf repository
 		private String withURI;
-
+		
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date created;
@@ -348,7 +350,7 @@ public class WithResource<T extends DescriptiveData> {
 	protected WithAdmin administrative;
 
 	@Embedded
-	private List<CollectionInfo > collectedIn;
+	private ArrayList<CollectionInfo > collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -356,7 +358,9 @@ public class WithResource<T extends DescriptiveData> {
 	@Embedded
 	// external collections to which the resource may belong to
 	private List<ExternalCollection> externalCollections;
+	
 	@Embedded
+	//depending on the source, we know which entry is the dataProvider and which the provider
 	private List<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
@@ -405,11 +409,11 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public List<CollectionInfo> getCollectedIn() {
+	public ArrayList<CollectionInfo> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(List<CollectionInfo> collectedIn) {
+	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 

@@ -132,10 +132,8 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getSingletonCollectedResources(ObjectId colId, int offset, int count) {
-		Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId)
-				.offset(offset).limit(count);
 		//Query<T> q = this.createQuery().field("collectedIn.collectionId").equal(colId).offset(offset).limit(count);
-		return this.find(q).asList();
+		return this.find(createColIdElemMatchQuery(colId).offset(offset).limit(count)).asList();
 	}
 
 	/**
@@ -147,8 +145,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public List<RecordResource> getByCollection(ObjectId colId) {
 		int MAX = 10000;
-		return getByCollectionBtwPositions(colId, 0, MAX);
-
+		return getByCollectionBtwnPositions(colId, 0, MAX);
 	}
 
 	/**
@@ -158,7 +155,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<RecordResource> getByCollectionBtwPositions(ObjectId colId, int lowerBound, int upperBound) {
+	public List<RecordResource> getByCollectionBtwnPositions(ObjectId colId, int lowerBound, int upperBound) {
 		Query<T> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
@@ -589,107 +586,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		return this.find(q).asList();
 	}
 
-
 	/**
-	 * ??????? do we have external Ids ??????
-	 * @param extId
-	 * @return
-	 */
-	public long countByExternalId(String extId) {
-		Query<T> q = this.createQuery()
-				.field("externalId").equal(extId);
-		return this.find(q).countAll();
-	}
-
-	/**
-<<<<<<< HEAD
-=======
-	 * Not a good Idea problably want work
-	 * @param resourceId
-	 * @param colId
-	 * @param position
-	 */
-	public boolean removeFromCollection(ObjectId dbId, ObjectId colId, int position) {
-		/*uery<T> q = this.createQuery().field("_id").equal(dbId);
-		WithResource r = (WithResource) findOne(q);
-
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		updateOps.set("collectedIn." + colId, positions);
-		WriteResult wr = this.update(q, updateOps).getWriteResult();
-		if(wr.wasAcknowledged())
-			return true;
-		return false;*/
-		return false;
-	}
-
-	//TODO:Mongo query!
-	/**
-	 * Also wrong implementation
-	 * @param colId
-	 * @param position
-	 */
-	public void shiftRecordsToLeft(ObjectId colId, int position) {
-		String colField = "collectedIn."+colId;
-		Query<T> q = this.createQuery().field(colField).exists();
-	    UpdateOperations<T> updateOps = this.createUpdateOperations();
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		BasicDBObject geq1 = new BasicDBObject();
-		geq1.put("$elemMatch", geq);
-		q.filter(colField, geq1);
-		List<WithResource> resources  = (List<WithResource>) this.find(q).asList();
-		for (WithResource resource: resources) {
-			/*List<CollectionInfo> collectedIn = resource.getCollectedIn();
-			ArrayList<Integer> positions = collectedIn.get(colId);
-			int index = 0;
-			for (Integer pos: positions) {
-				if (pos >= position) {
-					updateOps.disableValidation().dec(colField+"."+index);
-				}
-				index+=1;
-			}*/
-		}
-		this.update(q, updateOps);
-		/*attempts to update without retrieving the documents: does not work
-		/*if collectedIn is of type Map
-		 * update only works on first matching element, so discard
-		BasicDBObject colIdQuery = new BasicDBObject();
-		BasicDBObject existsField = new BasicDBObject();
-		existsField.put("$exists", true);
-		colIdQuery.put(colField, existsField);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		BasicDBObject geq1 = new BasicDBObject();
-		geq1.put("$elemMatch", geq);
-		colIdQuery.append(colField, geq1);
-		//System.out.println(colIdQuery);
-		BasicDBObject update = new BasicDBObject();
-		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put(colField+".0", -1);
-		update.put("$inc", entrySpec);
-		this.getDs().getCollection(entityClass).update(colIdQuery, update, false, true);
-		*/
-		/* if collectedIn is of type Array<CollectionInfo>
-		 * BasicDBObject query = new BasicDBObject();
-		BasicDBObject colIdQuery = new BasicDBObject();
-		colIdQuery.put("collectionId", colId);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", position);
-		colIdQuery.append("position", geq);
-		BasicDBObject elemMatch = new BasicDBObject();
-		elemMatch.put("$elemMatch", colIdQuery);
-		query.put("collectedIn", elemMatch);
-		System.out.println(query);
-		BasicDBObject update = new BasicDBObject();
-		BasicDBObject entrySpec = new BasicDBObject();
-		entrySpec.put("collectedIn.$.position", -1);
-		update.put("$inc", entrySpec);
-		System.out.println(this.getDs().getCollection(entityClass).find(query).count());
-		this.getDs().getCollection(entityClass).update(query, update, false, true);*/
-	}
-
-	/**
->>>>>>> changing of structures and indexing off mongo fields
 	 * This method is to update the 'public' field on all the records of a
 	 * collection. By default update method is invoked to all documents of a
 	 * collection.
@@ -734,7 +631,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public void incField( String fieldName, ObjectId dbId) {
 		Query<T> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
 		updateOps.inc(fieldName);
 		this.update(q, updateOps);
 	}

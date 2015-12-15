@@ -152,6 +152,7 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		}
 	}
 
+
 	/**
 	 * Shift one position left all resources in colId with position equal or greater than position.
 	 * @param colId
