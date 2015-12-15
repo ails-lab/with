@@ -34,23 +34,20 @@ import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.sources.formatreaders.DPLAExternalBasicRecordFormatter;
+import espace.core.sources.formatreaders.DPLARecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.Provider.Sources;
 import model.resources.WithResource;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
 
-	public static String LABEL = "DPLA";
-	private String DPLAKey = "SECRET_KEY";
-	private DPLAExternalBasicRecordFormatter formatreader;
-
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
-		builder.addSearchParam("api_key", DPLAKey);
+		builder.addSearchParam("api_key", apiKey);
 		builder.addQuery("q", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
@@ -61,7 +58,9 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public DPLASpaceSource() {
 		super();
-		formatreader = new DPLAExternalBasicRecordFormatter();
+		LABEL = Sources.DPLA.toString();
+		apiKey = "SECRET_KEY";
+		formatreader = new DPLARecordFormatter();
 		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
 		addDefaultWriter(CommonFilters.COUNTRY.getID(), fwriter("sourceResource.spatial.country"));
 		addDefaultWriter(CommonFilters.CREATOR.getID(), fwriter("sourceResource.creator"));
@@ -139,17 +138,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		};
 	}
 
-	public String getSourceName() {
-		return LABEL;
-	}
 
-	public String getDPLAKey() {
-		return DPLAKey;
-	}
-
-	public void setDPLAKey(String dPLAKey) {
-		DPLAKey = dPLAKey;
-	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -228,7 +217,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
+			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + apiKey);
 			JsonNode record = response.get("docs").get(0);
 			if (record != null)
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));

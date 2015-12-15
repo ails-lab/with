@@ -33,28 +33,23 @@ import espace.core.QueryBuilder;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.sources.formatreaders.BritishLibraryBasicRecordFormatter;
+import espace.core.sources.formatreaders.BritishLibraryRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.Provider.Sources;
 import model.resources.WithResource;
 import utils.ListUtils;
 
 public class BritishLibrarySpaceSource extends ISpaceSource {
-	public static final String LABEL = "The British Library";
-	private String apikey = "8bddf33bef4c14c98d469bfb1f8e78c7";
 	private HashMap<String, String> licences;
 	private HashMap<String, String> licencesId;
-	private BritishLibraryBasicRecordFormatter formatreader;
-
-	@Override
-	public String getSourceName() {
-		return LABEL;
-	}
 
 	public BritishLibrarySpaceSource() {
 		super();
-		formatreader = new BritishLibraryBasicRecordFormatter();
+		LABEL = Sources.BritishLibrary.toString();
+		apiKey = "8bddf33bef4c14c98d469bfb1f8e78c7";
+		formatreader = new BritishLibraryRecordFormatter();
 		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("media"));
 		addDefaultWriter(CommonFilters.RIGHTS.getID(), frwriter());
 		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
@@ -75,7 +70,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 	}
 
 	private void setLicences() {
-		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key="+apikey+"&format=json&nojsoncallback=1";
+		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key="+apiKey+"&format=json&nojsoncallback=1";
 		licences = new HashMap<String,String>();
 		licencesId = new HashMap<String,String>();
 		JsonNode response;
@@ -155,7 +150,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("" + "https://api.flickr.com/services/rest/");
 		builder.addSearchParam("method", "flickr.photos.search");
-		builder.addSearchParam("api_key", apikey);
+		builder.addSearchParam("api_key", apiKey);
 		builder.addSearchParam("format", "json");
 		builder.addSearchParam("user_id", "12403504%40N02");
 		builder.addSearchParam("extras",

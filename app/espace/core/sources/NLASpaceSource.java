@@ -41,24 +41,20 @@ import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.sources.formatreaders.NLAExternalBasicRecordFormatter;
+import espace.core.sources.formatreaders.NLARecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.RecordType;
+import model.Provider.Sources;
 import model.resources.WithResource;
 
 
 
 public class NLASpaceSource extends ISpaceSource {
-
-
 	
-	public static final String LABEL = "NLA";
-	private String Key = "SECRET_KEY";
-	private NLAExternalBasicRecordFormatter formatreader;
-
 	public NLASpaceSource() {
-		super();
-		formatreader = new NLAExternalBasicRecordFormatter();
+		LABEL = Sources.NLA.toString();
+		apiKey = "SECRET_KEY";
+		formatreader = new NLARecordFormatter();
 		addDefaultQueryModifier(CommonFilters.TYPE.getID(), qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR.getID(),qfwriterYEAR());
 		
@@ -113,7 +109,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 //		String spacesFormatQuery = Utils.spacesFormatQuery(q.searchTerm, "%20");
 //		spacesFormatQuery = addfilters(q, spacesFormatQuery);
 		QueryBuilder builder = new QueryBuilder("http://api.trove.nla.gov.au/result");
-		builder.addSearchParam("key", Key);
+		builder.addSearchParam("key", apiKey);
 		builder.addSearchParam("zone", "picture,book,music,article");
 		builder.addQuery("q", q.searchTerm);
 		// TODO term to exclude?
@@ -124,18 +120,6 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		builder.addSearchParam("reclevel", "full");
 		builder.addSearchParam("facet", "format,year");
 		return addfilters(q, builder).getHttp();
-	}
-
-	public String getSourceName() {
-		return LABEL;
-	}
-
-	public String getDPLAKey() {
-		return Key;
-	}
-
-	public void setDPLAKey(String dPLAKey) {
-		Key = dPLAKey;
 	}
 
 	@Override
@@ -232,14 +216,14 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		try {
 			response = HttpConnector
 					.getURLContent("http://api.trove.nla.gov.au/work/"
-							+ recordId + "?key=" + Key
+							+ recordId + "?key=" + apiKey
 							+ "&encoding=json&reclevel=full");
 			JsonNode record = response;
 			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_NLA, record
 					.toString()));
 			Document xmlResponse = HttpConnector
 					.getURLContentAsXML("http://api.trove.nla.gov.au/work/"
-							+ recordId + "?key=" + Key
+							+ recordId + "?key=" + apiKey
 							+ "&encoding=xml&reclevel=full");
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_NLA, Serializer
 					.serializeXML(xmlResponse)));

@@ -120,12 +120,6 @@ public class EmbeddedMediaObject {
 	
 	private Quality quality;
 	
-	
-	
-	
-	
-	
-	
 	public long getSize() {
 		return size;
 	}
@@ -174,22 +168,6 @@ public class EmbeddedMediaObject {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	/*
-	public String getWithUrl() {
-		return withUrl;
-	}
-
-	public void setWithUrl(String withUrl) {
-		this.withUrl = withUrl;
-	}
-
-	public String getWithThumbnailUrl() {
-		return withThumbnailUrl;
-	}
-
-	public void setWithThumbnailUrl(String withThumbnailUrl) {
-		this.withThumbnailUrl = withThumbnailUrl;
-	}*/
 
 	public LiteralOrResource getOriginalRights() {
 		return originalRights;

@@ -88,15 +88,8 @@ public class MediaObject extends EmbeddedMediaObject {
 	private Orientation orientation;
 	
 	private int audioChannelNumber;
-	
-	
-	
-	
-	
-	
-	
+
 	// Setters/Getters
-		
 	public ObjectId getDbId() {
 		return dbId;
 	}

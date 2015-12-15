@@ -16,15 +16,13 @@
 
 package espace.core.sources.formatreaders;
 
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
-
-import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
-import espace.core.sources.EuropeanaSpaceSource;
+import espace.core.sources.BritishLibrarySpaceSource;
+import espace.core.sources.DDBSpaceSource;
 import espace.core.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
@@ -34,12 +32,10 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
-import model.resources.RecordResource.RecordDescriptiveData;
-import utils.ListUtils;
 
-public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
-	
-	public EuropeanaExternalBasicRecordFormatter() {
+public class DDBRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+
+	public DDBRecordFormatter() {
 		object = new CulturalObject();
 	}
 	
@@ -47,31 +43,35 @@ public class EuropeanaExternalBasicRecordFormatter extends ExternalBasicRecordRe
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
-		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
-		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		model.setLabel(rec.getLiteralValue("title"));
+		model.setDescription(rec.getLiteralValue("subtitle"));
+//		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+//		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
+//		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
 		
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
-		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));
+//		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+//		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		String id = rec.getStringValue("id");
+		object.addToProvenance(new ProvenanceInfo(DDBSpaceSource.LABEL,  
+				"https://www.deutsche-digitale-bibliothek.de/item/"
+				+ id, id));
 		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
 		MediaObject med;
 		media.add(med = new MediaObject());
 		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		med.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
+//		med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
+//		med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
+//		object.setCreator(rec.getStringValue("principalOrFirstMaker"));
+////		object.setContributors(rec.getStringArrayValue("contributor"));
+//		// TODO: add years
+////		object.setYears(ListUtils.transform(rec.getStringArrayValue("year"), (String y)->{return Year.parse(y);}));
+//		// TODO: add rights
+////		object.setItemRights(rec.getStringValue("rights"));
 		return object;
-		
-		//TODO: add null checks
-//		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-//		object.setContributors(rec.getStringArrayValue("dcContributor"));
-//		object.setItemRights(rec.getStringValue("rights"));
 	}
-	
 
 }

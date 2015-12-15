@@ -23,6 +23,24 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class Provider {
 	
+	public enum Sources {
+		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UpladedByUser"), 
+		BritishLibrary("The British Library"), DDB("DDB"),
+		DigitalNZ("DigitalNZ"), DPLA("DPLA"), EFashion("EFashion"), NLA("NLA"),
+		Rijksmuseum("Rijksmuseum");
+
+		private final String text;
+
+	    private Sources(final String text) {
+	        this.text = text;
+	    }
+	    @Override
+	    public String toString() {
+	        return text;
+	    }
+
+	}
+	
 	public String providerName;
 	public String recordId;
 	public String recordUrl;

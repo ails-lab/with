@@ -40,31 +40,26 @@ import espace.core.FacetsModes;
 import espace.core.HttpConnector;
 import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
-import espace.core.QueryModifier;
 import espace.core.RecordJSONMetadata;
 import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.utils.JsonContextRecord;
-import model.EmbeddedMediaObject;
-import model.MediaObject;
+import espace.core.sources.formatreaders.EuropeanaRecordFormatter;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.ProvenanceInfo;
-import model.resources.CulturalObject;
+import model.Provider.Sources;
 import model.resources.WithResource;
-import model.resources.CulturalObject.CulturalObjectData;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
 
-	public static final String LABEL = "Europeana";
-	private final String europeanaKey = "SECRET_KEY";
 
 	public EuropeanaSpaceSource() {
 		super();
+		LABEL = Sources.Europeana.toString();
+		apiKey = "SECRET_KEY";
+		formatreader = new EuropeanaRecordFormatter();
 	    filtersSupportedBySource = new ArrayList<CommonFilters>(
 	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR,
 	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
@@ -162,23 +157,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	}
 
-	private Function<List<String>, QueryModifier> qrightwriter() {
-		Function<String, String> function = (String s) -> {
-			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
-			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
-			return "RIGHTS%3A%28" + s.replace(".", "") + "%29";
-		};
-		return new Function<List<String>, QueryModifier>() {
-			@Override
-			public AdditionalQueryModifier apply(List<String> t) {
-				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
-			}
-		};
-	}
-
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new EuroQB("http://europeana.eu/api/v2/search.json");
-		builder.addSearchParam("wskey", europeanaKey);
+		builder.addSearchParam("wskey", apiKey);
 
 		builder.addQuery("query", q.searchTerm);
 
@@ -203,9 +184,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return addfilters(q, builder).getHttp();
 	}
 
-	public String getSourceName() {
-		return LABEL;
-	}
+
 
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
@@ -244,7 +223,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		try{
 		if (response.path("success").asBoolean()) {
 			for (JsonNode item : response.path("items")) {
-				items.add(fillObjectFrom(item));
+				items.add(formatreader.fillObjectFrom(item));
 			}
 		}} catch(Exception e){
 			e.printStackTrace();
@@ -319,38 +298,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			JsonNode record = response.get("object");
 			if (response != null){
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
-			    /*
-				JsonNode item = record;
-
-				ItemsResponse it = new ItemsResponse();
-				it.id = Utils.readAttr(item, "id", true);
-//				not added before
-				it.type = Utils.readAttr(item, "type", true);
-				it.title = Utils.readArrayAttr(item, "title", false).get(0);
-				it.year = Utils.readArrayAttr(item, "year", false);
-				it.creator = Utils.readArrayAttr(item.path("europeanaAggregation"), "dcCreator", false).get(0);
-				it.description = Utils.readArrayAttr(
-						Utils.findNode(item
-								.path("proxies"), new Pair<String>("europeanaProxy",
-								"false"))
-						, "dcDescription", false).get(0);
-
-				it.dataProvider = Utils.readArrayAttr(item.get("aggregations").get(0), "edmDataProvider", false).get(0);
-
-
-
-				it.thumb = Utils.readArrayAttr(item, "edmPreview", false);
-				it.fullresolution = Utils.readArrayAttr(item, "edmIsShownBy", false);
-
-				it.url = new MyURL();
-				it.url.original = Utils.readArrayAttr(item, "edmIsShownAt", false);
-				it.url.fromSourceAPI = Utils.readAttr(item, "guid", false);
-				it.rights = Utils.readAttr(item, "rights", false);
-				it.externalId = it.fullresolution.get(0);
-				if (it.externalId == null || it.externalId == "")
-					it.externalId = it.url.original.get(0);
-				it.externalId = DigestUtils.md5Hex(it.externalId);*/
-
 			}
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
@@ -364,38 +311,4 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			return jsonMetadata;
 		}
 	}
-	
-	//can it be common for text being a response of search and text being the full json-content 
-	//(edm or ld, the one which is similar to search result)? With null checks.
-	@Override
-	public CulturalObject fillObjectFrom(JsonNode text) {
-		JsonContextRecord rec = new JsonContextRecord(text);
-		CulturalObject object = new CulturalObject();
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
-		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
-		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
-		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
-		return object;
-		
-		//TODO: add null checks
-//		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-//		object.setContributors(rec.getStringArrayValue("dcContributor"));
-//		object.setItemRights(rec.getStringValue("rights"));
-	}
-
 }
