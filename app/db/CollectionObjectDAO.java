@@ -124,7 +124,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteria[i] = this.createQuery()
 					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access);
+					.equal(access.ordinal());
 		}
 		q.or(criteria);
 		return this.find(q).asList();
@@ -170,7 +170,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteriaOr[i] = this.createQuery()
 					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access);
+					.equal(access.ordinal());
 		}
 		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
 				.size()];
@@ -198,7 +198,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteriaOr[i] = this.createQuery()
 					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access);
+					.greaterThanOrEq(access.ordinal());
 		}
 		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
 				.size()];

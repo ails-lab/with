@@ -17,12 +17,14 @@
 package controllers;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.WithResource.WithResourceType;
@@ -33,6 +35,7 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -58,6 +61,7 @@ public class CollectionObjectController extends Controller {
 
 	/**
 	 * Creates a new WITH resource from the JSON body
+	 * 
 	 * @param exhibition
 	 * @return the newly created resource
 	 */
@@ -249,6 +253,38 @@ public class CollectionObjectController extends Controller {
 		}
 	}
 
+	public static Result list(Option<String> userOrGroupName,
+			Option<String> access, boolean exhibitions, int offset, int count) {
+
+		Access accessLevel;
+		List<CollectionObject> collections;
+		if (access.isDefined()) {
+			accessLevel = Access.valueOf(access.get());
+		} else {
+			accessLevel = Access.OWN;
+		}
+		ObjectId userOrGroupId;
+		List<ObjectId> effectiveIds = AccessManager
+				.effectiveUserDbIds(session().get("effectiveUserIds"));
+		if (userOrGroupName.isDefined()) {
+			String name = userOrGroupName.get();
+			if (DB.getUserGroupDAO().getByName(name) != null) {
+				userOrGroupId = DB.getUserGroupDAO().getByName(name).getDbId();
+			} else {
+				userOrGroupId = DB.getUserDAO().getByUsername(name).getDbId();
+			}
+			HashMap<ObjectId, Access> restrictions = new HashMap<ObjectId, Access>();
+			restrictions.put(userOrGroupId, accessLevel);
+			collections = DB.getCollectionObjectDAO()
+					.getByMaxAccessWithRestrictions(effectiveIds, accessLevel,
+							restrictions, exhibitions, offset, count);
+		} else {
+			collections = DB.getCollectionObjectDAO().getByMaxAccess(
+					effectiveIds, accessLevel, exhibitions, offset, count);
+		}
+		return ok(Json.toJson(collections));
+	}
+
 	/**
 	 * @return
 	 */
@@ -257,8 +293,6 @@ public class CollectionObjectController extends Controller {
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		List<String> userIds = AccessManager.effectiveUserIds(session().get(
-				"effectiveUserIds"));
 		return getCollectionObject(fav);
 
 	}

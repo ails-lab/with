@@ -134,6 +134,17 @@ public class AccessManager {
 		return userIds;
 	}
 
+	public static List<ObjectId> effectiveUserDbIds(String effectiveUserIds) {
+		if (effectiveUserIds == null)
+			effectiveUserIds = "";
+		List<ObjectId> userIds = new ArrayList<ObjectId>();
+		for (String ui : effectiveUserIds.split(",")) {
+			if (ui.trim().length() > 0)
+				userIds.add(new ObjectId(ui.trim()));
+		}
+		return userIds;
+	}
+
 	public static String effectiveUserId(String effectiveUserIds) {
 		if (effectiveUserIds == null)
 			effectiveUserIds = "";
