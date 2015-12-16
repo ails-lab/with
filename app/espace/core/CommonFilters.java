@@ -21,21 +21,10 @@ public enum CommonFilters {
 		COUNTRY("Country"), YEAR("Year"), CONTRIBUTOR("Contributor"), DATA_PROVIDER("Data Provider");
 		
 		private final String text;
-		private final String id;
 
 	    private CommonFilters(final String text) {
 	        this.text = text;
-	        this.id = this.name();
 	    }
-
-	    private CommonFilters(String text, String id) {
-			this.text = text;
-			this.id = id;
-		}
-	    
-		public String getID() {
-			return id;
-		}
 
 		@Override
 	    public String toString() {

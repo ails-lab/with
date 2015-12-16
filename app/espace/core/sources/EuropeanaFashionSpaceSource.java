@@ -43,7 +43,7 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		// addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 		// addDefaultQueryModifier(CommonFilters.TYPE_ID, getFunction("219",
 		// "objectType"));
-		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getID(), getFunction("302", "dataProviders"));
+		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.name(), getFunction("302", "dataProviders"));
 
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10303"));
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10460"));

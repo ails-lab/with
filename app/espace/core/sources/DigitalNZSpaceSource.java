@@ -58,41 +58,41 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		LABEL = Sources.DigitalNZ.toString();
 		apiKey = "SECRET_KEY";
 		formatreader = new DNZBasicRecordFormatter();
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("and[category][]"));
-		addDefaultWriter(CommonFilters.CREATOR.getID(), fwriter("and[creator][]"));
-		addDefaultWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS.getID(), fwriter("and[usage][]"));
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("and[category][]"));
+		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("and[creator][]"));
+		addDefaultWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.RIGHTS.name(), fwriter("and[usage][]"));
 
 		// TODO: rights_url shows the license in the search
 
-		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "Images");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), "Audio");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "Books");
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "Images");
+		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "Audio");
+		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "Books");
 
-		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Commercial,
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.Creative_Commercial,
 		// "");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.Creative_Modify,
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.Creative_Modify,
 		// ".*creative(?!.*nd).*");
 
-		// addMapping(CommonFilters.RIGHTS.getID(),
+		// addMapping(CommonFilters.RIGHTS.name(),
 		// RightsValues.Creative_Not_Commercial,
 		// "http://creativecommons.org/licenses/by-nc/3.0/nz/",
 		// "http://creativecommons.org/licenses/by-nc-sa/3.0/",
 		// "This work is licensed under a Creative Commons
 		// Attribution-Noncommercial 3.0 New Zealand License");
 		//
-		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.UNKNOWN, "No known
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.UNKNOWN, "No known
 		// copyright restrictions\nCopyright Expired",
 		// "No known copyright restrictions");
-		// addMapping(CommonFilters.RIGHTS.getID(), RightsValues.RR, "All rights
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.RR, "All rights
 		// reserved");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.toString(), "Share");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), "Modify");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.toString(), "Use commercially");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.UNKNOWN.toString(), "Unknown");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.toString(), "All rights reserved");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), "Share");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), "Modify");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), "Use commercially");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.toString(), "Unknown");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.toString(), "All rights reserved");
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {

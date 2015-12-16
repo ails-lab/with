@@ -42,7 +42,7 @@ public class AccessManager {
 
 	public static boolean checkAccess(WithAccess withAccess,
 			String effectiveUserIds, Action action) {
-		if (withAccess.isPublic() == true) {
+		if (withAccess.isPublic() == true && action.equals(Action.READ)) {
 			return true;
 		}
 		if (effectiveUserIds == null || effectiveUserIds.equals("")) {

@@ -17,12 +17,14 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
@@ -47,6 +49,7 @@ import com.mongodb.DBObject;
 import com.mongodb.WriteResult;
 
 import utils.Tuple;
+import utils.AccessManager.Action;
 
 /*
  * The class consists of methods that can be both query
@@ -361,12 +364,11 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * Create a basic Mongo query with withCreator field matching, offset, limit and criteria.
 	 * @param criteria
 	 * @param creator
-	 * @param isExhibition
 	 * @param offset
 	 * @param count
 	 * @return
 	 */
-	private Query<T> formBasicQuery(CriteriaContainer[] criteria, ObjectId creator, Boolean isExhibition,  int offset, int count) {
+	private Query<T> formCreatorQuery(CriteriaContainer[] criteria, ObjectId creator,  int offset, int count) {
 		Query<T> q = this.createQuery().offset(offset).limit(count+1);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
@@ -384,7 +386,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public Tuple<List<T>, Tuple<Integer, Integer>> getResourcesWithCount(Query<T> q,
 			Boolean isExhibition) {
-
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		QueryResults<T> result;
 		List<T> collections = new ArrayList<T>();
@@ -451,7 +452,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(orAccessed));
 		}
-		Query<T> q = formBasicQuery(criteria, creator, isExhibition, offset, count);
+		Query<T> q = formCreatorQuery(criteria, creator, offset, count);
 		if (totalHits) {
 			return getResourcesWithCount(q, isExhibition);
 		}
@@ -484,7 +485,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
 			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(orAccessed));
 		}
-		Query<T> q = formBasicQuery(criteria, creator, isExhibition, offset, count);
+		Query<T> q = formCreatorQuery(criteria, creator, offset, count);
 		if (totalHits) {
 			return getResourcesWithCount(q, isExhibition);
 		}
@@ -572,11 +573,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
 
-
-
-
 	/**
-	 * ??????? do we have external Ids ??????
 	 * @param extId
 	 * @return
 	 */
@@ -647,4 +644,5 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		updateOps.dec(fieldName);
 		this.update(q, updateOps);
 	}
+	
 }

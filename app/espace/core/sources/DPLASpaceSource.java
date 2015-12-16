@@ -61,40 +61,40 @@ public class DPLASpaceSource extends ISpaceSource {
 		LABEL = Sources.DPLA.toString();
 		apiKey = "SECRET_KEY";
 		formatreader = new DPLARecordFormatter();
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
-		addDefaultWriter(CommonFilters.COUNTRY.getID(), fwriter("sourceResource.spatial.country"));
-		addDefaultWriter(CommonFilters.CREATOR.getID(), fwriter("sourceResource.creator"));
-		addDefaultWriter(CommonFilters.CONTRIBUTOR.getID(), fwriter("sourceResource.contributor"));
-		addDefaultWriter(CommonFilters.PROVIDER.getID(), fwriter("provider.name"));
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
-		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
+		addDefaultWriter(CommonFilters.COUNTRY.name(), fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("sourceResource.creator"));
+		addDefaultWriter(CommonFilters.CONTRIBUTOR.name(), fwriter("sourceResource.contributor"));
+		addDefaultWriter(CommonFilters.PROVIDER.name(), fwriter("provider.name"));
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
+		addDefaultComplexWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
 
 		/**
 		 * TODO check this
 		 */
 
-		addDefaultWriter(CommonFilters.RIGHTS.getID(), fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
+		addDefaultWriter(CommonFilters.RIGHTS.name(), fwriter("sourceResource.rights"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
 				".*non-commercial.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRPA.toString(), ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRRA.toString(), ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRFA.toString(), ".*rr-f.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRPA.toString(), ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRRA.toString(), ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*rr-f.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRFA.toString(), ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.toString(), ".*(creative).*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), ".*(creative).*");
 
-		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "image");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "moving image");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), "sound");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "text");
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "image");
+		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "moving image");
+		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "sound");
+		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "text");
 
 		// TODO: what to do with physical objects?
 	}

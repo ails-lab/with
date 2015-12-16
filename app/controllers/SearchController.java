@@ -127,10 +127,8 @@ public class SearchController extends Controller {
 							FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 							sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
 						}
-
 						r1.filters = ListUtils.transform(merge, f);
 						r1.responses = mergeResponses(finalResponses);
-
 						return ok(Json.toJson(r1));
 					}
 

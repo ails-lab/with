@@ -55,15 +55,15 @@ public class NLASpaceSource extends ISpaceSource {
 		LABEL = Sources.NLA.toString();
 		apiKey = "SECRET_KEY";
 		formatreader = new NLARecordFormatter();
-		addDefaultQueryModifier(CommonFilters.TYPE.getID(), qfwriter("format"));
-		addDefaultQueryModifier(CommonFilters.YEAR.getID(),qfwriterYEAR());
+		addDefaultQueryModifier(CommonFilters.TYPE.name(), qfwriter("format"));
+		addDefaultQueryModifier(CommonFilters.YEAR.name(),qfwriterYEAR());
 		
-		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), 
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), 
 				"Image","Photograph", "Poster, chart, other");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "Video");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), 
+		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "Video");
+		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), 
 				"Sound","Sheet music");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "Books","Article");
+		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "Books","Article");
 	}
 	
 	private Function<List<String>, QueryModifier> qfwriterYEAR() {

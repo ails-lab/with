@@ -50,23 +50,23 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 		LABEL = Sources.BritishLibrary.toString();
 		apiKey = "8bddf33bef4c14c98d469bfb1f8e78c7";
 		formatreader = new BritishLibraryRecordFormatter();
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("media"));
-		addDefaultWriter(CommonFilters.RIGHTS.getID(), frwriter());
-		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
-		// addDefaultWriter(CommonFilters.COUNTRY.getID(),
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("media"));
+		addDefaultWriter(CommonFilters.RIGHTS.name(), frwriter());
+		addDefaultComplexWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 
 		setLicences();
 		
-		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "photo");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "video");
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "photo");
+		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "video");
 		
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.toString(), getLicence("0"));
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),getLicence("2"),getLicence("1"));
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.Creative.toString(),getLicence("1"),getLicence("2"),getLicence("3"),getLicence("4"),getLicence("5"),getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.UNKNOWN.toString(),getLicence("7"));
-		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.Public.toString(),getLicence("9"),getLicence("10"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.toString(), getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),getLicence("2"),getLicence("1"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.name(),ItemRights.Creative.toString(),getLicence("1"),getLicence("2"),getLicence("3"),getLicence("4"),getLicence("5"),getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.name(),ItemRights.UNKNOWN.toString(),getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.name(),ItemRights.Public.toString(),getLicence("9"),getLicence("10"));
 	}
 
 	private void setLicences() {
