@@ -16,14 +16,20 @@
 
 package general.daoTests;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.junit.Test;
+
+import com.google.common.net.MediaType;
 
 import play.libs.Json;
 import utils.Tuple;
@@ -34,10 +40,15 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ResourceType;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
+import model.basicDataTypes.WithDate;
 import model.resources.AgentObject;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
@@ -81,9 +92,12 @@ public class DAOsTests {
 		wa.setWithCreator(u.getDbId());
 		wa.setExhibition(false);
 		WithAccess waccess = new WithAccess();
-		waccess.put(u.getDbId(), Access.OWN);
-		waccess.put(u1.getDbId(), Access.READ);
-		waccess.put(u2.getDbId(), Access.WRITE);
+		AccessEntry ae1 = new AccessEntry(u.getDbId(), Access.OWN);
+		AccessEntry ae2 = new AccessEntry(u1.getDbId(), Access.READ);
+		AccessEntry ae3 = new AccessEntry(u2.getDbId(), Access.WRITE);
+		waccess.addToAcl(ae1);
+		waccess.addToAcl(ae2);
+		waccess.addToAcl(ae3);
 		wa.setAccess(waccess);
 		wres.setAdministrative(wa);
 
@@ -92,9 +106,12 @@ public class DAOsTests {
 		wa2.setWithCreator(u.getDbId());
 		wa2.setExhibition(false);
 		WithAccess waccess2 = new WithAccess();
-		waccess2.put(u.getDbId(), Access.READ);
-		waccess2.put(u1.getDbId(), Access.OWN);
-		waccess2.put(u2.getDbId(), Access.WRITE);
+		ae1 = new AccessEntry(u1.getDbId(), Access.OWN);
+		ae2 = new AccessEntry(u2.getDbId(), Access.READ);
+		ae3 = new AccessEntry(u.getDbId(), Access.WRITE);
+		waccess.addToAcl(ae1);
+		waccess.addToAcl(ae2);
+		waccess.addToAcl(ae3);
 		wa.setAccess(waccess2);
 
 
@@ -103,9 +120,12 @@ public class DAOsTests {
 		wa3.setWithCreator(u.getDbId());
 		wa3.setExhibition(false);
 		WithAccess waccess3 = new WithAccess();
-		waccess3.put(u.getDbId(), Access.WRITE);
-		waccess3.put(u1.getDbId(), Access.READ);
-		waccess3.put(u2.getDbId(), Access.OWN);
+		ae1 = new AccessEntry(u2.getDbId(), Access.OWN);
+		ae2 = new AccessEntry(u.getDbId(), Access.READ);
+		ae3 = new AccessEntry(u1.getDbId(), Access.WRITE);
+		waccess.addToAcl(ae1);
+		waccess.addToAcl(ae2);
+		waccess.addToAcl(ae3);
 		wa.setAccess(waccess3);
 
 
@@ -120,10 +140,11 @@ public class DAOsTests {
 		ents.add(ci);
 		wres.setCollectedIn(ents);
 
+
 		//no externalCollections
 		List<ExternalCollection> ec;
 
-		//no provenance
+		// a dummy provenance
 		ProvenanceInfo pinfo = new ProvenanceInfo();
 		pinfo.setProvider("Europeana");
 		pinfo.setResourceId("18898");
@@ -146,7 +167,47 @@ public class DAOsTests {
 		CollectionDescriptiveData ddata = new CollectionDescriptiveData();
 		ddata.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
+
 		ddata.setDescription(desc);
+
+		MultiLiteralOrResource keywords =
+				new MultiLiteralOrResource(ResourceType.dbpedia,  "http://www.uri.org");
+				keywords.put("es", new ArrayList<String>(Arrays.asList("Buenos", "Córdoba", "La Plata")));
+				keywords.put("en", new ArrayList<String>(Arrays.asList("Buenos", "Cordoba", "Plata")));
+		ddata.setKeywords(keywords);
+
+
+		MultiLiteralOrResource altLabels =
+				new MultiLiteralOrResource(ResourceType.dbpedia,  "http://www.uri.org");
+				altLabels.put("en", new ArrayList<String>(Arrays.asList("music", "dance")));
+				altLabels.put("fr", new ArrayList<String>(Arrays.asList("musiciens", "dancers")));
+		ddata.setAltLabels(altLabels);
+
+		LiteralOrResource lor = new LiteralOrResource();
+		lor.put("en", "free rights");
+		lor.put("fr", "rights liberales");
+		ddata.setMetadataRights(lor);
+
+		WithDate d1 = new WithDate();
+		d1.setYear(1984);
+		try {
+			d1.setIsoDate(new SimpleDateFormat("dd-MM-yyyy").parse("24-11-1967"));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		WithDate d2 = new WithDate();
+		d2.setYear(1988);
+		try {
+			d2.setIsoDate(new SimpleDateFormat("dd-MM-yyyy").parse("25-07-1953"));
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		ddata.setDates(new ArrayList<WithDate>(Arrays.asList(d1, d2)));
+
 		wres.setDescriptiveData(ddata);
 
 
@@ -160,6 +221,7 @@ public class DAOsTests {
 		 */
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
 		wres.addMedia(MediaVersion.Thumbnail, emo);
+
 
 		if(DB.getCollectionObjectDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored! 1");

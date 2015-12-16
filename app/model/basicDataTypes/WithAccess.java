@@ -99,16 +99,16 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 	public void addAccess(AccessEntry accessEntry) {
 		this.acl.add(accessEntry);
 	}
-	
+
 	public void addAccess(ObjectId userId, Access access) {
 		AccessEntry accessEntry = new AccessEntry(userId, access);
 		this.acl.add(accessEntry);
 	}
-	
+
 	public void setAcl(List<AccessEntry> acl) {
 		this.acl = acl;
 	}
-	
+
 	public Access getAcl(ObjectId user) {
 		for (AccessEntry ae: acl) {
 			if (ae.user.equals(user))
@@ -116,4 +116,14 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 		}
 		return Access.NONE;
 	}
+
+	public void addToAcl(AccessEntry ae) {
+		if(acl == null) {
+			acl = new ArrayList<AccessEntry>();
+			acl.add(ae);
+		} else {
+			acl.add(ae);
+		}
+	}
+
 }
