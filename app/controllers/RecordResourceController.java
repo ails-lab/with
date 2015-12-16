@@ -238,7 +238,14 @@ public class RecordResourceController extends Controller {
 			return internalServerError(error);
 		}
 	}
-	
+
+	// TODO: Are we checking rights for every record alone?
+	public static Result list(String collectionId, int start, int count) {
+		List<RecordResource> records = DB.getRecordResourceDAO()
+				.getByCollectionBetweenPositions(new ObjectId(collectionId),
+						start, start + count);
+		return ok(Json.toJson(records));
+	}
 
 	// TODO: Remove favorites
 

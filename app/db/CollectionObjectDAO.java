@@ -76,6 +76,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		UpdateOperations<CollectionObject> updateOps = this
 				.createUpdateOperations();
 		updateFields("", json, updateOps);
+		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
 	}
 

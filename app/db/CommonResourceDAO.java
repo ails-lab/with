@@ -145,7 +145,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public List<RecordResource> getByCollection(ObjectId colId) {
 		int MAX = 10000;
-		return getByCollectionBtwnPositions(colId, 0, MAX);
+		return getByCollectionBetweenPositions(colId, 0, MAX);
 	}
 
 	/**
@@ -155,7 +155,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param colId, lowrBound, upperBound
 	 * @return
 	 */
-	public List<RecordResource> getByCollectionBtwnPositions(ObjectId colId, int lowerBound, int upperBound) {
+	public List<RecordResource> getByCollectionBetweenPositions(ObjectId colId, int lowerBound, int upperBound) {
 		Query<T> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);

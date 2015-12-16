@@ -208,13 +208,15 @@ public class CollectionObjectController extends Controller {
 	public static Result editCollectionObject(String id) {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
+		ObjectId dbId = new ObjectId(id);
 		try {
 			if (json == null) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
+			// TODO: check rights from DAO
 			CollectionObject oldCollection = DB.getCollectionObjectDAO().get(
-					new ObjectId(id));
+					dbId);
 			if (oldCollection == null) {
 				log.error("Cannot retrieve resource from database");
 				error.put("error", "Cannot retrieve resource from database");
@@ -228,25 +230,24 @@ public class CollectionObjectController extends Controller {
 				return forbidden(error);
 			}
 			// TODO change JSON at all its depth
-			ObjectMapper objectMapper = new ObjectMapper();
-			ObjectReader updator = objectMapper
-					.readerForUpdating(oldCollection);
-			CollectionObject newCollection;
-			newCollection = updator.readValue(json);
-			Set<ConstraintViolation<CollectionObject>> violations = Validation
-					.getValidator().validate(newCollection);
-			if (!violations.isEmpty()) {
-				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<CollectionObject> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath()
-							+ "\":\"" + cv.getMessage() + "\"}"));
-				}
-				error.put("error", properties);
-				return badRequest(error);
-			}
-			newCollection.getAdministrative().setLastModified(new Date());
-			DB.getCollectionObjectDAO().makePermanent(newCollection);
-			return ok(Json.toJson(newCollection));
+			DB.getCollectionObjectDAO().editCollection(dbId, json);
+			/*
+			 * ObjectMapper objectMapper = new ObjectMapper(); ObjectReader
+			 * updator = objectMapper .readerForUpdating(oldCollection);
+			 * CollectionObject newCollection; newCollection =
+			 * updator.readValue(json);
+			 * Set<ConstraintViolation<CollectionObject>> violations =
+			 * Validation .getValidator().validate(newCollection); if
+			 * (!violations.isEmpty()) { ArrayNode properties =
+			 * Json.newObject().arrayNode(); for
+			 * (ConstraintViolation<CollectionObject> cv : violations) {
+			 * properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\""
+			 * + cv.getMessage() + "\"}")); } error.put("error", properties);
+			 * return badRequest(error); }
+			 * newCollection.getAdministrative().setLastModified(new Date());
+			 * DB.getCollectionObjectDAO().makePermanent(newCollection);
+			 */
+			return ok(Json.toJson(DB.getCollectionObjectDAO().get(dbId)));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
