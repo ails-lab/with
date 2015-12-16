@@ -179,6 +179,7 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
 		updateOps.add("collectedIn", new CollectionInfo(colId, position));
 		this.update(q, updateOps);
+		shiftRecordsToRight(colId, position+1);
 	}
 	
 	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
@@ -186,5 +187,6 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
 		this.update(q, updateOps);
+		shiftRecordsToLeft(colId, position+1);
 	}
 }
