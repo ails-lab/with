@@ -201,15 +201,29 @@ class AccessFilter extends Filter {
   }
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
-    if (DB.getConf().hasPath("apikey.ignorePattern")) {
-      val pattern = DB.getConf().getString("apikey.ignorePattern").r.unanchored
-      (pattern findFirstIn rh.path) match {
-        case Some(_) => next(rh)
-        case None => apiKeyCheck(next, rh)
-      }
-    } else {
-      apiKeyCheck(next, rh)
-    }
+	//the author of this code struggled with scala
+	var s = false
+	if (DB.getConf().hasPath("apikey.ignorePattern2")){
+      		val pattern = DB.getConf().getString("apikey.ignorePattern2").r.unanchored
+      		(pattern findFirstIn rh.path) match {
+        		case Some(_) => s=true
+        		case None =>
+      		}
+	}
+
+	if (DB.getConf().hasPath("apikey.ignorePattern")){
+      		val pattern2 = DB.getConf().getString("apikey.ignorePattern").r.unanchored
+      		(pattern2 findFirstIn rh.path) match {
+        		case Some(_) => s=true
+        		case None => 
+      		}
+	} 
+	
+	if(s){
+		next(rh)
+	}else{
+		apiKeyCheck(next, rh)
+	}
   }
 }
 
