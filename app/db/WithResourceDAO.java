@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
+import model.DescriptiveData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.Literal.Language;
@@ -59,22 +60,18 @@ import utils.AccessManager.Action;
  * Special methods referring to one of these entities go to the
  * specific DAO class.
  */
-public abstract class CommonResourceDAO<T> extends DAO<T>{
-
-	public CommonResourceDAO() {
-		super(WithResource.class);
-	}
+public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 
 	/*
 	 * The value of the entity class is either
 	 * CollectionObject.class or RecordResource.class
 	 */
-	public CommonResourceDAO(Class<?> entityClass) {
+	public WithResourceDAO(Class<T> entityClass) {
 		super(entityClass);
 	}
 
 	/**
-	 * Retrieve an Object from DB using its dbId
+	 * Retrieve a resource from DB using its dbId
 	 * @param id
 	 * @return
 	 */
@@ -84,7 +81,7 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-	 * Get a CollectionObject by the dbId and retrieve
+	 * Get a resource by the dbId and retrieve
 	 * only a bunch of fields from the whole document
 	 * @param id
 	 * @param retrievedFields
@@ -140,72 +137,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	}
 
 	/**
-	 * Retrieve all records from specific collection checking
-	 * out for duplicates and restore them.
-	 *
-	 * @param colId
-	 * @return
-	 */
-	public List<RecordResource> getByCollection(ObjectId colId) {
-		int MAX = 10000;
-		return getByCollectionBetweenPositions(colId, 0, MAX);
-	}
-
-	/**
-	 * Retrieve records from specific collection using position
-	 * which is between lowerBound and upperBound
-	 *
-	 * @param colId, lowrBound, upperBound
-	 * @return
-	 */
-	public List<RecordResource> getByCollectionBetweenPositions(ObjectId colId, int lowerBound, int upperBound) {
-		Query<T> q = this.createQuery();
-		BasicDBObject colIdQuery = new BasicDBObject();
-		colIdQuery.put("collectionId", colId);
-		BasicDBObject elemMatch2 = new BasicDBObject();
-		BasicDBObject geq = new BasicDBObject();
-		geq.put("$gte", lowerBound);
-		geq.append("$lt", upperBound);
-		colIdQuery.append("position", geq);
-		BasicDBObject elemMatch1 = new BasicDBObject();
-		elemMatch1.put("$elemMatch", colIdQuery);
-		q.filter("collectedIn", elemMatch1);
-		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
-		/*DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
-		List<T> ds = new ArrayList<T>();
-		while (cursor.hasNext()) {
-		   DBObject o = cursor.next();
-		   T d = (T) DB.getMorphia().fromDBObject(entityClass, o);
-		   ds.add(d);
-		}*/
-		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(upperBound-lowerBound);
-		for (int i=0; i<(upperBound - lowerBound); i++) {
-			repeatedResources.add(new RecordResource());
-		}
-		int maxPosition = -1;
-		for (RecordResource d: resources) {
-			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) d.getCollectedIn();
-			//May be a long iteration, if a record belongs to many collections
-			for (CollectionInfo ci: collectionInfos) {
-				ObjectId collectionId = ci.getCollectionId();
-				if (collectionId.equals(colId)) {
-					int pos = ci.getPosition();
-					if ((lowerBound <= pos) && (pos < upperBound)) {
-						int arrayPosition = pos - lowerBound;
-						if (arrayPosition > maxPosition)
-							maxPosition = arrayPosition;
-						repeatedResources.add(arrayPosition, d);
-					}
-				}
-			}
-		}
-		if (maxPosition > -1)
-			return repeatedResources.subList(0, maxPosition+1);
-		else
-			return new ArrayList<RecordResource>();
-	}
-
-	/**
 	 * Given a list of ObjectId's (dbId's)
 	 * return the specified  resources
 	 * @param ids
@@ -224,13 +155,13 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 */
 	public List<T> getByLabel(String lang, String title) {
 		if (lang == null) lang = "default";
-		Query<T> q = this.createQuery().field("descriptiveData.label." + lang)
+		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang)
 				.equal(title);
 		return this.find(q).asList();
 	}
 
 	public List<T> getByLabel(Language lang, String title) {
-		Query<T> q = this.createQuery().field("descriptiveData.label." + lang.toString()).equal(title);
+		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang.toString()).equal(title);
 		return this.find(q).asList();
 	}
 
@@ -297,7 +228,6 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 		 * only the first element of this array directly!
 		 */
 		Query<T> q = this.createQuery();
-		//q.field("provenance").hasThisElement(q.field("provider").equals(sourceName));
 		BasicDBObject provQuery = new BasicDBObject();
 		provQuery.put("provider", sourceName);
 		BasicDBObject elemMatch = new BasicDBObject();
@@ -311,10 +241,13 @@ public abstract class CommonResourceDAO<T> extends DAO<T>{
 	 * @param sourceId
 	 * @return
 	 */
-	public long countBySource(String sourceId) {
-		//TODO: faster if could query on last entry of provenance array. Mongo query!
-		Query<T> q = this.createQuery().disableValidation();
-		//q.field("provenance").hasThisElement(q.field("provider").equals(sourceId));
+	public long countBySource(String sourceName) {
+		Query<T> q = this.createQuery();
+		BasicDBObject provQuery = new BasicDBObject();
+		provQuery.put("provider", sourceName);
+		BasicDBObject elemMatch = new BasicDBObject();
+		elemMatch.put("$elemMatch", provQuery);
+		q.filter("provenance", elemMatch);
 		return this.find(q).countAll();
 	}
 

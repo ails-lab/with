@@ -52,11 +52,9 @@ import model.resources.WithResource;
  * 2. Every time create a new DAO class associated with the explicit class
  * that I want to retieve.
  */
-public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
+public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
-	public RecordResourceDAO() {super(RecordResource.class);}
-
-	public RecordResourceDAO(Class<?> entityClass) {
+	public RecordResourceDAO() {
 		super(RecordResource.class);
 	}
 
@@ -124,6 +122,72 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 	}
 	*/
 	
+	/**
+	 * Retrieve records from specific collection using position
+	 * which is between lowerBound and upperBound
+	 *
+	 * @param colId, lowrBound, upperBound
+	 * @return
+	 */
+	public List<RecordResource> getByCollectionBetweenPositions(ObjectId colId, int lowerBound, int upperBound) {
+		Query<RecordResource> q = this.createQuery();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch2 = new BasicDBObject();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", lowerBound);
+		geq.append("$lt", upperBound);
+		colIdQuery.append("position", geq);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
+		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
+		/*DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
+		List<T> ds = new ArrayList<T>();
+		while (cursor.hasNext()) {
+		   DBObject o = cursor.next();
+		   T d = (T) DB.getMorphia().fromDBObject(entityClass, o);
+		   ds.add(d);
+		}*/
+		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(upperBound-lowerBound);
+		for (int i=0; i<(upperBound - lowerBound); i++) {
+			repeatedResources.add(new RecordResource());
+		}
+		int maxPosition = -1;
+		for (RecordResource d: resources) {
+			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) d.getCollectedIn();
+			//May be a long iteration, if a record belongs to many collections
+			for (CollectionInfo ci: collectionInfos) {
+				ObjectId collectionId = ci.getCollectionId();
+				if (collectionId.equals(colId)) {
+					int pos = ci.getPosition();
+					if ((lowerBound <= pos) && (pos < upperBound)) {
+						int arrayPosition = pos - lowerBound;
+						if (arrayPosition > maxPosition)
+							maxPosition = arrayPosition;
+						repeatedResources.add(arrayPosition, d);
+					}
+				}
+			}
+		}
+		if (maxPosition > -1)
+			return repeatedResources.subList(0, maxPosition+1);
+		else
+			return new ArrayList<RecordResource>();
+	}
+
+	/**
+	 * Retrieve all records from specific collection checking
+	 * out for duplicates and restore them.
+	 *
+	 * @param colId
+	 * @return
+	 */
+	public List<RecordResource> getByCollection(ObjectId colId) {
+		int MAX = 10000;
+		return getByCollectionBetweenPositions(colId, 0, MAX);
+	}
+	
 	public void shift(ObjectId colId, int position, BiConsumer<String, UpdateOperations> update) {
 		Query<RecordResource> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
@@ -178,8 +242,8 @@ public class RecordResourceDAO extends CommonResourceDAO<RecordResource> {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
 		updateOps.add("collectedIn", new CollectionInfo(colId, position));
-		this.update(q, updateOps);
 		shiftRecordsToRight(colId, position+1);
+		this.update(q, updateOps);
 	}
 	
 	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {

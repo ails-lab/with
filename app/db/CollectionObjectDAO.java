@@ -33,10 +33,10 @@ import org.mongodb.morphia.query.UpdateOperations;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
+public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	/*
-	 * The constructor is optional becuse the explicit type is passed through
+	 * The constructor is optional because the explicit type is passed through
 	 * generics.
 	 */
 	public CollectionObjectDAO() {

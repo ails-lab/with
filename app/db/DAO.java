@@ -49,10 +49,10 @@ import com.mongodb.util.JSON;
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 	static private final Logger.ALogger log = Logger.of(DAO.class);
 
-	protected final Class<?> entityClass;
+	protected final Class<E> entityClass;
 
-	public DAO(Class<?> entityClass) {
-		super(DB.getDs());
+	public DAO(Class<E> entityClass) {
+		super(entityClass, DB.getDs());
 		this.entityClass = entityClass;
 	}
 

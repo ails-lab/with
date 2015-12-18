@@ -24,6 +24,7 @@ import model.Collection;
 import model.CollectionRecord;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -172,6 +173,20 @@ public class DB {
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO) getDAO(RecordResource.class);
 	}
+	
+	public static WithResourceDAO<WithResource> getWithResourceDAO() {
+		DAO<?> dao = (DAO<WithResource>) daos.get("WithResource");
+		if (dao == null) {
+			try {
+				dao = new WithResourceDAO(WithResource.class);
+				daos.put("WithResource", dao);
+			} catch (Exception e) {
+				log.error("Can't instantiate DAO for WithResource", e);
+			}
+		}
+		return (WithResourceDAO<WithResource>) dao;
+	}
+	
 	/*
 	public static RecordResourceDAO.AgentObjectDAO getAgentObjectDAO() {
 		return (RecordResourceDAO.AgentObjectDAO)

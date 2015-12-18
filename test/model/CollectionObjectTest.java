@@ -106,8 +106,6 @@ public class CollectionObjectTest {
 		Literal desc = new Literal(Language.EN, "This is a description");
 		cdd.setDescription(desc);
 		co.setDescriptiveData(cdd);
-
-
 		/*
 		 * no content for the collection
 		 */
@@ -122,7 +120,6 @@ public class CollectionObjectTest {
 		co.setMedia(medias);
 		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
-
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
 		JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
