@@ -84,10 +84,10 @@ define(['knockout', 'text!./members.html', 'app'], function(ko, template, app) {
 		self.excecuteAdd = function(userData) {
 			console.log(self.groupId());
 			$.ajax({
-				method      : "GET",
+				method      : "PUT",
 				contentType    : "text/plain",
 				url         : "/group/addUserOrGroup/" + self.groupId(),
-				data		: "id="+userData.userId+"&groupId="+self.groupId(),
+				data		: "id="+userData.userId,
 				success		: function(result) {
 					self.image = userData.image;
 					if(userData.category == "user") {
