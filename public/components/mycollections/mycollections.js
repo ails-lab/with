@@ -204,7 +204,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.getEditableFromStorage = function () {
-			
 			var collections = [];
 			if (currentUser!== null){
 				collections = currentUser.editables();
@@ -213,11 +212,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$.smkAlert({text:'An error has occured. You are no longer logged in', type:'danger', permanent: true});
 				return [];
 			}
-			
-			
 		}
-
-	    
 
 		deleteCollection = function(collectionId) {
 			$.ajax({
@@ -230,26 +225,17 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.sharedCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
-					
-					
 					var theitem= ko.utils.arrayFirst(currentUser.editables(), function(item) {
 						return item.dbId===collectionId;
 			           
 			        });
-
 					currentUser.editables.remove(theitem);
-					//currentUser.editables.splice(index,1);
-					
+					//currentUser.editables.splice(index,1);	
 				}
 			});
 		};
 		
-		
-		
-		
-
 		self.moreShared=function(isExhibition){
-			
 			if (self.loading === true) {
 				setTimeout(self.moreShared(isExhibition), 300);
 			}
@@ -280,13 +266,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 				/*}*/
 			}
-			
-			
 		}
 		
 
 		self.moreCollections=function(isExhibition){
-			
 			if (self.loading === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
@@ -315,8 +298,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					});
 				}
 			}
-			
-			
 		}
 		
 		self.openShareCollection = function(collection, event) {
