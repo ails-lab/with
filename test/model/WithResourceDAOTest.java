@@ -93,7 +93,7 @@ public class WithResourceDAOTest {
 			System.out.println(Json.toJson(co));
 		}*/
 		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		System.out.println(DB.getWithResourceDAO().getById(getByLabel(Language.EN, "TestWithResourceNew0").size());
+		System.out.println(DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNew0").size());
 	}
 
 }
