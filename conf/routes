@@ -72,7 +72,7 @@ PUT      /group/:id                                controllers.GroupManager.edit
 DELETE   /group/:id                                controllers.GroupManager.deleteGroup(id)
 GET      /group/:id                                controllers.GroupManager.getGroup(id)
 PUT      /group/addUserOrGroup/:groupId            controllers.UserAndGroupManager.addUserOrGroupToGroup(id: String ?=null, groupId)
-PUT      /group/removeUserOrGroup/:groupId         controllers.UserAndGroupManager.removeUserOrGroupFromGroup(id: String ?=null, groupId)
+DELETE   /group/removeUserOrGroup/:groupId         controllers.UserAndGroupManager.removeUserOrGroupFromGroup(id: String ?=null, groupId)
 PUT      /group/join/:groupId                      controllers.UserAndGroupManager.joinGroup(groupId)
 PUT      /group/leave/:groupId                     controllers.UserAndGroupManager.leaveGroup(groupId)
 GET		 /group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")

@@ -275,6 +275,8 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByFacebookId(facebookId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 				return getUser(u.getDbId().toHexString());
 			} else {
 				String accessToken = json.get("accessToken").asText();
@@ -641,7 +643,7 @@ public class UserManager extends Controller {
 
 		create.dbId = "";
 		create.call = "";
-		create.ip = "";
+//		create.ip = "";
 		create.counterLimit = -1l;
 		create.volumeLimit = -1l;
 		// create.position = 1;
@@ -821,9 +823,9 @@ public class UserManager extends Controller {
 
 		email.setMsg(message);
 
-		
+
 		email.send();
-		
+
 	}
 
 	/***

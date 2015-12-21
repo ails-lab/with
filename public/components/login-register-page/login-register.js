@@ -1,10 +1,18 @@
 define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-validation', 'google'], function(ko, template, FB, app) {
 
-	FB.init({
-		appId   : '1584816805087190',
-		status  : true,
-		version : 'v2.2'
-	});
+	if (window.location.origin === 'http://localhost:9000') {
+		FB.init({
+			appId   : '1692894374279432',
+			status  : true,
+			version : 'v2.2'
+		});
+	} else {
+		FB.init({
+			appId   : '1584816805087190',
+			status  : true,
+			version : 'v2.2'
+		});
+	}
 
 	ko.validation.init({
 		errorElementClass: 'has-error',
@@ -18,7 +26,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		if(params.callback){
 			self.callback=params.callback;
 		}
-		
+
 		function tokenRequest( event ) {
 			var origin = event.origin;
 			var source = event.source;
@@ -350,7 +358,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							type        : "post",
 							contentType : "application/json",
 							dataType    : "json",
-							processData : false,
+							processData : "false",
 							url         : "/user/login",
 							data        : json,
 							success     : function(data, text) {
