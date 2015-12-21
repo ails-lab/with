@@ -288,7 +288,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 	function ItemViewModel(params) {
 		var self = this;
-		document.body.setAttribute("data-page","item");
+	//	document.body.setAttribute("data-page","item");
 		   
 		self.route = params.route;
 		self.from=window.location.href;	

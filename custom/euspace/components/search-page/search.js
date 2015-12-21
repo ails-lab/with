@@ -128,8 +128,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	           self.items.push(new Record(c));
 	        };
 
-
-
 		self.append =function(newitems){
 			self.items.push.apply(self.items, newitems);
 			};
@@ -625,7 +623,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         likeRecord = function (id,event) {
         	event.preventDefault();
 			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.externalId=== id;
+				return record.recordId=== id;
 			});
 
 			app.likeItem(rec, function (status) {
@@ -640,7 +638,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		collect = function (id,event) {
 			event.preventDefault();
 			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.externalId=== id;
+				return record.recordId=== id;
 			});
 			console.log(rec);
 			
@@ -656,11 +654,20 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				    }
 				    else{tile+='<span class="star"  id='+record.externalId+'>';}
 				    if(record.externalId){
-				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
+				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 						+'</span>';}
-						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					}
+			 else{
+				 tile+='<span class="star" id="'+record.externalId+'" style="display:none">'
+				 if(record.externalId){
+					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
+					    +'</span>';}
+					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+					
+			 }
                      tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
                       +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                       +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'

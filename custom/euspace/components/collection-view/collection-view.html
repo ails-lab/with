@@ -23,34 +23,9 @@
         <section class="listing">
           <div class="container">
             <!-- grid-->
-            <div class="grid" data-bind="collectionIsotope: citems">
-              <!-- item-->
-               <!-- ko if: $index() === 0 -->
+            <div class="grid" data-bind="attr: {id: id}">
               <div class="sizer"></div>
-              <!-- /ko -->
-              
-              
-              <div class="item media" data-bind="visible: isLoaded(), attr:{id:recordId}">
-              <div class="wrap">
-                       <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()" title="add to favorites">
-						<span class="fa-stack fa-fw" data-bind="visible:externalId!=null, event: { click: function() { $parent.likeRecord(this); } }">
-							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
-						</span>
-						<span class="collect" title="collect" data-bind="visible: isLogged(), event: { click: function() { $parent.collect($data); } }"><i class="fa fa-download fa-stack-1x fa-inverse"></i>
-						</span>
-					</span>
-		        <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
-                  <!-- thumbnail-->
-                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
-                  <!-- info-->
-                  <div class="info">
-                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: dataProvider"></span>
-                  </div>
-                 <span class="rights" data-bind="text: sourceCredits()"></span>
-                  <!-- pointer-->
-                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
-              </div>
-            </div>
+
               
             
             </div>
