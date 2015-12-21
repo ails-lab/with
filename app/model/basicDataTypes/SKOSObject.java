@@ -16,6 +16,75 @@
 
 package model.basicDataTypes;
 
+import java.util.Date;
+import java.util.List;
+
 public class SKOSObject {
 
+	public static class SKOSTerm {
+		String uri;
+		String type;
+
+		Literal prefLabel;
+		MultiLiteral altLabel;
+		
+	}
+	
+	public static class SKOSSemantic {
+		String uri;
+		String type;
+
+		Literal prefLabel;
+		MultiLiteral altLabel;
+
+		Literal scopeNote;
+		List<SKOSTerm> broader;
+		List<SKOSTerm> narrower;
+		List<SKOSTerm> broaderTransitive;
+		List<SKOSTerm> related;
+		
+		List<SKOSTerm> topConcepts;
+		List<SKOSTerm> members;
+		
+		List<String> inCollections;
+		List<String> inSchemes;
+		List<String> exactMatch;
+	}
+	
+	public static class SKOSAdmin {
+		Date created;
+		Date lastModified;
+
+		String externalId;
+		
+		public Date getCreated() {
+			return created;
+		}
+
+		public void setCreated(Date created) {
+			this.created = created;
+		}
+
+		public Date getLastModified() {
+			return lastModified;
+		}
+
+		public void setLastModified(Date lastModified) {
+			this.lastModified = lastModified;
+		}
+		
+		public String getExternalId() {
+			return externalId;
+		}
+
+		public void setExternalId(String externalId) {
+			this.externalId = externalId;
+		}
+
+	}
+	
+	protected SKOSAdmin administrative;
+	
+	protected SKOSSemantic semantic;
+	
 }
