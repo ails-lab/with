@@ -34,23 +34,20 @@ import espace.core.RecordJSONMetadata.Format;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.sources.formatreaders.DPLAExternalBasicRecordFormatter;
+import espace.core.sources.formatreaders.DPLARecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.Provider.Sources;
 import model.resources.WithResource;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
 
-	public static String LABEL = "DPLA";
-	private String DPLAKey = "SECRET_KEY";
-	private DPLAExternalBasicRecordFormatter formatreader;
-
 	public String getHttpQuery(CommonQuery q) {
 		// q=zeus&api_key=SECRET_KEY&sourceResource.creator=Zeus
 		QueryBuilder builder = new QueryBuilder("http://api.dp.la/v2/items");
-		builder.addSearchParam("api_key", DPLAKey);
+		builder.addSearchParam("api_key", apiKey);
 		builder.addQuery("q", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("page_size", q.pageSize);
@@ -61,41 +58,43 @@ public class DPLASpaceSource extends ISpaceSource {
 
 	public DPLASpaceSource() {
 		super();
-		formatreader = new DPLAExternalBasicRecordFormatter();
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
-		addDefaultWriter(CommonFilters.COUNTRY.getID(), fwriter("sourceResource.spatial.country"));
-		addDefaultWriter(CommonFilters.CREATOR.getID(), fwriter("sourceResource.creator"));
-		addDefaultWriter(CommonFilters.CONTRIBUTOR.getID(), fwriter("sourceResource.contributor"));
-		addDefaultWriter(CommonFilters.PROVIDER.getID(), fwriter("provider.name"));
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("sourceResource.type"));
-		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
+		LABEL = Sources.DPLA.toString();
+		apiKey = "SECRET_KEY";
+		formatreader = new DPLARecordFormatter();
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
+		addDefaultWriter(CommonFilters.COUNTRY.name(), fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("sourceResource.creator"));
+		addDefaultWriter(CommonFilters.CONTRIBUTOR.name(), fwriter("sourceResource.contributor"));
+		addDefaultWriter(CommonFilters.PROVIDER.name(), fwriter("provider.name"));
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
+		addDefaultComplexWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
 
 		/**
 		 * TODO check this
 		 */
 
-		addDefaultWriter(CommonFilters.RIGHTS.getID(), fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
+		addDefaultWriter(CommonFilters.RIGHTS.name(), fwriter("sourceResource.rights"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
 				".*non-commercial.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRPA.toString(), ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRRA.toString(), ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRFA.toString(), ".*rr-f.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRPA.toString(), ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRRA.toString(), ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*rr-f.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RRFA.toString(), ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative.toString(), ".*(creative).*");
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), ".*(creative).*");
 
-		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "image");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "moving image");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.SOUND.toString(), "sound");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.TEXT.toString(), "text");
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "image");
+		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "moving image");
+		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "sound");
+		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "text");
 
 		// TODO: what to do with physical objects?
 	}
@@ -139,17 +138,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		};
 	}
 
-	public String getSourceName() {
-		return LABEL;
-	}
 
-	public String getDPLAKey() {
-		return DPLAKey;
-	}
-
-	public void setDPLAKey(String dPLAKey) {
-		DPLAKey = dPLAKey;
-	}
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
@@ -228,7 +217,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
-			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + DPLAKey);
+			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + apiKey);
 			JsonNode record = response.get("docs").get(0);
 			if (record != null)
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));

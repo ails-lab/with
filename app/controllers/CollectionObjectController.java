@@ -17,12 +17,14 @@
 package controllers;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.WithResource.WithResourceType;
@@ -33,6 +35,7 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -58,6 +61,7 @@ public class CollectionObjectController extends Controller {
 
 	/**
 	 * Creates a new WITH resource from the JSON body
+	 * 
 	 * @param exhibition
 	 * @return the newly created resource
 	 */
@@ -204,13 +208,15 @@ public class CollectionObjectController extends Controller {
 	public static Result editCollectionObject(String id) {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
+		ObjectId dbId = new ObjectId(id);
 		try {
 			if (json == null) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
+			// TODO: check rights from DAO
 			CollectionObject oldCollection = DB.getCollectionObjectDAO().get(
-					new ObjectId(id));
+					dbId);
 			if (oldCollection == null) {
 				log.error("Cannot retrieve resource from database");
 				error.put("error", "Cannot retrieve resource from database");
@@ -224,29 +230,60 @@ public class CollectionObjectController extends Controller {
 				return forbidden(error);
 			}
 			// TODO change JSON at all its depth
-			ObjectMapper objectMapper = new ObjectMapper();
-			ObjectReader updator = objectMapper
-					.readerForUpdating(oldCollection);
-			CollectionObject newCollection;
-			newCollection = updator.readValue(json);
-			Set<ConstraintViolation<CollectionObject>> violations = Validation
-					.getValidator().validate(newCollection);
-			if (!violations.isEmpty()) {
-				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<CollectionObject> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath()
-							+ "\":\"" + cv.getMessage() + "\"}"));
-				}
-				error.put("error", properties);
-				return badRequest(error);
-			}
-			newCollection.getAdministrative().setLastModified(new Date());
-			DB.getCollectionObjectDAO().makePermanent(newCollection);
-			return ok(Json.toJson(newCollection));
+			DB.getCollectionObjectDAO().editCollection(dbId, json);
+			/*
+			 * ObjectMapper objectMapper = new ObjectMapper(); ObjectReader
+			 * updator = objectMapper .readerForUpdating(oldCollection);
+			 * CollectionObject newCollection; newCollection =
+			 * updator.readValue(json);
+			 * Set<ConstraintViolation<CollectionObject>> violations =
+			 * Validation .getValidator().validate(newCollection); if
+			 * (!violations.isEmpty()) { ArrayNode properties =
+			 * Json.newObject().arrayNode(); for
+			 * (ConstraintViolation<CollectionObject> cv : violations) {
+			 * properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\""
+			 * + cv.getMessage() + "\"}")); } error.put("error", properties);
+			 * return badRequest(error); }
+			 * newCollection.getAdministrative().setLastModified(new Date());
+			 * DB.getCollectionObjectDAO().makePermanent(newCollection);
+			 */
+			return ok(Json.toJson(DB.getCollectionObjectDAO().get(dbId)));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+
+	public static Result list(Option<String> userOrGroupName,
+			Option<String> access, boolean exhibitions, int offset, int count) {
+
+		Access accessLevel;
+		List<CollectionObject> collections;
+		if (access.isDefined()) {
+			accessLevel = Access.valueOf(access.get());
+		} else {
+			accessLevel = Access.OWN;
+		}
+		ObjectId userOrGroupId;
+		List<ObjectId> effectiveIds = AccessManager
+				.effectiveUserDbIds(session().get("effectiveUserIds"));
+		if (userOrGroupName.isDefined()) {
+			String name = userOrGroupName.get();
+			if (DB.getUserGroupDAO().getByName(name) != null) {
+				userOrGroupId = DB.getUserGroupDAO().getByName(name).getDbId();
+			} else {
+				userOrGroupId = DB.getUserDAO().getByUsername(name).getDbId();
+			}
+			HashMap<ObjectId, Access> restrictions = new HashMap<ObjectId, Access>();
+			restrictions.put(userOrGroupId, accessLevel);
+			collections = DB.getCollectionObjectDAO()
+					.getByMaxAccessWithRestrictions(effectiveIds, accessLevel,
+							restrictions, exhibitions, offset, count);
+		} else {
+			collections = DB.getCollectionObjectDAO().getByMaxAccess(
+					effectiveIds, accessLevel, exhibitions, offset, count);
+		}
+		return ok(Json.toJson(collections));
 	}
 
 	/**
@@ -257,8 +294,6 @@ public class CollectionObjectController extends Controller {
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		List<String> userIds = AccessManager.effectiveUserIds(session().get(
-				"effectiveUserIds"));
 		return getCollectionObject(fav);
 
 	}

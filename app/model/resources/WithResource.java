@@ -187,6 +187,14 @@ public class WithResource<T extends DescriptiveData> {
 			this.isExhibition = isExhibition;
 		}
 
+		public String getExternalId() {
+			return externalId;
+		}
+
+		public void setExternalId(String externalId) {
+			this.externalId = externalId;
+		}
+
 	}
 
 

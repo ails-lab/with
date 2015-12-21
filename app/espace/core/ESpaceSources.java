@@ -57,34 +57,14 @@ public class ESpaceSources {
 		esources.add(new RijksmuseumSpaceSource());
 		esources.add(new DDBSpaceSource());
 		esources.add(new BritishLibrarySpaceSource());
-		//esources.add(new WithSpaceSource());
+		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
-
-	/*public static Map<String, ISpaceSource> initSourceByNameMap() {
-		Map<String, ISpaceSource> sourcesMap = new HashMap<String, ISpaceSource>();
-		ISpaceSource s = new EuropeanaSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		s = new DPLASpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		s = new NLASpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		s = new DigitalNZSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		s = new EuropeanaFashionSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		s = new YouTubeSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		s = new WithSpaceSource();
-		sourcesMap.put(s.getSourceName(), s);
-		return sourcesMap;
-	}*/
 
 	public static List<ISpaceSource> getESources() {
 		if (esources == null) {
 			init();
 		}
 		return esources;
-
 	}
 }

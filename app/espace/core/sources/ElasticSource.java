@@ -35,11 +35,6 @@ public class ElasticSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(ElasticSource.class);
 
 	@Override
-	public String getSourceName() {
-		return "elastic";
-	}
-
-	@Override
 	public String getHttpQuery(CommonQuery q) {
 		log.debug("Method not implemented yet");
 		return null;

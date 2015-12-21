@@ -33,49 +33,44 @@ import espace.core.QueryBuilder;
 import espace.core.SourceResponse;
 import espace.core.Utils;
 import espace.core.Utils.Pair;
-import espace.core.sources.formatreaders.BritishLibraryBasicRecordFormatter;
+import espace.core.sources.formatreaders.BritishLibraryRecordFormatter;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
+import model.Provider.Sources;
 import model.resources.WithResource;
 import utils.ListUtils;
 
 public class BritishLibrarySpaceSource extends ISpaceSource {
-	public static final String LABEL = "The British Library";
-	private String apikey = "8bddf33bef4c14c98d469bfb1f8e78c7";
 	private HashMap<String, String> licences;
 	private HashMap<String, String> licencesId;
-	private BritishLibraryBasicRecordFormatter formatreader;
-
-	@Override
-	public String getSourceName() {
-		return LABEL;
-	}
 
 	public BritishLibrarySpaceSource() {
 		super();
-		formatreader = new BritishLibraryBasicRecordFormatter();
-		addDefaultWriter(CommonFilters.TYPE.getID(), fwriter("media"));
-		addDefaultWriter(CommonFilters.RIGHTS.getID(), frwriter());
-		addDefaultComplexWriter(CommonFilters.YEAR.getID(), qfwriterYEAR());
-		// addDefaultWriter(CommonFilters.COUNTRY.getID(),
+		LABEL = Sources.BritishLibrary.toString();
+		apiKey = "8bddf33bef4c14c98d469bfb1f8e78c7";
+		formatreader = new BritishLibraryRecordFormatter();
+		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("media"));
+		addDefaultWriter(CommonFilters.RIGHTS.name(), frwriter());
+		addDefaultComplexWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 
 		setLicences();
 		
-		addMapping(CommonFilters.TYPE.getID(), RecordType.IMAGE.toString(), "photo");
-		addMapping(CommonFilters.TYPE.getID(), RecordType.VIDEO.toString(), "video");
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "photo");
+		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "video");
 		
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.RR.toString(), getLicence("0"));
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),getLicence("2"),getLicence("1"));
-		addMapping(CommonFilters.RIGHTS.getID(), ItemRights.Modify.toString(), getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.Creative.toString(),getLicence("1"),getLicence("2"),getLicence("3"),getLicence("4"),getLicence("5"),getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.UNKNOWN.toString(),getLicence("7"));
-		addMapping(CommonFilters.RIGHTS.getID(),ItemRights.Public.toString(),getLicence("9"),getLicence("10"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.toString(), getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),getLicence("2"),getLicence("1"));
+		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.name(),ItemRights.Creative.toString(),getLicence("1"),getLicence("2"),getLicence("3"),getLicence("4"),getLicence("5"),getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.name(),ItemRights.UNKNOWN.toString(),getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.name(),ItemRights.Public.toString(),getLicence("9"),getLicence("10"));
 	}
 
 	private void setLicences() {
-		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key="+apikey+"&format=json&nojsoncallback=1";
+		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key="+apiKey+"&format=json&nojsoncallback=1";
 		licences = new HashMap<String,String>();
 		licencesId = new HashMap<String,String>();
 		JsonNode response;
@@ -155,7 +150,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("" + "https://api.flickr.com/services/rest/");
 		builder.addSearchParam("method", "flickr.photos.search");
-		builder.addSearchParam("api_key", apikey);
+		builder.addSearchParam("api_key", apiKey);
 		builder.addSearchParam("format", "json");
 		builder.addSearchParam("user_id", "12403504%40N02");
 		builder.addSearchParam("extras",

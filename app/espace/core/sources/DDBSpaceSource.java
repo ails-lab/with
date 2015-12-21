@@ -26,32 +26,25 @@ import espace.core.ISpaceSource;
 import espace.core.QueryBuilder;
 import espace.core.SourceResponse;
 import espace.core.Utils;
-import espace.core.sources.formatreaders.DDBBasicRecordFormatter;
+import espace.core.sources.formatreaders.DDBRecordFormatter;
 import model.ExternalBasicRecord;
+import model.Provider.Sources;
 import model.resources.WithResource;
 
 public class DDBSpaceSource extends ISpaceSource {
-
-	public static final String LABEL = "DDB";
-	private String key = "SECRET_KEY";
-	private DDBBasicRecordFormatter formatreader;
-
 	
 	public DDBSpaceSource() {
 		super();
-		formatreader = new DDBBasicRecordFormatter();
-	}
-
-	@Override
-	public String getSourceName() {
-		return LABEL;
+		LABEL = Sources.DDB.toString();
+		apiKey = "SECRET_KEY";
+		formatreader = new DDBRecordFormatter();
 	}
 
 	@Override
 	public QueryBuilder getBuilder(CommonQuery q) {
 		QueryBuilder builder = super.getBuilder(q);
 		builder.setBaseUrl("http://api.deutsche-digitale-bibliothek.de/search?");
-		builder.addSearchParam("oauth_consumer_key", key);
+		builder.addSearchParam("oauth_consumer_key", apiKey);
 		builder.addQuery("query", q.searchTerm);
 		builder.addSearchParam("rows", q.pageSize);
 		builder.addSearchParam("offset", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize)));

@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import org.apache.commons.codec.digest.DigestUtils;
-
-import espace.core.ExternalBasicRecordReader;
 import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.sources.DigitalNZSpaceSource;
@@ -35,8 +33,11 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class DNZBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
-
+public class DNZBasicRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+	
+	public DNZBasicRecordFormatter() {
+		object = new CulturalObject();
+	}
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {

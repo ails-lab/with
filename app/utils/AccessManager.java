@@ -42,7 +42,7 @@ public class AccessManager {
 
 	public static boolean checkAccess(WithAccess withAccess,
 			String effectiveUserIds, Action action) {
-		if (withAccess.isPublic() == true) {
+		if (withAccess.isPublic() == true && action.equals(Action.READ)) {
 			return true;
 		}
 		if (effectiveUserIds == null || effectiveUserIds.equals("")) {
@@ -130,6 +130,17 @@ public class AccessManager {
 		for (String ui : effectiveUserIds.split(",")) {
 			if (ui.trim().length() > 0)
 				userIds.add(ui);
+		}
+		return userIds;
+	}
+
+	public static List<ObjectId> effectiveUserDbIds(String effectiveUserIds) {
+		if (effectiveUserIds == null)
+			effectiveUserIds = "";
+		List<ObjectId> userIds = new ArrayList<ObjectId>();
+		for (String ui : effectiveUserIds.split(",")) {
+			if (ui.trim().length() > 0)
+				userIds.add(new ObjectId(ui.trim()));
 		}
 		return userIds;
 	}

@@ -16,11 +16,13 @@
 
 package espace.core;
 
+import model.resources.WithResource;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.utils.JsonContextRecord;
 
-public abstract class JsonContextRecordFormatReader<T> {
+public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	
 	protected T object;
 	

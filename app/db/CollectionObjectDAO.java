@@ -33,10 +33,10 @@ import org.mongodb.morphia.query.UpdateOperations;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
+public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	/*
-	 * The constructor is optional becuse the explicit type is passed through
+	 * The constructor is optional because the explicit type is passed through
 	 * generics.
 	 */
 	public CollectionObjectDAO() {
@@ -76,6 +76,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		UpdateOperations<CollectionObject> updateOps = this
 				.createUpdateOperations();
 		updateFields("", json, updateOps);
+		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
 	}
 
@@ -124,7 +125,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteria[i] = this.createQuery()
 					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access);
+					.equal(access.ordinal());
 		}
 		q.or(criteria);
 		return this.find(q).asList();
@@ -140,7 +141,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteria[i] = this.createQuery()
 					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access);
+					.greaterThanOrEq(access.ordinal());
 		}
 		q.field("administrative.isExhibition").equal(isExhibition);
 		q.or(criteria);
@@ -157,7 +158,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
-	public List<CollectionObject> getBySpecificAccessIntersection(
+	public List<CollectionObject> getBySpecificAccessWithRestrictions(
 			List<ObjectId> effectiveIds, Access access,
 			Map<ObjectId, Access> restrictions, Boolean isExhibition,
 			int offset, int count) {
@@ -170,7 +171,7 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteriaOr[i] = this.createQuery()
 					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access);
+					.equal(access.ordinal());
 		}
 		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
 				.size()];
@@ -184,4 +185,33 @@ public class CollectionObjectDAO extends CommonResourceDAO<CollectionObject> {
 		q.and(criteriaAnd);
 		return this.find(q).asList();
 	}
+	
+	public List<CollectionObject> getByMaxAccessWithRestrictions(
+			List<ObjectId> effectiveIds, Access access,
+			Map<ObjectId, Access> restrictions, Boolean isExhibition,
+			int offset, int count) {
+		Query<CollectionObject> q = this.createQuery()
+				.field("administrative.isExhibition").equal(isExhibition)
+				.order("-administrative.lastModified").offset(offset)
+				.limit(count);
+		CriteriaContainer[] criteriaOr = new CriteriaContainer[effectiveIds
+				.size()];
+		for (int i = 0; i < effectiveIds.size(); i++) {
+			criteriaOr[i] = this.createQuery()
+					.criteria("administrative.access." + effectiveIds.get(i))
+					.greaterThanOrEq(access.ordinal());
+		}
+		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
+				.size()];
+		int i = 0;
+		for (ObjectId id : restrictions.keySet()) {
+			criteriaOr[i++] = this.createQuery()
+					.criteria("administrative.access." + id)
+					.equal(restrictions.get(id));
+		}
+		q.or(criteriaOr);
+		q.and(criteriaAnd);
+		return this.find(q).asList();
+	}
+	
 }

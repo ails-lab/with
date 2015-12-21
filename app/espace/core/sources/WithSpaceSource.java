@@ -102,9 +102,7 @@ public class WithSpaceSource extends ISpaceSource {
 		SearchResponse response = searcher
 				.searchAccessibleCollectionsScanScroll(elasticoptions);
 		List<SearchHit> hits = getTotalHitsFromScroll(response);
-		colFields = getCollectionMetadaFromHit(hits);
-
-		System.out.println(accessFilters.toString());
+		colFields = getCollectionMetadataFromHit(hits);
 
 		/*
 		 * Search index for merged records according to collection ids gathered
@@ -122,13 +120,8 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 
 		SourceResponse res = new SourceResponse(resp, offset);
-		
-		for (CommonFilters filter: CommonFilters.values()) {
-			
-		}
 
 		if (checkFilters(q)) {
-
 			for (Entry<String, Aggregation> e : resp.getAggregations().asMap()
 					.entrySet()) {
 				e.getKey();
@@ -149,7 +142,6 @@ public class WithSpaceSource extends ISpaceSource {
 	}
 
 	private List<SearchHit> getTotalHitsFromScroll(SearchResponse scrollResp) {
-
 		List<SearchHit> totalHits = new ArrayList<SearchHit>();
 		while (true) {
 			for (SearchHit hit : scrollResp.getHits().getHits())
@@ -165,8 +157,7 @@ public class WithSpaceSource extends ISpaceSource {
 		return totalHits;
 	}
 
-	private List<Collection> getCollectionMetadaFromHit(List<SearchHit> hits) {
-
+	private List<Collection> getCollectionMetadataFromHit(List<SearchHit> hits) {
 		List<Collection> colFields = new ArrayList<Collection>();
 		for (SearchHit hit : hits) {
 			JsonNode json = Json.parse(hit.getSourceAsString());
@@ -194,8 +185,7 @@ public class WithSpaceSource extends ISpaceSource {
 		return null;
 	}
 
-	private List<List<Tuple<ObjectId, Access>>> mergeLists(
-			List<Tuple<ObjectId, Access>>... lists) {
+	private List<List<Tuple<ObjectId, Access>>> mergeLists(List<Tuple<ObjectId, Access>>... lists) {
 		List<List<Tuple<ObjectId, Access>>> outputList = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		for (List<Tuple<ObjectId, Access>> list : lists) {
 			for (Tuple<ObjectId, Access> tuple : list) {

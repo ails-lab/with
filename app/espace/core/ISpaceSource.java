@@ -30,6 +30,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import utils.ListUtils;
 import espace.core.Utils.Pair;
 import espace.core.sources.FilterValuesMap;
+import espace.core.sources.formatreaders.DNZBasicRecordFormatter;
 import espace.core.utils.JsonContextRecord;
 
 public abstract class ISpaceSource {
@@ -37,9 +38,14 @@ public abstract class ISpaceSource {
 	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
 	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
 	private FilterValuesMap vmap = new FilterValuesMap();
+	public static String LABEL = "";
+	protected String apiKey="";
+	protected JsonContextRecordFormatReader formatreader;
 
-	public abstract String getSourceName();
-
+	public String getSourceName() {
+		return LABEL;
+	}
+	
 	public String getHttpQuery(CommonQuery q) {
 		return "";
 	};
@@ -163,8 +169,8 @@ public abstract class ISpaceSource {
 		return Arrays.asList(q);
 	}
 	
-	public WithResource fillObjectFrom(JsonNode rec) {
+	/*public WithResource fillObjectFrom(JsonNode rec) {
 		return new WithResource();
-	}
+	}*/
 	
 }

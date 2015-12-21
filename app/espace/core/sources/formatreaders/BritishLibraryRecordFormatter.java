@@ -19,7 +19,7 @@ package espace.core.sources.formatreaders;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import espace.core.ExternalBasicRecordReader;
+import espace.core.JsonContextRecordFormatReader;
 import espace.core.sources.BritishLibrarySpaceSource;
 import espace.core.sources.DPLASpaceSource;
 import espace.core.utils.JsonContextRecord;
@@ -30,9 +30,12 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class BritishLibraryBasicRecordFormatter extends ExternalBasicRecordReader<CulturalObject> {
-
-
+public class BritishLibraryRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+	
+	public BritishLibraryRecordFormatter() {
+		object = new CulturalObject();
+	}
+	
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();

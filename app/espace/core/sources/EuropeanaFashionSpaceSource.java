@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+import model.Provider.Sources;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import espace.core.CommonFilterLogic;
@@ -35,15 +37,13 @@ import espace.core.SourceResponse;
 
 public class EuropeanaFashionSpaceSource extends ISpaceSource {
 
-	public static final String LABEL = "EFashion";
-
 	public EuropeanaFashionSpaceSource() {
 		super();
-
+		LABEL = Sources.EFashion.toString();
 		// addDefaultWriter(CommonFilters.TYPE_ID, qfwriter("TYPE"));
 		// addDefaultQueryModifier(CommonFilters.TYPE_ID, getFunction("219",
 		// "objectType"));
-		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.getID(), getFunction("302", "dataProviders"));
+		addDefaultQueryModifier(CommonFilters.DATA_PROVIDER.name(), getFunction("302", "dataProviders"));
 
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10303"));
 		// addMapping(CommonFilters.TYPE_ID, TypeValues.IMAGE, getURI("10460"));
@@ -101,10 +101,6 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		builder.setData(fq);
 		addfilters(q, builder);
 		return builder;
-	}
-
-	public String getSourceName() {
-		return LABEL;
 	}
 
 	@Override
