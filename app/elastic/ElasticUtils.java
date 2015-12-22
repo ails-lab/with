@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import model.Collection;
+import model.basicDataTypes.CollectionInfo;
+import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.search.SearchHit;
@@ -35,13 +37,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ElasticUtils {
 
 
-	public static ExtendedCollectionRecord hitToRecord(SearchHit hit) {
+	public static RecordResource hitToRecord(SearchHit hit) {
 		JsonNode json = Json.parse(hit.getSourceAsString());
-		ExtendedCollectionRecord record = Json.fromJson(json, ExtendedCollectionRecord.class);
-		if (hit.type().equals(Elastic.type_general)) {
-			List<String> colIds = new ArrayList<String>();
+		RecordResource record = Json.fromJson(json, RecordResource.class);
+		/*if (hit.type().equals(Elastic.type_general)) {
+			List<CollectionInfo> colIds = new ArrayList<CollectionInfo>();
 			List<String> tags = new ArrayList<String>();
-			ArrayNode ids = (ArrayNode) json.get("collections");
+			ArrayNode ids = (ArrayNode) json.get("descriptiveData.collectedIn");
 			ArrayNode allTags = (ArrayNode) json.get("tags");
 
 			for (JsonNode id : ids)
@@ -51,9 +53,9 @@ public class ElasticUtils {
 				if (!tags.contains(t.asText()))
 					tags.add(t.asText());
 
-			record.setCollections(colIds);
+			record.setCollectedIn(colIds);
 			record.setAllTags(tags);
-		}
+		}*/
 
 		return record;
 	}

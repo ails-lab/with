@@ -51,7 +51,7 @@ public class SourceResponse {
 	}
 
 	public SourceResponse(SearchResponse resp, int offset) {
-		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
+		List<WithResource> elasticrecords = new ArrayList<WithResource>();
 		this.totalCount = (int) resp.getHits().getTotalHits();
 		for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(ElasticUtils.hitToRecord(hit));

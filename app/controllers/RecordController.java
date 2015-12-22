@@ -26,6 +26,7 @@ import javax.validation.ConstraintViolation;
 import model.Collection;
 import model.CollectionRecord;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -263,7 +264,7 @@ public class RecordController extends Controller {
 		SearchResponse resp = searcher.searchForSimilar(title, provider, externalId, elasticoptions);
 		searcher.closeClient();
 
-		List<CollectionRecord> elasticrecords = new ArrayList<CollectionRecord>();
+		List<WithResource> elasticrecords = new ArrayList<WithResource>();
 		for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(ElasticUtils.hitToRecord(hit));
 			result.add(Json.toJson(ElasticUtils.hitToRecord(hit)));
@@ -279,7 +280,7 @@ public class RecordController extends Controller {
 	 * @param externalId
 	 * @return
 	 */
-	public static Result getMergedRecord(String externalId) {
+	/*public static Result getMergedRecord(String externalId) {
 
 		ObjectNode result = Json.newObject();
 
@@ -352,6 +353,6 @@ public class RecordController extends Controller {
 		result.put("liked",liked);
 		result.put("collections",collections);
 		return ok(result);
-	}
+	}*/
 
 }
