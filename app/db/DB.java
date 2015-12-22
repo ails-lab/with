@@ -24,6 +24,7 @@ import model.Collection;
 import model.CollectionRecord;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.ThesaurusObject;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
@@ -149,7 +150,10 @@ public class DB {
 		return mediaDAO;
 	}
 
-
+	public static ThesaurusObjectDAO getThesaurusDAO() {
+		return (ThesaurusObjectDAO) getDAO(ThesaurusObject.class);
+	}
+	
 	/*
 	 * Implementation of the new model DAO classes
 	 */
