@@ -17,7 +17,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		mobileMenu: '.main .menu'
 	});
     self.custom=false;
-	self.transDuration = '0.4s';
+	self.transDuration = 0;
 	var isFirefox = typeof InstallTrigger !== 'undefined'; // Firefox 1.0+
 	if (isFirefox) {
 		self.transDuration = 0;
@@ -335,20 +335,19 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.projects(data.projects);
 
 		self.loadNotifications(data.notifications);
+		$(".star").each(function () {
+			$(this).css("display", "");
+		});
+		$(".collect").each(function () {
+			$(this).css("display", "");
+		});
 		self.loadFavorites();
 
-		// Save to session
-		/*if (typeof (Storage) !== 'undefined') {
-			if (remember) {
-				localStorage.setItem("User", JSON.stringify(data));
-			} else {
-				sessionStorage.setItem("User", JSON.stringify(data));
-			}
-		}*/
+		
 
 		isLogged(true);
 		
-		window.localStorage.setItem('logged_in', true);
+		localStorage.setItem('logged_in', true);
 		waitForConnection(function () {
 			self.notificationSocket.send('{"action":"login","id":"' + data.dbId + '"}');
 		}, 1000);
@@ -367,7 +366,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
 			success: function (data, text) {
+				
 				loadUser(data, false, false);
+				
 			}
 		});
 	};
@@ -379,6 +380,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
+				
 				for (var i in data) {
 					if ($("#" + data[i])) {
 						$("#" + data[i]).addClass('active');
@@ -678,7 +680,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 					self.notificationSocket.send('{"action":"logout","id":"' + self.currentUser._id() + '"}');
 				}, 1000);
 				self.clearSession();
-				window.localStorage.setItem('logged_in', false);
+				localStorage.setItem('logged_in', false);
 				window.location.href = "/assets/index.html";
 				//update custom spaces
 				//window.opener.location.reload();
@@ -822,6 +824,10 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			//console.log("logged in:"+event.newValue);
 			
 				window.location.reload();
+				if(event.newValue=="true"){
+					console.log("just logare");
+					
+				}
 			
 	    }
 	}

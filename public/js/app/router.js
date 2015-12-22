@@ -50,7 +50,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	function activateCrossroads() {
 		//temp fix: scrollbar moves to top when route changes
 		function resetScroll(){document.body.scrollTop = document.documentElement.scrollTop = 0;}
-		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+		function parseHash(newHash, oldHash) { crossroads.parse(newHash);}
 		
 		crossroads.ignoreState= true; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;

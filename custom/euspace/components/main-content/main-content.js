@@ -254,8 +254,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			
                    tile+='<a href="#" onclick="loadCollectionOrExhibition(\''+collection.id+'\',event)">'
                     +'<div class="thumb"><img src="'+collection.cachedThumbnail()+'"></div>'
-                    +' <div class="info"><span class="type">'+collection.type+'</span><h1><span class="owner">'+ collection.owner+'</span></div>'
-                    +'</a></div></div>';
+                    +' <div class="info"><span class="type">'+collection.type+'</span><h1 class="title">'+collection.collname+'</h1><span class="owner">'+ collection.owner+'</span></div>'
+                     +'</a></div></div>';
 			return tile;
 			
 		}

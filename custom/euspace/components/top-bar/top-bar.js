@@ -26,18 +26,14 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		   return false;
 	}
 	
-	/* window.onhashchange = function () { alert(window.location.hash+" params route:"+self.route().page); }
-	  
-	  $(document).on('click', '.menu a', function (e) {
-	      console.log("unload triggered:"+$(window).scrollTop()+" params route:"+self.route().page);
-	      var scrollPosition = $(window).scrollTop();
-	      if(self.route().page=="collection-view")
-	      sessionStorage.setItem("collection-viewscroll"+self.route().id, scrollPosition);
-	      else if(self.route().page=="home-page")
-		      sessionStorage.setItem("homemasonryscroll", scrollPosition);
-	      else if(self.route().page=="provider")
-		      sessionStorage.setItem("providerview"+self.route().id, scrollPosition);
-	   }); */
+	 goToPage=function(data,event){
+		 if(data=="#home" || data=="#")
+		      sessionStorage.removeItem("homemasonryscroll");
+		   window.location.href=data;
+		   event.preventDefault();
+		   return false;
+	}
+	
 	  
 	}
 

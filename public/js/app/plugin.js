@@ -42,7 +42,7 @@ WITHApp.ui = function( custom ){
 		 
 
 		// init isotope
-		//initIsotope();
+		initIsotope();
 
 		// limit character description
 		//only applied to home page so moved to maincontent component ->initCharacterLimiter();
@@ -84,9 +84,29 @@ WITHApp.ui = function( custom ){
 			
 			// check if grid exist
 			if( $( settings.mSelector ).length > 0 ) {
+				
+				
+
+					// Isotope messes up in Chrome because it initiates before everything has loaded
+
+					// This ensures everything has loaded before applying
+
+					$(window).load(function() {
+
+						$( settings.mSelector ).isotope({
+
+							// options
+							columnWidth		: settings.mSizer,
+							itemSelector	: settings.mItem,
+							percentPosition	: true
+						})
+
+					});
+
+				
 
 				// init
-				$( settings.mSelector ).imagesLoaded(function(){	
+				/*$( settings.mSelector ).imagesLoaded(function(){	
 					
 				$( settings.mSelector ).isotope({
 
@@ -95,7 +115,7 @@ WITHApp.ui = function( custom ){
 					itemSelector	: settings.mItem,
 					percentPosition	: true
 				});
-			});
+			});*/
 			}
 		});
 		/*$( window ).load(function(){
