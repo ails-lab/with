@@ -298,11 +298,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		    }
 		    
 		  }).always(function(){
-			  console.log("in always");
 			  var scrollpos=sessionStorage.getItem("homemasonryscroll");
 				
 			  if(scrollpos && $("#homemasonry").height()<scrollpos)
-			   setTimeout(function(){window.scrollTo(0,document.body.scrollHeight-30);},300);
+			   setTimeout(function(){window.scrollTo(scrollpos);},300);
 			  
 		  });
 		  

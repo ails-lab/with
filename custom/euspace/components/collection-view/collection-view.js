@@ -419,7 +419,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
  		    	$(window).scrollTop($(".grid").height());	
  		    }
  		    
- 		  });
+ 		  }).always(function(){
+			//  console.log("in always");
+ 			 var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
+				
+			  if(scrollpos && $(".grid").height()<scrollpos)
+			   setTimeout(function(){window.scrollTo(scrollpos);},300);
+			  
+		  });
  		  
  		  return this;
  		};

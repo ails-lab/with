@@ -19,12 +19,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		    window.childwith.focus();
 	}
 	  
-	 goToPage=function(data,event){
-		   
-		   window.location.href=data;
-		   event.preventDefault();
-		   return false;
-	}
+	
 	
 	 goToPage=function(data,event){
 		 if(data=="#home" || data=="#")
