@@ -118,9 +118,11 @@ public class MediaObjectDAO {
 
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
-
 			} else {
-				mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());
+				if(media.getMediaBytes().length==0)
+					mediaGridFsFile = DB.getGridFs().createFile();
+				else
+					mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());
 			}
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
 			// remove stuff we don't want on the media object

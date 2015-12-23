@@ -55,6 +55,10 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import play.libs.F.Function;
+import play.libs.F.Promise;
+import play.libs.ws.WS;
+import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Http.MultipartFormData.FilePart;
@@ -67,6 +71,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
 import db.DB;
+import espace.core.CommonQuery;
+import espace.core.HttpConnector;
+import espace.core.SourceResponse;
+import espace.core.Utils;
 
 public class MediaController extends Controller {
 	public static final ALogger log = Logger.of(MediaController.class);
@@ -238,12 +246,22 @@ public class MediaController extends Controller {
 							}
 						}
 						
+						JsonNode parsed = parseMediaFile(fp.getFile());
+						
+						//TODO: fix errors (see parseExtended)
+						allRes.addAll(parseExtendedJson(med, parsed));
+						if(checkJsonArray(allRes,"error")){
+							result.put("errors found", allRes);
+							return badRequest(result);
+						} 
 						
 						if(med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)){
 
 							//we don't parse type here since media type will override it anyway
 							//if we do decide however, remember to check for mismatch
 							med.setType(WithMediaType.IMAGE);
+							
+							
 							
 							allRes.addAll(imageUpload(med, fp, formData));
 							
@@ -610,7 +628,7 @@ public class MediaController extends Controller {
 	
 	private static ArrayNode parseExtendedJson(MediaObject med, JsonNode json) {
 		ArrayNode allRes = Json.newObject().arrayNode();
-		//TODO: eventually add all extended model fields
+		//TODO: make a method that checks for conflicts with the external media checker!
 		if(med.getType()==WithMediaType.IMAGE){
 			parseImageFromJson(med, json, allRes); 
 		} else if(med.getType()==WithMediaType.VIDEO){
@@ -631,7 +649,34 @@ public class MediaController extends Controller {
 	private static void parseAudioFromJson(MediaObject med, JsonNode json, ArrayNode allRes) {
 		//Quality
 		parseJsonDuration(med, json, allRes);
+		
+		if(json.hasNonNull("channels")){
+			if(json.get("channels").canConvertToInt()){
+				med.setAudioChannelNumber(json.get("channels").asInt());
+			} else {
+				allRes.add(Json.newObject().put("error", "Audio channels number needs to be an integer"));
+			}
+		}
+		
+		parseJsonBitRate(med, json, allRes);
+		
+		if(json.hasNonNull("samplerate")){
+			if(json.get("samplerate").canConvertToInt()){
+				med.setSampleRate(json.get("samplerate").asInt());
+			} else {
+				allRes.add(Json.newObject().put("error", "Sample rate needs to be an integer"));
+			}
+		}
+		
+		
+		//bitdepth, fileformat? - image format?, palette
+		
+		//missing: componentColor, sampleSize
+		
+		// thumbnails from videos!
+		
 	}
+
 
 	private static void parseVideoFromJson(MediaObject med, JsonNode json, ArrayNode allRes) {
 		//durationSeconds //width, height //Quality	
@@ -641,13 +686,48 @@ public class MediaController extends Controller {
 		} 
 		
 		parseJsonDuration(med, json, allRes);
+		
+		parseJsonBitRate(med, json, allRes);
+
+		
+		//TODO: reminder that this should be an Enum!
+		if(json.hasNonNull("codec")){
+			med.setCodec(json.get("codec").asText());
+		}
+		
+		if(json.hasNonNull("framerate")){
+			if(json.get("framerate").canConvertToInt()){
+				med.setFrameRate(json.get("framerate").asInt());
+			} else {
+				allRes.add(Json.newObject().put("error", "Frame rate needs to be an integer"));
+			}
+		}
 	}
 
 	private static void parseImageFromJson(MediaObject med, JsonNode json, ArrayNode allRes) {
 		if(parseJsonDimensionsAndThumbnail(med, json, allRes)){
 			med.setOrientation();
 		}
+		
+		//TODO: reminder that this should be an Enum!
+		if(json.hasNonNull("colorspace")){
+			med.setColorSpace(json.get("colorspace").asText());
+		}
+		
+		
+		
 	}
+	
+	private static void parseJsonBitRate(MediaObject med, JsonNode json, ArrayNode allRes) {
+		if(json.hasNonNull("bitrate")){
+			if(json.get("bitrate").canConvertToInt()){
+				med.setBitRate(json.get("bitrate").asInt());
+			} else {
+				allRes.add(Json.newObject().put("error", "Bit rate needs to be an integer"));
+			}
+		}
+	}
+
 
 	//these methods are boolean and not arraynodes for flow control during testing
 	//with the media libraries we are going to use in the future
@@ -662,7 +742,8 @@ public class MediaController extends Controller {
 		}
 		return true;
 	}
-
+	
+	
 	private static boolean parseJsonDimensionsAndThumbnail(MediaObject med, JsonNode json, ArrayNode allRes) {
 		
 		if(json.hasNonNull("height")&&json.hasNonNull("width")){
@@ -680,7 +761,7 @@ public class MediaController extends Controller {
 			}
 		}
 		
-		//make thumb from image url if this is empty?
+		//TODO:make thumb from image url if this is empty?
 		if(json.hasNonNull("thumbnailUrl")){
 			med.setThumbnailUrl(json.get("thumbnailUrl").asText());
 			
@@ -755,6 +836,7 @@ public class MediaController extends Controller {
 	
 	
 //	use the libraries we will use for video editing!
+	//TODO
 	private static void makeThumb(MediaObject med, BufferedImage image) throws IOException {
 		Image ithumb = image.getScaledInstance(211, -1,
 				Image.SCALE_SMOOTH);
@@ -776,5 +858,50 @@ public class MediaController extends Controller {
 		med.setThumbWidth(thumb.getWidth());
 		med.setThumbHeight(thumb.getHeight());
 	}
+	
+	
+	
+	private static JsonNode parseMediaFile(File fileToParse) {
+		//TODO: fix exception (add allrez)
+		
+		String filename = fileToParse.getName();
+		
+		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata?mediafile=" + filename;
+		Logger.info("URL: " + queryURL);
+		JsonNode response = null;
+				
+		try {
+			
+			response = HttpConnector.postFile(queryURL, fileToParse);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		}
+		
+		
+		return response;
+	}
+
+	private static JsonNode parseMediaURL(String mediaURL) {
+		//TODO: fix exception (add allrez)
+			
+		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata?url=" + mediaURL;
+		Logger.info("URL: " + queryURL);
+		JsonNode response = null;
+				
+		try {
+			
+			response = HttpConnector.postURLContent(queryURL);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			// e.printStackTrace();
+		}
+
+		
+		return response;
+	}
+
 	
 }
