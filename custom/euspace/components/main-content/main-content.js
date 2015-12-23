@@ -119,13 +119,16 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  console.log("load all");
 		  //this should replaced with get space collections + exhibitions
 		   self.loading(true);
-		 
-		  var promiseCollections = self.getSpaceCollections();
+		 var count=40;
+		 if(sessionStorage.getItem("homemasonrycount")){
+			 count=sessionStorage.getItem("homemasonrycount");
+		 }
+		  var promiseCollections = self.getSpaceCollections(count);
 		  $.when(promiseCollections).done(function(responseCollections) {
 			        self.totalCollections(responseCollections.totalCollections);
 			        self.totalExhibitions(responseCollections.totalExhibitions);
 			        var items=self.revealItems(responseCollections['collectionsOrExhibitions']);
-					
+			       
 					if(items.length>0){
 						 var $newitems=getItems(items);
 					     
@@ -148,7 +151,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 		};
 		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
-		self.getSpaceCollections = function () {
+		self.getSpaceCollections = function (count) {
 			//call should be replaced with space collections+exhibitions
 			return $.ajax({
 				type: "GET",
@@ -156,7 +159,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=40&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+				data: "offset=0&count="+count+"&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 			}).success (function(){
 			});
 		};
@@ -195,7 +198,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 						
 						if(items.length>0){
 							 var $newitems=getItems(items);
-						     
 							 homeisotopeImagesReveal( $container,$newitems );
 							
 							}
@@ -243,6 +245,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			
 			}
 			self.homecollections.push.apply(self.homecollections, items);
+			 sessionStorage.setItem("homemasonrycount", self.homecollections().length);
+				
 			return items;
 			
 		};
@@ -255,7 +259,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
                    tile+='<a href="#" onclick="loadCollectionOrExhibition(\''+collection.id+'\',event)">'
                     +'<div class="thumb"><img src="'+collection.cachedThumbnail()+'"></div>'
                     +' <div class="info"><span class="type">'+collection.type+'</span><h1 class="title">'+collection.collname+'</h1><span class="owner">'+ collection.owner+'</span></div>'
-                     +'</a></div></div>';
+                    +'</a></div></div>';
 			return tile;
 			
 		}
@@ -288,21 +292,24 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		    iso.appended( $item );
 		    var scrollpos=sessionStorage.getItem("homemasonryscroll");
 			
-		    if(scrollpos && $(".grid").height()>scrollpos){
-		    	 $(window).scrollTop(scrollpos);
-		    	 sessionStorage.removeItem("homemasonryscroll");
-		    }else if(scrollpos && $(".grid").height()<scrollpos){
-		    	$(window).scrollTop($(".grid").height());	
-		    	if($(".grid").height()>scrollpos)
-		    		sessionStorage.removeItem("homemasonryscroll");
-		    }
+		    
 		    
 		  }).always(function(){
-			  var scrollpos=sessionStorage.getItem("homemasonryscroll");
-				
+			 var scrollpos=sessionStorage.getItem("homemasonryscroll");
+				/*
 			  if(scrollpos && $("#homemasonry").height()<scrollpos)
-			   setTimeout(function(){window.scrollTo(scrollpos);},300);
-			  
+			   setTimeout(function(){window.scrollTop(scrollpos);sessionStorage.removeItem("homemasonryscroll");},300);
+			  */
+			  if(scrollpos!=null && $(".grid").height()>scrollpos){
+				  console.log("scrolling to "+scrollpos);
+			    	 $(window).scrollTop(scrollpos);
+			    	 sessionStorage.removeItem("homemasonryscroll");
+			    }else if(scrollpos!=null && $(".grid").height()<scrollpos){
+			    	 console.log("scrolling to grid height");
+			    	$(window).scrollTop($(".grid").height());	
+			    	if(scrollpos!=null && $(".grid").height()>scrollpos)
+			    		sessionStorage.removeItem("homemasonryscroll");
+			    }
 		  });
 		  
 		  

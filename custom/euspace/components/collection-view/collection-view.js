@@ -411,20 +411,28 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
  		    // un-hide item
  		    $item.show();
  		    iso.appended( $item );
- 		    var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
+ 		   var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
  			if(scrollpos && $(".grid").height()>scrollpos){
  		    	 $(window).scrollTop(scrollpos);
- 		    	 //sessionStorage.removeItem("collection-viewscroll"+$(".grid").attr("id"));
+ 		    	 sessionStorage.removeItem("collection-viewscroll"+self.id());
  		    }else if(scrollpos && $(".grid").height()<scrollpos){
  		    	$(window).scrollTop($(".grid").height());	
+ 		    	
  		    }
+			 
  		    
  		  }).always(function(){
-			//  console.log("in always");
+			  
  			 var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
-				
-			  if(scrollpos && $(".grid").height()<scrollpos)
-			   setTimeout(function(){window.scrollTo(scrollpos);},300);
+  			if(scrollpos && $(".grid").height()>scrollpos){
+  		    	 $(window).scrollTop(scrollpos);
+  		    	 sessionStorage.removeItem("collection-viewscroll"+self.id());
+  		    }else if(scrollpos && $(".grid").height()<scrollpos){
+  		    	$(window).scrollTop($(".grid").height());	
+  		    	if(scrollpos!=null && $(".grid").height()>scrollpos)
+		    		sessionStorage.removeItem("collection-viewscroll"+self.id());
+  		    }
+ 			 
 			  
 		  });
  		  

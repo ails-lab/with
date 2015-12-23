@@ -294,11 +294,14 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		    $item.show();
 		    iso.appended( $item );
 		    var scrollpos=sessionStorage.getItem("providerview"+self.id());
-			if(scrollpos && $(".grid").height()>scrollpos){
-		    	 $(window).scrollTop(scrollpos);
-		    }else if(scrollpos && $(".grid").height()<scrollpos){
-		    	$(window).scrollTop($(".grid").height());	
-		    }
+		   if(scrollpos && $(".grid").height()>scrollpos){
+ 		    	 $(window).scrollTop(scrollpos);
+ 		    	 sessionStorage.removeItem("providerview"+self.id());
+ 		    }else if(scrollpos!=null && $(".grid").height()<scrollpos){
+ 		    	$(window).scrollTop($(".grid").height());	
+ 		    	
+ 		    }
+			
 		    
 		  });
 		  

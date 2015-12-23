@@ -19,15 +19,16 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete'], function(ko, 
 		    window.childwith.focus();
 	}
 	  
-	
-	
 	 goToPage=function(data,event){
-		 if(data=="#home" || data=="#")
+		 if(data=="#home" || data=="#"){
 		      sessionStorage.removeItem("homemasonryscroll");
+		      sessionStorage.removeItem("homemasonrycount");}
 		   window.location.href=data;
 		   event.preventDefault();
 		   return false;
 	}
+	
+	  
 	
 	  
 	}
