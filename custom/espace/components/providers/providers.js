@@ -36,7 +36,8 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
-			self.url="#provider/"+data.dbId;
+			//get 20 collections and exhibitions
+			self.url="#provider/"+data.dbId+"/count/20";
 			self.thumbnail='/media/' + data.thumbnail;
 			self.country=data.page.country;
 			self.totalCollections=data.totalCollections;

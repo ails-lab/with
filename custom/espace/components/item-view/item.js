@@ -350,12 +350,13 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			app.likeItem(rec, function (status) {
 				if (status) {
 					$star.addClass('active');
-					if($('#' + rec.externalId()))
-						$('#' + rec.externalId()).addClass('active');
+					if($( '[id="'+rec.recordId()+'"]' ))
+						$( '[id="'+rec.recordId()+'"]' ).find("span.star").addClass('active');
+						
 				} else {
 					$star.removeClass('active');
-					if($('#' + rec.externalId()))
-						$('#' + rec.externalId()).removeClass('active');
+					if($( '[id="'+rec.recordId()+'"]' ))
+						$( '[id="'+rec.recordId()+'"]' ).find("span.star").removeClass('active');
 				}
 			});
 		};

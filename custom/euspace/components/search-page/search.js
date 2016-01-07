@@ -628,9 +628,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$('#' + id).addClass('active');
+					$( '[id="'+id+'"]' ).find("span.star").addClass('active');
 				} else {
-					$('#' + id).removeClass('active');
+					$( '[id="'+id+'"]').find("span.star").removeClass('active');
 				}
 			});
 		};
@@ -640,7 +640,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
 				return record.recordId=== id;
 			});
-			console.log(rec);
 			
 			collectionShow(rec);
 		};
@@ -650,9 +649,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
 			 if(isLogged()){
 				    if(record.isLike()){
-				    	 tile+='<span class="star active"  id='+record.externalId+'>';
+				    	 tile+='<span class="star active">';
 				    }
-				    else{tile+='<span class="star"  id='+record.externalId+'>';}
+				    else{tile+='<span class="star">';}
 				    if(record.externalId){
 				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
@@ -660,7 +659,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					}
 			 else{
-				 tile+='<span class="star" id="'+record.externalId+'" style="display:none">'
+				 tile+='<span class="star" style="display:none">'
 				 if(record.externalId){
 					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
 					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
@@ -691,6 +690,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
             }
         });
       
+        
+        /*take care of special characters in id of item*/
+        function jq( myid ) {
+        	 
+            myid=myid.replace("\\g", "/");
+        	return "#" + myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
+         
+        }
 
 
   }

@@ -11,7 +11,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 
 	return new Router({
 		routes: [
-			{ url: '',          params: { page: 'home-page',     title: 'Home' } },
+		    { url: '',          params: { page: 'home-page',     title: 'Home' } },
+     		{ url: 'home',          params: { page: 'home-page',     title: 'Home' } },
 			{ url: 'search',    params: { page: 'search-page',   title: 'Search' } },
 			{ url: 'login',     params: { page: 'login-page',    title: 'Login' } },
 			{ url: 'profile',     params: { page: 'profile',    title: 'Profile' } },
@@ -21,9 +22,9 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
 			{ url: 'item/{id}',     params: { page: 'item-view',    title: 'Media Item' } },
-			{ url: 'provider/{id}',     params: { page: 'provider',    title: 'Content Provider' } },
+			{ url: 'provider/{id}/count/{count}',     params: { page: 'provider',    title: 'Content Provider' } },
 			{ url: 'providers',     params: { page: 'providers',    title: 'Content Providers' } },
-			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } },
+			{ url: 'collectionview/{id}/count/{count}',     params: { page: 'collection-view',    title: 'Collection View' } },
 			{ url: 'exhibitionview/{id}',     params: { page: 'exhibition-view',    title: 'Exhibition View' } },
 			{ url: 'reset/{token}', params: { page: 'new-password', title: 'Reset Password' } },
 			{ url: 'exhibition-edit',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
@@ -68,10 +69,38 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 					// toggle button
 					$( '.mobilemenu' ).toggleClass( 'active' );
 	          }
-	            setTimeout(function(){ WITHApp.init(); }, 300); 
+	          setTimeout(function(){ WITHApp.init(); }, 300);
+	          
+	         
+	     	 
 		}
-		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
-		crossroads.ignoreState= true; 
+		function parseHash(newHash, oldHash) {
+			if(oldHash)
+				if(oldHash=="home"){
+					 var scrollPosition = $(window).scrollTop();
+				     sessionStorage.setItem("homemasonryscroll", scrollPosition);
+				     
+				}
+				else if(oldHash.indexOf("provider/")==0){
+					 var scrollPosition = $(window).scrollTop();
+					 oldHash=oldHash.substring(9);
+					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
+					 sessionStorage.setItem("provider"+oldHash, scrollPosition);
+				}
+				else if (oldHash.indexOf("collectionview/")==0){
+					var scrollPosition = $(window).scrollTop();
+					 oldHash=oldHash.substring(15);
+					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
+					 
+					 console.log("collection-viewscroll"+oldHash);
+					 sessionStorage.setItem("collection-viewscroll"+oldHash, scrollPosition);
+				     
+				}
+			crossroads.parse(newHash);
+		
+		
+		}
+		crossroads.ignoreState= false; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);

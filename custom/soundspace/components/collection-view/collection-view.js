@@ -314,9 +314,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$('#' + id).find("span.star").addClass('active');
+					$( '[id="'+id+'"]' ).find("span.star").addClass('active');
+					
 				} else {
-					$('#' + id).find("span.star").removeClass('active');
+					$( '[id="'+id+'"]' ).find("span.star").removeClass('active');
 				}
 			});
 		};
@@ -336,7 +337,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
 			 if(isLogged()){
 				    if(record.isLiked()){
-				    	 tile+='<span class="star active" id="'+record.externalId+'">';
+				    	 tile+='<span class="star active">';
 				    }
 				    else{tile+='<span class="star">';}
 				    if(record.externalId){
@@ -346,7 +347,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					}
 			 else{
-				 tile+='<span class="star" id="'+record.externalId+'" style="display:none">'
+				 tile+='<span class="star" style="display:none">'
 				 if(record.externalId){
 					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
 					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
