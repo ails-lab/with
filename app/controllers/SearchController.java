@@ -32,6 +32,16 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import sources.core.CommonFilterLogic;
+import sources.core.CommonFilterResponse;
+import sources.core.CommonQuery;
+import sources.core.ESpaceSources;
+import sources.core.FiltersHelper;
+import sources.core.ISpaceSource;
+import sources.core.ParallelAPICall;
+import sources.core.SearchResponse;
+import sources.core.SourceResponse;
+import sources.core.Utils;
 import utils.AccessManager;
 import utils.ListUtils;
 
@@ -39,16 +49,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
-import espace.core.CommonFilterLogic;
-import espace.core.CommonFilterResponse;
-import espace.core.CommonQuery;
-import espace.core.ESpaceSources;
-import espace.core.FiltersHelper;
-import espace.core.ISpaceSource;
-import espace.core.ParallelAPICall;
-import espace.core.SearchResponse;
-import espace.core.SourceResponse;
-import espace.core.Utils;
 
 public class SearchController extends Controller {
 

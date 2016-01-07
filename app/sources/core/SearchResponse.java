@@ -14,22 +14,13 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
+import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
+public class SearchResponse {
 
-public class Application extends Controller {
-
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
-	}
+	public List<SourceResponse> responses;
+	public List<CommonFilterResponse> filters;
 
 }

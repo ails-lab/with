@@ -20,8 +20,8 @@ import static org.fest.assertions.Assertions.assertThat;
 
 import org.junit.Test;
 
-import espace.core.CommonQuery;
-import espace.core.sources.DDBSpaceSource;
+import sources.DDBSpaceSource;
+import sources.core.CommonQuery;
 
 /**
  *
