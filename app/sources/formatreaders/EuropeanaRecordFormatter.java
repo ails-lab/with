@@ -58,6 +58,7 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		object.setMedia(media);
 		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		//TODO: add withMediaRights, originalRights
 		return object;
 		//TODO: add null checks
 //		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
