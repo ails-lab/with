@@ -191,7 +191,7 @@ EUSpaceApp.ui = function( custom ){
 	var initIsotope = function(){
 
 		// log
-		//logger( 'info','plugins.js / initIsotope' );
+		logger( 'info','plugins.js / initIsotope' );
 
 		// initialize masonry after window.load
 		// safari seems to have problem when initialize on dom ready
@@ -199,7 +199,7 @@ EUSpaceApp.ui = function( custom ){
 		
 			// check if grid exist
 			if( $( settings.mSelector ).length > 0 ) {
-
+				
 				// init
 				$( settings.mSelector ).imagesLoaded(function(){	
 					
@@ -208,9 +208,22 @@ EUSpaceApp.ui = function( custom ){
 					// options
 					columnWidth		: settings.mSizer,
 					itemSelector	: settings.mItem,
-					percentPosition	: true
-				});
+					percentPosition	: true,
+					  onLayout: function( $elems, instance ) {
+						    // `this` refers to jQuery object of the container element
+						  console.log("onLayout");
+						    console.log( this.height() );
+						    var height = $( settings.mSelector ).height();
+
+							if( height > 0 ) { // or some other number
+								$( settings.mSelector ).height( height );
+							}
+				}
+				
 			});
+				$( settings.mSelector ).isotope("layout");
+				});
+				
 			}
 		});
 
@@ -670,6 +683,9 @@ EUSpaceApp.ui = function( custom ){
 			}
 		}
 	};
+	
+	
+	 
 };
 
 return {
