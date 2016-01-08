@@ -71,8 +71,8 @@ public class TestCollectionController {
 
 		UserGroup group = new UserGroup();
 		DB.getUserGroupDAO().makePermanent(group);
-		UserManager.addUserToGroup(user1.getDbId().toHexString(), group
-				.getDbId().toHexString());
+		//UserManager.addUserToGroup(user1.getDbId().toHexString(), group
+				//.getDbId().toHexString());
 
 		Collection col = new Collection();
 		col.setDescription("Collection from Controller");

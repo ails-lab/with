@@ -164,9 +164,12 @@ public class Collection {
 	public List<CollectionRecord> getFirstEntries() {
 		return firstEntries;
 	}
+	
+	public void removeFromFirstEntries(CollectionRecord entry) {
+		this.firstEntries.remove(entry);
+	}
 
 	public String getThumbnailUrl() {
-
 		if (firstEntries.size() > 0)
 			return firstEntries.get(0).getThumbnailUrl();
 		return null;

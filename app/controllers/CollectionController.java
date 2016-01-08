@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -694,12 +695,12 @@ public class CollectionController extends Controller {
 			int position = json.get("position").asInt();
 			DB.getCollectionRecordDAO().shiftRecordsToRight(new ObjectId(collectionId), position);
 			DB.getCollectionRecordDAO().makePermanent(record);
-			status = addRecordToFirstEntries(record, result, collectionId, position);
+			status = addRecordToFirstEntries(record, result, new ObjectId(collectionId), position);
 		} else {
 			int position  = c.getItemCount();
 			record.setPosition(position);
 			DB.getCollectionRecordDAO().makePermanent(record);
-			status = addRecordToFirstEntries(record, result, collectionId, position);
+			status = addRecordToFirstEntries(record, result, new ObjectId(collectionId), position);
 		}
 		JsonNode content = json.get("content");
 		if (content != null) {
@@ -744,7 +745,7 @@ public class CollectionController extends Controller {
 		return status;
 	}
 
-	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, String collectionId) {
+	/*private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, String collectionId) {
 		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
 		collection.itemCountIncr();
 		collection.setLastModified(new Date());
@@ -762,36 +763,110 @@ public class CollectionController extends Controller {
 			itemCountUpdater.incItemCount();
 			return ok(Json.toJson(record));
 		}
+	}*/
+	
+	public static Status updateFavoritesFirstEntries() {
+		int updated = 0;
+		System.out.println("update");
+		for (Collection c: DB.getCollectionDAO().getByTitle("_favorites")) {
+			ObjectId colId = c.getDbId();
+			List<CollectionRecord> records = c.getFirstEntries();
+			for (CollectionRecord r: DB.getCollectionRecordDAO().getByCollection(colId)) {
+				boolean contains = false;
+				for (CollectionRecord fe: records) {
+					if (fe.getDbId().equals(r.getDbId())) {
+						contains = true;
+						break;
+					}
+				}
+				if (!contains) {
+					updated++;
+					System.out.println("Adding to first records " + updated);
+					int size = records.size();
+					addRecordToFirstEntries(r, Json.newObject(), colId, size);
+				}
+			}
+			//remove duplicates in firstEntries
+			//HashSet<CollectionRecord> recordSet = new HashSet<CollectionRecord>(records);
+			//records = new ArrayList<CollectionRecord>(recordSet);
+			//DB.getCollectionDAO().makePermanent(c);
+		}
+		return ok(Json.toJson(updated));
 	}
+	
+	public static Status updateFirstEntries() {
+		for (Collection c: DB.getCollectionDAO().getAll()) {
+			ObjectId colId = c.getDbId();
+			List<CollectionRecord> records = c.getFirstEntries();
+			List<CollectionRecord> colRecords = new ArrayList<CollectionRecord>();
+			for (CollectionRecord r: DB.getCollectionRecordDAO().getByCollection(colId)) {
+				colRecords.add(r);
+				boolean contains = false;
+				for (CollectionRecord fe: records) {
+					if (fe.getDbId().equals(r.getDbId())) {
+						contains = true;
+						break;
+					}
+				}
+				if (!contains) {
+					int size = records.size();
+					addRecordToFirstEntries(r, Json.newObject(), colId, size);
+				}
+			}
+			for (CollectionRecord fe: records) {
+				boolean contains = false;
+				for (CollectionRecord colRec: colRecords) {
+					if (fe.getDbId().equals(colRec.getDbId())) {
+						contains = true;
+						break;
+					}
+				}
+				if (!contains) 
+					records.remove(fe);
+			}
+			//remove duplicates in firstEntries
+			//HashSet<CollectionRecord> recordSet = new HashSet<CollectionRecord>(records);
+			//records = new ArrayList<CollectionRecord>(recordSet);
+			DB.getCollectionDAO().makePermanent(c);
+		}
+		return ok();
+	}
+	
 
-	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, String collectionId,
+	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, ObjectId collectionId,
 			int position) {
-
-		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-		collection.itemCountIncr();
-		collection.setLastModified(new Date());
-		String recordId = record.getDbId().toString();
-		record.getContent().clear();
-		List<CollectionRecord> records = collection.getFirstEntries();
-		for (CollectionRecord r : records) {
-			if (recordId.equals(r.getDbId().toString())) {
-				records.remove(r);
-				break;
+		Collection collection = DB.getCollectionDAO().getById(collectionId);
+		if (collection.getFirstEntries().size() < 20 && position < 20) {
+			collection.itemCountIncr();
+			collection.setLastModified(new Date());
+			String recordId = record.getDbId().toString();
+			record.getContent().clear();
+			List<CollectionRecord> records = collection.getFirstEntries();
+			for (CollectionRecord r : records) {
+				if (recordId.equals(r.getDbId().toString())) {
+					records.remove(r);
+					break;
+				}
+			}
+			if (collection.getFirstEntries().size() < 20) {
+				if (position > records.size())
+					collection.getFirstEntries().add(record);
+				else
+					collection.getFirstEntries().add(position, record);
+			}
+			DB.getCollectionDAO().makePermanent(collection);
+			if (record.getDbId() == null) {
+				result.put("message", "Cannot save RecordLink to database!");
+				return internalServerError(result);
+			} else {
+				// update itemCount
+				ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+				itemCountUpdater.incItemCount();
+				return ok(Json.toJson(record));
 			}
 		}
-		if (collection.getFirstEntries().size() < 20) {
-			collection.getFirstEntries().add(position, record);
-		}
-		DB.getCollectionDAO().makePermanent(collection);
-		if (record.getDbId() == null) {
-			result.put("message", "Cannot save RecordLink to database!");
-			return internalServerError(result);
-		} else {
-			// update itemCount
-			ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
-			itemCountUpdater.incItemCount();
-			return ok(Json.toJson(record));
-		}
+		else 
+			return ok();
 	}
 
 	private static void addContentToRecord(ObjectId recordId, String source, String sourceId) {
