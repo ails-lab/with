@@ -371,7 +371,6 @@ public class ElasticSearcher {
 	}
 
 	private FilterBuilder filter(String key, String value) {
-		System.out.println("FILTER BUILDER: " + key + " - " + value);
 		FilterBuilder filter = FilterBuilders.termFilter(key, value);
 		return filter;
 	}

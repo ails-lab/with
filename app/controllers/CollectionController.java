@@ -856,7 +856,7 @@ public class CollectionController extends Controller {
 			}
 			DB.getCollectionDAO().makePermanent(collection);
 			if (record.getDbId() == null) {
-				result.put("message", "Cannot save RecordLink to database!");
+				result.put("message", "Cannot save Record to database!");
 				return internalServerError(result);
 			} else {
 				// update itemCount
