@@ -1,0 +1,70 @@
+
+// dark hue on top of images
+.hue() {
+	.hue {
+		background: rgba( 0,0,0,0.4 );
+		width: 100%;
+		height: 100%;
+	}
+}
+
+// tabs
+.tabs() {
+	margin: 0;
+	padding: 0;
+
+	// li
+	li {
+		list-style-type: none;
+		display: inline-block;
+		margin-right: -4px;
+
+		// anchor
+		a {
+			height: 55px;
+			padding: 17px 20px 0px 20px;
+			display: block;
+			color: @gray;
+			position: relative;
+			.transition( all @transition-timing );
+
+			// hover
+			&:hover {
+				color: darken(#d5cfa7, 25%);
+				text-decoration: none;
+				
+				// after
+				&::after {
+					.opacity( 1 );
+				}
+			}
+
+			// after
+			&::after {
+				width: 100%;
+				position: absolute;
+				content: "";
+				bottom: 0;
+				height: 3px;
+				background: @brand-blue;
+				left: 0;
+				.opacity( 0 );
+				.transition( opacity @transition-timing );
+			}
+		}
+
+		// active
+		&.active {
+
+			// anchor
+			a {
+				color: darken(#d5cfa7, 25%);
+
+				// after
+				&:after {
+					.opacity( 1 );
+				}
+			}
+		}
+	}
+}
