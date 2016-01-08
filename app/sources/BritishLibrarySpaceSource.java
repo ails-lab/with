@@ -176,14 +176,12 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response.path("photos"), "total", true);
 				res.count = Utils.readIntAttr(response.path("photos"), "perpage", true);
-				ArrayList<WithResource<?>> a = new ArrayList<>();
 				for (JsonNode item : response.path("photos").path("photo")) {
 					// countValue(type, t);
 //					countValue(rights, it.rights, 1);
-				    a.add(formatreader.readObjectFrom(item));
+				    res.addItem(formatreader.readObjectFrom(item));
 				}
-				res.items = a;
-				res.count = a.size();
+				res.count = res.items.getCulturalHO().size();
 
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();

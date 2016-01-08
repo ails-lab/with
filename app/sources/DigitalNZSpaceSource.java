@@ -142,16 +142,14 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-//		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-//		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-//		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
-//		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
+		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
+		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
+		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);;
 
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
-
-				ArrayList<WithResource<?>> a = new ArrayList<>();
 
 				JsonNode o = response.path("search");
 				// System.out.print(o.path("name").asText() + " ");
@@ -169,24 +167,23 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 //					for (String string : v) {
 //						countValue(type, string);
 //					}
-					a.add(formatreader.readObjectFrom(item));
+					res.addItem(formatreader.readObjectFrom(item));
 
 				}
-				res.count = a.size();
+				res.count = res.items.getCulturalHO().size();
 
-				res.items = a;
 
-//				readList(o.path("facets").path("category"), type);
-//				readList(o.path("facets").path("usage"), rights);
-//				readList(o.path("facets").path("year"), year);
+				readList(o.path("facets").path("category"), type);
+				readList(o.path("facets").path("usage"), rights);
+				readList(o.path("facets").path("year"), year);
 
-//				readList(o.path("facets").path("creator"), creator);
+				readList(o.path("facets").path("creator"), creator);
 
 				res.filtersLogic = new ArrayList<>();
-//				res.filtersLogic.add(type);
-//				res.filtersLogic.add(creator);
-//				res.filtersLogic.add(rights);
-//				res.filtersLogic.add(year);
+				res.filtersLogic.add(type);
+				res.filtersLogic.add(creator);
+				res.filtersLogic.add(rights);
+				res.filtersLogic.add(year);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

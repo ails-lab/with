@@ -25,6 +25,7 @@ import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
+import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
@@ -52,7 +53,7 @@ public class BritishLibraryRecordFormatter extends JsonContextRecordFormatReader
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
 		String id = rec.getStringValue("id");
-		object.addToProvenance(new ProvenanceInfo(BritishLibrarySpaceSource.LABEL,
+		object.addToProvenance(new ProvenanceInfo(Sources.BritishLibrary.toString(),
 				  "https://www.flickr.com/photos/britishlibrary/" + id + "/", id));
 		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
 		MediaObject med;

@@ -22,6 +22,7 @@ import java.util.List;
 import model.CollectionRecord;
 import model.ExternalBasicRecord;
 import model.Provider;
+import model.resources.CulturalObject;
 import model.resources.WithResource;
 
 import org.elasticsearch.action.search.SearchResponse;
@@ -39,14 +40,14 @@ public class SourceResponse {
 	public int totalCount;
 	public int startIndex;
 	public int count;
-	public List<WithResource<?>> items;
+	public ItemsGrouping items;
 	public String source;
 	public JsonNode facets;
 	public List<CommonFilterResponse> filters;
 	public List<CommonFilterLogic> filtersLogic;
 
 	public SourceResponse() {
-		items = new ArrayList<>();
+		items = new ItemsGrouping();
 		filters = new ArrayList<>();
 	}
 
@@ -74,7 +75,7 @@ public class SourceResponse {
 //			item.setThumbnailUrl(r.getThumbnailUrl().toString());
 //			items.add(item);
 //		}
-		this.items = items;
+		this.items.setCulturalHO(items);
 	}
 
 	public SourceResponse merge(SourceResponse r2) {
@@ -82,7 +83,7 @@ public class SourceResponse {
 		res.source = r2.source;
 		res.query = query;
 		res.count = count + r2.count;
-		res.items = new ArrayList<>();
+		res.items = new ItemsGrouping();
 		if (items != null)
 			res.items.addAll(items);
 		if (r2.items != null)
@@ -99,7 +100,15 @@ public class SourceResponse {
 	}
 
 	public void addItem(WithResource<?> record) {
-		if (record!=null)
-			items.add(record);
+		if (record!=null){
+		if (record instanceof CulturalObject)
+			items.getCulturalHO().add(record);
+		}
 	}
+
+	@Override
+	public String toString() {
+		return "SourceResponse [source=" + source + ", query=" + query + ", totalCount=" + totalCount + "]";
+	}
+	
 }

@@ -82,9 +82,8 @@ public class DDBSpaceSource extends ISpaceSource {
 				ArrayList<WithResource<?>> a = new ArrayList<>();
 
 				for (JsonNode item : docs) {
-					a.add(formatreader.readObjectFrom(item));
+					res.addItem(formatreader.readObjectFrom(item));
 				}
-				res.items = a;
 
 //				CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
 

@@ -129,8 +129,8 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-//		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-//		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
+		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
 
 		if (checkFilters(q)){
 		try {
@@ -164,7 +164,7 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 //						for (String string : v) {
 //							countValue(type, string);
 //						}
-						a.add(formatreader.readObjectFrom(item));
+						res.addItem(formatreader.readObjectFrom(item));
 						
 					}
 					for (JsonNode facet : o.path("facets").path("facet"))
@@ -178,10 +178,10 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 //							System.out.println(" path "+path);
 							switch (path.asText()) {
 							case "format":
-//								countValue(type, label, count);
+								countValue(type, label, count);
 								break;
 							case "year":
-//								countValue(year, label, count);
+								countValue(year, label, count);
 								break;
 							default:
 								break;
@@ -194,7 +194,6 @@ private Function<List<String>, Pair<String>> fwriter(String parameter) {
 				}
 			}
 		
-			res.items = a;
 			res.filtersLogic = new ArrayList<>();
 //			res.filtersLogic.add(type);
 //			res.filtersLogic.add(year);

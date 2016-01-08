@@ -147,12 +147,12 @@ public class DPLASpaceSource extends ISpaceSource {
 		String httpQuery = getHttpQuery(q);
 		res.query = httpQuery;
 		JsonNode response;
-//		CommonFilterLogic type = CommonFilterLogic.typeFilter();
-//		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
-//		CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
-//		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
-//		CommonFilterLogic country = CommonFilterLogic.countryFilter();
-//		CommonFilterLogic contributor = CommonFilterLogic.contributorFilter();
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
+		CommonFilterLogic provider =  new CommonFilterLogic(CommonFilters.PROVIDER);
+		CommonFilterLogic dataProvider =  new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
+		CommonFilterLogic creator =  new CommonFilterLogic(CommonFilters.CREATOR);
+		CommonFilterLogic country =  new CommonFilterLogic(CommonFilters.COUNTRY);
+		CommonFilterLogic contributor =  new CommonFilterLogic(CommonFilters.CONTRIBUTOR);
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
@@ -161,7 +161,6 @@ public class DPLASpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				res.count = docs.size();
 				res.startIndex = Utils.readIntAttr(response, "start", true);
-				ArrayList<WithResource<?>> a = new ArrayList<>();
 
 				for (JsonNode item : docs) {
 
@@ -169,32 +168,30 @@ public class DPLASpaceSource extends ISpaceSource {
 					// "type", false);
 					// countValue(type, t);
 
-					a.add(formatreader.readObjectFrom(item));
+					res.addItem(formatreader.readObjectFrom(item));
 //					countValue(creator, obj.getCreator());
 					
 				}
-				res.items = a;
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();
 
-//				readList(response.path("facets").path("provider.name"), provider);
-//
-//				readList(response.path("facets").path("dataProvider"), dataProvider);
-//
-//				readList(response.path("facets").path("sourceResource.type"), type);
-//
-//				readList(response.path("facets").path("sourceResource.contributor"), contributor);
-//
-//				readList(response.path("facets").path("sourceResource.spatial.country"), country);
+				readList(response.path("facets").path("provider.name"), provider);
+
+				readList(response.path("facets").path("dataProvider"), dataProvider);
+
+				readList(response.path("facets").path("sourceResource.type"), type);
+
+				readList(response.path("facets").path("sourceResource.contributor"), contributor);
+
+				readList(response.path("facets").path("sourceResource.spatial.country"), country);
 
 				res.filtersLogic = new ArrayList<>();
-//				res.filtersLogic.add(type);
-//				res.filtersLogic.add(provider);
-//				res.filtersLogic.add(dataProvider);
-//				res.filtersLogic.add(creator);
-//				res.filtersLogic.add(country);
-//
-//				res.filtersLogic.add(contributor);
+				res.filtersLogic.add(type);
+				res.filtersLogic.add(provider);
+				res.filtersLogic.add(dataProvider);
+				res.filtersLogic.add(creator);
+				res.filtersLogic.add(country);
+				res.filtersLogic.add(contributor);
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

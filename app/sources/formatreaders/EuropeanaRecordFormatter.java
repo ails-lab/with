@@ -24,6 +24,7 @@ import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
+import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
@@ -51,7 +52,7 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
-		object.addToProvenance(new ProvenanceInfo(EuropeanaSpaceSource.LABEL, rec.getStringValue("id"), rec.getStringValue("guid")));
+		object.addToProvenance(new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
 		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
 		MediaObject med;
 		media.add(med = new MediaObject());

@@ -42,6 +42,7 @@ import sources.core.FacetsModes;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
+import sources.core.QueryModifier;
 import sources.core.RecordJSONMetadata;
 import sources.core.SourceResponse;
 import sources.core.Utils;
@@ -60,27 +61,53 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		LABEL = Sources.Europeana.toString();
 		apiKey = "SECRET_KEY";
 		formatreader = new EuropeanaRecordFormatter();
-	    filtersSupportedBySource = new ArrayList<CommonFilters>(
-	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR,
-	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
-	    				CommonFilters.TYPE, CommonFilters.YEAR)
-	    		);
-	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
-	    		for (CommonFilters filter: filtersSupportedBySource) {
-	    			put(filter.name(), filter);
-	    		}
-	    	}};
-	    filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
-	    		for (String key: sourceToFiltersMappings.keySet()) {
-	    			put(sourceToFiltersMappings.get(key), key);
-	    		}
-	    	}};
-		for (CommonFilters filterType: filtersSupportedBySource) {
-			addDefaultWriter(filterType.name(), qfwriter(filtersToSourceMappings.get(filterType)));
-		}
-		for (RecordType type: RecordType.values()) {
-			addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
-		}
+		
+		
+		addDefaultWriter(CommonFilters.PROVIDER.name(), qfwriter("PROVIDER"));
+		addDefaultWriter(CommonFilters.DATA_PROVIDER.name(), qfwriter("DATA_PROVIDER"));
+		addDefaultWriter(CommonFilters.COUNTRY.name(), qfwriter("COUNTRY"));
+
+		addDefaultWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+
+		addDefaultWriter(CommonFilters.CREATOR.name(), qfwriter("CREATOR"));
+
+		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
+		// qfwriter("proxy_dc_contributor"));
+
+		addDefaultQueryModifier(CommonFilters.RIGHTS.name(), qrightwriter());
+
+		addDefaultWriter(CommonFilters.TYPE.name(), qfwriter("TYPE"));
+
+		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.name(), "IMAGE");
+		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.name(), "VIDEO");
+		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.name(), "SOUND");
+		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.name(), "TEXT");
+
+//		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
+
+		
+		
+//	    filtersSupportedBySource = new ArrayList<CommonFilters>(
+//	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR,
+//	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
+//	    				CommonFilters.TYPE, CommonFilters.YEAR)
+//	    		);
+//	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
+//	    		for (CommonFilters filter: filtersSupportedBySource) {
+//	    			put(filter.name(), filter);
+//	    		}
+//	    	}};
+//	    filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
+//	    		for (String key: sourceToFiltersMappings.keySet()) {
+//	    			put(sourceToFiltersMappings.get(key), key);
+//	    		}
+//	    	}};
+//		for (CommonFilters filterType: filtersSupportedBySource) {
+//			addDefaultWriter(filterType.name(), qfwriter(filtersToSourceMappings.get(filterType)));
+//		}
+//		for (RecordType type: RecordType.values()) {
+//			addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
+//		}
 
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.name(), ".*creative.*");
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
@@ -88,6 +115,20 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.name(), ".*rr-.*");
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.name(), ".*unknown.*");
 
+	}
+	
+	private Function<List<String>, QueryModifier> qrightwriter() {
+		Function<String, String> function = (String s) -> {
+			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
+			s = s.replace("(?!.*nd)", "*%20NOT%20*nd");
+			return "RIGHTS%3A%28" + s.replace(".", "") + "%29";
+		};
+		return new Function<List<String>, QueryModifier>() {
+			@Override
+			public AdditionalQueryModifier apply(List<String> t) {
+				return new AdditionalQueryModifier("%20" + Utils.getORList(ListUtils.transform(t, function), false));
+			}
+		};
 	}
 	
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
@@ -187,34 +228,63 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
+		
+		
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
+		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
+		CommonFilterLogic dataprovider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
+		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
+		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
+		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
+		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
+		
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();
-			CommonFilters withFilter = sourceToFiltersMappings.get(filterType);
-			if (withFilter != null) {
-				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
 				for (JsonNode jsonNode : facet.path("fields")) {
 					String label = jsonNode.path("label").asText();
 					int count = jsonNode.path("count").asInt();
 					switch (filterType) {
-						case "TYPE":
-						case "RIGHTS":
-							countValue(filter, label, count);
-							break;
-						case "DATA_PROVIDER":
-						case "PROVIDER":
-						case "proxy_dc_creator":
-						case "COUNTRY":
-						case "YEAR":
-							countValue(filter, label, false, count);
-							break;
+					case "TYPE":
+						countValue(type, label, count);
+						break;
+
+					case "DATA_PROVIDER":
+						countValue(dataprovider, label, false, count);
+						break;
+
+					case "PROVIDER":
+						countValue(provider, label, false, count);
+						break;
+
+					case "RIGHTS":
+						countValue(rights, label, count);
+						break;
+
+					case "proxy_dc_creator":
+						countValue(creator, label, false, count);
+						break;
+					case "COUNTRY":
+						countValue(country, label, false, count);
+						break;
+
+					case "YEAR":
+						countValue(year, label, false, count);
+						break;
+
 						default:
 							break;
 					}
-					filters.add(filter);
-				}
+					
 			}
 		}
+		filters.add(type);
+		filters.add(provider);
+		filters.add(dataprovider);
+		filters.add(creator);
+		filters.add(rights);
+		filters.add(country);
+		filters.add(year);
 		return filters;
 	}
 
@@ -244,7 +314,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				res.items = getItems(response);
+				res.items.setCulturalHO(getItems(response));;
 //				res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
 

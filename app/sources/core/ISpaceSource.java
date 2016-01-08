@@ -38,7 +38,7 @@ public abstract class ISpaceSource {
 	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
 	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
 	private FilterValuesMap vmap = new FilterValuesMap();
-	public static String LABEL = "";
+	public String LABEL = "";
 	protected String apiKey="";
 	protected JsonContextRecordFormatReader formatreader;
 

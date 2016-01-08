@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
+import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
@@ -56,7 +57,7 @@ public class DNZBasicRecordFormatter extends JsonContextRecordFormatReader<Cultu
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
 		String id = rec.getStringValue("id");
-		object.addToProvenance(new ProvenanceInfo(DigitalNZSpaceSource.LABEL,  
+		object.addToProvenance(new ProvenanceInfo(Sources.DigitalNZ.toString(),  
 				"http://www.digitalnz.org/objects/" +id, id));
 		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
 		MediaObject med;
