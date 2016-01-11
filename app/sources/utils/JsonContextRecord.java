@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteral;
 
 public class JsonContextRecord {
 
@@ -179,7 +180,7 @@ public class JsonContextRecord {
 			return null;
 	}
 	
-	public Literal getLiteralValue(String... path){
+	public MultiLiteral getLiteralValue(String... path){
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
 			return JsonNodeUtils.asLiteral(node);
