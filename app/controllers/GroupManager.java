@@ -38,7 +38,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import espace.core.HttpConnector;
 import model.Collection;
 import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.Organization;
@@ -53,6 +52,7 @@ import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import sources.core.HttpConnector;
 import utils.AccessManager;
 import utils.Tuple;
 

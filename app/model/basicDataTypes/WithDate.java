@@ -44,4 +44,9 @@ public class WithDate {
 	
 	//mandatory, other fields are extracted from that
 	String free;
+	
+	public void setDate(String free){
+		this.free = free;
+		//code to init the other Date representations
+	}
 }

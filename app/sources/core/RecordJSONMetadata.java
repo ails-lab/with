@@ -14,22 +14,33 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
+public class RecordJSONMetadata {
 
-import com.fasterxml.jackson.databind.JsonNode;
+	public enum Format {
+		JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, 
+		JSON_EDM, JSONLD_EDM, XML_EDM,
+		JSONLD_DPLA,
+		JSON_NLA, XML_NLA, 
+		JSON_DNZ, XML_DNZ,
+		JSON_YOUTUBE
+	}
 
-public class Application extends Controller {
+	private String jsonContent;
+	private Format format;
 
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
+	public RecordJSONMetadata(Format format, String jsonContent) {
+		this.jsonContent = jsonContent;
+		this.format = format;
+	}
+
+	public String getJsonContent() {
+		return jsonContent;
+	}
+
+	public String getFormat() {
+		return (String.valueOf(format).replaceAll("_", "-"));
 	}
 
 }

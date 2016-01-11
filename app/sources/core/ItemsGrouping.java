@@ -14,22 +14,34 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import model.resources.WithResource;
 
-public class Application extends Controller {
+public class ItemsGrouping {
+	
+	private List<WithResource<?>> culturalHO;
+	
+	
 
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
+	public ItemsGrouping() {
+		super();
+		culturalHO = new ArrayList<>();
+	}
+
+	public List<WithResource<?>> getCulturalHO() {
+		return culturalHO;
+	}
+
+	public void setCulturalHO(List<WithResource<?>> culturalHO) {
+		this.culturalHO = culturalHO;
+	}
+
+	public void addAll(ItemsGrouping items) {
+		culturalHO.addAll(items.getCulturalHO());
 	}
 
 }

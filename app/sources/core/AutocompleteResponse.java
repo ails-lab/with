@@ -14,22 +14,27 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
+import java.util.List;
+
+import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class Application extends Controller {
-
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
+//everythign public and in one place for brevity
+public class AutocompleteResponse {
+	
+    public static class Suggestion {
+    	public String value;
+    	public DataJSON data;
+    }
+	public static class DataJSON {
+		public String category;
+		public int frequencey = -1;
+		public String field = "";
 	}
-
+	
+	
+	public List<Suggestion> suggestions;
 }

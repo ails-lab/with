@@ -32,6 +32,16 @@ import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import sources.core.CommonFilterLogic;
+import sources.core.CommonFilterResponse;
+import sources.core.CommonQuery;
+import sources.core.ESpaceSources;
+import sources.core.FiltersHelper;
+import sources.core.ISpaceSource;
+import sources.core.ParallelAPICall;
+import sources.core.SearchResponse;
+import sources.core.SourceResponse;
+import sources.core.Utils;
 import utils.AccessManager;
 import utils.ListUtils;
 
@@ -39,16 +49,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import elastic.Elastic;
-import espace.core.CommonFilterLogic;
-import espace.core.CommonFilterResponse;
-import espace.core.CommonQuery;
-import espace.core.ESpaceSources;
-import espace.core.FiltersHelper;
-import espace.core.ISpaceSource;
-import espace.core.ParallelAPICall;
-import espace.core.SearchResponse;
-import espace.core.SourceResponse;
-import espace.core.Utils;
 
 public class SearchController extends Controller {
 
@@ -119,7 +119,7 @@ public class SearchController extends Controller {
 						// Logger.debug("Total time for all sources to respond:
 						// "
 						// + (System.currentTimeMillis()- initTime));
-
+System.out.println("merging now!!!!!!");
 						SearchResponse r1 = new SearchResponse();
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
@@ -170,8 +170,18 @@ public class SearchController extends Controller {
 
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
-		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> src
+		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> {
+			SourceResponse res = src
 				.getResults(cq);
+			if (res.source==null){
+				System.out.println("Errooooooor "+src.getSourceName());
+			}
+			System.out.println("got "+res);
+			return res;
+			};
+			
+			System.out.println(">>>>>>>>> requested "+q.source);
+			
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
 				List<CommonQuery> list = src.splitFilters(q);

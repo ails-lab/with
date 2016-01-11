@@ -14,22 +14,20 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
+import java.util.List;
 
-import com.fasterxml.jackson.databind.JsonNode;
+public class CommonFilterResponse {
+	public CommonFilters filter;
+	public List<ValueCount> suggestedValues;
 
-public class Application extends Controller {
+	public CommonFilterResponse() {
+	}
 
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
+	@Override
+	public String toString() {
+		return "CommonFilterResponse [filterName=" + filter.toString() + ", suggestedValues=" + suggestedValues.size() + "]";
 	}
 
 }

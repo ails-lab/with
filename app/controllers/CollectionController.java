@@ -51,6 +51,9 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import sources.core.ISpaceSource;
+import sources.core.ParallelAPICall;
+import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
@@ -68,9 +71,6 @@ import db.DB;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
 import elastic.ElasticUpdater;
-import espace.core.ISpaceSource;
-import espace.core.ParallelAPICall;
-import espace.core.RecordJSONMetadata;
 
 public class CollectionController extends Controller {
 	public static final ALogger log = Logger.of(CollectionController.class);

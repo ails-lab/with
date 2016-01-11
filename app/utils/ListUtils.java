@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import espace.core.CommonFilterLogic;
-import espace.core.CommonFilterResponse;
+import sources.core.CommonFilterLogic;
+import sources.core.CommonFilterResponse;
 
 public class ListUtils {
 

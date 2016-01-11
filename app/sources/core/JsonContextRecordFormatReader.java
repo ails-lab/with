@@ -14,22 +14,31 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
+import sources.utils.JsonContextRecord;
+import model.resources.WithResource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-public class Application extends Controller {
-
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
+public abstract class JsonContextRecordFormatReader<T extends WithResource> {
+	
+	protected T object;
+	
+	public T fillObjectFrom(String text) {
+		JsonContextRecord rec = new JsonContextRecord(text);
+		return fillObjectFrom(rec);
+	}
+	
+	public T fillObjectFrom(JsonNode text) {
+		JsonContextRecord rec = new JsonContextRecord(text);
+		return fillObjectFrom(rec);
+	}
+	
+	public abstract T fillObjectFrom(JsonContextRecord text);
+	
+	public T readObjectFrom(JsonNode text){
+		return fillObjectFrom(text);
 	}
 
 }

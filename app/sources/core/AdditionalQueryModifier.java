@@ -14,22 +14,17 @@
  */
 
 
-package controllers;
+package sources.core;
 
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sources.core.CommonQuery;
-import sources.core.ESpaceSources;
-import sources.core.Utils;
-import views.html.index;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-public class Application extends Controller {
-
-	public static Result index() {
-		return ok(index.render("Your new application is ready."));
+public class AdditionalQueryModifier extends QueryModifier {
+	private String queryText;
+	
+	public AdditionalQueryModifier(String queryText) {
+		super();
+		this.queryText = queryText;
 	}
 
+	public QueryBuilder modify(QueryBuilder builder){
+		return builder.addToQuery(queryText);
+	}
 }
