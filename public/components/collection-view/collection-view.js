@@ -284,8 +284,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				var url   = window.location.href.split("assets")[0];
 				var collectionCall = url + "collection/" + self.id();
 				return collectionCall;
-		}
-		 
+		};
 		 self.getAPIUrlRecords = function() {
 				var url   = window.location.href.split("assets")[0];
 				var recordsCall = url + "collection/" + self.id()+"/list?start=0&count=20&format=default";

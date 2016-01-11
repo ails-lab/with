@@ -535,7 +535,7 @@ public class WithResource<T extends DescriptiveData> {
 	}
 
 	/*
-	 * CollectionObject embedded logic
+	 * For collections or records uploaded by user
 	 */
 	public User retrieveCreator() {
 		return DB.getUserDAO().getById(this.administrative.withCreator, null);

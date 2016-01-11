@@ -50,8 +50,8 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResourceNew" + i));
-			model.setDescription(new Literal(Language.EN, "Some description"));
+			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNew" + i));
+			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 
 			int j=0;

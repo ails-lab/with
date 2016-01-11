@@ -38,6 +38,7 @@ import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -100,10 +101,10 @@ public class CollectionObjectTest {
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		Literal label = new Literal(Language.EN, "MyTitle");
+		MultiLiteral label = new MultiLiteral(Language.EN,"MyTitle");
 		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
 		cdd.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
 		co.setDescriptiveData(cdd);
 		/*
