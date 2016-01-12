@@ -19,6 +19,8 @@ package sources.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.validator.routines.UrlValidator;
+
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -274,6 +276,11 @@ public class Utils {
 
 	public static boolean hasAny(String term) {
 		return term != null && !term.equals("");
+	}
+
+	public static boolean isValidURL(String str) {
+		UrlValidator val = new UrlValidator();
+		return val.isValid(str);
 	}
 
 }

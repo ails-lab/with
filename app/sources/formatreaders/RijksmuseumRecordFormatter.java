@@ -55,7 +55,7 @@ public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<Cu
 		model.setDescription(rec.getLiteralValue("longTitle"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
@@ -72,8 +72,8 @@ public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<Cu
 		//TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
-		med.setWidth(Integer.parseInt(rec.getStringValue("webImage.width")));
-		med.setHeight(Integer.parseInt(rec.getStringValue("webImage.height")));
+		med.setWidth(rec.getIntValue("webImage.width"));
+		med.setHeight(rec.getIntValue("webImage.height"));
 		object.addMedia(MediaVersion.Original, med);
 //		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		return object;

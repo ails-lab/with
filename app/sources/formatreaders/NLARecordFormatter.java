@@ -51,7 +51,7 @@ public class NLARecordFormatter extends JsonContextRecordFormatReader<CulturalOb
 		model.setDescription(rec.getLiteralValue("abstract"));
 //		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 //		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
 //		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("sourceResource.creator"))));

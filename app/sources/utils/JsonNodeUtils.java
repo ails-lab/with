@@ -54,9 +54,9 @@ public class JsonNodeUtils {
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				// TODO ask if the key is a language
-				System.out.println(next);
+//				System.out.println(next);
 				//TODO: check transformation from string to lang enum
-				res.setMultiLiteral(Language.valueOf(next.getKey()), next.getValue().get(0).asText());
+				res.setMultiLiteral(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
 			}
 			return res;
 		}

@@ -74,6 +74,7 @@ public class JsonContextRecord {
 	}
 	
 	protected List<String> buildpaths(String... path){
+//		System.out.println(Arrays.toString(path));
 		List<String> spath = new ArrayList<>();
 		//TODO: what is context?
 		for (String string : context) {
@@ -180,6 +181,15 @@ public class JsonContextRecord {
 			return JsonNodeUtils.asString(node);
 		else 
 			return null;
+	}
+	
+	public int getIntValue(String... path){
+		JsonNode node = getValue(buildpaths(path));
+		try{
+			return Integer.parseInt(JsonNodeUtils.asString(node));
+		} catch (Exception e){
+			return 0;
+		}
 	}
 	
 	public MultiLiteral getLiteralValue(String... path){

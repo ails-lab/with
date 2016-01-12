@@ -49,7 +49,7 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
 //		model.setDates(dates);
@@ -59,7 +59,7 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue(rec.getStringValue("edmIsShownBy")));
+		medThumb.setUrl(rec.getStringValue("edmIsShownBy"));
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		//TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
