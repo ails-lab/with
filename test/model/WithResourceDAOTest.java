@@ -55,10 +55,10 @@ import db.DB;
 
 public class WithResourceDAOTest {
 	
-	ObjectId dbidForParent;
+	String parent;
 	
-	private EmbeddedMediaObject createImage(int i, int j) {
-		EmbeddedMediaObject image = new EmbeddedMediaObject();
+	private MediaObject createImage(int i, int j) {
+		MediaObject image = new MediaObject();
 		
 		//embedded
 		image.setType(WithMediaType.IMAGE);
@@ -105,17 +105,17 @@ public class WithResourceDAOTest {
 		//set the rest!
 		
 		
-		try {
-			DB.getMediaObjectDAO().makePermanent((MediaObject) image);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		assertThat( image.getDbId()).isNotNull();
+		//try {
+		//	DB.getMediaObjectDAO().makePermanent(image);
+		//} catch (Exception e) {
+		//	e.printStackTrace();
+		//}
+		//assertThat( image.getDbId()).isNotNull();
 		if (j==0){
-			image.setParentID(image.getDbId());
-			dbidForParent = image.getDbId();
+			image.setParentURL(image.getUrl());
+			parent = image.getUrl();
 		} else{
-			image.setParentID(dbidForParent);
+			image.setParentURL(parent);
 		}
 		return image;
 	}
@@ -155,8 +155,8 @@ public class WithResourceDAOTest {
 		
 		List<HashMap<MediaVersion, EmbeddedMediaObject>> media = new ArrayList<HashMap<MediaVersion, EmbeddedMediaObject>>();
 		
-		media.set(0, object1);
-		media.set(1, object2);
+		media.add(object1);
+		media.add(object2);
 		
 		withResource.setMedia(media);
 		
@@ -186,13 +186,13 @@ public class WithResourceDAOTest {
 			System.out.println(Json.toJson(co));
 		}*/
 		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		System.out.println(DB.getWithResourceDAO().getByLabel(Language.ENG, "TestWithResourceNew0").size());
+		System.out.println(DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNew").size());
 	}
 
 	
 	@Test
 	public void storeWithResource() {
-
+    
 		for (int i = 0; i < 1; i++) {
 			CulturalObject withResource = new CulturalObject();
 			withResource.getUsage().setLikes(i);
@@ -209,7 +209,7 @@ public class WithResourceDAOTest {
 			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNew" + i));
 			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
-
+    
 			int j=0;
 			if (i==0) j=i; else j=i+1;
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0+j);
@@ -241,8 +241,8 @@ public class WithResourceDAOTest {
 			//CulturalObject o = (CulturalObject) resources.get(0);
 			//System.out.println(o.getProvenance().get(0).getProvider() + " " + o.getProvenance().get(0).getUri());
 			//System.out.println(Json.toJson(o));
-
-*/
+    
+*/  
 		}
 		/*List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2);
 		for (RecordResource co: cos) {

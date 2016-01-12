@@ -119,7 +119,7 @@ public class MediaObjectDAO {
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
 			} else {
-				if(media.getMediaBytes().length==0)
+				if(media.getMediaBytes()==null)
 					mediaGridFsFile = DB.getGridFs().createFile();
 				else
 					mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());

@@ -82,11 +82,6 @@ public class EmbeddedMediaObject {
 	    
 	}
 	
-	@Id
-	@JsonIgnore
-	private ObjectId dbId;
-	
-	
 	private int width, height;
 		
 	private WithMediaType type;
@@ -98,7 +93,7 @@ public class EmbeddedMediaObject {
     
 	// If this is a thumbnail, the parentID field refers to
 	// the parent media object, else it should be "self".
-	private ObjectId parentID;
+	private String parentURL;
 	
 	private MediaVersion mediaVersion;
 	
@@ -135,15 +130,7 @@ public class EmbeddedMediaObject {
 	private long size;
 	
 	private Quality quality;
-	
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
-	
+		
 	public long getSize() {
 		return size;
 	}
@@ -204,12 +191,12 @@ public class EmbeddedMediaObject {
 	public int getWidth() {
 		return width;
 	}
-	public ObjectId getParentID() {
-		return parentID;
+	public String getParentURL() {
+		return parentURL;
 	}
 
-	public void setParentID(ObjectId parentID) {
-		this.parentID = parentID;
+	public void setParentURL(String parentURL) {
+		this.parentURL = parentURL;
 	}
 
 	public void setWidth(int width) {
