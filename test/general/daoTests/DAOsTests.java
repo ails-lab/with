@@ -31,8 +31,10 @@ import db.DB;
 import db.RecordResourceDAO;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.Literal.Language;
@@ -115,7 +117,7 @@ public class DAOsTests {
 		CollectionInfo ci = new CollectionInfo();
 		ci.setCollectionId(new ObjectId());
 		ci.setPosition(6);
-		List<CollectionInfo> ents = new ArrayList<CollectionInfo>();
+		ArrayList<CollectionInfo> ents = new ArrayList<CollectionInfo>();
 		ents.add(ci);
 		wres.setCollectedIn(ents);
 
@@ -141,10 +143,10 @@ public class DAOsTests {
 		//resourceType is collectionObject
 		wres.setResourceType(WithResourceType.WithResource);
 		// type: metadata specific for a record
-		Literal label = new Literal(Language.EN, "My record Title");
+		MultiLiteral label = new MultiLiteral(Language.EN, "My record Title");
 		CollectionDescriptiveData ddata = new CollectionDescriptiveData();
 		ddata.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		ddata.setDescription(desc);
 		wres.setDescriptiveData(ddata);
 
@@ -157,10 +159,8 @@ public class DAOsTests {
 		/*
 		 * media thumbnail for collection
 		 */
-		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
-		medias.add(emo);
-		wres.setMedia(medias);
+		wres.addMedia(MediaVersion.Thumbnail, emo);
 
 		if(DB.getCollectionObjectDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored! 1");
@@ -196,8 +196,7 @@ public class DAOsTests {
 				"EN", "My record Title");
 		System.out.println("Retrieved by owner and label: " + Json.toJson(co5));
 
-		User owner6 = DB.getCollectionObjectDAO().getCollectionOwner(wres.getDbId());
-		System.out.println("The owner of this Resource is: " + Json.toJson(owner6));
+		System.out.println("The owner of this Resource is: " + Json.toJson(wres.retrieveCreator()));
 
 		/*List<RecordResource> cos7 = DB.getRecordResourceDAO().getByProvider("Europeana");
 		System.out.println("retrieved All Resources provided from Europeana: " + Json.toJson(cos7));*/
@@ -238,7 +237,7 @@ public class DAOsTests {
 
 
 		System.out.println("If I add another like then we have:");
-		DB.getCollectionObjectDAO().incrementLikes(wres.getDbId().toString());
+		DB.getCollectionObjectDAO().incrementLikes(wres.getDbId());
 		System.out.println(DB.getCollectionObjectDAO().getTotalLikes(wres.getDbId()) + " total likes");
 
 

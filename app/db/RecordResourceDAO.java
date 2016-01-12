@@ -238,11 +238,32 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shift(colId, position, update);
 	}
 	
+	//TODO: has to be atomic as a whole
 	public void addToCollection(ObjectId resourceId, ObjectId colId, int position) {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
 		updateOps.add("collectedIn", new CollectionInfo(colId, position));
 		shiftRecordsToRight(colId, position+1);
+		this.update(q, updateOps);
+	}
+	
+	//TODO: have to test
+	public void updatePosition(ObjectId resourceId, ObjectId colId, int oldPosition, int newPosition) {
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		updateOps.add("collectedIn", new CollectionInfo(colId, newPosition));
+		updateOps.removeAll("collectedIn", new CollectionInfo(colId, oldPosition));
+		this.update(q, updateOps);
+	}
+	
+	//TODO: use findAndModify for entryCount of respective collection
+	//what if the append fails (for some strange reason, the record cannot be edited correctly) and the entry count has been increased already?
+	public void appendToCollection(ObjectId resourceId, ObjectId colId) {
+		//increase entry count
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		//updateOps.add("collectedIn", new CollectionInfo(colId, position));
+		//shiftRecordsToRight(colId, position+1);
 		this.update(q, updateOps);
 	}
 	

@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -59,12 +60,14 @@ public class DNZBasicRecordFormatter extends JsonContextRecordFormatReader<Cultu
 		String id = rec.getStringValue("id");
 		object.addToProvenance(new ProvenanceInfo(Sources.DigitalNZ.toString(),  
 				"http://www.digitalnz.org/objects/" +id, id));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("thumbnail_url"));
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		medThumb.setUrl(rec.getStringValue("thumbnail_url"));
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		EmbeddedMediaObject medFullSize= new EmbeddedMediaObject();
+		medFullSize.setUrl(rec.getStringValue("medFullSize"));
+		//TODO: add rights
+		//medFullSize.setWithRights(...);
+		object.addMedia(MediaVersion.Original, medThumb);
 		return object;
 //		//TODO: add type
 //		//TODO: add null checks

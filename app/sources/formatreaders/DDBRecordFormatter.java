@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -60,11 +61,9 @@ public class DDBRecordFormatter extends JsonContextRecordFormatReader<CulturalOb
 		object.addToProvenance(new ProvenanceInfo(Sources.DDB.toString(),  
 				"https://www.deutsche-digitale-bibliothek.de/item/"
 				+ id, id));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
+		med.setUrl("https://www.deutsche-digitale-bibliothek.de/"+rec.getStringValue("thumbnail"));
+		object.addMedia(MediaVersion.Thumbnail, med);
 //		med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
 //		med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
 //		object.setCreator(rec.getStringValue("principalOrFirstMaker"));

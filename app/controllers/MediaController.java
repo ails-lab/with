@@ -682,12 +682,12 @@ public class MediaController extends Controller {
 		
 		//make thumb from image url if this is empty?
 		if(json.hasNonNull("thumbnailUrl")){
-			med.setThumbnailUrl(json.get("thumbnailUrl").asText());
+			//med.setThumbnailUrl(json.get("thumbnailUrl").asText());
 			
 			if(json.hasNonNull("thumbHeight")&&json.hasNonNull("thumbWidth")){
 				if(json.get("thumbHeight").canConvertToInt() && json.get("thumbWidth").canConvertToInt()){
-					med.setThumbHeight(json.get("thumbHeight").asInt());
-					med.setThumbWidth(json.get("thumbWidth").asInt());
+					//med.setThumbHeight(json.get("thumbHeight").asInt());
+					//med.setThumbWidth(json.get("thumbWidth").asInt());
 				} else {
 					allRes.add(Json.newObject().put("error", "Thumbnail height and width need to be integers"));
 					return false;
@@ -719,13 +719,13 @@ public class MediaController extends Controller {
 			makeThumb(med, image);
 		} else {
 			//need a method to check if this is a valid url that contains an image! 
-			med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
+			//med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
 			if(formData.containsKey("thumbHeight")&&formData.containsKey("thumbWidth")){
 				String th = formData.get("thumbHeight")[0];
 				String tw = formData.get("thumbWidth")[0];
 				if(StringUtils.isNumeric(th) && StringUtils.isNumeric(tw)){
-					med.setThumbHeight(Integer.parseInt(th));
-					med.setThumbWidth(Integer.parseInt(tw));
+					//med.setThumbHeight(Integer.parseInt(th));
+					//med.setThumbWidth(Integer.parseInt(tw));
 				} else {
 					allRes.add(Json.newObject().put("error", "Thumbnail height and width need to be integers"));
 					return allRes;	//allow and not return?
@@ -772,9 +772,8 @@ public class MediaController extends Controller {
 		byte[] thumbByte = baos.toByteArray();
 		baos.close();
 		med.setThumbnailBytes(thumbByte);
-		
-		med.setThumbWidth(thumb.getWidth());
-		med.setThumbHeight(thumb.getHeight());
+		//med.setThumbWidth(thumb.getWidth());
+		//med.setThumbHeight(thumb.getHeight());
 	}
 	
 }

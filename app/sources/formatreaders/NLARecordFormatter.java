@@ -30,6 +30,7 @@ import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -59,11 +60,13 @@ public class NLARecordFormatter extends JsonContextRecordFormatReader<CulturalOb
 //		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
 		String id = rec.getStringValue("id");
 		object.addToProvenance(new ProvenanceInfo(Sources.NLA.toString(), rec.getStringValue("troveUrl"), id));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("identifier[type=url,linktype=thumbnail].value"));
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		medThumb.setUrl(rec.getStringValue(rec.getStringValue("identifier[type=url,linktype=thumbnail].value")));
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		//TODO: add rights!
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
+		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		object.addMedia(MediaVersion.Original, med);
 //		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		return object;
 //		object.setCreator(rec.getStringValue("contributor"));

@@ -18,12 +18,14 @@ package sources.formatreaders;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import sources.BritishLibrarySpaceSource;
 import sources.DPLASpaceSource;
 import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
@@ -55,17 +57,18 @@ public class BritishLibraryRecordFormatter extends JsonContextRecordFormatReader
 		String id = rec.getStringValue("id");
 		object.addToProvenance(new ProvenanceInfo(Sources.BritishLibrary.toString(),
 				  "https://www.flickr.com/photos/britishlibrary/" + id + "/", id));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("url_s"));
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		//TODO: add both thumbnail embMedia and full size embedded media!
+		medThumb.setUrl(rec.getStringValue("url_s"));
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
+		//TODO: add rights
 		med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
 		med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
+		object.addMedia(MediaVersion.Original, med);
 //		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		return object;
 		
-//		object.setThumbnailUrl(rec.getStringValue("url_s"));
 //		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
 //		object.setYears(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
 //		// TODO: add rights

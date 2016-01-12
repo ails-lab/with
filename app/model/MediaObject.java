@@ -57,8 +57,6 @@ public class MediaObject extends EmbeddedMediaObject {
 	private ArrayList<ObjectId> resources;
 
 	@JsonIgnore
-	private byte[] thumbnailBytes;
-	@JsonIgnore
 	private byte[] mediaBytes;
 	
 	//extended model fields
@@ -109,12 +107,6 @@ public class MediaObject extends EmbeddedMediaObject {
 	}
 	public void setDurationSeconds(double durationSeconds) {
 		this.durationSeconds = durationSeconds;
-	}
-	public byte[] getThumbnailBytes() {
-		return thumbnailBytes;
-	}
-	public void setThumbnailBytes(byte[] thumbnailBytes) {
-		this.thumbnailBytes = thumbnailBytes;
 	}
 	public byte[] getMediaBytes() {
 		return mediaBytes;

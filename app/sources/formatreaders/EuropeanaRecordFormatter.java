@@ -27,6 +27,7 @@ import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -57,17 +58,18 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("edmIsShownBy"));
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		medThumb.setUrl(rec.getStringValue(rec.getStringValue("edmIsShownBy")));
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		//TODO: add rights!
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		//TODO: add withMediaRights, originalRights
 		List<String> rights = rec.getStringArrayValue("rights");
 //		med.setOriginalRights(originalRights);
 //		
 //		med.setWithRights(withRights);
+		object.addMedia(MediaVersion.Original, med);
 		return object;
 		//TODO: add null checks
 //		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
