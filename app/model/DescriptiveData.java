@@ -17,6 +17,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -60,14 +61,14 @@ public class DescriptiveData {
 	// The whole legal bla, unedited, from the source, mostly cc0
 	private LiteralOrResource metadataRights;
 
-	// rdf  .. Agent, Artist, Painter, Painting, Series
+	// rdf .. Agent, Artist, Painter, Painting, Series
 	private String rdfType;
 
 	// URIs how this Resource is known elsewhere
-	private ArrayList<String> sameAs;
+	private List<String> sameAs;
 
 	// in a timeline where would this resource appear
-	private ArrayList<WithDate> dates;
+	private List<WithDate> dates;
 
 	// alternative title or name or placename
 	private MultiLiteral altLabels;
@@ -128,19 +129,19 @@ public class DescriptiveData {
 		this.rdfType = rdfType;
 	}
 
-	public ArrayList<String> getSameAs() {
+	public List<String> getSameAs() {
 		return sameAs;
 	}
 
-	public void setSameAs(ArrayList<String> sameAs) {
+	public void setSameAs(List<String> sameAs) {
 		this.sameAs = sameAs;
 	}
 
-	public ArrayList<WithDate> getDates() {
+	public List<WithDate> getDates() {
 		return dates;
 	}
 
-	public void setDates(ArrayList<WithDate> dates) {
+	public void setDates(List<WithDate> dates) {
 		this.dates = dates;
 	}
 

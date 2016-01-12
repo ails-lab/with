@@ -18,35 +18,55 @@ package model.basicDataTypes;
 
 import java.util.Date;
 
-import model.ExampleDataModels.LiteralOrResource;
-import model.ExampleDataModels.LiteralOrResource.ResourceType;
+import model.basicDataTypes.LiteralOrResource.ResourceType;
 
 /**
- * Capture accurate and inaccurate dates in a visualisable way. Enable search for year.
- * This is a point in time. If you mean a timespan, use different class.
+ * Capture accurate and inaccurate dates in a visualisable way. Enable search
+ * for year. This is a point in time. If you mean a timespan, use different
+ * class.
  */
 public class WithDate {
 	Date isoDate;
-	//facet
-	//year should be filled in whenever possible
-	//100 bc is translated to -100
+	// facet
+	// year should be filled in whenever possible
+	// 100 bc is translated to -100
 	int year;
-	
-	// controlled expression of an epoch "stone age", "renaissance", "16th century"
+
+	// controlled expression of an epoch "stone age", "renaissance", "16th
+	// century"
 	LiteralOrResource epoch;
-	
+
 	// if the year is not accurate, give the inaccuracy here( 0- accurate)
 	int approximation;
-	
-	// ontology based time 
+
+	// ontology based time
 	String uri;
 	ResourceType uriType;
-	
-	//mandatory, other fields are extracted from that
+
+	// mandatory, other fields are extracted from that
 	String free;
-	
-	public void setDate(String free){
-		this.free = free;
-		//code to init the other Date representations
+
+	public WithDate(String free) {
+		super();
+		setDate(free);
 	}
+
+	public void setDate(String free) {
+		this.free = free;
+		// code to init the other Date representations
+		if (sources.core.Utils.isNumericInteger(free)) {
+			this.year = Integer.parseInt(free);
+		} else if (free.matches("[0-9]+\\s+(bc|BC)")) {
+			this.year = Integer.parseInt(free.split("\\s")[0]);
+		} else if (sources.core.Utils.isValidURL(free)) {
+			this.uri = free;
+			this.uriType = ResourceType.uri;
+		}
+	}
+
+	public static void main(String[] args) {
+		System.out.println(new WithDate("100 BC").year);
+		;
+	}
+
 }

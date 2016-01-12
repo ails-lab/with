@@ -24,7 +24,10 @@ import org.hibernate.validator.internal.constraintvalidators.URLValidator;
 
 import sources.EuropeanaSpaceSource;
 import sources.core.JsonContextRecordFormatReader;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.JsonNodeUtils;
+import sources.utils.StringUtils;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -34,13 +37,12 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-
 public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
-	
+
 	public EuropeanaRecordFormatter() {
 		object = new CulturalObject();
 	}
-	
+
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
@@ -51,30 +53,30 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-//		model.setDates(dates);
+		model.setDates(StringUtils.getDates(rec.getStringArrayValue("year")));
 		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
-		
+
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
-		object.addToProvenance(new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
+		object.addToProvenance(
+				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 		medThumb.setUrl(rec.getStringValue("edmIsShownBy"));
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		//TODO: add rights!
+		// TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
-		//TODO: add withMediaRights, originalRights
+		// TODO: add withMediaRights, originalRights
 		List<String> rights = rec.getStringArrayValue("rights");
-//		med.setOriginalRights(originalRights);
-//		
-//		med.setWithRights(withRights);
+		// med.setOriginalRights(originalRights);
+		//
+		// med.setWithRights(withRights);
 		object.addMedia(MediaVersion.Original, med);
 		return object;
-		//TODO: add null checks
-//		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-//		object.setContributors(rec.getStringArrayValue("dcContributor"));
-//		object.setItemRights(rec.getStringValue("rights"));
+		// TODO: add null checks
+		// object.setThumbnailUrl(rec.getStringValue("edmPreview"));
+		// object.setContributors(rec.getStringArrayValue("dcContributor"));
+		// object.setItemRights(rec.getStringValue("rights"));
 	}
-	
+
 }
