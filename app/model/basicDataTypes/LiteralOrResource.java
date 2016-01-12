@@ -16,7 +16,10 @@
 
 package model.basicDataTypes;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.mongodb.morphia.annotations.Embedded;
+
+import sources.core.Utils;
 
 @Embedded
 public class LiteralOrResource extends Literal {
@@ -67,5 +70,13 @@ public class LiteralOrResource extends Literal {
 	public void setResource(ResourceType resourceType, String uri ) {
 		this.resource = new Resource(resourceType, uri);
 
+	}
+	
+	
+	public static LiteralOrResource build(String str){
+		if (Utils.isValidURL(str)){
+			return new LiteralOrResource(ResourceType.uri, str);
+		}
+		return new LiteralOrResource(str);
 	}
 }

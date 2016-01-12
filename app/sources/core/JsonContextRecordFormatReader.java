@@ -41,7 +41,9 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	protected abstract T fillObjectFrom(JsonContextRecord text);
 	
 	public T readObjectFrom(JsonNode text){
-		object = (T) new CulturalObject();
+		CulturalObject culturalObject = new CulturalObject();
+		culturalObject.getAdministrative().getAccess().setPublic(true);
+		object = (T) culturalObject;
 		return fillObjectFrom(text);
 	}
 
