@@ -31,6 +31,7 @@ import db.DB;
 import db.RecordResourceDAO;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
@@ -158,10 +159,8 @@ public class DAOsTests {
 		/*
 		 * media thumbnail for collection
 		 */
-		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
-		medias.add(emo);
-		wres.setMedia(medias);
+		wres.addMedia(MediaVersion.Thumbnail, emo);
 
 		if(DB.getCollectionObjectDAO().makePermanent(wres) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored! 1");

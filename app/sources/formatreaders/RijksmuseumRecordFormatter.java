@@ -26,6 +26,7 @@ import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -65,13 +66,15 @@ public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<Cu
 		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), id, 
 				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/"
 				+ id + ",0"));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("webImage.url"));
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		medThumb.setUrl(rec.getStringValue("webImage.url"));
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		//TODO: add rights!
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
+		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		med.setWidth(Integer.parseInt(rec.getStringValue("webImage.width")));
 		med.setHeight(Integer.parseInt(rec.getStringValue("webImage.height")));
+		object.addMedia(MediaVersion.Original, med);
 //		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		return object;
 ////		record.setContributors(rec.getStringArrayValue("contributor"));

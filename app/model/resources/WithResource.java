@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import db.DB;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextAnnotation;
 import model.basicDataTypes.CollectionInfo;
@@ -383,7 +384,7 @@ public class WithResource<T extends DescriptiveData> {
 	private HashMap<String, String> content;
 
 	// all attached media Objects (their embedded part)
-	private ArrayList<EmbeddedMediaObject> media;
+	private List<HashMap<MediaVersion, EmbeddedMediaObject>> media;
 
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
@@ -396,6 +397,8 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
+		this.media = new ArrayList<>();
+		this.media.add(new HashMap<MediaVersion, EmbeddedMediaObject>());
 	}
 
 	public WithResource(Class<?> clazz) {
@@ -404,6 +407,8 @@ public class WithResource<T extends DescriptiveData> {
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
 		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
+		this.media = new ArrayList<>();
+		this.media.add(new HashMap<MediaVersion, EmbeddedMediaObject>());
 	}
 
 	/*
@@ -509,12 +514,20 @@ public class WithResource<T extends DescriptiveData> {
 		this.content = content;
 	}
 
-	public ArrayList<EmbeddedMediaObject> getMedia() {
+	public List<HashMap<MediaVersion, EmbeddedMediaObject>> getMedia() {
 		return media;
 	}
-
-	public void setMedia(ArrayList<EmbeddedMediaObject> media) {
+	
+	public void setMedia(List<HashMap<MediaVersion, EmbeddedMediaObject>> media) {
 		this.media = media;
+	}
+
+	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
+		this.media.get(viewIndex).put(mediaVersion, media);
+	}
+	
+	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
+		this.media.get(0).put(mediaVersion, media);
 	}
 
 	public ArrayList<ContextAnnotation> getContextAnnotation() {

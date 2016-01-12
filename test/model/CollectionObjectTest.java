@@ -32,6 +32,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Literal;
@@ -115,10 +116,8 @@ public class CollectionObjectTest {
 		/*
 		 * media thumbnail for collection
 		 */
-		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
-		medias.add(emo);
-		co.setMedia(medias);
+		co.addMedia(MediaVersion.Original, emo);
 		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");

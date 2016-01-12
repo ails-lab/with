@@ -40,7 +40,10 @@ import com.google.common.net.MediaType;
 @Converters(MediaTypeConverter.class)
 public class EmbeddedMediaObject {
 
-
+	public static enum MediaVersion {
+		Original, Medium, Thumbnail, Square, Tiny
+	}
+	
 	public static enum WithMediaType {
 		VIDEO, IMAGE, TEXT, AUDIO
 	}
@@ -80,16 +83,12 @@ public class EmbeddedMediaObject {
 	}
 	
 	private int width, height;
-	
-	private int thumbWidth, thumbHeight;
-	
+		
 	private WithMediaType type;
 	
 	private Set<WithMediaRights> withRights;
 	
-	// if the thumbnail is externally provided
-	private String thumbnailUrl;
-	// the media objects URL
+	// the media object URL
 	private String url;
     
 	/*These do not have to be saved in the db
@@ -107,7 +106,6 @@ public class EmbeddedMediaObject {
 	 *  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/MediaType.html
 	 */
 
-	
 	private MediaType mimeType;
 	
 	public static enum Quality {
@@ -153,14 +151,6 @@ public class EmbeddedMediaObject {
 		this.withRights = withRights;
 	}
 
-	public String getThumbnailUrl() {
-		return thumbnailUrl;
-	}
-
-	public void setThumbnailUrl(String thumbnailUrl) {
-		this.thumbnailUrl = thumbnailUrl;
-	}
-
 	public String getUrl() {
 		return url;
 	}
@@ -196,23 +186,6 @@ public class EmbeddedMediaObject {
 	}
 	public void setHeight(int height) {
 		this.height = height;
-	}
-	
-
-	public int getThumbWidth() {
-		return thumbWidth;
-	}
-
-	public void setThumbWidth(int thumbWidth) {
-		this.thumbWidth = thumbWidth;
-	}
-
-	public int getThumbHeight() {
-		return thumbHeight;
-	}
-
-	public void setThumbHeight(int thumbHeight) {
-		this.thumbHeight = thumbHeight;
 	}
 
 }

@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -58,12 +59,13 @@ public class DPLARecordFormatter extends JsonContextRecordFormatReader<CulturalO
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
 		String id = rec.getStringValue("id");
 		object.addToProvenance(new ProvenanceInfo(Sources.DPLA.toString(),  "http://dp.la/item/"+id, id));
-		ArrayList<EmbeddedMediaObject> media= new ArrayList<>();
-		MediaObject med;
-		media.add(med = new MediaObject());
-		object.setMedia(media);
-		med.setThumbnailUrl(rec.getStringValue("object"));
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		medThumb.setUrl(rec.getStringValue("object"));
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		//TODO: add rights!
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		object.addMedia(MediaVersion.Original, med);
 		return object;
 //		//TODO: add type
 //		//TODO: add null checks
