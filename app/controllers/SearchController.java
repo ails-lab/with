@@ -119,7 +119,6 @@ public class SearchController extends Controller {
 						// Logger.debug("Total time for all sources to respond:
 						// "
 						// + (System.currentTimeMillis()- initTime));
-System.out.println("merging now!!!!!!");
 						SearchResponse r1 = new SearchResponse();
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {

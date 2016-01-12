@@ -116,7 +116,7 @@ public class TestNewModelMediaController {
 		
 		//extended
 		image.setMediaBytes(rawbytes);
-		//image.setThumbnailBytes(rawbytes);
+	//	image.setThumbnailBytes(rawbytes);
 		image.setOrientation(); //auto
 		//set the rest!
 		

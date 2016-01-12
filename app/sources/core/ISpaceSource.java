@@ -37,7 +37,7 @@ public abstract class ISpaceSource {
 	protected List<CommonFilters> filtersSupportedBySource = new ArrayList<CommonFilters>();
 	protected HashMap<String, CommonFilters> sourceToFiltersMappings = new HashMap<String, CommonFilters>();
 	protected HashMap<CommonFilters, String> filtersToSourceMappings = new HashMap<CommonFilters, String>();
-	private FilterValuesMap vmap = new FilterValuesMap();
+	protected FilterValuesMap vmap = new FilterValuesMap();
 	public String LABEL = "";
 	protected String apiKey="";
 	protected JsonContextRecordFormatReader formatreader;
@@ -87,9 +87,13 @@ public abstract class ISpaceSource {
 	}
 
 	protected void countValue(CommonFilterLogic type, String t, boolean toglobal, int count) {
-		if (toglobal)
-			type.addValue(vmap.translateToCommon(type.data.filter.name(), t), count);
-		else
+		if (toglobal){
+			String name = type.data.filter.name();
+			List<Object> translateToCommon = vmap.translateToCommon(name, t);
+			Function<Object, String> function = (Object x)-> x.toString();
+			List<String> transform = ListUtils.transform(translateToCommon, function);
+			type.addValue(transform, count);
+		} else
 			type.addValue(t, count);
 
 	}
@@ -98,7 +102,8 @@ public abstract class ISpaceSource {
 		if (q.filters == null || q.filters.size() == 0)
 			return true;
 		else{
-			return ListUtils.allof(q.filters,(CommonFilter f)->{return vmap.containsFilter(f.filterID);} );
+			Function<CommonFilter, Boolean> condition = (CommonFilter f)->vmap.containsFilter(f.filterID);
+			return ListUtils.allof(q.filters,condition );
 		}
 	}
 	
@@ -118,7 +123,7 @@ public abstract class ISpaceSource {
 		vmap.addDefaultWriter(filterId, function);
 	}
 	
-	protected void addMapping(String filterID, String commonValue, String... specificValue) {
+	protected void addMapping(String filterID, Object commonValue, String... specificValue) {
 		vmap.addMap(filterID, commonValue, specificValue);
 	}
 	
@@ -126,11 +131,11 @@ public abstract class ISpaceSource {
 		vmap.addMap(filterID, commonValue, specificValue);
 	}
 	
-	protected List<String> translateToSpecific(String filterID, String value) {
+	protected List<Object> translateToSpecific(String filterID, String value) {
 		return vmap.translateToSpecific(filterID, value);
 	}
 
-	protected List<String> translateToCommon(String filterID, String value) {
+	protected List<Object> translateToCommon(String filterID, String value) {
 		return vmap.translateToCommon(filterID, value);
 	}
 	
