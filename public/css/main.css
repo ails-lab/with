@@ -210,9 +210,10 @@ body header .logo {
   float: left;
   margin-right: 38px;
 }
-body header nav {
+/*body header nav {
   float: left;
 }
+*/
 body header nav ul {
   margin: 0;
   padding: 0;
@@ -601,7 +602,7 @@ body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhib
   margin: 0 -30px;
   padding: 0;
   position: relative;
-  
+
 }
 body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhibition:before,
 body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhibition:after {
@@ -627,8 +628,8 @@ body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhib
   float: left;
   width: 33.3%;
   text-align: center;
-  
-  
+
+
 }
 
 /*ntua addition*/
@@ -1062,7 +1063,7 @@ body div[role='main'] .filter .wrap .nav li {
 }
 body div[role='main'] .filter .wrap .nav li:hover a,
 body div[role='main'] .filter .wrap .nav li.active a {
-  background: white; /*ntua addition*/	
+  background: white; /*ntua addition*/
   color: black;
 }
 body div[role='main'] .filter .wrap .nav li:hover a::after,

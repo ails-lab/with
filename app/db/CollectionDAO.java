@@ -65,7 +65,7 @@ public class CollectionDAO extends DAO<Collection> {
 
 	public List<Collection> getByTitle(String title) {
 		Query<Collection> q = this.createQuery().field("title")
-				.equal("_favorites");
+				.equal(title);
 		return this.find(q).asList();
 	}
 

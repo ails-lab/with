@@ -35,6 +35,7 @@
         </select>
       </section>
       <!-- search result-->
+      
      <div id="gridlist" class="spacer search gridlist searchlist" data-bind="visible: sourceview()==false">
       <!-- ko if: noResults -->
 			<div>
@@ -44,26 +45,8 @@
         <section class="listing">
           <div class="container">
             <!-- grid-->
-            <div class="grid" data-bind="searchIsotope:mixresults, visible: mixresults().length>0">
-              <!-- item-->
-              <!-- ko if: $index() === 0 -->
+            <div class="grid">
               <div class="sizer"></div>
-              <!-- /ko -->
-               <div class="item media" data-bind="visible: isLoaded()">
-              <div class="wrap">
-                <!-- anchor--><a href="#" data-bind="event: { click: $parent.columnRecordSelect}">
-                  <!-- thumbnail-->
-                  <div class="thumb"><img data-bind="attr: {src: thumb}"  onError="this.src='img/content/thumb-empty.png'"></div>
-                  <!-- info-->
-                  <div class="info">
-                    <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
-                  </div>
-                 <span class="rights" data-bind="text: sourceCredits()"></span>
-                  <!-- pointer-->
-                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
-              </div>
-            </div>
-              
             </div>
           </div>
         </section>

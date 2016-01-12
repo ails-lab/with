@@ -41,6 +41,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.creator="";
 		self.provider="";
 		self.rights="";
+		self.dataProvider="";
 		self.url="";
 		self.externalId = "";
 		self.isLoaded = ko.observable(false);
@@ -56,7 +57,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.thumb=data.thumb;
 			self.fullres=data.fullres;
 			self.description=data.description;
+			self.dataProvider=data.dataProvider;
 			self.source=data.source;
+			console.log("source:"+self.source);
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.rights=data.rights;
@@ -89,17 +92,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			    	return "digitalnz.org";
 			    case "EFashion":
 			    	return "europeanafashion.eu";
-			    case "YouTube": {
+			    case "YouTube": 
 			    	return "youtube.com";
-			    }
-			     case "Mint":
+			    case "Mint":
 			    	return "mint";
-			    case "WITHin":
-			    	return "WITHin";
+			    case "Rijksmuseum":
+					return "www.rijksmuseum.nl";
 			    default: return "";
 			 }
 			});
-
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
 			distitle=self.title;
@@ -146,10 +147,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					var record = new Record({
 						id: result.dbId,
 						thumb: result.thumbnailUrl,
+						description: result.description!=null ? result.description : result.title,
 						title: result.title,
 						view_url: result.sourceUrl,
 						creator: result.creator,
 						provider: result.provider,
+						dataProvider: result.dataProvider,
 						source: result.source,
 						rights: result.rights,
 						externalId: result.externalId
@@ -161,6 +164,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 
 		self.loadCollection = function (id) {
+			
 			self.loading(true);
 			
 			$.ajax({
@@ -168,6 +172,16 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
+					if(data.isPublic==false){
+                		
+                		if(isLogged()==false){
+                		
+                			window.location='#login';
+                			return;
+                		  }
+                		
+                		
+                	}
 					self.collname(data.title);
 					self.desc(data.description);
 					self.creator(data.creator);
@@ -178,6 +192,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					self.loading(false);
+					if(xhr.status=="403"){
+					window.location='#login';return;}
+					
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});
@@ -244,7 +261,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 							self.citems.remove(e);
 							if ($("#" + e)) {
-								$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
+								$container.isotope( 'remove', $("#" + e)).isotope('layout');
+								//$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
 
 							self.itemCount(self.itemCount() - 1);
@@ -284,7 +302,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				var url   = window.location.href.split("assets")[0];
 				var collectionCall = url + "collection/" + self.id();
 				return collectionCall;
-		};
+		}
+		 
 		 self.getAPIUrlRecords = function() {
 				var url   = window.location.href.split("assets")[0];
 				var recordsCall = url + "collection/" + self.id()+"/list?start=0&count=20&format=default";

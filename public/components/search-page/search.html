@@ -11,6 +11,7 @@
 		</form>
 
 				<div id="withsearch-content" class="withsearch-content">
+					 
 					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
 					
 					<!-- ko if: noResults -->
@@ -34,7 +35,7 @@
 					 <!-- ko foreach: items -->
 					 
 					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
-							<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:record().thumbnail }"/>
+							<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:thumb }"/>
 								<span><!-- ko text: title --><!-- /ko --></span>
 						</a>
 					   <!-- /ko -->
@@ -63,8 +64,8 @@
               
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
-              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged">
-						<span class="fa-stack fa-fw" data-bind="event: { click: function() { $parent.likeRecord(this); } }">
+              <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()">
+						<span class="fa-stack fa-fw" data-bind="visible: externalId!=null,event: { click: function() { $parent.likeRecord(this); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
@@ -78,7 +79,7 @@
                
                  <div class="sourceCredits">
 					<!-- ko:if self.access() == "WRITE" || self.access() == "OWN" -->
-					    <span class="glyphicon glyphicon-trash closeButton" data-bind="visible: isLogged, event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
+					    <span class="glyphicon glyphicon-trash closeButton" data-bind="visible: isLogged(), event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
 					<!-- /ko -->
 					<a data-bind="text:sourceCredits,attr: { href: view_url }" target="_new"></a></div>
                   </a>

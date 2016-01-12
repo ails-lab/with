@@ -53,7 +53,9 @@ var require = {
 		"x-editable"                : "bower_modules/x-editable/dist/bootstrap3-editable/js/bootstrap-editable.min",
 		"knockout.x-editable"       : "bower_modules/knockout-x-editable/knockout.x-editable.min",
 		"jquery.sticky"			    : "bower_modules/jquery-sticky/jquery.sticky",
-		"slick"						: "js/slick.min"
+		"slick"						: "js/slick.min",
+		"knockout-switch-case"      : "bower_modules/knockout-switch-case/knockout-switch-case.min",
+		"moment"                    : "bower_modules/moment/min/moment.min"
 	},
 	shim: {
 		"knockout":  { exports: 'ko' },

@@ -81,7 +81,7 @@ a {
 }
 .spacer.search.gridlist {
   padding-top: 152px;
-   display: none;
+ /*  display: none;*/
 }
 .spacer.searchlocal {
   padding-top: 139px;

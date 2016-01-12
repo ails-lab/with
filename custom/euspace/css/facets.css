@@ -1,4 +1,67 @@
+/*dialog login*/
 
+.dialog .open{
+	z-index:10;
+	opacity:1;
+	top: 50%;
+    left: 50%;
+	
+}
+
+
+
+/* Starred Items */
+.item .star {
+	font-size: 20px;
+	position: absolute;
+	display:none;
+	top: 0px;
+	right: 4px;
+	width: 36px;
+	z-index: 1;
+}
+
+.item:hover .star {
+	color: #dddddd;
+	display: block;
+	cursor: pointer;
+}
+
+.item .collect {
+	font-size: 20px;
+    position: absolute;
+    display: none;
+    top: 3px;
+    right: 25px;
+    width: 36px;
+    z-index: 1;
+}
+
+.item:hover .collect {
+	color: #dddddd;
+	display: block;
+	cursor: pointer;
+}
+
+
+body [role='main'] .menubar.media .action li .star {
+	text-shadow:none;
+	}
+
+body [role='main'] .menubar.media .action li a {
+    padding: 0px;
+    line-height: 1.5;
+}
+
+.star .fa-inverse {
+	color: #ec5a62;
+}
+
+.star.active{
+	color: #ec5a62;
+	display: block;
+}
+/**/
 
 #more{
 	 bottom:100px;
@@ -191,7 +254,7 @@
 	visibility: hidden;
 	overflow: hidden;
 	text-align: center;
-	z-index: 99999999;
+	z-index: 1;
     background-color: #777777;
 	color: #eeeeee;
 	width: 50px;

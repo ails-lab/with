@@ -230,5 +230,19 @@ System.out.println("merging now!!!!!!");
 			}
 		});
 		return (ok());
+
+	}
+
+	public static Result reindex_records() {
+		Promise.promise(new Function0<String>() {
+			public String apply() throws Exception {
+				log.info("Reindex started");
+				Elastic.reindex_records();
+				log.info("Reindex finished");
+				return "ok";
+			}
+		});
+		return (ok());
+
 	}
 }

@@ -35,7 +35,9 @@
     "modernizr":"latest",
     "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
     "knockout-x-editable": "latest",
-    "jquery-sticky": "latest"
+    "jquery-sticky": "latest",
+    "knockout-switch-case": "latest",
+    "moment": "~2.10"
   },
   "resolutions": {
     "knockout": "~3.2.0"

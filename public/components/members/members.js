@@ -43,7 +43,6 @@ define(['knockout', 'text!./members.html', 'app'], function(ko, template, app) {
 				url         : "/group/membersInfo/" + self.groupId(),
 				data		: "category="+category,
 				success		: function(result) {
-					
 					if(result.users !== undefined) {
 						var users = result.users;
 						ko.mapping.fromJS(users, self.usersMapping, self.userMembers);
@@ -82,12 +81,10 @@ define(['knockout', 'text!./members.html', 'app'], function(ko, template, app) {
 		}
 		
 		self.excecuteAdd = function(userData) {
-			console.log(self.groupId());
 			$.ajax({
-				method      : "GET",
+				method      : "PUT",
 				contentType    : "text/plain",
-				url         : "/group/addUserOrGroup/" + self.groupId(),
-				data		: "id="+userData.userId+"&groupId="+self.groupId(),
+				url         : "/group/addUserOrGroup/" + self.groupId()+"?id="+userData.userId,
 				success		: function(result) {
 					self.image = userData.image;
 					if(userData.category == "user") {
@@ -103,14 +100,11 @@ define(['knockout', 'text!./members.html', 'app'], function(ko, template, app) {
 		}
 		
 		self.excecuteRemove = function(id, category) {
-			console.log("Remove from User Group");
 			$.ajax({
-				method      : "GET",
+				method      : "DELETE",
 				contentType    : "text/plain",
-				url         : "/group/removeUserOrGroup/" + self.groupId(),
-				data		: "id="+id+"&groupId="+self.groupId(),
+				url         : "/group/removeUserOrGroup/" + self.groupId()+"?id="+id,
 				success		: function(result) {
-					console.log(self.userMembers);
 					if(category == "user") {
 						var index = arrayFirstIndexOf(self.userMembers(), function(item) {
 							   return item.userId() === id;
@@ -119,14 +113,14 @@ define(['knockout', 'text!./members.html', 'app'], function(ko, template, app) {
 			   				self.userMembers.splice(index, 1);
 					} else {
 						var index = arrayFirstIndexOf(self.groupMembers(), function(item) {
-							   return item.userId === id;
+							   return item.userId() === id;
 						});
 			   			if (index > -1) {
 			   				self.groupMembers.splice(index, 1);
 			   			}
 					}
 				},
-				error      : function(result) {
+				error: function(result) {
 					$.smkAlert({text:'There is no such username or email', type:'danger', time: 10});
 				}
 			});
