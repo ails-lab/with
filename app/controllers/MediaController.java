@@ -771,7 +771,7 @@ public class MediaController extends Controller {
 		baos.flush();
 		byte[] thumbByte = baos.toByteArray();
 		baos.close();
-		med.setThumbnailBytes(thumbByte);
+	//	med.setThumbnailBytes(thumbByte);
 		//med.setThumbWidth(thumb.getWidth());
 		//med.setThumbHeight(thumb.getHeight());
 	}
