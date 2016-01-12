@@ -17,18 +17,22 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
 
 import model.CollectionRecord;
+import model.resources.CollectionObject.CollectionAdmin;
 import model.basicDataTypes.CollectionInfo;
 import model.resources.AgentObject;
+import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.EUscreenObject;
 import model.resources.EventObject;
@@ -257,14 +261,20 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	//TODO: use findAndModify for entryCount of respective collection
-	//what if the append fails (for some strange reason, the record cannot be edited correctly) and the entry count has been increased already?
+	//what if the append fails (for some strange reason, the record cannot be edited correctly) 
+	//and the entry count has been increased already?
 	public void appendToCollection(ObjectId resourceId, ObjectId colId) {
 		//increase entry count
-		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+		colUpdate.set("administrative.lastModified", new Date());
+		colUpdate.inc("administrative.entryCount");
+		CollectionObject co = DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
-		//updateOps.add("collectedIn", new CollectionInfo(colId, position));
+		UpdateOperations<RecordResource> recordUpdate = this.createUpdateOperations();
+		recordUpdate.add("collectedIn", new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()));
 		//shiftRecordsToRight(colId, position+1);
-		this.update(q, updateOps);
+		this.update(q, recordUpdate);
 	}
 	
 	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
