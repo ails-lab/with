@@ -34,12 +34,11 @@ public class CommonFilter implements Cloneable {
 		ArrayList<CommonFilter> res = new ArrayList<>();
 
 		for (String v : values) {
-			List<String> vvalues = src.translateToSpecific(filterID, v);
-			for (String vv : vvalues) {
+			for (Object vv : src.translateToSpecific(filterID, v)) {
 
 				try {
 					CommonFilter c = (CommonFilter) super.clone();
-					c.values = Arrays.asList(vv);
+					c.values = Arrays.asList(vv.toString());
 					res.add(c);
 				} catch (CloneNotSupportedException e) {
 					// TODO Auto-generated catch block

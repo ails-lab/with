@@ -36,6 +36,8 @@ import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.basicDataTypes.Literal;
+import play.libs.Json;
+import scala.collection.mutable.HashMap;
 
 public class JsonContextRecord {
 
@@ -206,6 +208,9 @@ public class JsonContextRecord {
 		System.out.println(r.getValue("ages[1]"));
 		r.setValue("f.color.name.enrique", r.getValue("a"));
 		r.setValue("f.color.name.mijalis", r.getValue("a"));
+		HashMap<String, String> f = new HashMap<>();
+		f.put("en", "Hello World");
+		System.out.println(Json.toJson(f).toString());
 		System.out.println(r.getRootInformation().toString());
 	}
 	
