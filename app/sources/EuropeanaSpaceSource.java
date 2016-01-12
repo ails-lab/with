@@ -29,6 +29,8 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
@@ -78,10 +80,10 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addDefaultWriter(CommonFilters.TYPE.name(), qfwriter("TYPE"));
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.name(), "IMAGE");
-		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.name(), "VIDEO");
-		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.name(), "SOUND");
-		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.name(), "TEXT");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.IMAGE, "IMAGE");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.AUDIO, "SOUND");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.TEXT, "TEXT");
 
 //		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
 
@@ -109,12 +111,12 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 //			addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
 //		}
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.name(), ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.name(), ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.name(), ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.name(), ".*unknown.*");
-
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.UNKNOWN, ".*unknown.*");
+		formatreader.setMap(this.vmap);
 	}
 	
 	private Function<List<String>, QueryModifier> qrightwriter() {
@@ -293,7 +295,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		try{
 		if (response.path("success").asBoolean()) {
 			for (JsonNode item : response.path("items")) {
-				items.add(formatreader.fillObjectFrom(item));
+				items.add(formatreader.readObjectFrom(item));
 			}
 		}} catch(Exception e){
 			e.printStackTrace();
@@ -314,7 +316,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				res.items.setCulturalHO(getItems(response));;
+				res.items.setCulturalCHO(getItems(response));;
 //				res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
 

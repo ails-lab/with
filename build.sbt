@@ -23,6 +23,8 @@ libraryDependencies ++= Seq(
  "org.apache.jena" % "apache-jena-libs" % "2.10.1",
  "commons-io" % "commons-io" % "2.3",
  "com.google.code.gson" % "gson" % "2.2.4",
+ "com.google.code.gson" % "gson" % "2.2.4",
+ "commons-validator" % "commons-validator" % "1.4.0",
 // "org.apache.httpcomponents" % "httpclient" % "4.4",
  "org.elasticsearch" % "elasticsearch" % "1.5.1",
 // "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.5.1",

@@ -170,7 +170,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 					res.addItem(formatreader.readObjectFrom(item));
 
 				}
-				res.count = res.items.getCulturalHO().size();
+				res.count = res.items.getCulturalCHO().size();
 
 
 				readList(o.path("facets").path("category"), type);

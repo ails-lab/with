@@ -18,6 +18,9 @@ package sources.formatreaders;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import org.hibernate.validator.internal.constraintvalidators.URLValidator;
 
 import sources.EuropeanaSpaceSource;
 import sources.core.JsonContextRecordFormatReader;
@@ -49,6 +52,7 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+//		model.setDates(dates);
 		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
 		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
@@ -60,6 +64,11 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		//TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		//TODO: add withMediaRights, originalRights
+		List<String> rights = rec.getStringArrayValue("rights");
+//		med.setOriginalRights(originalRights);
+//		
+//		med.setWithRights(withRights);
 		object.addMedia(MediaVersion.Original, med);
 		return object;
 		//TODO: add null checks

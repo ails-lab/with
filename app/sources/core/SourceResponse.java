@@ -75,7 +75,7 @@ public class SourceResponse {
 //			item.setThumbnailUrl(r.getThumbnailUrl().toString());
 //			items.add(item);
 //		}
-		this.items.setCulturalHO(items);
+		this.items.setCulturalCHO(items);
 	}
 
 	public SourceResponse merge(SourceResponse r2) {
@@ -102,7 +102,7 @@ public class SourceResponse {
 	public void addItem(WithResource<?> record) {
 		if (record!=null){
 		if (record instanceof CulturalObject)
-			items.getCulturalHO().add(record);
+			items.getCulturalCHO().add(record);
 		}
 	}
 

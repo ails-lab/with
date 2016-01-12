@@ -20,16 +20,15 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Year;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import views.html.main;
+import org.hibernate.validator.internal.constraintvalidators.URLValidator;
+
+import model.basicDataTypes.LiteralOrResource;
 
 public class StringUtils {
 
@@ -92,7 +91,7 @@ public class StringUtils {
 					res.add(Year.of(c.get(Calendar.YEAR)));
 				}
 			}
-		}
+	}
 		return res;
 	}
 
@@ -118,4 +117,8 @@ public class StringUtils {
 		return count;
 	}
 
+	public static LiteralOrResource toLiteralOrResource(String value){
+//		UrlValidaror v;
+		return null;
+	}
 }
