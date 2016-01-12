@@ -16,14 +16,16 @@
 
 package sources.core;
 
+import java.io.File;
+
 import org.w3c.dom.Document;
 
+import sources.core.Utils;
 import play.Logger;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import sources.core.Utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -56,8 +58,66 @@ public class HttpConnector {
 		}
 	}
 	
+	public static <T> T postFileContent(String url, File file) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).post(file).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+	
+	public static <T> T postContent(String url) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).post(url).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+
+
+	
 	public static JsonNode getURLContent(String url) throws Exception {
 		return HttpConnector.<JsonNode>getContent(url);
+	}
+	
+	public static JsonNode postURLContent(String url) throws Exception {
+		return HttpConnector.<JsonNode>postContent(url);
+	}
+	
+	public static JsonNode postFile(String url, File file) throws Exception {
+		return HttpConnector.<JsonNode>postFileContent(url, file);
 	}
 	
 	public static String getURLStringContent(String url) throws Exception {

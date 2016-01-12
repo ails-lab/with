@@ -71,10 +71,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
 
 import db.DB;
-import espace.core.CommonQuery;
-import espace.core.HttpConnector;
-import espace.core.SourceResponse;
-import espace.core.Utils;
+import sources.core.HttpConnector;
 
 public class MediaController extends Controller {
 	public static final ALogger log = Logger.of(MediaController.class);
@@ -872,7 +869,7 @@ public class MediaController extends Controller {
 				
 		try {
 			
-			response = HttpConnector.postFile(queryURL, fileToParse);
+			response = sources.core.HttpConnector.postFile(queryURL, fileToParse);
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
