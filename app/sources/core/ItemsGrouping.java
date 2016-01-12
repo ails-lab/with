@@ -23,25 +23,25 @@ import model.resources.WithResource;
 
 public class ItemsGrouping {
 	
-	private List<WithResource<?>> culturalHO;
+	private List<WithResource<?>> culturalCHO;
 	
 	
 
 	public ItemsGrouping() {
 		super();
-		culturalHO = new ArrayList<>();
+		culturalCHO = new ArrayList<>();
 	}
 
-	public List<WithResource<?>> getCulturalHO() {
-		return culturalHO;
+	public List<WithResource<?>> getCulturalCHO() {
+		return culturalCHO;
 	}
 
-	public void setCulturalHO(List<WithResource<?>> culturalHO) {
-		this.culturalHO = culturalHO;
+	public void setCulturalCHO(List<WithResource<?>> culturalHO) {
+		this.culturalCHO = culturalHO;
 	}
 
 	public void addAll(ItemsGrouping items) {
-		culturalHO.addAll(items.getCulturalHO());
+		culturalCHO.addAll(items.getCulturalCHO());
 	}
 
 }

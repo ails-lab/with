@@ -181,7 +181,7 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 //					countValue(rights, it.rights, 1);
 				    res.addItem(formatreader.readObjectFrom(item));
 				}
-				res.count = res.items.getCulturalHO().size();
+				res.count = res.items.getCulturalCHO().size();
 
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();

@@ -316,7 +316,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				res.items.setCulturalHO(getItems(response));;
+				res.items.setCulturalCHO(getItems(response));;
 //				res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
 
