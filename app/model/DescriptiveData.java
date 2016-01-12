@@ -39,17 +39,17 @@ public class DescriptiveData {
 	public DescriptiveData() {
 	}
 
-	public DescriptiveData(Literal label) {
+	public DescriptiveData(MultiLiteral label) {
 		this.label = label;
 	}
 
 	// one line content description with identifiable characteristic
 	@NotNull
 	@NotBlank
-	private Literal label;
+	private MultiLiteral label;
 
 	// arbitrary length content description
-	private Literal description;
+	private MultiLiteral description;
 
 	// an indexers dream !! They can be literal concepts and enriched easily
 	private MultiLiteralOrResource keywords;
@@ -72,19 +72,19 @@ public class DescriptiveData {
 	// alternative title or name or placename
 	private MultiLiteral altLabels;
 
-	public Literal getLabel() {
+	public MultiLiteral getLabel() {
 		return label;
 	}
 
-	public void setLabel(Literal label) {
+	public void setLabel(MultiLiteral label) {
 		this.label = label;
 	}
 
-	public Literal getDescription() {
+	public MultiLiteral getDescription() {
 		return description;
 	}
 
-	public void setDescription(Literal description) {
+	public void setDescription(MultiLiteral description) {
 		this.description = description;
 	}
 

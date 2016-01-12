@@ -103,10 +103,10 @@ public class TestNewModelMediaController {
 		image.setWithRights(set);
 		image.setHeight(599);
 		image.setWidth(755);
-		image.setThumbHeight(120);
-		image.setThumbWidth(100);
+		//image.setThumbHeight(120);
+		//image.setThumbWidth(100);
 		image.setUrl("http://www.ntua.gr/ntua-01.jpg");
-		image.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
+		//image.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
 		LiteralOrResource lor = new LiteralOrResource();
 		lor.setResource(ResourceType.dbpedia, "<http://pt.dbpedia.org/resource/Brasil>");
 		image.setOriginalRights(lor);

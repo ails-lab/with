@@ -41,6 +41,6 @@ public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotat
 	Type type;
 	
 	// body and target depend on the annotation type
-	AnnotationBody body;
-	AnnotationTarget target;
+	T1 body;
+	T2 target;
 }

@@ -32,12 +32,14 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -100,10 +102,10 @@ public class CollectionObjectTest {
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		Literal label = new Literal(Language.EN, "MyTitle");
+		MultiLiteral label = new MultiLiteral(Language.EN,"MyTitle");
 		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
 		cdd.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
 		co.setDescriptiveData(cdd);
 		/*
@@ -114,10 +116,8 @@ public class CollectionObjectTest {
 		/*
 		 * media thumbnail for collection
 		 */
-		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
-		medias.add(emo);
-		co.setMedia(medias);
+		co.addMedia(MediaVersion.Original, emo);
 		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");

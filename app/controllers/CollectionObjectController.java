@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
@@ -86,7 +87,7 @@ public class CollectionObjectController extends Controller {
 				collection.getDescriptiveData().setLabel(
 						getAvailableTitle(creator));
 				collection.getDescriptiveData().setDescription(
-						new Literal("Description"));
+						new MultiLiteral("Description"));
 				creator.addExhibitionsCreated();
 				DB.getUserDAO().makePermanent(creator);
 			}
@@ -125,9 +126,9 @@ public class CollectionObjectController extends Controller {
 	 * @param user
 	 * @return
 	 */
-	private static Literal getAvailableTitle(User user) {
+	private static MultiLiteral getAvailableTitle(User user) {
 		int exhibitionNum = user.getExhibitionsCreated();
-		return new Literal("DummyTitle" + exhibitionNum);
+		return new MultiLiteral("DummyTitle" + exhibitionNum);
 	}
 
 	/**

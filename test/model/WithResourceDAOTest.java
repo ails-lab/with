@@ -19,6 +19,7 @@ import java.util.Date;
 
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.Literal.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.resources.CollectionObject;
@@ -50,8 +51,8 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new Literal(Language.EN, "TestWithResourceNew" + i));
-			model.setDescription(new Literal(Language.EN, "Some description"));
+			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNew" + i));
+			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 
 			int j=0;
