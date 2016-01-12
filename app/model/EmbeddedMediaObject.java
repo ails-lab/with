@@ -39,7 +39,7 @@ import com.google.common.net.MediaType;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Converters(MediaTypeConverter.class)
 public class EmbeddedMediaObject {
-
+	
 	public static enum MediaVersion {
 		Original, Medium, Thumbnail, Square, Tiny
 	}
@@ -82,6 +82,11 @@ public class EmbeddedMediaObject {
 	    
 	}
 	
+	@Id
+	@JsonIgnore
+	private ObjectId dbId;
+	
+	
 	private int width, height;
 		
 	private WithMediaType type;
@@ -91,6 +96,12 @@ public class EmbeddedMediaObject {
 	// the media object URL
 	private String url;
     
+	// If this is a thumbnail, the parentID field refers to
+	// the parent media object, else it should be "self".
+	private ObjectId parentID;
+	
+	private MediaVersion mediaVersion;
+	
 	/*These do not have to be saved in the db
 	 just returned in the json, i.e. the json has 
 	 a field withThumbnailUrl computed based on 
@@ -100,6 +111,13 @@ public class EmbeddedMediaObject {
 	private String withThumbnailUrl;*/
 	
 	
+	public MediaVersion getMediaVersion() {
+		return mediaVersion;
+	}
+
+	public void setMediaVersion(MediaVersion mediaVersion) {
+		this.mediaVersion = mediaVersion;
+	}
 	private LiteralOrResource originalRights;
 	/*
 	 *  file name type values specified here:
@@ -117,6 +135,14 @@ public class EmbeddedMediaObject {
 	private long size;
 	
 	private Quality quality;
+	
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
 	
 	public long getSize() {
 		return size;
@@ -178,6 +204,14 @@ public class EmbeddedMediaObject {
 	public int getWidth() {
 		return width;
 	}
+	public ObjectId getParentID() {
+		return parentID;
+	}
+
+	public void setParentID(ObjectId parentID) {
+		this.parentID = parentID;
+	}
+
 	public void setWidth(int width) {
 		this.width = width;
 	}

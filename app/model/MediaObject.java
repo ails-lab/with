@@ -47,10 +47,7 @@ public class MediaObject extends EmbeddedMediaObject {
 	public static enum Orientation {
 		PORTRAIT, LANDSCAPE
 	}
-
-	@Id
-	@JsonIgnore
-	private ObjectId dbId;
+	
 	
 	// which resource is this Media part of, this is the access rights restriction
 	// if there is none, the media object is publicly available
@@ -90,14 +87,6 @@ public class MediaObject extends EmbeddedMediaObject {
 	
 	
 	// Setters/Getters
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
-	
 	public ArrayList<ObjectId> getResources() {
 		return resources;
 	}
