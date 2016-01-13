@@ -229,7 +229,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
-                    var data=reply.responces;
+                    var data=reply.responses;
 
                     var filters=reply.filters;
                     if(facetinit || facetrecacl){

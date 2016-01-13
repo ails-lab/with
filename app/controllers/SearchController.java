@@ -145,13 +145,11 @@ public class SearchController extends Controller {
 						SearchResponse r1 = new SearchResponse();
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-							// System.out.println(sourceResponse.filtersLogic);
 							FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 							sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
 						}
 
 						r1.filters = ListUtils.transform(merge, f);
-						System.out.println(r1.filters);
 						r1.responses = mergeResponses(finalResponses);
 
 						return ok(Json.toJson(r1));

@@ -62,7 +62,7 @@ define(['knockout', 'text!./testsearch.html'], function(ko, template) {
 
 	    				"success": function( data, textStatus, jQxhr ){
 	                self.filters(data.filters);
-	                self.responses(data.responces);
+	                self.responses(data.responses);
 	                
 	            },
 	            "error": function( jqXhr, textStatus, errorThrown ){

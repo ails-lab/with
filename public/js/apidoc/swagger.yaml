@@ -58,7 +58,7 @@ paths:
       tags:
         - Search
       summary: Advanced search with filters (faceted sarch).
-      description: An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values. Bear in mind we are aware of a small typographical error, the field "responces" will be changed to "responses".
+      description: An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values. Bear in mind we are aware of a small typographical error, the field "responses" will be changed to "responses".
       parameters:
         - in: body
           name: body
