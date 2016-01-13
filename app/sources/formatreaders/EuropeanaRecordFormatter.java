@@ -55,9 +55,9 @@ public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<Cult
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 		List<String> years = rec.getStringArrayValue("year");
 		model.setDates(StringUtils.getDates(years));
-		System.out.println(years);
+//		System.out.println(years+"--->"+model.getDates());
 		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
-
+//		model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(

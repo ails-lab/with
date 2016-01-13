@@ -73,6 +73,7 @@ public class JsonNodeUtils {
 			} else{
 				res.add(node.asText());
 			}
+			return res;
 		}
 		return null;
 	}

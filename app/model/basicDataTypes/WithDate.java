@@ -50,6 +50,62 @@ public class WithDate {
 		super();
 	}
 	
+	public Date getIsoDate() {
+		return isoDate;
+	}
+
+	public void setIsoDate(Date isoDate) {
+		this.isoDate = isoDate;
+	}
+
+	public int getYear() {
+		return year;
+	}
+
+	public void setYear(int year) {
+		this.year = year;
+	}
+
+	public LiteralOrResource getEpoch() {
+		return epoch;
+	}
+
+	public void setEpoch(LiteralOrResource epoch) {
+		this.epoch = epoch;
+	}
+
+	public int getApproximation() {
+		return approximation;
+	}
+
+	public void setApproximation(int approximation) {
+		this.approximation = approximation;
+	}
+
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+
+	public ResourceType getUriType() {
+		return uriType;
+	}
+
+	public void setUriType(ResourceType uriType) {
+		this.uriType = uriType;
+	}
+
+	public String getFree() {
+		return free;
+	}
+
+	public void setFree(String free) {
+		this.free = free;
+	}
+
 	public WithDate(String free) {
 		super();
 		setDate(free);
