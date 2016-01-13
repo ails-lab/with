@@ -46,6 +46,10 @@ public class WithDate {
 	// mandatory, other fields are extracted from that
 	String free;
 
+	public WithDate() {
+		super();
+	}
+	
 	public WithDate(String free) {
 		super();
 		setDate(free);
