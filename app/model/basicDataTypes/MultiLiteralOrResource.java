@@ -25,7 +25,6 @@ public class MultiLiteralOrResource extends MultiLiteral {
 	
 	private LiteralOrResource.Resource resource;
 	
-
 	public MultiLiteralOrResource() {
 		super();
 	}

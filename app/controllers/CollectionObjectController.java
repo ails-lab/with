@@ -28,6 +28,7 @@ import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
+import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
 
@@ -156,6 +157,9 @@ public class CollectionObjectController extends Controller {
 						"User does not have read-access for the resource");
 				return forbidden(result);
 			}
+			List<RecordResource> firstEntries = DB.getCollectionObjectDAO().getFirstEntries(new ObjectId(id), 5);
+			result = (ObjectNode) Json.toJson(collection);
+			result.put("firstEntries", Json.toJson(firstEntries));
 			return ok(Json.toJson(collection));
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
