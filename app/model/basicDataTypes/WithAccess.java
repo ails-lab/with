@@ -107,13 +107,4 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 		}
 		return Access.NONE;
 	}
-
-	/*public List<User> getUsersWithAccess(Access access) {
-		for (AccessEntry ae: acl) {
-			if (ae.level)
-				return ae.level;
-		}
-		return Access.NONE;
-	}*/
-
 }
