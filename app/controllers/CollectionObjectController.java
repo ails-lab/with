@@ -23,8 +23,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.KeyValuesPair.MultiLiteral;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;

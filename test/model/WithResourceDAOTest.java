@@ -17,9 +17,8 @@
 package model;
 import java.util.Date;
 
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.Literal.Language;
-import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.resources.CollectionObject;

@@ -19,8 +19,6 @@ package model.resources;
 import java.util.Date;
 import java.util.List;
 
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.MultiLiteral;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -31,6 +29,9 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import model.basicDataTypes.KeySingleValuePair.Literal;
+import model.basicDataTypes.KeyValuesPair.MultiLiteral;
 
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Entity("ThesaurusObject")

@@ -18,7 +18,7 @@ package model.basicDataTypes;
 
 import java.util.Date;
 
-import model.basicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 
 /**
  * Capture accurate and inaccurate dates in a visualisable way. Enable search

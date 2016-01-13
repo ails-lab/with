@@ -35,10 +35,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import model.basicDataTypes.Literal;
+import javassist.expr.NewArray;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
-import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.basicDataTypes.ResourceType;
 
 public class JsonContextRecord {
 
@@ -221,7 +222,14 @@ public class JsonContextRecord {
 		r.setValue("f.color.name.mijalis", r.getValue("a"));
 		HashMap<String, String> f = new HashMap<>();
 		f.put("en", "Hello World");
-		System.out.println(Json.toJson(f).toString());
+//		System.out.println(Json.toJson(f).toString());
+//		Literal l = new Literal(Language.EN, "hello");
+//		System.out.println(Json.toJson(l).toString());
+//		NewMultiLiteralOrResource ml = new NewMultiLiteralOrResource();
+//		ml.add(Language.EN, "bye");
+//		ml.add(ResourceType.uri, "http://bbla.bla");
+//		
+//		System.out.println(Json.toJson(ml).toString());
 		System.out.println(r.getRootInformation().toString());
 	}
 	

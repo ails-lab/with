@@ -19,7 +19,6 @@ package model.resources;
 import java.util.Date;
 
 import org.mongodb.morphia.annotations.Entity;
-import model.basicDataTypes.Literal;
 import model.resources.RecordResource.RecordDescriptiveData;
 
 

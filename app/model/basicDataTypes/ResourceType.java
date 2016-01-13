@@ -14,23 +14,11 @@
  */
 
 
-package model.resources;
+package model.basicDataTypes;
 
-import java.util.ArrayList;
-
-import org.mongodb.morphia.annotations.Entity;
-
-import model.basicDataTypes.WithPeriod;
-import model.resources.RecordResource.RecordDescriptiveData;
-
-
-@Entity("RecordResource")
-public class TimespanObject extends RecordResource<TimespanObject.TimespanData>{
-	
-	public static class TimespanData extends RecordDescriptiveData {
-
-		ArrayList<WithPeriod> timespan;
-	}
-	
-
+// resources we do understand about and can process further (or not)
+// uri being general and difficult to process
+//TODO: don't we want multiple urls (resources) to refer to the same Literal?
+public enum ResourceType implements ILiteralOrResource{
+	uri, skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
 }

@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import model.basicDataTypes.LiteralOrResource;
 import utils.MediaTypeConverter;
 
 import org.bson.types.ObjectId;
@@ -33,6 +32,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
+
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
