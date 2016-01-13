@@ -137,7 +137,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
-		BasicDBObject elemMatch2 = new BasicDBObject();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", lowerBound);
 		geq.append("$lt", upperBound);
@@ -283,5 +282,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
 		this.update(q, updateOps);
 		shiftRecordsToLeft(colId, position+1);
+	}
+	
+	public RecordResource getByCollectionAndPosition(ObjectId colId, int position) {
+		Query<RecordResource> q = this.createQuery().field("collectedIn").hasThisElement(new CollectionInfo(colId, position));
+		return this.findOne(q);	
 	}
 }

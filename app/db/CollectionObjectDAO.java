@@ -24,6 +24,7 @@ import java.util.Map;
 
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
+import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.CriteriaContainer;
@@ -70,6 +71,11 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		updateOps.dec("administrative.entryCount");
 		this.update(q, updateOps);
 	}
+	
+	public List<RecordResource> getFirstEntries(ObjectId dbId, int upperBound) {
+		return DB.getRecordResourceDAO().getByCollectionBetweenPositions(dbId, 0, upperBound);
+	}
+
 
 	public void editCollection(ObjectId dbId, JsonNode json) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
@@ -101,7 +107,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	         }
 	     }
 	}
-
+	
 	/**
 	 * Gets the union of the collections/exhibitions for a list of users and
 	 * groups for a specific right
