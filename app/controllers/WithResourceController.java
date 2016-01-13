@@ -255,12 +255,13 @@ public class WithResourceController extends Controller {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static Result moveRecordInCollection(String id, String recordId,
 			int oldPosition, int newPosition) {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
+			ObjectId recordDbId = new ObjectId(recordId);
 			CollectionObject collection = DB.getCollectionObjectDAO().get(
 					collectionDbId);
 			if (collection == null) {
@@ -275,18 +276,15 @@ public class WithResourceController extends Controller {
 						"User does not have the right to edit the resource");
 				return forbidden(result);
 			}
-			RecordResource record = DB.getRecordResourceDAO().get(
-					new ObjectId(recordId));
-			DB.getRecordResourceDAO().updatePosition(new ObjectId(recordId),collectionDbId, oldPosition, newPosition);
-			// TODO modify access
-			if (collection.getDescriptiveData().getLabel().equals("_favorites")) {
-				record.getUsage().decLikes();
-			} else {
-				record.getUsage().decCollected();
+			if (oldPosition > newPosition) {
+				DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
+						newPosition, oldPosition - 1);
+			} else if (newPosition > oldPosition) {
+				DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
+						oldPosition + 1, newPosition - 1);
 			}
-			DB.getRecordResourceDAO().makePermanent(record);
-			// Change the collection metadata as well
-			((CollectionAdmin) collection.getAdministrative()).incEntryCount();
+			DB.getRecordResourceDAO().updatePosition(recordDbId,
+					collectionDbId, oldPosition, newPosition);
 			collection.getAdministrative().setLastModified(new Date());
 			DB.getCollectionObjectDAO().makePermanent(collection);
 			result.put("message", "Record succesfully added to collection");
@@ -294,7 +292,7 @@ public class WithResourceController extends Controller {
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
-		}		
+		}
 	}
 
 	/**

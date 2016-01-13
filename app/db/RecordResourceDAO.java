@@ -216,7 +216,35 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		}
 	}
 
-
+	public void shift(ObjectId colId, int startPosition, int stopPosition, BiConsumer<String, UpdateOperations> update) {
+		Query<RecordResource> q = this.createQuery();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch2 = new BasicDBObject();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", startPosition);
+		geq.put("$le", stopPosition);
+		colIdQuery.append("position", geq);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
+		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
+		for (RecordResource resource: resources) {
+			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
+			ArrayList<CollectionInfo> collectedIn = resource.getCollectedIn();
+			int index = 0;
+			for (CollectionInfo ci: collectedIn) {
+				if (ci.getCollectionId().equals(colId)) {
+					int pos = ci.getPosition();
+					if (pos >= startPosition && pos <= stopPosition)
+						update.accept("collectedIn."+index+".position", updateOps);
+				}
+				index+=1;
+			}
+			this.update(this.createQuery().field("_id").equal(resource.getDbId()), updateOps);
+		}
+	}
+	
 	/**
 	 * Shift one position left all resources in colId with position equal or greater than position.
 	 * @param colId
@@ -228,6 +256,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shift(colId, position, update);
 	}
 	
+	public void shiftRecordsToLeft(ObjectId colId, int startPosition, int stopPosition) {
+		//UpdateOperations updateOps = this.createUpdateOperations();
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.dec(field);
+		shift(colId, startPosition, stopPosition, update);
+	}
+	
 	/**
 	 * Shift one position right all resources in colId with position equal or greater than position.
 	 * @param colId
@@ -236,6 +270,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public void shiftRecordsToRight(ObjectId colId, int position) {
 		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
 		shift(colId, position, update);
+	}
+	
+	public void shiftRecordsToRight(ObjectId colId, int startPosition, int stopPosition) {
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
+		shift(colId, startPosition, stopPosition, update);
 	}
 	
 	//TODO: has to be atomic as a whole
