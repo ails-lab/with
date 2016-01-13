@@ -59,6 +59,25 @@ import espace.core.SourceResponse;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
+	
+	//there should be a filter on source
+	//in general, more filters in new model for search within WITH db
+	public enum WithinFilters {
+		Provider("provider"), Type("type"), DataProvider("dataprovider"),
+		Creator("creator"), Rights("rights"),
+		Country("country"), Year("year");
+		
+		private String value;
+		
+		WithinFilters(String value) {
+	        this.value = value;
+	    }
+
+	    @Override
+	    public String toString() {
+	        return value;
+	    }
+	}
 
 	@Override
 	public String getSourceName() {
@@ -103,8 +122,6 @@ public class WithSpaceSource extends ISpaceSource {
 		List<SearchHit> hits = getTotalHitsFromScroll(response);
 		colFields = getCollectionMetadaFromHit(hits);
 
-		System.out.println(accessFilters.toString());
-
 		/*
 		 * Search index for merged records according to collection ids gathered
 		 * above
@@ -121,7 +138,12 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 
 		SourceResponse res = new SourceResponse(resp, offset);
-
+		
+		/*
+		for (WithinFilters filter: WithinFilters.values()) {
+			//Create CommonFilterLogic dynamically!!!!!!!!!!!!!!!!! See changes and e.g. EuropeanaSource in new model.
+		}
+	    */
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		CommonFilterLogic dataprovider = CommonFilterLogic.dataproviderFilter();
@@ -129,59 +151,73 @@ public class WithSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
 		CommonFilterLogic year = CommonFilterLogic.yearFilter();
-		CommonFilterLogic reusability = CommonFilterLogic.reusabilityFilter();
 
 		if (checkFilters(q)) {
-
 			for (Entry<String, Aggregation> e : resp.getAggregations().asMap()
 					.entrySet()) {
 				e.getKey();
 
 			}
-
 			for (Aggregation agg : resp.getAggregations().asList()) {
-
 				InternalTerms aggTerm = (InternalTerms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
 					switch (agg.getName()) {
-					case "types":
-						countValue(type, aggTerm.getBuckets().get(0).getKey(),
-								(int) aggTerm.getBuckets().get(0).getDocCount());
+					case "types": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(type, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "providers":
-						countValue(provider, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
+					}
+					case "providers": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(provider, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "dataProviders":
-						countValue(dataprovider, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
+					}
+					case "dataProviders": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(dataprovider, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "creators":
-						countValue(creator, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
+					}
+					case "creators": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(creator, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "rights":
-						countValue(rights,
-								aggTerm.getBuckets().get(0).getKey(),
-								(int) aggTerm.getBuckets().get(0).getDocCount());
+					}
+					case "rights": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(rights, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "countries":
-						countValue(country, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
+					}
+					case "countries": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(country, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "years":
-						countValue(year, aggTerm.getBuckets().get(0).getKey(),
-								(int) aggTerm.getBuckets().get(0).getDocCount());
+					}
+					case "years": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(year, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
 						break;
-					case "reusability":
-						countValue(reusability, aggTerm.getBuckets().get(0)
-								.getKey(), (int) aggTerm.getBuckets().get(0)
-								.getDocCount());
-						break;
+					}
 					default:
 						break;
 					}
@@ -196,7 +232,6 @@ public class WithSpaceSource extends ISpaceSource {
 			res.filtersLogic.add(rights);
 			res.filtersLogic.add(country);
 			res.filtersLogic.add(year);
-			res.filtersLogic.add(reusability);
 		}
 
 		return res;
