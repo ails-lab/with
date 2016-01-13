@@ -110,6 +110,7 @@ public class WithResourceController extends Controller {
 						.getByExternalId(sourceId);
 			} else {
 				ObjectNode errors;
+				record.getAdministrative().setExternalId(sourceId);
 				// Create a new record
 				switch (source) {
 				case UploadedByUser:
@@ -253,6 +254,47 @@ public class WithResourceController extends Controller {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+	
+	public static Result moveRecordInCollection(String id, String recordId,
+			int oldPosition, int newPosition) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(id);
+			CollectionObject collection = DB.getCollectionObjectDAO().get(
+					collectionDbId);
+			if (collection == null) {
+				log.error("Cannot retrieve resource from database");
+				result.put("error", "Cannot retrieve resource from database");
+				return internalServerError(result);
+			}
+			if (!AccessManager.checkAccess(collection.getAdministrative()
+					.getAccess(), session().get("effectiveUserIds"),
+					Action.EDIT)) {
+				result.put("error",
+						"User does not have the right to edit the resource");
+				return forbidden(result);
+			}
+			RecordResource record = DB.getRecordResourceDAO().get(
+					new ObjectId(recordId));
+			DB.getRecordResourceDAO().updatePosition(new ObjectId(recordId),collectionDbId, oldPosition, newPosition);
+			// TODO modify access
+			if (collection.getDescriptiveData().getLabel().equals("_favorites")) {
+				record.getUsage().decLikes();
+			} else {
+				record.getUsage().decCollected();
+			}
+			DB.getRecordResourceDAO().makePermanent(record);
+			// Change the collection metadata as well
+			((CollectionAdmin) collection.getAdministrative()).incEntryCount();
+			collection.getAdministrative().setLastModified(new Date());
+			DB.getCollectionObjectDAO().makePermanent(collection);
+			result.put("message", "Record succesfully added to collection");
+			return ok(result);
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}		
 	}
 
 	/**
