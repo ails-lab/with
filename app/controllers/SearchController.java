@@ -151,7 +151,8 @@ public class SearchController extends Controller {
 						}
 
 						r1.filters = ListUtils.transform(merge, f);
-						r1.responces = mergeResponses(finalResponses);
+						System.out.println(r1.filters);
+						r1.responses = mergeResponses(finalResponses);
 
 						return ok(Json.toJson(r1));
 					}
@@ -240,7 +241,7 @@ public class SearchController extends Controller {
 		return result;
 	}
 
-	public static Result testsearch() {
+	/*public static Result testsearch() {
 		return buildresult(new CommonQuery("Zeus"));
 	}
 
@@ -248,7 +249,7 @@ public class SearchController extends Controller {
 		// q.source = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
-		r1.responces = res;
+		r1.responses = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
 			// System.out.println(sourceResponse.source + " Filters: " +
@@ -262,7 +263,7 @@ public class SearchController extends Controller {
 		// System.out.println(" Merged Filters: " + merge1);
 
 		return ok(views.html.testsearch.render(userForm, res, merge1));
-	}
+	}*/
 
 	public static Result reindex() {
 		Promise.promise(new Function0<String>() {
