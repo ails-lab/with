@@ -99,6 +99,21 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 	public void setAcl(List<AccessEntry> acl) {
 		this.acl = acl;
 	}
+	
+	public Access getAcl(ObjectId user) {
+		for (AccessEntry ae: acl) {
+			if (ae.user.equals(user))
+				return ae.level;
+		}
+		return Access.NONE;
+	}
 
+	/*public List<User> getUsersWithAccess(Access access) {
+		for (AccessEntry ae: acl) {
+			if (ae.level)
+				return ae.level;
+		}
+		return Access.NONE;
+	}*/
 
 }
