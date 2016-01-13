@@ -72,7 +72,7 @@ public class Global extends GlobalSettings {
 			k.addCall(0, ".*" );
 
 			// guinness ... so that mint can contact this server
-			k.setIpPattern("147\\.102\\.11\\.71");
+//			k.setIpPattern("147\\.102\\.11\\.71");
 			// store it
 			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);
 		}

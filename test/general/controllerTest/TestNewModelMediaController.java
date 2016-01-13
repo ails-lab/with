@@ -78,7 +78,7 @@ import db.DB;
 
 public class TestNewModelMediaController {
 
-	
+
 	private MediaObject createImage() {
 		MediaObject image = new MediaObject();
 		URL url;
@@ -95,7 +95,7 @@ public class TestNewModelMediaController {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		//embedded
 		image.setType(WithMediaType.IMAGE);
 		Set<WithMediaRights> set = new HashSet<WithMediaRights>();
@@ -113,13 +113,13 @@ public class TestNewModelMediaController {
 		image.setMimeType(MediaType.parse("image/jpeg"));
 		image.setSize(rawbytes.length);
 		image.setQuality(Quality.IMAGE_SMALL);
-		
+
 		//extended
 		image.setMediaBytes(rawbytes);
-	//	image.setThumbnailBytes(rawbytes);
+		// image.setThumbnailBytes(rawbytes);
 		image.setOrientation(); //auto
 		//set the rest!
-		
+
 
 		try {
 			DB.getMediaObjectDAO().makePermanent(image);
@@ -130,8 +130,8 @@ public class TestNewModelMediaController {
 		return image;
 	}
 
-	
-	
+
+
 //	@Test
 	public void testGetMetadata() {
 		MediaObject image = createImage();
@@ -217,11 +217,11 @@ public class TestNewModelMediaController {
 			@Override
 			public void run() {
 				ObjectNode json = Json.newObject();
-				
+
 				//TODO: create json file metadata
 
 				//TODO: test all possible results (extract method to use in create)
-				
+
 				json.put("type", "Edited IMAGE");
 				Result result = route(fakeRequest("POST", "/media"
 						+ "/"+image.getDbId())
@@ -244,7 +244,7 @@ public class TestNewModelMediaController {
 	}
 
 	@Test
-// Testing file upload doesn't seem to be supported	
+// Testing file upload doesn't seem to be supported
 	public void testJSONCreateMedia() {
 		// make a user with password
 		User u = new User();
@@ -268,23 +268,23 @@ public class TestNewModelMediaController {
 					Assert.fail( "Login failed");
 				}
 				loginToWith.releaseConnection();
-								
+
 				//TODO: create json file metadata
 
 				//TODO: test all possible results
 
-				
-				
-				
+
+
+
 			} catch( Exception e ) {
 				Assert.fail( e.toString() );
 			}
 	    });
-	}	
-	
-	
+	}
+
+
 	@Test
-	// Testing file upload doesn't seem to be supported	
+	// Testing file upload doesn't seem to be supported
 		public void testCreateMedia() {
 			// make a user with password
 			User u = new User();
@@ -308,7 +308,7 @@ public class TestNewModelMediaController {
 						Assert.fail( "Login failed");
 					}
 					loginToWith.releaseConnection();
-									
+
 					// now try to upload a file
 					HttpPost aFile = new HttpPost( "http://localhost:3333/media/create?file=true");
 					File testFile = new File( "public/images/dancer.jpg");
@@ -319,24 +319,24 @@ public class TestNewModelMediaController {
 					response = hc.execute( aFile );
 					String jsonResponse = EntityUtils.toString(
 							response.getEntity(), "UTF8");
-					String id = JsonPath.parse( jsonResponse ).read( "$['results'][0]['mediaId']"); 
+					String id = JsonPath.parse( jsonResponse ).read( "$['results'][0]['mediaId']");
 					aFile.releaseConnection();
-					
+
 					assertThat( id ).isNotEmpty();
 					// maybe retrieve to see if its there
 					HttpGet get = new HttpGet( "http://localhost:3333/media/"+id);
-					
-					
-					
+
+
+
 					// maybe remove the media again
 					HttpDelete del = new HttpDelete( "http://localhost:3333/media/"+id);
 					response = hc.execute(del);
 					assertThat( response.getStatusLine().getStatusCode() ).isEqualTo( 200 );
-					
+
 				} catch( Exception e ) {
 					Assert.fail( e.toString() );
 				}
 		    });
-		}	
+		}
 
 }

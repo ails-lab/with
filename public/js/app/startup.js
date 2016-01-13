@@ -1,4 +1,4 @@
-define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'], function ($, ko, router, kom) {
+define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap', 'knockout-projections', 'knockout-amd-helpers', 'header'], function ($, ko, router,app, kom) {
 
 	// Knockout AMD Helpers Initialization
 	ko.amdTemplateEngine.defaultPath                  = 'templates';
@@ -27,6 +27,10 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	ko.components.register('exhibition-edit', { require: 'components/exhibition-edit/exhibition-edit' });
 	ko.components.register('popup-exhibition-edit', { require: 'components/exhibition-edit/popup-exhibition-edit' });
 	ko.components.register('api-docu', { require: 'components/api-documentation/api-documentation' });
+	ko.components.register('notifications-page', {
+		viewModel: { require: 'components/notifications/notifications' },
+		template: { require: 'text!components/notifications/notifications-page.html' }
+	});
 
 	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
 
@@ -74,8 +78,8 @@ define(['jquery','knockout', './router', 'knockout-mapping', 'bootstrap', 'knock
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 	popupName = ko.observable('empty');
 	popupParams = ko.observable({});
-
-
+    
+   
 	// Start the application
 	ko.applyBindings({ route: router.currentRoute, popupName: popupName, popupParams: popupParams });
 });

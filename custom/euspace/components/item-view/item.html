@@ -8,8 +8,16 @@
             </ul>
             <!-- action-->
             <ul class="action">
-              <li class="close"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close-green.png"></a></li>
-            </ul>
+            	<li class="close"><span class="fa-stack fa-fw"><a href="#" title="close" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ic-close.png"></a></span></li>
+         
+              <li class="close"> <span class="star" data-bind="visible: loggedUser()==true && record().externalId()!=null, css: { active: isLiked(record().externalId()) }">
+			 <span class="fa-stack fa-fw" data-bind="event: { click: function(data,event) { likeRecord(record(),event); } }">
+							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
+						</span>
+					</span></li>
+			 <li class="close" title="collect"><span class="fa-stack fa-fw" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"><i class="fa fa-download fa-stack-1x"></i>
+						</span></li>
+             </ul>
           </div>
         </nav>
         <!-- section media details-->
@@ -42,13 +50,13 @@
                             
                           </div>
                         </li>
-                        <li data-bind="if: record().provider()">
-                          <div class="title">PROVIDER</div>
-                          <div class="field" data-bind="text:record().provider()"></div>
-                        </li>
                          <li data-bind="if: record().creator()">
                           <div class="title">CREATOR</div>
                           <div class="field" data-bind="text:record().creator()"></div>
+                        </li>
+                         <li data-bind="if: record().dataProvider()">
+                          <div class="title">DATA PROVIDER</div>
+                          <div class="field" data-bind="text:record().dataProvider()"></div>
                         </li>
                         <li data-bind="if: record().rights()">
                           <div class="title">RIGHTS</div>
@@ -140,5 +148,7 @@
             </div>
           </div>
         </section>
+      
       </div>
+   <collection params="route: route"></collection>	     
 		

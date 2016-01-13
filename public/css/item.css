@@ -1,3 +1,19 @@
+.item .collect {
+	font-size: 20px;
+    position: absolute;
+    display: none;
+    top: 3px;
+    right: 25px;
+    width: 36px;
+    z-index: 1;
+}
+
+.item:hover .collect {
+	color: #dddddd;
+	display: block;
+	cursor: pointer;
+}
+
 .md-modal {
 	position: fixed;
 	top:10%;

@@ -30,7 +30,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } },
 			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } },
 			{ url: 'organization/{id}', params: { page: 'organization-page', title: 'Organization', 'type': 'organization' } },
-			{ url: 'project/{id}', params: { page: 'organization-page', title: 'Project', 'type': 'project' } }
+			{ url: 'project/{id}', params: { page: 'organization-page', title: 'Project', 'type': 'project' } },
+			{ url: 'notifications', params: { page: 'notifications-page', title: 'Notifications' } }
 		]
 	});
 
@@ -49,7 +50,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	function activateCrossroads() {
 		//temp fix: scrollbar moves to top when route changes
 		function resetScroll(){document.body.scrollTop = document.documentElement.scrollTop = 0;}
-		function parseHash(newHash, oldHash) { crossroads.parse(newHash); }
+		function parseHash(newHash, oldHash) { crossroads.parse(newHash);}
 		
 		crossroads.ignoreState= true; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
@@ -58,5 +59,6 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 		hasher.changed.add(resetScroll);
 		
 		hasher.init();
+		
 	}
 });

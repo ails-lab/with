@@ -27,6 +27,7 @@ import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
+import model.Notification;
 import model.usersAndGroups.UserGroup;
 
 import org.mongodb.morphia.Datastore;
@@ -153,7 +154,7 @@ public class DB {
 	public static ThesaurusObjectDAO getThesaurusDAO() {
 		return (ThesaurusObjectDAO) getDAO(ThesaurusObject.class);
 	}
-	
+
 	/*
 	 * Implementation of the new model DAO classes
 	 */
@@ -177,7 +178,7 @@ public class DB {
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO) getDAO(RecordResource.class);
 	}
-	
+
 	public static WithResourceDAO<WithResource> getWithResourceDAO() {
 		DAO<?> dao = (DAO<WithResource>) daos.get("WithResource");
 		if (dao == null) {
@@ -190,7 +191,11 @@ public class DB {
 		}
 		return (WithResourceDAO<WithResource>) dao;
 	}
-	
+
+	public static NotificationDAO getNotificationDAO() {
+		return (NotificationDAO) getDAO(Notification.class);
+	}
+
 	/*
 	public static RecordResourceDAO.AgentObjectDAO getAgentObjectDAO() {
 		return (RecordResourceDAO.AgentObjectDAO)

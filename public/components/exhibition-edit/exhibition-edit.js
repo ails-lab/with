@@ -137,6 +137,15 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
     var ExhibitionEditModel = function (params) {
         var self = this;
         self.route = params.route;
+        self.checkLogged=function(){
+			if(isLogged()==false){
+		
+			window.location='#login';
+			return;
+			}
+		}
+		
+		self.checkLogged();
         self.loading = ko.observable(false);
         self.title = ko.observable('');
         self.description = ko.observable('');
