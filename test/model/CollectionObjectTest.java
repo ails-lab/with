@@ -16,51 +16,27 @@
 
 package model;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.metadata.IIOMetadata;
-import javax.imageio.stream.ImageInputStream;
-
 import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.KeyValuesPair.MultiLiteral;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
-import model.resources.WithResource.WithAdmin;
-import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
-import model.MediaObject;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
 
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.net.MediaType;
 
 import db.DB;
 

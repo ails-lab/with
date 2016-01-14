@@ -44,7 +44,7 @@ public class WithResourceDAOTest {
 			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("ΜintTest", "http://myUri", "12345"));
 			WithAccess access = new WithAccess();
-			access.put(new ObjectId(), WithAccess.Access.READ);
+			access.addAccess(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
