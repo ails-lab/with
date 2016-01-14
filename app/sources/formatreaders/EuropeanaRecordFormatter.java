@@ -62,11 +62,11 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue("edmIsShownBy"));
+		medThumb.setUrl(model.getIsShownBy());
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		// TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		med.setUrl(model.getIsShownBy());
 		// TODO: add withMediaRights, originalRights
 		List<String> rights = rec.getStringArrayValue("rights");
 		// med.setOriginalRights(originalRights);

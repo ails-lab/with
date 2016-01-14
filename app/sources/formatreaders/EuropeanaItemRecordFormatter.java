@@ -64,33 +64,33 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		
 		rec.exitContext();
 		rec.enterContext("aggregations[0]");
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		
+		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"));
 		object.addToProvenance(provInfo);
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("about"), model.getIsShownAt()));
 		
+		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreator"))));
 		
 		rec.exitContext();
+		
+		
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 		
 //		System.out.println(years+"--->"+model.getDates());
-		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreatorLangAware"))));
 //		model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
 		
-		
-		
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue("edmIsShownBy"));
+		medThumb.setUrl(model.getIsShownBy());
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		// TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		med.setUrl(model.getIsShownBy());
 		// TODO: add withMediaRights, originalRights
-		List<String> rights = rec.getStringArrayValue("rights");
+//		List<String> rights = rec.getStringArrayValue("rights");
 		// med.setOriginalRights(originalRights);
 		//
 		// med.setWithRights(withRights);
