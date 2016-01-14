@@ -30,6 +30,7 @@ import static org.fest.assertions.Assertions.assertThat;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
+import play.libs.Json;
 import db.DB;
 
 public class WithResourceDAOTest {
@@ -50,7 +51,7 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNew" + i));
+			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNewRights" + i));
 			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 
@@ -60,6 +61,7 @@ public class WithResourceDAOTest {
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
+			System.out.println(Json.toJson(withResource));
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 			
 			/*CollectionObject co = new CollectionObject();
@@ -93,7 +95,7 @@ public class WithResourceDAOTest {
 			System.out.println(Json.toJson(co));
 		}*/
 		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		System.out.println(DB.getWithResourceDAO().getByLabel(Language.ENG, "TestWithResourceNew0").size());
+		System.out.println(DB.getWithResourceDAO().getByLabel(Language.ENG, "TestWithResourceNewRights0").size());
 	}
 
 }
