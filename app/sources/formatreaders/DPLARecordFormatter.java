@@ -23,7 +23,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import sources.DPLASpaceSource;
 import sources.EuropeanaSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
@@ -36,7 +35,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class DPLARecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class DPLARecordFormatter extends CulturalRecordFormatter {
 	
 	public DPLARecordFormatter() {
 		object = new CulturalObject();

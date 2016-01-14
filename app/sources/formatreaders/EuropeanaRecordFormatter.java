@@ -23,7 +23,6 @@ import java.util.List;
 import org.hibernate.validator.internal.constraintvalidators.URLValidator;
 
 import sources.EuropeanaSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.JsonNodeUtils;
@@ -37,7 +36,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
 	public EuropeanaRecordFormatter() {
 		object = new CulturalObject();
