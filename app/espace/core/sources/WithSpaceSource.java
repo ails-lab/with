@@ -128,6 +128,12 @@ public class WithSpaceSource extends ISpaceSource {
 		 */
 		elasticoptions = new SearchOptions(offset, count);
 		elasticoptions.addFilter("isPublic", "true");
+		List<CommonFilter> filters = q.filters;
+		for (CommonFilter f: filters) {
+			for (String filterValue: f.values) {
+				elasticoptions.addFilter(f.filterID, filterValue);
+			}
+		}
 		searcher.setType(Elastic.type_general);
 		for (Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId()
