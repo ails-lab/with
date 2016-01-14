@@ -35,6 +35,7 @@ import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
 import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
 import sources.core.CommonFilterLogic;
@@ -52,6 +53,7 @@ import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
+import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
 import utils.ListUtils;
 
@@ -368,10 +370,15 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey=" + key);
 			// todo read the other format;
-			new EuropeanaRecordFormatter();
 			JsonNode record = response.get("object");
 			if (response != null){
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+				
+
+				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
+				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json ));
+				
 			}
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);
