@@ -578,4 +578,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
+	public boolean hasAccess(List<ObjectId> effectiveIds, Action access, ObjectId resourceId) {
+		return true;
+	}
+	
 }
