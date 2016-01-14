@@ -22,7 +22,6 @@ import java.util.HashMap;
 
 import sources.BritishLibrarySpaceSource;
 import sources.DPLASpaceSource;
-import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -33,7 +32,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class BritishLibraryRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class BritishLibraryRecordFormatter extends CulturalRecordFormatter {
 	
 	public BritishLibraryRecordFormatter() {
 		object = new CulturalObject();

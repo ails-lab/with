@@ -35,11 +35,10 @@ import model.resources.CulturalObject.CulturalObjectData;
 import sources.EuropeanaSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
-public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 	
 	public RijksmuseumRecordFormatter() {
 		object = new CulturalObject();

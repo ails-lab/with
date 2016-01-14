@@ -23,7 +23,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import sources.BritishLibrarySpaceSource;
 import sources.DDBSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
@@ -36,7 +35,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class DDBRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class DDBRecordFormatter extends CulturalRecordFormatter {
 
 	public DDBRecordFormatter() {
 		object = new CulturalObject();
