@@ -19,6 +19,7 @@ package model.basicDataTypes;
 import java.util.Date;
 
 import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import play.Logger;
 
 /**
  * Capture accurate and inaccurate dates in a visualisable way. Enable search
@@ -121,6 +122,8 @@ public class WithDate {
 		} else if (sources.core.Utils.isValidURL(free)) {
 			this.uri = free;
 			this.uriType = ResourceType.uri;
+		} else {
+			Logger.error("unrecognized date: " + free);
 		}
 	}
 

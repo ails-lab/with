@@ -291,4 +291,17 @@ public class Utils {
 	public static void main(String[] args) {
 	}
 
+	public static boolean hasInfo(String string) {
+		return !(string==null || string.equals("") || string.equals("null"));
+	}
+
+	public static <T> List<T> asList(T... a) {
+		ArrayList<T> list = new ArrayList<>();
+		for (T o : a) {
+			if (o!=null)
+				list.add(o);
+		}
+		return list;
+	}
+
 }

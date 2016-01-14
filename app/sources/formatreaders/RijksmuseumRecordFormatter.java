@@ -35,6 +35,7 @@ import model.resources.CulturalObject.CulturalObjectData;
 import sources.EuropeanaSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
@@ -57,7 +58,7 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
+		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("principalOrFirstMaker"))));
 		
 //		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 //		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));

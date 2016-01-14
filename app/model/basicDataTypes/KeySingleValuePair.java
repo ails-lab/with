@@ -51,6 +51,8 @@ public class KeySingleValuePair<K,V> extends HashMap<K, V> {
 
 		
 		public static LiteralOrResource build(String string) {
+			if (!Utils.hasInfo(string))
+				return null;
 			if (Utils.isValidURL(string)){
 				return new LiteralOrResource(ResourceType.uri, string);
 			}

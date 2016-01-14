@@ -18,6 +18,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -307,7 +308,7 @@ public class WithResourceController extends Controller {
 			try {
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-				ArrayList<RecordJSONMetadata> recordsData = s
+				List<RecordJSONMetadata> recordsData = s
 						.getRecordFromSource(sourceId);
 				for (RecordJSONMetadata data : recordsData) {
 					DB.getCollectionRecordDAO().updateContent(record.getDbId(),
