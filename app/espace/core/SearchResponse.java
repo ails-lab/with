@@ -20,7 +20,7 @@ import java.util.List;
 
 public class SearchResponse {
 
-	public List<SourceResponse> responces;
+	public List<SourceResponse> responses;
 	public List<CommonFilterResponse> filters;
 
 }
