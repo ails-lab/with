@@ -65,7 +65,7 @@ public abstract class ISpaceSource {
 	}
 
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(
+	public List<RecordJSONMetadata> getRecordFromSource(
 			String recordId) {
 		return new ArrayList<RecordJSONMetadata>();
 	}

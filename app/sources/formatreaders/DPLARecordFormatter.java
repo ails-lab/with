@@ -23,6 +23,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import sources.DPLASpaceSource;
 import sources.EuropeanaSpaceSource;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
@@ -52,7 +53,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("sourceResource.creator"))));
+		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("sourceResource.creator"))));
 		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
