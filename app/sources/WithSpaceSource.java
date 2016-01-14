@@ -60,6 +60,25 @@ import elastic.ElasticUtils;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
+	
+	//there should be a filter on source
+	//in general, more filters in new model for search within WITH db
+	public enum WithinFilters {
+		Provider("provider"), Type("type"), DataProvider("dataprovider"),
+		Creator("creator"), Rights("rights"),
+		Country("country"), Year("year");
+		
+		private String value;
+		
+		WithinFilters(String value) {
+	        this.value = value;
+	    }
+
+	    @Override
+	    public String toString() {
+	        return value;
+	    }
+	}
 
 	@Override
 	public String getSourceName() {
@@ -102,7 +121,11 @@ public class WithSpaceSource extends ISpaceSource {
 		SearchResponse response = searcher
 				.searchAccessibleCollectionsScanScroll(elasticoptions);
 		List<SearchHit> hits = getTotalHitsFromScroll(response);
+<<<<<<< HEAD:app/sources/WithSpaceSource.java
 		colFields = getCollectionMetadataFromHit(hits);
+=======
+		colFields = getCollectionMetadaFromHit(hits);
+>>>>>>> develop:app/espace/core/sources/WithSpaceSource.java
 
 		/*
 		 * Search index for merged records according to collection ids gathered
@@ -120,6 +143,22 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 
 		SourceResponse res = new SourceResponse(resp, offset);
+<<<<<<< HEAD:app/sources/WithSpaceSource.java
+=======
+		
+		/*
+		for (WithinFilters filter: WithinFilters.values()) {
+			//Create CommonFilterLogic dynamically!!!!!!!!!!!!!!!!! See changes and e.g. EuropeanaSource in new model.
+		}
+	    */
+		CommonFilterLogic type = CommonFilterLogic.typeFilter();
+		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
+		CommonFilterLogic dataprovider = CommonFilterLogic.dataproviderFilter();
+		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
+		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
+		CommonFilterLogic country = CommonFilterLogic.countryFilter();
+		CommonFilterLogic year = CommonFilterLogic.yearFilter();
+>>>>>>> develop:app/espace/core/sources/WithSpaceSource.java
 
 		if (checkFilters(q)) {
 			for (Entry<String, Aggregation> e : resp.getAggregations().asMap()
@@ -127,6 +166,7 @@ public class WithSpaceSource extends ISpaceSource {
 				e.getKey();
 
 			}
+<<<<<<< HEAD:app/sources/WithSpaceSource.java
 			res.filtersLogic = new ArrayList<>();
 			for (Aggregation agg : resp.getAggregations().asList()) {
 				InternalTerms aggTerm = (InternalTerms) agg;
@@ -137,6 +177,82 @@ public class WithSpaceSource extends ISpaceSource {
 					res.filtersLogic.add(filter);
 				}
 			}
+=======
+			for (Aggregation agg : resp.getAggregations().asList()) {
+				InternalTerms aggTerm = (InternalTerms) agg;
+				if (aggTerm.getBuckets().size() > 0) {
+					switch (agg.getName()) {
+					case "types": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(type, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "providers": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(provider, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "dataProviders": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(dataprovider, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "creators": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(creator, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "rights": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(rights, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "countries": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(country, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "years": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(year, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					default:
+						break;
+					}
+				}
+			}
+
+			res.filtersLogic = new ArrayList<>();
+			res.filtersLogic.add(type);
+			res.filtersLogic.add(provider);
+			res.filtersLogic.add(dataprovider);
+			res.filtersLogic.add(creator);
+			res.filtersLogic.add(rights);
+			res.filtersLogic.add(country);
+			res.filtersLogic.add(year);
+>>>>>>> develop:app/espace/core/sources/WithSpaceSource.java
 		}
 		return res;
 	}
