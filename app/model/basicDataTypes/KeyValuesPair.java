@@ -26,47 +26,45 @@ import java.util.Map;
 import org.mongodb.morphia.annotations.Embedded;
 
 @Embedded
-public class KeyValuesPair<K,V> extends HashMap<K, List<V>> {
+public class KeyValuesPair<K> extends HashMap<String, List<String>> {
 
 	public KeyValuesPair() {
 		super();
 	}
-	
-	public void add(K key, V value) {
-		List<V> list = get(key);
-		if (list==null){
-			put(key, list = new ArrayList<>());
+
+	public void add(K key, String value) {
+		List<String> list = get(key);
+		if (list == null) {
+			put(key.toString(), list = new ArrayList<>());
 		}
 		list.add(value);
 	}
-	
-	public static class MultiLiteralOrResource extends KeyValuesPair<ILiteralOrResource, String>{
-		
+
+	public static class MultiLiteralOrResource extends KeyValuesPair<ILiteralOrResource> {
+
 	}
-	
-	public static class MultiLiteral extends KeyValuesPair<Language, String>{
+
+	public static class MultiLiteral extends KeyValuesPair<Language> {
 		public MultiLiteral() {
 			super();
 		}
-		
+
 		public MultiLiteral(String label) {
 			add(Language.UNKNOWN, label);
 		}
 
 		public MultiLiteral(Language lang, String label) {
 			if (this.containsKey(lang))
-				add(lang,label);
+				add(lang, label);
 			else
-				add(Language.UNKNOWN,label);
+				add(Language.UNKNOWN, label);
 			if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
 				add(Language.DEF, label);
 		}
 	}
-	
-	public class MultiResource extends KeyValuesPair<ResourceType, String> {
 
-		
-		
+	public class MultiResource extends KeyValuesPair<ResourceType> {
+
 	}
-    
+
 }
