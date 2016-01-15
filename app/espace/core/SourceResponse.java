@@ -60,6 +60,8 @@ public class SourceResponse {
 				it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 			it.url = new MyURL();
 			it.url.fromSourceAPI = r.getSourceUrl();
+			it.provider = r.getProvider();
+			it.externalId = r.getExternalId();
 			items.add(it);
 		}
 		this.items = items;
@@ -93,6 +95,7 @@ public class SourceResponse {
 		public String creator;
 		public List<String> year;
 		public String dataProvider;
+		public String provider;
 		public MyURL url;
 		public List<String> fullresolution;
 		public String comesFrom;

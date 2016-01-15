@@ -102,18 +102,18 @@ public class ElasticSearcher {
 
 		public void addFilter(String key, String value) {
 			ArrayList<String> values = null;
-			if(filters.containsKey(key)) {
+			if (filters.containsKey(key)) {
 				values = filters.get(key);
 			} else {
 				values = new ArrayList<String>();
 				filters.put(key, values);
 			}
-
 			values.add(value);
 		}
 
 		public void setFilterType(String type) {
-			if(type.equalsIgnoreCase("or")) filterType = FILTER_OR;
+			if (type.equalsIgnoreCase("or"))
+				filterType = FILTER_OR;
 			else filterType = FILTER_AND;
 		}
 	}

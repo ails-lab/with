@@ -69,8 +69,6 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 					// toggle button
 					$( '.mobilemenu' ).toggleClass( 'active' );
 	          }
-	          setTimeout(function(){ WITHApp.init(); }, 300);
-	          
 	         
 	     	 
 		}
@@ -107,6 +105,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 		hasher.changed.add(resetMenu);
 		
 		hasher.init();
+		
 	}
 	
 	
