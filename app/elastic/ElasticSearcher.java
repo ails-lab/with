@@ -112,7 +112,7 @@ public class ElasticSearcher {
 		}
 
 		public void setFilterType(String type) {
-			if (type.equalsIgnoreCase("or")) 
+			if (type.equalsIgnoreCase("or"))
 				filterType = FILTER_OR;
 			else filterType = FILTER_AND;
 		}
@@ -340,9 +340,9 @@ public class ElasticSearcher {
 					if(key.equals("isPublic") || key.equals("collections")) {
 						accessibles.add(this.filter(key, value));
 					} else if(key.equals("source")) {
-						sources.add(this.filter(key, value));
+						sources.add(this.filter(key, value.toLowerCase()));
 					} else {
-						others.add(this.filter(key, value));
+						others.add(this.filter(key, value.toLowerCase()));
 					}
 				}
 			}
