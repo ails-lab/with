@@ -104,9 +104,10 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
-		hasher.changed.add(resetMenu);
 		
 		hasher.init();
+		hasher.changed.add(resetMenu);
+		
 	}
 	
 	
