@@ -69,7 +69,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 					// toggle button
 					$( '.mobilemenu' ).toggleClass( 'active' );
 	          }
-	          setTimeout(function(){ WITHApp.init(); }, 600);
+	          setTimeout(function(){ console.log("with app init");WITHApp.init(); }, 600);
 	          
 	         
 	     	 
