@@ -61,6 +61,7 @@ public class SourceResponse {
 			it.url = new MyURL();
 			it.url.fromSourceAPI = r.getSourceUrl();
 			it.provider = r.getProvider();
+			it.externalId = r.getExternalId();
 			items.add(it);
 		}
 		this.items = items;
