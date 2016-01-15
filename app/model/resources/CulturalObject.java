@@ -56,7 +56,7 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	public static class CulturalObjectData extends RecordDescriptiveData {
 
 		// provenance[0].recordId
-		private String dcidentifier;
+		private List<String> dcidentifier;
 		
 		// language of object, if it has one. Not related to the metadata.
 		// eg. If the object is a book, its the language it is written in
