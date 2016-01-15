@@ -85,11 +85,11 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		
 		private List<CidocEvent> events;
 
-		public String getDcidentifier() {
+		public List<String> getDcidentifier() {
 			return dcidentifier;
 		}
 
-		public void setDcidentifier(String dcidentifier) {
+		public void setDcidentifier(List<String> dcidentifier) {
 			this.dcidentifier = dcidentifier;
 		}
 
