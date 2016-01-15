@@ -79,6 +79,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","profile");
+	  setTimeout(function(){ WITHApp.init(); }, 300);
 	  self.id = ko.observable(params.id);	
 
 	  /*---*/

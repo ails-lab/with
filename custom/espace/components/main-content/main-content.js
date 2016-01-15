@@ -96,7 +96,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
-	  //setTimeout(function(){ WITHApp.init(); }, 300);
+	  setTimeout(function(){ WITHApp.init(); }, 300);
 	  self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featured=ko.observable(null);	

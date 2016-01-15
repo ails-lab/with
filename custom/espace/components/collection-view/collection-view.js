@@ -123,7 +123,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	
 	function CViewModel(params) {
 		document.body.setAttribute("data-page","collection");
-		
+		setTimeout(function(){ WITHApp.init(); }, 300);
 		   
 		var self = this;
 
