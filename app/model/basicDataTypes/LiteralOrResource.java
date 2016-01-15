@@ -16,22 +16,39 @@
 
 package model.basicDataTypes;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.mongodb.morphia.annotations.Embedded;
 
+import sources.core.Utils;
+
 @Embedded
-public class OldMultiLiteralOrResource extends OldMultiLiteral {
+public class LiteralOrResource extends Literal {
 	
-	private OldLiteralOrResource.OldResource resource;
+	public static class Resource {
+		ResourceType uriType;
+		String uri;
+		
+		public Resource() {
+		}
+		
+		public Resource(ResourceType uriType, String uri) {
+			this.uriType = uriType;
+			this.uri = uri;
+		}
+	}
 	
-	public OldMultiLiteralOrResource() {
+	private Resource resource;
+	
+
+	public LiteralOrResource() {
 		super();
 	}
 
-	public OldMultiLiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
+	public LiteralOrResource(ResourceType resourceType, String uri) {
+		this.resource = new Resource(resourceType, uri);
 	}
 
-	public OldMultiLiteralOrResource(String label) {
+	public LiteralOrResource(String label) {
 		super(label);
 	}
 
@@ -44,7 +61,15 @@ public class OldMultiLiteralOrResource extends OldMultiLiteral {
 	}
 
 	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
+		this.resource = new Resource(resourceType, uri);
 
+	}
+	
+	
+	public static LiteralOrResource build(String str){
+		if (Utils.isValidURL(str)){
+			return new LiteralOrResource(ResourceType.uri, str);
+		}
+		return new LiteralOrResource(str);
 	}
 }

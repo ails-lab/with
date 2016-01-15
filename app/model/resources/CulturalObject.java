@@ -22,8 +22,8 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 
 import model.basicDataTypes.CidocEvent;
-import model.basicDataTypes.KeySingleValuePair.Literal;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.WithResourceType;
