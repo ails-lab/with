@@ -16,7 +16,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
-		    $container.isotope("layout");
+		   // $container.isotope("layout");
 		    
 		  });
 		  
@@ -140,7 +140,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	function SearchModel(params) {
 		var self = this;
 		document.body.setAttribute("data-page","search");
-		//setTimeout(function(){ EUSpaceUI.init(); }, 300);
+		setTimeout(function(){ EUSpaceUI.init(); }, 300);
 		var $container = $(".grid").isotope({
 			itemSelector: '.media',
 			masonry: {

@@ -123,7 +123,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	
 	function CViewModel(params) {
 		document.body.setAttribute("data-page","collection");
-		
+		setTimeout(function(){ WITHApp.init(); }, 300);
 		   
 		var self = this;
 
@@ -412,7 +412,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
  		    // un-hide item
  		    $item.show();
  		    iso.appended( $item );
- 		   $container.isotope("layout");
+ 		  // $container.isotope("layout");
  		   var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
  			if(scrollpos && $(".grid").height()>scrollpos){
  		    	 $(window).scrollTop(scrollpos);

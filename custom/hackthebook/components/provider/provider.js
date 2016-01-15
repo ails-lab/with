@@ -79,6 +79,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","profile");
+	  setTimeout(function(){ WITHApp.init(); }, 300);
 	  self.id = ko.observable(params.id);	
 
 	  /*---*/
@@ -293,7 +294,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
-		    $container.isotope("layout");
+		   // $container.isotope("layout");
 		    var scrollpos=sessionStorage.getItem("providerview"+self.id());
 		   if(scrollpos && $(".grid").height()>scrollpos){
  		    	 $(window).scrollTop(scrollpos);
