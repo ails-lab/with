@@ -293,6 +293,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
+		    $container.isotope("layout");
 		    var scrollpos=sessionStorage.getItem("providerview"+self.id());
 		   if(scrollpos && $(".grid").height()>scrollpos){
  		    	 $(window).scrollTop(scrollpos);

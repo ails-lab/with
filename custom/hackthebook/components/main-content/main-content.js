@@ -290,6 +290,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
+		    $container.isotope("layout");
 		    var scrollpos=sessionStorage.getItem("homemasonryscroll");
 			
 		    

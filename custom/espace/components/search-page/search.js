@@ -16,6 +16,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
+		    $container.isotope("layout");
 		    
 		  });
 		  
