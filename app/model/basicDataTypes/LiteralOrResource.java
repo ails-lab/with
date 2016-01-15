@@ -37,6 +37,13 @@ public class LiteralOrResource extends Literal {
 		addLiteral(label);
 	}
 
+	public void addLiteral(Language lang, String value) {
+		if (lang.equals(Language.DEF) && Utils.isValidURL(value))
+			addURI(value);
+		else
+			super.addLiteral(lang, value);
+	}
+
 	public void addURI(String uri) {
 		add(URI, uri);
 	}
