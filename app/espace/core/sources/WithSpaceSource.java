@@ -59,16 +59,16 @@ import espace.core.SourceResponse;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
-	
+
 	//there should be a filter on source
 	//in general, more filters in new model for search within WITH db
 	public enum WithinFilters {
 		Provider("provider"), Type("type"), DataProvider("dataprovider"),
 		Creator("creator"), Rights("rights"),
 		Country("country"), Year("year");
-		
-		private String value;
-		
+
+		private final String value;
+
 		WithinFilters(String value) {
 	        this.value = value;
 	    }
@@ -131,7 +131,7 @@ public class WithSpaceSource extends ISpaceSource {
 		List<CommonFilter> filters = q.filters;
 		for (CommonFilter f: filters) {
 			for (String filterValue: f.values) {
-				elasticoptions.addFilter(f.filterID, filterValue);
+				elasticoptions.addFilter(f.filterID+"_all", filterValue);
 			}
 		}
 		searcher.setType(Elastic.type_general);
@@ -144,7 +144,7 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 
 		SourceResponse res = new SourceResponse(resp, offset);
-		
+
 		/*
 		for (WithinFilters filter: WithinFilters.values()) {
 			//Create CommonFilterLogic dynamically!!!!!!!!!!!!!!!!! See changes and e.g. EuropeanaSource in new model.

@@ -340,9 +340,9 @@ public class ElasticSearcher {
 					if(key.equals("isPublic") || key.equals("collections")) {
 						accessibles.add(this.filter(key, value));
 					} else if(key.equals("source")) {
-						sources.add(this.filter(key, value.toLowerCase()));
+						sources.add(this.filter(key, value));
 					} else {
-						others.add(this.filter(key, value.toLowerCase()));
+						others.add(this.filter(key, value));
 					}
 				}
 			}
