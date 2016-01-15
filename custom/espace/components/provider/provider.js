@@ -99,7 +99,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  self.totalCollections=ko.observable(0);
 	  self.totalExhibitions=ko.observable(0);
 	  var $container = $(".grid").isotope({
-			itemSelector: '.media',
+			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
 				columnWidth		: '.sizer',
