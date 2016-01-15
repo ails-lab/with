@@ -16,18 +16,14 @@
 
 package controllers;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiFunction;
-
-import javax.validation.ConstraintViolation;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.RecordResource;
@@ -36,7 +32,6 @@ import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
-import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -48,7 +43,6 @@ import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -57,6 +51,7 @@ import db.DB;
  * @author mariaral
  *
  */
+@SuppressWarnings("rawtypes")
 public class WithResourceController extends Controller {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
@@ -68,26 +63,25 @@ public class WithResourceController extends Controller {
 	 *            the position of the record in the collection
 	 * @return
 	 */
-	@SuppressWarnings("rawtypes")
 	public static Result addRecordToCollection(String id,
 			Option<Integer> position) {
-		ObjectNode result = Json.newObject();
 		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		ObjectId collectionDbId = new ObjectId(id);
 		try {
-			ObjectId collectionDbId = new ObjectId(id);
+			if (!DB.getWithResourceDAO().hasAccess(
+					AccessManager.effectiveUserDbIds(session().get(
+							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
+				result.put("error",
+						"User does not have the right to edit the resource");
+				return forbidden(result);
+			}
 			CollectionObject collection = DB.getCollectionObjectDAO().get(
 					collectionDbId);
 			if (collection == null) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
 				return internalServerError(result);
-			}
-			if (!AccessManager.checkAccess(collection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.EDIT)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
 			}
 			if (json == null) {
 				result.put("error", "Invalid JSON");
@@ -218,19 +212,19 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
+			if (!DB.getWithResourceDAO().hasAccess(
+					AccessManager.effectiveUserDbIds(session().get(
+							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
+				result.put("error",
+						"User does not have the right to edit the resource");
+				return forbidden(result);
+			}
 			CollectionObject collection = DB.getCollectionObjectDAO().get(
 					collectionDbId);
 			if (collection == null) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
 				return internalServerError(result);
-			}
-			if (!AccessManager.checkAccess(collection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.EDIT)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
 			}
 			RecordResource record = DB.getRecordResourceDAO().get(
 					new ObjectId(recordId));
@@ -263,19 +257,19 @@ public class WithResourceController extends Controller {
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
 			ObjectId recordDbId = new ObjectId(recordId);
+			if (!DB.getWithResourceDAO().hasAccess(
+					AccessManager.effectiveUserDbIds(session().get(
+							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
+				result.put("error",
+						"User does not have the right to edit the resource");
+				return forbidden(result);
+			}
 			CollectionObject collection = DB.getCollectionObjectDAO().get(
 					collectionDbId);
 			if (collection == null) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
 				return internalServerError(result);
-			}
-			if (!AccessManager.checkAccess(collection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.EDIT)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
 			}
 			if (oldPosition > newPosition) {
 				DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
