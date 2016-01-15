@@ -18,7 +18,6 @@ package model.basicDataTypes;
 
 import java.util.Date;
 
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 import play.Logger;
 
 /**
@@ -42,7 +41,7 @@ public class WithDate {
 
 	// ontology based time
 	String uri;
-	ResourceType uriType;
+	// ResourceType uriType;
 
 	// mandatory, other fields are extracted from that
 	String free;
@@ -50,7 +49,7 @@ public class WithDate {
 	public WithDate() {
 		super();
 	}
-	
+
 	public Date getIsoDate() {
 		return isoDate;
 	}
@@ -90,14 +89,14 @@ public class WithDate {
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
-
-	public ResourceType getUriType() {
-		return uriType;
-	}
-
-	public void setUriType(ResourceType uriType) {
-		this.uriType = uriType;
-	}
+	//
+	// public ResourceType getUriType() {
+	// return uriType;
+	// }
+	//
+	// public void setUriType(ResourceType uriType) {
+	// this.uriType = uriType;
+	// }
 
 	public String getFree() {
 		return free;
@@ -121,7 +120,7 @@ public class WithDate {
 			this.year = Integer.parseInt(free.split("\\s")[0]);
 		} else if (sources.core.Utils.isValidURL(free)) {
 			this.uri = free;
-			this.uriType = ResourceType.uri;
+			// this.uriType = ResourceType.uri;
 		} else {
 			Logger.error("unrecognized date: " + free);
 		}

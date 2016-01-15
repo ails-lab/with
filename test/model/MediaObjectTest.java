@@ -27,7 +27,7 @@ import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ResourceType;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
@@ -56,28 +56,27 @@ public class MediaObjectTest {
 
 			if (readers.hasNext()) {
 
-                // pick the first available ImageReader
-                ImageReader reader = readers.next();
+				// pick the first available ImageReader
+				ImageReader reader = readers.next();
 
-                // attach source to the reader
-                reader.setInput(iis, true);
+				// attach source to the reader
+				reader.setInput(iis, true);
 
-                // read metadata of first image
-                IIOMetadata metadata = reader.getImageMetadata(0);
+				// read metadata of first image
+				IIOMetadata metadata = reader.getImageMetadata(0);
 
-                String[] names = metadata.getMetadataFormatNames();
-                int length = names.length;
-                for (int i = 0; i < length; i++) {
-                    System.out.println( "Format name: " + names[ i ] );
-                }
-            }
+				String[] names = metadata.getMetadataFormatNames();
+				int length = names.length;
+				for (int i = 0; i < length; i++) {
+					System.out.println("Format name: " + names[i]);
+				}
+			}
 
 			FileUtils.copyURLToFile(url, file);
-			FileInputStream fileStream = new FileInputStream(
-					file);
+			FileInputStream fileStream = new FileInputStream(file);
 
 			rawbytes = IOUtils.toByteArray(fileStream);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			System.out.println(e);
 			System.exit(-1);
 		}
@@ -86,7 +85,7 @@ public class MediaObjectTest {
 		mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource(ResourceType.uri, url.toString());
+		LiteralOrResource lor = LiteralOrResource.build(url.toString());
 		mo.setOriginalRights(lor);
 		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
 		set.add(WithMediaRights.Creative);
@@ -103,13 +102,11 @@ public class MediaObjectTest {
 		}
 
 		MediaObject nmo = DB.getMediaObjectDAO().findById(mo.getDbId());
-		if(nmo!=null)
+		if (nmo != null)
 			System.out.println("Media succesfuly retieved!");
-
 
 		DB.getMediaObjectDAO().deleteById(nmo.getDbId());
 		System.out.println("Succesfully deleted!");
-
 
 	}
 }

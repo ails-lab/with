@@ -43,7 +43,7 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord.ItemRights;
 import model.Media;
 import model.MediaObject;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ResourceType;
 
 import org.apache.commons.io.FileUtils;
@@ -84,11 +84,12 @@ public class MediaController extends Controller {
 		}
 
 		if (file) {
-//			confirm this is right! .as Changes the Content-Type header for this result.
-			//Logger.info(media.getMimeType().toString());
+			// confirm this is right! .as Changes the Content-Type header for
+			// this result.
+			// Logger.info(media.getMimeType().toString());
 			return ok(media.getMediaBytes()).as(media.getMimeType().toString());
 		} else {
-			//Logger.info(media.getMimeType().toString());
+			// Logger.info(media.getMimeType().toString());
 			JsonNode result = Json.toJson(media);
 			return ok(result);
 		}
@@ -108,7 +109,7 @@ public class MediaController extends Controller {
 		}
 
 		if (file) {
-			//TODO: Implement...
+			// TODO: Implement...
 			return ok(Json.newObject().put("message", "not implemeted yet!"));
 		} else {
 			MediaObject newMedia = null;
@@ -123,26 +124,27 @@ public class MediaController extends Controller {
 				if (json.has("mediaRights"))
 					allRes.addAll(parseMediaRightsFromJson(newMedia, json));
 
-				//TODO: finish investigating if an unparsable mimeType sets existing mimeType to null
-				//	and also wherever else something like this occurs
-				if (json.has("type")&&json.has("mimeType")){
+				// TODO: finish investigating if an unparsable mimeType sets
+				// existing mimeType to null
+				// and also wherever else something like this occurs
+				if (json.has("type") && json.has("mimeType")) {
 					allRes.addAll(parseTypeMimeTypeFromJson(newMedia, json));
-				} else if(json.has("mimeType")){
+				} else if (json.has("mimeType")) {
 					ObjectNode temp = (ObjectNode) json;
 					temp.put("type", newMedia.getType().name());
-					//will overwrite type if there is a mismatch from saved
+					// will overwrite type if there is a mismatch from saved
 					allRes.addAll(parseTypeMimeTypeFromJson(newMedia, temp));
-				} else if(json.has("type")){
-					//will (should...) not change mimeType
+				} else if (json.has("type")) {
+					// will (should...) not change mimeType
 					allRes.addAll(parseTypeMimeTypeFromJson(newMedia, json));
 				}
 				if (json.has("originalRights"))
 					allRes.addAll(parseOriginalRightsFromJson(newMedia, json));
 
-				//TODO:fix issue with thumbnail
+				// TODO:fix issue with thumbnail
 				allRes.addAll(parseExtendedJson(newMedia, json));
 
-				if(checkJsonArray(allRes,"error")){
+				if (checkJsonArray(allRes, "error")) {
 					result.put("errors found", allRes);
 					return badRequest(result);
 				}
@@ -188,33 +190,31 @@ public class MediaController extends Controller {
 		ObjectNode result = Json.newObject();
 		ArrayNode allRes = result.arrayNode();
 
-		List<String> userIds = AccessManager.effectiveUserIds(session().get(
-				"effectiveUserIds"));
-		//TODO: uncomment this after done testing
-		//if (userIds.isEmpty())
-		//	return forbidden();
+		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		// TODO: uncomment this after done testing
+		// if (userIds.isEmpty())
+		// return forbidden();
 		ObjectNode singleRes = Json.newObject();
 		MediaObject med = new MediaObject();
 
 		if (fileData) {
-			final Http.MultipartFormData multipartBody = request().body()
-					.asMultipartFormData();
+			final Http.MultipartFormData multipartBody = request().body().asMultipartFormData();
 			if (multipartBody != null) {
 				for (FilePart fp : multipartBody.getFiles()) {
 					try {
 						med.setMimeType(MediaType.parse(fp.getContentType()));
 						// in KB!
-						med.setSize(fp.getFile().length()/1024);
+						med.setSize(fp.getFile().length() / 1024);
 
-						//get data from multipartBody
+						// get data from multipartBody
 						Map<String, String[]> formData = multipartBody.asFormUrlEncoded();
 
-						if(formData.containsKey("url")){
-							//change this policy?
+						if (formData.containsKey("url")) {
+							// change this policy?
 							allRes.add(Json.newObject().put("warn", "External url is ignored when uploading files"));
 						}
 
-						if(formData.containsKey("withMediaRights")){
+						if (formData.containsKey("withMediaRights")) {
 							String[] withMediaRights = formData.get("withMediaRights");
 							ArrayList<String> rights = new ArrayList<String>(Arrays.asList(withMediaRights));
 							parseMediaRights(med, rights);
@@ -222,14 +222,14 @@ public class MediaController extends Controller {
 							allRes.add(Json.newObject().put("error", "Empty mandatory field mediaRights"));
 						}
 
-
-						//TODO: can this come in a different serialization from the frontend?
-						if(formData.containsKey("resourceType")){
-							if(formData.containsKey("uri")){
+						// TODO: can this come in a different serialization from
+						// the frontend?
+						if (formData.containsKey("resourceType")) {
+							if (formData.containsKey("uri")) {
 								ResourceType type = parseOriginalRights(formData.get("resourceType")[0]);
-								if (type==null){
+								if (type == null) {
 									LiteralOrResource lit = new LiteralOrResource();
-									lit.add(type, formData.get("uri")[0]);
+									lit.addURI(formData.get("uri")[0]);
 									med.setOriginalRights(lit);
 								} else {
 									allRes.add(Json.newObject().put("error", "Bad resource type"));
@@ -237,33 +237,37 @@ public class MediaController extends Controller {
 							}
 						}
 
+						if (med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)) {
 
-						if(med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)){
-
-							//we don't parse type here since media type will override it anyway
-							//if we do decide however, remember to check for mismatch
+							// we don't parse type here since media type will
+							// override it anyway
+							// if we do decide however, remember to check for
+							// mismatch
 							med.setType(WithMediaType.IMAGE);
 
 							allRes.addAll(imageUpload(med, fp, formData));
 
-
-//						} else if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
-//							med.setType(WithMediaType.VIDEO);//durationSeconds //width, height //thumbnailBytes //Quality
-//
-//						} else if(med.getMimeType().is(MediaType.ANY_TEXT_TYPE)){
-//							med.setType(WithMediaType.TEXT);
-//
-//						} else if(med.getMimeType().is(MediaType.ANY_AUDIO_TYPE)){
-//							med.setType(WithMediaType.AUDIO); //durationSeconds	//Quality
+							// } else
+							// if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
+							// med.setType(WithMediaType.VIDEO);//durationSeconds
+							// //width, height //thumbnailBytes //Quality
+							//
+							// } else
+							// if(med.getMimeType().is(MediaType.ANY_TEXT_TYPE)){
+							// med.setType(WithMediaType.TEXT);
+							//
+							// } else
+							// if(med.getMimeType().is(MediaType.ANY_AUDIO_TYPE)){
+							// med.setType(WithMediaType.AUDIO);
+							// //durationSeconds //Quality
 
 						} else {
-							//(ANY_APPLICATION_TYPE?)
-							allRes.add(Json.newObject().put("error", "Unsupported media type "
-									+ fp.getFilename()));
+							// (ANY_APPLICATION_TYPE?)
+							allRes.add(Json.newObject().put("error", "Unsupported media type " + fp.getFilename()));
 							log.error("Media create error", "Unsupported media type");
 						}
 
-						if(checkJsonArray(allRes,"error")){
+						if (checkJsonArray(allRes, "error")) {
 							result.put("errors found", allRes);
 							return badRequest(result);
 						}
@@ -272,87 +276,87 @@ public class MediaController extends Controller {
 						med.setDbId(null);
 						DB.getMediaObjectDAO().makePermanent(med);
 
-//						singleRes.put("isShownBy", "/media/"
-//								+ med.getDbId().toString());
-//						singleRes.put("externalId", med.getDbId().toString());
-//						allRes.add(singleRes);
+						// singleRes.put("isShownBy", "/media/"
+						// + med.getDbId().toString());
+						// singleRes.put("externalId",
+						// med.getDbId().toString());
+						// allRes.add(singleRes);
 					} catch (Exception e) {
-						allRes.add(Json.newObject().put("error", "Couldn't create from file "
-								+ fp.getFilename()));
+						allRes.add(Json.newObject().put("error", "Couldn't create from file " + fp.getFilename()));
 						log.error("Media create error", e);
 						result.put("errors found", allRes);
 						return badRequest(result);
 
 					}
 				}
-				//result.put("results", allRes);
+				// result.put("results", allRes);
 			}
-//			} else {
-//				final Map<String, String[]> req = request().body()
-//						.asFormUrlEncoded();
-//				if (req != null) {
-//				//	this means we have form data but no file, do we even allow this??
-//				//	don't we want to force json in this case?
-//					// this should be rare for file data
-//				} else {
-//					final JsonNode jsonBody = request().body().asJson();
-//					if (jsonBody != null) {
-//					//	then why do we even need the boolean parameter???
-//						// we extract the media and maybe some metadata from the
-//						// json body
-//
-//					} else {
-//					//	again why should we even allow this?
-//						// raw body to file upload
-//						// problem, there is absolutely no metadata, so don't
-//						// know what to put in the Media Object
-//						try {
-//							med = new MediaObject();
-//							med.setMediaBytes(request().body().asRaw().asBytes());
-//							DB.getMediaObjectDAO().makePermanent(med);
-//							result.put("Success", "Media object created!");
-//							result.put("mediaId", med.getDbId().toString());
-//						} catch (Exception e) {
-//							result.put("error", "Couldn't create Media object");
-//							log.error("Media create error", e);
-//						}
-//					}
-//				}
-//			}
+			// } else {
+			// final Map<String, String[]> req = request().body()
+			// .asFormUrlEncoded();
+			// if (req != null) {
+			// // this means we have form data but no file, do we even allow
+			// this??
+			// // don't we want to force json in this case?
+			// // this should be rare for file data
+			// } else {
+			// final JsonNode jsonBody = request().body().asJson();
+			// if (jsonBody != null) {
+			// // then why do we even need the boolean parameter???
+			// // we extract the media and maybe some metadata from the
+			// // json body
+			//
+			// } else {
+			// // again why should we even allow this?
+			// // raw body to file upload
+			// // problem, there is absolutely no metadata, so don't
+			// // know what to put in the Media Object
+			// try {
+			// med = new MediaObject();
+			// med.setMediaBytes(request().body().asRaw().asBytes());
+			// DB.getMediaObjectDAO().makePermanent(med);
+			// result.put("Success", "Media object created!");
+			// result.put("mediaId", med.getDbId().toString());
+			// } catch (Exception e) {
+			// result.put("error", "Couldn't create Media object");
+			// log.error("Media create error", e);
+			// }
+			// }
+			// }
+			// }
 		} else {
 			// metadata based media creation
-			//TODO: Use Enrique's code to better parse the json?
+			// TODO: Use Enrique's code to better parse the json?
 
-			//TODO: Find a way around all these validations! use @notnull if possible for complex checks
-			//	abandoned this for now
+			// TODO: Find a way around all these validations! use @notnull if
+			// possible for complex checks
+			// abandoned this for now
 
 			JsonNode json = null;
 			json = request().body().asJson();
 
-			//have two methods here instead of one because I use them in edit() as well
+			// have two methods here instead of one because I use them in edit()
+			// as well
 			allRes.addAll(parseEmbeddedJson(med, json));
-			if(checkJsonArray(allRes,"error")){
+			if (checkJsonArray(allRes, "error")) {
 				result.put("errors found", allRes);
 				return badRequest(result);
 			}
 
 			allRes.addAll(parseExtendedJson(med, json));
-			if(checkJsonArray(allRes,"error")){
+			if (checkJsonArray(allRes, "error")) {
 				result.put("errors found", allRes);
 				return badRequest(result);
 			}
 
 			med.setDbId(null);
 
-
-
-			//TODO: this is temporary for testing, need to alter DAO
-			//	fix and then delete this
+			// TODO: this is temporary for testing, need to alter DAO
+			// fix and then delete this
 			File file = new File("testfile");
 			try {
 				FileUtils.copyURLToFile(new URL(med.getUrl()), file);
-				FileInputStream fileStream = new FileInputStream(
-						file);
+				FileInputStream fileStream = new FileInputStream(file);
 				med.setMediaBytes(IOUtils.toByteArray(fileStream));
 			} catch (MalformedURLException e1) {
 				// TODO Auto-generated catch block
@@ -361,8 +365,6 @@ public class MediaController extends Controller {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
-
 
 			try {
 				DB.getMediaObjectDAO().makePermanent(med);
@@ -375,8 +377,7 @@ public class MediaController extends Controller {
 
 		}
 
-		singleRes.put("isShownBy", "/media/"
-				+ med.getDbId().toString());
+		singleRes.put("isShownBy", "/media/" + med.getDbId().toString());
 		singleRes.put("externalId", med.getDbId().toString());
 		allRes.add(singleRes);
 		result.put("results", allRes);
@@ -385,9 +386,11 @@ public class MediaController extends Controller {
 		return ok(result);
 	}
 
-	private static boolean checkJsonArray(ArrayNode allRes, String string){
-		for(JsonNode x:allRes){
-			if(x.has(string)){return true;}
+	private static boolean checkJsonArray(ArrayNode allRes, String string) {
+		for (JsonNode x : allRes) {
+			if (x.has(string)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -395,7 +398,7 @@ public class MediaController extends Controller {
 	private static ArrayNode parseEmbeddedJson(MediaObject med, JsonNode json) {
 		ArrayNode allRes = Json.newObject().arrayNode();
 
-		if(json.isNull()){
+		if (json.isNull()) {
 			allRes.add(Json.newObject().put("error", "Empty Json Body (file parameter is false)"));
 			return allRes;
 		}
@@ -409,15 +412,15 @@ public class MediaController extends Controller {
 
 	private static ArrayNode parseOriginalRightsFromJson(MediaObject med, JsonNode json) {
 		ArrayNode allRes = Json.newObject().arrayNode();
-		//TODO: ask if this is how this will arrive from the frontend
-		if(json.hasNonNull("originalRights")){
+		// TODO: ask if this is how this will arrive from the frontend
+		if (json.hasNonNull("originalRights")) {
 			JsonNode rights = json.get("originalRights");
-			if(rights.hasNonNull("resourceType")){
-				if(rights.hasNonNull("uri")){
+			if (rights.hasNonNull("resourceType")) {
+				if (rights.hasNonNull("uri")) {
 					ResourceType resType = parseOriginalRights(rights.get("resourceType").asText());
-					if (resType==null){
+					if (resType == null) {
 						LiteralOrResource lit = new LiteralOrResource();
-						lit.add(resType, rights.get("uri").asText());
+						lit.addURI(rights.get("uri").asText());
 						med.setOriginalRights(lit);
 					} else {
 						allRes.add(Json.newObject().put("error", "Bad resource type"));
@@ -432,64 +435,67 @@ public class MediaController extends Controller {
 
 		ArrayNode allRes = Json.newObject().arrayNode();
 
-		//parse mimeType - this is not a mandatory field right?
-		//maybe there can be a mismatch here with type,
-		//mimeType will override it (good for clean data)
-		//however, if mimeType is empty, type can still be valid!
+		// parse mimeType - this is not a mandatory field right?
+		// maybe there can be a mismatch here with type,
+		// mimeType will override it (good for clean data)
+		// however, if mimeType is empty, type can still be valid!
 
 		WithMediaType wmtype = null;
-		//First check for mimeType
-		if(json.hasNonNull("mimeType")) {
-			try{
+		// First check for mimeType
+		if (json.hasNonNull("mimeType")) {
+			try {
 				med.setMimeType(MediaType.parse(json.get("mimeType").asText().toUpperCase()));
 				MediaType mime = med.getMimeType();
-				//is it correct and one of four super types?
+				// is it correct and one of four super types?
 				wmtype = parseMimeType(mime, wmtype);
-				if(wmtype==null){
+				if (wmtype == null) {
 					allRes.add(Json.newObject().put("warn", "Unsupported mimeType!"));
-					//.zip acts as a flag here
+					// .zip acts as a flag here
 					med.setMimeType(MediaType.ZIP);
 				}
-			} catch(Exception e){
+			} catch (Exception e) {
 				allRes.add(Json.newObject().put("warn", "Could not parse mimeType!"));
 				med.setMimeType(MediaType.ZIP);
 			}
 
-			//Check if it also has withType
-			if(json.hasNonNull("type")){
-				//Is it a valid type?
-				if(!parseType(json.get("type").asText(), med)){
+			// Check if it also has withType
+			if (json.hasNonNull("type")) {
+				// Is it a valid type?
+				if (!parseType(json.get("type").asText(), med)) {
 
-					//Are both non valid?
-					if(med.getMimeType()==MediaType.ZIP){
+					// Are both non valid?
+					if (med.getMimeType() == MediaType.ZIP) {
 						allRes.add(Json.newObject().put("error", "Could not parse type and mimeType"));
 						return allRes;
 					}
-					//Bad type, good mimeType
-					allRes.add(Json.newObject().put("warn", "Could not parse field type, it has been inferred from mimeType"));
+					// Bad type, good mimeType
+					allRes.add(Json.newObject().put("warn",
+							"Could not parse field type, it has been inferred from mimeType"));
 					med.setType(wmtype);
-				}else {
-					//Now check for a mismatch (no reason to check if type has been set from mimeType)
-					if(typeMismatch(med.getMimeType(), med.getType())){
-						//TODO: do this or just ignore mimeType?
-						allRes.add(Json.newObject().put("warn", "mimeType and type mismatch, setting type from mimeType"));
+				} else {
+					// Now check for a mismatch (no reason to check if type has
+					// been set from mimeType)
+					if (typeMismatch(med.getMimeType(), med.getType())) {
+						// TODO: do this or just ignore mimeType?
+						allRes.add(
+								Json.newObject().put("warn", "mimeType and type mismatch, setting type from mimeType"));
 					}
 				}
 			}
 
-		//No mimeType, just check for type
-		} else if(json.hasNonNull("type")){
-				//Is it a valid type?
-				if(!parseType(json.get("type").asText(), med)){
-					allRes.add(Json.newObject().put("error", "Could not parse type field."));
-					return allRes;
-				}
+			// No mimeType, just check for type
+		} else if (json.hasNonNull("type")) {
+			// Is it a valid type?
+			if (!parseType(json.get("type").asText(), med)) {
+				allRes.add(Json.newObject().put("error", "Could not parse type field."));
+				return allRes;
+			}
 
 		} else {
-				allRes.add(Json.newObject().put("error", "You must provide a valid type or mimeType field."));
-				return allRes;
+			allRes.add(Json.newObject().put("error", "You must provide a valid type or mimeType field."));
+			return allRes;
 
-		} //TODO: else : extract mimeType from media url
+		} // TODO: else : extract mimeType from media url
 
 		return allRes;
 
@@ -498,13 +504,12 @@ public class MediaController extends Controller {
 	private static ArrayNode parseMediaRightsFromJson(MediaObject med, JsonNode json) {
 		ArrayNode allRes = Json.newObject().arrayNode();
 
-
-		//parse mediaRights - mandatory field!
-		if(json.hasNonNull("mediaRights")){
+		// parse mediaRights - mandatory field!
+		if (json.hasNonNull("mediaRights")) {
 			ArrayList<String> rights = new ArrayList<String>();
 			JsonNode rightsArray = json.get("mediaRights");
-			if(rightsArray.isArray()){
-				for(JsonNode rightNode : rightsArray){
+			if (rightsArray.isArray()) {
+				for (JsonNode rightNode : rightsArray) {
 					rights.add(rightNode.asText());
 				}
 			} else {
@@ -523,7 +528,7 @@ public class MediaController extends Controller {
 	private static ArrayNode parseURLFromJson(MediaObject med, JsonNode json) {
 		ArrayNode allRes = Json.newObject().arrayNode();
 
-		if(json.hasNonNull("url")){
+		if (json.hasNonNull("url")) {
 			med.setUrl(json.get("url").asText());
 		} else {
 			allRes.add(Json.newObject().put("error", "Empty url for the media object"));
@@ -533,74 +538,75 @@ public class MediaController extends Controller {
 		return allRes;
 	}
 
-
-	//TODO: move this to deserializer ?
-	private static void parseMediaRights(MediaObject med, ArrayList<String> rights){
+	// TODO: move this to deserializer ?
+	private static void parseMediaRights(MediaObject med, ArrayList<String> rights) {
 		Set<WithMediaRights> rightsSet = new HashSet<WithMediaRights>();
-			for(String right : rights){
-				for(WithMediaRights wmright: WithMediaRights.values()){
-					if(StringUtils.equals(wmright.name().toLowerCase(), right.toLowerCase())){
-						rightsSet.add(wmright);
-					}
+		for (String right : rights) {
+			for (WithMediaRights wmright : WithMediaRights.values()) {
+				if (StringUtils.equals(wmright.name().toLowerCase(), right.toLowerCase())) {
+					rightsSet.add(wmright);
 				}
 			}
+		}
 		med.setWithRights(rightsSet);
 	}
 
-	private static ResourceType parseOriginalRights(String resourceType){
-		for(ResourceType type: ResourceType.values()){
-			if(StringUtils.equals(type.name().toLowerCase(), resourceType.toLowerCase())){
+	private static ResourceType parseOriginalRights(String resourceType) {
+		for (ResourceType type : ResourceType.values()) {
+			if (StringUtils.equals(type.name().toLowerCase(), resourceType.toLowerCase())) {
 				return type;
 			}
 		}
 		return null;
 	}
 
-
-	//Type is a mandatory field only if mimeType is not provided. If both are provided however,
-	//we need to warn in case of a type mismatch (we can infer the media type from mimeType)
-	//Also, we might want to check the actual media url in the future in order to parse stuff
-	//	if (json.has("type"))
-	//	newMedia.setType(Media.BaseType.valueOf(json.get("type")
-	//	.asText()));
+	// Type is a mandatory field only if mimeType is not provided. If both are
+	// provided however,
+	// we need to warn in case of a type mismatch (we can infer the media type
+	// from mimeType)
+	// Also, we might want to check the actual media url in the future in order
+	// to parse stuff
+	// if (json.has("type"))
+	// newMedia.setType(Media.BaseType.valueOf(json.get("type")
+	// .asText()));
 
 	// this isn't a serialization issue it's a check...
 	private static WithMediaType parseMimeType(MediaType mime, WithMediaType type) {
-		if(mime.is(MediaType.ANY_IMAGE_TYPE)){
+		if (mime.is(MediaType.ANY_IMAGE_TYPE)) {
 			type = WithMediaType.IMAGE;
-		} else if(mime.is(MediaType.ANY_VIDEO_TYPE)){
+		} else if (mime.is(MediaType.ANY_VIDEO_TYPE)) {
 			type = WithMediaType.VIDEO;
-		} else if(mime.is(MediaType.ANY_AUDIO_TYPE)){
+		} else if (mime.is(MediaType.ANY_AUDIO_TYPE)) {
 			type = WithMediaType.AUDIO;
-		} else if(mime.is(MediaType.ANY_TEXT_TYPE)){
+		} else if (mime.is(MediaType.ANY_TEXT_TYPE)) {
 			type = WithMediaType.TEXT;
-		} else{
+		} else {
 			return null;
 		}
 		return type;
 	}
 
-	//TODO: serializer/deserializer?
+	// TODO: serializer/deserializer?
 	private static boolean parseType(String type, MediaObject med) {
-		if(type.toLowerCase().contains("image")){
+		if (type.toLowerCase().contains("image")) {
 			med.setType(WithMediaType.IMAGE);
-		} else if(type.toLowerCase().contains("video")){
+		} else if (type.toLowerCase().contains("video")) {
 			med.setType(WithMediaType.VIDEO);
-		} else if(type.toLowerCase().contains("audio")){
+		} else if (type.toLowerCase().contains("audio")) {
 			med.setType(WithMediaType.AUDIO);
-		} else if(type.toLowerCase().contains("text")){
+		} else if (type.toLowerCase().contains("text")) {
 			med.setType(WithMediaType.TEXT);
-		} else{
+		} else {
 			return false;
 		}
 		return true;
 	}
 
-	private static boolean typeMismatch(MediaType mime, WithMediaType with){
-		if( (mime.is(MediaType.ANY_IMAGE_TYPE) && with.name().toLowerCase().contains("image")) ||
-				(mime.is(MediaType.ANY_VIDEO_TYPE) && with.name().toLowerCase().contains("video")) ||
-				(mime.is(MediaType.ANY_AUDIO_TYPE) && with.name().toLowerCase().contains("audio")) ||
-				(mime.is(MediaType.ANY_TEXT_TYPE) && with.name().toLowerCase().contains("text")) ){
+	private static boolean typeMismatch(MediaType mime, WithMediaType with) {
+		if ((mime.is(MediaType.ANY_IMAGE_TYPE) && with.name().toLowerCase().contains("image"))
+				|| (mime.is(MediaType.ANY_VIDEO_TYPE) && with.name().toLowerCase().contains("video"))
+				|| (mime.is(MediaType.ANY_AUDIO_TYPE) && with.name().toLowerCase().contains("audio"))
+				|| (mime.is(MediaType.ANY_TEXT_TYPE) && with.name().toLowerCase().contains("text"))) {
 			return false;
 		} else {
 			return true;
@@ -609,33 +615,33 @@ public class MediaController extends Controller {
 
 	private static ArrayNode parseExtendedJson(MediaObject med, JsonNode json) {
 		ArrayNode allRes = Json.newObject().arrayNode();
-		//TODO: eventually add all extended model fields
-		if(med.getType()==WithMediaType.IMAGE){
+		// TODO: eventually add all extended model fields
+		if (med.getType() == WithMediaType.IMAGE) {
 			parseImageFromJson(med, json, allRes);
-		} else if(med.getType()==WithMediaType.VIDEO){
+		} else if (med.getType() == WithMediaType.VIDEO) {
 			parseVideoFromJson(med, json, allRes);
-		} else if(med.getType()==WithMediaType.TEXT){
+		} else if (med.getType() == WithMediaType.TEXT) {
 
-		} else if(med.getType()==WithMediaType.AUDIO){
-			 parseAudioFromJson(med, json, allRes);
+		} else if (med.getType() == WithMediaType.AUDIO) {
+			parseAudioFromJson(med, json, allRes);
 		} else {
 			allRes.add(Json.newObject().put("error", "Wrong or unsupported media type"));
 			return allRes;
 		}
-		//node.put("media", Json.toJson(med));
+		// node.put("media", Json.toJson(med));
 		allRes.add(Json.newObject().put("media", Json.toJson(med)));
 		return allRes;
 	}
 
 	private static void parseAudioFromJson(MediaObject med, JsonNode json, ArrayNode allRes) {
-		//Quality
+		// Quality
 		parseJsonDuration(med, json, allRes);
 	}
 
 	private static void parseVideoFromJson(MediaObject med, JsonNode json, ArrayNode allRes) {
-		//durationSeconds //width, height //Quality
+		// durationSeconds //width, height //Quality
 
-		if(parseJsonDimensionsAndThumbnail(med, json, allRes)){
+		if (parseJsonDimensionsAndThumbnail(med, json, allRes)) {
 			med.setOrientation();
 		}
 
@@ -643,16 +649,17 @@ public class MediaController extends Controller {
 	}
 
 	private static void parseImageFromJson(MediaObject med, JsonNode json, ArrayNode allRes) {
-		if(parseJsonDimensionsAndThumbnail(med, json, allRes)){
+		if (parseJsonDimensionsAndThumbnail(med, json, allRes)) {
 			med.setOrientation();
 		}
 	}
 
-	//these methods are boolean and not arraynodes for flow control during testing
-	//with the media libraries we are going to use in the future
+	// these methods are boolean and not arraynodes for flow control during
+	// testing
+	// with the media libraries we are going to use in the future
 	private static boolean parseJsonDuration(MediaObject med, JsonNode json, ArrayNode allRes) {
-		if(json.hasNonNull("durationSeconds")){
-			if(json.get("durationSeconds").canConvertToInt()){
+		if (json.hasNonNull("durationSeconds")) {
+			if (json.get("durationSeconds").canConvertToInt()) {
 				med.setDurationSeconds(json.get("durationSeconds").asInt());
 			} else {
 				allRes.add(Json.newObject().put("error", "Duration needs to be an integer (seconds)"));
@@ -664,8 +671,8 @@ public class MediaController extends Controller {
 
 	private static boolean parseJsonDimensionsAndThumbnail(MediaObject med, JsonNode json, ArrayNode allRes) {
 
-		if(json.hasNonNull("height")&&json.hasNonNull("width")){
-			if(json.get("height").canConvertToInt() && json.get("width").canConvertToInt()){
+		if (json.hasNonNull("height") && json.hasNonNull("width")) {
+			if (json.get("height").canConvertToInt() && json.get("width").canConvertToInt()) {
 				med.setHeight(json.get("height").asInt());
 				med.setWidth(json.get("width").asInt());
 			} else {
@@ -673,34 +680,32 @@ public class MediaController extends Controller {
 				return false;
 			}
 		} else {
-			if(json.hasNonNull("height")||json.hasNonNull("width")){
+			if (json.hasNonNull("height") || json.hasNonNull("width")) {
 				allRes.add(Json.newObject().put("error", "You need to provide both height and width"));
 				return false;
 			}
 		}
 
-		//make thumb from image url if this is empty?
-		if(json.hasNonNull("thumbnailUrl")){
-			//med.setThumbnailUrl(json.get("thumbnailUrl").asText());
+		// make thumb from image url if this is empty?
+		if (json.hasNonNull("thumbnailUrl")) {
+			// med.setThumbnailUrl(json.get("thumbnailUrl").asText());
 
-			if(json.hasNonNull("thumbHeight")&&json.hasNonNull("thumbWidth")){
-				if(json.get("thumbHeight").canConvertToInt() && json.get("thumbWidth").canConvertToInt()){
-					//med.setThumbHeight(json.get("thumbHeight").asInt());
-					//med.setThumbWidth(json.get("thumbWidth").asInt());
+			if (json.hasNonNull("thumbHeight") && json.hasNonNull("thumbWidth")) {
+				if (json.get("thumbHeight").canConvertToInt() && json.get("thumbWidth").canConvertToInt()) {
+					// med.setThumbHeight(json.get("thumbHeight").asInt());
+					// med.setThumbWidth(json.get("thumbWidth").asInt());
 				} else {
 					allRes.add(Json.newObject().put("error", "Thumbnail height and width need to be integers"));
 					return false;
 				}
-			} else if(json.hasNonNull("thumbHeight")||json.hasNonNull("thumbWidth")){
+			} else if (json.hasNonNull("thumbHeight") || json.hasNonNull("thumbWidth")) {
 				allRes.add(Json.newObject().put("error", "You need to provide both thumbnail height and width"));
-					return false;
-			} //else parse thumb url to get the values
+				return false;
+			} // else parse thumb url to get the values
 
-			}
+		}
 		return true;
 	}
-
-
 
 	private static ArrayNode imageUpload(MediaObject med, FilePart fp, Map<String, String[]> formData)
 			throws IOException {
@@ -712,38 +717,37 @@ public class MediaController extends Controller {
 		med.setWidth(image.getWidth());
 		med.setOrientation();
 
-
-		//thumbnail
-		if(!formData.containsKey("thumbnailUrl")){
+		// thumbnail
+		if (!formData.containsKey("thumbnailUrl")) {
 			makeThumb(med, image);
 		} else {
-			//need a method to check if this is a valid url that contains an image!
-			//med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
-			if(formData.containsKey("thumbHeight")&&formData.containsKey("thumbWidth")){
+			// need a method to check if this is a valid url that contains an
+			// image!
+			// med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
+			if (formData.containsKey("thumbHeight") && formData.containsKey("thumbWidth")) {
 				String th = formData.get("thumbHeight")[0];
 				String tw = formData.get("thumbWidth")[0];
-				if(StringUtils.isNumeric(th) && StringUtils.isNumeric(tw)){
-					//med.setThumbHeight(Integer.parseInt(th));
-					//med.setThumbWidth(Integer.parseInt(tw));
+				if (StringUtils.isNumeric(th) && StringUtils.isNumeric(tw)) {
+					// med.setThumbHeight(Integer.parseInt(th));
+					// med.setThumbWidth(Integer.parseInt(tw));
 				} else {
 					allRes.add(Json.newObject().put("error", "Thumbnail height and width need to be integers"));
-					return allRes;	//allow and not return?
+					return allRes; // allow and not return?
 				}
-			} else if(formData.containsKey("height")||formData.containsKey("width")){
+			} else if (formData.containsKey("height") || formData.containsKey("width")) {
 				allRes.add(Json.newObject().put("error", "You need to provide both thumbnail height and width"));
-				return allRes;	//allow and not return?
-			} //else parse thumb url to get the values
+				return allRes; // allow and not return?
+			} // else parse thumb url to get the values
 		}
 
-
-//		TODO : fix this naive quality enumeration, for now just for testing!
+		// TODO : fix this naive quality enumeration, for now just for testing!
 		long size = med.getSize();
 
-		if(size<1){
+		if (size < 1) {
 			med.setQuality(Quality.IMAGE_SMALL);
-		} else if(size<500){
+		} else if (size < 500) {
 			med.setQuality(Quality.IMAGE_500k);
-		} else if(size<1000) {
+		} else if (size < 1000) {
 			med.setQuality(Quality.IMAGE_1);
 		} else {
 			med.setQuality(Quality.IMAGE_4);
@@ -752,15 +756,11 @@ public class MediaController extends Controller {
 		return allRes;
 	}
 
-
-//	use the libraries we will use for video editing!
+	// use the libraries we will use for video editing!
 	private static void makeThumb(MediaObject med, BufferedImage image) throws IOException {
-		Image ithumb = image.getScaledInstance(211, -1,
-				Image.SCALE_SMOOTH);
+		Image ithumb = image.getScaledInstance(211, -1, Image.SCALE_SMOOTH);
 		// Create a buffered image with transparency
-		BufferedImage thumb = new BufferedImage(
-				ithumb.getWidth(null),
-				ithumb.getHeight(null), image.getType());
+		BufferedImage thumb = new BufferedImage(ithumb.getWidth(null), ithumb.getHeight(null), image.getType());
 		// Draw the image on to the buffered image
 		Graphics2D bGr = thumb.createGraphics();
 		bGr.drawImage(ithumb, 0, 0, null);
@@ -771,8 +771,8 @@ public class MediaController extends Controller {
 		byte[] thumbByte = baos.toByteArray();
 		baos.close();
 		// med.setThumbnailBytes(thumbByte);
-		//med.setThumbWidth(thumb.getWidth());
-		//med.setThumbHeight(thumb.getHeight());
+		// med.setThumbWidth(thumb.getWidth());
+		// med.setThumbHeight(thumb.getHeight());
 	}
 
 }

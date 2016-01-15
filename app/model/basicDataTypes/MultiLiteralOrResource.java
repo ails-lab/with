@@ -16,7 +16,14 @@
 
 package model.basicDataTypes;
 
-public interface ILiteralOrResource{
-	// NOTE both enums Language and ResourceType will implement this class.
-	
+public class MultiLiteralOrResource extends KeyValuesPair<String> {
+
+	public void addURI(String uri) {
+		add("uri", uri);
+	}
+
+	public void addLiteral(Language lang, String value) {
+		add(lang.toString(), value);
+	}
+
 }

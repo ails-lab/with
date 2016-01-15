@@ -24,8 +24,8 @@ import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.KeyValuesPair.MultiLiteral;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 
 public class JsonNodeUtils {
 	

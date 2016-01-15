@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import javassist.expr.NewArray;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
-import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ResourceType;
 
 public class JsonContextRecord {

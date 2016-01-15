@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;

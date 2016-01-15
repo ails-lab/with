@@ -16,28 +16,18 @@
 
 package model.basicDataTypes;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+public class Literal extends KeySingleValuePair<Language> {
 
-import org.mongodb.morphia.annotations.Embedded;
-
-@Embedded
-public class KeyValuesPair<K> extends HashMap<String, List<String>> {
-
-	public KeyValuesPair() {
+	public Literal() {
 		super();
 	}
 
-	public void add(K key, String value) {
-		List<String> list = get(key);
-		if (list == null) {
-			put(key.toString(), list = new ArrayList<>());
-		}
-		list.add(value);
+	public Literal(Language lang, String value) {
+		super();
+		add(lang, value);
 	}
 
+	public void addLiteral(Language lang, String value) {
+		add(lang, value);
+	}
 }

@@ -20,10 +20,6 @@ import java.util.HashMap;
 
 import org.mongodb.morphia.annotations.Embedded;
 
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
-import model.basicDataTypes.OldLiteralOrResource.OldResource;
-import sources.core.Utils;
-
 @Embedded
 public class KeySingleValuePair<K> extends HashMap<String, String> {
 
@@ -33,39 +29,6 @@ public class KeySingleValuePair<K> extends HashMap<String, String> {
 
 	public void add(K key, String value) {
 		put(key.toString(), value);
-	}
-
-	public static class LiteralOrResource extends KeySingleValuePair<ILiteralOrResource> {
-
-		public LiteralOrResource() {
-			super();
-		}
-
-		public LiteralOrResource(ResourceType resourceType, String uri) {
-			add(resourceType, uri);
-		}
-
-		public LiteralOrResource(String label) {
-			add(Language.UNKNOWN, label);
-		}
-
-		public static LiteralOrResource build(String string) {
-			if (!Utils.hasInfo(string))
-				return null;
-			if (Utils.isValidURL(string)) {
-				return new LiteralOrResource(ResourceType.uri, string);
-			}
-			return new LiteralOrResource(string);
-		}
-
-	}
-
-	public static class Literal extends KeySingleValuePair<Language> {
-
-	}
-
-	public static class Resource extends KeySingleValuePair<ResourceType> {
-
 	}
 
 }

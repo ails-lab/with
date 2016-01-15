@@ -30,7 +30,7 @@ import model.MediaObject;
 import model.Provider;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;

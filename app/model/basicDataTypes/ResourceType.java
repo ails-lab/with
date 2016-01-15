@@ -19,6 +19,6 @@ package model.basicDataTypes;
 // resources we do understand about and can process further (or not)
 // uri being general and difficult to process
 //TODO: don't we want multiple urls (resources) to refer to the same Literal?
-public enum ResourceType implements ILiteralOrResource{
-	uri, skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
+public enum ResourceType {
+	skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
 }

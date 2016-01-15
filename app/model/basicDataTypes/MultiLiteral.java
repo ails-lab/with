@@ -16,28 +16,25 @@
 
 package model.basicDataTypes;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import org.mongodb.morphia.annotations.Embedded;
-
-@Embedded
-public class KeyValuesPair<K> extends HashMap<String, List<String>> {
-
-	public KeyValuesPair() {
+public class MultiLiteral extends KeyValuesPair<Language> {
+	public MultiLiteral() {
 		super();
 	}
 
-	public void add(K key, String value) {
-		List<String> list = get(key);
-		if (list == null) {
-			put(key.toString(), list = new ArrayList<>());
-		}
-		list.add(value);
+	public MultiLiteral(String label) {
+		add(Language.UNKNOWN, label);
 	}
 
+	public MultiLiteral(Language lang, String label) {
+		if (this.containsKey(lang))
+			add(lang, label);
+		else
+			add(Language.UNKNOWN, label);
+		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
+			add(Language.DEF, label);
+	}
+
+	public void addLiteral(Language lang, String value) {
+		add(lang, value);
+	}
 }

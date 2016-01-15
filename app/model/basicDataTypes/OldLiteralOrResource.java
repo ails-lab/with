@@ -23,53 +23,53 @@ import sources.core.Utils;
 
 @Embedded
 public class OldLiteralOrResource extends OldLiteral {
-	
-	public static class OldResource {
-		ResourceType uriType;
-		String uri;
-		
-		public OldResource() {
-		}
-		
-		public OldResource(ResourceType uriType, String uri) {
-			this.uriType = uriType;
-			this.uri = uri;
-		}
-	}
-	
-	private OldResource resource;
-	
 
-	public OldLiteralOrResource() {
-		super();
-	}
-
-	public OldLiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new OldResource(resourceType, uri);
-	}
-
-	public OldLiteralOrResource(String label) {
-		super(label);
-	}
-
-	// etc etc
-	public String getResource(ResourceType resourceType) {
-		if (resource.uriType.equals(resourceType))
-			return resource.uri;
-		else
-			return "";
-	}
-
-	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new OldResource(resourceType, uri);
-
-	}
-	
-	
-	public static OldLiteralOrResource build(String str){
-		if (Utils.isValidURL(str)){
-			return new OldLiteralOrResource(ResourceType.uri, str);
-		}
-		return new OldLiteralOrResource(str);
-	}
+	// public static class OldResource {
+	// ResourceType uriType;
+	// String uri;
+	//
+	// public OldResource() {
+	// }
+	//
+	// public OldResource(ResourceType uriType, String uri) {
+	// this.uriType = uriType;
+	// this.uri = uri;
+	// }
+	// }
+	//
+	// private OldResource resource;
+	//
+	//
+	// public OldLiteralOrResource() {
+	// super();
+	// }
+	//
+	// public OldLiteralOrResource(ResourceType resourceType, String uri) {
+	// this.resource = new OldResource(resourceType, uri);
+	// }
+	//
+	// public OldLiteralOrResource(String label) {
+	// super(label);
+	// }
+	//
+	// // etc etc
+	// public String getResource(ResourceType resourceType) {
+	// if (resource.uriType.equals(resourceType))
+	// return resource.uri;
+	// else
+	// return "";
+	// }
+	//
+	// public void setResource(ResourceType resourceType, String uri ) {
+	// this.resource = new OldResource(resourceType, uri);
+	//
+	// }
+	//
+	//
+	// public static OldLiteralOrResource build(String str){
+	// if (Utils.isValidURL(str)){
+	// return new OldLiteralOrResource(ResourceType.uri, str);
+	// }
+	// return new OldLiteralOrResource(str);
+	// }
 }
