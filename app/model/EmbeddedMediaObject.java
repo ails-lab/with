@@ -87,14 +87,14 @@ public class EmbeddedMediaObject {
 		
 	private WithMediaType type;
 	
-	private Set<WithMediaRights> withRights;
+	private WithMediaRights withRights;
 	
 	// the media object URL
 	private String url;
     
 	// If this is a thumbnail, the parentID field refers to
 	// the parent media object, else it should be "self".
-	private String parentURL;
+	private String parentID;
 	
 	private MediaVersion mediaVersion;
 	
@@ -157,11 +157,11 @@ public class EmbeddedMediaObject {
 		this.type = type;
 	}
 
-	public Set<WithMediaRights> getWithRights() {
+	public WithMediaRights getWithRights() {
 		return withRights;
 	}
 
-	public void setWithRights(Set<WithMediaRights> withRights) {
+	public void setWithRights(WithMediaRights withRights) {
 		this.withRights = withRights;
 	}
 
@@ -192,12 +192,12 @@ public class EmbeddedMediaObject {
 	public int getWidth() {
 		return width;
 	}
-	public String getParentURL() {
-		return parentURL;
+	public String getParentID() {
+		return parentID;
 	}
 
-	public void setParentURL(String parentURL) {
-		this.parentURL = parentURL;
+	public void setParentID(String parentID) {
+		this.parentID = parentID;
 	}
 
 	public void setWidth(int width) {
