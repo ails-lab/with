@@ -37,6 +37,7 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.Quality;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
@@ -181,6 +182,7 @@ public class MediaController extends Controller {
 		return ok(result);
 	}
 
+	
 	/**
 	 * Allow media create with two different methods, by first supplying
 	 * metadata or a file File data can arrive in different ways. Whole body is
@@ -214,12 +216,23 @@ public class MediaController extends Controller {
 
 						//get data from multipartBody
 						Map<String, String[]> formData = multipartBody.asFormUrlEncoded();
-
+						
+						JsonNode parsed = Json.newObject();
+						
 						if(formData.containsKey("url")){
 							//change this policy?
-							allRes.add(Json.newObject().put("warn", "External url is ignored when uploading files"));
+							//allRes.add(Json.newObject().put("warn", "External url is ignored when uploading files"));
+							Logger.info("IT CONTAINSWTF: " +formData.get("url")[0]);
+							parsed = parseMediaURL(formData.get("url")[0]);
+						} else {
+							parsed = parseMediaFile(fp.getFile(), fp.getFilename());
 						}
+						
+						Logger.info("mediacheckreply: " + parsed);
+						
+						parseMediaCheckerReply(med, parsed);
 
+						//TODO: move these to editMedia()
 						if(formData.containsKey("withMediaRights")){
 							String[] withMediaRights = formData.get("withMediaRights");
 							ArrayList<String> rights = new ArrayList<String>(Arrays.asList(withMediaRights));
@@ -228,8 +241,9 @@ public class MediaController extends Controller {
 							allRes.add(Json.newObject().put("error", "Empty mandatory field mediaRights"));
 						}
 
-
+/*
 						//TODO: can this come in a different serialization from the frontend?
+  						
 						if(formData.containsKey("resourceType")){
 							if(formData.containsKey("uri")){
 								ResourceType type = parseOriginalRights(formData.get("resourceType")[0]);
@@ -242,11 +256,11 @@ public class MediaController extends Controller {
 								}
 							}
 						}
-					
-						JsonNode parsed = parseMediaFile(fp.getFile());
+*/					
 						
+						Logger.info(parsed.asText());
 						//TODO: fix errors (see parseExtended)
-						allRes.addAll(parseExtendedJson(med, parsed));
+						//allRes.addAll(parseExtendedJson(med, parsed));
 						if(checkJsonArray(allRes,"error")){
 							result.put("errors found", allRes);
 							return badRequest(result);
@@ -256,8 +270,12 @@ public class MediaController extends Controller {
 							//we don't parse type here since media type will override it anyway
 							//if we do decide however, remember to check for mismatch
 							med.setType(WithMediaType.IMAGE);
-							allRes.addAll(imageUpload(med, fp, formData));
+							
+							med.setMediaBytes(FileUtils.readFileToByteArray(fp.getFile()));
+							med.setDbId(null);
+							DB.getMediaObjectDAO().makePermanent(med);
 
+							imageUpload(med, fp, formData);
 
 //						} else if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
 //							med.setType(WithMediaType.VIDEO);//durationSeconds //width, height //thumbnailBytes //Quality
@@ -270,19 +288,16 @@ public class MediaController extends Controller {
 
 						} else {
 							//(ANY_APPLICATION_TYPE?)
-							allRes.add(Json.newObject().put("error", "Unsupported media type "
-									+ fp.getFilename()));
-							log.error("Media create error", "Unsupported media type");
+							//allRes.add(Json.newObject().put("error", "Unsupported media type "
+							//		+ fp.getFilename()));
+							//log.error("Media create error", "Unsupported media type");
 						}
 
-						if(checkJsonArray(allRes,"error")){
-							result.put("errors found", allRes);
-							return badRequest(result);
-						}
+						//if(checkJsonArray(allRes,"error")){
+						//	result.put("errors found", allRes);
+						//	return badRequest(result);
+						//}
 
-						med.setMediaBytes(FileUtils.readFileToByteArray(fp.getFile()));
-						med.setDbId(null);
-						DB.getMediaObjectDAO().makePermanent(med);
 
 //						singleRes.put("isShownBy", "/media/"
 //								+ med.getDbId().toString());
@@ -347,32 +362,33 @@ public class MediaController extends Controller {
 				result.put("errors found", allRes);
 				return badRequest(result);
 			}
-
+			
 			allRes.addAll(parseExtendedJson(med, json));
+			
 			if(checkJsonArray(allRes,"error")){
 				result.put("errors found", allRes);
 				return badRequest(result);
 			}
-
+			
 			med.setDbId(null);
 
 
 
 			//TODO: this is temporary for testing, need to alter DAO
 			//	fix and then delete this
-			File file = new File("testfile");
-			try {
-				FileUtils.copyURLToFile(new URL(med.getUrl()), file);
-				FileInputStream fileStream = new FileInputStream(
-						file);
-				med.setMediaBytes(IOUtils.toByteArray(fileStream));
-			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+//			File file = new File("testfile");
+//			try {
+//				FileUtils.copyURLToFile(new URL(med.getUrl()), file);
+//				FileInputStream fileStream = new FileInputStream(
+//						file);
+//				med.setMediaBytes(IOUtils.toByteArray(fileStream));
+//			} catch (MalformedURLException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (IOException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}
 
 
 
@@ -386,7 +402,13 @@ public class MediaController extends Controller {
 			}
 
 		}
+		
+		//plz don't hate
+		//if(allRes.get(0).asText()=="null"){
+		//	allRes.remove(0);
+		//}
 
+		
 		singleRes.put("isShownBy", "/media/"
 				+ med.getDbId().toString());
 		singleRes.put("externalId", med.getDbId().toString());
@@ -411,7 +433,7 @@ public class MediaController extends Controller {
 			allRes.add(Json.newObject().put("error", "Empty Json Body (file parameter is false)"));
 			return allRes;
 		}
-
+		
 		allRes.addAll(parseURLFromJson(med, json));
 		allRes.addAll(parseMediaRightsFromJson(med, json));
 		allRes.addAll(parseTypeMimeTypeFromJson(med, json));
@@ -776,40 +798,32 @@ public class MediaController extends Controller {
 	}
 
 
-
-	private static ArrayNode imageUpload(MediaObject med, FilePart fp, Map<String, String[]> formData)
-			throws IOException {
-		med.setType(WithMediaType.IMAGE);
-		ArrayNode allRes = Json.newObject().arrayNode();
-
-		BufferedImage image = ImageIO.read(fp.getFile());
-		med.setHeight(image.getHeight());
-		med.setWidth(image.getWidth());
-		med.setOrientation();
-
-
-		//thumbnail
-		if(!formData.containsKey("thumbnailUrl")){
-			makeThumb(med, image);
-		} else {
-			//need a method to check if this is a valid url that contains an image!
-			//med.setThumbnailUrl(formData.get("thumbnailUrl")[0]);
-			if(formData.containsKey("thumbHeight")&&formData.containsKey("thumbWidth")){
-				String th = formData.get("thumbHeight")[0];
-				String tw = formData.get("thumbWidth")[0];
-				if(StringUtils.isNumeric(th) && StringUtils.isNumeric(tw)){
-					//med.setThumbHeight(Integer.parseInt(th));
-					//med.setThumbWidth(Integer.parseInt(tw));
-				} else {
-					allRes.add(Json.newObject().put("error", "Thumbnail height and width need to be integers"));
-					return allRes;	//allow and not return?
+	private static void parseMediaCheckerReply(MediaObject med, JsonNode json) {
+		
+		MediaType mime = MediaType.parse(json.get("mimetype").asText().toUpperCase());
+		
+		med.setMimeType(mime);
+		
+		med.setHeight(json.get("height").asInt());
+		
+		med.setWidth(json.get("width").asInt());
+		
+		
+		//TODO: palette is component color?
+		
+		if(json.hasNonNull("palette")){
+			ArrayList<String> rights = new ArrayList<String>();
+			JsonNode paletteArray = json.get("palette");
+			if(paletteArray.isArray()){
+				for(JsonNode paletteNode : paletteArray){
+					rights.add(paletteNode.asText());
 				}
-			} else if(formData.containsKey("height")||formData.containsKey("width")){
-				allRes.add(Json.newObject().put("error", "You need to provide both thumbnail height and width"));
-				return allRes;	//allow and not return?
-			} //else parse thumb url to get the values
+			}
 		}
-
+		
+		med.setColorSpace(json.get("colorspace").asText());
+		
+		med.setOrientation();
 
 //		TODO : fix this naive quality enumeration, for now just for testing!
 		long size = med.getSize();
@@ -824,14 +838,104 @@ public class MediaController extends Controller {
 			med.setQuality(Quality.IMAGE_4);
 		}
 
-		return allRes;
+		med.setMediaVersion(MediaVersion.Original);
+		
+	}
+
+	private static JsonNode imageUpload(MediaObject med, FilePart fp, Map<String, String[]> formData)
+			throws Exception {
+
+		BufferedImage image = ImageIO.read(fp.getFile());
+
+
+		//makeThumb(med, image);
+		
+		MediaObject tiny = new MediaObject();
+		MediaObject square = new MediaObject();
+		MediaObject thumbnail = new MediaObject();
+		MediaObject medium = new MediaObject();
+			
+		if (med.getWidth() <= 100) {
+			tiny = med;
+			tiny.setDbId(null);
+			square = med;
+			thumbnail = med;
+			medium = med;
+
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+		} else if(med.getWidth()<=150&&med.getHeight()<=150){
+			square = med;
+			thumbnail = med;
+			medium = med;
+
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+			DB.getMediaObjectDAO().makePermanent(med);
+
+		} else if(med.getWidth()<=300){
+			thumbnail = med;
+			medium = med;
+
+			DB.getMediaObjectDAO().makePermanent(med);
+			DB.getMediaObjectDAO().makePermanent(med);
+
+		} else if(med.getWidth()<=640){
+			medium = med;
+			DB.getMediaObjectDAO().makePermanent(med);
+
+		} else {
+			tiny = makeThumb(med, image, 100, -1, false);
+			if(med.getHeight()<med.getWidth()){
+				square = makeThumb(med, image, -1, 150, true);
+			} else{
+				square = makeThumb(med, image, 150, -1, true);
+			}
+			
+		}
+		
+		// image is big
+		// store original and resize for thumbnail
+		//TODO:THIS
+		//Media fullImage = media;
+		// Resize image and put new width, height and bytes to data
+
+		DB.getMediaObjectDAO().makePermanent(med);
+		
+		ObjectNode results = Json.newObject();
+		
+		results.put("original", med.getDbId().toString());
+		results.put("tiny", tiny.getDbId().toString());
+		results.put("square", square.getDbId().toString());
+		results.put("thumbnail", thumbnail.getDbId().toString());
+		results.put("medium", medium.getDbId().toString());
+		
+//		singleRes.put("isShownBy", "/media/"
+//				+ med.getDbId().toString());
+		
+		return results;
 	}
 
 
 //	use the libraries we will use for video editing!
 	//TODO
-	private static void makeThumb(MediaObject med, BufferedImage image) throws IOException {
-		Image ithumb = image.getScaledInstance(211, -1,
+	private static MediaObject makeThumb(MediaObject med, BufferedImage image, 
+			int width, int height, boolean crop) throws IOException {
+		
+		MediaObject thumb = new MediaObject();
+		
+		//211, -1
+		Image ithumb = image.getScaledInstance(width, height,
 				Image.SCALE_SMOOTH);
 		// Create a buffered image with transparency
 		BufferedImage thumb = new BufferedImage(
@@ -846,28 +950,59 @@ public class MediaController extends Controller {
 		baos.flush();
 		byte[] thumbByte = baos.toByteArray();
 		baos.close();
-		// med.setThumbnailBytes(thumbByte);
-		//med.setThumbWidth(thumb.getWidth());
-		//med.setThumbHeight(thumb.getHeight());
+
+		med.setMediaBytes(thumbByte);
+		med.setThumbWidth(thumb.getWidth());
+		med.setThumbHeight(thumb.getHeight());
 	}
 
-	private static JsonNode parseMediaFile(File fileToParse) {
+	private static JsonNode parseMediaFile(File fileToParse, String fileName) {
 		//TODO: fix exception (add allrez)
 		
-		String filename = fileToParse.getName();
+		Logger.info("mediafile, " + "file://"+fileToParse.getName()+ ", " + fileToParse);
 		
-		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata?mediafile=" + filename;
+		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata";
 		Logger.info("URL: " + queryURL);
 		JsonNode response = null;
-				
 		try {
+			//response = sources.core.HttpConnector.postFile(queryURL, fileToParse, "mediafile", "file://"+fileToParse.getAbsolutePath());
+			response = sources.core.HttpConnector.postMultiPartFormData(queryURL, fileToParse, 
+					"mediafile", fileToParse.getName());
 			
-			response = sources.core.HttpConnector.postFile(queryURL, fileToParse);
-
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			// e.printStackTrace();
 		}
+		
+		
+//		//String filename = fileToParse.getName();
+//		
+//		ObjectNode node = Json.newObject();
+//		
+//		node.put("mediafile", "file://"+fileToParse.getAbsolutePath());
+//		
+//		
+//		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata";
+//		Logger.info("URL: " + queryURL);
+//		Logger.info("filename: " + fileToParse.getAbsolutePath());
+//		Logger.info("filename: " + fileToParse.getPath());
+//		Logger.info("filename: " + fileToParse.toPath());
+//		
+//		
+//		JsonNode response = null;
+//				
+//		try {
+//			
+//			response = sources.core.HttpConnector.postJson(queryURL, node);
+//
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			// e.printStackTrace();
+//		}
+		
+		
+		Logger.info("response: " + response);
+		
 		
 		
 		return response;

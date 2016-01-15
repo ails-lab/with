@@ -16,6 +16,7 @@
 
 package db;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,8 +120,12 @@ public class MediaObjectDAO {
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
 			} else {
-				if(media.getMediaBytes()==null)
-					mediaGridFsFile = DB.getGridFs().createFile();
+				if(media.getMediaBytes()==null){
+				    String tmp = new String();   // an empty string
+				    
+					mediaGridFsFile = DB.getGridFs().createFile(
+					        new ByteArrayInputStream(tmp.getBytes()));
+				}
 				else
 					mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());
 			}
