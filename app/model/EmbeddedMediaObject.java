@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
 
-import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)

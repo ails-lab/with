@@ -14,17 +14,9 @@
  */
 
 
-package model.annotations;
+package model.basicDataTypes;
 
-import model.basicDataTypes.KeySingleValuePair.Literal;
-
-public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation.ExhibitionAnnotationBody> {
-
-	public static class ExhibitionAnnotationBody extends Annotation.AnnotationBody {
-		Literal exhibitionDescription;
-		String audioUrl;
-		String videoUrl;
-	}
-
-
+public interface ILiteralOrResource{
+	// NOTE both enums Language and ResourceType will implement this class.
+	
 }

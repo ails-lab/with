@@ -22,22 +22,22 @@ import java.util.Locale;
 import org.mongodb.morphia.annotations.Embedded;
 
 @Embedded
-public class Literal extends HashMap<String, String> {
+public class OldLiteral extends HashMap<String, String> {
 
-	public Literal() {
+	public OldLiteral() {
 	}
 
-	public Literal(String label) {
+	public OldLiteral(String label) {
 		this.put(Language.UNKNOWN.toString(), label);
 	}
 
-	public Literal(Language lang, String label) {
+	public OldLiteral(Language lang, String label) {
 		this.put(lang.toString(), label);
 		if (lang.equals(Language.ENG))
 			this.put(Language.DEF.toString(), label);
 	}
 
-	public Literal(String lang, String label) {
+	public OldLiteral(String lang, String label) {
 		this.put(lang, label);
 	}
 

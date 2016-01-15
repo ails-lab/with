@@ -20,17 +20,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class MultiLiteral extends HashMap<String, ArrayList<String>> {
+public class OldMultiLiteral extends HashMap<String, ArrayList<String>> {
 
 	
-		public MultiLiteral() {
+		public OldMultiLiteral() {
 		}
 
-		public MultiLiteral(String label) {
+		public OldMultiLiteral(String label) {
 			this.put(Language.UNKNOWN.toString(), new ArrayList<String>(Arrays.asList(label)));
 		}
 
-		public MultiLiteral(Language lang, String label) {
+		public OldMultiLiteral(Language lang, String label) {
 			if (this.containsKey(lang.toString()))
 				this.get(lang.toString()).add(label);
 			else

@@ -27,9 +27,9 @@ import org.mongodb.morphia.annotations.Embedded;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.MultiLiteral;
-import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.basicDataTypes.KeyValuesPair.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -20,8 +20,8 @@ import java.util.ArrayList;
 
 import org.mongodb.morphia.annotations.Entity;
 
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.KeySingleValuePair.Literal;
+import model.basicDataTypes.KeyValuesPair.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
 

@@ -18,7 +18,7 @@ package model.basicDataTypes;
 
 import java.util.Date;
 
-import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 import play.Logger;
 
 /**
