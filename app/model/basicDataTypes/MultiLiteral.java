@@ -16,25 +16,29 @@
 
 package model.basicDataTypes;
 
-public class MultiLiteral extends KeyValuesPair<Language> {
+public class MultiLiteral extends KeyValuesPair<String> {
+
 	public MultiLiteral() {
 		super();
 	}
 
 	public MultiLiteral(String label) {
-		add(Language.UNKNOWN, label);
+		super();
+		addLiteral(label);
 	}
 
 	public MultiLiteral(Language lang, String label) {
-		if (this.containsKey(lang))
-			add(lang, label);
-		else
-			add(Language.UNKNOWN, label);
-		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
-			add(Language.DEF, label);
+		super();
+		addLiteral(lang, label);
 	}
 
 	public void addLiteral(Language lang, String value) {
-		add(lang, value);
+		add(lang.toString(), value);
+		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
+			add(Language.DEF.toString(), value);
+	}
+
+	public void addLiteral(String value) {
+		addLiteral(Language.UNKNOWN, value);
 	}
 }

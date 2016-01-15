@@ -16,14 +16,27 @@
 
 package model.basicDataTypes;
 
-public class MultiLiteralOrResource extends KeyValuesPair<String> {
+import sources.core.Utils;
 
-	public void addURI(String uri) {
-		add("uri", uri);
+public class MultiLiteralOrResource extends MultiLiteral {
+
+	public MultiLiteralOrResource() {
+		super();
 	}
 
-	public void addLiteral(Language lang, String value) {
-		add(lang.toString(), value);
+	public MultiLiteralOrResource(Language lang, String label) {
+		super(lang, label);
+	}
+
+	public MultiLiteralOrResource(String label) {
+		if (Utils.isValidURL(label)) {
+			addURI(label);
+		}
+		addLiteral(label);
+	}
+
+	public void addURI(String uri) {
+		add(LiteralOrResource.URI, uri);
 	}
 
 }

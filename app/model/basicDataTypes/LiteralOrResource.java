@@ -18,34 +18,32 @@ package model.basicDataTypes;
 
 import sources.core.Utils;
 
-public class LiteralOrResource extends KeySingleValuePair<String> {
+public class LiteralOrResource extends Literal {
+
+	public static final String URI = "uri";
 
 	public LiteralOrResource() {
 		super();
 	}
 
-	public LiteralOrResource(String key, String value) {
-		add(key, value);
+	public LiteralOrResource(Language key, String value) {
+		super(key, value);
 	}
 
 	public LiteralOrResource(String label) {
-		add(Language.UNKNOWN.toString(), label);
+		if (Utils.isValidURL(label)) {
+			addURI(label);
+		}
+		addLiteral(label);
 	}
 
 	public void addURI(String uri) {
-		add("uri", uri);
-	}
-
-	public void addLiteral(Language lang, String value) {
-		add(lang.toString(), value);
+		add(URI, uri);
 	}
 
 	public static LiteralOrResource build(String string) {
 		if (!Utils.hasInfo(string))
 			return null;
-		if (Utils.isValidURL(string)) {
-			return new LiteralOrResource("uri", string);
-		}
 		return new LiteralOrResource(string);
 	}
 

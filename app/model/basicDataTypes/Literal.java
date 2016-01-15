@@ -16,7 +16,7 @@
 
 package model.basicDataTypes;
 
-public class Literal extends KeySingleValuePair<Language> {
+public class Literal extends KeySingleValuePair<String> {
 
 	public Literal() {
 		super();
@@ -24,10 +24,16 @@ public class Literal extends KeySingleValuePair<Language> {
 
 	public Literal(Language lang, String value) {
 		super();
-		add(lang, value);
+		addLiteral(lang, value);
 	}
 
 	public void addLiteral(Language lang, String value) {
-		add(lang, value);
+		add(lang.toString(), value);
+		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
+			add(Language.DEF.toString(), value);
+	}
+
+	public void addLiteral(String value) {
+		addLiteral(Language.UNKNOWN, value);
 	}
 }
