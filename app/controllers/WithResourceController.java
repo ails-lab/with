@@ -18,6 +18,7 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -26,6 +27,7 @@ import javax.validation.ConstraintViolation;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CollectionObject;
@@ -121,13 +123,19 @@ public class WithResourceController extends Controller {
 							.setUri("/records/" + record.getDbId().toString());
 					// Fill the EmbeddedMediaObject from the MediaObject that
 					// has been created
-					ObjectId mediaId;
+					String mediaUrl;
+					WithMediaRights withRights;
 					EmbeddedMediaObject media;
 					for (MediaVersion version : MediaVersion.values()) {
-						mediaId = new ObjectId(json.get(version.toString())
-								.asText());
-						media = DB.getMediaObjectDAO().findById(mediaId);
-						record.addMedia(version, media);
+						EmbeddedMediaObject embeddedMedia;
+						if ((embeddedMedia = ((HashMap<MediaVersion, EmbeddedMediaObject>) record
+								.getMedia().get(0)).get(version)) != null) {
+							mediaUrl = embeddedMedia.getUrl();
+							withRights = embeddedMedia.getWithRights();
+							media = DB.getMediaObjectDAO().getByUrl(mediaUrl);
+							media.setWithRights(withRights);
+							record.addMedia(version, media);
+						}
 					}
 					DB.getRecordResourceDAO().makePermanent(record);
 					break;

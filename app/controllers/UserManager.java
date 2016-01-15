@@ -412,8 +412,8 @@ public class UserManager extends Controller {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				ObjectNode result = (ObjectNode) Json.parse(Json.toJson(user).toString());
-				result.put("favoritesId",
-						DB.getCollectionDAO().getByOwnerAndTitle(new ObjectId(id), "_favorites").getDbId().toString());
+				//result.put("favoritesId",
+				//		DB.getCollectionDAO().getByOwnerAndTitle(new ObjectId(id), "_favorites").getDbId().toString());
 				String image = UserAndGroupManager.getImageBase64(user);
 				JsonNode groupIds = result.get("userGroupsIds");
 				ArrayNode userGroups = Json.newObject().arrayNode();

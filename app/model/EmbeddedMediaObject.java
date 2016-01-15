@@ -40,7 +40,7 @@ import model.basicDataTypes.LiteralOrResource;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Converters(MediaTypeConverter.class)
 public class EmbeddedMediaObject {
-
+	
 	public static enum MediaVersion {
 		Original, Medium, Thumbnail, Square, Tiny
 	}
@@ -87,11 +87,17 @@ public class EmbeddedMediaObject {
 		
 	private WithMediaType type;
 	
-	private Set<WithMediaRights> withRights;
+	private WithMediaRights withRights;
 	
 	// the media object URL
 	private String url;
     
+	// If this is a thumbnail, the parentID field refers to
+	// the parent media object, else it should be "self".
+	private String parentID;
+	
+	private MediaVersion mediaVersion;
+	
 	/*These do not have to be saved in the db
 	 just returned in the json, i.e. the json has 
 	 a field withThumbnailUrl computed based on 
@@ -101,6 +107,13 @@ public class EmbeddedMediaObject {
 	private String withThumbnailUrl;*/
 	
 	
+	public MediaVersion getMediaVersion() {
+		return mediaVersion;
+	}
+
+	public void setMediaVersion(MediaVersion mediaVersion) {
+		this.mediaVersion = mediaVersion;
+	}
 	private LiteralOrResource originalRights;
 	/*
 	 *  file name type values specified here:
@@ -118,7 +131,7 @@ public class EmbeddedMediaObject {
 	private long size;
 	
 	private Quality quality;
-	
+		
 	public long getSize() {
 		return size;
 	}
@@ -144,11 +157,11 @@ public class EmbeddedMediaObject {
 		this.type = type;
 	}
 
-	public Set<WithMediaRights> getWithRights() {
+	public WithMediaRights getWithRights() {
 		return withRights;
 	}
 
-	public void setWithRights(Set<WithMediaRights> withRights) {
+	public void setWithRights(WithMediaRights withRights) {
 		this.withRights = withRights;
 	}
 
@@ -179,6 +192,14 @@ public class EmbeddedMediaObject {
 	public int getWidth() {
 		return width;
 	}
+	public String getParentID() {
+		return parentID;
+	}
+
+	public void setParentID(String parentID) {
+		this.parentID = parentID;
+	}
+
 	public void setWidth(int width) {
 		this.width = width;
 	}

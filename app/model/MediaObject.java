@@ -47,6 +47,8 @@ public class MediaObject extends EmbeddedMediaObject {
 	public static enum Orientation {
 		PORTRAIT, LANDSCAPE
 	}
+	
+	
 
 	@Id
 	@JsonIgnore
@@ -66,12 +68,8 @@ public class MediaObject extends EmbeddedMediaObject {
 	
 	private double durationSeconds;
 	
-//	for pdfs only
+//	for pdfs only TODO: add this in the controller
 	private int spatialResolution;
-	
-	private int sampleSize;
-	
-	private int sampleRate;
 	
 	private int bitRate;
 	
@@ -87,6 +85,12 @@ public class MediaObject extends EmbeddedMediaObject {
 	
 	private int audioChannelNumber;
 
+//	audio only	
+	private int sampleSize;
+	
+	private int sampleRate;
+	
+	
 	// Setters/Getters
 	public ObjectId getDbId() {
 		return dbId;
@@ -95,7 +99,7 @@ public class MediaObject extends EmbeddedMediaObject {
 	public void setDbId(ObjectId dbId) {
 		this.dbId = dbId;
 	}
-	
+
 	public ArrayList<ObjectId> getResources() {
 		return resources;
 	}
@@ -202,6 +206,7 @@ public class MediaObject extends EmbeddedMediaObject {
 	public void setAudioChannelNumber(int audioChannelNumber) {
 		this.audioChannelNumber = audioChannelNumber;
 	}
+
 
 
 }
