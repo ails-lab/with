@@ -97,10 +97,10 @@ public class DB {
 		if (morphia == null) {
 			morphia = new Morphia();
 			// this method is not working, have to find why!!
-			//morphia.mapPackage("model");
-			//morphia.mapPackage("model.resources");
-			//morphia.mapPackage("model.basicDataTypes");
-			//morphia.mapPackage("model.usersAndGroups");
+			morphia.mapPackage("model");
+			morphia.mapPackage("model.resources");
+			morphia.mapPackage("model.basicDataTypes");
+			morphia.mapPackage("model.usersAndGroups");
 			//morphia.map(User.class);
 			morphia.getMapper().getConverters()
 					.addConverter(new RightsConverter());

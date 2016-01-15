@@ -70,8 +70,6 @@ public class WithResource<T extends DescriptiveData> {
 		private boolean isExhibition;
 
 		//index
-		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
-		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		@Embedded
 		private WithAccess access = new WithAccess();
 
