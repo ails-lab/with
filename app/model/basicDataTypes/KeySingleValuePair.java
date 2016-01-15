@@ -25,17 +25,17 @@ import model.basicDataTypes.OldLiteralOrResource.OldResource;
 import sources.core.Utils;
 
 @Embedded
-public class KeySingleValuePair<K,V> extends HashMap<K, V> {
+public class KeySingleValuePair<K> extends HashMap<String, String> {
 
 	public KeySingleValuePair() {
 		super();
 	}
-	
-	public void add(K key, V value) {
-		put(key, value);
+
+	public void add(K key, String value) {
+		put(key.toString(), value);
 	}
-	
-	public static class LiteralOrResource extends KeySingleValuePair<ILiteralOrResource, String>{
+
+	public static class LiteralOrResource extends KeySingleValuePair<ILiteralOrResource> {
 
 		public LiteralOrResource() {
 			super();
@@ -46,27 +46,26 @@ public class KeySingleValuePair<K,V> extends HashMap<K, V> {
 		}
 
 		public LiteralOrResource(String label) {
-			add(Language.UNKNOWN,label);
+			add(Language.UNKNOWN, label);
 		}
 
-		
 		public static LiteralOrResource build(String string) {
 			if (!Utils.hasInfo(string))
 				return null;
-			if (Utils.isValidURL(string)){
+			if (Utils.isValidURL(string)) {
 				return new LiteralOrResource(ResourceType.uri, string);
 			}
 			return new LiteralOrResource(string);
 		}
-		
-	}
-	
-	public static class Literal extends KeySingleValuePair<Language, String>{
-		
-	}
-	
-	public static class Resource extends KeySingleValuePair<ResourceType, String> {
 
 	}
-    
+
+	public static class Literal extends KeySingleValuePair<Language> {
+
+	}
+
+	public static class Resource extends KeySingleValuePair<ResourceType> {
+
+	}
+
 }
