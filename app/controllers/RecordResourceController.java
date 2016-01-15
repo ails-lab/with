@@ -269,4 +269,21 @@ public class RecordResourceController extends Controller {
 		}
 		return ok(recordsList);
 	}
+
+	public static ObjectNode validateRecord(RecordResource record) {
+		ObjectNode result = Json.newObject();
+		Set<ConstraintViolation<RecordResource>> violations = Validation
+				.getValidator().validate(record);
+		if (!violations.isEmpty()) {
+			ArrayNode properties = Json.newObject().arrayNode();
+			for (ConstraintViolation<RecordResource> cv : violations) {
+				properties.add(Json.parse("{\"" + cv.getPropertyPath()
+						+ "\":\"" + cv.getMessage() + "\"}"));
+			}
+			result.put("error", properties);
+			return result;
+		} else {
+			return null;
+		}
+	}
 }

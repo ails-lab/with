@@ -25,8 +25,8 @@ import java.util.function.BiConsumer;
 
 import model.DescriptiveData;
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.Literal.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResource;
@@ -576,6 +576,10 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.dec(fieldName);
 		this.update(q, updateOps);
+	}
+	
+	public boolean hasAccess(List<ObjectId> effectiveIds, Action access, ObjectId resourceId) {
+		return true;
 	}
 	
 }

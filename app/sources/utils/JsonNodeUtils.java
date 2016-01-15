@@ -24,9 +24,8 @@ import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.Literal.Language;
-import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.basicDataTypes.Language;
 
 public class JsonNodeUtils {
 	
@@ -54,9 +53,9 @@ public class JsonNodeUtils {
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				// TODO ask if the key is a language
-				System.out.println(next);
+//				System.out.println(next);
 				//TODO: check transformation from string to lang enum
-				res.setMultiLiteral(Language.valueOf(next.getKey()), next.getValue().get(0).asText());
+				res.add(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
 			}
 			return res;
 		}
@@ -73,6 +72,7 @@ public class JsonNodeUtils {
 			} else{
 				res.add(node.asText());
 			}
+			return res;
 		}
 		return null;
 	}

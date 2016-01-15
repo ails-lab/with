@@ -39,8 +39,8 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.Media;
 import model.MediaObject;
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.ResourceType;
 import model.usersAndGroups.User;
 
 import org.apache.commons.io.FileUtils;
@@ -108,7 +108,7 @@ public class TestNewModelMediaController {
 		image.setUrl("http://www.ntua.gr/ntua-01.jpg");
 		//image.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
 		LiteralOrResource lor = new LiteralOrResource();
-		lor.setResource(ResourceType.dbpedia, "<http://pt.dbpedia.org/resource/Brasil>");
+		lor.add(ResourceType.dbpedia, "<http://pt.dbpedia.org/resource/Brasil>");
 		image.setOriginalRights(lor);
 		image.setMimeType(MediaType.parse("image/jpeg"));
 		image.setSize(rawbytes.length);

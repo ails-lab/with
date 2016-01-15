@@ -861,7 +861,7 @@ public class CollectionController extends Controller {
 			try {
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-				ArrayList<RecordJSONMetadata> recordsData = s.getRecordFromSource(sourceId);
+				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(sourceId);
 				for (RecordJSONMetadata data : recordsData) {
 					DB.getCollectionRecordDAO().updateContent(record.getDbId(), data.getFormat(),
 							data.getJsonContent());

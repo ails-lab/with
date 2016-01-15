@@ -16,43 +16,39 @@
 
 package model.basicDataTypes;
 
+import org.apache.commons.validator.routines.UrlValidator;
 import org.mongodb.morphia.annotations.Embedded;
 
+import sources.core.Utils;
+
 @Embedded
-public class LiteralOrResource extends Literal {
+public class OldLiteralOrResource extends OldLiteral {
 	
-	// resources we do understand about and can process further (or not)
-	// uri being general and difficult to process
-	//TODO: don't we want multiple urls (resources) to refer to the same Literal?
-	public static enum ResourceType {
-		uri, skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
-	}
-	
-	public static class Resource {
+	public static class OldResource {
 		ResourceType uriType;
 		String uri;
 		
-		public Resource() {
+		public OldResource() {
 		}
 		
-		public Resource(ResourceType uriType, String uri) {
+		public OldResource(ResourceType uriType, String uri) {
 			this.uriType = uriType;
 			this.uri = uri;
 		}
 	}
 	
-	private Resource resource;
+	private OldResource resource;
 	
 
-	public LiteralOrResource() {
+	public OldLiteralOrResource() {
 		super();
 	}
 
-	public LiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new Resource(resourceType, uri);
+	public OldLiteralOrResource(ResourceType resourceType, String uri) {
+		this.resource = new OldResource(resourceType, uri);
 	}
 
-	public LiteralOrResource(String label) {
+	public OldLiteralOrResource(String label) {
 		super(label);
 	}
 
@@ -65,7 +61,15 @@ public class LiteralOrResource extends Literal {
 	}
 
 	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new Resource(resourceType, uri);
+		this.resource = new OldResource(resourceType, uri);
 
+	}
+	
+	
+	public static OldLiteralOrResource build(String str){
+		if (Utils.isValidURL(str)){
+			return new OldLiteralOrResource(ResourceType.uri, str);
+		}
+		return new OldLiteralOrResource(str);
 	}
 }

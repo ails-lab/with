@@ -19,12 +19,14 @@ package sources.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.validator.routines.UrlValidator;
+
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class Utils {
-	
+
 	public static class Lang {
 		public Lang(String languageCode, String textValue) {
 			this.lang = languageCode;
@@ -59,24 +61,26 @@ public class Utils {
 		return q1;
 	}
 
-	public static String replaceQuotes(String text){
+	public static String replaceQuotes(String text) {
 		String[] temp = text.split("\"");
 		text = "";
 		int b = 1;
-		
-		for(String s:temp){
+
+		for (String s : temp) {
 			text = text + s;
-			if(b!=temp.length){text=text+"%22";}
+			if (b != temp.length) {
+				text = text + "%22";
+			}
 			b++;
 		}
-		
-		//NOTE: THESE WON'T WORK for some reason
-		//url.replace("\"", "\\\"");
-		//String.join("%20", temp);
-		
+
+		// NOTE: THESE WON'T WORK for some reason
+		// url.replace("\"", "\\\"");
+		// String.join("%20", temp);
+
 		return text;
 	}
-	
+
 	public static String readAttr(JsonNode json, String string, boolean force) throws Exception {
 		return readAttr(json, string, force, null);
 	}
@@ -123,13 +127,11 @@ public class Utils {
 
 	private static String getPlainString(JsonNode jsonNode) {
 		if (jsonNode.isTextual())
-		return jsonNode.textValue();
-		else{
+			return jsonNode.textValue();
+		else {
 			return jsonNode.path(0).textValue();
 		}
 	}
-	
-	
 
 	public static List<Lang> readLangAttr(JsonNode json, String string, boolean force) throws Exception {
 		if (json == null)
@@ -186,12 +188,13 @@ public class Utils {
 	public static String getORList(List<String> values) {
 		return getORList(values, true);
 	}
+
 	public static String getORList(List<String> values, boolean paren) {
 		String res = "";
 		if (values.size() > 1) {
 			if (paren)
-				res+="(";
-			res +=  spacesPlusFormatQuery(values.get(0));
+				res += "(";
+			res += spacesPlusFormatQuery(values.get(0));
 			for (int i = 1; i < values.size(); i++) {
 				res += "%20OR%20" + spacesPlusFormatQuery(values.get(i));
 			}
@@ -202,11 +205,11 @@ public class Utils {
 		}
 		return res;
 	}
-	
+
 	public static String getStringList(List<String> values, String separator) {
 		String res = "";
 		if (values.size() > 1) {
-			res +=  spacesPlusFormatQuery(values.get(0));
+			res += spacesPlusFormatQuery(values.get(0));
 			for (int i = 1; i < values.size(); i++) {
 				res += separator + spacesPlusFormatQuery(values.get(i));
 			}
@@ -231,13 +234,13 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=" + spacesFormatQuery(second.toString(),"%20");
+			return first + "=" + spacesFormatQuery(second.toString(), "%20");
 		}
-		
+
 	}
-	
-	public static class LongPair<T> extends Pair<T>{
-		
+
+	public static class LongPair<T> extends Pair<T> {
+
 		public LongPair() {
 			super();
 		}
@@ -247,7 +250,7 @@ public class Utils {
 		}
 
 		public String getHttp() {
-			return first + "=%22" + spacesFormatQuery(second.toString(),"%20")+"%22";
+			return first + "=%22" + spacesFormatQuery(second.toString(), "%20") + "%22";
 		}
 	}
 
@@ -274,6 +277,31 @@ public class Utils {
 
 	public static boolean hasAny(String term) {
 		return term != null && !term.equals("");
+	}
+
+	public static boolean isValidURL(String str) {
+		UrlValidator val = new UrlValidator();
+		return val.isValid(str);
+	}
+
+	public static boolean isNumericInteger(String date) {
+		return date.matches("[-]*[0-9]+");
+	}
+
+	public static void main(String[] args) {
+	}
+
+	public static boolean hasInfo(String string) {
+		return !(string==null || string.equals("") || string.equals("null"));
+	}
+
+	public static <T> List<T> asList(T... a) {
+		ArrayList<T> list = new ArrayList<>();
+		for (T o : a) {
+			if (o!=null)
+				list.add(o);
+		}
+		return list;
 	}
 
 }

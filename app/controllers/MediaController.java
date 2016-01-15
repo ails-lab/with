@@ -44,9 +44,8 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord.ItemRights;
 import model.Media;
 import model.MediaObject;
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.LiteralOrResource.ResourceType;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.ResourceType;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -249,7 +248,7 @@ public class MediaController extends Controller {
 								ResourceType type = parseOriginalRights(formData.get("resourceType")[0]);
 								if (type==null){
 									LiteralOrResource lit = new LiteralOrResource();
-									lit.setResource(type, formData.get("uri")[0]);
+									lit.add(type, formData.get("uri")[0]);
 									med.setOriginalRights(lit);
 								} else {
 									allRes.add(Json.newObject().put("error", "Bad resource type"));
@@ -451,7 +450,7 @@ public class MediaController extends Controller {
 					ResourceType resType = parseOriginalRights(rights.get("resourceType").asText());
 					if (resType==null){
 						LiteralOrResource lit = new LiteralOrResource();
-						lit.setResource(resType, rights.get("uri").asText());
+						lit.add(resType, rights.get("uri").asText());
 						med.setOriginalRights(lit);
 					} else {
 						allRes.add(Json.newObject().put("error", "Bad resource type"));

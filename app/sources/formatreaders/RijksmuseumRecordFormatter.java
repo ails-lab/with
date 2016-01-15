@@ -28,18 +28,18 @@ import model.MediaObject;
 import model.Provider;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
-import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.EuropeanaSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
-public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 	
 	public RijksmuseumRecordFormatter() {
 		object = new CulturalObject();
@@ -55,10 +55,10 @@ public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<Cu
 		model.setDescription(rec.getLiteralValue("longTitle"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
+		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("principalOrFirstMaker"))));
 		
 //		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 //		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
@@ -72,8 +72,8 @@ public class RijksmuseumRecordFormatter extends JsonContextRecordFormatReader<Cu
 		//TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(rec.getStringValue("edmIsShownBy"));
-		med.setWidth(Integer.parseInt(rec.getStringValue("webImage.width")));
-		med.setHeight(Integer.parseInt(rec.getStringValue("webImage.height")));
+		med.setWidth(rec.getIntValue("webImage.width"));
+		med.setHeight(rec.getIntValue("webImage.height"));
 		object.addMedia(MediaVersion.Original, med);
 //		med.setUrl(rec.getStringValue("edmIsShownBy"));
 		return object;

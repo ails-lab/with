@@ -23,7 +23,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import sources.DPLASpaceSource;
 import sources.EuropeanaSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
@@ -31,12 +31,12 @@ import model.MediaObject;
 import model.Provider;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
-import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
-public class DPLARecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
+public class DPLARecordFormatter extends CulturalRecordFormatter {
 	
 	public DPLARecordFormatter() {
 		object = new CulturalObject();
@@ -50,10 +50,10 @@ public class DPLARecordFormatter extends JsonContextRecordFormatReader<CulturalO
 		model.setDescription(rec.getLiteralValue("sourceResource.description"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 //		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("sourceResource.creator"))));
+		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("sourceResource.creator"))));
 		
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));

@@ -41,7 +41,6 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	protected abstract T fillObjectFrom(JsonContextRecord text);
 	
 	public T readObjectFrom(JsonNode text){
-		object = (T) new CulturalObject();
 		return fillObjectFrom(text);
 	}
 

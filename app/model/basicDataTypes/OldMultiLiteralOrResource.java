@@ -16,25 +16,22 @@
 
 package model.basicDataTypes;
 
-import model.basicDataTypes.LiteralOrResource.ResourceType;
-
 import org.mongodb.morphia.annotations.Embedded;
 
 @Embedded
-public class MultiLiteralOrResource extends MultiLiteral {
+public class OldMultiLiteralOrResource extends OldMultiLiteral {
 	
-	private LiteralOrResource.Resource resource;
+	private OldLiteralOrResource.OldResource resource;
 	
-
-	public MultiLiteralOrResource() {
+	public OldMultiLiteralOrResource() {
 		super();
 	}
 
-	public MultiLiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new LiteralOrResource.Resource(resourceType, uri);
+	public OldMultiLiteralOrResource(ResourceType resourceType, String uri) {
+		this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
 	}
 
-	public MultiLiteralOrResource(String label) {
+	public OldMultiLiteralOrResource(String label) {
 		super(label);
 	}
 
@@ -47,7 +44,7 @@ public class MultiLiteralOrResource extends MultiLiteral {
 	}
 
 	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new LiteralOrResource.Resource(resourceType, uri);
+		this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
 
 	}
 }

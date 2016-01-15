@@ -27,14 +27,32 @@ import db.converters.ProvenanceInfoConverter;
 
 @Converters(ProvenanceInfoConverter.class)
 @Indexes({
-	@Index(fields = @Field(value = "provider", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "resourceId", type = IndexType.ASC), options = @IndexOptions())
-})
+		@Index(fields = @Field(value = "provider", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "resourceId", type = IndexType.ASC), options = @IndexOptions()) })
 public class ProvenanceInfo {
+
+	public enum Sources {
+		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UpladedByUser"),
+		BritishLibrary("The British Library"), DDB("DDB"),
+		DigitalNZ("DigitalNZ"), DPLA("DPLA"), EFashion("EFashion"), NLA("NLA"),
+		Rijksmuseum("Rijksmuseum");
+		
+		private final String text;
+
+		private Sources(final String text) {
+			this.text = text;
+		}
+
+		@Override
+		public String toString() {
+			return text;
+		}
+
+	}
+
 	private String provider;
 	private String uri;
 	private String resourceId;
-
 
 	public ProvenanceInfo() {
 	}
@@ -52,18 +70,23 @@ public class ProvenanceInfo {
 	public String getProvider() {
 		return provider;
 	}
+
 	public void setProvider(String provider) {
 		this.provider = provider;
 	}
+
 	public String getUri() {
 		return uri;
 	}
+
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
+
 	public String getResourceId() {
 		return resourceId;
 	}
+
 	public void setResourceId(String recordId) {
 		this.resourceId = recordId;
 	}
