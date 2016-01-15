@@ -466,11 +466,11 @@ public class MediaController extends Controller {
 		
 		ObjectNode results = Json.newObject();
 		
-		results.put("original", med.getDbId().toString());
-		results.put("tiny", tiny.getDbId().toString());
-		results.put("square", square.getDbId().toString());
-		results.put("thumbnail", thumbnail.getDbId().toString());
-		results.put("medium", medium.getDbId().toString());
+		results.put("original", "/media/"+med.getDbId().toString()+"?file=true");
+		results.put("tiny", "/media/"+tiny.getDbId().toString()+"?file=true");
+		results.put("square", "/media/"+square.getDbId().toString()+"?file=true");
+		results.put("thumbnail", "/media/"+thumbnail.getDbId().toString()+"?file=true");
+		results.put("medium", "/media/"+medium.getDbId().toString()+"?file=true");
 		
 //		singleRes.put("isShownBy", "/media/"
 //				+ med.getDbId().toString());
