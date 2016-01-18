@@ -47,6 +47,22 @@ import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
+	
+	public enum QueryOperator {GT("$gt"), EQ("$eq"), GTE( "$gte");
+	
+		private final String text;
+	
+		private QueryOperator(final String text) {
+			this.text = text;
+		}
+	
+		@Override
+		public String toString() {
+			return text;
+		}
+		
+	}
+	
 	static private final Logger.ALogger log = Logger.of(DAO.class);
 
 	protected final Class<E> entityClass;

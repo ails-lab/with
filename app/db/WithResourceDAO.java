@@ -18,9 +18,12 @@ package db;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -28,9 +31,11 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
+import org.mongodb.morphia.query.FieldEnd;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
+
 import com.mongodb.BasicDBObject;
 
 import utils.Tuple;
@@ -240,13 +245,21 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param userAccess
 	 * @return
 	 */
-	private Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess) {
+	protected Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess, QueryOperator operator) {
 		int ordinal = userAccess.y.ordinal();
 		/*Criteria[] criteria = new Criteria[Access.values().length-ordinal];
 		for (int i=0; i<Access.values().length-ordinal; i++)
 			criteria[i] = this.createQuery().criteria("rights." + userAccess.x.toHexString())
 			.equal(Access.values()[i+ordinal].toString());*/
-		return this.createQuery().criteria("administrative.access." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
+		//return this.createQuery().criteria("administrative.access." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
+		BasicDBObject accessQuery = new BasicDBObject();
+		accessQuery.put("user", userAccess.x);
+		BasicDBObject geq = new BasicDBObject();
+		geq.put(operator.toString(), ordinal);
+		accessQuery.append("level", geq);
+		//BasicDBObject elemMatch1 = new BasicDBObject();
+		//elemMatch1.put("$elemMatch", accessQuery);
+		return this.createQuery().criteria("administrative.access").hasThisElement(accessQuery);
 	}
 
 	/**
@@ -254,13 +267,12 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param loggedInUserEffIds
 	 * @return
 	 */
-	private CriteriaContainer formLoggedInUserQuery(List<ObjectId> loggedInUserEffIds) {
-		int ordinal = Access.READ.ordinal();
+	protected CriteriaContainer formLoggedInUserQuery(List<ObjectId> loggedInUserEffIds) {
 		Criteria[] criteria = new Criteria[loggedInUserEffIds.size()+1];
 		for (int i=0; i<loggedInUserEffIds.size(); i++) {
-			criteria[i] = this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
+			criteria[i] = formAccessLevelQuery(new Tuple(loggedInUserEffIds.get(i), Access.READ), QueryOperator.GTE);//this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
 		}
-		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("rights.isPublic").equal(true);
+		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("administrative.access.isPublic").equal(true);
 		return this.createQuery().or(criteria);
 	}
 
@@ -269,10 +281,10 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param filterByUserAccess
 	 * @return
 	 */
-	private CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
+	protected CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
-			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess));
+			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess, QueryOperator.GTE));
 		}
 		return this.createQuery().or(criteria);
 	}
@@ -285,7 +297,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param count
 	 * @return
 	 */
-	private Query<T> formCreatorQuery(CriteriaContainer[] criteria, ObjectId creator,  int offset, int count) {
+	protected Query<T> formCreatorQuery(CriteriaContainer[] criteria, ObjectId creator,  int offset, int count) {
 		Query<T> q = this.createQuery().offset(offset).limit(count+1);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
