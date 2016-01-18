@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 
 public class JsonNodeUtils {
 
@@ -52,10 +53,25 @@ public class JsonNodeUtils {
 			MultiLiteral res = new MultiLiteral();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
-				// TODO ask if the key is a language
-				// System.out.println(next);
-				// TODO: check transformation from string to lang enum
-				res.add(Language.getLanguage(next.getKey()).toString(), next.getValue().get(0).asText());
+				res.addLiteral(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
+			}
+			return res;
+		}
+		return null;
+	}
+
+	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node) {
+		if (node != null && !node.isMissingNode()) {
+			if (node.isArray()) {
+				node = node.get(0);
+			}
+			if (node.isTextual()) {
+				return new MultiLiteralOrResource(Language.DEF, node.asText());
+			}
+			MultiLiteralOrResource res = new MultiLiteralOrResource();
+			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+				Entry<String, JsonNode> next = iterator.next();
+				res.addLiteral(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
 			}
 			return res;
 		}

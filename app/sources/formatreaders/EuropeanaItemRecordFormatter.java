@@ -23,6 +23,7 @@ import java.util.List;
 import org.hibernate.validator.internal.constraintvalidators.URLValidator;
 
 import sources.EuropeanaSpaceSource;
+import sources.FilterValuesMap;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.JsonNodeUtils;
@@ -38,7 +39,8 @@ import model.resources.CulturalObject.CulturalObjectData;
 
 public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
-	public EuropeanaItemRecordFormatter() {
+	public EuropeanaItemRecordFormatter(FilterValuesMap map) {
+		super(map);
 		object = new CulturalObject();
 	}
 
@@ -46,43 +48,42 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-		
+
 		rec.enterContext("proxies[0]");
-		
+
 		model.setLabel(rec.getLiteralValue("dcTitle"));
 		model.setDescription(rec.getLiteralValue("dcDescription"));
-//		model.setKeywords(rec.getLiteralValue("dcSubject"));
+		// model.setKeywords(rec.getLiteralValue("dcSubject"));
 		List<String> years = rec.getStringArrayValue("dcDate.def");
 		model.setDates(StringUtils.getDates(years));
-//		model.setDctype(Utils.asList(rec.getLiteralValue("deType")));
+		// model.setDctype(Utils.asList(rec.getLiteralValue("deType")));
 		rec.exitContext();
 
 		rec.enterContext("proxies[1]");
-		
+
 		years = rec.getStringArrayValue("dcDate.def");
 		model.getDates().addAll(StringUtils.getDates(years));
-		
+
 		rec.exitContext();
 		rec.enterContext("aggregations[0]");
-		
+
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"));
 		object.addToProvenance(provInfo);
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("about"), model.getIsShownAt()));
-		
+
 		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreator"))));
-		
+
 		rec.exitContext();
-		
-		
+
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-		
-//		System.out.println(years+"--->"+model.getDates());
-//		model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
-		
+
+		// System.out.println(years+"--->"+model.getDates());
+		// model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
+
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 		medThumb.setUrl(model.getIsShownBy());
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
@@ -90,7 +91,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(model.getIsShownBy());
 		// TODO: add withMediaRights, originalRights
-//		List<String> rights = rec.getStringArrayValue("rights");
+		// List<String> rights = rec.getStringArrayValue("rights");
 		// med.setOriginalRights(originalRights);
 		//
 		// med.setWithRights(withRights);

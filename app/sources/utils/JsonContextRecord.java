@@ -201,6 +201,14 @@ public class JsonContextRecord {
 			return null;
 	}
 
+	public MultiLiteralOrResource getLiteralOrResourceValue(String... path) {
+		JsonNode node = getValue(buildpaths(path));
+		if (node != null)
+			return JsonNodeUtils.asMultiLiteralOrResource(node);
+		else
+			return null;
+	}
+
 	public List<String> getStringArrayValue(String... path) {
 		return JsonNodeUtils.asStringArray(getValue(buildpaths(path)));
 	}

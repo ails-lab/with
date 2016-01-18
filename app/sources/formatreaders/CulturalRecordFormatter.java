@@ -23,29 +23,48 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.utils.JsonContextRecord;
 
 public abstract class CulturalRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
 
-	public CulturalRecordFormatter() {
+	private FilterValuesMap valuesMap;
+
+	public CulturalRecordFormatter(FilterValuesMap valuesMap) {
 		super();
+		this.valuesMap = valuesMap;
 	}
-	
-	public CulturalObject readObjectFrom(JsonNode text){
-		CulturalObject culturalObject = new CulturalObject();
-		culturalObject.getAdministrative().getAccess().setPublic(true);
-		object = culturalObject;
+
+	public CulturalObject readObjectFrom(JsonNode text) {
+		object = new CulturalObject();
+		object.getAdministrative().getAccess().setPublic(true);
+
+		CulturalObjectData model = new CulturalObjectData();
+		object.setDescriptiveData(model);
+		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+
 		fillObjectFrom(text);
+
 		List<ProvenanceInfo> provenance = object.getProvenance();
-		int index = provenance.size()-1;
+		int index = provenance.size() - 1;
 		String resourceId = provenance.get(index).getResourceId();
 		object.getAdministrative().setExternalId(resourceId);
+
 		return object;
 	}
 
+	public FilterValuesMap getValuesMap() {
+		return valuesMap;
+	}
+
+	public void setValuesMap(FilterValuesMap valuesMap) {
+		this.valuesMap = valuesMap;
+	}
 
 }

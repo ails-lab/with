@@ -22,6 +22,7 @@ import java.util.HashMap;
 
 import sources.BritishLibrarySpaceSource;
 import sources.DPLASpaceSource;
+import sources.FilterValuesMap;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
@@ -34,46 +35,48 @@ import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 
 public class BritishLibraryRecordFormatter extends CulturalRecordFormatter {
-	
-	public BritishLibraryRecordFormatter() {
+
+	public BritishLibraryRecordFormatter(FilterValuesMap map) {
+		super(map);
 		object = new CulturalObject();
 	}
-	
+
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
 		model.setLabel(rec.getLiteralValue("title"));
 		model.setDescription(rec.getLiteralValue("description._content"));
-//		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-//		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
+		// model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
+		// model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
+		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("principalOrFirstMaker"))));
-		
+
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		object.addToProvenance(
+				new ProvenanceInfo(rec.getStringValue("provider.name"), null, rec.getStringValue("provider.@id")));
 		String id = rec.getStringValue("id");
 		object.addToProvenance(new ProvenanceInfo(Sources.BritishLibrary.toString(),
-				  "https://www.flickr.com/photos/britishlibrary/" + id + "/", id));
+				"https://www.flickr.com/photos/britishlibrary/" + id + "/", id));
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		//TODO: add both thumbnail embMedia and full size embedded media!
+		// TODO: add both thumbnail embMedia and full size embedded media!
 		medThumb.setUrl(rec.getStringValue("url_s"));
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		//TODO: add rights
+		// TODO: add rights
 		med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
 		med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
 		object.addMedia(MediaVersion.Original, med);
-//		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		// med.setUrl(rec.getStringValue("edmIsShownBy"));
 		return object;
-		
-//		object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-//		object.setYears(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
-//		// TODO: add rights
-//		// object.setItemRights(rec.getStringValue("rights"));
-//		object.setExternalId(object.getIsShownAt());
+
+		// object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
+		// object.setYears(StringUtils.getYears(rec.getStringArrayValue("datetaken")));
+		// // TODO: add rights
+		// // object.setItemRights(rec.getStringValue("rights"));
+		// object.setExternalId(object.getIsShownAt());
 	}
 
 }

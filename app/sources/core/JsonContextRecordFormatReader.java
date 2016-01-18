@@ -24,32 +24,23 @@ import model.resources.WithResource;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public abstract class JsonContextRecordFormatReader<T extends WithResource> {
-	
+
 	protected T object;
-	private FilterValuesMap map;
-	
+
 	public T fillObjectFrom(String text) {
 		JsonContextRecord rec = new JsonContextRecord(text);
 		return fillObjectFrom(rec);
 	}
-	
+
 	protected T fillObjectFrom(JsonNode text) {
 		JsonContextRecord rec = new JsonContextRecord(text);
 		return fillObjectFrom(rec);
 	}
-	
+
 	protected abstract T fillObjectFrom(JsonContextRecord text);
-	
-	public T readObjectFrom(JsonNode text){
+
+	public T readObjectFrom(JsonNode text) {
 		return fillObjectFrom(text);
-	}
-
-	public FilterValuesMap getMap() {
-		return map;
-	}
-
-	public void setMap(FilterValuesMap map) {
-		this.map = map;
 	}
 
 }

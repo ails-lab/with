@@ -57,7 +57,6 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DigitalNZ.toString();
 		apiKey = "SECRET_KEY";
-		formatreader = new DNZBasicRecordFormatter();
 		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("and[category][]"));
 		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("and[creator][]"));
 		addDefaultWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
@@ -69,7 +68,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "Audio");
 		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "Books");
 
-		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.Creative_Commercial,
+		// addMapping(CommonFilters.RIGHTS.name(),
+		// RightsValues.Creative_Commercial,
 		// "");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
 		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.Creative_Modify,
@@ -82,7 +82,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// "This work is licensed under a Creative Commons
 		// Attribution-Noncommercial 3.0 New Zealand License");
 		//
-		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.UNKNOWN, "No known
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.UNKNOWN, "No
+		// known
 		// copyright restrictions\nCopyright Expired",
 		// "No known copyright restrictions");
 		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.RR, "All rights
@@ -93,6 +94,9 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), "Use commercially");
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.toString(), "Unknown");
 		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.toString(), "All rights reserved");
+
+		formatreader = new DNZBasicRecordFormatter(vmap);
+
 	}
 
 	private Function<List<String>, Pair<String>> fwriter(String parameter) {
@@ -145,7 +149,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
 		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
 		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
-		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);;
+		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
+		;
 
 		if (checkFilters(q)) {
 			try {
@@ -162,16 +167,16 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 				for (JsonNode item : aa) {
 					// System.out.println(item.toString());
 
-//					List<String> v = Utils.readArrayAttr(item, "category", false);
-//					// System.out.println("add " + v);
-//					for (String string : v) {
-//						countValue(type, string);
-//					}
+					// List<String> v = Utils.readArrayAttr(item, "category",
+					// false);
+					// // System.out.println("add " + v);
+					// for (String string : v) {
+					// countValue(type, string);
+					// }
 					res.addItem(formatreader.readObjectFrom(item));
 
 				}
 				res.count = res.items.getCulturalCHO().size();
-
 
 				readList(o.path("facets").path("category"), type);
 				readList(o.path("facets").path("usage"), rights);
