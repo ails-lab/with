@@ -20,24 +20,36 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
-import org.mongodb.morphia.annotations.Embedded;
+public class MultiLiteral extends MapWithList {
 
-@Embedded
-public class KeyValuesPair<K> extends HashMap<String, List<String>> {
 
-	public KeyValuesPair() {
-		super();
+	public MultiLiteral() {
 	}
 
-	public void add(K key, String value) {
-		List<String> list = get(key);
-		if (list == null) {
-			put(key.toString(), list = new ArrayList<>());
+	public MultiLiteral(String label) {
+		addLiteral(label);
+	}
+
+	public MultiLiteral(Language lang, String label) {
+		addLiteral(lang, label);
+	}
+
+	public void addLiteral(Language lang, String value) {
+		add(lang.toString(), value);
+		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
+			add(Language.DEF.toString(), value);
+	}
+
+	public void addLiteral(String value) {
+		addLiteral(Language.UNKNOWN, value);
+	}
+	
+	public List<String> getMultiLiteral(Language lang) {
+		/*if(Language.ANY.equals(lang)) {
+			return this.get(this.keySet().toArray()[0]);
 		}
-		list.add(value);
+		else*/
+			return get(lang.toString());
 	}
-
 }

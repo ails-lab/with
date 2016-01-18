@@ -38,21 +38,24 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import javassist.expr.NewArray;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
-import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ResourceType;
 
 public class JsonContextRecord {
 
 	private JsonNode rootInformation;
 	private List<String> context;
-	
+
 	public JsonContextRecord(JsonNode rootInformation) {
 		this.context = new ArrayList<>();
 		this.rootInformation = rootInformation;
 	}
-	
+
 	public JsonContextRecord(String jsonString) {
-		//TODO: what us context?
+		// TODO: what us context?
 		context = new ArrayList<>();
 		ObjectMapper mapper = new ObjectMapper();
 		try {
@@ -65,19 +68,19 @@ public class JsonContextRecord {
 			e.printStackTrace();
 		}
 	}
-	
-	public void enterContext(String path){
-		
+
+	public void enterContext(String path) {
+
 	}
-	
-	public void exitContext(){
-		context.remove(context.size()-1);
+
+	public void exitContext() {
+		context.remove(context.size() - 1);
 	}
-	
-	protected List<String> buildpaths(String... path){
-//		System.out.println(Arrays.toString(path));
+
+	protected List<String> buildpaths(String... path) {
+		// System.out.println(Arrays.toString(path));
 		List<String> spath = new ArrayList<>();
-		//TODO: what is context?
+		// TODO: what is context?
 		for (String string : context) {
 			String[] singlepaths = string.split("\\.");
 			spath.addAll(Arrays.asList(singlepaths));
@@ -88,10 +91,10 @@ public class JsonContextRecord {
 		}
 		return spath;
 	}
-	
-	public JsonNode getValue(Collection<String> steps){
+
+	public JsonNode getValue(Collection<String> steps) {
 		JsonNode node = rootInformation;
-		//TODO: if one null, return null?
+		// TODO: if one null, return null?
 		for (String string : steps) {
 			node = getPath(node, string);
 			if (node == null)
@@ -99,33 +102,30 @@ public class JsonContextRecord {
 		}
 		return node;
 	}
-	
-	
-	public void setValue(String steps, String val){
+
+	public void setValue(String steps, String val) {
 		List<String> path = buildpaths(steps);
-		setValue(path,val);
-	}
-	
-	public void setValue(String steps, JsonNode val){
-		List<String> path = buildpaths(steps);
-		setValue(path,val);
+		setValue(path, val);
 	}
 
-	
-	public void setValue(Collection<String> steps, String val){
+	public void setValue(String steps, JsonNode val) {
+		List<String> path = buildpaths(steps);
+		setValue(path, val);
+	}
+
+	public void setValue(Collection<String> steps, String val) {
 		ObjectMapper mapper = new ObjectMapper();
-		setValue(steps,mapper .convertValue(val, JsonNode.class));
+		setValue(steps, mapper.convertValue(val, JsonNode.class));
 	}
 
-	
-	public void setValue(Collection<String> steps, JsonNode val){
+	public void setValue(Collection<String> steps, JsonNode val) {
 		JsonNode node = rootInformation;
 		for (Iterator<String> iterator = steps.iterator(); iterator.hasNext();) {
 			String string = (String) iterator.next();
 			JsonNode path = getPath(node, string);
-			if (!node.has(string)){
+			if (!node.has(string)) {
 				ObjectNode n = (ObjectNode) node;
-				n.put(string, buildNewObject(iterator,val, new ObjectMapper()));
+				n.put(string, buildNewObject(iterator, val, new ObjectMapper()));
 			} else {
 				node = path;
 			}
@@ -133,21 +133,21 @@ public class JsonContextRecord {
 	}
 
 	private JsonNode buildNewObject(Iterator<String> iterator, JsonNode val, ObjectMapper map) {
-		if (!iterator.hasNext()){
+		if (!iterator.hasNext()) {
 			return val;
-		} else{
+		} else {
 			ObjectNode n = map.createObjectNode();
 			n.put(iterator.next(), buildNewObject(iterator, val, map));
 			return n;
 		}
 	}
-	
+
 	private JsonNode getPath(JsonNode node, String path) {
-		if (path.endsWith("]")){
+		if (path.endsWith("]")) {
 			String[] elements = path.split("\\[|\\]");
 			String p = elements[0];
 			// is a index
-			try{
+			try {
 				int index = Integer.parseInt(elements[1]);
 				return node.path(p).get(index);
 			} catch (NumberFormatException e) {
@@ -161,50 +161,58 @@ public class JsonContextRecord {
 						String[] splits = string.split("=");
 						String name = splits[0];
 						String vals = splits[1];
-						if (current.path(name).asText().matches(vals)){
+						if (current.path(name).asText().matches(vals)) {
 							return current;
 						}
 					}
-					
+
 				}
 			}
-		} 
+		}
 		return node.path(path);
 	}
-	
-	public JsonNode getValue(String... path){
+
+	public JsonNode getValue(String... path) {
 		return getValue(buildpaths(path));
 	}
-	
-	public String getStringValue(String... path){
+
+	public String getStringValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
 			return JsonNodeUtils.asString(node);
-		else 
+		else
 			return null;
 	}
-	
-	public int getIntValue(String... path){
+
+	public int getIntValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
-		try{
+		try {
 			return Integer.parseInt(JsonNodeUtils.asString(node));
-		} catch (Exception e){
+		} catch (Exception e) {
 			return 0;
 		}
 	}
-	
-	public MultiLiteral getLiteralValue(String... path){
+
+	public MultiLiteral getLiteralValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
 			return JsonNodeUtils.asLiteral(node);
-		else 
+		else
 			return null;
 	}
-	public List<String> getStringArrayValue(String... path){
+
+	public MultiLiteralOrResource getLiteralOrResourceValue(String... path) {
+		JsonNode node = getValue(buildpaths(path));
+		if (node != null)
+			return JsonNodeUtils.asMultiLiteralOrResource(node);
+		else
+			return null;
+	}
+
+	public List<String> getStringArrayValue(String... path) {
 		return JsonNodeUtils.asStringArray(getValue(buildpaths(path)));
 	}
-	
-	
+
 	public JsonNode getRootInformation() {
 		return rootInformation;
 	}
@@ -222,15 +230,15 @@ public class JsonContextRecord {
 		r.setValue("f.color.name.mijalis", r.getValue("a"));
 		HashMap<String, String> f = new HashMap<>();
 		f.put("en", "Hello World");
-//		System.out.println(Json.toJson(f).toString());
-//		Literal l = new Literal(Language.EN, "hello");
-//		System.out.println(Json.toJson(l).toString());
-//		NewMultiLiteralOrResource ml = new NewMultiLiteralOrResource();
-//		ml.add(Language.EN, "bye");
-//		ml.add(ResourceType.uri, "http://bbla.bla");
-//		
-//		System.out.println(Json.toJson(ml).toString());
+		System.out.println(Json.toJson(f).toString());
+		Literal l = new Literal(Language.EN, "hello");
+		System.out.println(Json.toJson(l).toString());
+		MultiLiteralOrResource ml = new MultiLiteralOrResource();
+		ml.addLiteral(Language.EN, "bye");
+		ml.addLiteral(Language.DEF, "http://www.google.com");
+
+		System.out.println(Json.toJson(ml).toString());
 		System.out.println(r.getRootInformation().toString());
 	}
-	
+
 }

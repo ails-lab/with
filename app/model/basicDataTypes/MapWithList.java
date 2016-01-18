@@ -26,18 +26,16 @@ import java.util.Map;
 import org.mongodb.morphia.annotations.Embedded;
 
 @Embedded
-public class KeyValuesPair<K> extends HashMap<String, List<String>> {
+public class MapWithList extends HashMap<String, List<String>> {
 
-	public KeyValuesPair() {
-		super();
+	public MapWithList() {
 	}
 
-	public void add(K key, String value) {
-		List<String> list = get(key);
-		if (list == null) {
-			put(key.toString(), list = new ArrayList<>());
-		}
-		list.add(value);
+	public void add(String key, String value) {
+		if (this.containsKey(key))
+			this.get(key).add(value);
+		else
+			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 
 }

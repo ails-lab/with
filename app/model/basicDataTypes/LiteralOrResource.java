@@ -16,28 +16,35 @@
 
 package model.basicDataTypes;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import sources.core.Utils;
 
-import org.mongodb.morphia.annotations.Embedded;
+public class LiteralOrResource extends Literal {
 
-@Embedded
-public class KeyValuesPair<K> extends HashMap<String, List<String>> {
+	public static final String URI = "uri";
 
-	public KeyValuesPair() {
+	public LiteralOrResource() {
 		super();
 	}
 
-	public void add(K key, String value) {
-		List<String> list = get(key);
-		if (list == null) {
-			put(key.toString(), list = new ArrayList<>());
-		}
-		list.add(value);
+	public LiteralOrResource(Language key, String value) {
+		super(key, value);
+	}
+
+	public LiteralOrResource(String label) {
+		if (Utils.isValidURL(label)) 
+			addURI(label);
+		else
+			addLiteral(label);
+	}
+
+	public void addURI(String uri) {
+		put(URI, uri);
+	}
+
+	public static LiteralOrResource build(String string) {
+		if (!Utils.hasInfo(string))
+			return null;
+		return new LiteralOrResource(string);
 	}
 
 }

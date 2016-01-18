@@ -20,31 +20,31 @@ import org.mongodb.morphia.annotations.Embedded;
 
 @Embedded
 public class OldMultiLiteralOrResource extends OldMultiLiteral {
-	
-	private OldLiteralOrResource.OldResource resource;
-	
-	public OldMultiLiteralOrResource() {
-		super();
-	}
 
-	public OldMultiLiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
-	}
+	// private OldLiteralOrResource.OldResource resource;
+	//
+	// public OldMultiLiteralOrResource() {
+	// super();
+	// }
 
-	public OldMultiLiteralOrResource(String label) {
-		super(label);
-	}
-
-	// etc etc
-	public String getResource(ResourceType resourceType) {
-		if (resource.uriType.equals(resourceType))
-			return resource.uri;
-		else
-			return "";
-	}
-
-	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
-
-	}
+	// public OldMultiLiteralOrResource(ResourceType resourceType, String uri) {
+	// this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
+	// }
+	//
+	// public OldMultiLiteralOrResource(String label) {
+	// super(label);
+	// }
+	//
+	// // etc etc
+	// public String getResource(ResourceType resourceType) {
+	// if (resource.uriType.equals(resourceType))
+	// return resource.uri;
+	// else
+	// return "";
+	// }
+	//
+	// public void setResource(ResourceType resourceType, String uri ) {
+	// this.resource = new OldLiteralOrResource.OldResource(resourceType, uri);
+	//
+	// }
 }

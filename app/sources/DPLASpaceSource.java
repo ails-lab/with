@@ -60,7 +60,6 @@ public class DPLASpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DPLA.toString();
 		apiKey = "SECRET_KEY";
-		formatreader = new DPLARecordFormatter();
 		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
 		addDefaultWriter(CommonFilters.COUNTRY.name(), fwriter("sourceResource.spatial.country"));
 		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("sourceResource.creator"));
@@ -95,6 +94,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "moving image");
 		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "sound");
 		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "text");
+
+		formatreader = new DPLARecordFormatter(vmap);
 
 		// TODO: what to do with physical objects?
 	}
@@ -138,8 +139,6 @@ public class DPLASpaceSource extends ISpaceSource {
 		};
 	}
 
-
-
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
 		SourceResponse res = new SourceResponse();
@@ -148,11 +147,11 @@ public class DPLASpaceSource extends ISpaceSource {
 		res.query = httpQuery;
 		JsonNode response;
 		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
-		CommonFilterLogic provider =  new CommonFilterLogic(CommonFilters.PROVIDER);
-		CommonFilterLogic dataProvider =  new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
-		CommonFilterLogic creator =  new CommonFilterLogic(CommonFilters.CREATOR);
-		CommonFilterLogic country =  new CommonFilterLogic(CommonFilters.COUNTRY);
-		CommonFilterLogic contributor =  new CommonFilterLogic(CommonFilters.CONTRIBUTOR);
+		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
+		CommonFilterLogic dataProvider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
+		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
+		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
+		CommonFilterLogic contributor = new CommonFilterLogic(CommonFilters.CONTRIBUTOR);
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(httpQuery);
@@ -169,8 +168,8 @@ public class DPLASpaceSource extends ISpaceSource {
 					// countValue(type, t);
 
 					res.addItem(formatreader.readObjectFrom(item));
-//					countValue(creator, obj.getCreator());
-					
+					// countValue(creator, obj.getCreator());
+
 				}
 				res.facets = response.path("facets");
 				res.filtersLogic = new ArrayList<>();

@@ -17,8 +17,6 @@
 package model.basicDataTypes;
 
 import java.util.ArrayList;
-
-import model.basicDataTypes.KeyValuesPair.MultiLiteralOrResource;
 public class CidocEvent {
 	public static enum EventType {
 		CREATED, OTHER 

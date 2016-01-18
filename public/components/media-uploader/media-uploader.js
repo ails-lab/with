@@ -13,10 +13,34 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 		});
 		self.description = ko.observable().extend();
 		self.imageURL = ko.observable();
-		self.isShownBy = ko.observable();
-		self.thumbnailUrl = ko.observable();
 		self.collectionId = ko.observable(params.collectionId);
-		self.externalId = ko.observable();
+
+		self.originalUrl = ko.observable();
+		self.mediumUrl = ko.observable();
+		self.thumbnailUrl = ko.observable();
+		self.squareUrl = ko.observable();
+		self.tinyUrl = ko.observable();
+
+		self.rights = ko.observableArray([
+			'Public("Attribution Alone")',
+			'Restricted("Restricted")',
+			'Permission("Permission")',
+			'Modify("Allow re-use and modifications")',
+			'Commercial("Allow re-use for commercial")',
+			'Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon")',
+			'Creative_Not_Commercial("NOT Comercial")',
+			'Creative_Not_Modify("NOT Modify")',
+			'Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes")',
+			'Creative_SA("share alike")',
+			'Creative_BY("use by attribution")',
+			'Creative("Allow re-use")',
+			'RR("Rights Reserved")',
+			'RRPA("Rights Reserved - Paid Access")',
+			'RRRA("Rights Reserved - Restricted Access")',
+			'RRFA("Rights Reserved - Free Access")',
+			'UNKNOWN("Unknown")'
+		]);
+		self.withRights = ko.observable('UNKNOWN("Unknown")');
 
 		$('#imageupload').fileupload({
 			type: "POST",
@@ -34,9 +58,11 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 					};
 					reader.readAsDataURL(data.files[0]);
 				}
-				self.isShownBy(data.result.results[0].isShownBy);
-				self.thumbnailUrl(data.result.results[0].thumbnailUrl);
-				self.externalId(data.result.results[0].externalId);
+				self.originalUrl(data.result.results[0].original);
+				self.mediumUrl(data.result.results[0].medium);
+				self.thumbnailUrl(data.result.results[0].thumbnail);
+				self.squareUrl(data.result.results[0].square);
+				self.tinyUrl(data.result.results[0].tiny);
 			},
 			error: function (e, data) {
 				console.log(e);
@@ -51,14 +77,35 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 
 		self.uploadImage = function () {
 			var data = {
-				source: 'UploadedByUser',
-				title: self.title(),
-				description: self.description(),
-				provider: app.currentUser.username(),
-				type: 'IMAGE',
-				thumbnailUrl: self.thumbnailUrl(),
-				isShownBy: self.isShownBy(),
-				externalId: self.externalId()
+				provenance: {
+					provider: 'UploadedByUser'
+				},
+				descriptiveData: {
+					label: self.title(),
+					description: self.description()
+				},
+				media: [{
+					original: {
+						url: this.originalUrl(),
+						withRights: this.withRights()
+					},
+					medium: {
+						url: this.mediumUrl(),
+						withRights: this.withRights()
+					},
+					thumbnail: {
+						url: this.thumbnailUrl(),
+						withRights: this.withRights()
+					},
+					square: {
+						url: this.squareUrl(),
+						withRights: this.withRights()
+					},
+					tiny: {
+						url: this.tinyUrl(),
+						withRights: this.withRights()
+					}
+				}]
 			};
 			$.ajax({
 				url: '/collection/' + self.collectionId() + '/addRecord',
