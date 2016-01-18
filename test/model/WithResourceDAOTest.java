@@ -62,9 +62,7 @@ public class WithResourceDAOTest {
 
 		// embedded
 		image.setType(WithMediaType.IMAGE);
-		Set<WithMediaRights> set = new HashSet<WithMediaRights>();
-		set.add(WithMediaRights.Public);
-		image.setWithRights(set);
+		image.setWithRights(WithMediaRights.Public);
 		if (j == 0) {
 			image.setMediaVersion(MediaVersion.Original);
 			image.setHeight(599);

@@ -87,9 +87,7 @@ public class MediaObjectTest {
 		mo.setWidth(1230);
 		LiteralOrResource lor = LiteralOrResource.build(url.toString());
 		mo.setOriginalRights(lor);
-		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
-		set.add(WithMediaRights.Creative);
-		mo.setWithRights(set);
+		mo.setWithRights(WithMediaRights.Creative);
 		mo.setType(WithMediaType.IMAGE);
 		mo.setUrl(url.toString());
 
