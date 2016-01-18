@@ -34,6 +34,7 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
+import utils.AccessEnumConverter;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -41,7 +42,6 @@ import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
-import db.converters.RightsConverter;
 
 // get the DAOs from here
 // the EntityManagerFactory is here
@@ -103,7 +103,7 @@ public class DB {
 			//morphia.mapPackage("model.usersAndGroups");
 			//morphia.map(User.class);
 			morphia.getMapper().getConverters()
-					.addConverter(new RightsConverter());
+					.addConverter(new AccessEnumConverter());
 		}
 		return morphia;
 	}
@@ -180,7 +180,7 @@ public class DB {
 	}
 
 	public static WithResourceDAO<WithResource> getWithResourceDAO() {
-		DAO<?> dao = (DAO<WithResource>) daos.get("WithResource");
+		DAO<?> dao = daos.get("WithResource");
 		if (dao == null) {
 			try {
 				dao = new WithResourceDAO(WithResource.class);

@@ -44,10 +44,11 @@ public class MultiLiteral extends MapWithList {
 	public void addLiteral(String value) {
 		addLiteral(Language.UNKNOWN, value);
 	}
-	
+
 	public List<String> getMultiLiteral(Language lang) {
 		/*if(Language.ANY.equals(lang)) {
 			return this.get(this.keySet().toArray()[0]);
+
 		}
 		else*/
 			return get(lang.toString());
