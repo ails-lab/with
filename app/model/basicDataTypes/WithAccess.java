@@ -96,6 +96,15 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 		return acl;
 	}
 
+	public void addAccess(AccessEntry accessEntry) {
+		this.acl.add(accessEntry);
+	}
+	
+	public void addAccess(ObjectId userId, Access access) {
+		AccessEntry accessEntry = new AccessEntry(userId, access);
+		this.acl.add(accessEntry);
+	}
+	
 	public void setAcl(List<AccessEntry> acl) {
 		this.acl = acl;
 	}
