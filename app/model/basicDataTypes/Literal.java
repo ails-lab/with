@@ -16,24 +16,43 @@
 
 package model.basicDataTypes;
 
-public class Literal extends KeySingleValuePair<String> {
+import java.util.HashMap;
+
+public class Literal extends HashMap<String, String> {
 
 	public Literal() {
-		super();
+	}
+	
+	public Literal(String label) {
+		this.put(Language.UNKNOWN.toString(), label);
 	}
 
-	public Literal(Language lang, String value) {
-		super();
-		addLiteral(lang, value);
+	public Literal(Language lang, String label) {
+		this.put(lang.toString(), label);
+		if (lang.equals(Language.ENG))
+			this.put(Language.DEF.toString(), label);
 	}
 
 	public void addLiteral(Language lang, String value) {
-		add(lang.toString(), value);
-		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
-			add(Language.DEF.toString(), value);
+		this.put(lang.toString(), value);
+		if (lang.equals(Language.ENG) && !this.containsKey(Language.DEF.toString()))
+			this.put(Language.DEF.toString(), value);
 	}
-
+	
 	public void addLiteral(String value) {
 		addLiteral(Language.UNKNOWN, value);
+	}
+	
+	/**
+	 * Don't request the "unknown" language, request "any" if you don't care
+		 * @param lang
+	 * @return
+	 */
+	public String getLiteral(Language lang) {
+		/*=if(Language.ANY.equals(lang)) {
+			return this.get(this.keySet().toArray()[0]);
+		}
+		else*/
+			return get(lang.toString());
 	}
 }

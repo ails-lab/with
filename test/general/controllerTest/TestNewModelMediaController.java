@@ -92,9 +92,7 @@ public class TestNewModelMediaController {
 
 		// embedded
 		image.setType(WithMediaType.IMAGE);
-		Set<WithMediaRights> set = new HashSet<WithMediaRights>();
-		set.add(WithMediaRights.Public);
-		image.setWithRights(set);
+		image.setWithRights(WithMediaRights.Public);
 		image.setHeight(599);
 		image.setWidth(755);
 		// image.setThumbHeight(120);

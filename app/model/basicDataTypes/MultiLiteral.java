@@ -16,19 +16,22 @@
 
 package model.basicDataTypes;
 
-public class MultiLiteral extends KeyValuesPair<String> {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+
+public class MultiLiteral extends MapWithList {
+
 
 	public MultiLiteral() {
-		super();
 	}
 
 	public MultiLiteral(String label) {
-		super();
 		addLiteral(label);
 	}
 
 	public MultiLiteral(Language lang, String label) {
-		super();
 		addLiteral(lang, label);
 	}
 
@@ -40,5 +43,13 @@ public class MultiLiteral extends KeyValuesPair<String> {
 
 	public void addLiteral(String value) {
 		addLiteral(Language.UNKNOWN, value);
+	}
+	
+	public List<String> getMultiLiteral(Language lang) {
+		/*if(Language.ANY.equals(lang)) {
+			return this.get(this.keySet().toArray()[0]);
+		}
+		else*/
+			return get(lang.toString());
 	}
 }
