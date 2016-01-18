@@ -149,9 +149,9 @@ public class RecordController extends Controller {
 					&& (DB.getCollectionDAO().makePermanent(collection) != null)) {
 
 				// update the record in the index
-				ElasticUpdater updater = new ElasticUpdater(oldRecord,
-						newRecord);
-				updater.updateRecordTags();
+				//ElasticUpdater updater = new ElasticUpdater(oldRecord,
+				//		newRecord);
+				//updater.updateRecordTags();
 				result.put("message", "Record updated sucessfully!");
 			} else {
 				result.put("message", "Record not updated!");
@@ -214,9 +214,9 @@ public class RecordController extends Controller {
 					&& (DB.getCollectionDAO().makePermanent(c) != null)) {
 
 				// delete record from index
-				ElasticEraser eraser = new ElasticEraser(record);
-				eraser.deleteRecord();
-				eraser.deleteRecordEntryFromMerged();
+				//ElasticEraser eraser = new ElasticEraser(record);
+				//eraser.deleteRecord();
+				//eraser.deleteRecordEntryFromMerged();
 
 				return ok(Json.toJson(record));
 			} else {

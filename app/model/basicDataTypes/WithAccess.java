@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  * So that Model objects can have a proper type for rights embedded
  */
-public class WithAccess  {
+public class WithAccess  extends HashMap<ObjectId, Access>{
 
 	@Indexes({
 		@Index(fields = @Field(value = "user", type = IndexType.ASC), options = @IndexOptions(disableValidation=true)),

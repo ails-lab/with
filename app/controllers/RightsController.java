@@ -114,8 +114,8 @@ public class RightsController extends Controller {
 				return internalServerError(result);
 			}
 			// update collection rights in index
-			ElasticUpdater updater = new ElasticUpdater(collection);
-			updater.updateCollectionRights();
+			//ElasticUpdater updater = new ElasticUpdater(collection);
+			//updater.updateCollectionRights();
 			// Inform user or group for the unsharing
 			Notification notification = new Notification();
 			notification.setActivity(Activity.COLLECTION_UNSHARED);
@@ -139,8 +139,8 @@ public class RightsController extends Controller {
 				return internalServerError(result);
 			}
 			// update collection rights in index
-			ElasticUpdater updater = new ElasticUpdater(collection);
-			updater.updateCollectionRights();
+			//ElasticUpdater updater = new ElasticUpdater(collection);
+			//updater.updateCollectionRights();
 			Notification newNotification = new Notification();
 			newNotification.setActivity(Activity.COLLECTION_SHARED);
 			if (groupRelated) {

@@ -171,8 +171,8 @@ public class NotificationController extends Controller {
 						return internalServerError(result);
 					}
 					// update collection rights in index
-					ElasticUpdater updater = new ElasticUpdater(collection);
-					updater.updateCollectionRights();
+					//ElasticUpdater updater = new ElasticUpdater(collection);
+					//updater.updateCollectionRights();
 				}
 				notification.setPendingResponse(false);
 				notification.setReadAt(new Timestamp(now.getTime()));
@@ -247,8 +247,8 @@ public class NotificationController extends Controller {
 			try {
 				notification = DB.getNotificationDAO().get(
 						new ObjectId(id.asText()));
-				if (notification.getReadAt() == null
-						&& notification.isPendingResponse() == false) {
+				if ((notification.getReadAt() == null)
+						&& (notification.isPendingResponse() == false)) {
 					Date now = new Date();
 					notification.setReadAt(new Timestamp(now.getTime()));
 					DB.getNotificationDAO().makePermanent(notification);

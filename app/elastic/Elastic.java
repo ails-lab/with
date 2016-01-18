@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutionException;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
@@ -296,15 +298,14 @@ public class Elastic {
 		//getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
 		//putMapping();
 
-				Callback<CollectionRecord> callback = new Callback<CollectionRecord>() {
+				Callback<RecordResource> callback = new Callback<RecordResource>() {
 				@Override
-					public void invoke(CollectionRecord r ) throws Throwable {
-						ElasticIndexer ei = new ElasticIndexer( r );
-						ei.index();
-					}
+					public void invoke(RecordResource rr ) throws Throwable {
+						ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+						}
 				};
 				try {
-					DB.getCollectionRecordDAO().onAll( callback, false );
+					DB.getRecordResourceDAO().onAll( callback, false );
 				} catch( Exception e ) {
 					log.error( "ReIndexing problem", e );
 				}

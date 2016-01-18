@@ -80,7 +80,7 @@ public class Deserializer {
 			TreeNode treeNode = rightsString.readValueAsTree();
 			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
 			if (isPublic != null) {
-				rights.setPublic(isPublic.asBoolean());
+				rights.setIsPublic(isPublic.asBoolean());
 			}
 			ObjectNode jsonRights = (ObjectNode) treeNode.get("rights");
 			if (jsonRights != null) {

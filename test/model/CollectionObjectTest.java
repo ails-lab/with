@@ -16,14 +16,28 @@
 
 package model;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
+
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ResourceType;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -33,6 +47,9 @@ import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
 import model.usersAndGroups.User;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
@@ -165,11 +182,11 @@ public class CollectionObjectTest {
 		//mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource(ResourceType.uri, url.toString());
+		LiteralOrResource lor = new LiteralOrResource(Language.EN, url.toString());
 		mo.setOriginalRights(lor);
 		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
 		set.add(WithMediaRights.Creative);
-		mo.setWithRights(set);
+		//mo.setWithRights(set);
 		mo.setType(WithMediaType.IMAGE);
 		mo.setUrl(url.toString());
 

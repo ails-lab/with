@@ -25,7 +25,8 @@ import java.util.Map.Entry;
 
 import model.Collection;
 import model.EmbeddedMediaObject;
-import model.basicDataTypes.Literal.Language;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
@@ -74,9 +75,11 @@ public class ElasticUtils {
 					continue;
 				all_labels.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
-				String un = rr.getDescriptiveData().getLabel().getLiteral(Language.UNKNOWN);
-				if(un != null)
-				addToLangAll(e.getKey(), un);
+				List<String> un = rr.getDescriptiveData().getLabel().getMultiLiteral(Language.UNKNOWN);
+				if(un != null) {
+					for(String u: un)
+						addToLangAll(e.getKey(), u);
+				}
 			}
 			idx_doc.put("label_all", all_labels);
 
@@ -98,9 +101,11 @@ public class ElasticUtils {
 					continue;
 				all_descs.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
-				String un = rr.getDescriptiveData().getDescription().getLiteral(Language.UNKNOWN);
-				if(un != null)
-				addToLangAll(e.getKey(), un);
+				List<String> un = rr.getDescriptiveData().getDescription().getMultiLiteral(Language.UNKNOWN);
+				if(un != null) {
+					for(String u: un)
+						addToLangAll(e.getKey(), u);
+				}
 			}
 			idx_doc.put("description_all", all_descs);
 		}
@@ -192,7 +197,8 @@ public class ElasticUtils {
 		 */
 		ArrayNode media_objects = Json.newObject().arrayNode();
 		if(rr.getMedia() != null) {
-			for(EmbeddedMediaObject emo: rr.getMedia()) {
+			// take care about all EmbeddedMediaObjects
+			EmbeddedMediaObject emo = rr.getMedia().get(0).get(MediaVersion.Original);
 				ObjectNode media = Json.newObject();
 				media.put("withRights", Json.toJson(emo.getWithRights()));
 				media.put("withMediaType", Json.toJson(emo.getType()));
@@ -214,7 +220,6 @@ public class ElasticUtils {
 						media.remove(fName);
 					}
 				}
-			}
 			idx_doc.put("media", media_objects);
 		}
 
