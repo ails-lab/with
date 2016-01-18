@@ -16,32 +16,26 @@
 
 package model.basicDataTypes;
 
-import sources.core.Utils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-public class MultiLiteralOrResource extends MultiLiteral {
+import org.mongodb.morphia.annotations.Embedded;
 
-	public MultiLiteralOrResource() {
+@Embedded
+public class MapWithList extends HashMap<String, List<String>> {
+
+	public MapWithList() {
 	}
 
-	public MultiLiteralOrResource(Language lang, String label) {
-	}
-
-	public MultiLiteralOrResource(String label) {
-		if (Utils.isValidURL(label)) {
-			addURI(label);
-		} else
-			addLiteral(label);
-	}
-
-	public void addLiteral(Language lang, String value) {
-		if (lang.equals(Language.DEF) && Utils.isValidURL(value))
-			addURI(value);
+	public void add(String key, String value) {
+		if (this.containsKey(key))
+			this.get(key).add(value);
 		else
-			super.addLiteral(lang, value);
-	}
-
-	public void addURI(String uri) {
-		add(LiteralOrResource.URI, uri);
+			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 
 }
