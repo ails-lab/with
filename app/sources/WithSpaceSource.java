@@ -60,6 +60,25 @@ import elastic.ElasticUtils;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
+	
+	//there should be a filter on source
+	//in general, more filters in new model for search within WITH db
+	public enum WithinFilters {
+		Provider("provider"), Type("type"), DataProvider("dataprovider"),
+		Creator("creator"), Rights("rights"),
+		Country("country"), Year("year");
+		
+		private String value;
+		
+		WithinFilters(String value) {
+	        this.value = value;
+	    }
+
+	    @Override
+	    public String toString() {
+	        return value;
+	    }
+	}
 
 	@Override
 	public String getSourceName() {
@@ -103,7 +122,6 @@ public class WithSpaceSource extends ISpaceSource {
 				.searchAccessibleCollectionsScanScroll(elasticoptions);
 		List<SearchHit> hits = getTotalHitsFromScroll(response);
 		colFields = getCollectionMetadataFromHit(hits);
-
 		/*
 		 * Search index for merged records according to collection ids gathered
 		 * above
@@ -125,15 +143,16 @@ public class WithSpaceSource extends ISpaceSource {
 			for (Entry<String, Aggregation> e : resp.getAggregations().asMap()
 					.entrySet()) {
 				e.getKey();
-
 			}
 			res.filtersLogic = new ArrayList<>();
 			for (Aggregation agg : resp.getAggregations().asList()) {
 				InternalTerms aggTerm = (InternalTerms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
 					CommonFilterLogic filter = new CommonFilterLogic(CommonFilters.valueOf(agg.getName()));
-					countValue(filter, aggTerm.getBuckets().get(0).getKey(),
+					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+						countValue(filter, aggTerm.getBuckets().get(i).getKey(),
 							(int) aggTerm.getBuckets().get(0).getDocCount());
+					}
 					res.filtersLogic.add(filter);
 				}
 			}
