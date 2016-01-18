@@ -395,9 +395,12 @@ public class MediaController extends Controller {
 				square = makeThumb(med, image, -1, 150, true);
 			} else{
 				square.setMediaBytes(med.getMediaBytes());
+				square.setMimeType(med.getMimeType());
 			}
 			thumbnail.setMediaBytes(med.getMediaBytes());
+			thumbnail.setMimeType(med.getMimeType());
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
 			
 			
 
@@ -405,8 +408,11 @@ public class MediaController extends Controller {
 			tiny = makeThumb(med, image, 100, -1, false);
 
 			square.setMediaBytes(med.getMediaBytes());
+			square.setMimeType(med.getMimeType());
 			thumbnail.setMediaBytes(med.getMediaBytes());
+			thumbnail.setMimeType(med.getMimeType());
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
 
 
 		} else if(med.getWidth()<=300){
@@ -418,7 +424,9 @@ public class MediaController extends Controller {
 			}
 
 			thumbnail.setMediaBytes(med.getMediaBytes());
+			thumbnail.setMimeType(med.getMimeType());
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
 			
 		} else if(med.getWidth()<=640){
 			tiny = makeThumb(med, image, 100, -1, false);
@@ -430,6 +438,7 @@ public class MediaController extends Controller {
 			thumbnail = makeThumb(med, image, 300, -1, false);
 
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
 
 		} else {
 			tiny = makeThumb(med, image, 100, -1, false);
@@ -492,6 +501,25 @@ public class MediaController extends Controller {
 		BufferedImage thumb = new BufferedImage(
 				ithumb.getWidth(null),
 				ithumb.getHeight(null), image.getType());
+		
+		Logger.info("Width: " + thumb.getWidth() + ", x = "+ (((thumb.getWidth() - 150)/2)-1));
+		
+		BufferedImage thumb2 = null;
+		
+		if(crop){
+			if(thumb.getHeight()>150){
+				int y = ((thumb.getHeight() - 150)/2)-1;
+				thumb2 = thumb.getSubimage(0, y, 150, 150);
+				
+				
+			}else if(thumb.getWidth()>150){
+				int x = ((thumb.getWidth() - 150)/2)-1;
+				thumb2 = thumb.getSubimage(x, 0, 150, 150);
+			}
+			
+			thumb = thumb2;
+		}
+		
 		// Draw the image on to the buffered image
 		Graphics2D bGr = thumb.createGraphics();
 		bGr.drawImage(ithumb, 0, 0, null);
@@ -503,6 +531,7 @@ public class MediaController extends Controller {
 		baos.close();
 		
 		MediaObject mthumb = new MediaObject();
+		mthumb.setMimeType(med.getMimeType());
 		mthumb.setDbId(null);
 		mthumb.setMediaBytes(thumbByte);
 		mthumb.setWidth(ithumb.getWidth(null));
