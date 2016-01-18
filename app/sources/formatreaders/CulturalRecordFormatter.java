@@ -42,7 +42,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 
 	public CulturalObject readObjectFrom(JsonNode text) {
 		object = new CulturalObject();
-		object.getAdministrative().getAccess().setPublic(true);
+		object.getAdministrative().getAccess().setIsPublic(true);
 
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);

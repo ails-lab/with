@@ -30,6 +30,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
 import utils.Deserializer;
@@ -85,13 +86,14 @@ public class WithResource<T extends DescriptiveData> {
 
 		// uri that this resource has in the rdf repository
 		private String withURI;
-		
+
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 		private Date created;
 
 		@JsonSerialize(using = Serializer.DateSerializer.class)
 		@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+		@Version
 		private Date lastModified;
 
 		@Embedded
@@ -357,7 +359,7 @@ public class WithResource<T extends DescriptiveData> {
 	protected WithAdmin administrative;
 
 	@Embedded
-	private ArrayList<CollectionInfo > collectedIn;
+	private List<CollectionInfo > collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -365,7 +367,7 @@ public class WithResource<T extends DescriptiveData> {
 	@Embedded
 	// external collections to which the resource may belong to
 	private List<ExternalCollection> externalCollections;
-	
+
 	@Embedded
 	//depending on the source, we know which entry is the dataProvider and which the provider
 	private List<ProvenanceInfo> provenance;
@@ -420,17 +422,20 @@ public class WithResource<T extends DescriptiveData> {
 		this.administrative = administrative;
 	}
 
-	public ArrayList<CollectionInfo> getCollectedIn() {
+	public List<CollectionInfo> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(ArrayList<CollectionInfo> collectedIn) {
+	public void setCollectedIn(List<CollectionInfo> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
 		CollectionInfo entry = new CollectionInfo(colId, position);
+		if(collectedIn == null)
+			collectedIn = new ArrayList<CollectionInfo>();
 		collectedIn.add(entry);
+
 	}
 
 

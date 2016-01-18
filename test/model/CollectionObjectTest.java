@@ -16,22 +16,40 @@
 
 package model;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.stream.ImageInputStream;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ResourceType;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionDescriptiveData;
+import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
 import model.usersAndGroups.User;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
@@ -41,13 +59,15 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import elastic.Elastic;
+import elastic.ElasticUtils;
 
 public class CollectionObjectTest {
 
 	@Test
 	public void modelCollection() {
 
-		CollectionObject co = new CollectionObject();
+		RecordResource<RecordDescriptiveData> co = new RecordResource<RecordResource.RecordDescriptiveData>();
 
 		/*
 		 * Owner of the CollectionObject
@@ -65,7 +85,7 @@ public class CollectionObjectTest {
 		co.getAdministrative().setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
-		waccess.put(u.getDbId(), Access.OWN);
+		waccess.addToAcl(new AccessEntry(u.getDbId(), Access.OWN));
 		co.getAdministrative().setAccess(waccess);
 
 		//no externalCollections
@@ -78,7 +98,7 @@ public class CollectionObjectTest {
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
 		MultiLiteral label = new MultiLiteral(Language.EN,"MyTitle");
-		CollectionObject.CollectionDescriptiveData cdd = new CollectionDescriptiveData();
+		RecordDescriptiveData cdd = new RecordDescriptiveData();
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
@@ -93,27 +113,31 @@ public class CollectionObjectTest {
 		 */
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
 		co.addMedia(MediaVersion.Original, emo);
-		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+		if (DB.getRecordResourceDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+
 		System.out.println("Stored!");
+		System.out.println(Json.toJson(co));
+		System.out.println(ElasticUtils.transformRR(co));
+		RecordResource rr1 =  DB.getRecordResourceDAO().getById(co.getDbId());
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
-		JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
+		/*JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 		ObjectNode json = new ObjectNode(nodeFactory);
 		ObjectNode labelJson = nodeFactory.objectNode();
 		ObjectNode titleJson = nodeFactory.objectNode();
 		labelJson.put(Language.EN.toString(), "New Title");
 		titleJson.put("label", labelJson);
 		json.put("descriptiveData", titleJson);
-		/*titleJson.put("isExhibition", true);
-		json.put("administrative", titleJson);*/
+		titleJson.put("isExhibition", true);
+		json.put("administrative", titleJson);
 		for (CollectionObject c: DB.getCollectionObjectDAO().getByLabel("en", "MyTitle")) {
 			System.out.println(Json.toJson(c));
 			ObjectId colId = c.getDbId();
 			DB.getCollectionObjectDAO().editCollection(colId, json);
-		}
+		}*/
 
 	}
-/*
+
 
 	private MediaObject getMediaObject() {
 
@@ -155,14 +179,14 @@ public class CollectionObjectTest {
 		}
 
 		mo.setMediaBytes(rawbytes);
-		mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
+		//mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource(ResourceType.uri, url.toString());
+		LiteralOrResource lor = new LiteralOrResource(Language.EN, url.toString());
 		mo.setOriginalRights(lor);
 		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
 		set.add(WithMediaRights.Creative);
-		mo.setWithRights(set);
+		//mo.setWithRights(set);
 		mo.setType(WithMediaType.IMAGE);
 		mo.setUrl(url.toString());
 
@@ -176,5 +200,5 @@ public class CollectionObjectTest {
 
 		return mo;
 	}
-	*/
+
 }

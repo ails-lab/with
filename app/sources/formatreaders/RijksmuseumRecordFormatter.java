@@ -65,8 +65,8 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		// object.addToProvenance(new
 		// ProvenanceInfo(rec.getStringValue("provider")));
 		String id = rec.getStringValue("objectNumber");
-		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), id,
-				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/" + id + ",0"));
+		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), 
+				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/" + id + ",0", id));
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 		medThumb.setUrl(rec.getStringValue("webImage.url"));
 		object.addMedia(MediaVersion.Thumbnail, medThumb);

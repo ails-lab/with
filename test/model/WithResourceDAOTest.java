@@ -49,11 +49,13 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
-
 import play.libs.Json;
 
 import com.google.common.net.MediaType;
 
+import com.google.common.net.MediaType;
+
+import play.libs.Json;
 import db.DB;
 
 public class WithResourceDAOTest {
@@ -75,7 +77,7 @@ public class WithResourceDAOTest {
 			System.out.println(u.getUsername());
 			WithAccess access = new WithAccess();
 			access.addAccess(u.getDbId(), WithAccess.Access.READ);
-			access.setPublic(true);
+			access.setIsPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());

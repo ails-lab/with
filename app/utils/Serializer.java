@@ -57,6 +57,17 @@ public class Serializer {
 
 	}
 
+	public static class AccessSerializer extends JsonSerializer<Object> {
+
+		@Override
+		public void serialize(Object access, JsonGenerator jsonGen,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			jsonGen.writeObject(((Access)access).ordinal());
+		}
+
+	}
+
 	public static class ObjectIdArraySerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object objectIds, JsonGenerator jsonGen,
@@ -88,15 +99,10 @@ public class Serializer {
 				SerializerProvider arg2) throws IOException,
 				JsonProcessingException {
 			boolean isPublic = ((WithAccess) rights).isPublic();
-			Map<String, String> rightsMap = new HashMap<String, String>();
-			for (Entry<ObjectId, Access> e : ((Map<ObjectId, Access>) rights)
-					.entrySet()) {
-				rightsMap.put(e.getKey().toString(), e.getValue().toString());
-			}
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode json = mapper.createObjectNode();
 			json.put("isPublic", isPublic);
-			json.put("rights", Json.toJson(rightsMap));
+			json.put("acl", Json.toJson(((WithAccess)rights).getAcl()));
 			jsonGen.writeObject(json);
 		}
 	}

@@ -83,7 +83,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"));
 		object.addToProvenance(provInfo);
 		object.addToProvenance(
-				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("about"), model.getIsShownAt()));
+				new ProvenanceInfo(Sources.Europeana.toString(),  model.getIsShownAt(),rec.getStringValue("about")));
 
 		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreator"))));
 

@@ -40,7 +40,8 @@ public class Global extends GlobalSettings {
 	@Override
 	public void onStart( Application app ) {
 		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
-		Elastic.putMapping();
+		if(DB.getConf().getBoolean("elasticsearch.enable"))
+			Elastic.initializeIndex();
 		setupWithKey();
 
 		// read keys into the Manager

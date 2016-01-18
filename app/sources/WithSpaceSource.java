@@ -90,7 +90,7 @@ public class WithSpaceSource extends ISpaceSource {
 		/*
 		 * Set the basic search parameters
 		 */
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_general);
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.type);
 		String term = q.getQuery();
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
@@ -117,7 +117,7 @@ public class WithSpaceSource extends ISpaceSource {
 		/*
 		 * Search index for accessible collections
 		 */
-		searcher.setType(Elastic.type_collection);
+		searcher.setType(Elastic.type);
 		SearchResponse response = searcher
 				.searchAccessibleCollectionsScanScroll(elasticoptions);
 		List<SearchHit> hits = getTotalHitsFromScroll(response);
@@ -128,7 +128,7 @@ public class WithSpaceSource extends ISpaceSource {
 		 */
 		elasticoptions = new SearchOptions(offset, count);
 		elasticoptions.addFilter("isPublic", "true");
-		searcher.setType(Elastic.type_general);
+		searcher.setType(Elastic.type);
 		for (Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId()
 					.toString());

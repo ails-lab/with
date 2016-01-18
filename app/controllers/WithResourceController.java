@@ -26,7 +26,6 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.RecordResource;

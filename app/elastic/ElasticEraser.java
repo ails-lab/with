@@ -16,125 +16,57 @@
 
 package elastic;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.update.UpdateRequest;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.script.ScriptService.ScriptType;
-
-import db.DB;
-import model.Collection;
-import model.CollectionRecord;
 import play.Logger;
 
 public class ElasticEraser {
 	static private final Logger.ALogger log = Logger.of(ElasticUpdater.class);
 
-	private Collection collection;
-	private CollectionRecord record;
-
-
-
-	public ElasticEraser(Collection c) {
-		this.collection = c;
-	}
-
-	public ElasticEraser(CollectionRecord r) {
-		this.record = r;
-	}
-
-
-	public void deleteCollection() {
-		try {
-			Elastic.getTransportClient().prepareDelete(
-					Elastic.index,
-					Elastic.type_collection,
-					collection.getDbId().toString())
-				.setOperationThreaded(false)
-				.execute()
-				.actionGet();
-		} catch(ElasticsearchException e) {
-			log.error("Cannot delete the specified collection document", e);
-		}
-	}
-
-	public void deleteRecord() {
-		try {
-			Elastic.getTransportClient().prepareDelete(
-					Elastic.index,
-					Elastic.type_within,
-					record.getDbId().toString())
-				.setOperationThreaded(false)
-				.execute()
-				.actionGet();
-		} catch(ElasticsearchException e) {
-			log.error("Cannot delete the specified record document", e);
-		}
-	}
-
-	public void deleteMergedRecord() {
-		try {
-			Elastic.getTransportClient().prepareDelete(
-					Elastic.index,
-					Elastic.type_general,
-					record.getExternalId())
-				.setOperationThreaded(false)
-				.execute()
-				.actionGet();
-		} catch(ElasticsearchException e) {
-			log.error("Cannot delete the specified merged record document", e);
-		}
-	}
-
-	public void deleteRecordEntryFromMerged() {
-		try {
-			if(record.getExternalId() == null)
-				record.setExternalId(record.getDbId().toString());
-
-			Elastic.getTransportClient().prepareUpdate(
-						Elastic.index,
-						Elastic.type_general,
-						record.getExternalId())
-				.addScriptParam("tags", record.getTags().toArray())
-				.addScriptParam("id", record.getCollectionId().toString())
-				.setScript("for(String t: tags) {"
-					+ "if(ctx._source.tags.contains(t)){"
-					+ "ctx._source.tags.remove(t)"
-					+ "}}; "
-					+ "ctx._source.collections.remove(id);", ScriptType.INLINE)
-				.execute().actionGet();
-			} catch (Exception e) {
-			log.error("Cannot delete entries from merged record!", e);
-		}
-	}
 
 	/*
-	 * Bulk deletes all records of a deleted collection
+	 * Delete the specified Resource using it's db id
+	 * from the index
 	 */
-	public void deleteAllCollectionRecords() {
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-											.getByCollection(collection.getDbId());
+	public static void deleteResource(String dbId) {
+		try {
+			Elastic.getTransportClient().prepareDelete(
+					Elastic.index,
+					Elastic.type,
+					dbId)
+				.setOperationThreaded(false)
+				.execute()
+				.actionGet();
+		} catch(ElasticsearchException e) {
+			log.error("Cannot delete the specified resource document", e);
+		}
+	}
 
-		if( records.size() == 0 ) {
+
+
+	/*
+	 * Bulk deletes all resources of a deleted collection
+	 */
+	public static void deleteManyResources(List<String> ids) {
+
+		if( ids.size() == 0 ) {
 			log.debug("No records within the collection to index!");
-		} else if( records.size() == 1 ) {
+		} else if( ids.size() == 1 ) {
 				Elastic.getTransportClient().prepareDelete(
 								Elastic.index,
-								Elastic.type_within,
-								records.get(0).getDbId().toString())
+								Elastic.type,
+								ids.get(0))
 					 	.execute()
 					 	.actionGet();
 		} else {
 			try {
-				for(CollectionRecord r: records) {
+				for(String id: ids) {
 					Elastic.getBulkProcessor().add(new DeleteRequest(
 							Elastic.index,
-							Elastic.type_within,
-							r.getDbId().toString()));
+							Elastic.type,
+							id));
 				}
 				Elastic.getBulkProcessor().flush();
 			} catch (Exception e) {
@@ -143,40 +75,4 @@ public class ElasticEraser {
 		}
 	}
 
-	/*
-	 * Bulk deletes entries from merged records
-	 * when a collaction is deleted
-	 */
-	public void deleteAllEntriesFromMerged() {
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-											.getByCollection(collection.getDbId());
-
-		if( records.size() == 0 ) {
-			log.debug("No records within the collection to index!");
-		} else if( records.size() == 1 ) {
-				this.record = records.get(0);
-				deleteRecordEntryFromMerged();
-		} else {
-			try {
-				for(CollectionRecord r: records) {
-					Elastic.getBulkProcessor().add(new UpdateRequest(
-							Elastic.index,
-							Elastic.type_general,
-							r.getExternalId())
-						.addScriptParam("tags", r.getTags().toArray())
-						.addScriptParam("id", r.getCollectionId().toString())
-						.script(
-							"for(String t: tags) {"
-							+ "if(ctx._source.tags.contains(t)){"
-							+ "ctx._source.tags.remove(t)"
-							+ "}}; "
-							+ "ctx._source.collections.remove(id);"
-						));
-				}
-				Elastic.getBulkProcessor().flush();
-			} catch (Exception e) {
-				log.error("Error in Bulk delete record entries from merged", e);
-			}
-		}
-	}
 }
