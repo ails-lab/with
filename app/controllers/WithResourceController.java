@@ -102,7 +102,8 @@ public class WithResourceController extends Controller {
 					record = (RecordResource) DB.getRecordResourceDAO()
 							.getByExternalId(externalId);
 				}
-			} else if (DB.getRecordResourceDAO().getByExternalId(sourceId) != null) {
+			} else if (sourceId != null
+					&& DB.getRecordResourceDAO().getByExternalId(sourceId) != null) {
 				record = (RecordResource) DB.getRecordResourceDAO()
 						.getByExternalId(sourceId);
 			} else {
@@ -111,6 +112,7 @@ public class WithResourceController extends Controller {
 				// Create a new record
 				switch (source) {
 				case UploadedByUser:
+					DB.getRecordResourceDAO().makePermanent(record);
 					((ProvenanceInfo) record.getProvenance().get(last))
 							.setResourceId(record.getDbId().toString());
 					((ProvenanceInfo) record.getProvenance().get(last))
@@ -120,8 +122,8 @@ public class WithResourceController extends Controller {
 					String mediaUrl;
 					WithMediaRights withRights;
 					EmbeddedMediaObject media;
+					EmbeddedMediaObject embeddedMedia;
 					for (MediaVersion version : MediaVersion.values()) {
-						EmbeddedMediaObject embeddedMedia;
 						if ((embeddedMedia = ((HashMap<MediaVersion, EmbeddedMediaObject>) record
 								.getMedia().get(0)).get(version)) != null) {
 							mediaUrl = embeddedMedia.getUrl();
