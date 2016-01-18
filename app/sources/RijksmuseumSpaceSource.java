@@ -32,12 +32,12 @@ import model.ExternalBasicRecord;
 import model.Provider.Sources;
 
 public class RijksmuseumSpaceSource extends ISpaceSource {
-	
+
 	public RijksmuseumSpaceSource() {
 		LABEL = Sources.Rijksmuseum.toString();
 		apiKey = "SECRET_KEY";
 	}
-	
+
 	public String getHttpQuery(CommonQuery q) {
 		QueryBuilder builder = new QueryBuilder("https://www.rijksmuseum.nl/api/en/collection");
 		builder.addSearchParam("key", apiKey);
@@ -52,7 +52,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		formatreader = new RijksmuseumRecordFormatter();
+		formatreader = new RijksmuseumRecordFormatter(vmap);
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);

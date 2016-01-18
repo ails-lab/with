@@ -33,12 +33,12 @@ import model.Provider.Sources;
 import model.resources.WithResource;
 
 public class DDBSpaceSource extends ISpaceSource {
-	
+
 	public DDBSpaceSource() {
 		super();
 		LABEL = Sources.DDB.toString();
 		apiKey = "SECRET_KEY";
-		formatreader = new DDBRecordFormatter();
+		formatreader = new DDBRecordFormatter(vmap);
 	}
 
 	@Override
@@ -85,13 +85,14 @@ public class DDBSpaceSource extends ISpaceSource {
 					res.addItem(formatreader.readObjectFrom(item));
 				}
 
-//				CommonFilterLogic dataProvider = CommonFilterLogic.dataproviderFilter();
+				// CommonFilterLogic dataProvider =
+				// CommonFilterLogic.dataproviderFilter();
 
 				// JsonNode o = response.path("facets");
 				// readList(o.path("dataProviders"), dataProvider);
 
 				res.filtersLogic = new ArrayList<>();
-//				res.filtersLogic.add(dataProvider);
+				// res.filtersLogic.add(dataProvider);
 
 			} catch (Exception e) {
 				// TODO Auto-generated catch block

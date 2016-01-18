@@ -16,14 +16,35 @@
 
 package model.basicDataTypes;
 
-import java.util.ArrayList;
-public class CidocEvent {
-	public static enum EventType {
-		CREATED, OTHER 
+import sources.core.Utils;
+
+public class LiteralOrResource extends Literal {
+
+	public static final String URI = "uri";
+
+	public LiteralOrResource() {
+		super();
 	}
-	
-	EventType eventType;
-	WithPeriod timespan;
-	MultiLiteralOrResource agent;
-	MultiLiteralOrResource place;
+
+	public LiteralOrResource(Language key, String value) {
+		super(key, value);
+	}
+
+	public LiteralOrResource(String label) {
+		if (Utils.isValidURL(label)) 
+			addURI(label);
+		else
+			addLiteral(label);
+	}
+
+	public void addURI(String uri) {
+		put(URI, uri);
+	}
+
+	public static LiteralOrResource build(String string) {
+		if (!Utils.hasInfo(string))
+			return null;
+		return new LiteralOrResource(string);
+	}
+
 }

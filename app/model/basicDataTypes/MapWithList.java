@@ -14,24 +14,28 @@
  */
 
 
-package model.resources;
+package model.basicDataTypes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Embedded;
 
-import model.basicDataTypes.MultiLiteralOrResource;
-import model.basicDataTypes.WithPeriod;
-import model.DescriptiveData;
-import model.resources.RecordResource.RecordDescriptiveData;
+@Embedded
+public class MapWithList extends HashMap<String, List<String>> {
 
-@Entity("RecordResource")
-public class EventObject extends RecordResource<EventObject.EventData> {
-	
-	public static class EventData extends RecordDescriptiveData {
-		ArrayList<WithPeriod> period;
-		MultiLiteralOrResource personsInvolved;
-		MultiLiteralOrResource placesInvolved;
-		MultiLiteralOrResource objectsInvolved;
+	public MapWithList() {
 	}
+
+	public void add(String key, String value) {
+		if (this.containsKey(key))
+			this.get(key).add(value);
+		else
+			this.put(key, new ArrayList<String>(Arrays.asList(value)));
+	}
+
 }

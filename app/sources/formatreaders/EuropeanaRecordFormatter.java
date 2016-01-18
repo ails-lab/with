@@ -16,47 +16,41 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.hibernate.validator.internal.constraintvalidators.URLValidator;
-
-import sources.EuropeanaSpaceSource;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
-import sources.utils.JsonNodeUtils;
-import sources.utils.StringUtils;
 import model.EmbeddedMediaObject;
-import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.Provider.Sources;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
+import sources.core.CommonFilters;
+import sources.core.Utils;
+import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
+import utils.ListUtils;
 
 public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
-	public EuropeanaRecordFormatter() {
+	public EuropeanaRecordFormatter(FilterValuesMap map) {
+		super(map);
 		object = new CulturalObject();
 	}
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
 		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 		List<String> years = rec.getStringArrayValue("year");
 		model.setDates(StringUtils.getDates(years));
-//		System.out.println(years+"--->"+model.getDates());
 		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreatorLangAware"))));
-//		model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
+		model.setKeywords(rec.getLiteralOrResourceValue("dcSubjectLangAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(
@@ -69,9 +63,10 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		med.setUrl(model.getIsShownBy());
 		// TODO: add withMediaRights, originalRights
 		List<String> rights = rec.getStringArrayValue("rights");
-		// med.setOriginalRights(originalRights);
-		//
-		// med.setWithRights(withRights);
+		med.setOriginalRights(ListUtils.transform(rights, (String x) -> LiteralOrResource.build(x)).get(0));
+		med.setWithRights(
+				(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0));
+
 		object.addMedia(MediaVersion.Original, med);
 		return object;
 		// TODO: add null checks

@@ -16,16 +16,30 @@
 
 package sources.core;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.w3c.dom.Document;
 
+import sources.core.Utils;
 import play.Logger;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
-import sources.core.Utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.ning.http.client.FluentCaseInsensitiveStringsMap;
+import com.ning.http.multipart.FilePart;
+import com.ning.http.multipart.MultipartRequestEntity;
+import com.ning.http.multipart.Part;
+
 
 public class HttpConnector {
 
@@ -56,9 +70,201 @@ public class HttpConnector {
 		}
 	}
 	
+	public static <T> T postFileContent(String url, File file, String paramName, String paramValue) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).setQueryParameter(paramName, paramValue).post(file).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+	
+/*	public static <T> T postMultiPartFormDataContent(String url, FilePart file, 
+			String paramName, String paramValue) throws Exception {
+		
+		
+		try {
+
+			Map<String, FilePart> data = new HashMap<String, FilePart>();
+			
+			data.put(paramName, file);
+			
+			String boundary = "--XYZ123--";
+
+			String body = "";
+			for (String key : data.keySet()) {
+			  body += "--" + boundary + "\r\n"
+			       + "Content-Disposition: form-data; name=\""
+			       + key + "\"\r\n\r\n"
+			       + data.get(key) + "\r\n";
+			}
+			body += "--" + boundary + "--";
+
+
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).setTimeout(10000)
+					.setHeader("Content-Type", "multipart/form-data; boundary=" + boundary)
+					.setHeader("Content-length", String.valueOf(body.length()))
+					.post(body).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+*/	
+	
+	
+	public static <T> T postMultiPartFormDataContent(String url, File file, 
+			String paramName, String paramValue) throws Exception {
+		
+		
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			
+			// Build up the Multiparts
+			List<Part> parts = new ArrayList<>();
+			parts.add(new FilePart("file", file));
+			Part[] partsA = parts.toArray(new Part[parts.size()]);
+			
+			FluentCaseInsensitiveStringsMap params = new FluentCaseInsensitiveStringsMap();
+			
+			params.add(paramName, "file"+paramValue);
+			
+			// Add it to the MultipartRequestEntity
+			MultipartRequestEntity reqE = new MultipartRequestEntity(partsA,
+					params);
+			reqE.writeRequest(bos);
+			InputStream reqIS = new ByteArrayInputStream(bos.toByteArray());
+			//WSRequestHolder req = WS.url(InterchangeConfig.conflateUrl+"dataset")
+			//    .setContentType(reqE.getContentType());
+			
+			
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).setTimeout(10000)
+					.post(reqIS).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			Logger.info("request: " + WS.url(url1).setQueryParameter(paramName, paramValue)
+					.post(reqIS));
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+
+	
+	public static <T> T postJsonContent(String url, JsonNode node) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).post(node).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+
+public static <T> T postContent(String url) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> jsonPromise = WS.url(url1).post(url).map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) {
+//					System.out.println(response.getBody());
+					T json = (T) response.asJson();
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return json;
+				}
+			});
+			return (T) jsonPromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+
+
 	public static JsonNode getURLContent(String url) throws Exception {
 		return HttpConnector.<JsonNode>getContent(url);
 	}
+	
+	public static JsonNode postURLContent(String url) throws Exception {
+		return HttpConnector.<JsonNode>postContent(url);
+	}
+
+	
+	public static JsonNode postJson(String url, JsonNode node) throws Exception {
+		return HttpConnector.<JsonNode>postJsonContent(url, node);
+	}
+
+	
+	public static JsonNode postFile(String url, File file, String paramName, String paramValue) throws Exception {
+		return HttpConnector.<JsonNode>postFileContent(url, file, paramName, paramValue);
+	}
+	
+	public static JsonNode postMultiPartFormData(String url, File file, String paramName, String paramValue) throws Exception {
+		return HttpConnector.<JsonNode>postMultiPartFormDataContent(url, file, paramName, paramValue);
+	}
+
 	
 	public static String getURLStringContent(String url) throws Exception {
 		return HttpConnector.<String>getContent(url);

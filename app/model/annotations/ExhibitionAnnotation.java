@@ -16,7 +16,7 @@
 
 package model.annotations;
 
-import model.basicDataTypes.KeySingleValuePair.Literal;
+import model.basicDataTypes.Literal;
 
 public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation.ExhibitionAnnotationBody> {
 

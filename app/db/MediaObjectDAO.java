@@ -16,6 +16,7 @@
 
 package db;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,9 +119,15 @@ public class MediaObjectDAO {
 
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
-
 			} else {
-				mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());
+				if(media.getMediaBytes()==null){
+				    String tmp = new String();   // an empty string
+				    
+					mediaGridFsFile = DB.getGridFs().createFile(
+					        new ByteArrayInputStream(tmp.getBytes()));
+				}
+				else
+					mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());
 			}
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
 			// remove stuff we don't want on the media object

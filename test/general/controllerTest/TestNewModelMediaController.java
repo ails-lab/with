@@ -39,7 +39,7 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.Media;
 import model.MediaObject;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ResourceType;
 import model.usersAndGroups.User;
 
@@ -72,12 +72,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import db.DB;
 
-
-
-
-
 public class TestNewModelMediaController {
-
 
 	private MediaObject createImage() {
 		MediaObject image = new MediaObject();
@@ -87,8 +82,7 @@ public class TestNewModelMediaController {
 			url = new URL("http://www.ntua.gr/ntua-01.jpg");
 			File file = new File("test_java.txt");
 			FileUtils.copyURLToFile(url, file);
-			FileInputStream fileStream = new FileInputStream(
-					file);
+			FileInputStream fileStream = new FileInputStream(file);
 			rawbytes = IOUtils.toByteArray(fileStream);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -96,155 +90,143 @@ public class TestNewModelMediaController {
 			e.printStackTrace();
 		}
 
-		//embedded
+		// embedded
 		image.setType(WithMediaType.IMAGE);
-		Set<WithMediaRights> set = new HashSet<WithMediaRights>();
-		set.add(WithMediaRights.Public);
-		image.setWithRights(set);
+		image.setWithRights(WithMediaRights.Public);
 		image.setHeight(599);
 		image.setWidth(755);
-		//image.setThumbHeight(120);
-		//image.setThumbWidth(100);
+		// image.setThumbHeight(120);
+		// image.setThumbWidth(100);
 		image.setUrl("http://www.ntua.gr/ntua-01.jpg");
-		//image.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
+		// image.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
 		LiteralOrResource lor = new LiteralOrResource();
-		lor.add(ResourceType.dbpedia, "<http://pt.dbpedia.org/resource/Brasil>");
+		lor.addURI("<http://pt.dbpedia.org/resource/Brasil>");
 		image.setOriginalRights(lor);
 		image.setMimeType(MediaType.parse("image/jpeg"));
 		image.setSize(rawbytes.length);
 		image.setQuality(Quality.IMAGE_SMALL);
 
-		//extended
+		// extended
 		image.setMediaBytes(rawbytes);
 		// image.setThumbnailBytes(rawbytes);
-		image.setOrientation(); //auto
-		//set the rest!
-
+		image.setOrientation(); // auto
+		// set the rest!
 
 		try {
 			DB.getMediaObjectDAO().makePermanent(image);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		assertThat( image.getDbId()).isNotNull();
+		assertThat(image.getDbId()).isNotNull();
 		return image;
 	}
 
-
-
-//	@Test
+	// @Test
 	public void testGetMetadata() {
 		MediaObject image = createImage();
 
-		running( fakeApplication(), new Runnable() {
+		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
-				Result result = route(fakeRequest("GET", "/media"
-						+ "/"+image.getDbId()));
+				Result result = route(fakeRequest("GET", "/media" + "/" + image.getDbId()));
 
-			    JsonParser parser = new JsonParser();
-			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			    JsonElement el = parser.parse(contentAsString(result));
-			    System.out.println(gson.toJson(el));
+				JsonParser parser = new JsonParser();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
 
-			    if(status(result) == 200)
-				    assertThat(status(result)).isEqualTo(OK);
-			    else {
-			    	System.out.println(status(result));
-			    	Assert.fail();
-			    }
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
 
 			}
 		});
 
 	}
 
-
-//	@Test
+	// @Test
 	public void testGetFile() {
 		MediaObject image = createImage();
 
-		running( fakeApplication(), new Runnable() {
+		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
-				Result result = route(fakeRequest("GET", "/media"
-						+ "/"+image.getDbId()
-						+ "?file=true"));
+				Result result = route(fakeRequest("GET", "/media" + "/" + image.getDbId() + "?file=true"));
 
-
-			    if(status(result) == 200)
-				    assertThat(status(result)).isEqualTo(OK);
-			    else {
-			    	System.out.println(status(result));
-			    	Assert.fail();
-			    }
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
 
 			}
 		});
 	}
 
-//	@Test
+	// @Test
 	public void testDeleteMedia() {
 		MediaObject image = createImage();
 
-		running( fakeApplication(), new Runnable() {
+		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
-				Result result = route(fakeRequest("DELETE", "/media"
-						+ "/"+image.getDbId()));
+				Result result = route(fakeRequest("DELETE", "/media" + "/" + image.getDbId()));
 
 				JsonParser parser = new JsonParser();
-			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			    JsonElement el = parser.parse(contentAsString(result));
-			    System.out.println(gson.toJson(el));
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
 
-			    if(status(result) == 200)
-				    assertThat(status(result)).isEqualTo(OK);
-			    else {
-			    	System.out.println(status(result));
-			    	Assert.fail();
-			    }
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
 
 			}
 		});
 	}
 
-//	@Test
+	// @Test
 	public void testEditMedia() {
 		MediaObject image = createImage();
 
-		running( fakeApplication(), new Runnable() {
+		running(fakeApplication(), new Runnable() {
 			@Override
 			public void run() {
 				ObjectNode json = Json.newObject();
 
-				//TODO: create json file metadata
+				// TODO: create json file metadata
 
-				//TODO: test all possible results (extract method to use in create)
+				// TODO: test all possible results (extract method to use in
+				// create)
 
 				json.put("type", "Edited IMAGE");
-				Result result = route(fakeRequest("POST", "/media"
-						+ "/"+image.getDbId())
-						.withJsonBody(json));
+				Result result = route(fakeRequest("POST", "/media" + "/" + image.getDbId()).withJsonBody(json));
 
-			    JsonParser parser = new JsonParser();
-			    Gson gson = new GsonBuilder().setPrettyPrinting().create();
-			    JsonElement el = parser.parse(contentAsString(result));
-			    System.out.println(gson.toJson(el));
+				JsonParser parser = new JsonParser();
+				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				JsonElement el = parser.parse(contentAsString(result));
+				System.out.println(gson.toJson(el));
 
-			    if(status(result) == 200)
-				    assertThat(status(result)).isEqualTo(OK);
-			    else {
-			    	System.out.println(status(result));
-			    	Assert.fail();
-			    }
+				if (status(result) == 200)
+					assertThat(status(result)).isEqualTo(OK);
+				else {
+					System.out.println(status(result));
+					Assert.fail();
+				}
 
 			}
 		});
 	}
 
 	@Test
-// Testing file upload doesn't seem to be supported
+	// Testing file upload doesn't seem to be supported
 	public void testJSONCreateMedia() {
 		// make a user with password
 		User u = new User();
@@ -254,89 +236,82 @@ public class TestNewModelMediaController {
 		u.setPassword("secret");
 		DB.getUserDAO().makePermanent(u);
 
-		running(testServer(3333), ()->{
+		running(testServer(3333), () -> {
 			try {
 				HttpClient hc = new DefaultHttpClient();
-				HttpPost loginToWith = new HttpPost( "http://localhost:3333/user/login" );
+				HttpPost loginToWith = new HttpPost("http://localhost:3333/user/login");
 				String json = "{\"email\":\"my@you.me\",\"password\":\"secret\"}";
-				StringEntity se = new StringEntity( json, "UTF8" );
-				loginToWith.setEntity( se );
-				loginToWith.addHeader( "Content-type", "text/json");
+				StringEntity se = new StringEntity(json, "UTF8");
+				loginToWith.setEntity(se);
+				loginToWith.addHeader("Content-type", "text/json");
 
 				HttpResponse response = hc.execute(loginToWith);
-				if( response.getStatusLine().getStatusCode() != 200 ) {
-					Assert.fail( "Login failed");
+				if (response.getStatusLine().getStatusCode() != 200) {
+					Assert.fail("Login failed");
 				}
 				loginToWith.releaseConnection();
 
-				//TODO: create json file metadata
+				// TODO: create json file metadata
 
-				//TODO: test all possible results
+				// TODO: test all possible results
 
-
-
-
-			} catch( Exception e ) {
-				Assert.fail( e.toString() );
+			} catch (Exception e) {
+				Assert.fail(e.toString());
 			}
-	    });
+		});
 	}
-
 
 	@Test
 	// Testing file upload doesn't seem to be supported
-		public void testCreateMedia() {
-			// make a user with password
-			User u = new User();
-			u.setEmail("my@you.me");
-			u.setUsername("cool_url");
-			// set password after email, email salts the password!
-			u.setPassword("secret");
-			DB.getUserDAO().makePermanent(u);
+	public void testCreateMedia() {
+		// make a user with password
+		User u = new User();
+		u.setEmail("my@you.me");
+		u.setUsername("cool_url");
+		// set password after email, email salts the password!
+		u.setPassword("secret");
+		DB.getUserDAO().makePermanent(u);
 
-			running(testServer(3333), ()->{
-				try {
-					HttpClient hc = new DefaultHttpClient();
-					HttpPost loginToWith = new HttpPost( "http://localhost:3333/user/login" );
-					String json = "{\"email\":\"my@you.me\",\"password\":\"secret\"}";
-					StringEntity se = new StringEntity( json, "UTF8" );
-					loginToWith.setEntity( se );
-					loginToWith.addHeader( "Content-type", "text/json");
+		running(testServer(3333), () -> {
+			try {
+				HttpClient hc = new DefaultHttpClient();
+				HttpPost loginToWith = new HttpPost("http://localhost:3333/user/login");
+				String json = "{\"email\":\"my@you.me\",\"password\":\"secret\"}";
+				StringEntity se = new StringEntity(json, "UTF8");
+				loginToWith.setEntity(se);
+				loginToWith.addHeader("Content-type", "text/json");
 
-					HttpResponse response = hc.execute(loginToWith);
-					if( response.getStatusLine().getStatusCode() != 200 ) {
-						Assert.fail( "Login failed");
-					}
-					loginToWith.releaseConnection();
-
-					// now try to upload a file
-					HttpPost aFile = new HttpPost( "http://localhost:3333/media/create?file=true");
-					File testFile = new File( "public/images/dancer.jpg");
-					MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-					builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-					builder.addBinaryBody("upfile", testFile, ContentType.create("image/jpeg"), "testImage001.jpg");
-					aFile.setEntity( builder.build());
-					response = hc.execute( aFile );
-					String jsonResponse = EntityUtils.toString(
-							response.getEntity(), "UTF8");
-					String id = JsonPath.parse( jsonResponse ).read( "$['results'][0]['mediaId']");
-					aFile.releaseConnection();
-
-					assertThat( id ).isNotEmpty();
-					// maybe retrieve to see if its there
-					HttpGet get = new HttpGet( "http://localhost:3333/media/"+id);
-
-
-
-					// maybe remove the media again
-					HttpDelete del = new HttpDelete( "http://localhost:3333/media/"+id);
-					response = hc.execute(del);
-					assertThat( response.getStatusLine().getStatusCode() ).isEqualTo( 200 );
-
-				} catch( Exception e ) {
-					Assert.fail( e.toString() );
+				HttpResponse response = hc.execute(loginToWith);
+				if (response.getStatusLine().getStatusCode() != 200) {
+					Assert.fail("Login failed");
 				}
-		    });
-		}
+				loginToWith.releaseConnection();
+
+				// now try to upload a file
+				HttpPost aFile = new HttpPost("http://localhost:3333/media/create?file=true");
+				File testFile = new File("public/images/dancer.jpg");
+				MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+				builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+				builder.addBinaryBody("upfile", testFile, ContentType.create("image/jpeg"), "testImage001.jpg");
+				aFile.setEntity(builder.build());
+				response = hc.execute(aFile);
+				String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF8");
+				String id = JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
+				aFile.releaseConnection();
+
+				assertThat(id).isNotEmpty();
+				// maybe retrieve to see if its there
+				HttpGet get = new HttpGet("http://localhost:3333/media/" + id);
+
+				// maybe remove the media again
+				HttpDelete del = new HttpDelete("http://localhost:3333/media/" + id);
+				response = hc.execute(del);
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+
+			} catch (Exception e) {
+				Assert.fail(e.toString());
+			}
+		});
+	}
 
 }

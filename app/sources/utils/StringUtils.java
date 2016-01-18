@@ -28,7 +28,7 @@ import java.util.List;
 
 import org.hibernate.validator.internal.constraintvalidators.URLValidator;
 
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
 
 public class StringUtils {

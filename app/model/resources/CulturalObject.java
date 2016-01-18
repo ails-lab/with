@@ -22,8 +22,8 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 
 import model.basicDataTypes.CidocEvent;
-import model.basicDataTypes.KeySingleValuePair.Literal;
-import model.basicDataTypes.KeySingleValuePair.LiteralOrResource;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.WithResourceType;
@@ -56,7 +56,7 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	public static class CulturalObjectData extends RecordDescriptiveData {
 
 		// provenance[0].recordId
-		private String dcidentifier;
+		private List<String> dcidentifier;
 		
 		// language of object, if it has one. Not related to the metadata.
 		// eg. If the object is a book, its the language it is written in
@@ -85,11 +85,11 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		
 		private List<CidocEvent> events;
 
-		public String getDcidentifier() {
+		public List<String> getDcidentifier() {
 			return dcidentifier;
 		}
 
-		public void setDcidentifier(String dcidentifier) {
+		public void setDcidentifier(List<String> dcidentifier) {
 			this.dcidentifier = dcidentifier;
 		}
 

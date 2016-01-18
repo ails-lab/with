@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.KeyValuesPair.MultiLiteral;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;

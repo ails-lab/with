@@ -19,57 +19,80 @@ package sources.utils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.KeyValuesPair.MultiLiteral;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 
 public class JsonNodeUtils {
-	
+
 	public static String asString(JsonNode node) {
-		if (node!=null && !node.isMissingNode()){
-			if (node.isArray()){
+		if (node != null && !node.isMissingNode()) {
+			if (node.isArray()) {
 				JsonNode jsonNode = node.get(0);
-				if (jsonNode!=null)
-				return jsonNode.asText();
+				if (jsonNode != null)
+					return jsonNode.asText();
 			} else
 				return node.asText();
 		}
 		return null;
 	}
-	
+
 	public static MultiLiteral asLiteral(JsonNode node) {
-		if (node!=null && !node.isMissingNode()){
-			if (node.isArray()){
+		if (node != null && !node.isMissingNode()) {
+			if (node.isArray()) {
 				node = node.get(0);
-			} 
-			if (node.isTextual()){
-				return new MultiLiteral(Language.DEF,node.asText());
+			}
+			if (node.isTextual()) {
+				return new MultiLiteral(Language.DEF, node.asText());
 			}
 			MultiLiteral res = new MultiLiteral();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
-				// TODO ask if the key is a language
-//				System.out.println(next);
-				//TODO: check transformation from string to lang enum
-				res.add(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
+				Language language = Language.getLanguage(next.getKey());
+				JsonNode value = next.getValue();
+				for (int i = 0; i < value.size(); i++) {
+					res.addLiteral(language, value.get(i).asText());
+				}
 			}
 			return res;
 		}
 		return null;
 	}
-	
+
+	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node) {
+		if (node != null && !node.isMissingNode()) {
+			if (node.isArray()) {
+				node = node.get(0);
+			}
+			if (node.isTextual()) {
+				return new MultiLiteralOrResource(Language.DEF, node.asText());
+			}
+			MultiLiteralOrResource res = new MultiLiteralOrResource();
+			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+				Entry<String, JsonNode> next = iterator.next();
+				Language language = Language.getLanguage(next.getKey());
+				JsonNode value = next.getValue();
+				for (int i = 0; i < value.size(); i++) {
+					res.addLiteral(language, value.get(i).asText());
+				}
+			}
+			return res;
+		}
+		return null;
+	}
+
 	public static List<String> asStringArray(JsonNode node) {
-		if (node!=null && !node.isMissingNode()){
+		if (node != null && !node.isMissingNode()) {
 			ArrayList<String> res = new ArrayList<>();
-			if (node.isArray()){
+			if (node.isArray()) {
 				for (int i = 0; i < node.size(); i++) {
 					res.add(node.get(i).asText());
 				}
-			} else{
+			} else {
 				res.add(node.asText());
 			}
 			return res;
