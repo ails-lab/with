@@ -24,6 +24,7 @@ public class MultiLiteralOrResource extends MultiLiteral {
 	}
 
 	public MultiLiteralOrResource(Language lang, String label) {
+		super(lang, label);
 	}
 
 	public MultiLiteralOrResource(String label) {
