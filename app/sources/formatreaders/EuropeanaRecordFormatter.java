@@ -21,6 +21,7 @@ import java.util.List;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -66,6 +67,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		med.setOriginalRights(ListUtils.transform(rights, (String x) -> LiteralOrResource.build(x)).get(0));
 		med.setWithRights(
 				(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0));
+		med.setType((WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type")).get(0));
 
 		object.addMedia(MediaVersion.Original, med);
 		return object;
