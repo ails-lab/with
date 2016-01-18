@@ -36,6 +36,10 @@ public class CommonFilters {
 	public static final String DATAPROVIDER_ID = "data_provider";
 	public static final String DATAPROVIDER_NAME = "Data Provider";
 
+	public static final String COMESFROM_ID = "comesFrom";
+	public static final String COMESFROM_NAME = "Comes From";
+
+
 	public static final String AVAILABILITY_ID = "availability";
 	public static final String AVAILABILITY_NAME = "Availability";
 
