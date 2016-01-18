@@ -19,7 +19,6 @@ package sources.utils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map.Entry;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,7 +52,11 @@ public class JsonNodeUtils {
 			MultiLiteral res = new MultiLiteral();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
-				res.addLiteral(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
+				Language language = Language.getLanguage(next.getKey());
+				JsonNode value = next.getValue();
+				for (int i = 0; i < value.size(); i++) {
+					res.addLiteral(language, value.get(i).asText());
+				}
 			}
 			return res;
 		}
@@ -71,7 +74,11 @@ public class JsonNodeUtils {
 			MultiLiteralOrResource res = new MultiLiteralOrResource();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
-				res.addLiteral(Language.getLanguage(next.getKey()), next.getValue().get(0).asText());
+				Language language = Language.getLanguage(next.getKey());
+				JsonNode value = next.getValue();
+				for (int i = 0; i < value.size(); i++) {
+					res.addLiteral(language, value.get(i).asText());
+				}
 			}
 			return res;
 		}

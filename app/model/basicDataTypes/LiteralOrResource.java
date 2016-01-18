@@ -33,8 +33,8 @@ public class LiteralOrResource extends Literal {
 	public LiteralOrResource(String label) {
 		if (Utils.isValidURL(label)) {
 			addURI(label);
-		}
-		addLiteral(label);
+		} else
+			addLiteral(label);
 	}
 
 	public void addLiteral(Language lang, String value) {

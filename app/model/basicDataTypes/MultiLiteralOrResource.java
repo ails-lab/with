@@ -31,8 +31,8 @@ public class MultiLiteralOrResource extends MultiLiteral {
 	public MultiLiteralOrResource(String label) {
 		if (Utils.isValidURL(label)) {
 			addURI(label);
-		}
-		addLiteral(label);
+		} else
+			addLiteral(label);
 	}
 
 	public void addLiteral(Language lang, String value) {

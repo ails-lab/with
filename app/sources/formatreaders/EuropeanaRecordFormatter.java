@@ -16,22 +16,9 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.hibernate.validator.internal.constraintvalidators.URLValidator;
-
-import sources.EuropeanaSpaceSource;
-import sources.FilterValuesMap;
-import sources.core.CommonFilters;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
-import sources.utils.JsonNodeUtils;
-import sources.utils.StringUtils;
-import utils.ListUtils;
 import model.EmbeddedMediaObject;
-import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.Provider.Sources;
@@ -39,6 +26,12 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
+import sources.core.CommonFilters;
+import sources.core.Utils;
+import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
+import utils.ListUtils;
 
 public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
@@ -57,7 +50,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		List<String> years = rec.getStringArrayValue("year");
 		model.setDates(StringUtils.getDates(years));
 		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreatorLangAware"))));
-		model.setKeywords(rec.getLiteralOrResourceValue("dcSubjectLanAware"));
+		model.setKeywords(rec.getLiteralOrResourceValue("dcSubjectLangAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		object.addToProvenance(

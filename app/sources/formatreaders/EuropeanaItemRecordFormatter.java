@@ -16,26 +16,20 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.hibernate.validator.internal.constraintvalidators.URLValidator;
-
-import sources.EuropeanaSpaceSource;
-import sources.FilterValuesMap;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
-import sources.utils.JsonNodeUtils;
-import sources.utils.StringUtils;
 import model.EmbeddedMediaObject;
-import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
+import sources.core.Utils;
+import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
@@ -46,17 +40,28 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
 
 		rec.enterContext("proxies[0]");
 
 		model.setLabel(rec.getLiteralValue("dcTitle"));
 		model.setDescription(rec.getLiteralValue("dcDescription"));
-		// model.setKeywords(rec.getLiteralValue("dcSubject"));
+		model.setKeywords(rec.getLiteralOrResourceValue("dcSubject"));
 		List<String> years = rec.getStringArrayValue("dcDate.def");
 		model.setDates(StringUtils.getDates(years));
 		// model.setDctype(Utils.asList(rec.getLiteralValue("deType")));
+
+		MultiLiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
+		// med.setOriginalRights(ListUtils.transform(rights, (String x) ->
+		// LiteralOrResource.build(x)).get(0));
+		// med.setWithRights(
+		// (WithMediaRights)
+		// getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(),
+		// rights.get(0)).get(0));
+
+		object.addMedia(MediaVersion.Original, med);
+
 		rec.exitContext();
 
 		rec.enterContext("proxies[1]");
@@ -78,9 +83,6 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		rec.exitContext();
 
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-
 		// System.out.println(years+"--->"+model.getDates());
 		// model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
 
@@ -88,13 +90,8 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		medThumb.setUrl(model.getIsShownBy());
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		// TODO: add rights!
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setUrl(model.getIsShownBy());
-		// TODO: add withMediaRights, originalRights
-		// List<String> rights = rec.getStringArrayValue("rights");
-		// med.setOriginalRights(originalRights);
-		//
-		// med.setWithRights(withRights);
+
 		object.addMedia(MediaVersion.Original, med);
 		return object;
 		// TODO: add null checks
