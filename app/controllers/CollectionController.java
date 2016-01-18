@@ -296,8 +296,8 @@ public class CollectionController extends Controller {
 		}
 
 		// index new collection
-		ElasticIndexer indexer = new ElasticIndexer(newCollection);
-		indexer.indexCollectionMetadata();
+		//ElasticIndexer indexer = new ElasticIndexer(newCollection);
+		//indexer.indexCollectionMetadata();
 
 		User owner = DB.getUserDAO().get(newCollection.getCreatorId());
 		DB.getUserDAO().makePermanent(owner);
@@ -434,17 +434,17 @@ public class CollectionController extends Controller {
 			int exhibitionsSize = page.getFeaturedExhibitions().size();
 			List<Collection> collectionsOrExhibitions = new ArrayList<Collection>();
 			if (!isExhibition.isDefined()) {
-				for (int i = start; i < start + countPerType && i < collectionsSize; i++) {
+				for (int i = start; (i < (start + countPerType)) && (i < collectionsSize); i++) {
 					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
 					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
 				}
 			} else {
 				if (!isExhibition.get()) {
-					for (int i = start; i < start + countPerType && i < collectionsSize; i++)
+					for (int i = start; (i < (start + countPerType)) && (i < collectionsSize); i++)
 						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(),
 								effectiveUserIds);
 				} else {
-					for (int i = start; i < start + countPerType && i < exhibitionsSize; i++)
+					for (int i = start; (i < (start + countPerType)) && (i < exhibitionsSize); i++)
 						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(),
 								effectiveUserIds);
 				}
@@ -481,7 +481,7 @@ public class CollectionController extends Controller {
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
 		}
-		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {// not logged or ask for public collections
+		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && (isPublic.get() == true))) {// not logged or ask for public collections
 			// return all public collections
 			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO()
 					.getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
@@ -720,11 +720,11 @@ public class CollectionController extends Controller {
 			}
 		}
 		// index record and merged_record and increment likes
-		ElasticIndexer indexer = new ElasticIndexer(record);
-		indexer.index();
+		//ElasticIndexer indexer = new ElasticIndexer(record);
+		//indexer.index();
 		// increment likes if collection title is _favourites
 		if (c.getTitle().equals("_favorites")) {
-			indexer.index();
+			//indexer.index();
 			ElasticUpdater updater = new ElasticUpdater(null, record);
 			updater.incLikes();
 		}
@@ -867,8 +867,8 @@ public class CollectionController extends Controller {
 							data.getJsonContent());
 				}
 				// index record and merged_record
-				ElasticIndexer indexer = new ElasticIndexer(record);
-				indexer.index();
+				//ElasticIndexer indexer = new ElasticIndexer(record);
+				//indexer.index();
 				return true;
 			} catch (ClassNotFoundException e) {
 				// my class isn't there!
@@ -882,8 +882,8 @@ public class CollectionController extends Controller {
 
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
 		// index record and merged_record
-		ElasticIndexer indexer = new ElasticIndexer(record);
-		indexer.index();
+		//ElasticIndexer indexer = new ElasticIndexer(record);
+		//indexer.index();
 		String sourceClassName = "espace.core.sources." + source + "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
@@ -984,14 +984,14 @@ public class CollectionController extends Controller {
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {
 				recordsList.add(Json.toJson(e.getContent()));
-			} 
+			}
 			else if (format.equals("default")) {
 				e.getContent().clear();
 				recordsList.add(Json.toJson(e));
 			}
 			else if (e.getContent().containsKey(format)) {
 				recordsList.add(e.getContent().get(format));
-			}		
+			}
 		}
 		result.put("itemCount", collection.getItemCount());
 		result.put("records", recordsList);

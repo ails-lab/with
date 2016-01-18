@@ -72,16 +72,12 @@ public class Elastic {
 
 	public static String cluster 		    = getConf().getString("elasticsearch.cluster");
 	public static String index   		    = getConf().getString("elasticsearch.index.name");
-	public static String old_index   		    = getConf().getString("elasticsearch.old_index.name");
+	public static String old_index 		    = getConf().getString("elasticsearch.old_index.name");
 	public static String shards   		    = getConf().getString("elasticsearch.index.num_of_shards");
 	public static String replicas  		    = getConf().getString("elasticsearch.index.num_of_replicas");
 	public static String alias   		    = getConf().getString("elasticsearch.alias.name");
-	public static String mapping_collection = getConf().getString("elasticsearch.index.mapping.collection");
-	public static String type_collection    = getConf().getString("elasticsearch.index.type.collection");
-	public static String mapping_within     = getConf().getString("elasticsearch.index.mapping.within");
-	public static String type_within        = getConf().getString("elasticsearch.index.type.within");
-	public static String mapping_general    = getConf().getString("elasticsearch.index.mapping.general");
-	public static String type_general       = getConf().getString("elasticsearch.index.type.general");
+	public static String type				= getConf().getString("elasticsearch.index.type.resource");
+	public static String mapping 			= getConf().getString("elasticsearch.index.mapping.resource");
 
 
 
@@ -218,11 +214,9 @@ public class Elastic {
 
 
 		// take custom mappings
-		JsonNode general_mapping = null;
-		JsonNode collection_mapping = null;
+		JsonNode resourceMapping = null;
 		try {
-			general_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_general))));
-			collection_mapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping_collection))));
+			resourceMapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping))));
 		} catch (IOException e) {
 			log.error("Cannot read mapping from file!", e);
 			return;
@@ -232,8 +226,7 @@ public class Elastic {
 		try {
 			Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index)
 					.setSettings(Elastic.getIndexSettings())
-					.addMapping(type_general, general_mapping.toString())
-					.addMapping(type_collection, collection_mapping.toString())
+					.addMapping(type, resourceMapping.toString())
 					.execute().actionGet();
 			if(!old_index.equals(""))
 				Elastic.getTransportClient().admin().indices().prepareAliases()
@@ -287,8 +280,8 @@ public class Elastic {
 		Callback<Collection> callback = new Callback<Collection>() {
 		@Override
 			public void invoke(Collection c ) throws Throwable {
-				ElasticIndexer ei = new ElasticIndexer( c );
-				ei.index();
+				//ElasticIndexer ei = new ElasticIndexer( c );
+				//ei.index();
 			}
 		};
 		try {

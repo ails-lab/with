@@ -242,7 +242,7 @@ public class RecordController extends Controller {
 		/*
 		 * Search for available collections
 		 */
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_collection);
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.type);
 		SearchOptions elasticoptions = new SearchOptions(0, 1000);
 		List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId,Access>>>();
 
@@ -256,7 +256,7 @@ public class RecordController extends Controller {
 		//elasticoptions = new SearchOptions(offset, count);
 		elasticoptions = new SearchOptions();
 		elasticoptions.addFilter("isPublic", "true");
-		searcher.setType(Elastic.type_general);
+		searcher.setType(Elastic.type);
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}

@@ -42,7 +42,7 @@ public class ElasticSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.type_within);
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.type);
 		String term = q.getQuery();
 		SearchResponse resp = searcher.search(term);
 		searcher.closeClient();
