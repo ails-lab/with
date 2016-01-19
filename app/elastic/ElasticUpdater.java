@@ -22,10 +22,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess.Access;
 
 import org.bson.types.ObjectId;
@@ -45,102 +47,112 @@ import db.DB;
 public class ElasticUpdater {
 	static private final Logger.ALogger log = Logger.of(ElasticUpdater.class);
 
-	private Collection collection;
-	private CollectionRecord record;
-	private CollectionRecord oldRecord;
-	private String json;
-
-
-	public ElasticUpdater( Collection c) {
-		this.collection = c;
-	}
-
-	public ElasticUpdater( CollectionRecord old, CollectionRecord r ) {
-		this.oldRecord = old;
-		this.record = r;
-	}
-
-	public ElasticUpdater( String json ) {
-		this.json = json;
-	}
-
-	private JsonNode toJson(String jsonString) {
-		return Json.parse(jsonString);
-	}
 
 	/*
-	 * Updates record metadata. NOT collection specific stuff
-	 * Re-indexes the record type, deletes entry from collection_specific field
-	 * of merged_record type and indexes a new merged_record type
+	 * Update one document with the structure provided.
 	 */
-	/**
-	 * Not fully functional
-	 */
-	public void updateRecordTags() {
-		try {
-			 Elastic.getTransportClient().prepareUpdate(
-					Elastic.index,
-					Elastic.type_within,
-					record.getDbId().toString())
-				.setDoc(prepareRecordDoc())
+	public static void updateOne(ObjectId id, Map<String, Object> doc) {
+		Elastic.getTransportClient().prepareUpdate(
+				Elastic.index,
+				Elastic.type,
+				id.toString())
+				.setDoc(doc)
 				.get();
-			 updateMergedDoc();
-		} catch (Exception e) {
-			log.error("Cannot update record tags!", e);
-		}
 	}
 
-	/*
-	 * Prepares document for record type
-	 */
-	private XContentBuilder prepareRecordDoc() {
-		Iterator<Entry<String, JsonNode>> recordIt = Json.toJson(record).fields();
-		XContentBuilder doc = null;
-		try {
-			doc = jsonBuilder().startObject();
-			while( recordIt.hasNext() ) {
-				Entry<String, JsonNode> entry = recordIt.next();
-				if( !entry.getKey().equals("content") &&
-					!entry.getKey().equals("dbId")) {
-					if (entry.getKey().equals("exhibitionRecord")) {
-						String introValue =  entry.getValue().get("annotation").asText();
-						doc.field("annotation_all", introValue);
-						doc.field("annotation", introValue);
-					} else {
-						doc.field(entry.getKey()+"_all", entry.getValue().asText());
-						doc.field(entry.getKey(), entry.getValue().asText());
-					}
-				}
-			}
 
-			doc.endObject();
-		} catch (IOException e) {
-			log.error("Cannot create json document for indexing", e);
-			return null;
+	/*
+	 * Bulk updates. Updates all documents provided with the structure
+	 * provided.
+	 */
+	public static void updateMany(List<ObjectId> ids, List<Map<String, Object>> docs) throws Exception {
+
+		if(ids.size() != docs.size()) {
+			throw new Exception("Error: ids list does not have the same size with upDocs list");
 		}
 
-		return doc;
+		if( ids.size() == 0 ) {
+			log.debug("No resources to update!");
+		} else if( ids.size() == 1 ) {
+					Elastic.getTransportClient().prepareUpdate(
+							Elastic.index,
+							Elastic.type,
+							ids.get(0).toString())
+							.setDoc(docs.get(0))
+							.get();
+		} else {
+
+				int i = 0;
+				for(Map<String, Object> doc: docs) {
+					Elastic.getBulkProcessor().add(new UpdateRequest(
+							Elastic.index,
+							Elastic.type,
+							ids.get(i).toString())
+					.doc(doc));
+					i++;
+				}
+				Elastic.getBulkProcessor().close();
+		}
+
 	}
 
 	/*
 	 * Completes the whole update process of a merged document
 	 */
-	private void updateMergedDoc() {
+	public static void addResourceToCollection(String id, ObjectId colId, int position) throws IOException {
 		try {
 			Elastic.getTransportClient().prepareUpdate()
 				.setIndex(Elastic.index)
-				.setType(Elastic.type_general)
-				.setId(record.getExternalId())
-			.addScriptParam("old_tags", oldRecord.getTags().toArray())
-			.addScriptParam("new_tags", record.getTags().toArray())
-			.setScript("for(String t: old_tags) {"
-					+ "if(ctx._source.tags.contains(t))"
-					+ "ctx._source.tags.remove(t)"
-					+ "}; "
-					+ "for(String t: new_tags) {"
-					+ "if(!ctx._source.tags.contains(t))"
-					+ "ctx._source.tags.add(t)"
-					+ "}; ", ScriptType.INLINE)
+				.setType(Elastic.type)
+				.setId(id)
+			//.addScriptParam("colInfo", new CollectionInfo(colId, position))
+			.addScriptParam("colInfo", jsonBuilder().startObject().field("collectionId", colId).field("position", position).endObject())
+			.setScript("ctx._source.collectedIn.add(colInfo)", ScriptType.INLINE)
+			.execute().actionGet();
+		} catch (ElasticsearchException  e) {
+			log.error("Cannot add entry to collectedIn and update document!", e);
+		}
+	}
+
+
+	public static void removeResourceFromCollection(String id, ObjectId colId, int position) {
+		try {
+			Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.type)
+				.setId(id)
+			.addScriptParam("colId", colId.toString())
+			.addScriptParam("pos", position)
+			.setScript("info = null"
+					+ "ctx._source.collectedIn.each {"
+					+ " if( it.collectionId.equals(colId) &&"
+					+ "    it.position == pos) { "
+					+ "      info = it "
+					+ " } "
+					+ "  }"
+					+ "ctx._source.collectedIn.remove(info) ", ScriptType.INLINE)
+			.execute().actionGet();
+		} catch (ElasticsearchException  e) {
+			log.error("Cannot remove entry from collectedIn and update document!", e);
+		}
+	}
+
+
+	public static void updatePositionInCollection(String id, ObjectId colId, int old_position, int new_position) {
+		try {
+			Elastic.getTransportClient().prepareUpdate()
+				.setIndex(Elastic.index)
+				.setType(Elastic.type)
+				.setId(id)
+			.addScriptParam("colId", colId.toString())
+			.addScriptParam("old_pos", old_position)
+			.addScriptParam("new_pos", new_position)
+			.setScript("ctx._source.collectedIn.each {"
+					+ " if( it.collectionId.equals(colId) &&"
+					+ "    it.position == old_pos) { "
+					+ "      position = new_pos "
+					+ " } "
+					+ "  }", ScriptType.INLINE)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
 			log.error("Cannot update merged record document!", e);
@@ -149,99 +161,27 @@ public class ElasticUpdater {
 
 
 	/*
-	 * Update collection metadata method. Does NOT updates rights
-	 */
-	public void updateCollectionMetadata() {
-		try {
-			 Elastic.getTransportClient().prepareUpdate(
-					Elastic.index,
-					Elastic.type_collection,
-					collection.getDbId().toString())
-				.setDoc(prepareEditedCollectionDoc())
-				.get();
-		} catch (Exception e) {
-			log.error("Cannot update collection metadata!", e);
-		}
-	}
-
-	private XContentBuilder prepareEditedCollectionDoc() {
-		Iterator<Entry<String, JsonNode>> collectionIt = Json.toJson(collection).fields();
-		XContentBuilder doc = null;
-		try {
-			doc = jsonBuilder().startObject();
-
-			while( collectionIt.hasNext() ) {
-				Entry<String, JsonNode> entry = collectionIt.next();
-				if( entry.getKey().equals("itemCount") ) {
-					doc.field(entry.getKey(), entry.getValue().asInt());
-				} else if( !entry.getKey().equals("firstEntries") &&
-							!entry.getKey().equals("rights") &&
-							!entry.getKey().equals("dbId")) {
-					doc.field(entry.getKey()+"_all", entry.getValue().asText());
-					doc.field(entry.getKey(), entry.getValue().asText());
-				}
-			}
-		} catch(IOException io) {
-			log.error("Cannot create document to update!", io);
-			return null;
-		}
-		return doc;
-	}
-
-	/*
-	 * Increment itemCount on collection type
-	 */
-	public void incItemCount() {
-		try {
-			Elastic.getTransportClient().prepareUpdate(
-						Elastic.index,
-						Elastic.type_collection,
-						collection.getDbId().toString())
-				.setScript("ctx._source.itemCount++;", ScriptType.INLINE)
-				.execute().actionGet();
-			} catch (Exception e) {
-			log.error("Cannot increase itemCount!", e);
-			}
-	}
-
-	/*
-	 * Decrement itemCount on collection type
-	 */
-	public void decItemCount() {
-		try {
-			Elastic.getTransportClient().prepareUpdate(
-						Elastic.index,
-						Elastic.type_collection,
-						collection.getDbId().toString())
-				.setScript("ctx._source.itemCount--;", ScriptType.INLINE)
-				.execute().actionGet();
-			} catch (Exception e) {
-			log.error("Cannot decrement itemCount!", e);
-			}
-	}
-
-	/*
 	 * Update rights on a collection
 	 */
-	public void updateCollectionRights() {
+	public static void updateCollectionRights(ObjectId id) {
 		try {
 			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
-						Elastic.type_collection,
-						collection.getDbId().toString())
-				.setDoc(prepareUpdateOnRights())
+						Elastic.type,
+						id.toString())
+				.setDoc(prepareUpdateOnRights(id))
 				.execute().actionGet();		} catch (Exception e) {
 			log.error("Cannot update collection rights!", e);
 		}
 	}
 
-	private XContentBuilder prepareUpdateOnRights() {
+	public static XContentBuilder prepareUpdateOnRights(ObjectId id) {
 		XContentBuilder doc = null;
 		try {
 
 			doc = jsonBuilder().startObject();
 			ArrayNode array = Json.newObject().arrayNode();
-			for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
+			/*for(Entry<ObjectId, Access> e: collection.getRights().entrySet()) {
 				ObjectNode right = Json.newObject();
 				right.put("user", e.getKey().toString());
 				switch (e.getValue().toString()) {
@@ -261,7 +201,7 @@ public class ElasticUpdater {
 					break;
 				}
 				array.add(right);
-			}
+			}*/
 			doc.rawField("rights", array.toString().getBytes());
 			doc.endObject();
 
@@ -275,59 +215,53 @@ public class ElasticUpdater {
 
 
 	/*
-	 * Update isPublic field
+	 * Takes a list of ids and visibility values and updates
+	 * the visibility on these documents
+	 *
+	 * For example when a Collection becomes public then we have to make all the nested douments public
+	 * Or when a Collection becomes private the all the resources become private unless that resources that
+	 * belong in public collections.
 	 */
-	public void updateVisibility() {
+	public static void updateVisibility(List<ObjectId> ids, List<Boolean> visibility) throws Exception {
 
-		XContentBuilder doc = null;
-		try {
-			doc = jsonBuilder().startObject();
-			doc.field("isPublic", collection.getIsPublic());
-			doc.field("isPublic_all", collection.getIsPublic());
-			doc.endObject();
-		} catch(IOException io) {
-			log.error("Cannot create document to update!", io);
+		if(ids.size() != visibility.size()) {
+			throw new Exception("Error: ids list does not have the same size with upDocs list");
 		}
 
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByCollection(collection.getDbId());
 
-		if( records.size() == 0 ) {
-			log.debug("No records within the collection to update!");
-		} else if( records.size() == 1 ) {
-					Elastic.getTransportClient().prepareUpdate(
-							Elastic.index,
-							Elastic.type_within,
-							records.get(0).getDbId().toString())
-						.setDoc(doc)
-						.get();
-					if(!collection.getIsPublic() &&
-						DB.getCollectionRecordDAO()
-						.checkMergedRecordVisibility(records.get(0).getExternalId(), records.get(0).getDbId()))
-						return;
+		XContentBuilder doc = null;
+		if( ids.size() == 0 ) {
+			log.debug("No resources to update!");
+		} else if( ids.size() == 1 ) {
 
-						Elastic.getTransportClient().prepareUpdate(
-							Elastic.index,
-							Elastic.type_general,
-							records.get(0).getExternalId())
-						.setDoc(doc)
-						.get();
+			try {
+				doc = jsonBuilder().startObject();
+				doc.field("isPublic", visibility.get(0));
+				doc.endObject();
+			} catch(IOException io) {
+				log.error("Cannot create document to update!", io);
+			}
+
+			Elastic.getTransportClient().prepareUpdate(
+					Elastic.index,
+					Elastic.type,
+					ids.get(0).toString())
+				.setDoc(doc)
+				.get();
 		} else {
-				for(int i = 0; i<records.size(); i++) {
-					Elastic.getBulkProcessor().add(new UpdateRequest(
-							Elastic.index,
-							Elastic.type_within,
-							records.get(i).getDbId().toString())
-						.doc(doc));
-					if(!collection.getIsPublic() &&
-						DB.getCollectionRecordDAO()
-						.checkMergedRecordVisibility(records.get(i).getExternalId(), records.get(i).getDbId()))
-						continue;
+				for(int i = 0; i<ids.size(); i++) {
 
+					try {
+						doc = jsonBuilder().startObject();
+						doc.field("isPublic", visibility.get(i));
+						doc.endObject();
+					} catch(IOException io) {
+						log.error("Cannot create document to update!", io);
+					}
 					Elastic.getBulkProcessor().add(new UpdateRequest(
 							Elastic.index,
-							Elastic.type_general,
-							records.get(i).getExternalId())
+							Elastic.type,
+							ids.get(i).toString())
 						.doc(doc));
 				}
 				Elastic.getBulkProcessor().flush();
@@ -336,123 +270,36 @@ public class ElasticUpdater {
 
 
 	/*
-	 * Increment totalLikes on collection type
+	 * Increment likes on collection type
 	 */
-	/**
-	 * Not fully functional
-	 */
-	public void incLikes() {
-		incLikesToRecords();
-	}
 
-	/*
-	 * Decrement totalLikes on collection type
-	 */
-	public void decLikes() {
+	public static void incLikes(ObjectId id) {
 		try {
 			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
-						Elastic.type_general,
-						record.getExternalId())
-				.setScript("ctx._source.totalLikes--;", ScriptType.INLINE)
+						Elastic.type,
+						id.toString())
+				.setScript("ctx._source.usage.likes++;", ScriptType.INLINE)
 				.execute().actionGet();
 			} catch (Exception e) {
 			log.error("Cannot update collection likes!", e);
 			}
-		decLikesToRecords();
 	}
 
 	/*
-	 * Increment likes on records with same externalId
+	 * Decrement likes on collection type
 	 */
-	public void incLikesToRecords() {
-
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByExternalId(record.getExternalId());
-		if( records.size() < 1 ) {
-			log.debug("No records within the collection to update!");
-		} else {
-				for(int i = 0; i<records.size(); i++) {
-					System.out.println(records.get(i));
-					if(!records.get(i).getDbId().equals(record.getDbId())) {
-						Elastic.getBulkProcessor().add(new UpdateRequest(
-								Elastic.index,
-								Elastic.type_within,
-								records.get(i).getDbId().toString())
-							.script("ctx._source.totalLikes++;"
-									+ "ctx._source.totalLikes_all++;"));
-					}
-				}
-				Elastic.getBulkProcessor().flush();
-		}
+	public static void decLikes(ObjectId id) {
+		try {
+			Elastic.getTransportClient().prepareUpdate(
+						Elastic.index,
+						Elastic.type,
+						id.toString())
+				.setScript("ctx._source.usage.likes--;", ScriptType.INLINE)
+				.execute().actionGet();
+			} catch (Exception e) {
+			log.error("Cannot update collection likes!", e);
+			}
 	}
 
-
-	/*
-	 * Decrement likes on records with same externalId
-	 */
-	public void decLikesToRecords() {
-
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByExternalId(record.getExternalId());
-
-		if( records.size() == 0 ) {
-			log.debug("No records within the collection to update!");
-		} else if( records.size() == 1 ) {
-					Elastic.getTransportClient().prepareUpdate(
-							Elastic.index,
-							Elastic.type_within,
-							records.get(0).getDbId().toString())
-						.setScript("ctx._source.totalLikes--;", ScriptType.INLINE)
-						.get();
-		} else {
-
-				for(int i = 0; i<records.size(); i++) {
-					Elastic.getBulkProcessor().add(new UpdateRequest(
-							Elastic.index,
-							Elastic.type_within,
-							records.get(i).getDbId().toString())
-						.script("ctx._source.totalLikes--;"
-								+ "ctx._source.totalLikes_all--;"));
-				}
-				Elastic.getBulkProcessor().flush();
-		}
-	}
-
-
-	/*
-	 * Bulk updates. Probably not going to be used
-	 */
-	private void updateCollection() throws Exception {
-		List<CollectionRecord> records = DB.getCollectionRecordDAO()
-				.getByCollection(collection.getDbId());
-		List<XContentBuilder> documents = new ArrayList<XContentBuilder>();
-		for(CollectionRecord r: records) {
-			this.record = r;
-			documents.add(null);
-		}
-		if( documents.size() == 0 ) {
-			log.debug("No records within the collection to update!");
-		} else if( documents.size() == 1 ) {
-					Elastic.getTransportClient().prepareUpdate(
-							Elastic.index,
-							Elastic.type_general,
-							record.getDbId().toString())
-							.setSource(documents.get(0))
-							.get();
-		} else {
-
-				int i = 0;
-				for(XContentBuilder doc: documents) {
-					Elastic.getBulkProcessor().add(new UpdateRequest(
-							Elastic.index,
-							Elastic.type_general,
-							records.get(i).getDbId().toString())
-					.source(doc));
-					i++;
-				}
-				Elastic.getBulkProcessor().close();
-		}
-
-	}
 }

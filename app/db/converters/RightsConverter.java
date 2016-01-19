@@ -31,30 +31,29 @@ public class RightsConverter extends TypeConverter {//implements SimpleValueConv
 	public RightsConverter() {
 		super( WithAccess.class );
 	}
-	
+
 	@Override
 	public Object decode(Class<?> arg0, Object fromDbObject, MappedField arg2) {
-		WithAccess r = new WithAccess();
+		return arg2;
+		/*WithAccess r = new WithAccess();
 		DBObject dbObj = (DBObject) fromDbObject;
 		for(String k: dbObj.keySet() ) {
 			if( k.equals("isPublic"))
 				r.setPublic((Boolean) dbObj.get("isPublic"));
 			else
-				r.put(new ObjectId(k),  
+				r.put(new ObjectId(k),
 					WithAccess.Access.values()[(int) dbObj.get(k)]);
 		}
-		return r;
+		return r;*/
 	}
 
 	@Override
     public Object encode(final Object value, final MappedField optionalExtraInfo) {
-    	WithAccess r = (WithAccess) value;
-    	BasicDBObject dbObj = new BasicDBObject(); 
+		return optionalExtraInfo;
+    	/*WithAccess r = (WithAccess) value;
+    	BasicDBObject dbObj = new BasicDBObject();
     	dbObj.put("isPublic", r.isPublic());
-    	for( ObjectId k: r.keySet()) {
-    		dbObj.put( k.toString(), r.get(k).ordinal());
-    	}
-        return dbObj;
+        return dbObj;*/
     }
 
 }

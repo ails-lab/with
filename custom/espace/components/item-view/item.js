@@ -135,7 +135,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				    filters:[]
 				}),
 				success : function(result) {
-					data=result.responces[0]!=undefined ? result.responces[0].items :null;
+					data=result.responses[0]!=undefined ? result.responses[0].items :null;
 					var items=[];
 					if(data!=null) {
 						for (var i in data) {
@@ -187,7 +187,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					    filters:[]
 					}),
 					success : function(result) {
-						data=result.responces[0]!=undefined ? result.responces[0].items :null;
+						data=result.responses[0]!=undefined ? result.responses[0].items :null;
 						var items=[];
 						if(data!=null) {
 							for (var i in data) {

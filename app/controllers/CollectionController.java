@@ -146,10 +146,10 @@ public class CollectionController extends Controller {
 			}
 
 			// delete collection from index
-			ElasticEraser eraser = new ElasticEraser(c);
+			/*ElasticEraser eraser = new ElasticEraser(c);
 			eraser.deleteCollection();
 			eraser.deleteAllCollectionRecords();
-			eraser.deleteAllEntriesFromMerged();
+			eraser.deleteAllEntriesFromMerged();*/
 			result.put("message", "Collection deleted succesfully from database");
 			return ok(result);
 		} catch (Exception e) {
@@ -217,12 +217,12 @@ public class CollectionController extends Controller {
 			}
 
 			// update collection index and mongo records
-			ElasticUpdater updater = new ElasticUpdater(newVersion);
-			updater.updateCollectionMetadata();
+			/*ElasticUpdater updater = new ElasticUpdater(newVersion);
+			updater.updateCollectionMetadata();*/
 			if (oldIsPublic != newVersion.getIsPublic()) {
 				DB.getCollectionRecordDAO().setSpecificRecordField(newVersion.getDbId(), "rights.isPublic",
 						String.valueOf(newVersion.getIsPublic()));
-				updater.updateVisibility();
+				//updater.updateVisibility();
 			}
 
 			ObjectNode c = (ObjectNode) Json.toJson(newVersion);
@@ -296,8 +296,8 @@ public class CollectionController extends Controller {
 		}
 
 		// index new collection
-		ElasticIndexer indexer = new ElasticIndexer(newCollection);
-		indexer.indexCollectionMetadata();
+		//ElasticIndexer indexer = new ElasticIndexer(newCollection);
+		//indexer.indexCollectionMetadata();
 
 		User owner = DB.getUserDAO().get(newCollection.getCreatorId());
 		DB.getUserDAO().makePermanent(owner);
@@ -434,17 +434,17 @@ public class CollectionController extends Controller {
 			int exhibitionsSize = page.getFeaturedExhibitions().size();
 			List<Collection> collectionsOrExhibitions = new ArrayList<Collection>();
 			if (!isExhibition.isDefined()) {
-				for (int i = start; i < start + countPerType && i < collectionsSize; i++) {
+				for (int i = start; (i < (start + countPerType)) && (i < collectionsSize); i++) {
 					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(), effectiveUserIds);
 					addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(), effectiveUserIds);
 				}
 			} else {
 				if (!isExhibition.get()) {
-					for (int i = start; i < start + countPerType && i < collectionsSize; i++)
+					for (int i = start; (i < (start + countPerType)) && (i < collectionsSize); i++)
 						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedCollections(),
 								effectiveUserIds);
 				} else {
-					for (int i = start; i < start + countPerType && i < exhibitionsSize; i++)
+					for (int i = start; (i < (start + countPerType)) && (i < exhibitionsSize); i++)
 						addCollectionToList(i, collectionsOrExhibitions, page.getFeaturedExhibitions(),
 								effectiveUserIds);
 				}
@@ -481,7 +481,7 @@ public class CollectionController extends Controller {
 			if (creatorUser != null)
 				creatorId = creatorUser.getDbId();
 		}
-		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && isPublic.get() == true)) {// not logged or ask for public collections
+		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && (isPublic.get() == true))) {// not logged or ask for public collections
 			// return all public collections
 			Tuple<List<Collection>, Tuple<Integer, Integer>> info = DB.getCollectionDAO()
 					.getPublic(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
@@ -720,13 +720,13 @@ public class CollectionController extends Controller {
 			}
 		}
 		// index record and merged_record and increment likes
-		ElasticIndexer indexer = new ElasticIndexer(record);
-		indexer.index();
+		//ElasticIndexer indexer = new ElasticIndexer(record);
+		//indexer.index();
 		// increment likes if collection title is _favourites
 		if (c.getTitle().equals("_favorites")) {
-			indexer.index();
-			ElasticUpdater updater = new ElasticUpdater(null, record);
-			updater.incLikes();
+			//indexer.index();
+			/*ElasticUpdater updater = new ElasticUpdater(null, record);
+			updater.incLikes();*/
 		}
 		return status;
 	}
@@ -750,7 +750,7 @@ public class CollectionController extends Controller {
 			return ok(Json.toJson(record));
 		}
 	}*/
-	
+
 	public static Status updateFavoritesFirstEntries() {
 		int updated = 0;
 		System.out.println("update");
@@ -779,7 +779,7 @@ public class CollectionController extends Controller {
 		}
 		return ok(Json.toJson(updated));
 	}
-	
+
 	public static Status updateFirstEntries() {
 		for (Collection c: DB.getCollectionDAO().getAll()) {
 			ObjectId colId = c.getDbId();
@@ -807,7 +807,7 @@ public class CollectionController extends Controller {
 						break;
 					}
 				}
-				if (!contains) 
+				if (!contains)
 					records.remove(fe);
 			}
 			//remove duplicates in firstEntries
@@ -817,12 +817,12 @@ public class CollectionController extends Controller {
 		}
 		return ok();
 	}
-	
+
 
 	private static Status addRecordToFirstEntries(CollectionRecord record, ObjectNode result, ObjectId collectionId,
 			int position) {
 		Collection collection = DB.getCollectionDAO().getById(collectionId);
-		if (collection.getFirstEntries().size() < 20 && position < 20) {
+		if ((collection.getFirstEntries().size() < 20) && (position < 20)) {
 			collection.itemCountIncr();
 			collection.setLastModified(new Date());
 			String recordId = record.getDbId().toString();
@@ -846,12 +846,12 @@ public class CollectionController extends Controller {
 				return internalServerError(result);
 			} else {
 				// update itemCount
-				ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
-				itemCountUpdater.incItemCount();
+				/*ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+				itemCountUpdater.incItemCount();*/
 				return ok(Json.toJson(record));
 			}
 		}
-		else 
+		else
 			return ok();
 	}
 
@@ -867,8 +867,8 @@ public class CollectionController extends Controller {
 							data.getJsonContent());
 				}
 				// index record and merged_record
-				ElasticIndexer indexer = new ElasticIndexer(record);
-				indexer.index();
+				//ElasticIndexer indexer = new ElasticIndexer(record);
+				//indexer.index();
 				return true;
 			} catch (ClassNotFoundException e) {
 				// my class isn't there!
@@ -882,8 +882,8 @@ public class CollectionController extends Controller {
 
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(recordId);
 		// index record and merged_record
-		ElasticIndexer indexer = new ElasticIndexer(record);
-		indexer.index();
+		//ElasticIndexer indexer = new ElasticIndexer(record);
+		//indexer.index();
 		String sourceClassName = "espace.core.sources." + source + "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
@@ -924,8 +924,8 @@ public class CollectionController extends Controller {
 		DB.getCollectionDAO().makePermanent(collection);
 
 		// decrement collection itemCount
-		ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
-		itemCountUpdater.decItemCount();
+		//ElasticUpdater itemCountUpdater = new ElasticUpdater(collection);
+		//itemCountUpdater.decItemCount();
 		CollectionRecord record = DB.getCollectionRecordDAO().getById(new ObjectId(recordId));
 		//int position = 0;
 		//if (collection.getIsExhibition()) {
@@ -934,8 +934,8 @@ public class CollectionController extends Controller {
 		// decrement likes from records
 		if (collection.getTitle().equals("_favorites")) {
 			DB.getCollectionRecordDAO().decrementLikes(record.getExternalId());
-			ElasticUpdater updater = new ElasticUpdater(null, record);
-			updater.decLikes();
+			//ElasticUpdater updater = new ElasticUpdater(null, record);
+			//updater.decLikes();
 		}
 		if (DB.getCollectionRecordDAO().deleteById(new ObjectId(recordId)).getN() == 0) {
 			result.put("message", "Cannot delete CollectionEntry!");
@@ -943,9 +943,9 @@ public class CollectionController extends Controller {
 		}
 
 		// delete record and merged_record from index
-		ElasticEraser eraser = new ElasticEraser(record);
-		eraser.deleteRecord();
-		eraser.deleteRecordEntryFromMerged();
+		//ElasticEraser eraser = new ElasticEraser(record);
+		//eraser.deleteRecord();
+		//eraser.deleteRecordEntryFromMerged();
 
 		//if (collection.getIsExhibition()) {
 			DB.getCollectionRecordDAO().shiftRecordsToLeft(new ObjectId(collectionId), position);
@@ -984,14 +984,14 @@ public class CollectionController extends Controller {
 		for (CollectionRecord e : records) {
 			if (format.equals("all")) {
 				recordsList.add(Json.toJson(e.getContent()));
-			} 
+			}
 			else if (format.equals("default")) {
 				e.getContent().clear();
 				recordsList.add(Json.toJson(e));
 			}
 			else if (e.getContent().containsKey(format)) {
 				recordsList.add(e.getContent().get(format));
-			}		
+			}
 		}
 		result.put("itemCount", collection.getItemCount());
 		result.put("records", recordsList);

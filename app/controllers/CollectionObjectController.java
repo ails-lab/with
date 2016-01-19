@@ -142,6 +142,14 @@ public class CollectionObjectController extends Controller {
 	public static Result getCollectionObject(String id) {
 		ObjectNode result = Json.newObject();
 		try {
+			ObjectId collectionDbId = new ObjectId(id);
+			if (!DB.getWithResourceDAO().hasAccess(
+					AccessManager.effectiveUserDbIds(session().get(
+							"effectiveUserIds")), Action.READ, collectionDbId)) {
+				result.put("error",
+						"User does not have read-access for the resource");
+				return forbidden(result);
+			}
 			CollectionObject collection = DB.getCollectionObjectDAO().get(
 					new ObjectId(id));
 			if (collection == null) {
@@ -149,14 +157,8 @@ public class CollectionObjectController extends Controller {
 				result.put("error", "Cannot retrieve resource from database");
 				return internalServerError(result);
 			}
-			if (!AccessManager.checkAccess(collection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.READ)) {
-				result.put("error",
-						"User does not have read-access for the resource");
-				return forbidden(result);
-			}
-			List<RecordResource> firstEntries = DB.getCollectionObjectDAO().getFirstEntries(new ObjectId(id), 5);
+			List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
+					.getFirstEntries(collectionDbId, 5);
 			result = (ObjectNode) Json.toJson(collection);
 			result.put("firstEntries", Json.toJson(firstEntries));
 			return ok(Json.toJson(collection));
@@ -177,19 +179,22 @@ public class CollectionObjectController extends Controller {
 	public static Result deleteCollectionObject(String id) {
 		ObjectNode result = Json.newObject();
 		try {
+			ObjectId collectionDbId = new ObjectId(id);
+			if (!DB.getWithResourceDAO()
+					.hasAccess(
+							AccessManager.effectiveUserDbIds(session().get(
+									"effectiveUserIds")), Action.DELETE,
+							collectionDbId)) {
+				result.put("error",
+						"User does not have read-access for the resource");
+				return forbidden(result);
+			}
 			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					new ObjectId(id));
+					collectionDbId);
 			if (collection == null) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
 				return internalServerError(result);
-			}
-			if (!AccessManager.checkAccess(collection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.DELETE)) {
-				result.put("error",
-						"User does not have the right to delete the resource");
-				return forbidden(result);
 			}
 			DB.getCollectionObjectDAO().makeTransient(collection);
 			result.put("message", "Resource was deleted successfully");
@@ -210,32 +215,26 @@ public class CollectionObjectController extends Controller {
 	 */
 	// TODO check restrictions (unique fields e.t.c)
 	public static Result editCollectionObject(String id) {
-		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
-		ObjectId dbId = new ObjectId(id);
+		ObjectNode result = Json.newObject();
+		ObjectId collectionDbId = new ObjectId(id);
 		try {
+			if (!DB.getWithResourceDAO()
+					.hasAccess(
+							AccessManager.effectiveUserDbIds(session().get(
+									"effectiveUserIds")), Action.EDIT,
+							collectionDbId)) {
+				result.put("error",
+						"User does not have read-access for the resource");
+				return forbidden(result);
+			}
 			if (json == null) {
-				error.put("error", "Invalid JSON");
-				return badRequest(error);
-			}
-			// TODO: check rights from DAO
-			CollectionObject oldCollection = DB.getCollectionObjectDAO().get(
-					dbId);
-			if (oldCollection == null) {
-				log.error("Cannot retrieve resource from database");
-				error.put("error", "Cannot retrieve resource from database");
-				return internalServerError(error);
-			}
-			if (!AccessManager.checkAccess(oldCollection.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.EDIT)) {
-				error.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(error);
+				result.put("error", "Invalid JSON");
+				return badRequest(result);
 			}
 			// TODO change JSON at all its depth
-			DB.getCollectionObjectDAO().editCollection(dbId, json);
-			/*
+			DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
+			/* 
 			 * ObjectMapper objectMapper = new ObjectMapper(); ObjectReader
 			 * updator = objectMapper .readerForUpdating(oldCollection);
 			 * CollectionObject newCollection; newCollection =
@@ -251,10 +250,10 @@ public class CollectionObjectController extends Controller {
 			 * newCollection.getAdministrative().setLastModified(new Date());
 			 * DB.getCollectionObjectDAO().makePermanent(newCollection);
 			 */
-			return ok(Json.toJson(DB.getCollectionObjectDAO().get(dbId)));
+			return ok(Json.toJson(DB.getCollectionObjectDAO().get(collectionDbId)));
 		} catch (Exception e) {
-			error.put("error", e.getMessage());
-			return internalServerError(error);
+			result.put("error", e.getMessage());
+			return internalServerError(result);
 		}
 	}
 

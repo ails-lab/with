@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import model.basicDataTypes.WithAccess.Access;
-
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Field;
@@ -29,8 +27,14 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
+import model.basicDataTypes.WithAccess.Access;
 
-import db.converters.RightsConverter;
+import utils.AccessEnumConverter;
+import utils.Deserializer;
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  *
@@ -38,22 +42,28 @@ import db.converters.RightsConverter;
  *
  * So that Model objects can have a proper type for rights embedded
  */
-@Converters( RightsConverter.class )
-public class WithAccess extends HashMap<ObjectId, Access> {
+public class WithAccess  extends HashMap<ObjectId, Access>{
 
 	@Indexes({
 		@Index(fields = @Field(value = "user", type = IndexType.ASC), options = @IndexOptions(disableValidation=true)),
 		@Index(fields = @Field(value = "level", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = {@Field(value = "user", type = IndexType.ASC), @Field(value = "level", type = IndexType.DESC) }, options = @IndexOptions())
 	})
+
+	@Converters( AccessEnumConverter.class )
 	public static class AccessEntry {
+
+		public AccessEntry() {}
 
 		public AccessEntry(ObjectId user, Access level) {
 			this.user = user;
 			this.level = level;
 		}
 
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId user;
+		@JsonSerialize(using = Serializer.AccessSerializer.class)
+		@JsonDeserialize(using = Deserializer.AccessDeserializer.class)
 		private Access level;
 
 
@@ -88,18 +98,29 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 		return isPublic;
 	}
 
-	public void setPublic(boolean isPublic) {
+	public void setIsPublic(boolean isPublic) {
 		this.isPublic = isPublic;
 	}
 
 	public List<AccessEntry> getAcl() {
+		if(acl==null)
+			acl = new ArrayList<WithAccess.AccessEntry>();
 		return acl;
+	}
+
+	public void addAccess(AccessEntry accessEntry) {
+		this.acl.add(accessEntry);
+	}
+
+	public void addAccess(ObjectId userId, Access access) {
+		AccessEntry accessEntry = new AccessEntry(userId, access);
+		this.acl.add(accessEntry);
 	}
 
 	public void setAcl(List<AccessEntry> acl) {
 		this.acl = acl;
 	}
-	
+
 	public Access getAcl(ObjectId user) {
 		for (AccessEntry ae: acl) {
 			if (ae.user.equals(user))
@@ -107,4 +128,14 @@ public class WithAccess extends HashMap<ObjectId, Access> {
 		}
 		return Access.NONE;
 	}
+
+	public void addToAcl(AccessEntry ae) {
+		if(acl == null) {
+			acl = new ArrayList<AccessEntry>();
+			acl.add(ae);
+		} else {
+			acl.add(ae);
+		}
+	}
+
 }

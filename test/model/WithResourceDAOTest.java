@@ -51,6 +51,7 @@ import org.junit.Test;
 
 import com.google.common.net.MediaType;
 
+import play.libs.Json;
 import db.DB;
 
 public class WithResourceDAOTest {
@@ -108,10 +109,10 @@ public class WithResourceDAOTest {
 		// }
 		// assertThat( image.getDbId()).isNotNull();
 		if (j == 0) {
-			image.setParentURL(image.getUrl());
+		//	image.setParentURL(image.getUrl());
 			parent = image.getUrl();
 		} else {
-			image.setParentURL(parent);
+		//	image.setParentURL(parent);
 		}
 		return image;
 	}
@@ -193,13 +194,13 @@ public class WithResourceDAOTest {
 			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("ΜintTest", "http://myUri", "12345"));
 			WithAccess access = new WithAccess();
-			access.put(new ObjectId(), WithAccess.Access.READ);
+			access.addAccess(new ObjectId(), WithAccess.Access.READ);
 			access.setPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNew" + i));
+			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNewRights" + i));
 			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 
