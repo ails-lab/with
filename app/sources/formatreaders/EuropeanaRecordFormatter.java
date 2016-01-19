@@ -16,56 +16,64 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
-import sources.EuropeanaSpaceSource;
-import sources.core.JsonContextRecordFormatReader;
-import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
-import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
+import sources.core.CommonFilters;
+import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
+import utils.ListUtils;
 
+public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
-public class EuropeanaRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
-	
-	public EuropeanaRecordFormatter() {
+	public EuropeanaRecordFormatter(FilterValuesMap map) {
+		super(map);
 		object = new CulturalObject();
 	}
-	
+
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
 		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
 		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
-//		model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Arrays.asList(new LiteralOrResource(rec.getStringValue("dcCreatorLangAware"))));
-		
+		List<String> years = rec.getStringArrayValue("year");
+		model.setDates(StringUtils.getDates(years));
+		model.setDccreator(rec.getLiteralOrResourceValue("dcCreatorLangAware"));
+		model.setKeywords(rec.getLiteralOrResourceValue("dcSubjectLangAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
-		object.addToProvenance(new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("id"), rec.getStringValue("guid")));
+		object.addToProvenance(
+				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("guid"), rec.getStringValue("id")));
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue(rec.getStringValue("edmIsShownBy")));
+		medThumb.setUrl(model.getIsShownBy());
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		//TODO: add rights!
+		// TODO: add rights!
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
+		med.setUrl(model.getIsShownBy());
+		// TODO: add withMediaRights, originalRights
+		List<String> rights = rec.getStringArrayValue("rights");
+		med.setOriginalRights(ListUtils.transform(rights, (String x) -> LiteralOrResource.build(x)).get(0));
+		med.setWithRights(
+				(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0));
+		med.setType((WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type")).get(0));
+
 		object.addMedia(MediaVersion.Original, med);
 		return object;
-		//TODO: add null checks
-//		object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-//		object.setContributors(rec.getStringArrayValue("dcContributor"));
-//		object.setItemRights(rec.getStringValue("rights"));
+		// TODO: add null checks
+		// object.setThumbnailUrl(rec.getStringValue("edmPreview"));
+		// object.setContributors(rec.getStringArrayValue("dcContributor"));
+		// object.setItemRights(rec.getStringValue("rights"));
 	}
-	
+
 }

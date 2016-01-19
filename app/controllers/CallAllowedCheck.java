@@ -18,6 +18,8 @@ package controllers;
 
 import static akka.pattern.Patterns.ask;
 import model.ApiKey.Response;
+import play.Logger;
+import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.F.Promise;
 import play.mvc.Action;
@@ -36,18 +38,22 @@ import akka.actor.ActorSelection;
  */
 public class CallAllowedCheck extends Action.Simple {
 
+	public static final ALogger log = Logger.of( CallAllowedCheck.class);
+
+	
 	@Override
 	public Promise<Result> call(Context ctx) throws Throwable {
 		// long reqSize = ctx.request().body();
 		String[] apikeys = ctx.request().queryString().get( "apikey");
+		
 		ApiKeyManager.Access access = new ApiKeyManager.Access();
 		if( apikeys != null ) {
 			access.apikey = apikeys[0];
 		} else if( ctx.session().containsKey("apikey")) {
 			access.apikey = ctx.session().get( "apikey" );
-		} else {
-			// check if ip is allowed
-			access.ip = ctx.request().remoteAddress();
+//		} else {
+//			// check if ip is allowed
+//			access.ip = ctx.request().remoteAddress();
 		}
 		access.call = ctx.request().path();
 

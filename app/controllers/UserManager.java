@@ -90,14 +90,14 @@ public class UserManager extends Controller {
 			proposedName = initial + i++;
 			u = DB.getUserDAO().getByUsername(proposedName);
 			g = DB.getUserGroupDAO().getByName(proposedName);
-		} while (u != null || g != null);
+		} while ((u != null) || (g != null));
 		names.add(proposedName);
 		if ((firstName == null) || (lastName == null))
 			return names;
 		proposedName = firstName + "_" + lastName;
 		i = 0;
-		while (DB.getUserDAO().getByUsername(proposedName) != null
-				|| DB.getUserGroupDAO().getByName(proposedName) != null) {
+		while ((DB.getUserDAO().getByUsername(proposedName) != null)
+				|| (DB.getUserGroupDAO().getByName(proposedName) != null)) {
 			proposedName = proposedName + i++;
 		}
 		names.add(proposedName);
@@ -132,7 +132,7 @@ public class UserManager extends Controller {
 			}
 			// Validate email address with regular expression
 			final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+					+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
 			Pattern pattern = Pattern.compile(EMAIL_PATTERN);
 			Matcher matcher = pattern.matcher(email);
 			if (!matcher.matches()) {
@@ -170,7 +170,7 @@ public class UserManager extends Controller {
 			error.put("username", "Username is Empty");
 		} else {
 			username = json.get("username").asText();
-			if (DB.getUserDAO().getByUsername(username) != null || DB.getUserGroupDAO().getByName(username) != null) {
+			if ((DB.getUserDAO().getByUsername(username) != null) || (DB.getUserGroupDAO().getByName(username) != null)) {
 				error.put("username", "Username Already in Use");
 				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);
@@ -207,8 +207,8 @@ public class UserManager extends Controller {
 		fav.setCreatorId(user.getDbId());
 		fav.setTitle("_favorites");
 		DB.getCollectionDAO().makePermanent(fav);
-		ElasticIndexer indexer = new ElasticIndexer(fav);
-		indexer.indexCollectionMetadata();
+		//ElasticIndexer indexer = new ElasticIndexer(fav);
+		//indexer.indexCollectionMetadata();
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
 		result.remove("md5Password");
@@ -276,6 +276,8 @@ public class UserManager extends Controller {
 			u = DB.getUserDAO().getByFacebookId(facebookId);
 			if (u != null) {
 				session().put("user", u.getDbId().toHexString());
+				session().put("sourceIp", request().remoteAddress());
+				session().put("lastAccessTime", Long.toString(System.currentTimeMillis()));
 				return getUser(u.getDbId().toHexString());
 			} else {
 				String accessToken = json.get("accessToken").asText();
@@ -410,8 +412,8 @@ public class UserManager extends Controller {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
 			if (user != null) {
 				ObjectNode result = (ObjectNode) Json.parse(Json.toJson(user).toString());
-				result.put("favoritesId",
-						DB.getCollectionDAO().getByOwnerAndTitle(new ObjectId(id), "_favorites").getDbId().toString());
+				//result.put("favoritesId",
+				//		DB.getCollectionDAO().getByOwnerAndTitle(new ObjectId(id), "_favorites").getDbId().toString());
 				String image = UserAndGroupManager.getImageBase64(user);
 				JsonNode groupIds = result.get("userGroupsIds");
 				ArrayNode userGroups = Json.newObject().arrayNode();
@@ -452,7 +454,9 @@ public class UserManager extends Controller {
 				return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
-			return internalServerError(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
+			ObjectNode error = Json.newObject();
+			error.put("error", e.getMessage());
+			return internalServerError(error);
 		}
 	}
 
@@ -583,36 +587,6 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result addUserToGroup(String uid, String gid) {
-		ObjectNode result = Json.newObject();
-
-		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(gid));
-		if (group == null) {
-			result.put("message", "Cannot retrieve group from database!");
-			return internalServerError(result);
-		}
-
-		group.getUsers().add(new ObjectId(uid));
-		Set<ObjectId> parentGroups = group.getAncestorGroups();
-
-		User user = DB.getUserDAO().get(new ObjectId(uid));
-		if (user == null) {
-			result.put("message", "Cannot retrieve user from database!");
-			return internalServerError(result);
-		}
-		parentGroups.add(group.getDbId());
-		user.addUserGroups(parentGroups);
-
-		if (!(DB.getUserDAO().makePermanent(user) == null) && !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-			result.put("message", "Group succesfully added to User");
-			return ok(result);
-		}
-
-		result.put("message", "Cannot store to database!");
-		return internalServerError(result);
-
-	}
-
 	public static Result apikey() {
 
 		// need to limit calls like this and reset password to 3 times per day
@@ -670,7 +644,7 @@ public class UserManager extends Controller {
 
 		create.dbId = "";
 		create.call = "";
-		create.ip = "";
+//		create.ip = "";
 		create.counterLimit = -1l;
 		create.volumeLimit = -1l;
 		// create.position = 1;
@@ -850,9 +824,9 @@ public class UserManager extends Controller {
 
 		email.setMsg(message);
 
-		
+
 		email.send();
-		
+
 	}
 
 	/***
@@ -936,8 +910,7 @@ public class UserManager extends Controller {
 
 			}
 		}
-
 		return badRequest(result);
-
 	}
+
 }

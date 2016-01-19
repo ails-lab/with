@@ -16,38 +16,33 @@
 
 package model.basicDataTypes;
 
-import model.basicDataTypes.LiteralOrResource.ResourceType;
+import sources.core.Utils;
 
-import org.mongodb.morphia.annotations.Embedded;
-
-@Embedded
 public class MultiLiteralOrResource extends MultiLiteral {
-	
-	private LiteralOrResource.Resource resource;
-	
 
 	public MultiLiteralOrResource() {
-		super();
 	}
 
-	public MultiLiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new LiteralOrResource.Resource(resourceType, uri);
+	public MultiLiteralOrResource(Language lang, String label) {
+		super(lang, label);
 	}
 
 	public MultiLiteralOrResource(String label) {
-		super(label);
+		if (Utils.isValidURL(label)) {
+			addURI(label);
+		} else
+			addLiteral(label);
 	}
 
-	// etc etc
-	public String getResource(ResourceType resourceType) {
-		if (resource.uriType.equals(resourceType))
-			return resource.uri;
+	public void addLiteral(Language lang, String value) {
+		if (lang.equals(Language.DEF) && Utils.isValidURL(value))
+			addURI(value);
 		else
-			return "";
+			super.addLiteral(lang, value);
 	}
 
-	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new LiteralOrResource.Resource(resourceType, uri);
-
+	public void addURI(String uri) {
+		add(LiteralOrResource.URI, uri);
 	}
+
 }

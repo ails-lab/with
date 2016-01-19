@@ -25,23 +25,24 @@ import java.util.function.Function;
 import sources.core.CommonFilters;
 import sources.core.QueryModifier;
 import sources.core.Utils.Pair;
+import utils.ListUtils;
 
 public class FilterValuesMap {
 
-	private HashMap<String, List<String>> specificvalues;
+	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
-	private HashMap<String, List<String>> commonvalues;
+	private HashMap<String, List<Object>> commonvalues;
 	private HashMap<String, Function<List<String>, QueryModifier>> writters;
 
 	public FilterValuesMap() {
-		specificvalues = new HashMap<String, List<String>>();
-		commonvalues = new HashMap<String, List<String>>();
+		specificvalues = new HashMap<>();
+		commonvalues = new HashMap<>();
 		// queryTexts = new HashMap<String, List<Pair<String>>>();
 		writters = new HashMap<>();
 	}
 
-	private String getKey(String filterID, String value) {
-		return filterID + "-" + value;
+	private String getKey(String filterID, Object value) {
+		return filterID + "-" + value.toString();
 	}
 
 	private <T> List<T> getOrset(HashMap<String, List<T>> map, String key, boolean addNew) {
@@ -68,7 +69,7 @@ public class FilterValuesMap {
 		return getOrset(map, key, true);
 	}
 
-	public void addMap(String filterID, String commonValue, String... specificValue) {
+	public void addMap(String filterID, Object commonValue, String... specificValue) {
 		getOrset(specificvalues, getKey(filterID, commonValue)).addAll(Arrays.asList(specificValue));
 		for (String string : specificValue) {
 			getOrset(commonvalues, getKey(filterID, string)).add(commonValue);
@@ -76,14 +77,14 @@ public class FilterValuesMap {
 		// getOrset(queryTexts, getKey(filterID, commonValue)).add(queryText);
 	}
 
-	public List<String> translateToCommon(String filterID, String specificValue) {
+	public List<Object> translateToCommon(String filterID, String specificValue) {
 		if (specificValue != null) {
 			String matchexpr = getKey(filterID, specificValue);
-			List<String> v = new ArrayList<>();			
+			List<Object> v = new ArrayList<>();			
 			for (String kk : commonvalues.keySet()) {
 				if (matchexpr.matches(kk)) {
 					// String k = getKey(filterID, specificValue);
-					List<String> orset = getOrset(commonvalues, kk, false);
+					List<Object> orset = getOrset(commonvalues, kk, false);
 					v.addAll(orset);
 					return v;
 				}
@@ -96,16 +97,16 @@ public class FilterValuesMap {
 		return null;
 	}
 
-	public List<String> translateToSpecific(String filterID, String... commonValue) {
+	public List<Object> translateToSpecific(String filterID, String... commonValue) {
 		return translateToSpecific(filterID, Arrays.asList(commonValue));
 	}
 
-	public List<String> translateToSpecific(String filterID, List<String> commonValue) {
+	public List<Object> translateToSpecific(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
-			ArrayList<String> res = new ArrayList<String>();
+			ArrayList<Object> res = new ArrayList<>();
 			for (String string : commonValue) {
 				String k = getKey(filterID, string);
-				List<String> v = getOrset(specificvalues, k, false);
+				List<Object> v = getOrset(specificvalues, k, false);
 				if (v.isEmpty()) {
 					v.add(string);
 				}
@@ -119,10 +120,10 @@ public class FilterValuesMap {
 	public List<QueryModifier> translateToQuery(String filterID, List<String> commonValue) {
 		if (commonValue != null) {
 			List<QueryModifier> res = new ArrayList<>();
-			List<String> values = translateToSpecific(filterID, commonValue);
+			List<Object> values = translateToSpecific(filterID, commonValue);
 			Function<List<String>, QueryModifier> w = writters.get(filterID);
 			if (w != null)
-				res.add(w.apply(values));
+				res.add(w.apply(ListUtils.transform(values, (Object x)-> x.toString())));
 			return res;
 		}
 		return null;

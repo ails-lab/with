@@ -19,46 +19,38 @@ package model.basicDataTypes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
-import model.basicDataTypes.Literal.Language;
+public class MultiLiteral extends MapWithList {
 
-public class MultiLiteral extends HashMap<String, ArrayList<String>> {
 
-	
-		public MultiLiteral() {
+	public MultiLiteral() {
+	}
+
+	public MultiLiteral(String label) {
+		addLiteral(label);
+	}
+
+	public MultiLiteral(Language lang, String label) {
+		addLiteral(lang, label);
+	}
+
+	public void addLiteral(Language lang, String value) {
+		add(lang.toString(), value);
+		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
+			add(Language.DEF.toString(), value);
+	}
+
+	public void addLiteral(String value) {
+		addLiteral(Language.UNKNOWN, value);
+	}
+
+	public List<String> getMultiLiteral(Language lang) {
+		/*if(Language.ANY.equals(lang)) {
+			return this.get(this.keySet().toArray()[0]);
+
 		}
-
-		public MultiLiteral(String label) {
-			this.put(Language.UNKNOWN.toString(), new ArrayList<String>(Arrays.asList(label)));
-		}
-
-		public MultiLiteral(Language lang, String label) {
-			if (this.containsKey(lang.toString()))
-				this.get(lang.toString()).add(label);
-			else
-				this.put(Language.UNKNOWN.toString(), new ArrayList<String>(Arrays.asList(label)));
-			if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
-				this.put(Language.DEF.toString(), new ArrayList<String>(Arrays.asList(label)));
-		}
-
-		// keys are language 2 letter codes,
-		// "unknown" for unknown language
-		public void setMultiLiteral(Language lang, String label) {
-			if (this.containsKey(lang.toString()))
-				this.get(lang.toString()).add(label);
-			else
-				this.put(Language.UNKNOWN.toString(), new ArrayList<String>(Arrays.asList(label)));
-		}
-		/**
-		 * Don't request the "unknown" language, request "any" if you don't care
-			 * @param lang
-		 * @return
-		 */
-		public ArrayList<String> getMultiLiteral(Language lang) {
-			/*if(Language.ANY.equals(lang)) {
-				return this.get(this.keySet().toArray()[0]);
-			}
-			else*/
-				return get(lang.toString());
-		}
+		else*/
+			return get(lang.toString());
+	}
 }

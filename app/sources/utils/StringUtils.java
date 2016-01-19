@@ -20,16 +20,16 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Year;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import views.html.main;
+import org.hibernate.validator.internal.constraintvalidators.URLValidator;
+
+import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.WithDate;
 
 public class StringUtils {
 
@@ -83,7 +83,7 @@ public class StringUtils {
 						c.setTimeInMillis(v);
 						res.add(Year.of(c.get(Calendar.YEAR)));
 					}
-	
+
 				} catch (Exception e) {
 					DateFormat f = DateFormat.getDateInstance();
 					Date d = parseDate(string);
@@ -96,12 +96,22 @@ public class StringUtils {
 		return res;
 	}
 
-	public static List<Year> getYears(String... dates) {
-		return getYears(Arrays.asList(dates));
+	public static List<WithDate> getDates(List<String> dates) {
+		ArrayList<WithDate> res = new ArrayList<>();
+		if (dates != null) {
+			for (String string : dates) {
+				res.add(new WithDate(string));
+			}
+		}
+		return res;
+	}
+
+	public static List<WithDate> getYearsDate(String... dates) {
+		return getDates(Arrays.asList(dates));
 	}
 
 	public static void main(String[] args) {
-		System.out.println(getYears("2011 BC"));
+		// System.out.println(getYears("2011 BC"));
 	}
 
 	public static int count(String text, String subtext) {
@@ -118,4 +128,8 @@ public class StringUtils {
 		return count;
 	}
 
+	public static LiteralOrResource toLiteralOrResource(String value) {
+		// UrlValidaror v;
+		return null;
+	}
 }

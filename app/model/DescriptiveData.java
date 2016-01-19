@@ -17,6 +17,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,7 +27,6 @@ import org.mongodb.morphia.annotations.Embedded;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
@@ -55,19 +55,19 @@ public class DescriptiveData {
 	private MultiLiteralOrResource keywords;
 
 	// This are reachable URLs
-	private String isShownAt, isShownBy;
+	private LiteralOrResource isShownAt, isShownBy;
 
 	// The whole legal bla, unedited, from the source, mostly cc0
 	private LiteralOrResource metadataRights;
 
-	// rdf  .. Agent, Artist, Painter, Painting, Series
+	// rdf .. Agent, Artist, Painter, Painting, Series
 	private String rdfType;
 
 	// URIs how this Resource is known elsewhere
-	private ArrayList<String> sameAs;
+	private MultiLiteralOrResource sameAs;
 
 	// in a timeline where would this resource appear
-	private ArrayList<WithDate> dates;
+	private List<WithDate> dates;
 
 	// alternative title or name or placename
 	private MultiLiteral altLabels;
@@ -97,19 +97,21 @@ public class DescriptiveData {
 	}
 
 	public String getIsShownAt() {
-		return isShownAt;
+		return isShownAt.getURI();
 	}
 
 	public void setIsShownAt(String isShownAt) {
-		this.isShownAt = isShownAt;
+		this.isShownAt = new LiteralOrResource();
+		this.isShownAt.addURI(isShownAt);
 	}
 
 	public String getIsShownBy() {
-		return isShownBy;
+		return isShownBy.getURI();
 	}
 
 	public void setIsShownBy(String isShownBy) {
-		this.isShownBy = isShownBy;
+		this.isShownBy = new LiteralOrResource();
+		this.isShownBy.addURI(isShownBy);
 	}
 
 	public LiteralOrResource getMetadataRights() {
@@ -128,19 +130,19 @@ public class DescriptiveData {
 		this.rdfType = rdfType;
 	}
 
-	public ArrayList<String> getSameAs() {
+	public MultiLiteralOrResource getSameAs() {
 		return sameAs;
 	}
 
-	public void setSameAs(ArrayList<String> sameAs) {
+	public void setSameAs(MultiLiteralOrResource sameAs) {
 		this.sameAs = sameAs;
 	}
 
-	public ArrayList<WithDate> getDates() {
+	public List<WithDate> getDates() {
 		return dates;
 	}
 
-	public void setDates(ArrayList<WithDate> dates) {
+	public void setDates(List<WithDate> dates) {
 		this.dates = dates;
 	}
 

@@ -16,28 +16,30 @@
 
 package sources.core;
 
+import sources.FilterValuesMap;
 import sources.utils.JsonContextRecord;
+import model.resources.CulturalObject;
 import model.resources.WithResource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 public abstract class JsonContextRecordFormatReader<T extends WithResource> {
-	
+
 	protected T object;
-	
+
 	public T fillObjectFrom(String text) {
 		JsonContextRecord rec = new JsonContextRecord(text);
 		return fillObjectFrom(rec);
 	}
-	
-	public T fillObjectFrom(JsonNode text) {
+
+	protected T fillObjectFrom(JsonNode text) {
 		JsonContextRecord rec = new JsonContextRecord(text);
 		return fillObjectFrom(rec);
 	}
-	
-	public abstract T fillObjectFrom(JsonContextRecord text);
-	
-	public T readObjectFrom(JsonNode text){
+
+	protected abstract T fillObjectFrom(JsonContextRecord text);
+
+	public T readObjectFrom(JsonNode text) {
 		return fillObjectFrom(text);
 	}
 

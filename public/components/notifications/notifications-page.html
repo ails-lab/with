@@ -1,0 +1,39 @@
+<div id="userCollections" class="container-fluid" style="padding-bottom: 100px;">
+	<div class="row">
+		<div class="col-lg-6 col-md-6 col-sm-12">
+			<span class="withmain"><h2>My Notifications</h2></span>
+
+			<div class="pull-right"><a href="javascript:void()" data-bind="click: markUserNotificationsRead">Mark all as read</a></div><br />
+			<ul class="list-group notification-list" data-bind="foreach: userNotifications">
+				<li class="list-group-item" data-bind="css: { 'list-group-item-info': unread }">
+					<div class="message pull-left">
+						<span data-bind="html: message"></span><br />
+						<small data-bind="text: date"></small>
+					</div>
+					<div class="pull-right" data-bind="visible: pending">
+						<button type="button" class="btn btn-primary" data-bind="click: $parent.accept"><span class="glyphicon glyphicon-ok"></span></button>
+						<button type="button" class="btn btn-default" data-bind="click: $parent.reject"><span class="glyphicon glyphicon-remove"></span></button>
+					</div>
+				</li>
+			</ul>
+		</div>
+
+		<div class="col-lg-6 col-md-6 col-sm-12">
+			<span class="withmain"><h2>My Groups' Notifications</h2></span>
+
+			<div class="pull-right"><a href="javascript:void()" data-bind="click: markGroupNotificationsRead">Mark all as read</a></div><br />
+			<ul class="list-group notification-list" data-bind="foreach: groupNotifications">
+				<li class="list-group-item" data-bind="css: { 'list-group-item-info': unread }">
+					<div class="message pull-left">
+						<span data-bind="html: message"></span><br />
+						<small data-bind="text: date"></small>
+					</div>
+					<div class="pull-right" data-bind="visible: pending">
+						<button type="button" class="btn btn-primary" data-bind="click: $parent.accept"><span class="glyphicon glyphicon-ok"></span></button>
+						<button type="button" class="btn btn-default" data-bind="click: $parent.reject"><span class="glyphicon glyphicon-remove"></span></button>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>

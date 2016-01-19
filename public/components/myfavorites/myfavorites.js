@@ -86,6 +86,15 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 	function MyFavoritesModel(params) {
 		var self = this;
 		self.loading = ko.observable(false);
+		self.checkLogged=function(){
+			if(isLogged()==false){
+		
+			window.location='#login';
+			return;
+		  }
+		}
+		
+		self.checkLogged();
 		self.items = ko.observableArray();
 
 		self.loadFavorites = function () {

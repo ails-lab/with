@@ -26,9 +26,8 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
-import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.MultiLiteralOrResource;
 import model.DescriptiveData;
+import model.basicDataTypes.MultiLiteralOrResource;
 
 @Entity("CollectionObject")
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {

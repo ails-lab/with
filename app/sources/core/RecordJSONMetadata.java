@@ -19,6 +19,7 @@ package sources.core;
 public class RecordJSONMetadata {
 
 	public enum Format {
+		JSON_WITH,
 		JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, 
 		JSON_EDM, JSONLD_EDM, XML_EDM,
 		JSONLD_DPLA,

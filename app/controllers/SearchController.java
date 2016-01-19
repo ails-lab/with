@@ -119,11 +119,9 @@ public class SearchController extends Controller {
 						// Logger.debug("Total time for all sources to respond:
 						// "
 						// + (System.currentTimeMillis()- initTime));
-System.out.println("merging now!!!!!!");
 						SearchResponse r1 = new SearchResponse();
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-							// System.out.println(sourceResponse.filtersLogic);
 							FiltersHelper.merge(merge, sourceResponse.filtersLogic);
 							sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
 						}
@@ -203,7 +201,7 @@ System.out.println("merging now!!!!!!");
 		// q.source = Arrays.asList(DigitalNZSpaceSource.LABEL);
 		List<SourceResponse> res = search(q);
 		SearchResponse r1 = new SearchResponse();
-		r1.responces = res;
+		r1.responses = res;
 		ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 		for (SourceResponse sourceResponse : res) {
 			// System.out.println(sourceResponse.source + " Filters: " +
@@ -217,9 +215,8 @@ System.out.println("merging now!!!!!!");
 		// System.out.println(" Merged Filters: " + merge1);
 
 		return ok(views.html.testsearch.render(userForm, res, merge1));
-	}
 	 */
-	
+
 	public static Result reindex() {
 		Promise.promise(new Function0<String>() {
 			public String apply() throws Exception {
@@ -230,5 +227,19 @@ System.out.println("merging now!!!!!!");
 			}
 		});
 		return (ok());
+
+	}
+
+	public static Result reindex_records() {
+		Promise.promise(new Function0<String>() {
+			public String apply() throws Exception {
+				log.info("Reindex started");
+				Elastic.reindex_records();
+				log.info("Reindex finished");
+				return "ok";
+			}
+		});
+		return (ok());
+
 	}
 }

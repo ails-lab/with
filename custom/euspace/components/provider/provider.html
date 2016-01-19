@@ -72,24 +72,9 @@
       <section class="listing">
         <div class="container">
           <!-- grid-->
-          <div class="grid" id="homemasonry" data-bind="profileisotope: collections">
-            <!-- ko if: $index() === 0 -->
+          <div class="grid">
               <div class="sizer"></div>
-              <!-- /ko -->
-              <div data-bind="visible: isLoaded(), css: itemcss">
-              <div class="wrap">
-                <!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
-                  <!-- thumbnail-->
-                  <div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
-                  <!-- info-->
-                  <div class="info"><span class="type" data-bind="text:type"></span>
-                    <h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
-                  </div>
-                  <!-- pointer-->
-                  <div class="pointer"><span class="arrow"><img src="img/ic-right-arrow.png" alt="Arrow"></span></div></a>
-              </div>
-            </div>
-            
+             
           </div>
           
           <div id="more" data-bind="visible: loading, scroll: collections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>

@@ -83,7 +83,7 @@ public class Collection {
 
 	// fixed-size list of entries
 	// those will be as well in the CollectionEntry table
-	// we need to remove some fields from CollectionRecord 
+	// we need to remove some fields from CollectionRecord
 	//otherwise the whole document will be very heavy
 	@Embedded
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
@@ -92,7 +92,7 @@ public class Collection {
 	@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 	@Embedded
 	private final WithAccess rights = new WithAccess();
-	
+
 	@Embedded
 	@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 	private final Map<ObjectId, Access> underModerationInGroups = new HashMap<ObjectId, Access>();
@@ -139,7 +139,7 @@ public class Collection {
 	}
 
 	public void setIsPublic(boolean isPublic) {
-		rights.setPublic(isPublic);
+		rights.setIsPublic(isPublic);
 	}
 
 	public User retrieveCreator() {
@@ -173,8 +173,11 @@ public class Collection {
 		return firstEntries;
 	}
 
-	public String getThumbnailUrl() {
+	public void removeFromFirstEntries(CollectionRecord entry) {
+		this.firstEntries.remove(entry);
+	}
 
+	public String getThumbnailUrl() {
 		if (firstEntries.size() > 0)
 			return firstEntries.get(0).getThumbnailUrl();
 		return null;

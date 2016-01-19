@@ -118,6 +118,10 @@ public class GroupManager extends Controller {
 			newGroup.addAdministrator(admin);
 			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
+			User administartor = DB.getUserDAO().get(creator);
+			administartor.addGroupForAdministration(newGroup.getDbId());
+			administartor = DB.getUserDAO().get(admin);
+			administartor.addGroupForAdministration(newGroup.getDbId());
 			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newGroup);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
@@ -382,9 +386,11 @@ public class GroupManager extends Controller {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 			if (collectionHits) {
 				Query<Collection> q = DB.getCollectionDAO().createQuery();
-				CriteriaContainer[] criteria =  new CriteriaContainer[3];
-				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString()).greaterThanOrEq(1);
-				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString()).equal(3);
+				CriteriaContainer[] criteria = new CriteriaContainer[3];
+				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString())
+						.greaterThanOrEq(1);
+				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString())
+						.equal(3);
 				criteria[2] = DB.getCollectionDAO().createQuery().criteria("rights.isPublic").equal(true);
 				q.and(criteria);
 				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);

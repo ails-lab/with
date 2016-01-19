@@ -17,37 +17,21 @@
 package db;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 
-import model.DescriptiveData;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.Literal.Language;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
-import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
-
-import ch.qos.logback.core.util.AggregationType;
-
-import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.WriteResult;
 
 import utils.Tuple;
 import utils.AccessManager.Action;
@@ -576,6 +560,10 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		UpdateOperations<T> updateOps = this.createUpdateOperations();
 		updateOps.dec(fieldName);
 		this.update(q, updateOps);
+	}
+	
+	public boolean hasAccess(List<ObjectId> effectiveIds, Action access, ObjectId resourceId) {
+		return true;
 	}
 	
 }

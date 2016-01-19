@@ -17,18 +17,22 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
 
 import model.CollectionRecord;
+import model.resources.CollectionObject.CollectionAdmin;
 import model.basicDataTypes.CollectionInfo;
 import model.resources.AgentObject;
+import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.EUscreenObject;
 import model.resources.EventObject;
@@ -121,7 +125,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	}
 	*/
-	
+
 	/**
 	 * Retrieve records from specific collection using position
 	 * which is between lowerBound and upperBound
@@ -133,7 +137,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
-		BasicDBObject elemMatch2 = new BasicDBObject();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", lowerBound);
 		geq.append("$lt", upperBound);
@@ -141,7 +144,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
-		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
+		List<RecordResource> resources  = this.find(q).asList();
 		/*DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
 		List<T> ds = new ArrayList<T>();
 		while (cursor.hasNext()) {
@@ -187,7 +190,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		int MAX = 10000;
 		return getByCollectionBetweenPositions(colId, 0, MAX);
 	}
-	
+
 	public void shift(ObjectId colId, int position, BiConsumer<String, UpdateOperations> update) {
 		Query<RecordResource> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
@@ -199,10 +202,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
-		List<RecordResource> resources  = (List<RecordResource>) this.find(q).asList();
+		List<RecordResource> resources  = this.find(q).asList();
 		for (RecordResource resource: resources) {
 			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
-			ArrayList<CollectionInfo> collectedIn = resource.getCollectedIn();
+			List<CollectionInfo> collectedIn = resource.getCollectedIn();
 			int index = 0;
 			for (CollectionInfo ci: collectedIn) {
 				if (ci.getCollectionId().equals(colId)) {
@@ -216,6 +219,34 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		}
 	}
 
+	public void shift(ObjectId colId, int startPosition, int stopPosition, BiConsumer<String, UpdateOperations> update) {
+		Query<RecordResource> q = this.createQuery();
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch2 = new BasicDBObject();
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$gte", startPosition);
+		geq.put("$le", stopPosition);
+		colIdQuery.append("position", geq);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
+		List<RecordResource> resources  = this.find(q).asList();
+		for (RecordResource resource: resources) {
+			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
+			List<CollectionInfo> collectedIn = resource.getCollectedIn();
+			int index = 0;
+			for (CollectionInfo ci: collectedIn) {
+				if (ci.getCollectionId().equals(colId)) {
+					int pos = ci.getPosition();
+					if ((pos >= startPosition) && (pos <= stopPosition))
+						update.accept("collectedIn."+index+".position", updateOps);
+				}
+				index+=1;
+			}
+			this.update(this.createQuery().field("_id").equal(resource.getDbId()), updateOps);
+		}
+	}
 
 	/**
 	 * Shift one position left all resources in colId with position equal or greater than position.
@@ -227,7 +258,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.dec(field);
 		shift(colId, position, update);
 	}
-	
+
+	public void shiftRecordsToLeft(ObjectId colId, int startPosition, int stopPosition) {
+		//UpdateOperations updateOps = this.createUpdateOperations();
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.dec(field);
+		shift(colId, startPosition, stopPosition, update);
+	}
+
 	/**
 	 * Shift one position right all resources in colId with position equal or greater than position.
 	 * @param colId
@@ -237,7 +274,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
 		shift(colId, position, update);
 	}
-	
+
+	public void shiftRecordsToRight(ObjectId colId, int startPosition, int stopPosition) {
+		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
+		shift(colId, startPosition, stopPosition, update);
+	}
+
 	//TODO: has to be atomic as a whole
 	public void addToCollection(ObjectId resourceId, ObjectId colId, int position) {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
@@ -246,7 +288,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shiftRecordsToRight(colId, position+1);
 		this.update(q, updateOps);
 	}
-	
+
 	//TODO: have to test
 	public void updatePosition(ObjectId resourceId, ObjectId colId, int oldPosition, int newPosition) {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
@@ -255,23 +297,35 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, oldPosition));
 		this.update(q, updateOps);
 	}
-	
+
 	//TODO: use findAndModify for entryCount of respective collection
-	//what if the append fails (for some strange reason, the record cannot be edited correctly) and the entry count has been increased already?
+	//what if the append fails (for some strange reason, the record cannot be edited correctly)
+	//and the entry count has been increased already?
 	public void appendToCollection(ObjectId resourceId, ObjectId colId) {
 		//increase entry count
-		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+		colUpdate.set("administrative.lastModified", new Date());
+		colUpdate.inc("administrative.entryCount");
+		CollectionObject co = DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
-		//updateOps.add("collectedIn", new CollectionInfo(colId, position));
+		UpdateOperations<RecordResource> recordUpdate = this.createUpdateOperations();
+		recordUpdate.add("collectedIn", new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()));
 		//shiftRecordsToRight(colId, position+1);
-		this.update(q, updateOps);
+		this.update(q, recordUpdate);
 	}
-	
+
+
 	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
 		this.update(q, updateOps);
 		shiftRecordsToLeft(colId, position+1);
+	}
+
+	public RecordResource getByCollectionAndPosition(ObjectId colId, int position) {
+		Query<RecordResource> q = this.createQuery().field("collectedIn").hasThisElement(new CollectionInfo(colId, position));
+		return this.findOne(q);
 	}
 }

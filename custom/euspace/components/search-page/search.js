@@ -2,14 +2,31 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	$.bridget('isotope', Isotope);
 	
+	$.fn.isotopeImagesReveal = function( $items ) {
+		  var iso = this.data('isotope');
+		  var itemSelector = iso.options.itemSelector;
+		  
+		  // append to container
+		  this.append( $items );
+		// hide by default
+		  $items.hide();
+		  $items.imagesLoaded().progress( function( imgLoad, image ) {
+		    // get item
+		    var $item = $( image.img ).parents( itemSelector );
+		    // un-hide item
+		    $item.show();
+		    iso.appended( $item );
+		    
+		  });
+		  
+		  return this;
+		};
+
+
+
 	 
-	ko.bindingHandlers.searchIsotope = {
-				init: app.initOrUpdate('init'),
-				update: app.initOrUpdate('update')
-			};
-
-
-
+	
+	 
 	function Record(data) {
 		var self = this;
 	    self.recordId = "";
@@ -21,12 +38,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.source="";
 		self.creator="";
 		self.provider="";
+		self.dataProvider="";
 		self.rights="";
 		self.url="";
 		self.externalId = "";
 		self.cachedThumbnail="";
 		self.isLike=ko.observable(false);
-		 self.isLoaded = ko.observable(false);
+		self.isLoaded = ko.observable(false);
 		 
 		
 		self.load = function(data) {
@@ -42,10 +60,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.source=data.source;
 			self.creator=data.creator;
 			self.provider=data.provider;
+			self.dataProvider=data.dataProvider;
 			self.rights=data.rights;
 			self.recordId=data.recordId;
 			self.externalId=data.externalId;
-			
+			var likeval=app.isLiked(self.externalId);
+			self.isLike(likeval);
 		   if(!self.thumb){
 		   
 					   self.thumb="img/content/thumb-empty.png";
@@ -80,8 +100,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			distitle=self.title;
 			if(self.creator!==undefined && self.creator.length>0)
 				distitle+=", by "+self.creator;
-			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
-				distitle+=", "+self.provider;
+			
 			return distitle;
 		});
 
@@ -109,8 +128,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	           self.items.push(new Record(c));
 	        };
 
-
-
 		self.append =function(newitems){
 			self.items.push.apply(self.items, newitems);
 			};
@@ -122,8 +139,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	function SearchModel(params) {
 		var self = this;
 		document.body.setAttribute("data-page","search");
-		setTimeout(function(){ EUSpaceUI.init(); }, 300);
-		var $container = $('.grid');
+		//setTimeout(function(){ EUSpaceUI.init(); }, 300);
+		var $container = $(".grid").isotope({
+			itemSelector: '.media',
+			masonry: {
+				columnWidth		: '.sizer',
+				percentPosition	: true
+			}
+		});
 		var $request;
 		self.filterselect=ko.observable(false);
 		self.filterselection=ko.observableArray([]);
@@ -133,7 +156,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
-		
 		self.results = ko.observableArray([]);
 		self.selectedRecord=ko.observable(false);
 		//self.results.extend({ rateLimit: 50 });
@@ -160,27 +182,30 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		}  
 		
 		self.noResults = ko.computed(function() {
-			return (!self.searching() && self.results().length == 0 && self.currentTerm() != "");
+			return (!self.searching() && self.results().length == 0 && self.mixresults().length == 0 && self.currentTerm() != "");
 		})
 
 		self.toggleSourceview = function (data,event) { 
-			if($(event.currentTarget).find("a").attr('data-view')=='column'){
+			if($(event.currentTarget).find("a").attr('data-view')=='column' && self.sourceview()==false){
 				self.sourceview(true);
-				EUSpaceUI.initSearchColumnAdjustment();	
+				WITHApp.initSearchColumnAdjustment();	
 			}
 			else{
 				
 				self.sourceview(false);
-				/*$container.isotope({
+				
+			   $container.isotope({
 					itemSelector: '.media',
-					transitionDuration: transDuration,
 					masonry: {
 						columnWidth		: '.sizer',
 						percentPosition	: true
 					}
-				  });*/
+				});
+					
 			}
-			
+			$( '.searchbar .view li').removeClass( 'active' );
+			$(event.currentTarget).addClass( 'active' );
+
 
 		};
 
@@ -195,6 +220,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.next(-1);
 			self.mixresults([]);
 			self.results([]);
+			if ($container.data('isotope')){
+				 $container.isotope( 'remove', $(".media"));}
+			$container.isotope({
+						itemSelector: '.media',
+						masonry: {
+							columnWidth		: '.sizer',
+							percentPosition	: true
+						}
+					});
 			self.searching(false);
 			ko.dataFor(searchfacets).initFacets();
 			
@@ -225,13 +259,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
-                    var data=reply.responces;
+                    var data=reply.responses;
 
                     var filters=reply.filters;
                     if(facetinit || facetrecacl){
                     self.filters.removeAll();
                     self.filters().push.apply(self.filters(),filters);}
-					for(var i in data) {
+                 	for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
 						if(data[i].items!=null && data[i].items.length==self.pageSize() && moreitems==false){
@@ -239,6 +273,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						}
 						var items = [];
 						items=self.revealItems(data[i].items);
+						
+						if(items.length>0){
+							 var $newitems=getItems(items);
+						     
+							 $container.isotopeImagesReveal( $newitems );
+
+							}
 						
 						api_console="";
 						if(source=="Europeana"){
@@ -277,10 +318,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						if(srcCat.items().length>0 && (!found || self.results().length==0)){
 							srcCat.loading(false);
 							self.results.push(srcCat);
-							EUSpaceUI.initSearchColumnAdjustment();
+							if(self.sourceview())
+							WITHApp.initSearchColumnAdjustment();
 						}
 
 					}
+					
+					
+					
 					
 					if(moreitems){
 						self.next(self.page()+1);
@@ -335,7 +380,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					    filters:self.filterselection()
 					}),
 					"success": function(reply) {
-						var data=reply.responces;
+						var data=reply.responses;
 	                   
 						
 	                    for(var i in data) {
@@ -353,9 +398,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 								thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
 								fullres: result.fullresolution!=null ? result.fullresolution : "",
 								title: result.title!=null? result.title:"",
+								description: result.description!=null ?result.description: result.title,		
 								view_url: result.url.fromSourceAPI,
 								creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-								provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+								dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+								provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
 								rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 								externalId: result.externalId,
 								source: source
@@ -393,14 +440,26 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
       self.filtersearch = function() {
     	  if($request!==undefined)$request.abort();
     	   self.filterselect(true);
-
-			self.results.removeAll();
+    	   self.results.removeAll();
 			self.mixresults.removeAll();
+			if ($container.data('isotope')){
+				 $container.isotope( 'remove', $(".media"));}
+				
+			$container.isotope({
+						itemSelector: '.media',
+						masonry: {
+							columnWidth		: '.sizer',
+							percentPosition	: true
+						}
+					});
+
+				
 			self.page(1);
 			self.next(-1);
 			self.previous(0);
 			self.currentTerm(self.term());
 			self.searching(false);
+			
 			
 			self._search(false,true);
 			
@@ -415,6 +474,17 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 			self.results.removeAll();
 			self.mixresults.removeAll();
+			if ($container.data('isotope')){
+				 $container.isotope( 'remove', $(".media"));
+			}	
+			
+			$container.isotope({
+						itemSelector: '.media',
+						masonry: {
+							columnWidth		: '.sizer',
+							percentPosition	: true
+						}
+					});
 			self.page(1);
 			self.next(1);
 			self.previous(0);
@@ -513,17 +583,19 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
 						fullres: result.fullresolution!=null ? result.fullresolution : "",
 						title: result.title!=null? result.title:"",
+						description: result.description!=null ? result.description : result.title,
 						view_url: result.url.fromSourceAPI,
 						creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-						provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
+						provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
+						dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
 						rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
 						externalId: result.externalId,
 						source: source
 					  });
 				  items.push(record);
-				 self.mixresults().push(record);}
+				 }
 			}
-			self.mixresults.valueHasMutated();
+			self.mixresults.push.apply(self.mixresults, items);
 			return items;
 		};
 		
@@ -537,8 +609,95 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
             }, 600);
         }
 
+        recordSelect = function (data,event) {
+        	
+        	event.preventDefault();
+			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
+				   return record.recordId === data;
+				});
+			itemShow(selrecord);
+			return false;
+
+		}
+        
+        likeRecord = function (id,event) {
+        	event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
+				return record.recordId=== id;
+			});
+
+			app.likeItem(rec, function (status) {
+				if (status) {
+					$( '[id="'+id+'"]' ).find("span.star").addClass('active');
+				} else {
+					$( '[id="'+id+'"]').find("span.star").removeClass('active');
+				}
+			});
+		};
 		
+		collect = function (id,event) {
+			event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
+				return record.recordId=== id;
+			});
+			
+			collectionShow(rec);
+		};
+
+ 
+        function getItem(record) {
+			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
+			 if(isLogged()){
+				    if(record.isLike()){
+				    	 tile+='<span class="star active">';
+				    }
+				    else{tile+='<span class="star">';}
+				    if(record.externalId){
+				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
+						+'</span>';}
+						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+					}
+			 else{
+				 tile+='<span class="star" style="display:none">'
+				 if(record.externalId){
+					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
+					    +'</span>';}
+					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+					
+			 }
+                     tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
+                      +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
+                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
+                      +'<span class="rights">'+record.sourceCredits()+'</span>'
+                     +'</a></div> </div>';
+			return tile;
+			
+		}
+		
+        function getItems(data) {
+      	  var items = '';
+      	  for ( i in data) {
+      	    items += getItem(data[i]);
+      	  }
+      	  return $( items );
+      	}
       
+        $("#withsearchid").keyup(function(event){
+            if(event.keyCode == 13){
+            	self.search(true,true);
+            }
+        });
+      
+        
+        /*take care of special characters in id of item*/
+        function jq( myid ) {
+        	 
+            myid=myid.replace("\\g", "/");
+        	return "#" + myid.replace( /(:|\.|\[|\]|,)/g, "\\$1" );
+         
+        }
 
 
   }

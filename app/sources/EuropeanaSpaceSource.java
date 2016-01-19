@@ -29,10 +29,13 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
 import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
 import sources.core.CommonFilterLogic;
@@ -50,19 +53,17 @@ import sources.core.AutocompleteResponse.DataJSON;
 import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
+import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
 import utils.ListUtils;
 
 public class EuropeanaSpaceSource extends ISpaceSource {
 
-
 	public EuropeanaSpaceSource() {
 		super();
 		LABEL = Sources.Europeana.toString();
 		apiKey = "SECRET_KEY";
-		formatreader = new EuropeanaRecordFormatter();
-		
-		
+
 		addDefaultWriter(CommonFilters.PROVIDER.name(), qfwriter("PROVIDER"));
 		addDefaultWriter(CommonFilters.DATA_PROVIDER.name(), qfwriter("DATA_PROVIDER"));
 		addDefaultWriter(CommonFilters.COUNTRY.name(), qfwriter("COUNTRY"));
@@ -78,45 +79,48 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addDefaultWriter(CommonFilters.TYPE.name(), qfwriter("TYPE"));
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.name(), "IMAGE");
-		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.name(), "VIDEO");
-		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.name(), "SOUND");
-		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.name(), "TEXT");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.IMAGE, "IMAGE");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.AUDIO, "SOUND");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.TEXT, "TEXT");
 
-//		addDefaultQueryModifier(CommonFilters.REUSABILITY_ID, qreusabilitywriter());
+		// addDefaultQueryModifier(CommonFilters.REUSABILITY_ID,
+		// qreusabilitywriter());
 
-		
-		
-//	    filtersSupportedBySource = new ArrayList<CommonFilters>(
-//	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR,
-//	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
-//	    				CommonFilters.TYPE, CommonFilters.YEAR)
-//	    		);
-//	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
-//	    		for (CommonFilters filter: filtersSupportedBySource) {
-//	    			put(filter.name(), filter);
-//	    		}
-//	    	}};
-//	    filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
-//	    		for (String key: sourceToFiltersMappings.keySet()) {
-//	    			put(sourceToFiltersMappings.get(key), key);
-//	    		}
-//	    	}};
-//		for (CommonFilters filterType: filtersSupportedBySource) {
-//			addDefaultWriter(filterType.name(), qfwriter(filtersToSourceMappings.get(filterType)));
-//		}
-//		for (RecordType type: RecordType.values()) {
-//			addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
-//		}
+		// filtersSupportedBySource = new ArrayList<CommonFilters>(
+		// Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY,
+		// CommonFilters.CREATOR,
+		// CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER,
+		// CommonFilters.RIGHTS,
+		// CommonFilters.TYPE, CommonFilters.YEAR)
+		// );
+		// sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
+		// for (CommonFilters filter: filtersSupportedBySource) {
+		// put(filter.name(), filter);
+		// }
+		// }};
+		// filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
+		// for (String key: sourceToFiltersMappings.keySet()) {
+		// put(sourceToFiltersMappings.get(key), key);
+		// }
+		// }};
+		// for (CommonFilters filterType: filtersSupportedBySource) {
+		// addDefaultWriter(filterType.name(),
+		// qfwriter(filtersToSourceMappings.get(filterType)));
+		// }
+		// for (RecordType type: RecordType.values()) {
+		// addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
+		// }
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.name(), ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.name(), ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.name(), ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.name(), ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.name(), ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.UNKNOWN, ".*unknown.*");
+		formatreader = new EuropeanaRecordFormatter(vmap);
 
 	}
-	
+
 	private Function<List<String>, QueryModifier> qrightwriter() {
 		Function<String, String> function = (String s) -> {
 			s = s.replace("(?!.*nc)", "*%20NOT%20*nc");
@@ -130,7 +134,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			}
 		};
 	}
-	
+
 	private Function<List<String>, Pair<String>> qfwriter(String parameter) {
 		if (parameter.equals(CommonFilters.YEAR.name())) {
 			return qfwriterYEAR();
@@ -225,11 +229,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		return addfilters(q, builder).getHttp();
 	}
 
-
-
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
-		
-		
+
 		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
 		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
 		CommonFilterLogic dataprovider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
@@ -237,45 +238,45 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
 		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
 		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
-		
+
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();
-				for (JsonNode jsonNode : facet.path("fields")) {
-					String label = jsonNode.path("label").asText();
-					int count = jsonNode.path("count").asInt();
-					switch (filterType) {
-					case "TYPE":
-						countValue(type, label, count);
-						break;
+			for (JsonNode jsonNode : facet.path("fields")) {
+				String label = jsonNode.path("label").asText();
+				int count = jsonNode.path("count").asInt();
+				switch (filterType) {
+				case "TYPE":
+					countValue(type, label, count);
+					break;
 
-					case "DATA_PROVIDER":
-						countValue(dataprovider, label, false, count);
-						break;
+				case "DATA_PROVIDER":
+					countValue(dataprovider, label, false, count);
+					break;
 
-					case "PROVIDER":
-						countValue(provider, label, false, count);
-						break;
+				case "PROVIDER":
+					countValue(provider, label, false, count);
+					break;
 
-					case "RIGHTS":
-						countValue(rights, label, count);
-						break;
+				case "RIGHTS":
+					countValue(rights, label, count);
+					break;
 
-					case "proxy_dc_creator":
-						countValue(creator, label, false, count);
-						break;
-					case "COUNTRY":
-						countValue(country, label, false, count);
-						break;
+				case "proxy_dc_creator":
+					countValue(creator, label, false, count);
+					break;
+				case "COUNTRY":
+					countValue(country, label, false, count);
+					break;
 
-					case "YEAR":
-						countValue(year, label, false, count);
-						break;
+				case "YEAR":
+					countValue(year, label, false, count);
+					break;
 
-						default:
-							break;
-					}
-					
+				default:
+					break;
+				}
+
 			}
 		}
 		filters.add(type);
@@ -290,15 +291,16 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public ArrayList<WithResource<?>> getItems(JsonNode response) {
 		ArrayList<WithResource<?>> items = new ArrayList<>();
-		try{
-		if (response.path("success").asBoolean()) {
-			for (JsonNode item : response.path("items")) {
-				items.add(formatreader.fillObjectFrom(item));
+		try {
+			if (response.path("success").asBoolean()) {
+				for (JsonNode item : response.path("items")) {
+					items.add(formatreader.readObjectFrom(item));
+				}
 			}
-		}} catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return items;
 	}
 
@@ -314,8 +316,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
-				res.items.setCulturalHO(getItems(response));;
-//				res.facets = response.path("facets");
+				res.items.setCulturalCHO(getItems(response));
+				;
+				// res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
 
 			} catch (Exception e) {
@@ -365,9 +368,15 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		try {
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".json?wskey=" + key);
+			// todo read the other format;
 			JsonNode record = response.get("object");
-			if (response != null){
+			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+
+				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter(vmap);
+				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+
 			}
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);

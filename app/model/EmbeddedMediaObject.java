@@ -16,23 +16,15 @@
 
 package model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import model.basicDataTypes.LiteralOrResource;
 import utils.MediaTypeConverter;
 
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Id;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
+
+import model.basicDataTypes.LiteralOrResource;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -43,16 +35,16 @@ public class EmbeddedMediaObject {
 	public static enum MediaVersion {
 		Original, Medium, Thumbnail, Square, Tiny
 	}
-	
+
 	public static enum WithMediaType {
 		VIDEO, IMAGE, TEXT, AUDIO
 	}
 
 	// this needs work
 	public static enum WithMediaRights {
-		Public("Attribution Alone"), 
+		Public("Attribution Alone"),
 		Restricted("Restricted"),
-		Permission("Permission"), 
+		Permission("Permission"),
 		Modify("Allow re-use and modifications"),
 		Commercial("Allow re-use for commercial"),
 		Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
@@ -68,7 +60,7 @@ public class EmbeddedMediaObject {
 		RRFA("Rights Reserved - Free Access"),
 		UNKNOWN("Unknown");
 
-		
+
 		private final String text;
 
 	    private WithMediaRights(final String text) {
@@ -79,45 +71,62 @@ public class EmbeddedMediaObject {
 	    public String toString() {
 	        return text;
 	    }
-	    
+
 	}
-	
+
 	private int width, height;
-		
+
 	private WithMediaType type;
-	
-	private Set<WithMediaRights> withRights;
-	
+
+	private WithMediaRights withRights;
+
 	// the media object URL
 	private String url;
-    
+
+	// If this is a thumbnail, the parentID field refers to
+	// the parent media object, else it should be "self".
+	private String parentID;
+
+	private MediaVersion mediaVersion;
+
 	/*These do not have to be saved in the db
-	 just returned in the json, i.e. the json has 
-	 a field withThumbnailUrl computed based on 
+	 just returned in the json, i.e. the json has
+	 a field withThumbnailUrl computed based on
 	 whether there exists a MediaObject in the db* *
 	// with urls for embedded or cached objects
 	private String withUrl;
 	private String withThumbnailUrl;*/
-	
-	
+
+
+	public MediaVersion getMediaVersion() {
+		return mediaVersion;
+	}
+
+	public void setMediaVersion(MediaVersion mediaVersion) {
+		this.mediaVersion = mediaVersion;
+	}
+
 	private LiteralOrResource originalRights;
 	/*
 	 *  file name type values specified here:
 	 *  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/MediaType.html
 	 */
-
 	private MediaType mimeType;
-	
+
 	public static enum Quality {
 		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
 		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
-	
+
 	//in KB
 	private long size;
-	
+
 	private Quality quality;
-	
+
+
+	/*
+	 * Getters/Setters
+	 */
 	public long getSize() {
 		return size;
 	}
@@ -125,7 +134,7 @@ public class EmbeddedMediaObject {
 	public void setSize(long size) {
 		this.size = size;
 	}
-	
+
 	public Quality getQuality() {
 		return quality;
 	}
@@ -134,7 +143,7 @@ public class EmbeddedMediaObject {
 		this.quality = quality;
 	}
 
-	
+
 	public WithMediaType getType() {
 		return type;
 	}
@@ -143,11 +152,11 @@ public class EmbeddedMediaObject {
 		this.type = type;
 	}
 
-	public Set<WithMediaRights> getWithRights() {
+	public WithMediaRights getWithRights() {
 		return withRights;
 	}
 
-	public void setWithRights(Set<WithMediaRights> withRights) {
+	public void setWithRights(WithMediaRights withRights) {
 		this.withRights = withRights;
 	}
 
@@ -166,7 +175,7 @@ public class EmbeddedMediaObject {
 	public void setOriginalRights(LiteralOrResource originalRights) {
 		this.originalRights = originalRights;
 	}
-	
+
 	public MediaType getMimeType() {
 		return mimeType;
 	}
@@ -174,10 +183,18 @@ public class EmbeddedMediaObject {
 	public void setMimeType(MediaType mimeType) {
 		this.mimeType = mimeType;
 	}
-	
+
 	public int getWidth() {
 		return width;
 	}
+	public String getParentID() {
+		return parentID;
+	}
+
+	public void setParentID(String parentID) {
+		this.parentID = parentID;
+	}
+
 	public void setWidth(int width) {
 		this.width = width;
 	}

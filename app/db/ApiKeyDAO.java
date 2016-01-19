@@ -35,13 +35,13 @@ public class ApiKeyDAO extends DAO<ApiKey> {
 	public List<ApiKey> getAll() {
 		return find().asList();
 	}
-	
-	public List<ApiKey> getByIpPattern( String ipPattern ) {
-		Query<ApiKey> q = createQuery()
-					.field( "ipPattern")
-					.equal( ipPattern );
-		return find( q ).asList();
-	}
+//	
+//	public List<ApiKey> getByIpPattern( String ipPattern ) {
+//		Query<ApiKey> q = createQuery()
+//					.field( "ipPattern")
+//					.equal( ipPattern );
+//		return find( q ).asList();
+//	}
 
 	public ApiKey getByName( String name ) {
 		Query<ApiKey> q = createQuery()

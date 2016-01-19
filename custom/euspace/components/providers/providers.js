@@ -36,7 +36,8 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
-			self.url="#provider/"+data.dbId;
+			//get 20 collections and exhibitions
+			self.url="#provider/"+data.dbId+"/count/20";
 			self.thumbnail='/media/' + data.thumbnail;
 			self.country=data.page.country;
 			self.totalCollections=data.totalCollections;
@@ -54,7 +55,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 	function ProvidersViewModel(params) {
 		this.route = params.route;
 	    document.body.setAttribute("data-page","contentproviders");
-	    setTimeout(function(){ EUSpaceUI.init(); }, 300);
+	    //setTimeout(function(){ EUSpaceUI.init(); }, 300);
 		var self = this;
 
 		var $container = $(".grid");
@@ -95,7 +96,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			// replace with group/descendantOrganizations/:projectId
 			self.loading(true);
 			$.ajax({
-				"url": "/group/descendantOrganizations/" + projectId+"?collectionHits=true",
+				"url": "/group/descendantOrganizations/" + WITHApp.projectId+"?collectionHits=true",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {

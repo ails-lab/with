@@ -16,56 +16,39 @@
 
 package model.basicDataTypes;
 
-import org.mongodb.morphia.annotations.Embedded;
+import sources.core.Utils;
 
-@Embedded
 public class LiteralOrResource extends Literal {
-	
-	// resources we do understand about and can process further (or not)
-	// uri being general and difficult to process
-	//TODO: don't we want multiple urls (resources) to refer to the same Literal?
-	public static enum ResourceType {
-		uri, skos, dbpedia, getty, wikidata, geodata, gemet, withRepository
-	}
-	
-	public static class Resource {
-		ResourceType uriType;
-		String uri;
-		
-		public Resource() {
-		}
-		
-		public Resource(ResourceType uriType, String uri) {
-			this.uriType = uriType;
-			this.uri = uri;
-		}
-	}
-	
-	private Resource resource;
-	
+
+	public static final String URI = "uri";
 
 	public LiteralOrResource() {
 		super();
 	}
 
-	public LiteralOrResource(ResourceType resourceType, String uri) {
-		this.resource = new Resource(resourceType, uri);
+	public LiteralOrResource(Language key, String value) {
+		super(key, value);
 	}
 
 	public LiteralOrResource(String label) {
-		super(label);
-	}
-
-	// etc etc
-	public String getResource(ResourceType resourceType) {
-		if (resource.uriType.equals(resourceType))
-			return resource.uri;
+		if (Utils.isValidURL(label)) 
+			addURI(label);
 		else
-			return "";
+			addLiteral(label);
 	}
 
-	public void setResource(ResourceType resourceType, String uri ) {
-		this.resource = new Resource(resourceType, uri);
-
+	public void addURI(String uri) {
+		put(URI, uri);
 	}
+	
+	public String getURI() {
+		return get(URI);
+	}
+
+	public static LiteralOrResource build(String string) {
+		if (!Utils.hasInfo(string))
+			return null;
+		return new LiteralOrResource(string);
+	}
+
 }
