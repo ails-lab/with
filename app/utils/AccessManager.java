@@ -35,7 +35,6 @@ import play.Logger.ALogger;
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
 
-	@Converters(AccessEnumConverter.class)
 	public static enum Action {
 		READ, EDIT, DELETE
 	};

@@ -312,8 +312,8 @@ public class TestRecordController {
 		}
 		DB.getCollectionRecordDAO().makePermanent(record);
 
-		ElasticIndexer indexer = new ElasticIndexer(col, record);
-		indexer.index();
+		//ElasticIndexer indexer = new ElasticIndexer(col, record);
+		//indexer.index();
 
 		running( fakeApplication(), new Runnable() {
 			@Override

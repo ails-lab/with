@@ -29,7 +29,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 import model.basicDataTypes.WithAccess.Access;
 
-import utils.AccessEnumConverter;
+import db.converters.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
 

@@ -34,7 +34,6 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 
 import play.Logger;
-import utils.AccessEnumConverter;
 
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
@@ -102,8 +101,8 @@ public class DB {
 			//morphia.mapPackage("model.basicDataTypes");
 			//morphia.mapPackage("model.usersAndGroups");
 			//morphia.map(User.class);
-			morphia.getMapper().getConverters()
-					.addConverter(new AccessEnumConverter());
+			//morphia.getMapper().getConverters()
+					//.addConverter(new AccessEnumConverter());
 		}
 		return morphia;
 	}

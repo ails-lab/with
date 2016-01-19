@@ -171,14 +171,14 @@ public class DAOsTests {
 		ddata.setDescription(desc);
 
 		MultiLiteralOrResource keywords =
-				new MultiLiteralOrResource(ResourceType.dbpedia,  "http://www.uri.org");
+				new MultiLiteralOrResource("http://www.uri.org");
 				keywords.put("es", new ArrayList<String>(Arrays.asList("Buenos", "Córdoba", "La Plata")));
 				keywords.put("en", new ArrayList<String>(Arrays.asList("Buenos", "Cordoba", "Plata")));
 		ddata.setKeywords(keywords);
 
 
 		MultiLiteralOrResource altLabels =
-				new MultiLiteralOrResource(ResourceType.dbpedia,  "http://www.uri.org");
+				new MultiLiteralOrResource("http://www.uri.org");
 				altLabels.put("en", new ArrayList<String>(Arrays.asList("music", "dance")));
 				altLabels.put("fr", new ArrayList<String>(Arrays.asList("musiciens", "dancers")));
 		ddata.setAltLabels(altLabels);
