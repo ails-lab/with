@@ -41,6 +41,8 @@ import com.mongodb.gridfs.GridFS;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
+import db.converters.AccessEnumConverter;
+
 
 // get the DAOs from here
 // the EntityManagerFactory is here
@@ -101,8 +103,8 @@ public class DB {
 			//morphia.mapPackage("model.basicDataTypes");
 			//morphia.mapPackage("model.usersAndGroups");
 			//morphia.map(User.class);
-			//morphia.getMapper().getConverters()
-					//.addConverter(new AccessEnumConverter());
+			morphia.getMapper().getConverters()
+					.addConverter(new AccessEnumConverter());
 		}
 		return morphia;
 	}

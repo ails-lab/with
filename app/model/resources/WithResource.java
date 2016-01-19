@@ -72,6 +72,8 @@ public class WithResource<T extends DescriptiveData> {
 
 		//index
 		@Embedded
+		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
+		//@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		private WithAccess access = new WithAccess();
 
 		/*

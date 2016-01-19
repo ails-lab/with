@@ -74,7 +74,6 @@ public class WithResourceDAOTest {
 				System.out.println("No user found");
 				return;
 			}
-			System.out.println(u.getUsername());
 			WithAccess access = new WithAccess();
 			access.addAccess(u.getDbId(), WithAccess.Access.READ);
 			access.setIsPublic(true);
@@ -91,7 +90,6 @@ public class WithResourceDAOTest {
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
-			System.out.println(Json.toJson(withResource));
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 
 			/*

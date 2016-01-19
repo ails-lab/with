@@ -144,13 +144,13 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 */
 	public List<T> getByLabel(String lang, String title) {
 		if (lang == null) lang = "default";
-		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang)
-				.equal(title);
+		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label" + lang)
+				.contains(title);
 		return this.find(q).asList();
 	}
 
 	public List<T> getByLabel(Language lang, String title) {
-		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang.toString()).equal(title);
+		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang.toString()).contains(title);
 		return this.find(q).asList();
 	}
 

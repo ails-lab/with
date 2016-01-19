@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import model.ExhibitionRecord;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 
 import org.bson.types.ObjectId;
 
@@ -74,17 +75,18 @@ public class Deserializer {
 	public static class WithAccessDeserializer extends JsonDeserializer<WithAccess> {
 
 		@Override
-		public WithAccess deserialize(JsonParser rightsString, DeserializationContext arg1)
+		public WithAccess deserialize(JsonParser accessString, DeserializationContext arg1)
 				throws IOException, JsonProcessingException {
 			WithAccess rights = new WithAccess();
-			TreeNode treeNode = rightsString.readValueAsTree();
+			TreeNode treeNode = accessString.readValueAsTree();
 			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
 			if (isPublic != null) {
 				rights.setIsPublic(isPublic.asBoolean());
 			}
-			ObjectNode jsonRights = (ObjectNode) treeNode.get("rights");
-			if (jsonRights != null) {
-				Map<String, Integer> rightsMap = jsonRights.traverse().readValueAs(new TypeReference<Map<String, Integer>>() {});
+			ObjectNode jsonAcl = (ObjectNode) treeNode.get("acl");
+			if (jsonAcl != null) {
+				ArrayList<AccessEntry> acl = jsonAcl.traverse().readValueAs(new TypeReference<AccessEntry>() {});
+				rights.setAcl(acl);
 				//if (rightsMap != null)
 					//for(Entry<String, Integer> e : rightsMap.entrySet())
 					//rights.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
