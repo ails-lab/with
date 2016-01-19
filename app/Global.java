@@ -14,24 +14,24 @@
  */
 
 
-import java.util.List;
+import com.mongodb.WriteConcern;
 
+import actors.ApiKeyManager;
+import actors.LockActor;
+import akka.actor.ActorRef;
+import akka.actor.ActorSelection;
+import akka.actor.Props;
+import controllers.AccessFilter;
+import controllers.SessionFilter;
+import db.DB;
+import elastic.Elastic;
 import model.ApiKey;
 import play.Application;
 import play.GlobalSettings;
 import play.Logger;
 import play.api.mvc.EssentialFilter;
 import play.libs.Akka;
-import actors.ApiKeyManager;
-import akka.actor.ActorRef;
-import akka.actor.ActorSelection;
-import akka.actor.Props;
-import controllers.AccessFilter;
-import controllers.SessionFilter;
-import com.mongodb.WriteConcern;
-
-import db.DB;
-import elastic.Elastic;
+import utils.Locks;
 
 
 public class Global extends GlobalSettings {
@@ -39,7 +39,15 @@ public class Global extends GlobalSettings {
 
 	@Override
 	public void onStart( Application app ) {
-		Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
+		
+		// this needs to change for multi webhosts app
+		// some global 
+		ActorRef apiKeyManager = Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
+		ActorRef lockManager = Akka.system().actorOf( Props.create( LockActor.class), "lockManager");
+		
+		
+		Locks.setLockManagerActorRef( lockManager );
+		
 		Elastic.putMapping();
 		setupWithKey();
 
@@ -77,4 +85,5 @@ public class Global extends GlobalSettings {
 			DB.getApiKeyDAO().save(k, WriteConcern.SAFE);
 		}
 	}
+	
 }
