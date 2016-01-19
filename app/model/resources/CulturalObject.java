@@ -24,6 +24,8 @@ import org.mongodb.morphia.annotations.Entity;
 import model.basicDataTypes.CidocEvent;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.WithResourceType;
@@ -56,80 +58,91 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	public static class CulturalObjectData extends RecordDescriptiveData {
 
 		// provenance[0].recordId
-		private List<String> dcidentifier;
+		private MultiLiteralOrResource dcidentifier;
 		
 		// language of object, if it has one. Not related to the metadata.
 		// eg. If the object is a book, its the language it is written in
 		// no language for most paintings, vases, sculptures ... etc
-		private List<Literal> dclanguage;
+		private MultiLiteral dclanguage;
 		
 		// Painting, Sculpture, Building, Book .... 
-		private List<LiteralOrResource> dctype;
+		private MultiLiteralOrResource dctype;
 		
 		// places or times
-		private List<LiteralOrResource> dccoverage;
+		private MultiLiteralOrResource dccoverage;
+		
+		private MultiLiteralOrResource dcrights;
 		
 		// places are here
-		private List<LiteralOrResource> dcspatial;
+		private MultiLiteralOrResource dcspatial;
 		
-		private List<LiteralOrResource> dccreator;
+		private MultiLiteralOrResource dccreator;
+
+		public MultiLiteralOrResource getDcrights() {
+			return dcrights;
+		}
+
+		public void setDcrights(MultiLiteralOrResource dcrights) {
+			this.dcrights = dcrights;
+		}
 
 		private List<WithDate> dccreated;
 		private List<WithDate> dcdate;
 		
 		//TODO: do we want multilinguality for dcformat and dctermsmedium?
-		private List<LiteralOrResource> dcformat;
-		private List<LiteralOrResource> dctermsmedium;
+		private MultiLiteralOrResource dcformat;
+		private MultiLiteralOrResource dctermsmedium;
 		
-		private List<LiteralOrResource> isRelatedTo;
+		
+		private MultiLiteralOrResource isRelatedTo;
 		
 		private List<CidocEvent> events;
 
-		public List<String> getDcidentifier() {
+		public MultiLiteralOrResource getDcidentifier() {
 			return dcidentifier;
 		}
 
-		public void setDcidentifier(List<String> dcidentifier) {
+		public void setDcidentifier(MultiLiteralOrResource dcidentifier) {
 			this.dcidentifier = dcidentifier;
 		}
 
-		public List<Literal> getDclanguage() {
+		public MultiLiteral getDclanguage() {
 			return dclanguage;
 		}
 
-		public void setDclanguage(List<Literal> dclanguage) {
+		public void setDclanguage(MultiLiteral dclanguage) {
 			this.dclanguage = dclanguage;
 		}
 
-		public List<LiteralOrResource> getDctype() {
+		public MultiLiteralOrResource getDctype() {
 			return dctype;
 		}
 
-		public void setDctype(List<LiteralOrResource> dctype) {
+		public void setDctype(MultiLiteralOrResource dctype) {
 			this.dctype = dctype;
 		}
 
-		public List<LiteralOrResource> getDccoverage() {
+		public MultiLiteralOrResource getDccoverage() {
 			return dccoverage;
 		}
 
-		public void setDccoverage(List<LiteralOrResource> dccoverage) {
+		public void setDccoverage(MultiLiteralOrResource dccoverage) {
 			this.dccoverage = dccoverage;
 		}
 
-		public List<LiteralOrResource> getDcspatial() {
+		public MultiLiteralOrResource getDcspatial() {
 			return dcspatial;
 		}
 
-		public void setDcspatial(List<LiteralOrResource> dcspatial) {
+		public void setDcspatial(MultiLiteralOrResource dcspatial) {
 			this.dcspatial = dcspatial;
 		}
 
-		public List<LiteralOrResource> getDccreator() {
+		public MultiLiteralOrResource getDccreator() {
 			return dccreator;
 		}
 
-		public void setDccreator(List<LiteralOrResource> dccreator) {
+		public void setDccreator(MultiLiteralOrResource dccreator) {
 			this.dccreator = dccreator;
 		}
 
@@ -149,27 +162,27 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 			this.dcdate = dcdate;
 		}
 
-		public List<LiteralOrResource> getDcformat() {
+		public MultiLiteralOrResource getDcformat() {
 			return dcformat;
 		}
 
-		public void setDcformat(List<LiteralOrResource> dcformat) {
+		public void setDcformat(MultiLiteralOrResource dcformat) {
 			this.dcformat = dcformat;
 		}
 
-		public List<LiteralOrResource> getDctermsmedium() {
+		public MultiLiteralOrResource getDctermsmedium() {
 			return dctermsmedium;
 		}
 
-		public void setDctermsmedium(List<LiteralOrResource> dctermsmedium) {
+		public void setDctermsmedium(MultiLiteralOrResource dctermsmedium) {
 			this.dctermsmedium = dctermsmedium;
 		}
 
-		public List<LiteralOrResource> getIsRelatedTo() {
+		public MultiLiteralOrResource getIsRelatedTo() {
 			return isRelatedTo;
 		}
 
-		public void setIsRelatedTo(List<LiteralOrResource> isRelatedTo) {
+		public void setIsRelatedTo(MultiLiteralOrResource isRelatedTo) {
 			this.isRelatedTo = isRelatedTo;
 		}
 
