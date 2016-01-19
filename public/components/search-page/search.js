@@ -22,6 +22,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.creator="";
 		self.provider="";
 		self.dataProvider="";
+		self.dataProvider_uri="";
 		self.rights="";
 		self.url="";
 		self.externalId = "";
@@ -45,6 +46,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.creator=data.creator;
 			self.provider=data.provider;
 			self.dataProvider=data.dataProvider;
+			self.dataProvider_uri=data.dataProvider_uri;
 			self.rights=data.rights;
 			self.recordId=data.recordId;
 			self.externalId=data.externalId;
@@ -75,10 +77,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			    	return "europeanafashion.eu";
 			    case "YouTube": 
 			    	return "youtube.com";
+			    case "The British Library":
+			    	return "www.bl.uk";
 			    case "Mint":
 			    	return "mint";
 			    case "Rijksmuseum":
 					return "www.rijksmuseum.nl";
+			    case "DDB":
+			        return "deutsche-digitale-bibliothek.de";
 			    default: return "";
 			 }
 			});
@@ -86,10 +92,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.displayTitle = ko.pureComputed(function() {
 			var distitle="";
 			distitle=self.title;
-			if(self.creator!==undefined && self.creator.length>0)
+			if(self.creator && self.creator.length>0)
 				distitle+=", by "+self.creator;
-			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
-				distitle+=", "+self.provider;
+			if(self.dataProvider && self.dataProvider.length>0 && self.dataProvider!=self.creator)
+				distitle+=", "+self.dataProvider;
 			return distitle;
 		});
 
@@ -136,8 +142,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.filterselection=ko.observableArray([]);
 		self.route = params.route;
 		self.term = ko.observable("");
+		/* to be used if site becomes multilingual*/
+		self.lang=ko.observable("");
 		self.sourceview=ko.observable(true);
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ", "Rijksmuseum", "WITHin", "The British Library"]);
+		self.sources= ko.observableArray([ "Rijksmuseum","DigitalNZ","DDB","The British Library","DPLA","Europeana"]);
 		self.mixresults=ko.observableArray([]);
 		
 		self.results = ko.observableArray([]);
@@ -229,7 +237,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
-                    var data=reply.responces;
+                    var data=reply.responses;
 
                     var filters=reply.filters;
                     if(facetinit || facetrecacl){
@@ -238,7 +246,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
-						if(data[i].items!=null && data[i].items.length==self.pageSize() && moreitems==false){
+						if(data[i].items!=null && data[i].items.culturalCHO.length==self.pageSize() && moreitems==false){
 							moreitems=true;
 						}
 						var items = [];
@@ -262,7 +270,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						  });
 						 items.push(record);}
 						}*/
-						items=self.revealItems(data[i].items);
+						items=self.revealItems(data[i].items.culturalCHO);
 						api_console="";
 						if(source=="Europeana"){
 							api_console="http://labs.europeana.eu/api/console/?function=search&query="+self.term();
@@ -452,20 +460,24 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			for (var i in data) {
 				var result = data[i];
 				 if(result !=null ){
-						
+					var admindata=result.administrative;
+					var descdata=result.descriptiveData;
+					var media=result.media;
+					var provenance=result.provenance;
 			        var record = new Record({
-						recordId: result.recordId || result.id,
-						thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-						fullres: result.fullresolution!=null ? result.fullresolution : "",
-						title: result.title!=null? result.title:"",
-						description: result.description!=null ? result.description: result.title,
-						view_url: result.url.fromSourceAPI,
-						creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-						dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-						provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-						rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-						externalId: result.externalId,
-						source: result.comesFrom!=null ? result.comesFrom : source
+						//recordId: result.recordId || result.id,
+						thumb: media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"images/no_image.jpg",
+						fullres: media!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+						title: findByLangValues(descdata.label,self.lang()),
+						description: findByLangValues(descdata.description,self.lang()),
+						view_url: findProvenanceValues(provenance,"source_uri"),
+						creator: findByLangValues(descdata.dccreator,self.lang()),
+						dataProvider: findProvenanceValues(provenance,"dataProvider"),
+						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+						provider: findProvenanceValues(provenance,"provider"),
+						rights: findResOrLit(descdata.metadataRights,self.lang()),
+						externalId: findProvenanceValues(provenance,"id"),
+						source: findProvenanceValues(provenance,"source")
 					  });
 					  
 					 
@@ -529,10 +541,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
     	);
         
         
-        
-        
-        
-        self.goToTop= function () {
+       self.goToTop= function () {
         	if($request!==undefined)$request.abort();
         	verticalOffset = typeof(verticalOffset) != 'undefined' ? verticalOffset : 0;
         	element = $("#withsearchid");
@@ -551,7 +560,119 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			});
 		};
 
+	 function findByLangValues(val,sellang) {
+	          selvalue="";
+	          if(sellang.length==0){
+					sellang="def";
+				}
+		      if(val){
+		       if (val[sellang]) {
+		    	   for(var i=0;i<val[sellang].length;i++){
+		                	if(selvalue.length>0){selvalue+=",";}
+		                	selvalue=val[sellang][i];
+		    	   }
+		        }
+	          else{   selvalue=val.unknown;}  
+		      }
+		        
+	           return selvalue;
+	    }
         
+	 
+	 function findProvenanceValues(array, selection) {
+			selvalue="";
+			if(selection=="dataProvider"){
+			  if(array.length>1 && array[0].provider)
+				  selvalue=array[0].provider; 
+				  
+			     
+			 }
+			else if(selection=="dataProvider_uri"){
+				  if(array.length>1){
+					  selvalue=array[0].uri; 
+					  
+					  if(array[0].uri && array[0].uri.length>0){
+						  selvalue=array[0].uri; 
+			        	}
+			              
+				 }}
+			else if (selection=="provider"){
+				  if(array.length==3){
+					  selvalue=array[1].provider; 
+					  
+					  if(array[1].uri && array[1].uri.length>0){
+			        		if(array[1].provider && array[1].provider.length>0){
+			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
+			        		}
+			        		else{
+			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
+			        		}
+			        	}else if(array[1].provider){
+			              selvalue+=array[1].provider;}
+					  
+				     }	
+			}
+			else if (selection=="provider_uri"){
+				  if(array.length==3)
+					  if(array[1].uri && array[1].uri.length>0){
+			        		
+			        			selvalue=array[1].uri;
+			        		}
+			        		
+			        	
+			}
+			else if (selection=="source"){
+				var size=array.length-1;
+				if(array[size].provider){
+	              selvalue+=array[size].provider;}
+			  
+		     }
+			else if (selection=="source_uri"){
+				var size=array.length-1;
+				if(array[size].uri && array[size].uri.length>0){
+	        		
+	        			selvalue=array[size].uri;
+	        		
+	        		
+	        	}
+			  
+		     }
+			else if (selection=="id"){
+				var size=array.length-1;
+				if(array[size].resourceId && array[size].resourceId.length>0){
+	        		
+	        			selvalue+=array[size].resourceId;
+	        		}
+	        	
+			  
+		     }
+			return selvalue;
+				
+		}
+	 
+	 
+	 function findResOrLit(data,sellang) {
+			selvalue="";
+			if(sellang.length==0){
+				sellang="def";
+			}
+			if(data[sellang]){
+				
+			   for(var i=0;i<data[sellang].length;i++){
+			                	if(selvalue.length>0){selvalue+=",";}
+			                	selvalue=data[sellang][i];
+			     }
+			    
+			}
+			else if(data.uri){
+				selvalue=data.uri;
+			}
+			return selvalue;
+			
+		}
+			 
+			
+	 
 
 
 
