@@ -143,6 +143,7 @@ public class ElasticSearcher {
 		TermsBuilder termAgg = AggregationBuilders.terms("types").field("type_all");
 		TermsBuilder providerAgg = AggregationBuilders.terms("providers").field("provider_all");
 		TermsBuilder dataProviderAgg = AggregationBuilders.terms("dataProviders").field("dataProvider_all");
+		TermsBuilder sourceAgg 	= AggregationBuilders.terms("source").field("source_all");
 		TermsBuilder creatorAgg = AggregationBuilders.terms("creators").field("creator_all");
 		TermsBuilder rightsAgg = AggregationBuilders.terms("rights").field("rights_all");
 		TermsBuilder countryAgg = AggregationBuilders.terms("countries").field("country_all");
@@ -151,6 +152,7 @@ public class ElasticSearcher {
 		search.addAggregation(termAgg)
 			  .addAggregation(providerAgg)
 			  .addAggregation(dataProviderAgg)
+			  .addAggregation(sourceAgg)
 			  .addAggregation(creatorAgg)
 			  .addAggregation(rightsAgg)
 			  .addAggregation(countryAgg)
