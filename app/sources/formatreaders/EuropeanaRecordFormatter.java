@@ -29,7 +29,6 @@ import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
-import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 import utils.ListUtils;
@@ -50,7 +49,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
 		List<String> years = rec.getStringArrayValue("year");
 		model.setDates(StringUtils.getDates(years));
-		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreatorLangAware"))));
+		model.setDccreator(rec.getLiteralOrResourceValue("dcCreatorLangAware"));
 		model.setKeywords(rec.getLiteralOrResourceValue("dcSubjectLangAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
