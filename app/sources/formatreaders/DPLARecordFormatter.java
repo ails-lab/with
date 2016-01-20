@@ -35,16 +35,13 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("sourceResource.title"));
-		model.setDescription(rec.getLiteralValue("sourceResource.description"));
-		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		model.setLabel(rec.getMultiLiteralValue("sourceResource.title"));
+		model.setDescription(rec.getMultiLiteralValue("sourceResource.description"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
+		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(rec.getLiteralOrResourceValue("sourceResource.creator"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue("sourceResource.creator"));
 
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(

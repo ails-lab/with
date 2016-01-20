@@ -18,10 +18,14 @@ package sources.formatreaders;
 
 import java.util.List;
 
+import com.sun.webkit.Timer.Mode;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
@@ -41,67 +45,80 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type"));
-		if (vals!=null)
-		med.setType((WithMediaType) vals.get(0));
-
-
+		WithMediaType type = (WithMediaType) vals.get(0);
+		
 		rec.enterContext("proxies[0]");
 
-		model.setLabel(rec.getLiteralValue("dcTitle"));
-		model.setDescription(rec.getLiteralValue("dcDescription"));
-		model.setKeywords(rec.getLiteralOrResourceValue("dcSubject"));
-		List<String> years = rec.getStringArrayValue("dcDate.def");
-		model.setDates(StringUtils.getDates(years));
-		// model.setDctype(Utils.asList(rec.getLiteralValue("deType")));
+		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
+		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
+		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreator"));
+		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
+		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
+		model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
+		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
+		model.setLabel(rec.getMultiLiteralValue("dcTitle"));
+		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubject"));
+		model.setDates(rec.getWithDateArrayValue("dcDate"));
+		model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
 
-		MultiLiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
-		// med.setOriginalRights(ListUtils.transform(rights, (String x) ->
-		// LiteralOrResource.build(x)).get(0));
-		// med.setWithRights(
-		// (WithMediaRights)
-		// getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(),
-		// rights.get(0)).get(0));
+		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
+		WithMediaRights withMediaRights = (WithMediaRights)
+		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(),
+		 rights.getURI()).get(0);
+		
 
-		object.addMedia(MediaVersion.Original, med);
 
 		rec.exitContext();
 
 		rec.enterContext("proxies[1]");
 
-		years = rec.getStringArrayValue("dcDate.def");
-		model.getDates().addAll(StringUtils.getDates(years));
+		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
 
 		rec.exitContext();
 		rec.enterContext("aggregations[0]");
 
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"));
+		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
+		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"),model.getIsShownAt().getURI(),null);
 		object.addToProvenance(provInfo);
+		
+		provInfo = new ProvenanceInfo(rec.getStringValue("edmProvider"));
+		object.addToProvenance(provInfo);
+		
+		
+		String recID = rec.getStringValue("about");
+		String uri = "http://www.europeana.eu/portal/record"+recID+".html";
 		object.addToProvenance(
-				new ProvenanceInfo(Sources.Europeana.toString(),  model.getIsShownAt(),rec.getStringValue("about")));
+				new ProvenanceInfo(Sources.Europeana.toString(),  uri,recID));
 
-		model.setDccreator(rec.getLiteralOrResourceValue("dcCreator"));
-
+		
 		rec.exitContext();
 
-		// System.out.println(years+"--->"+model.getDates());
-		// model.setKeywords(rec.getLiteralValue("dcSubjectLanAware"));
+		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 
+		
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(model.getIsShownBy());
+		medThumb.setUrl(model.getIsShownBy().getURI());
+		medThumb.setType(type);
+		medThumb.setParentID(model.getIsShownBy().getURI());
+		medThumb.setOriginalRights(rights);
+		medThumb.setWithRights(withMediaRights);
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		// TODO: add rights!
-		med.setUrl(model.getIsShownBy());
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
+		med.setType(type);
+		med.setParentID("self");
+		med.setUrl(model.getIsShownBy().getURI());
+		med.setOriginalRights(rights);
+		med.setWithRights(withMediaRights);
+		
 		object.addMedia(MediaVersion.Original, med);
 		return object;
-		// TODO: add null checks
-		// object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-		// object.setContributors(rec.getStringArrayValue("dcContributor"));
-		// object.setItemRights(rec.getStringValue("rights"));
 	}
 
 }

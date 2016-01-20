@@ -35,16 +35,13 @@ public class BritishLibraryRecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("title"));
-		model.setDescription(rec.getLiteralValue("description._content"));
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		model.setLabel(rec.getMultiLiteralValue("title"));
+		model.setDescription(rec.getMultiLiteralValue("description._content"));
 		// model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		// model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(rec.getLiteralOrResourceValue(rec.getStringValue("principalOrFirstMaker")));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue(rec.getStringValue("principalOrFirstMaker")));
 
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(

@@ -24,8 +24,11 @@ import java.util.Map.Entry;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.WithDate;
 
 public class JsonNodeUtils {
 
@@ -40,16 +43,21 @@ public class JsonNodeUtils {
 		}
 		return null;
 	}
-
-	public static MultiLiteral asLiteral(JsonNode node) {
+	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isArray()) {
 				node = node.get(0);
 			}
 			if (node.isTextual()) {
-				return new MultiLiteral(Language.DEF, node.asText());
+				res.addLiteral(Language.DEF, node.asText());
+				return res;
+			} 
+			if (node.isArray()){
+				for (int i = 0; i < node.size(); i++) {
+					res.addLiteral(Language.DEF, node.get(i).asText());
+				}
+				return res;
 			}
-			MultiLiteral res = new MultiLiteral();
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
@@ -58,31 +66,72 @@ public class JsonNodeUtils {
 					res.addLiteral(language, value.get(i).asText());
 				}
 			}
+			res.fillDEF();
 			return res;
 		}
 		return null;
 	}
 
-	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node) {
+	public static MultiLiteral asMultiLiteral(JsonNode node) {
+		return readMultiLiteral(new MultiLiteral(), node);
+	}
+	public static Literal readLiteral(Literal res, JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isArray()) {
 				node = node.get(0);
 			}
 			if (node.isTextual()) {
-				return new MultiLiteralOrResource(Language.DEF, node.asText());
+				res.addLiteral(Language.DEF, node.asText());
+				return res;
 			}
-			MultiLiteralOrResource res = new MultiLiteralOrResource();
+			if (node.isArray()){
+				res.addLiteral(Language.DEF, node.get(0).asText());
+				return res;
+			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
 				JsonNode value = next.getValue();
+				res.addLiteral(language, value.get(0).asText());
+			}
+			res.fillDEF();
+			return res;
+		}
+		return null;
+	}
+	
+	public static Literal asLiteral(JsonNode node) {
+		return readLiteral(new Literal(), node);
+	}
+	public static LiteralOrResource asLiteralOrResource(JsonNode node) {
+		return (LiteralOrResource) readLiteral(new LiteralOrResource(), node);
+	}
+
+	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node) {
+		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node);
+	}
+	
+	public static List<WithDate> asWithDateArray(JsonNode node) {
+		if (node != null && !node.isMissingNode()) {
+			ArrayList<WithDate> res = new ArrayList<>();
+			if (node.isArray()) {
+				for (int i = 0; i < node.size(); i++) {
+					res.add(new WithDate(node.get(i).asText()));
+				}
+			} else if (node.isTextual())  {
+				res.add(new WithDate(node.asText()));
+				return res;
+			} 
+			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+				Entry<String, JsonNode> next = iterator.next();
+				JsonNode value = next.getValue();
 				for (int i = 0; i < value.size(); i++) {
-					res.addLiteral(language, value.get(i).asText());
+					res.add(new WithDate(value.get(i).asText()));
 				}
 			}
 			return res;
 		}
-		return null;
+		return new ArrayList<>();
 	}
 
 	public static List<String> asStringArray(JsonNode node) {
