@@ -162,20 +162,25 @@ public class RecordResourceController extends Controller {
 				for (ConstraintViolation<RecordResource> cv : violations) {
 					properties.add(Json.parse("{\"" + cv.getPropertyPath()
 							+ "\":\"" + cv.getMessage() + "\"}"));
+					Logger.info(cv.getPropertyPath() + " : " + cv.getMessage());
 				}
 				error.put("error", properties);
 				return badRequest(error);
-			}
+			} 
 			// Fill with all the administrative metadata
 			resource.setResourceType(WithResourceType.valueOf(resourceType));
 			resource.getAdministrative().setWithCreator(creator);
 			resource.getAdministrative().setCreated(new Date());
 			resource.getAdministrative().setLastModified(new Date());
+			DB.getRecordResourceDAO().makePermanent(resource);
+
 			resource.getAdministrative().setWithURI(
 					request().host() + resource.getDbId().toString());
-			DB.getRecordResourceDAO().makePermanent(resource);
+			Logger.info("here?1");
+			Logger.info("here?1");
 			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
+			Logger.info("here?1");
 			return ok(Json.toJson(resource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
