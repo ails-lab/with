@@ -44,6 +44,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type"));
+		if (vals!=null)
 		med.setType((WithMediaType) vals.get(0));
 
 
@@ -83,7 +84,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(),  model.getIsShownAt(),rec.getStringValue("about")));
 
-		model.setDccreator(rec.getLiteralOrResourceValue(rec.getStringValue("dcCreator")));
+		model.setDccreator(rec.getLiteralOrResourceValue("dcCreator"));
 
 		rec.exitContext();
 

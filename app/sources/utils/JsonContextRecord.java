@@ -23,26 +23,17 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import javassist.expr.NewArray;
-import play.libs.Json;
-import scala.collection.mutable.HashMap;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
-import model.basicDataTypes.ResourceType;
+import play.libs.Json;
+import scala.collection.mutable.HashMap;
 
 public class JsonContextRecord {
 
@@ -70,7 +61,7 @@ public class JsonContextRecord {
 	}
 
 	public void enterContext(String path) {
-
+		context.add(path);
 	}
 
 	public void exitContext() {
