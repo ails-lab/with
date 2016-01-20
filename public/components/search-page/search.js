@@ -27,6 +27,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.url="";
 		self.externalId = "";
 		self.cachedThumbnail="";
+		self.likes=0;
+		self.collected=0;
+		self.collectedIn=[];
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
@@ -36,7 +39,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			if(data.title==undefined){
 				self.title="No title";
 			}else{self.title=data.title;}
-			self.url="#item/"+data.recordId;
+			//self.url="#item/"+data.recordId;
 			self.view_url=data.view_url;
 			self.thumb=data.thumb;
 			//self.imageThumb(data.thumb);
@@ -50,13 +53,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.rights=data.rights;
 			self.recordId=data.recordId;
 			self.externalId=data.externalId;
+			self.likes=data.likes;
+			self.collected=data.collected;
+			self.collectedIn=data.collectedIn;
 			var likeval=app.isLiked(self.externalId);
-			
-			
-		   if(!self.thumb){
-		   
-					   self.thumb="img/content/thumb-empty.png";
-			 }
+		 
 		};
 
 		self.doLike=function(){
@@ -376,7 +377,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 		self.recordSelect= function (e){
         	$( '.itemview' ).fadeIn();
-			itemShow(e);
+			itemShow(e,true);
 
 		}
 
@@ -464,9 +465,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					var descdata=result.descriptiveData;
 					var media=result.media;
 					var provenance=result.provenance;
+					var usage=result.usage;
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
-						thumb: media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"images/no_image.jpg",
+						thumb: media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 						fullres: media!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
 						title: findByLangValues(descdata.label,self.lang()),
 						description: findByLangValues(descdata.description,self.lang()),
@@ -476,8 +478,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
 						rights: findResOrLit(descdata.metadataRights,self.lang()),
-						externalId: findProvenanceValues(provenance,"id"),
-						source: findProvenanceValues(provenance,"source")
+						externalId: admindata.externalId,
+						source: findProvenanceValues(provenance,"source"),
+						likes: usage.likes,
+						collected: usage.collected,
+						collectedIn:result.collectedIn
 					  });
 					  
 					 

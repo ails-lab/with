@@ -6,7 +6,7 @@
 						<a class="btn btn-default btn-sm" data-bind="event: {click: collect}">
                    <i class="fa fa-download"></i> Collect it</a>
 				</span>
-				<!-- ko text: record().title() --><!-- /ko --> 
+				<!-- ko text: record().title --><!-- /ko --> 
 				</h3>
 				<hr class="faded">
 				
@@ -16,48 +16,48 @@
 					    <div class="spec">
 					      <div class="itemlabel">Description
 					      </div>
-					      <div class="value" data-bind="text:record().description()"> 
+					      <div class="value" data-bind="html:record().description"> 
 					      </div>
 					      </div>
 					      
 					     
 					    
-					     <div class="spec" data-bind="if: record().creator()">
+					     <div class="spec" data-bind="if: record().creator">
 					      <div class="itemlabel">Creator
 					      </div>
-					      <div class="value" data-bind="text:record().creator()">
+					      <div class="value" data-bind="text:record().creator">
 					      
 					      </div>
 					    </div>
-					  <div class="spec" data-bind="if: record().dataProvider()">
+					  <div class="spec" data-bind="if: record().dataProvider">
 					      <div class="itemlabel">Data Provider
 					      </div>
-					      <div class="value" data-bind="text:record().dataProvider()">
+					      <div class="value" data-bind="text:record().dataProvider">
 					      
 					      </div>
 					    </div>
-					   <div class="spec" data-bind="if: record().provider()">
+					   <div class="spec" data-bind="if: record().provider">
 					      <div class="itemlabel">Provider
 					      </div>
-					      <div class="value" data-bind="text:record().provider()">
+					      <div class="value" data-bind="text:record().provider">
 					      
 					      </div>
 					    </div>
 					    
-					    <div class="spec" data-bind="if: record().rights()">
+					    <div class="spec" data-bind="if: record().rights">
 					      <div class="itemlabel">Rights
 					      </div>
-					      <div class="value" data-bind="text:record().rights()">
+					      <div class="value" data-bind="text:record().rights">
 					      
 					      </div>
 					    </div>
 					    
-					    <div class="spec" data-bind="if: (record().collectedCount()>0)">
+					    <div class="spec" data-bind="if: (record().collected>0)">
 					      <div class="itemlabel">Within
-					<!-- ko text: record().collectedCount() --><!-- /ko --> 
+					<!-- ko text: record().collected --><!-- /ko --> 
 						collections					      				      
 					    </div>
-					      	<!-- ko foreach: record().collections() -->
+					      	<!-- ko foreach: record().collections -->
 
 					       <div  style="cursor:pointer" class:"value"  > 
 								 <div data-bind="attr: {  title: userName },text: title,click: $parent.goToCollection"  ></div>
@@ -66,9 +66,9 @@
 					  
 					    </div>
 					    
-					      <div class="spec" data-bind="if: (record().liked()>0)">
+					      <div class="spec" data-bind="if: (record().liked>0)">
 					      <div class="itemlabel">Liked 
-					<!-- ko text: record().liked() --><!-- /ko --> 
+					<!-- ko text: record().liked --><!-- /ko --> 
 					
 					    </div>					  
 					    </div>
@@ -79,24 +79,23 @@
 					      </div>
 					      <div class="value">
 					      
-					      <div><img  class="logo" data-bind="attr:{src:record().sourceImage()}"/>
+					      <div data-bind="text: record().source">
 					      </div>
 					      </div>
 					    </div>
+					    
+					   
 					  
 					   <div class="spec">
 					     
 					      <div class="value">
-					      <a data-bind="attr: { href:record().view_url()}" target="_blank">More details </a>
-					      
+					      <a data-bind="attr: { href:record().view_url}" target="_blank">More details </a>
+					      <p>&nbsp;</p>
 					      </div>
 					    </div>
 					  
-					  
-					  
-					  
 					  </div>
-					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:record().fullres(), alt: record().title() }" class="itemim"/></div>
+					  <div class="col-md-6"><img id="fullresim" data-bind="event: { error: changeSource },attr: { src:record().fullres, alt: record().title }" class="itemim"/></div>
 					</div>
 				 </div>
 			

@@ -1,5 +1,121 @@
 define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 
+	
+	function Record(data,showMeta) {
+		var self = this;
+	    self.recordId = "";
+		self.title = "";
+		self.description="";
+		self.thumb = "";
+		self.fullres="";
+		self.view_url="";
+		self.source="";
+		self.creator="";
+		self.provider="";
+		self.dataProvider="";
+		self.dataProvider_uri="";
+		self.rights="";
+		self.url="";
+		self.externalId = "";
+		self.cachedThumbnail="";
+		self.likes=0;
+		self.collected=0;
+		
+		self.collectedIn =  [];
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
+		});
+		self.isLoaded = ko.observable(false);
+		
+		self.load = function(data) {
+			if(data.title==undefined){
+				self.title="No title";
+			}else{self.title=data.title;}
+			self.view_url=data.view_url;
+			self.thumb=data.thumb;
+			if ( data.fullres && data.fullres.length > 0 ) {
+				self.fullres=data.fullres;
+			} else {
+				self.fullres=self.cachedThumbnail();
+			}
+			//self.fullres=data.fullres;
+			self.description=data.description;
+			self.source=data.source;
+			self.creator=data.creator;
+			self.provider=data.provider;
+			self.dataProvider=data.dataProvider;
+			self.dataProvider_uri=data.dataProvider_uri;
+			self.rights=data.rights;
+			self.recordId=data.recordId;
+			self.externalId=data.externalId;
+			self.likes=data.likes;
+			self.collected=data.collected;
+			self.collectedIn=data.collectedIn;
+			var likeval=app.isLiked(self.externalId);
+			
+		 
+		};
+
+		self.doLike=function(){
+			self.isLike(true);
+		}
+		
+		self.cachedThumbnail = ko.pureComputed(function() {
+
+
+			   if(self.thumb){
+				if (self.thumb.indexOf('//') === 0) {
+					return self.thumb;
+				} else {
+					var newurl='url=' + encodeURIComponent(self.thumb)+'&';
+					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+				}}
+			   else{
+				   return "images/no_image.jpg";
+			   }
+			});
+		self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source) {
+			    case "DPLA":
+			    	return "dp.la";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": 
+			    	return "youtube.com";
+			    case "The British Library":
+			    	return "www.bl.uk";
+			    case "Mint":
+			    	return "mint";
+			    case "Rijksmuseum":
+					return "www.rijksmuseum.nl";
+			    case "DDB":
+			        return "deutsche-digitale-bibliothek.de";
+			    default: return "";
+			 }
+			});
+
+		self.displayTitle = ko.pureComputed(function() {
+			var distitle="";
+			distitle=self.title;
+			if(self.creator && self.creator.length>0)
+				distitle+=", by "+self.creator;
+			if(self.dataProvider && self.dataProvider.length>0 && self.dataProvider!=self.creator)
+				distitle+=", "+self.dataProvider;
+			return distitle;
+		});
+
+		
+		
+		if(data != undefined) self.load(data);
+	}
+	
+	/*
 	function Record(data,showMeta) {
 		var self = this;
 		self.recordId = ko.observable("");
@@ -158,7 +274,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		});
 
 		if (data) self.load(data);
-	}
+	}*/
 
 	function ItemViewModel(params) {
 		var self = this;
@@ -185,7 +301,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.close = function () {
-			self.record().fullres('');
+			self.record().fullres='';
 			$("body").removeClass("modal-open");
 			$("#modal-1").find("div[id^='modal-']").removeClass('md-show').css('display', 'none');
 			$('#modal-1').removeClass('md-show');
@@ -194,7 +310,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.changeSource = function (item) {
-			item.record().fullres(item.record().cachedThumbnail());
+			item.record().fullres=item.record().cachedThumbnail();
 		};
 
 		self.collect = function (item) {
