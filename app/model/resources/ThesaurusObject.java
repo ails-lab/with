@@ -223,7 +223,7 @@ public class ThesaurusObject {
 		}
 	}
 	
-	//@Embedded
+	@Embedded
 	public static class SKOSAdmin {
 		private Date created;
 		
