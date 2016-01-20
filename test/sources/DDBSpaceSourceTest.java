@@ -1,3 +1,4 @@
+
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +15,3 @@
  */
 
 
-package sources;
-
-import static org.fest.assertions.Assertions.assertThat;
-
-import org.junit.Test;
-
-import sources.DDBSpaceSource;
-import sources.core.CommonQuery;
-
-/**
- *
- * Simple (JUnit) tests that can call all parts of a play app. If you are
- * interested in mocking a whole application, see the wiki for more details.
- *
- */
-public class DDBSpaceSourceTest {
-
-	@Test
-	public void renderTemplate() {
-		DDBSpaceSource src = new DDBSpaceSource();
-		CommonQuery q = new CommonQuery();
-		q.searchTerm = "Romanorum et Germanorum";
-		System.out.println(src.getResults(q));
-	}
-
-}
