@@ -33,16 +33,20 @@ DELETE	/record/:id							controllers.RecordResourceController.deleteRecordResour
 
 #PUT		/collections/liked						controllers.CollectionObjectController.addToFavorites()			
 # Collection Controller (tested except some methods)
+POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean ?= false)
+POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
+POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
+GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollection(id)
+PUT		 /collection/:id 						controllers.CollectionObjectController.editCollection(id)
+DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollection(id)
+
 GET 	 /collection/list						controllers.CollectionController.list(directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/listShared					controllers.CollectionController.listShared(direct: Boolean ?= true, directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/featured					controllers.CollectionController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
-POST     /collection/create                    controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean ?= false)
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
-POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
 DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 GET		 /collection/favorites					controllers.CollectionController.getFavorites()
-POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 DELETE   /collection/unliked/:recId			    controllers.CollectionController.removeFromFavorites(recId)
 GET		 /collection/favoriteCollection			controllers.CollectionController.getFavoriteCollection()
 
