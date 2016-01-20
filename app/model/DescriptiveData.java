@@ -103,22 +103,20 @@ public class DescriptiveData {
 		this.keywords = keywords;
 	}
 
-	public String getIsShownAt() {
-		return isShownAt.getURI();
+	public LiteralOrResource getIsShownAt() {
+		return isShownAt;
 	}
 
-	public void setIsShownAt(String isShownAt) {
-		this.isShownAt = new LiteralOrResource();
-		this.isShownAt.addURI(isShownAt);
+	public void setIsShownAt(LiteralOrResource isShownAt) {
+		this.isShownAt = isShownAt;
 	}
 
-	public String getIsShownBy() {
-		return isShownBy.getURI();
+	public LiteralOrResource getIsShownBy() {
+		return isShownBy;
 	}
 
-	public void setIsShownBy(String isShownBy) {
-		this.isShownBy = new LiteralOrResource();
-		this.isShownBy.addURI(isShownBy);
+	public void setIsShownBy(LiteralOrResource isShownBy) {
+		this.isShownBy = isShownBy;
 	}
 
 	public LiteralOrResource getMetadataRights() {
