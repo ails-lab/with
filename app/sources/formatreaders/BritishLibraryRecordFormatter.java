@@ -16,23 +16,15 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-
-import sources.BritishLibrarySpaceSource;
-import sources.DPLASpaceSource;
-import sources.FilterValuesMap;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.MediaObject;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
+import sources.utils.JsonContextRecord;
 
 public class BritishLibraryRecordFormatter extends CulturalRecordFormatter {
 
@@ -52,7 +44,7 @@ public class BritishLibraryRecordFormatter extends CulturalRecordFormatter {
 		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("principalOrFirstMaker"))));
+		model.setDccreator(rec.getLiteralOrResourceValue(rec.getStringValue("principalOrFirstMaker")));
 
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(

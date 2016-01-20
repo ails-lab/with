@@ -22,14 +22,12 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
-import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
-import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
@@ -46,6 +44,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type"));
+		if (vals!=null)
 		med.setType((WithMediaType) vals.get(0));
 
 
@@ -85,7 +84,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(),  model.getIsShownAt(),rec.getStringValue("about")));
 
-		model.setDccreator(Utils.asList(LiteralOrResource.build(rec.getStringValue("dcCreator"))));
+		model.setDccreator(rec.getLiteralOrResourceValue("dcCreator"));
 
 		rec.exitContext();
 
