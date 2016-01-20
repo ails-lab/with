@@ -21,6 +21,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.elasticsearch.index.analysis.GermanStemTokenFilterFactory;
+
 public class MultiLiteral extends MapWithList {
 
 
@@ -37,8 +39,8 @@ public class MultiLiteral extends MapWithList {
 
 	public void addLiteral(Language lang, String value) {
 		add(lang.toString(), value);
-		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
-			add(Language.DEF.toString(), value);
+//		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
+//			add(Language.DEF.toString(), value);
 	}
 
 	public void addLiteral(String value) {
@@ -52,5 +54,24 @@ public class MultiLiteral extends MapWithList {
 		}
 		else*/
 			return get(lang.toString());
+	}
+	
+	public void fillDEF(){
+		String defLang = Language.EN.toString();
+		if (!containsKey(defLang)){
+			int max = 0;
+			for (String k : this.keySet()) {
+				if (!k.equals(Language.DEF.toString())){
+					int m = get(k).size();
+					if (max < m){
+						max = m;
+						defLang = k;
+					}
+				}
+			}
+		}
+		for (String d : get(defLang)) {
+			add(Language.DEF.toString(), d);
+		}
 	}
 }

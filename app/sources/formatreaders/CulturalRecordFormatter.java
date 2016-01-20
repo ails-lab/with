@@ -46,7 +46,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 
 		CulturalObjectData model = new CulturalObjectData();
 		object.setDescriptiveData(model);
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
+		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 
 		fillObjectFrom(text);
