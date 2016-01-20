@@ -65,6 +65,7 @@ public class WithResourceController extends Controller {
 	 *            the position of the record in the collection
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public static Result addRecordToCollection(String id,
 			Option<Integer> position) {
 		JsonNode json = request().body().asJson();
@@ -95,8 +96,11 @@ public class WithResourceController extends Controller {
 					.getProvenance().get(last)).getProvider());
 			String sourceId = ((ProvenanceInfo) record.getProvenance()
 					.get(last)).getResourceId();
-			if (json.get("externalId") != null) {
-				String externalId = json.get("externalId").asText();
+			JsonNode administrative;
+			JsonNode externalIdNode;
+			if ((administrative = json.get("administrative")) != null
+					&& (externalIdNode = administrative.get("externalId")) != null) {
+				String externalId = externalIdNode.asText();
 				// It should be at the database
 				if (DB.getRecordResourceDAO().getByExternalId(externalId) != null) {
 					record = (RecordResource) DB.getRecordResourceDAO()
@@ -128,7 +132,8 @@ public class WithResourceController extends Controller {
 								.getMedia().get(0)).get(version)) != null) {
 							mediaUrl = embeddedMedia.getUrl();
 							withRights = embeddedMedia.getWithRights();
-							media = DB.getMediaObjectDAO().getByUrl(mediaUrl);
+							media = (EmbeddedMediaObject) DB
+									.getMediaObjectDAO().getByUrl(mediaUrl);
 							media.setWithRights(withRights);
 							record.addMedia(version, media);
 						}
@@ -315,7 +320,7 @@ public class WithResourceController extends Controller {
 				List<RecordJSONMetadata> recordsData = s
 						.getRecordFromSource(sourceId);
 				for (RecordJSONMetadata data : recordsData) {
-					DB.getCollectionRecordDAO().updateContent(record.getDbId(),
+					DB.getRecordResourceDAO().updateContent(record.getDbId(),
 							data.getFormat(), data.getJsonContent());
 				}
 				return true;
@@ -329,8 +334,7 @@ public class WithResourceController extends Controller {
 			}
 		};
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId);
-		String sourceClassName = "espace.core.sources." + source
-				+ "SpaceSource";
+		String sourceClassName = "sources." + source + "SpaceSource";
 		ParallelAPICall.createPromise(methodQuery, record, sourceClassName);
 	}
 

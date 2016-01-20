@@ -494,10 +494,10 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param extId
 	 * @return
 	 */
-	public List<T> getByExternalId(String extId) {
+	public T getByExternalId(String extId) {
 		Query<T> q = this.createQuery().field("administrative.externalId")
 				.equal(extId);
-		return this.find(q).asList();
+		return this.findOne(q);
 	}
 
 	/**

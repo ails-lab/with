@@ -197,7 +197,7 @@ public class MediaObjectDAO {
 		GridFSDBFile media = null;
 		try {
 			// here I have to ask where we will use 'url' or 'withUrl' or both
-			BasicDBObject query = new BasicDBObject("withlUrl", withUrl);
+			BasicDBObject query = new BasicDBObject("url", withUrl);
 			media = DB.getGridFs().findOne(query);
 			if(media.containsField("thumbnailBytes"))
 				media.removeField("thumbnailBytes");
