@@ -32,9 +32,12 @@ import model.usersAndGroups.UserGroup;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
+import org.mongodb.morphia.mapping.Mapper;
 
 import play.Logger;
 
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.gridfs.GridFS;
@@ -42,6 +45,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.converters.AccessEnumConverter;
+import db.converters.MultiLiteralConverter;
+import db.converters.RightsConverter;
 
 
 // get the DAOs from here
@@ -104,7 +109,11 @@ public class DB {
 			//morphia.mapPackage("model.usersAndGroups");
 			//morphia.map(User.class);
 			morphia.getMapper().getConverters()
-					.addConverter(new AccessEnumConverter());
+				.addConverter(new MultiLiteralConverter());
+			morphia.getMapper().getConverters()
+				.addConverter(new AccessEnumConverter());
+			//Mapper mapper = morphia.getMapper();
+		    //mapper.getOptions().setObjectFactory(new CustomMorphiaObjectFactory());
 		}
 		return morphia;
 	}

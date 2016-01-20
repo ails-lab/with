@@ -35,7 +35,9 @@ import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -193,7 +195,7 @@ public class CollectionController extends Controller {
 			if (json.has("belongsTo")) {
 				String organizationString = json.get("belongsTo").textValue();
 				ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
-				newVersion.getRights().put(organizationId, Access.OWN);
+				newVersion.getRights().addToAcl(organizationId, Access.OWN);
 			}
 
 			Set<ConstraintViolation<Collection>> violations = Validation.getValidator().validate(newVersion);
@@ -269,7 +271,7 @@ public class CollectionController extends Controller {
 		if (json.has("belongsTo")) {
 			String organizationString = json.get("belongsTo").textValue();
 			ObjectId organizationId = DB.getUserGroupDAO().getByName(organizationString).getDbId();
-			newCollection.getRights().put(organizationId, Access.OWN);
+			newCollection.getRights().addToAcl(organizationId, Access.OWN);
 		}
 		/*
 		 * if (json.has("submitToProjects")) { JsonNode readableBy =
@@ -500,7 +502,7 @@ public class CollectionController extends Controller {
 			return ok(result);
 		} else { //logged in, check if super user, if not, restrict query to accessible by effectiveUserIds
 			Tuple<List<Collection>, Tuple<Integer, Integer>> info;
-			if (!AccessManager.checkAccess(new HashMap<ObjectId, Access>(), effectiveUserIds, Action.DELETE)) {
+			if (!AccessManager.checkAccess(new WithAccess(), effectiveUserIds, Action.DELETE)) {
 				List<ObjectId> effObjectIds = new ArrayList<ObjectId>(effectiveUserIds.size());
 				for (String id : effectiveUserIds) {
 					effObjectIds.add(new ObjectId(id));
@@ -543,9 +545,10 @@ public class CollectionController extends Controller {
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
 		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-		for (ObjectId userId : collection.getRights().keySet()) {
+		for (AccessEntry ae : collection.getRights().getAcl()) {
+			ObjectId userId = ae.getUser();
 			User user = DB.getUserDAO().getById(userId, null);
-			Access accessRights = collection.getRights().get(userId);
+			Access accessRights = collection.getRights().getAcl(userId);
 			if (user != null) {
 				result.add(userOrGroupJson(user, accessRights));
 			} else {

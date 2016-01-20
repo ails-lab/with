@@ -75,7 +75,7 @@ public class ElasticUtils {
 					continue;
 				all_labels.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getLabel().getMultiLiteral(Language.UNKNOWN);
+				List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
 				if(un != null) {
 					for(String u: un)
 						addToLangAll(e.getKey(), u);
@@ -101,7 +101,7 @@ public class ElasticUtils {
 					continue;
 				all_descs.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getDescription().getMultiLiteral(Language.UNKNOWN);
+				List<String> un = rr.getDescriptiveData().getDescription().get(Language.UNKNOWN);
 				if(un != null) {
 					for(String u: un)
 						addToLangAll(e.getKey(), u);
@@ -125,7 +125,7 @@ public class ElasticUtils {
 					continue;
 				all_keywords.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getKeywords().getMultiLiteral(Language.UNKNOWN);
+				List<String> un = rr.getDescriptiveData().getKeywords().get(Language.UNKNOWN);
 				if(un != null) {
 					for(String u: un)
 						addToLangAll(e.getKey(), u);
@@ -149,7 +149,7 @@ public class ElasticUtils {
 					continue;
 				all_altLabels.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getAltLabels().getMultiLiteral(Language.UNKNOWN);
+				List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
 				if(un != null) {
 					for(String u: un)
 						addToLangAll(e.getKey(), u);

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Field;
@@ -43,6 +44,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+import db.converters.AccessEnumConverter;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -71,9 +73,8 @@ public class WithResource<T extends DescriptiveData> {
 		private boolean isExhibition;
 
 		//index
-		@Embedded
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
-		//@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
+		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		private WithAccess access = new WithAccess();
 
 		/*

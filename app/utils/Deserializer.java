@@ -20,12 +20,15 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -94,7 +97,22 @@ public class Deserializer {
 			return rights;
 		}
 	}
+	
+	public static class MultiLiteralDesiarilizer extends JsonDeserializer<MultiLiteral> {
 
+		@Override
+		public MultiLiteral deserialize(JsonParser string, DeserializationContext arg1)
+				throws IOException, JsonProcessingException {
+			Map<String, List<String>> outMap = new HashMap<String, List<String>>();
+			Map<String, String[]> map = string.readValueAs(new TypeReference<Map<String, String[]>>() {
+			});
+			for (Entry<String, String[]> e: map.entrySet()) {
+				outMap.put(e.getKey(), Arrays.asList(e.getValue()));
+			}
+			return (MultiLiteral) outMap;
+		}
+	}
+	
 	public static class AccessMapDeserializer extends JsonDeserializer<Map<ObjectId, Access>> {
 
 		@Override

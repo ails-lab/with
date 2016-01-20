@@ -128,7 +128,7 @@ public class UserAndGroupManager extends Controller {
 				Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
 				if (collection != null) {
 					// TODO: have to do recursion here!
-					Access accessRights = collection.getRights().get(u.getDbId());
+					Access accessRights = collection.getRights().getAcl(u.getDbId());
 					if (accessRights != null)
 						userJSON.put("accessRights", accessRights.toString());
 					else

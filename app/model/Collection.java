@@ -87,7 +87,7 @@ public class Collection {
 	private final List<CollectionRecord> firstEntries = new ArrayList<CollectionRecord>();
 
 	@JsonSerialize(using = Serializer.WithAccessSerializer.class)
-	@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
+	//@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 	@Embedded
 	private final WithAccess rights = new WithAccess();
 
@@ -153,11 +153,11 @@ public class Collection {
 		// Set owner for first time
 		if (this.creatorId == null) {
 			this.creatorId = creatorId;
-			rights.put(this.creatorId, Access.OWN);
+			rights.addToAcl(this.creatorId, Access.OWN);
 			// Owner has changed
 		} else if (!this.creatorId.equals(creatorId)) {
 			// Remove rights for old owner
-			rights.remove(this.creatorId, Access.OWN);
+			//rights.removeAcl(this.creatorId, Access.OWN);
 			this.creatorId = null;
 			setCreatorId(creatorId);
 		}

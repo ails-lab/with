@@ -21,8 +21,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class MultiLiteral extends MapWithList {
+import org.mongodb.morphia.annotations.Converters;
 
+import utils.Deserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import db.converters.MultiLiteralConverter;
+
+@Converters(MultiLiteralConverter.class)
+public class MultiLiteral extends HashMap<String, List<String>> {
 
 	public MultiLiteral() {
 	}
@@ -45,12 +53,19 @@ public class MultiLiteral extends MapWithList {
 		addLiteral(Language.UNKNOWN, value);
 	}
 
-	public List<String> getMultiLiteral(Language lang) {
+	public List<String> get(Language lang) {
 		/*if(Language.ANY.equals(lang)) {
 			return this.get(this.keySet().toArray()[0]);
 
 		}
 		else*/
 			return get(lang.toString());
+	}
+	
+	public void add(String key, String value) {
+		if (this.containsKey(key))
+			this.get(key).add(value);
+		else
+			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 }

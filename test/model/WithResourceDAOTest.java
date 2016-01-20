@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,10 +50,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
+
 import play.libs.Json;
 
 import com.google.common.net.MediaType;
-
 import com.google.common.net.MediaType;
 
 import play.libs.Json;
@@ -62,6 +63,8 @@ public class WithResourceDAOTest {
 
 	@Test
 	public void storeWithResource() {
+		
+		User u = DB.getUserDAO().getByUsername("eirini1");
 
 		for (int i = 0; i < 1; i++) {
 			CulturalObject withResource = new CulturalObject();
@@ -69,20 +72,20 @@ public class WithResourceDAOTest {
 			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("ΜintTest", "http://myUri", "12345"));
-			User u = DB.getUserDAO().getByUsername("eirini1");
 			if(u == null) {
 				System.out.println("No user found");
 				return;
 			}
 			WithAccess access = new WithAccess();
-			access.addAccess(u.getDbId(), WithAccess.Access.READ);
+			access.addToAcl(u.getDbId(), WithAccess.Access.READ);
 			access.setIsPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
+			withResource.getAdministrative().setWithCreator(u.getDbId());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
 			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNewRights" + i));
-			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
+			//model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 			int j=0;
 			if (i==0) j=i; else j=i+1;
@@ -90,6 +93,7 @@ public class WithResourceDAOTest {
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
+			System.out.println(Json.toJson(withResource));
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 
 			/*
@@ -133,7 +137,8 @@ public class WithResourceDAOTest {
 			System.out.println(Json.toJson(co));
 		}*/
 		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		System.out.println(DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNewRights0").size());
+		CulturalObject co1 = (CulturalObject) DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNewRights0").get(0);
+		System.out.println(Json.toJson(co1));
 	}
 
 }

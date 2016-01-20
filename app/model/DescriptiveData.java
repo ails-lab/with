@@ -24,8 +24,13 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Embedded;
 
+import utils.Deserializer;
+import utils.Serializer;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
@@ -49,6 +54,7 @@ public class DescriptiveData {
 	private MultiLiteral label;
 
 	// arbitrary length content description
+	@Embedded
 	private MultiLiteral description;
 
 	// an indexers dream !! They can be literal concepts and enriched easily
@@ -72,10 +78,11 @@ public class DescriptiveData {
 	// alternative title or name or placename
 	private MultiLiteral altLabels;
 
+	
 	public MultiLiteral getLabel() {
 		return label;
 	}
-
+	
 	public void setLabel(MultiLiteral label) {
 		this.label = label;
 	}

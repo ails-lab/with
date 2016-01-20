@@ -60,8 +60,8 @@ public class MediaDAOTest {
 		thumb.setWidth(755);
 
 		thumb.getRights().setIsPublic( true );
-		thumb.getRights().put( new ObjectId() ,WithAccess.Access.OWN);
-		thumb.getRights().put( new ObjectId() ,WithAccess.Access.WRITE);
+		thumb.getRights().addToAcl(new ObjectId() ,WithAccess.Access.OWN);
+		thumb.getRights().addToAcl(new ObjectId() ,WithAccess.Access.WRITE);
 		
 		DB.getMediaDAO().makePermanent(thumb);
 		//test succesful storage

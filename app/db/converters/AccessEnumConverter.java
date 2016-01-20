@@ -22,7 +22,7 @@ import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
-public class AccessEnumConverter extends TypeConverter implements SimpleValueConverter{
+public class AccessEnumConverter extends TypeConverter {//implements SimpleValueConverter{
 
 	public AccessEnumConverter() {
 		super(Access.class);

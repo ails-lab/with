@@ -150,7 +150,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	}
 
 	public List<T> getByLabel(Language lang, String title) {
-		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang.toString()).contains(title);
+		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label." + lang.toString()).equal(title);//.contains(title);
 		return this.find(q).asList();
 	}
 
@@ -175,7 +175,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param count
 	 * @return
 	 */
-	public List<T> getByOwner(ObjectId creatorId, int offset, int count) {
+	public List<T> getByCreator(ObjectId creatorId, int offset, int count) {
 		Query<T> q = this.createQuery().field("administrative.withCreator")
 				.equal(creatorId).offset(offset).limit(count);
 		return this.find(q).asList();
@@ -188,8 +188,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param id
 	 * @return
 	 */
-	public List<T> getFirstResourceByOwner(ObjectId id) {
-		return getByOwner(id, 0, 1);
+	public List<T> getFirstResourceByCreator(ObjectId id) {
+		return getByCreator(id, 0, 1);
 	}
 
 	/**
