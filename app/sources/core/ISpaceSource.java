@@ -23,14 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
-import model.resources.WithResource;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
 import sources.FilterValuesMap;
 import sources.core.Utils.Pair;
-import sources.formatreaders.DNZBasicRecordFormatter;
-import sources.utils.JsonContextRecord;
 import utils.ListUtils;
 
 public abstract class ISpaceSource {
@@ -173,9 +167,19 @@ public abstract class ISpaceSource {
 	public List<CommonQuery> splitFilters(CommonQuery q) {
 		return Arrays.asList(q);
 	}
+
+	public FilterValuesMap getVmap() {
+		return vmap;
+	}
+
+	public void setVmap(FilterValuesMap vmap) {
+		this.vmap = vmap;
+	}
 	
 	/*public WithResource fillObjectFrom(JsonNode rec) {
 		return new WithResource();
 	}*/
+	
+	
 	
 }

@@ -42,7 +42,7 @@ POST     /collection/:id/addRecord              controllers.WithResourceControll
 DELETE   /collection/:id/removeRecord           controllers.CollectionController.removeRecordFromCollection(id, recId)
 GET      /collection/:id/list		   	        controllers.CollectionController.listCollectionRecords(id, format: String ?="default", start: Integer ?=0, count: Integer ?=10)
 GET		 /collection/favorites					controllers.CollectionController.getFavorites()
-POST     /collection/liked			            controllers.CollectionController.addToFavorites()
+POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 DELETE   /collection/unliked/:recId			    controllers.CollectionController.removeFromFavorites(recId)
 GET		 /collection/favoriteCollection			controllers.CollectionController.getFavoriteCollection()
 

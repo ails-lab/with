@@ -79,8 +79,8 @@ public class ExhibitionController extends Controller {
 		}
 
 		// index new exhibition
-		ElasticIndexer indexer = new ElasticIndexer(newExhibition);
-		indexer.indexCollectionMetadata();
+		//ElasticIndexer indexer = new ElasticIndexer(newExhibition);
+		//indexer.indexCollectionMetadata();
 
 		owner.addExhibitionsCreated();
 		DB.getUserDAO().makePermanent(owner);

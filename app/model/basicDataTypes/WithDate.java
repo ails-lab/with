@@ -126,9 +126,4 @@ public class WithDate {
 		}
 	}
 
-	public static void main(String[] args) {
-		System.out.println(new WithDate("100 BC").year);
-		;
-	}
-
 }

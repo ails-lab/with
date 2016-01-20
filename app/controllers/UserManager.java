@@ -90,14 +90,14 @@ public class UserManager extends Controller {
 			proposedName = initial + i++;
 			u = DB.getUserDAO().getByUsername(proposedName);
 			g = DB.getUserGroupDAO().getByName(proposedName);
-		} while (u != null || g != null);
+		} while ((u != null) || (g != null));
 		names.add(proposedName);
 		if ((firstName == null) || (lastName == null))
 			return names;
 		proposedName = firstName + "_" + lastName;
 		i = 0;
-		while (DB.getUserDAO().getByUsername(proposedName) != null
-				|| DB.getUserGroupDAO().getByName(proposedName) != null) {
+		while ((DB.getUserDAO().getByUsername(proposedName) != null)
+				|| (DB.getUserGroupDAO().getByName(proposedName) != null)) {
 			proposedName = proposedName + i++;
 		}
 		names.add(proposedName);
@@ -170,7 +170,7 @@ public class UserManager extends Controller {
 			error.put("username", "Username is Empty");
 		} else {
 			username = json.get("username").asText();
-			if (DB.getUserDAO().getByUsername(username) != null || DB.getUserGroupDAO().getByName(username) != null) {
+			if ((DB.getUserDAO().getByUsername(username) != null) || (DB.getUserGroupDAO().getByName(username) != null)) {
 				error.put("username", "Username Already in Use");
 				ArrayNode names = proposeUsername(username, firstName, lastName);
 				result.put("proposal", names);
@@ -207,8 +207,8 @@ public class UserManager extends Controller {
 		fav.setCreatorId(user.getDbId());
 		fav.setTitle("_favorites");
 		DB.getCollectionDAO().makePermanent(fav);
-		ElasticIndexer indexer = new ElasticIndexer(fav);
-		indexer.indexCollectionMetadata();
+		//ElasticIndexer indexer = new ElasticIndexer(fav);
+		//indexer.indexCollectionMetadata();
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
 		result.remove("md5Password");

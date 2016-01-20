@@ -55,7 +55,7 @@ public class DescriptiveData {
 	private MultiLiteralOrResource keywords;
 
 	// This are reachable URLs
-	private String isShownAt, isShownBy;
+	private LiteralOrResource isShownAt, isShownBy;
 
 	// The whole legal bla, unedited, from the source, mostly cc0
 	private LiteralOrResource metadataRights;
@@ -64,7 +64,7 @@ public class DescriptiveData {
 	private String rdfType;
 
 	// URIs how this Resource is known elsewhere
-	private List<String> sameAs;
+	private MultiLiteralOrResource sameAs;
 
 	// in a timeline where would this resource appear
 	private List<WithDate> dates;
@@ -97,19 +97,21 @@ public class DescriptiveData {
 	}
 
 	public String getIsShownAt() {
-		return isShownAt;
+		return isShownAt.getURI();
 	}
 
 	public void setIsShownAt(String isShownAt) {
-		this.isShownAt = isShownAt;
+		this.isShownAt = new LiteralOrResource();
+		this.isShownAt.addURI(isShownAt);
 	}
 
 	public String getIsShownBy() {
-		return isShownBy;
+		return isShownBy.getURI();
 	}
 
 	public void setIsShownBy(String isShownBy) {
-		this.isShownBy = isShownBy;
+		this.isShownBy = new LiteralOrResource();
+		this.isShownBy.addURI(isShownBy);
 	}
 
 	public LiteralOrResource getMetadataRights() {
@@ -128,11 +130,11 @@ public class DescriptiveData {
 		this.rdfType = rdfType;
 	}
 
-	public List<String> getSameAs() {
+	public MultiLiteralOrResource getSameAs() {
 		return sameAs;
 	}
 
-	public void setSameAs(List<String> sameAs) {
+	public void setSameAs(MultiLiteralOrResource sameAs) {
 		this.sameAs = sameAs;
 	}
 

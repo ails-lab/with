@@ -40,6 +40,10 @@ public class LiteralOrResource extends Literal {
 	public void addURI(String uri) {
 		put(URI, uri);
 	}
+	
+	public String getURI() {
+		return get(URI);
+	}
 
 	public static LiteralOrResource build(String string) {
 		if (!Utils.hasInfo(string))

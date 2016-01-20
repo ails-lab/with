@@ -60,9 +60,19 @@ public class Deserializer {
 			return exhRec;
 		}
 	}
-	
+
+	public static class AccessDeserializer extends JsonDeserializer<Access> {
+
+		@Override
+		public Access deserialize(JsonParser accessOrdinal, DeserializationContext arg1)
+				throws IOException, JsonProcessingException {
+			return Access.values()[accessOrdinal.readValueAs(Integer.class)];
+		}
+
+	}
+
 	public static class WithAccessDeserializer extends JsonDeserializer<WithAccess> {
-		
+
 		@Override
 		public WithAccess deserialize(JsonParser rightsString, DeserializationContext arg1)
 				throws IOException, JsonProcessingException {
@@ -70,14 +80,14 @@ public class Deserializer {
 			TreeNode treeNode = rightsString.readValueAsTree();
 			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
 			if (isPublic != null) {
-				rights.setPublic(isPublic.asBoolean());
+				rights.setIsPublic(isPublic.asBoolean());
 			}
-			ObjectNode jsonRights = (ObjectNode) treeNode.get("rights"); 
+			ObjectNode jsonRights = (ObjectNode) treeNode.get("rights");
 			if (jsonRights != null) {
 				Map<String, Integer> rightsMap = jsonRights.traverse().readValueAs(new TypeReference<Map<String, Integer>>() {});
-				if (rightsMap != null)
-					for(Entry<String, Integer> e : rightsMap.entrySet()) 
-					rights.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
+				//if (rightsMap != null)
+					//for(Entry<String, Integer> e : rightsMap.entrySet())
+					//rights.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
 			}
 			return rights;
 		}

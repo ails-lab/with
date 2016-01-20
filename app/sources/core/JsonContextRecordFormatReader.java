@@ -16,12 +16,10 @@
 
 package sources.core;
 
-import sources.FilterValuesMap;
-import sources.utils.JsonContextRecord;
-import model.resources.CulturalObject;
-import model.resources.WithResource;
-
 import com.fasterxml.jackson.databind.JsonNode;
+
+import model.resources.WithResource;
+import sources.utils.JsonContextRecord;
 
 public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 
@@ -40,6 +38,9 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	protected abstract T fillObjectFrom(JsonContextRecord text);
 
 	public T readObjectFrom(JsonNode text) {
+		return fillObjectFrom(text);
+	}
+	public T readObjectFrom(JsonContextRecord text) {
 		return fillObjectFrom(text);
 	}
 

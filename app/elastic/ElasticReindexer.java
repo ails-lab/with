@@ -17,110 +17,135 @@
 package elastic;
 
 
+import java.util.List;
 import java.util.Map;
 
+import model.resources.RecordResource;
+
+import org.bson.types.ObjectId;
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
-import org.junit.Test;
-
+import org.mongodb.morphia.Key;
+import org.mongodb.morphia.query.Query;
+import db.DB;
 import play.Logger;
 
 public class ElasticReindexer {
 	static private final Logger.ALogger log = Logger.of(ElasticIndexer.class);
 
-	private String oldIndex = "with2";
-	private String newIndex = "with_v2";
 
-	public ElasticReindexer() {
+
+
+	/*
+	 * SLOW RE-INDEX
+	 *
+	 * Retrieve all documents from Mongo and slowly index all
+	 * of them to the index.
+	 * Documents with the same id are reindex (so they are updated)
+	 * at the index. Documents that do not exist they are indexed
+	 * for the first time.
+	 *
+	 * Therefore we are NOT going to have duplicates.
+	 */
+	public static void reindexAllDbDocuments(String indice) {
+
+		BulkProcessor bulk = Elastic.getBulkProcessor();
+		long countAll = DB.getRecordResourceDAO().find().countAll();
+
+		for(int i = 0; i < (countAll/1000); i++) {
+			Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i*1000).limit(1000);
+			List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
+			for(RecordResource rr: resourceCursor) {
+				bulk.add(new IndexRequest(Elastic.index, Elastic.type, rr.getDbId().toString())
+						.source(ElasticUtils.transformRR(rr)));
+			}
+			bulk.flush();
+		}
+
+		Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset((int)(countAll/1000)*1000).limit(1000);
+		List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
+		for(RecordResource rr: resourceCursor) {
+			bulk.add(new IndexRequest(Elastic.index, Elastic.type, rr.getDbId().toString())
+					.source(ElasticUtils.transformRR(rr)));
+		}
+		bulk.close();
 
 	}
 
-	/*public ElasticReindexer(String oldName, String newName) {
-		this.oldIndex = oldName;
-		this.newIndex = newName;
+	/*
+	 * FAST RE-INDEX
+	 *
+	 * Find which documents belong to Mongo DB but they
+	 * are not in the index and index only them.
+	 * Probably using a single bulk operation.
+	 */
+	public static void indexInconsistentDocs() {
+
+		BulkProcessor bulk = Elastic.getBulkProcessor();
+		List<Key<RecordResource>> allKeys = DB.getRecordResourceDAO().find().asKeyList();
+
+		for(Key<RecordResource> k: allKeys) {
+			TermQueryBuilder termQ = QueryBuilders.termQuery("_id", k.getId());
+			SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
+					.setSize(0)
+					.setTerminateAfter(1)
+					.setQuery(termQ)
+					.execute().actionGet();
+
+			if(resp.getHits().getTotalHits() == 0) {
+				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(k.getId().toString()));
+				bulk.add(new IndexRequest(Elastic.index, Elastic.type, rr.getDbId().toString())
+					.source(ElasticUtils.transformRR(rr)));
+			}
+		}
+		bulk.close();
 	}
 
-	public static void main(String args[]) {
-		ElasticReindexer reindexer = new ElasticReindexer(args[0], args[1]);
-		reindexer.reindex();
-	}*/
-
-	@Test
-	public void reindex() {
+	/*
+	 * CHANGE INDICE
+	 *
+	 * Reindex all documents of a indice to a newly created indice.
+	 * Method iterates through a scroll search cursor and reindex every
+	 * 5ms a maximum size of 1000 documents.
+	 */
+	public static void reindexOnANewIndice(String oldIndice, String newIndice) {
 		SearchResponse scrollResp = Elastic.getTransportClient()
-				.prepareSearch(oldIndex)
+				.prepareSearch(oldIndice)
 				.setSearchType(SearchType.SCAN)
 				.setScroll(new TimeValue(60000))
 				.setQuery(QueryBuilders.matchAllQuery())
 				.setSize(100)
 				.execute().actionGet();
 
-		int BULK_ACTIONS_THRESHOLD = 1000;
-		int BULK_CONCURRENT_REQUESTS = 1;
-		BulkProcessor bulkProcessor = BulkProcessor.builder(Elastic.getTransportClient(), new BulkProcessor.Listener() {
-		    @Override
-		    public void beforeBulk(long executionId, BulkRequest request) {
-		        log.info("Bulk Going to execute new bulk composed of {} actions", request.numberOfActions());
-		    }
-
-		    @Override
-		    public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
-		        log.info("Executed bulk composed of {} actions", request.numberOfActions());
-		    }
-
-		    @Override
-		    public void afterBulk(long executionId, BulkRequest request, Throwable failure) {
-		        log.warn("Error executing bulk", failure);
-		    }
-		    })
-		    .setBulkActions(BULK_ACTIONS_THRESHOLD)
-		    .setConcurrentRequests(BULK_CONCURRENT_REQUESTS)
-		    .setFlushInterval(TimeValue.timeValueMillis(5))
-		    .build();
+		BulkProcessor bulk = Elastic.getBulkProcessor();
 
 		while(true) {
+			for(SearchHit hit: scrollResp.getHits()) {
+				IndexRequest req = new IndexRequest(newIndice, hit.type(), hit.id());
+				Map source = ((hit.getSource()));
+				req.source(source);
+				bulk.add(req);
+			}
+
 			scrollResp = Elastic.getTransportClient()
 					.prepareSearchScroll(scrollResp.getScrollId())
 					.setScroll(new TimeValue(600000))
 					.execute().actionGet();
+
 			if(scrollResp.getHits().getHits().length == 0) {
 				log.info("Closing the bulk processor");
-		        bulkProcessor.close();
+				bulk.close();
 		        break;
 			}
 
-			for(SearchHit hit: scrollResp.getHits()) {
-				IndexRequest req = new IndexRequest(newIndex, hit.type(), hit.id());
-				Map source = ((hit.getSource()));
-				req.source(source);
-				bulkProcessor.add(req);
-			}
+
 		}
 
 	}
-
-	public String getNewIndex() {
-		return newIndex;
-	}
-
-	public void setNewIndex(String newIndex) {
-		this.newIndex = newIndex;
-	}
-
-	public String getOldIndex() {
-		return oldIndex;
-	}
-
-	public void setOldIndex(String oldIndex) {
-		this.oldIndex = oldIndex;
-	}
-
-
 }
