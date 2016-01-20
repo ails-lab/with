@@ -48,7 +48,12 @@ import db.DB;
 import elastic.ElasticIndexer;
 import model.ApiKey;
 import model.Collection;
+import model.DescriptiveData;
+import model.ExampleDataModels.CollectionDescriptiveData;
 import model.Media;
+import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
+import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import play.Logger;
@@ -202,17 +207,18 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		Collection fav = new Collection();
-		fav.setCreated(new Date());
-		fav.setCreatorId(user.getDbId());
-		fav.setTitle("_favorites");
-		DB.getCollectionDAO().makePermanent(fav);
+/*		CollectionObject fav = new CollectionObject();
+		fav.getAdministrative().setCreated(new Date());
+		fav.getAdministrative().setWithCreator(user.getDbId());
+		fav.getDescriptiveData();
+		fav.setDescriptiveData(new CollectionDescriptiveData());
+		DB.getCollectionObjectDAO().makePermanent(fav);*/
 		//ElasticIndexer indexer = new ElasticIndexer(fav);
 		//indexer.indexCollectionMetadata();
 		session().put("user", user.getDbId().toHexString());
 		result = (ObjectNode) Json.parse(DB.getJson(user));
 		result.remove("md5Password");
-		result.put("favoritesId", fav.getDbId().toString());
+		//result.put("favoritesId", fav.getDbId().toString());
 		return ok(result);
 
 	}
