@@ -173,14 +173,10 @@ public class RecordResourceController extends Controller {
 			resource.getAdministrative().setCreated(new Date());
 			resource.getAdministrative().setLastModified(new Date());
 			DB.getRecordResourceDAO().makePermanent(resource);
-
 			resource.getAdministrative().setWithURI(
 					request().host() + resource.getDbId().toString());
-			Logger.info("here?1");
-			Logger.info("here?1");
 			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
-			Logger.info("here?1");
 			return ok(Json.toJson(resource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
