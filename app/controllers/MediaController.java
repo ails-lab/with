@@ -473,10 +473,10 @@ public class MediaController extends Controller {
 		DB.getMediaObjectDAO().makePermanent(thumbnail);
 		DB.getMediaObjectDAO().makePermanent(medium);
 		
-		tiny.setUrl("/media/" + med.getDbId().toString() + "?file=true");
-		square.setUrl("/media/" + med.getDbId().toString() + "?file=true");
-		thumbnail.setUrl("/media/" + med.getDbId().toString() + "?file=true");
-		medium.setUrl("/media/" + med.getDbId().toString() + "?file=true");
+		tiny.setUrl("/media/" + tiny.getDbId().toString() + "?file=true");
+		square.setUrl("/media/" + square.getDbId().toString() + "?file=true");
+		thumbnail.setUrl("/media/" + thumbnail.getDbId().toString() + "?file=true");
+		medium.setUrl("/media/" + medium.getDbId().toString() + "?file=true");
 
 		
 		DB.getMediaObjectDAO().makePermanent(tiny);
@@ -520,7 +520,7 @@ public class MediaController extends Controller {
 				ithumb.getWidth(null),
 				ithumb.getHeight(null), image.getType());
 		
-		Logger.info("Width: " + thumb.getWidth() + ", x = "+ (((thumb.getWidth() - 150)/2)-1));
+		//Logger.info("Width: " + thumb.getWidth() + ", x = "+ (((thumb.getWidth() - 150)/2)-1));
 		
 		BufferedImage thumb2 = null;
 		
