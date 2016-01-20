@@ -367,7 +367,7 @@ public class GroupManager extends Controller {
 			if (collectionId != null) {
 				Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getRights().get(group.getDbId());
+					Access accessRights = collection.getRights().getAcl(group.getDbId());
 					if (accessRights != null)
 						groupJSON.put("accessRights", accessRights.toString());
 					else

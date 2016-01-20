@@ -440,8 +440,8 @@ public class TestCollectionController {
 		col.setIsPublic(true);
 		col.setCreatorId(user);
 		DB.getCollectionDAO().makePermanent(col);
-		ElasticIndexer indexer = new ElasticIndexer(col);
-		indexer.indexCollectionMetadata();
+		//ElasticIndexer indexer = new ElasticIndexer(col);
+		//indexer.indexCollectionMetadata();
 
 		Collection col1 = new Collection();
 		col1.setDescription("Collection from Controller");

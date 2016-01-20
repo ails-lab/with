@@ -29,7 +29,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 import model.basicDataTypes.WithAccess.Access;
 
-import utils.AccessEnumConverter;
+import db.converters.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -42,7 +42,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
  *
  * So that Model objects can have a proper type for rights embedded
  */
-public class WithAccess  extends HashMap<ObjectId, Access>{
+public class WithAccess  {
 
 	@Indexes({
 		@Index(fields = @Field(value = "user", type = IndexType.ASC), options = @IndexOptions(disableValidation=true)),
@@ -50,7 +50,7 @@ public class WithAccess  extends HashMap<ObjectId, Access>{
 		@Index(fields = {@Field(value = "user", type = IndexType.ASC), @Field(value = "level", type = IndexType.DESC) }, options = @IndexOptions())
 	})
 
-	@Converters( AccessEnumConverter.class )
+	@Converters(AccessEnumConverter.class)
 	public static class AccessEntry {
 
 		public AccessEntry() {}
@@ -103,18 +103,27 @@ public class WithAccess  extends HashMap<ObjectId, Access>{
 	}
 
 	public List<AccessEntry> getAcl() {
-		if(acl==null)
+		if (acl==null)
 			acl = new ArrayList<WithAccess.AccessEntry>();
 		return acl;
 	}
 
-	public void addAccess(AccessEntry accessEntry) {
+	public void addToAcl(AccessEntry accessEntry) {
 		this.acl.add(accessEntry);
 	}
 
-	public void addAccess(ObjectId userId, Access access) {
+	public void addToAcl(ObjectId userId, Access access) {
 		AccessEntry accessEntry = new AccessEntry(userId, access);
 		this.acl.add(accessEntry);
+	}
+	
+	public void removeFromAcl(ObjectId userId) {
+		for (int i=0; i<this.acl.size(); i++) {
+			if (acl.get(i).getUser().equals(userId)) {
+				acl.remove(i);
+				return;
+			}
+		}
 	}
 
 	public void setAcl(List<AccessEntry> acl) {
@@ -127,15 +136,6 @@ public class WithAccess  extends HashMap<ObjectId, Access>{
 				return ae.level;
 		}
 		return Access.NONE;
-	}
-
-	public void addToAcl(AccessEntry ae) {
-		if(acl == null) {
-			acl = new ArrayList<AccessEntry>();
-			acl.add(ae);
-		} else {
-			acl.add(ae);
-		}
 	}
 
 }

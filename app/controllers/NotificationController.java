@@ -163,7 +163,7 @@ public class NotificationController extends Controller {
 				Collection collection = DB.getCollectionDAO().get(
 						notification.getCollection());
 				if (accept) {
-					collection.getRights().put(notification.getReceiver(),
+					collection.getRights().addToAcl(notification.getReceiver(),
 							notification.getAccess());
 					if (DB.getCollectionDAO().makePermanent(collection) == null) {
 						result.put("error",

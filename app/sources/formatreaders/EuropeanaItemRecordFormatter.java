@@ -96,7 +96,6 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
 		// TODO: add rights!
 		med.setUrl(model.getIsShownBy());
-
 		object.addMedia(MediaVersion.Original, med);
 		return object;
 		// TODO: add null checks
