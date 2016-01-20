@@ -18,6 +18,8 @@ package sources.formatreaders;
 
 import java.util.List;
 
+import com.sun.webkit.Timer.Mode;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -57,6 +59,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
 		model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
+		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setLabel(rec.getMultiLiteralValue("dcTitle"));
 		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubject"));
