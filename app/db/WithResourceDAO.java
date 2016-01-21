@@ -259,7 +259,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		accessQuery.append("level", oper);
 		//BasicDBObject elemMatch1 = new BasicDBObject();
 		//elemMatch1.put("$elemMatch", accessQuery);
-		return this.createQuery().criteria("administrative.access").hasThisElement(accessQuery);
+		return this.createQuery().criteria("administrative.access.acl").hasThisElement(accessQuery);
 	}
 
 	/**
@@ -268,12 +268,13 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @return
 	 */
 	protected CriteriaContainer loggedInUserWithAtLeastAccessQuery(List<ObjectId> loggedInUserEffIds, Access access) {
-		Criteria[] criteria = new Criteria[loggedInUserEffIds.size()+1];
+		List<Criteria> criteria = new ArrayList<Criteria>();//new Criteria[loggedInUserEffIds.size()+1];
 		for (int i=0; i<loggedInUserEffIds.size(); i++) {
-			criteria[i] = formAccessLevelQuery(new Tuple(loggedInUserEffIds.get(i), access), QueryOperator.GTE);//this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
+			criteria.add(formAccessLevelQuery(new Tuple(loggedInUserEffIds.get(i), access), QueryOperator.GTE));
 		}
-		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("administrative.access.isPublic").equal(true);
-		return this.createQuery().or(criteria);
+		if (access.ordinal()<2)
+			criteria.add(this.createQuery().criteria("administrative.access.isPublic").equal(true));
+		return this.createQuery().or(criteria.toArray(new Criteria[criteria.size()]));
 	}
 
 	/**
@@ -308,14 +309,15 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	
 	public boolean hasAccess(List<ObjectId> effectiveIds,  Action action, ObjectId resourceId) {
 		CriteriaContainer criteria = loggedInUserWithAtLeastAccessQuery(effectiveIds, actionToAccess(action));
-		Query<T> q = this.createQuery().limit(1);
-		q.field("_id").equals(resourceId);
+		Query<T> q = this.createQuery().disableValidation().limit(1);
+		q.field("_id").equal(resourceId);
 		q.or(criteria);
+		System.out.println(q.toString());
 		return (this.find(q)==null? false: true);
 	}
 	
 	public Access actionToAccess(Action action) {
-		return Access.valueOf(action.toString());
+		return Access.values()[action.ordinal()+1];
 	}
 	
 	/**
