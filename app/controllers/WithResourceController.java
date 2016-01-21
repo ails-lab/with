@@ -132,8 +132,8 @@ public class WithResourceController extends Controller {
 								.getMedia().get(0)).get(version)) != null) {
 							mediaUrl = embeddedMedia.getUrl();
 							withRights = embeddedMedia.getWithRights();
-							media = (EmbeddedMediaObject) DB
-									.getMediaObjectDAO().getByUrl(mediaUrl);
+							media = new EmbeddedMediaObject(DB
+									.getMediaObjectDAO().getByUrl(mediaUrl));
 							media.setWithRights(withRights);
 							record.addMedia(version, media);
 						}
