@@ -57,7 +57,7 @@ public class NotificationController extends Controller {
 		ObjectNode result = Json.newObject();
 		try {
 			String currentUserId = AccessManager.effectiveUserId(session().get(
-					"effectiveUserIds"));
+					"user"));
 			if (currentUserId == null) {
 				result.put("error", "User is not authorized for this action");
 				return forbidden(result);
