@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
+import model.DescriptiveData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
@@ -531,6 +532,14 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		UpdateOperations<T> updateOps = this
 				.createUpdateOperations();
 		updateOps.set("content."+format, content);
+		this.update(q, updateOps);
+	}
+	
+	public void updateDescriptiveData(ObjectId recId, DescriptiveData data) {
+		Query<T> q = this.createQuery().field("_id").equal(recId);
+		UpdateOperations<T> updateOps = this
+				.createUpdateOperations();
+		updateOps.set("descriptiveData", data);
 		this.update(q, updateOps);
 	}
 
