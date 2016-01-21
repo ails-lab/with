@@ -17,11 +17,13 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import model.basicDataTypes.Language;
+import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.RecordResource;
 import model.resources.WithResource;
@@ -247,18 +249,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 */
 	protected Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess, QueryOperator operator) {
 		int ordinal = userAccess.y.ordinal();
-		/*Criteria[] criteria = new Criteria[Access.values().length-ordinal];
-		for (int i=0; i<Access.values().length-ordinal; i++)
-			criteria[i] = this.createQuery().criteria("rights." + userAccess.x.toHexString())
-			.equal(Access.values()[i+ordinal].toString());*/
-		//return this.createQuery().criteria("administrative.access." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
 		BasicDBObject accessQuery = new BasicDBObject();
 		accessQuery.put("user", userAccess.x);
 		BasicDBObject oper = new BasicDBObject();
 		oper.put(operator.toString(), ordinal);
 		accessQuery.append("level", oper);
-		//BasicDBObject elemMatch1 = new BasicDBObject();
-		//elemMatch1.put("$elemMatch", accessQuery);
 		return this.createQuery().criteria("administrative.access.acl").hasThisElement(accessQuery);
 	}
 

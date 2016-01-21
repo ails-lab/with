@@ -149,9 +149,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		Criteria[] criteria = new Criteria[effectiveIds
 				.size()];
 		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteria[i] = this.createQuery()
-					.criteria("administrative.access." + effectiveIds.get(i))
-					.greaterThanOrEq(access.ordinal());
+			criteria[i] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), access), QueryOperator.GTE);
 		}
 		q.field("administrative.isExhibition").equal(isExhibition);
 		q.or(criteria);
@@ -168,60 +166,41 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
-	public List<CollectionObject> getBySpecificAccessWithRestrictions(
-			List<ObjectId> effectiveIds, Access access,
-			Map<ObjectId, Access> restrictions, Boolean isExhibition,
+	public List<CollectionObject> getByAccessWithRestrictions(
+			List<ObjectId> effectiveIds, QueryOperator op1,  Access access,
+			Map<ObjectId, Access> restrictions, QueryOperator op2, Boolean isExhibition,
 			int offset, int count) {
 		Query<CollectionObject> q = this.createQuery()
 				.field("administrative.isExhibition").equal(isExhibition)
 				.order("-administrative.lastModified").offset(offset)
 				.limit(count);
-		CriteriaContainer[] criteriaOr = new CriteriaContainer[effectiveIds
-				.size()];
+		Criteria[] criteriaOr = new Criteria[effectiveIds.size()];
 		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteriaOr[i] = this.createQuery()
-					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access.ordinal());
+			criteriaOr[i] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), access), op1);
 		}
-		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
-				.size()];
+		Criteria[] criteriaAnd = new Criteria[restrictions.size()];
 		int i = 0;
 		for (ObjectId id : restrictions.keySet()) {
-			criteriaOr[i++] = this.createQuery()
-					.criteria("administrative.access." + id)
-					.equal(restrictions.get(id));
+			criteriaOr[i++] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), restrictions.get(id)), op2);
 		}
 		q.or(criteriaOr);
 		q.and(criteriaAnd);
 		return this.find(q).asList();
+		
+	}
+	
+	public List<CollectionObject> getBySpecificAccessWithRestrictions(
+			List<ObjectId> effectiveIds, Access access,
+			Map<ObjectId, Access> restrictions, Boolean isExhibition,
+			int offset, int count) {
+		return getByAccessWithRestrictions(effectiveIds, QueryOperator.EQ, access, restrictions, QueryOperator.EQ, isExhibition, offset, count);
 	}
 	
 	public List<CollectionObject> getByMaxAccessWithRestrictions(
 			List<ObjectId> effectiveIds, Access access,
 			Map<ObjectId, Access> restrictions, Boolean isExhibition,
 			int offset, int count) {
-		Query<CollectionObject> q = this.createQuery()
-				.field("administrative.isExhibition").equal(isExhibition)
-				.order("-administrative.lastModified").offset(offset)
-				.limit(count);
-		CriteriaContainer[] criteriaOr = new CriteriaContainer[effectiveIds
-				.size()];
-		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteriaOr[i] = this.createQuery()
-					.criteria("administrative.access." + effectiveIds.get(i))
-					.greaterThanOrEq(access.ordinal());
-		}
-		CriteriaContainer[] criteriaAnd = new CriteriaContainer[restrictions
-				.size()];
-		int i = 0;
-		for (ObjectId id : restrictions.keySet()) {
-			criteriaOr[i++] = this.createQuery()
-					.criteria("administrative.access." + id)
-					.equal(restrictions.get(id));
-		}
-		q.or(criteriaOr);
-		q.and(criteriaAnd);
-		return this.find(q).asList();
+		return getByAccessWithRestrictions(effectiveIds, QueryOperator.GTE, access, restrictions, QueryOperator.EQ, isExhibition, offset, count);
 	}
 	
 	/**

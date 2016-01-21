@@ -86,15 +86,16 @@ public class CollectionController extends Controller {
 		ObjectNode result = Json.newObject();
 		Collection c = null;
 		User collectionOwner = null;
+		ObjectId id = new ObjectId(collectionId);
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		try {
-			c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
+			c = DB.getCollectionDAO().getById(id);
 			if (c == null) {
 				result.put("error", "Cannot retrieve metadata for the specified collection!");
 				return internalServerError(result);
 			}
 
-			if (!AccessManager.checkAccess(c.getRights(), userIds, Action.READ) && !c.getIsPublic()) {
+			if (!AccessManager.hasAccess(userIds, Action.READ, id) && !c.getIsPublic()) {
 				result.put("error", "User does not have read-access for the collection");
 				return forbidden(result);
 			}
