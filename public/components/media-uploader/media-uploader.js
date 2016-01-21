@@ -54,7 +54,7 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 				source: 'UploadedByUser',
 				title: self.title(),
 				description: self.description(),
-				provider: app.currentUser.username(),
+				dataProvider: app.currentUser.username(),
 				type: 'IMAGE',
 				thumbnailUrl: self.thumbnailUrl(),
 				isShownBy: self.isShownBy(),
