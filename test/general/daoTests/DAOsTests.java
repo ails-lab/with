@@ -171,14 +171,14 @@ public class DAOsTests {
 		ddata.setDescription(desc);
 
 		MultiLiteralOrResource keywords =
-				new MultiLiteralOrResource(ResourceType.dbpedia,  "http://www.uri.org");
+				new MultiLiteralOrResource("http://www.uri.org");
 				keywords.put("es", new ArrayList<String>(Arrays.asList("Buenos", "Córdoba", "La Plata")));
 				keywords.put("en", new ArrayList<String>(Arrays.asList("Buenos", "Cordoba", "Plata")));
 		ddata.setKeywords(keywords);
 
 
 		MultiLiteralOrResource altLabels =
-				new MultiLiteralOrResource(ResourceType.dbpedia,  "http://www.uri.org");
+				new MultiLiteralOrResource("http://www.uri.org");
 				altLabels.put("en", new ArrayList<String>(Arrays.asList("music", "dance")));
 				altLabels.put("fr", new ArrayList<String>(Arrays.asList("musiciens", "dancers")));
 		ddata.setAltLabels(altLabels);
@@ -243,7 +243,7 @@ public class DAOsTests {
 		List<CollectionObject> co2 = DB.getCollectionObjectDAO().getByLabel("EN", "My record Title");
 		System.out.println("Retrieved by label: \n" + Json.toJson(co2) );
 
-		List<CollectionObject> co3 = DB.getCollectionObjectDAO().getByOwner(u.getDbId(), 0, 10);
+		List<CollectionObject> co3 = DB.getCollectionObjectDAO().getByCreator(u.getDbId(), 0, 10);
 		System.out.println("Retrieved by Owner: \n" + Json.toJson(co3) );
 
 		/*List<String> fields = new ArrayList<String>();

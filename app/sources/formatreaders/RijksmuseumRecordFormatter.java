@@ -35,16 +35,13 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("title"));
-		model.setDescription(rec.getLiteralValue("longTitle"));
-		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		model.setLabel(rec.getMultiLiteralValue("title"));
+		model.setDescription(rec.getMultiLiteralValue("longTitle"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
+		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(rec.getLiteralOrResourceValue("principalOrFirstMaker"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue("principalOrFirstMaker"));
 
 		// object.addToProvenance(new
 		// ProvenanceInfo(rec.getStringValue("dataProvider")));

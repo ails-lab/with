@@ -40,12 +40,12 @@ import model.MediaObject;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
-import model.basicDataTypes.Literal.Language;
-import model.basicDataTypes.LiteralOrResource.ResourceType;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.RecordResource;
@@ -424,10 +424,10 @@ public class ElasticTest {
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		Literal label = new Literal(Language.EN, "MyTitle");
+		MultiLiteral label = new MultiLiteral(Language.EN, "MyTitle");
 		RecordDescriptiveData cdd = new RecordDescriptiveData();
 		cdd.setLabel(label);
-		Literal desc = new Literal(Language.EN, "This is a description");
+		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
 		co.setDescriptiveData(cdd);
 		/*
@@ -441,7 +441,7 @@ public class ElasticTest {
 		ArrayList<EmbeddedMediaObject> medias = new ArrayList<EmbeddedMediaObject>();
 		EmbeddedMediaObject emo = getMediaObject();
 		medias.add(emo);
-		co.setMedia(medias);
+		//co.setMedia(medias);
 
 		return co;
 	}
@@ -491,11 +491,9 @@ public class ElasticTest {
 		//mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource(ResourceType.uri, url.toString());
+		LiteralOrResource lor = new LiteralOrResource(url.toString());
 		mo.setOriginalRights(lor);
-		HashSet<WithMediaRights> set = new HashSet<EmbeddedMediaObject.WithMediaRights>();
-		set.add(WithMediaRights.Creative);
-		mo.setWithRights(set);
+		mo.setWithRights(WithMediaRights.Creative);
 		mo.setType(WithMediaType.IMAGE);
 		mo.setUrl(url.toString());
 

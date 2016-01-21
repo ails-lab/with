@@ -14,35 +14,42 @@
  */
 
 
-package utils;
+package db.converters;
 
-import model.basicDataTypes.WithAccess.Access;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
-import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
+import com.mongodb.BasicDBList;
 
-public class AccessEnumConverter extends TypeConverter implements SimpleValueConverter{
+import model.basicDataTypes.MultiLiteral;
 
-	public AccessEnumConverter() {
-		super(Access.class);
-	}
+public class MultiLiteralConverter extends TypeConverter{
 
-	@Override
-	public Object encode(Object value, MappedField optionalExtraInfo) {
-		if(value==null) {
-			return null;
-		}
-
-		return ((Access)value).ordinal();
+	public MultiLiteralConverter() {
+		super(MultiLiteral.class);
 	}
 
 	@Override
 	public Object decode(Class targetClass, Object fromDBObject,
 			MappedField optionalExtraInfo) {
-		if (fromDBObject == null) {
+		if (fromDBObject == null) 
             return null;
-        }
-        return Access.values()[(int)fromDBObject];
+		else {
+			MultiLiteral outMap = new MultiLiteral();
+			for (Entry<String, BasicDBList> e: ((Map<String, BasicDBList>) fromDBObject).entrySet()) {
+				ArrayList<String> outList = new ArrayList<String>();
+				for (Object s: e.getValue()) {
+					outList.add((String) s);
+				}
+				outMap.put(e.getKey(), outList);
+			}
+			return outMap;
+		}
 	}
+
 }

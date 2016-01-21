@@ -372,11 +372,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			JsonNode record = response.get("object");
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
-
 				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter(vmap);
 				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
-
 			}
 			response = HttpConnector
 					.getURLContent("http://www.europeana.eu/api/v2/record/" + recordId + ".jsonld?wskey=" + key);

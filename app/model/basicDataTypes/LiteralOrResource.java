@@ -36,6 +36,13 @@ public class LiteralOrResource extends Literal {
 		else
 			addLiteral(label);
 	}
+	
+	public void addLiteral(Language lang, String value) {
+		if (lang.equals(Language.DEF) && Utils.isValidURL(value))
+			addURI(value);
+		else
+			super.addLiteral(lang, value);
+	}
 
 	public void addURI(String uri) {
 		put(URI, uri);
@@ -45,10 +52,10 @@ public class LiteralOrResource extends Literal {
 		return get(URI);
 	}
 
-	public static LiteralOrResource build(String string) {
-		if (!Utils.hasInfo(string))
-			return null;
-		return new LiteralOrResource(string);
-	}
+//	public static LiteralOrResource build(String string) {
+//		if (!Utils.hasInfo(string))
+//			return null;
+//		return new LiteralOrResource(string);
+//	}
 
 }

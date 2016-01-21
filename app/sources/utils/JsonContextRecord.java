@@ -30,8 +30,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
+import model.basicDataTypes.WithDate;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
 
@@ -184,7 +186,15 @@ public class JsonContextRecord {
 		}
 	}
 
-	public MultiLiteral getLiteralValue(String... path) {
+	public MultiLiteral getMultiLiteralValue(String... path) {
+		JsonNode node = getValue(buildpaths(path));
+		if (node != null)
+			return JsonNodeUtils.asMultiLiteral(node);
+		else
+			return null;
+	}
+	
+	public Literal getLiteralValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
 			return JsonNodeUtils.asLiteral(node);
@@ -192,16 +202,28 @@ public class JsonContextRecord {
 			return null;
 	}
 
-	public MultiLiteralOrResource getLiteralOrResourceValue(String... path) {
+	public MultiLiteralOrResource getMultiLiteralOrResourceValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
 			return JsonNodeUtils.asMultiLiteralOrResource(node);
 		else
 			return null;
 	}
+	
+	public LiteralOrResource getLiteralOrResourceValue(String... path) {
+		JsonNode node = getValue(buildpaths(path));
+		if (node != null)
+			return JsonNodeUtils.asLiteralOrResource(node);
+		else
+			return null;
+	}
 
 	public List<String> getStringArrayValue(String... path) {
 		return JsonNodeUtils.asStringArray(getValue(buildpaths(path)));
+	}
+	
+	public List<WithDate> getWithDateArrayValue(String... path) {
+		return JsonNodeUtils.asWithDateArray(getValue(buildpaths(path)));
 	}
 
 	public JsonNode getRootInformation() {
