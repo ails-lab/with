@@ -53,6 +53,7 @@ public class ElasticUtils {
 
 			record.setCollections(colIds);
 			record.setAllTags(tags);
+			record.setExternalId(hit.getId());
 		}
 
 		return record;

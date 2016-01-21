@@ -26,7 +26,7 @@ import utils.SortedList;
 public class CommonFilterLogic implements Cloneable {
 
 	private HashMap<String, ValueCount> counts;
-	private boolean global = true;
+	private final boolean global = true;
 
 	public CommonFilterResponse data = new CommonFilterResponse();
 
@@ -76,11 +76,18 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.PROVIDER_NAME;
 		return r;
 	}
-	
+
 	public static CommonFilterLogic dataproviderFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.DATAPROVIDER_ID;
 		r.data.filterName = CommonFilters.DATAPROVIDER_NAME;
+		return r;
+	}
+
+	public static CommonFilterLogic comesFromFilter() {
+		CommonFilterLogic r = new CommonFilterLogic();
+		r.data.filterID = CommonFilters.COMESFROM_ID;
+		r.data.filterName = CommonFilters.COMESFROM_NAME;
 		return r;
 	}
 
@@ -121,14 +128,14 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.RIGHTS_NAME;
 		return r;
 	}
-	
+
 	public static CommonFilterLogic reusabilityFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.REUSABILITY_ID;
 		r.data.filterName = CommonFilters.REUSABILITY_NAME;
 		return r;
 	}
-	
+
 	public static CommonFilterLogic countryFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.COUNTRY_ID;
@@ -143,7 +150,7 @@ public class CommonFilterLogic implements Cloneable {
 		return r;
 	}
 	/**
-	 * TODO check this added for availability face of NLA 
+	 * TODO check this added for availability face of NLA
 	 */
 	public static CommonFilterLogic contributorFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
@@ -151,7 +158,7 @@ public class CommonFilterLogic implements Cloneable {
 		r.data.filterName = CommonFilters.CONTRIBUTOR_NAME;
 		return r;
 	}
-	
+
 	public static CommonFilterLogic availabilityFilter() {
 		CommonFilterLogic r = new CommonFilterLogic();
 		r.data.filterID = CommonFilters.AVAILABILITY_ID;

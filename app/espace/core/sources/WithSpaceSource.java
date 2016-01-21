@@ -131,7 +131,10 @@ public class WithSpaceSource extends ISpaceSource {
 		List<CommonFilter> filters = q.filters;
 		for (CommonFilter f: filters) {
 			for (String filterValue: f.values) {
-				elasticoptions.addFilter(f.filterID+"_all", filterValue);
+				if(f.filterID.equals("comesFrom"))
+					elasticoptions.addFilter("source_all", filterValue);
+				else
+					elasticoptions.addFilter(f.filterID+"_all", filterValue);
 			}
 		}
 		searcher.setType(Elastic.type_general);
@@ -153,6 +156,7 @@ public class WithSpaceSource extends ISpaceSource {
 		CommonFilterLogic type = CommonFilterLogic.typeFilter();
 		CommonFilterLogic provider = CommonFilterLogic.providerFilter();
 		CommonFilterLogic dataprovider = CommonFilterLogic.dataproviderFilter();
+		CommonFilterLogic comesFrom = CommonFilterLogic.comesFromFilter();
 		CommonFilterLogic creator = CommonFilterLogic.creatorFilter();
 		CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		CommonFilterLogic country = CommonFilterLogic.countryFilter();
@@ -187,6 +191,14 @@ public class WithSpaceSource extends ISpaceSource {
 					case "dataProviders": {
 						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
 							countValue(dataprovider, aggTerm.getBuckets().get(i)
+									.getKey(), (int) aggTerm.getBuckets().get(i)
+									.getDocCount());
+						}
+						break;
+					}
+					case "source": {
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(comesFrom, aggTerm.getBuckets().get(i)
 									.getKey(), (int) aggTerm.getBuckets().get(i)
 									.getDocCount());
 						}
@@ -234,6 +246,7 @@ public class WithSpaceSource extends ISpaceSource {
 			res.filtersLogic.add(type);
 			res.filtersLogic.add(provider);
 			res.filtersLogic.add(dataprovider);
+			res.filtersLogic.add(comesFrom);
 			res.filtersLogic.add(creator);
 			res.filtersLogic.add(rights);
 			res.filtersLogic.add(country);
