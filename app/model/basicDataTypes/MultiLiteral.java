@@ -69,7 +69,10 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 	}
 
 	public void fillDEF(){
-		String defLang = Language.EN.toString();
+		String defLang = null;
+		if (containsKey(Language.EN.toString())){
+			defLang = Language.EN.toString();
+		}
 		if (!containsKey(defLang)){
 			int max = 0;
 			for (String k : this.keySet()) {
@@ -82,6 +85,7 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 				}
 			}
 		}
+		if (defLang!=null)
 		for (String d : get(defLang)) {
 			add(Language.DEF.toString(), d);
 		}

@@ -84,7 +84,8 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"),model.getIsShownAt().getURI(),null);
+		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
+		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"),uriAt,null);
 		object.addToProvenance(provInfo);
 		
 		provInfo = new ProvenanceInfo(rec.getStringValue("edmProvider"));
@@ -96,13 +97,14 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.Europeana.toString(),  uri,recID));
 
+		List<String> theViews = rec.getStringArrayValue("hasView");
+		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject");
 		
 		rec.exitContext();
 
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
-		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject");
 		String uri3 = ro==null?null:ro.getURI();
 		if (uri3!=null){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
@@ -122,6 +124,18 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 			med.setOriginalRights(rights);
 			med.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Original, med);
+		}
+		
+		if (theViews!=null && theViews.size()>0){
+			for (String string : theViews) {
+				EmbeddedMediaObject med = new EmbeddedMediaObject();
+				med.setType(type);
+				med.setParentID("self");
+				med.setUrl(string);
+				med.setOriginalRights(rights);
+				med.setWithRights(withMediaRights);
+				object.addMediaView(MediaVersion.Original, med);
+			}
 		}
 		
 		// TODO fill the views
