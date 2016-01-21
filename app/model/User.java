@@ -191,30 +191,28 @@ public class User extends UserOrGroup {
 	public void setFacebookId(String facebookId) {
 		this.facebookId = facebookId;
 	}
-	
+
 	private String genderToString(Gender gender) {
 		String genderString = String.valueOf(gender);
 		String first = genderString.substring(0, 1).toUpperCase();
 		return first + genderString.substring(1).toLowerCase();
 	}
-	
 
 	public String getGender() {
 		if (gender != null) {
 			return genderToString(gender);
-		}
-		else {
+		} else {
 			return genderToString(Gender.UNSPECIFIED);
 		}
 	}
 
 	public void setGender(String gender) {
-		 try {
-			 Gender genderType = Gender.valueOf(gender);
-			 this.gender = genderType;
-	    } catch (IllegalArgumentException ex) {  
-	    	this.gender = Gender.UNSPECIFIED;
-	    }
+		try {
+			Gender genderType = Gender.valueOf(gender);
+			this.gender = genderType;
+		} catch (IllegalArgumentException ex) {
+			this.gender = Gender.UNSPECIFIED;
+		}
 	}
 
 	public String getGoogleId() {
@@ -283,20 +281,25 @@ public class User extends UserOrGroup {
 	}
 
 	public Set<Notification> getNotifications() {
-		Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
-		userOrGroupIds.add(this.getDbId());
-		userOrGroupIds.addAll(this.adminInGroups);
-		Set<Notification> unreadNotifications = new HashSet<Notification>(DB
-				.getNotificationDAO().getUnreadByReceivers(userOrGroupIds, 0));
-		Set<Notification> notifications;
-		if (unreadNotifications.size() < 20) {
-			notifications = new HashSet<Notification>(DB.getNotificationDAO()
-					.getAllByReceivers(userOrGroupIds,
-							20 - unreadNotifications.size()));
-			notifications.addAll(unreadNotifications);
-		} else {
-			notifications = unreadNotifications;
+		try {
+			Set<ObjectId> userOrGroupIds = new HashSet<ObjectId>();
+			userOrGroupIds.add(this.getDbId());
+			userOrGroupIds.addAll(this.adminInGroups);
+			Set<Notification> unreadNotifications = new HashSet<Notification>(
+					DB.getNotificationDAO().getUnreadByReceivers(
+							userOrGroupIds, 0));
+			Set<Notification> notifications = new HashSet<Notification>();
+			if (unreadNotifications.size() < 20) {
+				notifications = new HashSet<Notification>(DB
+						.getNotificationDAO().getAllByReceivers(userOrGroupIds,
+								20 - unreadNotifications.size()));
+				notifications.addAll(unreadNotifications);
+			} else {
+				notifications = unreadNotifications;
+			}
+			return notifications;
+		} catch (Exception e) {
+			return new HashSet<Notification>();
 		}
-		return notifications;
 	}
 }

@@ -97,7 +97,14 @@ public class Notification {
 			return null;
 		}
 		User user = DB.getUserDAO().get(this.sender);
-		return user.getFirstName() + " " + user.getLastName();
+		if (user != null) {
+			return user.getFirstName() + " " + user.getLastName();			
+		}
+		UserGroup group = DB.getUserGroupDAO().get(this.sender);
+		if (group != null) {
+			return group.getFriendlyName();
+		}
+		return null;
 	}
 
 	public void setSender(ObjectId sender) {
