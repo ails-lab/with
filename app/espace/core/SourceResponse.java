@@ -19,6 +19,7 @@ package espace.core;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import model.CollectionRecord;
 
@@ -29,6 +30,7 @@ import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import db.DB;
 import elastic.ElasticUtils;
 
 public class SourceResponse {
@@ -50,8 +52,9 @@ public class SourceResponse {
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
 		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
-		for (CollectionRecord r : elasticrecords) {
+		for (CollectionRecord er : elasticrecords) {
 			ItemsResponse it = new ItemsResponse();
+			CollectionRecord r = DB.getCollectionRecordDAO().getByExternalId(er.getExternalId()).get(0);
 			it.comesFrom = r.getSource();
 			it.title = r.getTitle();
 			it.description = r.getDescription();
@@ -62,6 +65,12 @@ public class SourceResponse {
 			it.url.fromSourceAPI = r.getSourceUrl();
 			it.provider = r.getProvider();
 			it.externalId = r.getExternalId();
+			it.type = r.getType();
+			it.rights = r.getItemRights();
+			it.dataProvider = r.getDataProvider();
+			it.creator = r.getCreator();
+			it.year = new ArrayList<>(Arrays.asList(r.getYear()));
+		    it.tags = er.getTags();
 			items.add(it);
 		}
 		this.items = items;
@@ -101,6 +110,7 @@ public class SourceResponse {
 		public String comesFrom;
 		public String rights;
 		public String externalId;
+		public Set<String> tags;
 	}
 
 	public String query;
