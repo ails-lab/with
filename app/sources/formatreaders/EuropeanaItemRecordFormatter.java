@@ -100,26 +100,31 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		rec.exitContext();
 
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
-
-		
-		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
-		medThumb.setUrl(uri2);
-		medThumb.setType(type);
-		medThumb.setParentID(uri2);
-		medThumb.setOriginalRights(rights);
-		medThumb.setWithRights(withMediaRights);
-		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		// TODO: add rights!
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setType(type);
-		med.setParentID("self");
-		med.setUrl(uri2);
-		med.setOriginalRights(rights);
-		med.setWithRights(withMediaRights);
+		LiteralOrResource ro = rec.getLiteralOrResourceValue("edmObject");
+		String uri3 = ro==null?null:ro.getURI();
+		if (uri3!=null){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri2);
+			medThumb.setType(type);
+			medThumb.setParentID(uri3);
+			medThumb.setOriginalRights(rights);
+			medThumb.setWithRights(withMediaRights);
+			object.addMedia(MediaVersion.Thumbnail, medThumb);
+		}
 		
-		object.addMedia(MediaVersion.Original, med);
+		if (uri2!=null){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setType(type);
+			med.setParentID("self");
+			med.setUrl(uri2);
+			med.setOriginalRights(rights);
+			med.setWithRights(withMediaRights);
+			object.addMedia(MediaVersion.Original, med);
+		}
+		
+		// TODO fill the views
 		return object;
 	}
 
