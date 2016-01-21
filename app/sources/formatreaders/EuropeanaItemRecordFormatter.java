@@ -67,7 +67,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
 
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
-		WithMediaRights withMediaRights = (WithMediaRights)
+		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
 		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(),
 		 rights.getURI()).get(0);
 		
