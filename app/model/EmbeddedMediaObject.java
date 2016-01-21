@@ -20,6 +20,7 @@ import utils.MediaTypeConverter;
 
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
@@ -42,35 +43,28 @@ public class EmbeddedMediaObject {
 
 	// this needs work
 	public static enum WithMediaRights {
-		Public("Attribution Alone"),
-		Restricted("Restricted"),
-		Permission("Permission"),
-		Modify("Allow re-use and modifications"),
-		Commercial("Allow re-use for commercial"),
-		Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon"),
-		Creative_Not_Commercial("NOT Comercial"),
-		Creative_Not_Modify("NOT Modify"),
-		Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes"),
-		Creative_SA("share alike"),
-		Creative_BY("use by attribution"),
-		Creative("Allow re-use"),
-		RR("Rights Reserved"),
-		RRPA("Rights Reserved - Paid Access"),
-		RRRA("Rights Reserved - Restricted Access"),
-		RRFA("Rights Reserved - Free Access"),
-		UNKNOWN("Unknown");
-
+		Public("Attribution Alone"), Restricted("Restricted"), Permission(
+				"Permission"), Modify("Allow re-use and modifications"), Commercial(
+				"Allow re-use for commercial"), Creative_Commercial_Modify(
+				"use for commercial purposes modify, adapt, or build upon"), Creative_Not_Commercial(
+				"NOT Comercial"), Creative_Not_Modify("NOT Modify"), Creative_Not_Commercial_Modify(
+				"not modify, adapt, or build upon, not for commercial purposes"), Creative_SA(
+				"share alike"), Creative_BY("use by attribution"), Creative(
+				"Allow re-use"), RR("Rights Reserved"), RRPA(
+				"Rights Reserved - Paid Access"), RRRA(
+				"Rights Reserved - Restricted Access"), RRFA(
+				"Rights Reserved - Free Access"), UNKNOWN("Unknown");
 
 		private final String text;
 
-	    private WithMediaRights(final String text) {
-	        this.text = text;
-	    }
+		private WithMediaRights(final String text) {
+			this.text = text;
+		}
 
-	    @Override
-	    public String toString() {
-	        return text;
-	    }
+		@Override
+		public String toString() {
+			return text;
+		}
 
 	}
 
@@ -89,14 +83,12 @@ public class EmbeddedMediaObject {
 
 	private MediaVersion mediaVersion;
 
-	/*These do not have to be saved in the db
-	 just returned in the json, i.e. the json has
-	 a field withThumbnailUrl computed based on
-	 whether there exists a MediaObject in the db* *
-	// with urls for embedded or cached objects
-	private String withUrl;
-	private String withThumbnailUrl;*/
-
+	/*
+	 * These do not have to be saved in the db just returned in the json, i.e.
+	 * the json has a field withThumbnailUrl computed based on whether there
+	 * exists a MediaObject in the db* * // with urls for embedded or cached
+	 * objects private String withUrl; private String withThumbnailUrl;
+	 */
 
 	public MediaVersion getMediaVersion() {
 		return mediaVersion;
@@ -108,21 +100,20 @@ public class EmbeddedMediaObject {
 
 	private LiteralOrResource originalRights;
 	/*
-	 *  file name type values specified here:
-	 *  http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/net/MediaType.html
+	 * file name type values specified here:
+	 * http://docs.guava-libraries.googlecode
+	 * .com/git/javadoc/com/google/common/net/MediaType.html
 	 */
 	private MediaType mimeType;
 
 	public static enum Quality {
-		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD,
-		AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
+		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
 	}
 
-	//in KB
+	// in KB
 	private long size;
 
 	private Quality quality;
-
 
 	/*
 	 * Getters/Setters
@@ -142,7 +133,6 @@ public class EmbeddedMediaObject {
 	public void setQuality(Quality quality) {
 		this.quality = quality;
 	}
-
 
 	public WithMediaType getType() {
 		return type;
@@ -187,6 +177,7 @@ public class EmbeddedMediaObject {
 	public int getWidth() {
 		return width;
 	}
+
 	public String getParentID() {
 		return parentID;
 	}
@@ -198,11 +189,42 @@ public class EmbeddedMediaObject {
 	public void setWidth(int width) {
 		this.width = width;
 	}
+
 	public int getHeight() {
 		return height;
 	}
+
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
+	public EmbeddedMediaObject(int width, int height, WithMediaType type,
+			WithMediaRights withRights, String url, String parentID,
+			MediaVersion mediaVersion, LiteralOrResource originalRights,
+			MediaType mimeType, long size, Quality quality) {
+		this.width = width;
+		this.height = height;
+		this.type = type;
+		this.withRights = withRights;
+		this.url = url;
+		this.parentID = parentID;
+		this.mediaVersion = mediaVersion;
+		this.originalRights = originalRights;
+		this.mimeType = mimeType;
+		this.size = size;
+		this.quality = quality;
+	}
+
+	/**
+	 * Copy constructor.
+	 */
+	public EmbeddedMediaObject(EmbeddedMediaObject media) {
+		this(media.getWidth(), media.getHeight(), media.getType(), media
+				.getWithRights(), media.getUrl(), media.getParentID(), media
+				.getMediaVersion(), media.getOriginalRights(), media
+				.getMimeType(), media.getSize(), media.getQuality());
+	}
+
+	public EmbeddedMediaObject() {
+	}
 }

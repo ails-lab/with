@@ -35,14 +35,13 @@ import play.Logger.ALogger;
 public class AccessManager {
 	public static final ALogger log = Logger.of(AccessManager.class);
 
-	@Converters(AccessEnumConverter.class)
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
 
 	public static boolean checkAccess(WithAccess withAccess,
 			String effectiveUserIds, Action action) {
-		if (withAccess.isPublic() == true && action.equals(Action.READ)) {
+		/*if (withAccess.isPublic() == true && action.equals(Action.READ)) {
 			return true;
 		}
 		if (effectiveUserIds == null || effectiveUserIds.equals("")) {
@@ -63,13 +62,13 @@ public class AccessManager {
 					&& (withAccess.get(id).ordinal() > action.ordinal())) {
 				return true;
 			}
-		}
+		}*/
 		return false;
 	}
 
-	public static boolean checkAccess(Map<ObjectId, Access> rights,
+	public static boolean checkAccess(WithAccess rights,
 			List<String> userIds, Action action) {
-		for (String id : userIds) {
+		/*for (String id : userIds) {
 			User user = DB.getUserDAO().getById(new ObjectId(id),
 					new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
@@ -78,7 +77,7 @@ public class AccessManager {
 					&& (rights.get(new ObjectId(id)).ordinal() > action
 							.ordinal()))
 				return true;
-		}
+		}*/
 		return false;
 	}
 
@@ -87,10 +86,10 @@ public class AccessManager {
 		return false;
 	}
 
-	public static Access getMaxAccess(Map<ObjectId, Access> rights,
+	public static Access getMaxAccess(WithAccess rights,
 			List<String> userIds) {
 		Access maxAccess = Access.NONE;
-		for (String id : userIds) {
+		/*for (String id : userIds) {
 			User user = DB.getUserDAO().getById(new ObjectId(id),
 					new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
@@ -100,7 +99,7 @@ public class AccessManager {
 				if (access.ordinal() > maxAccess.ordinal())
 					maxAccess = access;
 			}
-		}
+		}*/
 		return maxAccess;
 	}
 

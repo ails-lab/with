@@ -35,8 +35,8 @@ public class Literal extends HashMap<String, String> {
 
 	public void addLiteral(Language lang, String value) {
 		this.put(lang.toString(), value);
-		if (lang.equals(Language.ENG) && !this.containsKey(Language.DEF.toString()))
-			this.put(Language.DEF.toString(), value);
+//		if (lang.equals(Language.ENG) && !this.containsKey(Language.DEF.toString()))
+//			this.put(Language.DEF.toString(), value);
 	}
 	
 	public void addLiteral(String value) {
@@ -54,5 +54,13 @@ public class Literal extends HashMap<String, String> {
 		}
 		else*/
 			return get(lang.toString());
+	}
+	
+	public void fillDEF(){
+		String defLang = Language.EN.toString();
+		if (!containsKey(defLang)){
+			defLang = this.keySet().toArray()[0].toString();
+		}
+		put(Language.DEF.toString(), get(defLang));
 	}
 }

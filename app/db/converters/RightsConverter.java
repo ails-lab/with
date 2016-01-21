@@ -34,6 +34,7 @@ public class RightsConverter extends TypeConverter {//implements SimpleValueConv
 
 	@Override
 	public Object decode(Class<?> arg0, Object fromDbObject, MappedField arg2) {
+		System.out.println("!!!!");
 		return arg2;
 		/*WithAccess r = new WithAccess();
 		DBObject dbObj = (DBObject) fromDbObject;
@@ -49,6 +50,7 @@ public class RightsConverter extends TypeConverter {//implements SimpleValueConv
 
 	@Override
     public Object encode(final Object value, final MappedField optionalExtraInfo) {
+		System.out.println("!!!!");
 		return optionalExtraInfo;
     	/*WithAccess r = (WithAccess) value;
     	BasicDBObject dbObj = new BasicDBObject();

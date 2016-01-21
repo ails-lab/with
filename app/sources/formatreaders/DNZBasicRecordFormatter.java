@@ -35,16 +35,13 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		CulturalObjectData model = new CulturalObjectData();
-		object.setDescriptiveData(model);
-		model.setLabel(rec.getLiteralValue("title"));
-		model.setDescription(rec.getLiteralValue("description"));
+		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		model.setLabel(rec.getMultiLiteralValue("title"));
+		model.setDescription(rec.getMultiLiteralValue("description"));
 		// model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
 		// model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		model.setMetadataRights(LiteralOrResource.build("http://creativecommons.org/publicdomain/zero/1.0/"));
-		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(rec.getLiteralOrResourceValue(rec.getStringValue("creator")));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue(rec.getStringValue("creator")));
 
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
 		object.addToProvenance(

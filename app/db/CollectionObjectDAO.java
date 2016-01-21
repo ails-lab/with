@@ -27,9 +27,12 @@ import model.resources.CollectionObject;
 import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
+
+import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -126,12 +129,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.field("administrative.isExhibition").equal(isExhibition)
 				.order("-administrative.lastModified").offset(offset)
 				.limit(count);
-		CriteriaContainer[] criteria = new CriteriaContainer[effectiveIds
+		Criteria[] criteria = new Criteria[effectiveIds
 				.size()];
 		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteria[i] = this.createQuery()
-					.criteria("administrative.access." + effectiveIds.get(i))
-					.equal(access.ordinal());
+			criteria[i] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), Access.READ), QueryOperator.EQ);
 		}
 		q.or(criteria);
 		return this.find(q).asList();
@@ -142,7 +143,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		Query<CollectionObject> q = this.createQuery()
 				.order("-administrative.lastModified").offset(offset)
 				.limit(count);
-		CriteriaContainer[] criteria = new CriteriaContainer[effectiveIds
+		Criteria[] criteria = new Criteria[effectiveIds
 				.size()];
 		for (int i = 0; i < effectiveIds.size(); i++) {
 			criteria[i] = this.createQuery()

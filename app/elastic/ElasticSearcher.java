@@ -324,6 +324,7 @@ public class ElasticSearcher {
 				  .setScroll(new TimeValue(60000))
 				  .setSize(100);
 		}
+		System.out.println("got in here!");
 		//search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
 		FilterBuilder filterBuilder = null;
 

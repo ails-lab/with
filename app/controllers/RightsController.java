@@ -108,7 +108,7 @@ public class RightsController extends Controller {
 		}
 		ObjectId collectionId = collection.getDbId();
 		if (right.equals("NONE")) {
-			collection.getRights().remove(userOrGroupId);
+			collection.getRights().removeFromAcl(userOrGroupId);
 			if (DB.getCollectionDAO().makePermanent(collection) == null) {
 				result.put("error", "Cannot store collection to database!");
 				return internalServerError(result);
@@ -133,7 +133,7 @@ public class RightsController extends Controller {
 			result.put("mesage", "Collection unshared with user or group");
 			return ok(result);
 		} else if (admin.isSuperUser()) {
-			collection.getRights().put(userOrGroupId, Access.valueOf(right));
+			collection.getRights().addToAcl(userOrGroupId, Access.valueOf(right));
 			if (DB.getCollectionDAO().makePermanent(collection) == null) {
 				result.put("error", "Cannot store collection to database!");
 				return internalServerError(result);

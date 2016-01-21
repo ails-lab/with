@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.CollectionObject.CollectionDescriptiveData;
+import model.usersAndGroups.User;
 import static org.fest.assertions.Assertions.assertThat;
 
 import org.apache.commons.io.FileUtils;
@@ -49,6 +51,9 @@ import org.apache.commons.io.IOUtils;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 
+import play.libs.Json;
+
+import com.google.common.net.MediaType;
 import com.google.common.net.MediaType;
 
 import play.libs.Json;
@@ -56,136 +61,10 @@ import db.DB;
 
 public class WithResourceDAOTest {
 
-	String parent;
-
-	private MediaObject createImage(int i, int j) {
-		MediaObject image = new MediaObject();
-
-		// embedded
-		image.setType(WithMediaType.IMAGE);
-		image.setWithRights(WithMediaRights.Public);
-		if (j == 0) {
-			image.setMediaVersion(MediaVersion.Original);
-			image.setHeight(599);
-			image.setWidth(755);
-		} else if (j == 1) {
-			image.setMediaVersion(MediaVersion.Medium);
-			image.setHeight(599);
-			image.setWidth(755);
-		} else if (j == 2) {
-			image.setMediaVersion(MediaVersion.Tiny);
-			image.setHeight(599);
-			image.setWidth(755);
-		} else if (j == 3) {
-			image.setMediaVersion(MediaVersion.Thumbnail);
-			image.setHeight(599);
-			image.setWidth(755);
-
-		} else {
-			image.setMediaVersion(MediaVersion.Square);
-			image.setHeight(599);
-			image.setWidth(755);
-		}
-		// image.setThumbHeight(120);
-		// image.setThumbWidth(100);
-		image.setUrl("http://www.ntua.gr/ntua-0" + i + ".jpg");
-		// image.setThumbnailUrl("http://www.ntua.gr/ntua-01.jpg");
-		LiteralOrResource lor = new LiteralOrResource("<http://pt.dbpedia.org/resource/Brasil>");
-		image.setOriginalRights(lor);
-		image.setMimeType(MediaType.parse("image/jpeg"));
-		image.setSize(10000000);
-		image.setQuality(Quality.IMAGE_SMALL);
-
-		// extended
-		// image.setMediaBytes(rawbytes);
-		// image.setThumbnailBytes(rawbytes);
-		// image.setOrientation(); //auto
-		// set the rest!
-
-		// try {
-		// DB.getMediaObjectDAO().makePermanent(image);
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// assertThat( image.getDbId()).isNotNull();
-		if (j == 0) {
-		//	image.setParentURL(image.getUrl());
-			parent = image.getUrl();
-		} else {
-		//	image.setParentURL(parent);
-		}
-		return image;
-	}
-
-	@Test
-	public void storeMediaResource() {
-
-		CulturalObject withResource = new CulturalObject();
-
-		EmbeddedMediaObject image10 = createImage(1, 0);
-		EmbeddedMediaObject image11 = createImage(1, 1);
-		EmbeddedMediaObject image12 = createImage(1, 2);
-		EmbeddedMediaObject image13 = createImage(1, 3);
-		EmbeddedMediaObject image14 = createImage(1, 4);
-		EmbeddedMediaObject image20 = createImage(2, 0);
-		EmbeddedMediaObject image21 = createImage(2, 1);
-		EmbeddedMediaObject image22 = createImage(2, 2);
-		EmbeddedMediaObject image23 = createImage(2, 3);
-		EmbeddedMediaObject image24 = createImage(2, 4);
-
-		HashMap<MediaVersion, EmbeddedMediaObject> object1 = new HashMap<MediaVersion, EmbeddedMediaObject>();
-		HashMap<MediaVersion, EmbeddedMediaObject> object2 = new HashMap<MediaVersion, EmbeddedMediaObject>();
-
-		object1.put(image10.getMediaVersion(), image10);
-		object1.put(image11.getMediaVersion(), image11);
-		object1.put(image12.getMediaVersion(), image12);
-		object1.put(image13.getMediaVersion(), image13);
-		object1.put(image14.getMediaVersion(), image14);
-
-		object2.put(image20.getMediaVersion(), image20);
-		object2.put(image21.getMediaVersion(), image21);
-		object2.put(image22.getMediaVersion(), image22);
-		object2.put(image23.getMediaVersion(), image23);
-		object2.put(image24.getMediaVersion(), image24);
-
-		List<HashMap<MediaVersion, EmbeddedMediaObject>> media = new ArrayList<HashMap<MediaVersion, EmbeddedMediaObject>>();
-
-		media.add(object1);
-		media.add(object2);
-
-		withResource.setMedia(media);
-
-		withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
-		withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
-		withResource.addToProvenance(new ProvenanceInfo("ΜintTest", "http://myUri", "12345"));
-		WithAccess access = new WithAccess();
-		access.put(new ObjectId(), WithAccess.Access.READ);
-		access.setPublic(true);
-		withResource.getAdministrative().setAccess(access);
-		withResource.getAdministrative().setCreated(new Date());
-		withResource.getAdministrative().setLastModified(new Date());
-		RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
-		model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNew"));
-		model.setDescription(new MultiLiteral(Language.EN, "Some description"));
-		withResource.setDescriptiveData(model);
-
-		// withResource.addPositionToCollectedIn(new
-		// ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
-		assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
-
-		/*
-		 * List<RecordResource> cos =
-		 * DB.getRecordResourceDAO().getByCollectionBtwPositions(new
-		 * ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2); for (RecordResource co:
-		 * cos) { System.out.println(Json.toJson(co)); }
-		 */
-		// DB.getRecordResourceDAO().shiftRecordsToLeft(new
-		// ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		System.out.println(DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNew").size());
-	}
-
 	@Test
 	public void storeWithResource() {
+		
+		User u = DB.getUserDAO().getByUsername("eirini1");
 
 		for (int i = 0; i < 1; i++) {
 			CulturalObject withResource = new CulturalObject();
@@ -193,26 +72,28 @@ public class WithResourceDAOTest {
 			withResource.addToProvenance(new ProvenanceInfo("provider0", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("provider1", "http://myUri", "12345"));
 			withResource.addToProvenance(new ProvenanceInfo("ΜintTest", "http://myUri", "12345"));
+			if(u == null) {
+				System.out.println("No user found");
+				return;
+			}
 			WithAccess access = new WithAccess();
-			access.addAccess(new ObjectId(), WithAccess.Access.READ);
-			access.setPublic(true);
+			access.addToAcl(u.getDbId(), WithAccess.Access.READ);
+			access.setIsPublic(true);
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
+			withResource.getAdministrative().setWithCreator(u.getDbId());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
 			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNewRights" + i));
-			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
+			//model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
-
-			int j = 0;
-			if (i == 0)
-				j = i;
-			else
-				j = i + 1;
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0 + j);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1 + j);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0 + j);
-			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1 + j);
+			int j=0;
+			if (i==0) j=i; else j=i+1;
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 0+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
+			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
+			System.out.println(Json.toJson(withResource));
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 
 			/*
@@ -251,15 +132,13 @@ public class WithResourceDAOTest {
 			 * 
 			 */
 		}
-		/*
-		 * List<RecordResource> cos =
-		 * DB.getRecordResourceDAO().getByCollectionBtwPositions(new
-		 * ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2); for (RecordResource co:
-		 * cos) { System.out.println(Json.toJson(co)); }
-		 */
-		// DB.getRecordResourceDAO().shiftRecordsToLeft(new
-		// ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
-		System.out.println(DB.getWithResourceDAO().getByLabel(Language.ENG, "TestWithResourceNew0").size());
+		/*List<RecordResource> cos = DB.getRecordResourceDAO().getByCollectionBtwPositions(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0, 2);
+		for (RecordResource co: cos) {
+			System.out.println(Json.toJson(co));
+		}*/
+		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
+		CulturalObject co1 = (CulturalObject) DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNewRights0").get(0);
+		System.out.println(Json.toJson(co1));
 	}
 
 }

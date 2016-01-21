@@ -43,37 +43,44 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
-		model.setLabel(rec.getLiteralValue("dcTitleLangAware"));
-		model.setDescription(rec.getLiteralValue("dcDescriptionLangAware"));
-		model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		List<String> years = rec.getStringArrayValue("year");
-		model.setDates(StringUtils.getDates(years));
-		model.setDccreator(rec.getLiteralOrResourceValue("dcCreatorLangAware"));
-		model.setKeywords(rec.getLiteralOrResourceValue("dcSubjectLangAware"));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		
+		
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
+		
+		model.setLabel(rec.getMultiLiteralValue("dcTitleLangAware"));
+		model.setDescription(rec.getMultiLiteralValue("dcDescriptionLangAware"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
+		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
+		model.setDates(rec.getWithDateArrayValue("year"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreatorLangAware"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt().getURI(),null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
+		String recID = rec.getStringValue("id");
+		String uri = "http://www.europeana.eu/portal/record"+recID+".html";
 		object.addToProvenance(
-				new ProvenanceInfo(Sources.Europeana.toString(), rec.getStringValue("guid"), rec.getStringValue("id")));
-		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(model.getIsShownBy());
-		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		// TODO: add rights!
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl(model.getIsShownBy());
-		// TODO: add withMediaRights, originalRights
+				new ProvenanceInfo(Sources.Europeana.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("rights");
-		med.setOriginalRights(ListUtils.transform(rights, (String x) -> LiteralOrResource.build(x)).get(0));
-		med.setWithRights(
-				(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0));
-		med.setType((WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type")).get(0));
+		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type")).get(0);
+		WithMediaRights withRights = (WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0);
+		
+		
+		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+		medThumb.setUrl(model.getIsShownBy().getURI());
+		medThumb.setType(type);
+		medThumb.setParentID(model.getIsShownBy().getURI());
+		medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+		medThumb.setWithRights(withRights);
+		object.addMedia(MediaVersion.Thumbnail, medThumb);
+		EmbeddedMediaObject med = new EmbeddedMediaObject();
+		med.setParentID("self");
+		med.setUrl(model.getIsShownBy().getURI());
+		med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+		med.setWithRights(withRights);
+		med.setType(type);
 
 		object.addMedia(MediaVersion.Original, med);
 		return object;
-		// TODO: add null checks
-		// object.setThumbnailUrl(rec.getStringValue("edmPreview"));
-		// object.setContributors(rec.getStringArrayValue("dcContributor"));
-		// object.setItemRights(rec.getStringValue("rights"));
 	}
 
 }

@@ -50,6 +50,15 @@ import model.basicDataTypes.ResourceType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+//import org.apache.http.HttpResponse;
+//import org.apache.http.ParseException;
+//import org.apache.http.client.HttpClient;
+//import org.apache.http.client.methods.HttpPost;
+//import org.apache.http.entity.ContentType;
+//import org.apache.http.entity.mime.HttpMultipartMode;
+//import org.apache.http.entity.mime.MultipartEntityBuilder;
+//import org.apache.http.impl.client.DefaultHttpClient;
+//import org.apache.http.util.EntityUtils;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -69,6 +78,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
+import com.jayway.jsonpath.JsonPath;
 
 import db.DB;
 import sources.core.HttpConnector;
@@ -203,9 +213,9 @@ public class MediaController extends Controller {
 					} else {
 						parsed = parseMediaFile(fp.getFile(), fp.getFilename());
 					}
-
+					
 					parseMediaCheckerReply(med, parsed);
-
+					
 					// TODO: move these to editMedia()
 					if (formData.containsKey("withMediaRights")) {
 						String withMediaRights = formData.get("withMediaRights")[0];
@@ -246,6 +256,14 @@ public class MediaController extends Controller {
 
 						med.setMediaBytes(FileUtils.readFileToByteArray(fp.getFile()));
 						med.setDbId(null);
+						//if(formData.containsKey("url")){
+						//	med.setUrl(formData.get("url")[0]);
+						//} else {
+							DB.getMediaObjectDAO().makePermanent(med);
+							med.setUrl("/media/" + med.getDbId().toString() + "?file=true");
+							
+							
+						//}
 						DB.getMediaObjectDAO().makePermanent(med);
 
 						// Logger.info(med.getDbId().toString());
@@ -360,10 +378,11 @@ public class MediaController extends Controller {
 		} else {
 			med.setQuality(Quality.IMAGE_4);
 		}
-
+		
 		med.setMediaVersion(MediaVersion.Original);
 
 		med.setParentID("self");
+		
 	}
 
 	// TODO:don't hate i will clean it!
@@ -389,16 +408,23 @@ public class MediaController extends Controller {
 				square = makeThumb(med, image, -1, 150, true);
 			} else {
 				square.setMediaBytes(med.getMediaBytes());
+				square.setMimeType(med.getMimeType());
 			}
 			thumbnail.setMediaBytes(med.getMediaBytes());
+			thumbnail.setMimeType(med.getMimeType());
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
+			
 
 		} else if (med.getWidth() <= 150 && med.getHeight() <= 150) {
 			tiny = makeThumb(med, image, 100, -1, false);
 
 			square.setMediaBytes(med.getMediaBytes());
+			square.setMimeType(med.getMimeType());
 			thumbnail.setMediaBytes(med.getMediaBytes());
+			thumbnail.setMimeType(med.getMimeType());
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
 
 		} else if (med.getWidth() <= 300) {
 			tiny = makeThumb(med, image, 100, -1, false);
@@ -409,7 +435,10 @@ public class MediaController extends Controller {
 			}
 
 			thumbnail.setMediaBytes(med.getMediaBytes());
+			thumbnail.setMimeType(med.getMimeType());
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
+			
 
 		} else if (med.getWidth() <= 640) {
 			tiny = makeThumb(med, image, 100, -1, false);
@@ -421,6 +450,7 @@ public class MediaController extends Controller {
 			thumbnail = makeThumb(med, image, 300, -1, false);
 
 			medium.setMediaBytes(med.getMediaBytes());
+			medium.setMimeType(med.getMimeType());
 
 		} else {
 			tiny = makeThumb(med, image, 100, -1, false);
@@ -432,32 +462,44 @@ public class MediaController extends Controller {
 			thumbnail = makeThumb(med, image, 300, -1, false);
 			medium = makeThumb(med, image, 640, -1, false);
 		}
-
+		
 		tiny.setParentID(dbid);
 		square.setParentID(dbid);
 		thumbnail.setParentID(dbid);
 		medium.setParentID(dbid);
-
+		
 		DB.getMediaObjectDAO().makePermanent(tiny);
 		DB.getMediaObjectDAO().makePermanent(square);
 		DB.getMediaObjectDAO().makePermanent(thumbnail);
 		DB.getMediaObjectDAO().makePermanent(medium);
+		
+		tiny.setUrl("/media/" + tiny.getDbId().toString() + "?file=true");
+		square.setUrl("/media/" + square.getDbId().toString() + "?file=true");
+		thumbnail.setUrl("/media/" + thumbnail.getDbId().toString() + "?file=true");
+		medium.setUrl("/media/" + medium.getDbId().toString() + "?file=true");
+
+		
+		DB.getMediaObjectDAO().makePermanent(tiny);
+		DB.getMediaObjectDAO().makePermanent(square);
+		DB.getMediaObjectDAO().makePermanent(thumbnail);
+		DB.getMediaObjectDAO().makePermanent(medium);
+		
 
 		// image is big
 		// store original and resize for thumbnail
 		// TODO:THIS
 		// Media fullImage = media;
 		// Resize image and put new width, height and bytes to data
-
+		
 		// DB.getMediaObjectDAO().makePermanent(med);
-
+		
 		ObjectNode results = Json.newObject();
-
-		results.put("original", "/media/" + med.getDbId().toString() + "?file=true");
-		results.put("tiny", "/media/" + tiny.getDbId().toString() + "?file=true");
-		results.put("square", "/media/" + square.getDbId().toString() + "?file=true");
-		results.put("thumbnail", "/media/" + thumbnail.getDbId().toString() + "?file=true");
-		results.put("medium", "/media/" + medium.getDbId().toString() + "?file=true");
+		
+		results.put("original", med.getUrl());
+		results.put("tiny", tiny.getUrl());
+		results.put("square", square.getUrl());
+		results.put("thumbnail", thumbnail.getUrl());
+		results.put("medium", medium.getUrl());
 
 		// singleRes.put("isShownBy", "/media/"
 		// + med.getDbId().toString());
@@ -474,7 +516,28 @@ public class MediaController extends Controller {
 		// 211, -1
 		Image ithumb = image.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 		// Create a buffered image with transparency
-		BufferedImage thumb = new BufferedImage(ithumb.getWidth(null), ithumb.getHeight(null), image.getType());
+		BufferedImage thumb = new BufferedImage(
+				ithumb.getWidth(null),
+				ithumb.getHeight(null), image.getType());
+		
+		//Logger.info("Width: " + thumb.getWidth() + ", x = "+ (((thumb.getWidth() - 150)/2)-1));
+		
+		BufferedImage thumb2 = null;
+		
+		if(crop){
+			if(thumb.getHeight()>150){
+				int y = ((thumb.getHeight() - 150)/2)-1;
+				thumb2 = thumb.getSubimage(0, y, 150, 150);
+				
+				
+			}else if(thumb.getWidth()>150){
+				int x = ((thumb.getWidth() - 150)/2)-1;
+				thumb2 = thumb.getSubimage(x, 0, 150, 150);
+			}
+			
+			thumb = thumb2;
+		}
+		
 		// Draw the image on to the buffered image
 		Graphics2D bGr = thumb.createGraphics();
 		bGr.drawImage(ithumb, 0, 0, null);
@@ -486,6 +549,7 @@ public class MediaController extends Controller {
 		baos.close();
 
 		MediaObject mthumb = new MediaObject();
+		mthumb.setMimeType(med.getMimeType());
 		mthumb.setDbId(null);
 		mthumb.setMediaBytes(thumbByte);
 		mthumb.setWidth(ithumb.getWidth(null));
@@ -494,12 +558,45 @@ public class MediaController extends Controller {
 		return mthumb;
 	}
 
-	private static JsonNode parseMediaFile(File fileToParse, String fileName) {
+	private static JsonNode parseMediaFile(File fileToParse, String fileName)  {
 		// TODO: fix exception (add allrez)
 
 		// Logger.info("mediafile, " + "file://"+fileToParse.getName()+ ", " +
 		// fileToParse);
+	
+		
+//		HttpClient hc = new DefaultHttpClient();
+//
+//		JsonNode resp = Json.newObject();
+//		//try {
+//	
+//			HttpPost aFile = new HttpPost("http://mediachecker.image.ntua.gr/api/extractmetadata");
+//			File testFile = fileToParse;
+//			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+//			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+//			builder.addBinaryBody("upfile", testFile, ContentType.create("image/jpeg"), fileName);
+//			aFile.setEntity(builder.build());
+//			HttpResponse response = hc.execute(aFile);
+//			String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF8");
+//			String id = JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
+//			aFile.releaseConnection();
+//			resp = Json.parse(jsonResponse);
+//			
+//			Logger.info(jsonResponse);
+//
+//			Logger.info(resp.asText());
+//
+//		//} catch (Exception e) {
+//		// TODO Auto-generated catch block
+//		// e.printStackTrace();
+//		//}
 
+
+		
+		
+		
+		
+	
 		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata";
 		// Logger.info("URL: " + queryURL);
 		JsonNode response = null;
