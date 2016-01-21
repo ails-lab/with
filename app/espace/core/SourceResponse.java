@@ -63,6 +63,8 @@ public class SourceResponse {
 				it.id = r.getSourceId();
 				if(r.getThumbnailUrl() != null)
 					it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
+				if (r.getIsShownBy() != null)
+					it.fullresolution = Arrays.asList(r.getIsShownBy().toString());
 				it.url = new MyURL();
 				it.url.fromSourceAPI = r.getSourceUrl();
 				it.provider = r.getProvider();
