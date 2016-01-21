@@ -54,24 +54,27 @@ public class SourceResponse {
 		List<ItemsResponse> items = new ArrayList<ItemsResponse>();
 		for (CollectionRecord er : elasticrecords) {
 			ItemsResponse it = new ItemsResponse();
-			CollectionRecord r = DB.getCollectionRecordDAO().getByExternalId(er.getExternalId()).get(0);
-			it.comesFrom = r.getSource();
-			it.title = r.getTitle();
-			it.description = r.getDescription();
-			it.id = r.getSourceId();
-			if(r.getThumbnailUrl() != null)
-				it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
-			it.url = new MyURL();
-			it.url.fromSourceAPI = r.getSourceUrl();
-			it.provider = r.getProvider();
-			it.externalId = r.getExternalId();
-			it.type = r.getType();
-			it.rights = r.getItemRights();
-			it.dataProvider = r.getDataProvider();
-			it.creator = r.getCreator();
-			it.year = new ArrayList<>(Arrays.asList(r.getYear()));
-		    it.tags = er.getTags();
-			items.add(it);
+			List<CollectionRecord> rs = DB.getCollectionRecordDAO().getByExternalId(er.getExternalId());
+			if (rs != null && !rs.isEmpty()) {
+				CollectionRecord r = rs.get(0);
+				it.comesFrom = r.getSource();
+				it.title = r.getTitle();
+				it.description = r.getDescription();
+				it.id = r.getSourceId();
+				if(r.getThumbnailUrl() != null)
+					it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
+				it.url = new MyURL();
+				it.url.fromSourceAPI = r.getSourceUrl();
+				it.provider = r.getProvider();
+				it.externalId = r.getExternalId();
+				it.type = r.getType();
+				it.rights = r.getItemRights();
+				it.dataProvider = r.getDataProvider();
+				it.creator = r.getCreator();
+				it.year = new ArrayList<>(Arrays.asList(r.getYear()));
+			    it.tags = er.getTags();
+				items.add(it);
+			}
 		}
 		this.items = items;
 	}

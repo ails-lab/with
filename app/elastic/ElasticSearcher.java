@@ -335,24 +335,26 @@ public class ElasticSearcher {
 
 		if(options.filters.size() > 0) {
 			OrFilterBuilder accessibles = FilterBuilders.orFilter();
-			OrFilterBuilder sources 	= FilterBuilders.orFilter();
 			AndFilterBuilder faceted 	= FilterBuilders.andFilter();
 			for(String key: options.filters.keySet()) {
-				for(String value: options.filters.get(key)) {
-					if(key.equals("isPublic") || key.equals("collections")) {
+				if(key.equals("isPublic") || key.equals("collections")) {
+					for(String value: options.filters.get(key)) {
 						accessibles.add(this.filter(key, value));
-					} else if(key.equals("source")) {
-						sources.add(this.filter(key, value));
-					} else {
-						faceted.add(this.filter(key, value));
 					}
+				} else {
+					OrFilterBuilder multiValues = FilterBuilders.orFilter();
+					for(String value: options.filters.get(key)) {
+						multiValues.add(this.filter(key, value));
+					}
+					faceted.add(multiValues);
 				}
 			}
+
 			if(options.filterType == FILTER_OR) {
-				((OrFilterBuilder) filterBuilder).add(accessibles).add(sources).add(faceted);
+				((OrFilterBuilder) filterBuilder).add(accessibles).add(faceted);
 			}
 			else {
-				((AndFilterBuilder) filterBuilder).add(accessibles).add(sources).add(faceted);
+				((AndFilterBuilder) filterBuilder).add(accessibles).add(faceted);
 			}
 			QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
 			search.setQuery(filtered);
