@@ -138,7 +138,7 @@ public class WithResourceDAOTest {
 		}*/
 		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
 		CulturalObject co1 = (CulturalObject) DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNewRights0").get(0);
-		assertThat(DB.getWithResourceDAO().hasAccess(new ArrayList<>(Arrays.asList(u.getDbId())), Action.EDIT, co1.getDbId())).isEqualTo(true);
+		assertThat(DB.getWithResourceDAO().hasAccess(new ArrayList<>(Arrays.asList(u.getDbId())), Action.READ, co1.getDbId())).isEqualTo(true);
 	}
 
 }

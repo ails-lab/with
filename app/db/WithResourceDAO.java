@@ -312,8 +312,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		Query<T> q = this.createQuery().disableValidation().limit(1);
 		q.field("_id").equal(resourceId);
 		q.or(criteria);
-		System.out.println(q.toString());
-		return (this.find(q)==null? false: true);
+		return (this.find(q).asList().size()==0? false: true);
 	}
 	
 	public Access actionToAccess(Action action) {
