@@ -328,7 +328,7 @@
                                 },
                                 "rights": {
                                     "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                    "description": "Values are READ, WRITE, OWN."
                                 }
                             }
                         }
@@ -346,7 +346,7 @@
                                 },
                                 "rights": {
                                     "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                    "description": "Values are READ, WRITE, OWN."
                                 }
                             }
                         }
@@ -364,7 +364,7 @@
                                 },
                                 "rights": {
                                     "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                    "description": "Values are READ, WRITE, OWN."
                                 }
                             }
                         }
@@ -382,7 +382,7 @@
                                 },
                                 "rights": {
                                     "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                    "description": "Values are READ, WRITE, OWN."
                                 }
                             }
                         }
@@ -448,6 +448,74 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/featured": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "groupOrUserName",
+                        "in": "query",
+                        "description": "The name of the group or user.",
+                        "type": "string"
+                    },
+                    {
+                        "name": "isExhibition",
+                        "in": "query",
+                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "default": 0,
+                        "description": "Offset",
+                        "type": "integer"
+                    },
+                    {
+                        "name": "countPerType",
+                        "in": "query",
+                        "default": 10,
+                        "description": "Count (default 10)",
+                        "type": "integer"
+                    }
+                ],
+                "summary": "Get featured collections.",
+                "description": "This call returns a list of featured collections of a user or group. If ```isExhibition``` is left blank, this call will return both collections and exhibitions up to number specified by the count parameter, i.e. the results array will have twice the size of the count. ",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "totalCollections": {
+                                    "type": "integer"
+                                },
+                                "totalExhibitions": {
+                                    "type": "integer"
+                                },
+                                "collectionsOrExhibitions": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Collection"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (user or group cannot be found)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -1005,91 +1073,57 @@
                 }
             }
         },
-        "/collection/create": {
+        "/collection": {
             "post": {
-                "tags": [
-                    "Collection"
-                ],
-                "summary": "Create a new collection.",
-                "description": "This creates a new collection and stores it in the database. You can add records to it later with  ```/collection/{collectionId}/addRecord``` Fields with asterisk are required. Note that calls to this path can also be used for exhibitions. A user must be logged in for the session and will be automatically retrieved. This user will be the owner of this collection. The ```belongsTo``` field will set the organization that owns this collection.",
                 "parameters": [
                     {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Collection metadata",
+                        "name": "isExhibition",
+                        "in": "query",
+                        "description": "Is this an exhibition.",
                         "required": true,
+                        "type": "boolean",
+                        "default": false
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "A sample body for test calls.",
                         "schema": {
-                            "type": "object",
-                            "required": [
-                                "title",
-                                "isPublic"
-                            ],
-                            "properties": {
-                                "title": {
-                                    "type": "string"
-                                },
-                                "description": {
-                                    "type": "string"
-                                },
-                                "isPublic": {
-                                    "type": "boolean"
-                                },
-                                "rights": {
-                                    "type": "string"
-                                },
-                                "belongsTo": {
-                                    "type": "string"
-                                },
-                                "isExhibition": {
-                                    "type": "boolean"
-                                },
-                                "exhibition": {
-                                    "type": "object",
-                                    "properties": {
-                                        "intro": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            }
+                            "$ref": "#/definitions/SampleCollection"
                         }
                     }
+                ],
+                "summary": "Create a new collection.",
+                "description": "This call will create a new collection and store it in the database. I have included it here only for testing purposes so make sure you either delete unwanted collections afterwards, or use a database for testing.",
+                "tags": [
+                    "Test calls"
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Collection"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
                             "properties": {
-                                "error": {
-                                    "description": "invalid json, constraint violations",
-                                    "type": "string"
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
                                 }
                             }
                         }
                     },
                     "403": {
-                        "description": "Forbidden",
+                        "description": "Forbidden (no read-access)",
                         "schema": {
                             "properties": {
                                 "error": {
-                                    "description": "cannot find user or unspecified",
                                     "type": "string"
                                 }
                             }
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error",
+                        "description": "Internal Server Error(database error)",
                         "schema": {
                             "properties": {
                                 "error": {
-                                    "description": "title already exists, cannot save to database",
                                     "type": "string"
                                 }
                             }
@@ -1517,6 +1551,45 @@
                 }
             }
         },
+        "/record/similar/{externalId}": {
+            "parameters": [
+                {
+                    "name": "externalId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The external id of a record",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "summary": "Find similar records.",
+                "description": "Retrieve a list of records that are similar to the one specified. Similarity is based on keywords in the title and provider fields. You can use this call to check if an external record already exists in a collection and link to that instead of re-importing it.",
+                "tags": [
+                    "Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/record/{recordId}": {
             "parameters": [
                 {
@@ -1560,9 +1633,9 @@
                     }
                 }
             },
-            "post": {
+            "put": {
                 "summary": "Update a record.",
-                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body.",
+                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body. If the format parameter is provided, then only that specified serialization will be updated.",
                 "parameters": [
                     {
                         "name": "format",
@@ -1628,6 +1701,14 @@
             "delete": {
                 "summary": "Remove a record.",
                 "description": "Remove the whole record specified in the path from the database, or just a single format.",
+                "parameters": [
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+                        "type": "string"
+                    }
+                ],
                 "tags": [
                     "Record"
                 ],
@@ -2235,86 +2316,6 @@
                 }
             }
         },
-        "/collection/55b74e5b569e1b44eeac72c0/list": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of the collection",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "description": "This call makes a test request for all records of a sampled collection. Please see ```/api/advancedsearch``` for more. In this example the collection is called \"street art\".",
-                "summary": "Retrieve all records in a collection.",
-                "tags": [
-                    "Test calls"
-                ],
-                "parameters": [
-                    {
-                        "name": "start",
-                        "in": "query",
-                        "description": "offset",
-                        "type": "integer",
-                        "default": 0
-                    },
-                    {
-                        "name": "count",
-                        "in": "query",
-                        "description": "count",
-                        "type": "integer",
-                        "default": 10
-                    },
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
-                        "type": "string",
-                        "default": "all"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK (JSON contains the serialization specified)",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "itemCount": {
-                                    "type": "integer"
-                                },
-                                "records": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/InternalRecord"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbiden (invalid collection id, no read access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot retrieve records from database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/collection/55b74e5b569e1b44eeac72c0": {
             "parameters": [
                 {
@@ -2514,6 +2515,108 @@
                     }
                 }
             }
+        },
+        "/collection/56a10eaa590b1916a881a342/addRecord": {
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database.",
+                "summary": "Add a record to a collection.",
+                "tags": [
+                    "Test calls"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "required": true,
+                        "description": "The position in the collection.",
+                        "type": "string",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/SampleInternalRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "A sample body for test calls.",
+                        "schema": {
+                            "$ref": "#/definitions/SampleInternalRecord"
+                        }
+                    }
+                ],
+                "summary": "Create a new record.",
+                "description": "This call will create a new collection and store it in the database. I have included it here only for testing purposes so make sure you either delete unwanted collections afterwards, or use a database for testing.",
+                "tags": [
+                    "Test calls"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2614,37 +2717,86 @@
             }
         },
         "Collection": {
-            "description": "Collection metadata. The fields isExhibition and exhibition are only used in calls for exhibitions.",
+            "description": "Collection metadata.",
             "type": "object",
             "properties": {
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "itemCount": {
-                    "type": "integer"
-                },
-                "isPublic": {
-                    "type": "boolean"
-                },
-                "isExhibition": {
-                    "type": "boolean"
-                },
-                "firstEntries": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/InternalRecord"
-                    }
-                },
-                "thumbnailUrl": {
-                    "type": "string"
-                },
                 "dbId": {
                     "type": "string"
                 },
-                "ownerId": {
+                "resourceType": {
+                    "type": "string"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ExternalCollection"
+                    }
+                },
+                "administrative": {
+                    "$ref": "#/definitions/Administrative"
+                },
+                "usage": {
+                    "$ref": "#/definitions/Usage"
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/CollectionDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Provenance"
+                    }
+                }
+            }
+        },
+        "ExternalCollection": {
+            "description": "Metadata related to external collections an object may belong to.",
+            "type": "object",
+            "properties": {
+                "position": {
+                    "type": "integer"
+                },
+                "collectionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "Administrative": {
+            "description": "WITH related metadata.",
+            "type": "object",
+            "properties": {
+                "withUri": {
+                    "type": "string"
+                },
+                "externalId": {
+                    "type": "string"
+                },
+                "parentResourceId": {
+                    "type": "string"
+                },
+                "exhibition": {
+                    "type": "boolean"
+                },
+                "access": {
+                    "type": "object",
+                    "properties": {
+                        "isPublic": {
+                            "type": "boolean"
+                        },
+                        "acl": {
+                            "type": "object",
+                            "properties": {
+                                "user": {
+                                    "type": "string"
+                                },
+                                "level": {
+                                    "type": "integer"
+                                }
+                            }
+                        }
+                    }
+                },
+                "withCreator": {
                     "type": "string"
                 },
                 "created": {
@@ -2653,18 +2805,272 @@
                 "lastModified": {
                     "type": "string"
                 },
-                "rights": {
+                "underModeration": {
                     "type": "object",
                     "properties": {
-                        "value": {
+                        "xxx": {
                             "type": "string"
                         }
                     }
                 },
-                "creator": {
+                "isExhibition": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "Usage": {
+            "description": "Information related to the social aspect of WITH.",
+            "type": "object",
+            "properties": {
+                "likes": {
+                    "type": "integer"
+                },
+                "collected": {
+                    "type": "integer"
+                },
+                "annotated": {
+                    "type": "integer"
+                },
+                "viewCount": {
+                    "type": "integer"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "Provenance": {
+            "description": "Holds provenance metadata about a collected resource.",
+            "type": "object",
+            "properties": {
+                "provider": {
                     "type": "string"
                 },
-                "access": {
+                "uri": {
+                    "type": "string"
+                },
+                "resourceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "CollectionDescriptiveData": {
+            "description": "Extends DescriptiveData with fields unique to CollectionObjects.",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "$ref": "#/definitions/MultiLiteral"
+                },
+                "description": {
+                    "$ref": "#/definitions/MultiLiteral"
+                },
+                "keywords": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                },
+                "isShownAt": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "isShownBy": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "metadataRights": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "rdfType": {
+                    "type": "string"
+                },
+                "sameAs": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                },
+                "dates": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "altLabels": {
+                    "$ref": "#/definitions/MultiLiteral"
+                },
+                "dccreator": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                },
+                "dctermsaudience": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                },
+                "dclanguage": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                }
+            }
+        },
+        "DescriptiveData": {
+            "description": "Descriptive metadata vary depending on the type of the collected resource. The basic data structures of all the different types are: ```LiteralType, ResourceType, ResourceOrLiteralType```",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "$ref": "#/definitions/MultiLiteral"
+                },
+                "description": {
+                    "$ref": "#/definitions/MultiLiteral"
+                },
+                "keywords": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                },
+                "isShownAt": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "isShownBy": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "metadataRights": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "rdfType": {
+                    "type": "string"
+                },
+                "sameAs": {
+                    "$ref": "#/definitions/MultiLiteralOrResource"
+                },
+                "dates": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "altLabels": {
+                    "$ref": "#/definitions/MultiLiteral"
+                }
+            }
+        },
+        "MultiLiteralOrResource": {
+            "description": "Can either be a multiliteral or a resource.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ResourceOrLiteral"
+            }
+        },
+        "MultiLiteral": {
+            "description": "More than one RDF literal types.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Literal"
+            }
+        },
+        "Literal": {
+            "description": "An RDF literal type.",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "default": "value"
+                }
+            }
+        },
+        "Resource": {
+            "description": "An RDF resource type.",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "default": "value"
+                }
+            }
+        },
+        "ResourceOrLiteral": {
+            "description": "Either an RDF literal or a resource.",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "default": "value"
+                }
+            }
+        },
+        "MediaObjectExtended": {
+            "description": "The extended media object extends the embedded media object with fields for more technical metadata.",
+            "allOf": {
+                "$ref": "#/definitions/MediaObjectEmbedded",
+                "type": "object",
+                "properties": {
+                    "dbid": {
+                        "type": "string"
+                    },
+                    "mediaBytes": {
+                        "type": "string"
+                    },
+                    "codec": {
+                        "type": "string"
+                    },
+                    "durationSeconds": {
+                        "type": "integer"
+                    },
+                    "spatialResolution": {
+                        "type": "integer"
+                    },
+                    "bitRate": {
+                        "type": "integer"
+                    },
+                    "frameRate": {
+                        "type": "integer"
+                    },
+                    "colorSpace": {
+                        "type": "string"
+                    },
+                    "componentColor": {
+                        "type": "string"
+                    },
+                    "orientation": {
+                        "type": "string"
+                    },
+                    "audioChannelNumber": {
+                        "type": "integer"
+                    },
+                    "sampleSize": {
+                        "type": "integer"
+                    },
+                    "sampleRate": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "MediaObjectEmbedded": {
+            "description": "Holds metadata for media objects, i.e. images, video, text or audio files that are the basis of records.",
+            "type": "object",
+            "properties": {
+                "withMediaType": {
+                    "type": "string"
+                },
+                "withMediaRights": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "parentId": {
+                    "type": "string"
+                },
+                "mediaVersion": {
+                    "type": "string"
+                },
+                "originalRights": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "mimeType": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "number"
+                },
+                "quality": {
                     "type": "string"
                 }
             }
@@ -2677,126 +3083,32 @@
                 "position"
             ],
             "properties": {
-                "externalId": {
-                    "type": "string"
-                },
-                "isPublic": {
-                    "type": "boolean"
-                },
-                "source": {
-                    "type": "string"
-                },
-                "thumbnailUrl": {
-                    "type": "string"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "provider": {
-                    "type": "string"
-                },
-                "sourceId": {
-                    "type": "string"
-                },
-                "sourceUrl": {
-                    "type": "string"
-                },
-                "type": {
-                    "type": "string"
-                },
-                "totalLikes": {
-                    "type": "integer"
-                },
-                "position": {
-                    "type": "integer"
-                },
-                "content": {
-                    "description": "Different formats will have different field names in the array see documentation for \"/collection/{collectionId}/list\".",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
                 "dbId": {
                     "type": "string"
                 },
-                "collectionId": {
-                    "type": "string"
-                }
-            }
-        },
-        "Record": {
-            "description": "An individual record description and metadata. This is the schema for objects acquired through searches in external sources.",
-            "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
-            "properties": {
-                "id": {
+                "resourceType": {
                     "type": "string"
                 },
-                "thumb": {
+                "collectedIn": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "title": {
-                    "type": "string"
+                "administrative": {
+                    "$ref": "#/definitions/Administrative"
                 },
-                "description": {
-                    "type": "string"
+                "usage": {
+                    "$ref": "#/definitions/Usage"
                 },
-                "creator": {
-                    "type": "string"
-                },
-                "year": {
+                "media": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/MediaObjectEmbedded"
                     }
                 },
-                "dataProvider": {
-                    "type": "string"
-                },
-                "url": {
-                    "type": "object",
-                    "properties": {
-                        "original": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        },
-                        "fromSourceAPI": {
-                            "type": "string"
-                        }
-                    }
-                },
-                "fullresolution": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "comesFrom": {
-                    "type": "string"
-                },
-                "rights": {
-                    "type": "string"
-                },
-                "externalId": {
-                    "type": "string"
+                "descriptiveData": {
+                    "$ref": "#/definitions/DescriptiveData"
                 }
             }
         },
@@ -2850,7 +3162,7 @@
                     "items": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/definitions/Record"
+                            "$ref": "#/definitions/InternalRecord"
                         }
                     },
                     "source": {
@@ -2899,6 +3211,276 @@
                 },
                 "filters": {
                     "$ref": "#/definitions/Filters"
+                }
+            }
+        },
+        "SampleMediaObjectEmbedded": {
+            "description": "Holds metadata for media objects, i.e. images, video, text or audio files that are the basis of records.",
+            "type": "object",
+            "properties": {
+                "Original": {
+                    "type": "string",
+                    "default": {
+                        "uri": "/media/569f78d6590b1966cdeb3443?file=true"
+                    }
+                },
+                "Tiny": {
+                    "type": "string",
+                    "default": {
+                        "uri": "/media/569f78de590b1966cdeb3450?file=true"
+                    }
+                },
+                "Square": {
+                    "type": "string",
+                    "default": {
+                        "uri": "/media/569f78de590b1966cdeb3452?file=true"
+                    }
+                },
+                "Thumbnail": {
+                    "type": "string",
+                    "default": {
+                        "uri": "/media/569f78de590b1966cdeb3454?file=true"
+                    }
+                },
+                "Medium": {
+                    "type": "string",
+                    "default": {
+                        "uri": "/media/569f78de590b1966cdeb3456?file=true"
+                    }
+                }
+            }
+        },
+        "SampleInternalRecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "type": "object",
+            "required": [
+                "title",
+                "position"
+            ],
+            "properties": {
+                "resourceType": {
+                    "type": "string",
+                    "default": "CulturalObject"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleExternalCollection"
+                    }
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
+                    }
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/SampleDescriptiveData"
+                }
+            }
+        },
+        "SampleCollection": {
+            "description": "Collection metadata.",
+            "type": "object",
+            "properties": {
+                "resourceType": {
+                    "type": "string",
+                    "default": "CulturalObject"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleExternalCollection"
+                    }
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/SampleCollectionDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleProvenance"
+                    }
+                }
+            }
+        },
+        "SampleExternalCollection": {
+            "description": "Metadata related to external collections an object may belong to.",
+            "type": "object",
+            "properties": {
+                "collectionId": {
+                    "type": "string",
+                    "default": "569f78d6590b1966cdeb3443"
+                },
+                "position": {
+                    "type": "integer",
+                    "default": 16
+                }
+            }
+        },
+        "SampleProvenance": {
+            "description": "Holds provenance metadata about a collected resource.",
+            "type": "object",
+            "properties": {
+                "provider": {
+                    "type": "string",
+                    "default": "john's lab"
+                },
+                "uri": {
+                    "type": "string",
+                    "default": "uri@uri//uri"
+                },
+                "resourceId": {
+                    "type": "string",
+                    "default": "569f78d6590b1966cdeb3443"
+                }
+            }
+        },
+        "SampleCollectionDescriptiveData": {
+            "description": "Extends DescriptiveData with fields unique to CollectionObjects.",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "label1",
+                            "label2"
+                        ]
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "desc1",
+                            "desc2"
+                        ]
+                    }
+                },
+                "keywords": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "keyword1",
+                            "keyword1"
+                        ]
+                    }
+                },
+                "isShownAt": {
+                    "type": "string",
+                    "default": {
+                        "en": "somewhere"
+                    }
+                },
+                "rdfType": {
+                    "type": "string",
+                    "default": "type1orSomething"
+                },
+                "altlabels": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "altlabel1",
+                            "altlabel1"
+                        ]
+                    }
+                }
+            }
+        },
+        "SampleDescriptiveData": {
+            "description": "Descriptive metadata vary depending on the type of the collected resource. The basic data structures of all the different types are: ```LiteralType, ResourceType, ResourceOrLiteralType```",
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "label1",
+                            "label2"
+                        ]
+                    }
+                },
+                "description": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "desc1",
+                            "desc2"
+                        ]
+                    }
+                },
+                "keywords": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "keyword1",
+                            "keyword1"
+                        ]
+                    }
+                },
+                "isShownAt": {
+                    "type": "string",
+                    "default": {
+                        "en": "somewhere"
+                    }
+                },
+                "rdfType": {
+                    "type": "string",
+                    "default": "type1orSomething"
+                },
+                "altlabels": {
+                    "type": "string",
+                    "default": {
+                        "en": [
+                            "altlabel1",
+                            "altlabel1"
+                        ]
+                    }
+                }
+            }
+        },
+        "SampleMultiLiteralOrResource": {
+            "description": "Can either be a multiliteral or a resource.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ResourceOrLiteral"
+            }
+        },
+        "SampleMultiLiteral": {
+            "description": "More than one RDF literal types.",
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Literal"
+            }
+        },
+        "SampleLiteral": {
+            "description": "An RDF literal type.",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "default": "value"
+                }
+            }
+        },
+        "SampleResource": {
+            "description": "An RDF resource type.",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "default": "value"
+                }
+            }
+        },
+        "SampleResourceOrLiteral": {
+            "description": "Either an RDF literal or a resource.",
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "default": "value"
                 }
             }
         }
