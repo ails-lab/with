@@ -255,9 +255,9 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		//return this.createQuery().criteria("administrative.access." + userAccess.x.toHexString()).greaterThanOrEq(ordinal);
 		BasicDBObject accessQuery = new BasicDBObject();
 		accessQuery.put("user", userAccess.x);
-		BasicDBObject geq = new BasicDBObject();
-		geq.put(operator.toString(), ordinal);
-		accessQuery.append("level", geq);
+		BasicDBObject oper = new BasicDBObject();
+		oper.put(operator.toString(), ordinal);
+		accessQuery.append("level", oper);
 		//BasicDBObject elemMatch1 = new BasicDBObject();
 		//elemMatch1.put("$elemMatch", accessQuery);
 		return this.createQuery().criteria("administrative.access").hasThisElement(accessQuery);
@@ -268,10 +268,10 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param loggedInUserEffIds
 	 * @return
 	 */
-	protected CriteriaContainer formLoggedInUserQuery(List<ObjectId> loggedInUserEffIds) {
+	protected CriteriaContainer loggedInUserWithAtLeastAccessQuery(List<ObjectId> loggedInUserEffIds, Access access) {
 		Criteria[] criteria = new Criteria[loggedInUserEffIds.size()+1];
 		for (int i=0; i<loggedInUserEffIds.size(); i++) {
-			criteria[i] = formAccessLevelQuery(new Tuple(loggedInUserEffIds.get(i), Access.READ), QueryOperator.GTE);//this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
+			criteria[i] = formAccessLevelQuery(new Tuple(loggedInUserEffIds.get(i), access), QueryOperator.GTE);//this.createQuery().criteria("rights." + loggedInUserEffIds.get(i)).greaterThanOrEq(ordinal);
 		}
 		criteria[loggedInUserEffIds.size()] = this.createQuery().criteria("administrative.access.isPublic").equal(true);
 		return this.createQuery().or(criteria);
@@ -282,7 +282,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @param filterByUserAccess
 	 * @return
 	 */
-	protected CriteriaContainer formQueryAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
+	protected CriteriaContainer atLeastAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
 			criteria = ArrayUtils.addAll(criteria, formAccessLevelQuery(userAccess, QueryOperator.GTE));
@@ -306,192 +306,19 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 			q.and(criteria);
 		return q;
 	}
-
-	/**
-	 * Return a tuple containing a list of CollectionObjects (usually bounded from a limit)
-	 * together with the total number of entities corresponded to the query.
-	 * @param q
-	 * @param isExhibition
-	 * @return
-	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>> getResourcesWithCount(Query<T> q,
-			Boolean isExhibition) {
-		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
-		QueryResults<T> result;
-		List<T> collections = new ArrayList<T>();
-		if (isExhibition == null) {
-			result = this.find(q);
-			collections = result.asList();
-			Query<T> q2 = q.cloneQuery();
-			q2.field("administrative.isExhibition").equal(true);
-			q.field("administrative.isExhibition").equal(false);
-			hits.x = (int) this.find(q).countAll();
-			hits.y = (int) this.find(q2).countAll();
-		}
-		else {
-			q.field("administrative.isExhibition").equal(isExhibition);
-			result = this.find(q);
-			collections = result.asList();
-			if (isExhibition)
-				hits.y = (int) result.countAll();
-			else
-				hits.x = (int) result.countAll();
-		}
-		return new Tuple<List<T>, Tuple<Integer, Integer>>(collections, hits);
+	
+	public boolean hasAccess(List<ObjectId> effectiveIds,  Action action, ObjectId resourceId) {
+		CriteriaContainer criteria = loggedInUserWithAtLeastAccessQuery(effectiveIds, actionToAccess(action));
+		Query<T> q = this.createQuery().limit(1);
+		q.field("_id").equals(resourceId);
+		q.or(criteria);
+		return (this.find(q)==null? false: true);
 	}
-
-	/**
-	 * Return the total number of CollectionObject entities for a specific query
-	 * @param q
-	 * @param isExhibition
-	 * @return
-	 */
-	public Tuple<Integer, Integer> getResourceCount(Query<T> q, Boolean isExhibition) {
-		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
-		if (isExhibition == null) {
-			Query<T> q2 = q.cloneQuery();
-			q2.field("administrative.isExhibition").equal(true);
-			q.field("administrative.isExhibition").equal(false);
-			hits.x = (int) this.find(q).countAll();
-			hits.y = (int) this.find(q2).countAll();
-		}
-		else {
-			q.field("administrative.isExhibition").equal(isExhibition);
-			if (isExhibition)
-				hits.y = (int) this.find(q).countAll();
-			else
-				hits.x = (int)  this.find(q).countAll();
-		}
-		return hits;
+	
+	public Access actionToAccess(Action action) {
+		return Access.valueOf(action.toString());
 	}
-
-	/**
-	 * Return all CollectionObjects (usually bounded by a limit) some user access criteria.
-	 * The method can be parametrised to return also the total number of entities for the specified query.
-	 * @param accessedByUserOrGroup
-	 * @param creator
-	 * @param isExhibition
-	 * @param totalHits
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>>  getByACL(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
-			Boolean isExhibition, boolean totalHits, int offset, int count) {
-		CriteriaContainer[] criteria =  new CriteriaContainer[0];
-		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
-			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(orAccessed));
-		}
-		Query<T> q = formCreatorQuery(criteria, creator, offset, count);
-		if (totalHits) {
-			return getResourcesWithCount(q, isExhibition);
-		}
-		else {
-			if (isExhibition != null)
-				q.field("administrative.isExhibition").equal(isExhibition);
-			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
-		}
-	}
-
-	/**
-	 * Return all CollectionObjects (usually bounded by a limit) that satisfy the loggin user's access
-	 * criteria and optionally some other user access criteria. Typically all the CollectionObject that a user has access.
-	 * The method can be parametrised to return also the total number of entities for the specified query.
-	 * @param loggeInEffIds
-	 * @param accessedByUserOrGroup
-	 * @param creator
-	 * @param isExhibition
-	 * @param totalHits
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>>  getUsersAccessibleWithACL(List<ObjectId> loggeInEffIds,
-			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
-			Boolean isExhibition, boolean totalHits, int offset, int count) {
-
-		CriteriaContainer[] criteria =  new CriteriaContainer[0];
-		criteria = ArrayUtils.addAll(criteria, formLoggedInUserQuery(loggeInEffIds));
-		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
-			criteria = ArrayUtils.addAll(criteria, formQueryAccessCriteria(orAccessed));
-		}
-		Query<T> q = formCreatorQuery(criteria, creator, offset, count);
-		if (totalHits) {
-			return getResourcesWithCount(q, isExhibition);
-		}
-		else {
-			if (isExhibition != null)
-				q.field("administrative.isExhibition").equal(isExhibition);
-			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
-		}
-	}
-
-	/**
-	 * Return all CollectionObjects (usually bounded by a limit) of a user that satisfy some user
-	 * access criteria (that are shared with some users).
-	 * The method can be parametrised to return also the total number of entities for the specified query.
-	 * @param userId
-	 * @param accessedByUserOrGroup
-	 * @param isExhibition
-	 * @param totalHits
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>> getSharedWithACL(ObjectId userId, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup,
-			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-
-		Query<T> q = this.createQuery().offset(offset).limit(count+1);
-		q.field("administrative.withCreator").notEqual(userId);
-		CriteriaContainer[] criteria =  new CriteriaContainer[0];
-		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
-			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
-		}
-		if (criteria.length > 0)
-			q.and(criteria);
-		if (totalHits) {
-			return getResourcesWithCount(q, isExhibition);
-		}
-		else {
-			if (isExhibition != null)
-				q.field("administrative.isExhibition").equal(isExhibition);
-			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
-		}
-	}
-
-	/**
-	 * Return all public CollectionObjects (usually bounded by a limit) that also satisfy some user access criteria.
-	 * The method can be parametrised to return also the total number of entities for the specified query.
-	 * @param accessedByUserOrGroup
-	 * @param creator
-	 * @param isExhibition
-	 * @param totalHits
-	 * @param offset
-	 * @param count
-	 * @return
-	 */
-	public Tuple<List<T>, Tuple<Integer, Integer>> getPublicWithACL(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
-			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-
-		Query<T> q = this.createQuery().offset(offset).limit(count+1);
-		if (creator != null)
-			q.field("administrative.withCreator").equal(creator);
-		Criteria[] criteria = {this.createQuery().criteria("administrative.access.isPublic").equal(true)};
-		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
-			criteria = ArrayUtils.addAll(criteria ,formQueryAccessCriteria(orAccessed));
-		}
-		if (criteria.length > 0)
-			q.and(criteria);
-		if (totalHits) {
-			return getResourcesWithCount(q, isExhibition);
-		}
-		else {
-			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
-			return new Tuple<List<T>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
-		}
-	}
-
+	
 	/**
 	 * Return the total number of likes for a resource.
 	 * @param id
@@ -583,8 +410,5 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
-	public boolean hasAccess(List<ObjectId> effectiveIds, Action access, ObjectId resourceId) {
-		return true;
-	}
-	
+
 }
