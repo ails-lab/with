@@ -103,9 +103,11 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		
 		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(model.getIsShownBy().getURI());
+		LiteralOrResource isShownBy = model.getIsShownBy();
+		String uri2 = isShownBy==null?null:isShownBy.getURI();
+		medThumb.setUrl(uri2);
 		medThumb.setType(type);
-		medThumb.setParentID(model.getIsShownBy().getURI());
+		medThumb.setParentID(uri2);
 		medThumb.setOriginalRights(rights);
 		medThumb.setWithRights(withMediaRights);
 		object.addMedia(MediaVersion.Thumbnail, medThumb);
@@ -113,7 +115,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		EmbeddedMediaObject med = new EmbeddedMediaObject();
 		med.setType(type);
 		med.setParentID("self");
-		med.setUrl(model.getIsShownBy().getURI());
+		med.setUrl(uri2);
 		med.setOriginalRights(rights);
 		med.setWithRights(withMediaRights);
 		
