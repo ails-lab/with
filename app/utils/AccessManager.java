@@ -65,13 +65,22 @@ public class AccessManager {
 		}*/
 		return false;
 	}
+	
+	public static boolean isSuperUser(String userId) {
+		 return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
+	}
 
 	public static boolean hasAccess(List<String> userIds, Action action, ObjectId resourceId) {
+		
+		return DB.getWithResourceDAO().hasAccess(toObjectIds(userIds), action, resourceId);
+	}
+	
+	public static List<ObjectId> toObjectIds(List<String> userIds) {
 		List<ObjectId> objectIds = new ArrayList<ObjectId>();
 		for (String userId: userIds) {
 			objectIds.add(new ObjectId(userId));
 		}
-		return DB.getWithResourceDAO().hasAccess(objectIds, action, resourceId);
+		return objectIds;
 	}
 
 	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights,

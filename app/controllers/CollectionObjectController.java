@@ -16,6 +16,8 @@
 
 package controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,8 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.Collection;
+import model.CollectionRecord;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
@@ -299,5 +303,51 @@ public class CollectionObjectController extends Controller {
 				.toString();
 		return getCollectionObject(fav);
 
+	}
+	
+	/**
+	 * List all Records from a Collection using a start item and a page size
+	 */
+	public static Result listRecordResources(String collectionId, String contentFormat, int start, int count) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(collectionId);
+		//TODO: don't have to get the whiole collection, use DAO method
+		//Collection collection = DB.getCollectionDAO().getById(colId);
+
+		if (DB.getCollectionObjectDAO().existsResource(colId)) {
+			result.put("error", "Invalid collection id");
+			return forbidden(result);
+		}
+		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		if (!AccessManager.hasAccess(userIds, Action.READ, colId) && (!DB.getCollectionObjectDAO().isPublic(colId))) {
+			result.put("error", "User does not have read-access to the collection");
+			return forbidden(result);
+		}
+		List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, count);
+		if (records == null) {
+			result.put("message", "Cannot retrieve records from database!");
+			return internalServerError(result);
+		}
+		ArrayNode recordsList = Json.newObject().arrayNode();
+		for (RecordResource e : records) {
+			if (contentFormat.equals("contentOnly")) {
+				recordsList.add(Json.toJson(e.getContent()));
+			}
+			else {
+				if (contentFormat.equals("noContent")) {
+					e.getContent().clear();
+				}
+				else if (e.getContent().containsKey(contentFormat)) {
+					HashMap<String, String> newContent = new HashMap<String, String>(1);
+					newContent.put(contentFormat, (String) e.getContent().get(contentFormat));
+					e.setContent(newContent);
+				}
+				recordsList.add(Json.toJson(e));
+			}
+		}
+		result.put("itemCount", ((CollectionAdmin) ((CollectionObject) DB.getCollectionObjectDAO().getById(colId, 
+				new ArrayList<String>(Arrays.asList("administrative.entryCount")))).getAdministrative()).getEntryCount());
+		result.put("records", recordsList);
+		return ok(result);
 	}
 }

@@ -82,7 +82,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
-
+	}
+	
+	public boolean existsResource(ObjectId id) {
+		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
+		return (this.find(q).asList().size()==0? false: true);
 	}
 
 	/**
@@ -109,12 +113,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	}
 
 	/**
-	 * Return all resources that belong to a 'collection' throwing
-	 * away duplicate entries in a 'collection'
-	 * This methods is here cause in the future may a collection
-	 * belong to a another collection.
-	 *
-	 *
+	 * Return all resources that belong to a collection throwing
+	 * away duplicate entries in a collection
 	 * TODO: Return only some fields for these resources.
 	 *
 	 * @param colId
@@ -207,20 +207,14 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	}
 
 	/**
-	 * Retrieve a resource using the source that provided it
+	 * Retrieve a resource if the provenanceChain contains the providerName
 	 * @param sourceName
 	 * @return
 	 */
-	public List<T> getByProvider(String sourceName) {
-
-		//TODO: faster if could query on last entry of provenance array. Mongo query!
-		/*
-		 * We can sort the array in inverted order so to query
-		 * only the first element of this array directly!
-		 */
+	public List<T> getByProvider(String providerName) {
 		Query<T> q = this.createQuery();
 		BasicDBObject provQuery = new BasicDBObject();
-		provQuery.put("provider", sourceName);
+		provQuery.put("provider", providerName);
 		BasicDBObject elemMatch = new BasicDBObject();
 		elemMatch.put("$elemMatch", provQuery);
 		q.filter("provenance", elemMatch);
@@ -242,6 +236,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		return this.find(q).countAll();
 	}
 
+	public boolean isPublic(ObjectId id) {
+		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
+		q.field("administrative.isPublic").equal(true);
+		return (find(q).asList().size()==0? false: true);
+	}
 	/**
 	 * Create a Mongo access query criteria
 	 * @param userAccess

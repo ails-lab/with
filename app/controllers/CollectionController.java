@@ -138,7 +138,7 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(id));
-			if (!AccessManager.checkAccess(c.getRights(), userIds, Action.DELETE)) {
+			if (!AccessManager.hasAccess(userIds, Action.DELETE, new ObjectId(id))) {
 				result.put("error", "User does not have permission to delete the collection");
 				return forbidden(result);
 			}
@@ -179,7 +179,7 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
-		if (!AccessManager.checkAccess(oldVersion.getRights(), userIds, Action.EDIT)) {
+		if (!AccessManager.hasAccess(userIds, Action.EDIT, new ObjectId(id))) {
 			result.put("error", "User does not have permission to edit the collection");
 			return forbidden(result);
 		}
@@ -503,14 +503,10 @@ public class CollectionController extends Controller {
 			return ok(result);
 		} else { //logged in, check if super user, if not, restrict query to accessible by effectiveUserIds
 			Tuple<List<Collection>, Tuple<Integer, Integer>> info;
-			if (!AccessManager.checkAccess(new WithAccess(), effectiveUserIds, Action.DELETE)) {
-				List<ObjectId> effObjectIds = new ArrayList<ObjectId>(effectiveUserIds.size());
-				for (String id : effectiveUserIds) {
-					effObjectIds.add(new ObjectId(id));
-				}
-				info = DB.getCollectionDAO().getByAccess(effObjectIds, accessedByUserOrGroup, creatorId,
+			if (!AccessManager.isSuperUser(effectiveUserIds.get(0))) 
+				info = DB.getCollectionDAO().getByAccess(AccessManager.toObjectIds(effectiveUserIds), accessedByUserOrGroup, creatorId,
 						isExhibitionBoolean, collectionHits, offset, count);
-			} else
+			else
 				info = DB.getCollectionDAO().getByAccess(accessedByUserOrGroup, creatorId, isExhibitionBoolean,
 						collectionHits, offset, count);
 			if (info.y != null) {
@@ -660,7 +656,7 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 
 		Collection c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-		if (!AccessManager.checkAccess(c.getRights(), userIds, Action.EDIT)) {
+		if (!AccessManager.hasAccess(userIds, Action.EDIT, new ObjectId(collectionId))) {
 			result.put("error", "User does not have permission to edit the collection");
 			return forbidden(result);
 		}
@@ -901,7 +897,7 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 
 		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-		if (!AccessManager.checkAccess(collection.getRights(), userIds, Action.EDIT)) {
+		if (!AccessManager.hasAccess(userIds, Action.EDIT, new ObjectId(collectionId))) {
 			result.put("error", "User does not have permission to edit the collection");
 			return forbidden(result);
 		}
@@ -966,6 +962,7 @@ public class CollectionController extends Controller {
 	public static Result listCollectionRecords(String collectionId, String format, int start, int count) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
+		//TODO: don't have to get the whiole collection, use DAO method
 		Collection collection = DB.getCollectionDAO().getById(colId);
 
 		if (collection == null) {
@@ -973,7 +970,7 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-		if (!AccessManager.checkAccess(collection.getRights(), userIds, Action.READ) && (!collection.getIsPublic())) {
+		if (!AccessManager.hasAccess(userIds, Action.READ, new ObjectId(collectionId)) && (!collection.getIsPublic())) {
 			result.put("error", "User does not have read-access to the collection");
 			return forbidden(result);
 		}
