@@ -60,7 +60,7 @@ public class SourceResponse {
 				it.comesFrom = r.getSource();
 				it.title = r.getTitle();
 				it.description = r.getDescription();
-				it.id = r.getSourceId();
+				it.id = r.getDbId().toString();
 				if(r.getThumbnailUrl() != null)
 					it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
 				if (r.getIsShownBy() != null)
