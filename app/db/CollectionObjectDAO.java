@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import model.Collection;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
@@ -141,6 +142,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
+	/*
 	public List<CollectionObject> getByMaxAccess(List<ObjectId> effectiveIds,
 			Access access, Boolean isExhibition, int offset, int count) {
 		Query<CollectionObject> q = this.createQuery()
@@ -154,9 +156,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		q.field("administrative.isExhibition").equal(isExhibition);
 		q.or(criteria);
 		return this.find(q).asList();
-	}
+	}*/
 
-	public List<CollectionObject> getPublic(Boolean isExhibition, int offset,
+	/*public List<CollectionObject> getPublic(Boolean isExhibition, int offset,
 			int count) {
 		Query<CollectionObject> q = this.createQuery()
 				.field("administrative.access.isPublic").equal(true)
@@ -164,27 +166,126 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.limit(count);
 		q.field("administrative.isExhibition").equal(isExhibition);
 		return this.find(q).asList();
+	}*/
+	
+	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getCollectionsAndHits(Query<CollectionObject> q,
+			Boolean isExhibition) {
+		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
+		QueryResults<CollectionObject> result;
+		List<CollectionObject> collections = new ArrayList<CollectionObject>();
+		if (isExhibition == null) {
+			result = this.find(q);
+			collections = result.asList();
+			Query<CollectionObject> q2 = q.cloneQuery();
+			q2.field("isExhibition").equal(true);
+			q.field("isExhibition").equal(false);
+			hits.x = (int) this.find(q).countAll();
+			hits.y = (int) this.find(q2).countAll();
+		}
+		else {
+			q.field("isExhibition").equal(isExhibition);
+			result = this.find(q);
+			collections = result.asList();
+			if (isExhibition)
+				hits.y = (int) result.countAll();
+			else
+				hits.x = (int) result.countAll();
+		}
+		return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(collections, hits);
 	}
 
-	public List<CollectionObject> getByAccessWithRestrictions(
+	public Tuple<Integer, Integer> getHits(Query<CollectionObject> q, Boolean isExhibition) {
+		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
+		if (isExhibition == null) {
+			Query<CollectionObject> q2 = q.cloneQuery();
+			q2.field("isExhibition").equal(true);
+			q.field("isExhibition").equal(false);
+			hits.x = (int) this.find(q).countAll();
+			hits.y = (int) this.find(q2).countAll();
+		}
+		else {
+			q.field("isExhibition").equal(isExhibition);
+			if (isExhibition)
+				hits.y = (int) this.find(q).countAll();
+			else
+				hits.x = (int)  this.find(q).countAll();
+		}
+		return hits;
+	}
+	
+	
+	
+	public Query<CollectionObject> creatorAndCriteriaQuery(CriteriaContainer[] criteria, ObjectId creator, Boolean isExhibition,  int offset, int count) {
+		Query<CollectionObject> q = this.createQuery().offset(offset).limit(count+1);
+		if (creator != null)
+			q.field("administrative.withCreator").equal(creator);
+		if (criteria.length > 0)
+			q.and(criteria);
+		return q;
+	}
+	
+	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>>  getByRestrictions(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition, boolean totalHits, int offset, int count) {
+		CriteriaContainer[] criteria =  new CriteriaContainer[0];
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria, atLeastAccessCriteria(orAccessed));
+		}
+		Query<CollectionObject> q = creatorAndCriteriaQuery(criteria, creator, isExhibition, offset, count);
+		if (totalHits) {
+			return getCollectionsAndHits(q, isExhibition);
+		}
+		else {
+			if (isExhibition != null)
+				q.field("administrative.isExhibition").equal(isExhibition);
+			return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
+		}
+	}
+	
+	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>>  getByRestrictions(
+			List<ObjectId> loggeInEffIds, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition, boolean totalHits, int offset, int count) {
+		CriteriaContainer[] criteria =  new CriteriaContainer[0];
+		criteria = ArrayUtils.addAll(criteria, loggedInUserWithAtLeastAccessQuery(loggeInEffIds, Access.READ));
+		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
+			criteria = ArrayUtils.addAll(criteria, atLeastAccessCriteria(orAccessed));
+		}
+		Query<CollectionObject> q = creatorAndCriteriaQuery(criteria, creator, isExhibition, offset, count);
+		if (totalHits) {
+			return getCollectionsAndHits(q, isExhibition);
+		}
+		else {
+			if (isExhibition != null)
+				q.field("administrative.isExhibition").equal(isExhibition);
+			return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
+		}
+	}
+
+	/*public List<CollectionObject> getByAccessWithRestrictions(
 			List<ObjectId> effectiveIds, QueryOperator op1,  Access access,
 			Map<ObjectId, Access> restrictions, QueryOperator op2, Boolean isExhibition,
 			int offset, int count) {
 		Query<CollectionObject> q = this.createQuery()
-				.field("administrative.isExhibition").equal(isExhibition)
 				.order("-administrative.lastModified").offset(offset)
 				.limit(count);
-		Criteria[] criteriaOr = new Criteria[effectiveIds.size()];
-		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteriaOr[i] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), access), op1);
+		if (isExhibition != null)
+			q.field("isExhibition").equal(isExhibition);
+		if (!effectiveIds.isEmpty()) {
+			List<Criteria> criteriaOr = new ArrayList<Criteria>();
+			for (int i = 0; i < effectiveIds.size(); i++) {
+				criteriaOr.add(formAccessLevelQuery(new Tuple(effectiveIds.get(i), access), op1));
+			}
+			q.or(criteriaOr.toArray(new Criteria[criteriaOr.size()]));
 		}
-		Criteria[] criteriaAnd = new Criteria[restrictions.size()];
-		int i = 0;
-		for (ObjectId id : restrictions.keySet()) {
-			criteriaOr[i++] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), restrictions.get(id)), op2);
+		else {
+			q.field("administrative.access.isPublic").equal(true);
 		}
-		q.or(criteriaOr);
-		q.and(criteriaAnd);
+		if (!restrictions.isEmpty()) {
+			List<Criteria> criteriaAnd = new ArrayList<Criteria>();
+			for (ObjectId id : restrictions.keySet()) {
+				criteriaAnd.add(formAccessLevelQuery(new Tuple(id, restrictions.get(id)), op2));
+			}
+			q.and(criteriaAnd.toArray(new Criteria[criteriaAnd.size()]));
+		}
 		return this.find(q).asList();
 		
 	}
@@ -202,6 +303,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			int offset, int count) {
 		return getByAccessWithRestrictions(effectiveIds, QueryOperator.GTE, access, restrictions, QueryOperator.EQ, isExhibition, offset, count);
 	}
+	*/
 	
 	/**
 	 * Return a tuple containing a list of CollectionObjects (usually bounded from a limit)
@@ -383,7 +485,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 		else {
 			if (isExhibition != null)
-				q.field("isExhibition").equal(isExhibition);
+				q.field("administrative.isExhibition").equal(isExhibition);
 			return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}

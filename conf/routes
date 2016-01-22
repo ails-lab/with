@@ -33,8 +33,8 @@ DELETE	/record/:id							controllers.RecordResourceController.deleteRecordResour
 
 #PUT		/collections/liked						controllers.CollectionObjectController.addToFavorites()			
 # Collection Controller (tested except some methods)
-GET 	 /collection/list						controllers.CollectionObjectController.list(userOrGroupName: play.libs.F.Option[String], access: play.libs.F.Option[String], exhibitions: Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
-#GET /collection/list controllers.CollectionController.list(directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
+#GET 	 /collection/list						controllers.CollectionObjectController.list(userOrGroupName: play.libs.F.Option[String], access: String ? "OWN", exhibitions: play.libs.F.Option[Boolean], offset: Integer ?=0, count: Integer ?=10)
+GET 	/collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean ?= false)
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
