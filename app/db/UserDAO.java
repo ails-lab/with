@@ -122,4 +122,10 @@ public class UserDAO extends DAO<User> {
 				.hasThisOne(groupId);
 		return find(q).asList();
 	}
+	
+	public boolean isSuperUser(ObjectId userId) {
+		Query<User> q = this.createQuery().field("_id").equal(userId).limit(1);
+		q.field("superUser").equal(true);
+		return (find(q).asList().size()==0? false: true);
+	}
 }

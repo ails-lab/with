@@ -85,8 +85,8 @@ public class MediaObjectTest {
 		mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = LiteralOrResource.build(url.toString());
-		mo.setOriginalRights(lor);
+		//LiteralOrResource lor = LiteralOrResource.build(url.toString());
+		//mo.setOriginalRights(lor);
 		mo.setWithRights(WithMediaRights.Creative);
 		mo.setType(WithMediaType.IMAGE);
 		mo.setUrl(url.toString());

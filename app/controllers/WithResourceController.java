@@ -16,18 +16,22 @@
 
 package controllers;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
-import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CulturalObject;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
+import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
@@ -41,10 +45,12 @@ import play.mvc.Result;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -320,16 +326,24 @@ public class WithResourceController extends Controller {
 				List<RecordJSONMetadata> recordsData = s
 						.getRecordFromSource(sourceId);
 				for (RecordJSONMetadata data : recordsData) {
-					DB.getRecordResourceDAO().updateContent(record.getDbId(),
-							data.getFormat(), data.getJsonContent());
+					if (data.getFormat().equals("JSON-WITH")) {
+						ObjectMapper mapper = new ObjectMapper();
+						JsonNode json = mapper.readTree(data.getJsonContent())
+								.get("descriptiveData");
+						DescriptiveData descriptiveData = Json.fromJson(json,
+								CulturalObjectData.class);
+						DB.getWithResourceDAO().updateDescriptiveData(recordId,
+								descriptiveData);
+						//TODO update media as well
+					} else {
+						DB.getRecordResourceDAO().updateContent(
+								record.getDbId(), data.getFormat(),
+								data.getJsonContent());
+					}
 				}
 				return true;
-			} catch (ClassNotFoundException e) {
+			} catch (Exception e) {
 				// my class isn't there!
-				return false;
-			} catch (InstantiationException e) {
-				return false;
-			} catch (IllegalAccessException e) {
 				return false;
 			}
 		};

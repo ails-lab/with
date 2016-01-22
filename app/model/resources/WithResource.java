@@ -155,24 +155,9 @@ public class WithResource<T extends DescriptiveData> {
 		}
 
 		public void setWithCreator(ObjectId creatorId) {
-			// Set owner for first time
-			if (this.withCreator == null) {
-				this.withCreator = creatorId;
-				WithAccess creatorAccess = new WithAccess();
-				AccessEntry e = new AccessEntry(creatorId, Access.OWN);
-				creatorAccess.getAcl().add(e);
-				this.access = creatorAccess;
-				// Owner has changed
-			} else if (!this.withCreator.equals(creatorId)) {
-				// Remove rights for old owner
-				for(AccessEntry ae: access.getAcl()) {
-					if(ae.getLevel().equals(Access.OWN)); {
-						ae.setUser(creatorId);
-						withCreator = creatorId;
-						break;
-					}
-				}
-			}
+			//OWN rights from old creator are not withdrawn (ownership is not identical to creation role)
+			this.withCreator = creatorId;
+			this.getAccess().addToAcl(creatorId, Access.OWN);
 		}
 
 		public User retrieveWithCreator() {
@@ -530,6 +515,12 @@ public class WithResource<T extends DescriptiveData> {
 
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
 		this.media.get(viewIndex).put(mediaVersion, media);
+	}
+	
+	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
+		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
+		e.put(mediaVersion, media);
+		this.media.add(e);
 	}
 	
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {

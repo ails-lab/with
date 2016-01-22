@@ -57,6 +57,7 @@ import com.google.common.net.MediaType;
 import com.google.common.net.MediaType;
 
 import play.libs.Json;
+import utils.AccessManager.Action;
 import db.DB;
 
 public class WithResourceDAOTest {
@@ -82,10 +83,10 @@ public class WithResourceDAOTest {
 			withResource.getAdministrative().setAccess(access);
 			withResource.getAdministrative().setCreated(new Date());
 			withResource.getAdministrative().setLastModified(new Date());
-			withResource.getAdministrative().setWithCreator(u.getDbId());
+			withResource.getAdministrative().setWithCreator(DB.getUserDAO().getByUsername("eirini2").getDbId());
 			RecordResource.RecordDescriptiveData model = new RecordResource.RecordDescriptiveData();
 			model.setLabel(new MultiLiteral(Language.EN, "TestWithResourceNewRights" + i));
-			//model.setDescription(new MultiLiteral(Language.EN, "Some description"));
+			model.setDescription(new MultiLiteral(Language.EN, "Some description"));
 			withResource.setDescriptiveData(model);
 			int j=0;
 			if (i==0) j=i; else j=i+1;
@@ -93,7 +94,6 @@ public class WithResourceDAOTest {
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb80"), 1+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 0+j);
 			withResource.addPositionToCollectedIn(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1+j);
-			System.out.println(Json.toJson(withResource));
 			assertThat(DB.getRecordResourceDAO().makePermanent(withResource)).isNotEqualTo(null);
 
 			/*
@@ -138,7 +138,7 @@ public class WithResourceDAOTest {
 		}*/
 		//DB.getRecordResourceDAO().shiftRecordsToLeft(new ObjectId("5656dd6ce4b0b19378e1cb81"), 1);
 		CulturalObject co1 = (CulturalObject) DB.getWithResourceDAO().getByLabel(Language.EN, "TestWithResourceNewRights0").get(0);
-		System.out.println(Json.toJson(co1));
+		assertThat(DB.getWithResourceDAO().hasAccess(new ArrayList<>(Arrays.asList(u.getDbId())), Action.READ, co1.getDbId())).isEqualTo(true);
 	}
 
 }
