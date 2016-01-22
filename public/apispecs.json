@@ -2716,20 +2716,34 @@
                 }
             }
         },
-        "Collection": {
-            "description": "Collection metadata.",
+        "WithResource": {
+            "description": "This is the parent type of the WITH data model. Record and Collection models extend this model.",
             "type": "object",
+            "discriminator": "descriptiveData",
+            "required": [
+                "title",
+                "position"
+            ],
             "properties": {
                 "dbId": {
                     "type": "string"
                 },
                 "resourceType": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "WithResource",
+                        "CollectionObject",
+                        "CulturalObject",
+                        "EuScreenObject",
+                        "EventObject",
+                        "PlaceObject",
+                        "TimespanObject"
+                    ]
                 },
                 "collectedIn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/ExternalCollection"
+                        "$ref": "#/definitions/CollectionInfo"
                     }
                 },
                 "administrative": {
@@ -2738,28 +2752,55 @@
                 "usage": {
                     "$ref": "#/definitions/Usage"
                 },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/MediaObjectEmbedded"
+                    }
+                },
                 "descriptiveData": {
-                    "$ref": "#/definitions/CollectionDescriptiveData"
+                    "$ref": "#/definitions/DescriptiveData"
                 },
                 "provenance": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Provenance"
                     }
+                },
+                "content": {
+                    "type": "object",
+                    "properties": {
+                        "key": {
+                            "type": "string",
+                            "default": "value"
+                        }
+                    }
                 }
             }
         },
-        "ExternalCollection": {
-            "description": "Metadata related to external collections an object may belong to.",
-            "type": "object",
-            "properties": {
-                "position": {
-                    "type": "integer"
-                },
-                "collectionId": {
-                    "type": "string"
+        "InternalRecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/WithResource"
                 }
-            }
+            ]
+        },
+        "Collection": {
+            "description": "Collection metadata.",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/WithResource"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "descriptiveData": {
+                            "$ref": "#/definitions/CollectionDescriptiveData"
+                        }
+                    }
+                }
+            ]
         },
         "Administrative": {
             "description": "WITH related metadata.",
@@ -2768,33 +2809,8 @@
                 "withUri": {
                     "type": "string"
                 },
-                "externalId": {
-                    "type": "string"
-                },
-                "parentResourceId": {
-                    "type": "string"
-                },
-                "exhibition": {
-                    "type": "boolean"
-                },
                 "access": {
-                    "type": "object",
-                    "properties": {
-                        "isPublic": {
-                            "type": "boolean"
-                        },
-                        "acl": {
-                            "type": "object",
-                            "properties": {
-                                "user": {
-                                    "type": "string"
-                                },
-                                "level": {
-                                    "type": "integer"
-                                }
-                            }
-                        }
-                    }
+                    "$ref": "#/definitions/Access"
                 },
                 "withCreator": {
                     "type": "string"
@@ -2808,13 +2824,72 @@
                 "underModeration": {
                     "type": "object",
                     "properties": {
-                        "xxx": {
-                            "type": "string"
+                        "key": {
+                            "$ref": "#/definitions/Access"
                         }
                     }
                 },
                 "isExhibition": {
                     "type": "boolean"
+                },
+                "externalId": {
+                    "type": "string"
+                }
+            }
+        },
+        "Access": {
+            "description": "Information related to access rights.",
+            "type": "object",
+            "properties": {
+                "isPublic": {
+                    "type": "boolean"
+                },
+                "acl": {
+                    "type": "object",
+                    "properties": {
+                        "user": {
+                            "type": "string"
+                        },
+                        "level": {
+                            "type": "integer"
+                        }
+                    }
+                }
+            }
+        },
+        "CollectionInfo": {
+            "description": "Information about internal collections this object may belong to.",
+            "type": "object",
+            "properties": {
+                "collectionId": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ExternalCollection": {
+            "description": "Metadata related to external collections an object may belong to.",
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string"
+                },
+                "collectionUri": {
+                    "type": "string"
+                },
+                "nextInSequenceUri": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
                 }
             }
         },
@@ -2857,54 +2932,6 @@
                 }
             }
         },
-        "CollectionDescriptiveData": {
-            "description": "Extends DescriptiveData with fields unique to CollectionObjects.",
-            "type": "object",
-            "properties": {
-                "label": {
-                    "$ref": "#/definitions/MultiLiteral"
-                },
-                "description": {
-                    "$ref": "#/definitions/MultiLiteral"
-                },
-                "keywords": {
-                    "$ref": "#/definitions/MultiLiteralOrResource"
-                },
-                "isShownAt": {
-                    "$ref": "#/definitions/ResourceOrLiteral"
-                },
-                "isShownBy": {
-                    "$ref": "#/definitions/ResourceOrLiteral"
-                },
-                "metadataRights": {
-                    "$ref": "#/definitions/ResourceOrLiteral"
-                },
-                "rdfType": {
-                    "type": "string"
-                },
-                "sameAs": {
-                    "$ref": "#/definitions/MultiLiteralOrResource"
-                },
-                "dates": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "altLabels": {
-                    "$ref": "#/definitions/MultiLiteral"
-                },
-                "dccreator": {
-                    "$ref": "#/definitions/MultiLiteralOrResource"
-                },
-                "dctermsaudience": {
-                    "$ref": "#/definitions/MultiLiteralOrResource"
-                },
-                "dclanguage": {
-                    "$ref": "#/definitions/MultiLiteralOrResource"
-                }
-            }
-        },
         "DescriptiveData": {
             "description": "Descriptive metadata vary depending on the type of the collected resource. The basic data structures of all the different types are: ```LiteralType, ResourceType, ResourceOrLiteralType```",
             "type": "object",
@@ -2943,6 +2970,28 @@
                     "$ref": "#/definitions/MultiLiteral"
                 }
             }
+        },
+        "CollectionDescriptiveData": {
+            "description": "Extends DescriptiveData with fields unique to CollectionObjects.",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/DescriptiveData"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "dccreator": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dctermsaudience": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dclanguage": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        }
+                    }
+                }
+            ]
         },
         "MultiLiteralOrResource": {
             "description": "Can either be a multiliteral or a resource.",
@@ -2988,54 +3037,6 @@
                 }
             }
         },
-        "MediaObjectExtended": {
-            "description": "The extended media object extends the embedded media object with fields for more technical metadata.",
-            "allOf": {
-                "$ref": "#/definitions/MediaObjectEmbedded",
-                "type": "object",
-                "properties": {
-                    "dbid": {
-                        "type": "string"
-                    },
-                    "mediaBytes": {
-                        "type": "string"
-                    },
-                    "codec": {
-                        "type": "string"
-                    },
-                    "durationSeconds": {
-                        "type": "integer"
-                    },
-                    "spatialResolution": {
-                        "type": "integer"
-                    },
-                    "bitRate": {
-                        "type": "integer"
-                    },
-                    "frameRate": {
-                        "type": "integer"
-                    },
-                    "colorSpace": {
-                        "type": "string"
-                    },
-                    "componentColor": {
-                        "type": "string"
-                    },
-                    "orientation": {
-                        "type": "string"
-                    },
-                    "audioChannelNumber": {
-                        "type": "integer"
-                    },
-                    "sampleSize": {
-                        "type": "integer"
-                    },
-                    "sampleRate": {
-                        "type": "integer"
-                    }
-                }
-            }
-        },
         "MediaObjectEmbedded": {
             "description": "Holds metadata for media objects, i.e. images, video, text or audio files that are the basis of records.",
             "type": "object",
@@ -3075,42 +3076,57 @@
                 }
             }
         },
-        "InternalRecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
-            "properties": {
-                "dbId": {
-                    "type": "string"
+        "MediaObjectExtended": {
+            "description": "The extended media object extends the embedded media object with fields for more technical metadata.",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/MediaObjectEmbedded"
                 },
-                "resourceType": {
-                    "type": "string"
-                },
-                "collectedIn": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
+                {
+                    "type": "object",
+                    "properties": {
+                        "dbid": {
+                            "type": "string"
+                        },
+                        "mediaBytes": {
+                            "type": "string"
+                        },
+                        "codec": {
+                            "type": "string"
+                        },
+                        "durationSeconds": {
+                            "type": "integer"
+                        },
+                        "spatialResolution": {
+                            "type": "integer"
+                        },
+                        "bitRate": {
+                            "type": "integer"
+                        },
+                        "frameRate": {
+                            "type": "integer"
+                        },
+                        "colorSpace": {
+                            "type": "string"
+                        },
+                        "componentColor": {
+                            "type": "string"
+                        },
+                        "orientation": {
+                            "type": "string"
+                        },
+                        "audioChannelNumber": {
+                            "type": "integer"
+                        },
+                        "sampleSize": {
+                            "type": "integer"
+                        },
+                        "sampleRate": {
+                            "type": "integer"
+                        }
                     }
-                },
-                "administrative": {
-                    "$ref": "#/definitions/Administrative"
-                },
-                "usage": {
-                    "$ref": "#/definitions/Usage"
-                },
-                "media": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/MediaObjectEmbedded"
-                    }
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/DescriptiveData"
                 }
-            }
+            ]
         },
         "Filters": {
             "description": "This JSON Array contains details about the different filter values available as well as counts of records for each filter.",
@@ -3276,6 +3292,12 @@
                 },
                 "descriptiveData": {
                     "$ref": "#/definitions/SampleDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleProvenance"
+                    }
                 }
             }
         },
@@ -3324,7 +3346,7 @@
             "properties": {
                 "provider": {
                     "type": "string",
-                    "default": "john's lab"
+                    "default": "Europeana"
                 },
                 "uri": {
                     "type": "string",
