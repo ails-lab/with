@@ -78,19 +78,30 @@ class EffektiveUserFilter extends Filter {
    * get user and proxy from session on the way in, add effective user array, and remove it in outgoing sessions
    */
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
+		  var ignoreRequest = false
+		  if( DB.getConf().hasPath( "session.ignore")) {
+			  val ignore = DB.getConf().getString( "session.ignore").r.unanchored
+					  ignore findFirstIn( rh.path ) match {
+					  case Some(_) => ignoreRequest = true
+					  case None => ignoreRequest = false
+			  }
+		  }
 
-		  val userId = rh.session.get("user")
-		  val proxyId = rh.session.get("proxy")
+		  if( ignoreRequest ) next( rh )
+		  else {
+			  val userId = rh.session.get("user")
+					  val proxyId = rh.session.get("proxy")
 
-		  val userIds = effectiveUserIds(userId, proxyId).mkString(",")
-		  val sessionData = rh.session + (("effectiveUserIds", userIds))
-		  val newRh = FilterUtils.withSession(rh, sessionData.data)
+					  val userIds = effectiveUserIds(userId, proxyId).mkString(",")
+					  val sessionData = rh.session + (("effectiveUserIds", userIds))
+					  val newRh = FilterUtils.withSession(rh, sessionData.data)
 
-		  next(newRh).map { result =>
-  		  FilterUtils.outsession(result) match {
-	    	  case Some(session) => result.withSession(Session(session) - ("effectiveUserIds"))
-    		  case None => result
-		    }
+					  next(newRh).map { result =>
+					  FilterUtils.outsession(result) match {
+					  case Some(session) => result.withSession(Session(session) - ("effectiveUserIds"))
+					  case None => result
+					  }
+			  }
 		  }
   }
 }
