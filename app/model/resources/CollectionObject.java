@@ -68,7 +68,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 
 	@Embedded
 	public static class CollectionDescriptiveData extends DescriptiveData {
-
+		//TODO: change these to camelCase!
 		// start day or possible start days
 		private MultiLiteralOrResource dccreator;
 		// for whom the resource is intended or useful

@@ -54,7 +54,7 @@ function apiKeyClick(){
                 url = decodeURIComponent(url[1]);
             } else {
  
-                url = "http://with.image.ntua.gr/assets/apispecs.json";
+                url = "http://localhost:9000/assets/apispecs.json";
             }
  
             window.swaggerUi = new SwaggerUi({

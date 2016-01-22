@@ -517,6 +517,12 @@ public class WithResource<T extends DescriptiveData> {
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
 	
+	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
+		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
+		e.put(mediaVersion, media);
+		this.media.add(e);
+	}
+	
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		this.media.get(0).put(mediaVersion, media);
 	}

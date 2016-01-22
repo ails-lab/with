@@ -62,24 +62,27 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 				new ProvenanceInfo(Sources.Europeana.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("rights");
 		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type")).get(0);
-		WithMediaRights withRights = (WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0);
-		
-		
-		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(model.getIsShownBy().getURI());
-		medThumb.setType(type);
-		medThumb.setParentID(model.getIsShownBy().getURI());
-		medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
-		medThumb.setWithRights(withRights);
-		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setParentID("self");
-		med.setUrl(model.getIsShownBy().getURI());
-		med.setOriginalRights(new LiteralOrResource(rights.get(0)));
-		med.setWithRights(withRights);
-		med.setType(type);
-
-		object.addMedia(MediaVersion.Original, med);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0);
+		String uri3 = rec.getStringValue("edmPreview");
+		if (uri3!=null){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri3);
+			medThumb.setType(type);
+			medThumb.setParentID(model.getIsShownBy().getURI());
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setWithRights(withRights);
+			object.addMedia(MediaVersion.Thumbnail, medThumb);
+		}
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		if (uri2!=null){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setParentID("self");
+			med.setUrl(uri2);
+			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			med.setWithRights(withRights);
+			med.setType(type);
+			object.addMedia(MediaVersion.Original, med);
+		}
 		return object;
 	}
 
