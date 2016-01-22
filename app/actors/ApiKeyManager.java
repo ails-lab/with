@@ -39,22 +39,17 @@ import db.DB;
  */
 public class ApiKeyManager extends UntypedActor  {
 	public static final ALogger log = Logger.of( ApiKeyManager.class);
-
+	public static final ALogger allAccessLog = Logger.of( "AllAccess" );
+	
 	Hashtable<String, ApiKey> apiKeys = new Hashtable<String, ApiKey>();
-//	List<ApiKey> ipPatterns = new ArrayList<ApiKey>();
 	
 	public static class Access implements Serializable {
 		public String call;
-//		public String ip;
 		public String apikey;
 		public long volume;
 		public boolean update = false;
 		
-		public String toString( ) {
-//			return ("Call: " + call + " ip: " + ip 
-//					+ " apikey: " + apikey + " volume: " + volume 
-//					+ " update: " + (update?"true":"false"));
-			
+		public String toString( ) {			
 			return ("Call: " + call 
 					+ " apikey: " + apikey + " volume: " + volume 
 					+ " update: " + (update?"true":"false"));
@@ -63,9 +58,7 @@ public class ApiKeyManager extends UntypedActor  {
 	
 	public static class Create implements Serializable {
 		public String dbId;
-		
-//		public String ip;
-		
+			
 		// the following two are optional
 		// an email doesn't need to be a registered user's email
 		
@@ -115,16 +108,12 @@ public class ApiKeyManager extends UntypedActor  {
 	 */
 	private void readKeysFromDb() {
 		apiKeys.clear();
-//		ipPatterns.clear();
-//		Logger.info("reading " + DB.getApiKeyDAO().count() + " many keys");
+		Logger.info("reading " + DB.getApiKeyDAO().count() + " many keys");
 		for( ApiKey k: DB.getApiKeyDAO().find()) {
 			if( !StringUtils.isEmpty(k.getKeyString())) {
 				apiKeys.put( k.getKeyString(), k);
-//				Logger.info(k.getKeyString());
+				Logger.info(k.getKeyString());
 			} 
-//				else {
-//				ipPatterns.add( k );
-//			}
 		}
 	}
 	
@@ -133,24 +122,10 @@ public class ApiKeyManager extends UntypedActor  {
 			// safe or overwrite
 			DB.getApiKeyDAO().save(k);
 		}
-//		for( ApiKey k:ipPatterns) {
-//			DB.getApiKeyDAO().save(k);
-//		}
 	}
 	
-//	private ApiKey getByIp( String ip ) {
-//		for( ApiKey k: ipPatterns ) {
-//			if( ip.matches( k.getIpPattern()))
-//				return k;
-//		}
-//		return null;
-//	}
 	
 	private ApiKey getByDbId( String id ) {
-//		for( ApiKey k: ipPatterns ) {
-//			if( k.getDbId().toString().equals(id))
-//				return k;
-//		}
 		for( ApiKey k: apiKeys.values() ) {
 			if( k.getDbId().toString().equals(id))
 				return k;
@@ -167,17 +142,9 @@ public class ApiKeyManager extends UntypedActor  {
 			return;
 		}
 		
-//		Logger.debug( access.toString() );
+		Logger.debug( access.toString() );
 		ApiKey key = null;
 		
-//		if( !StringUtils.isEmpty(access.ip)) { 
-//			key = getByIp(access.ip);
-//			if( key == null ) { 
-//				if( !access.update )
-//					sender().tell( ApiKey.Response.INVALID_IP, self());
-//				return;
-//			}
-//		} else {
 			key = apiKeys.get( access.apikey);
 			if( key == null ) {
 				if( !access.update )
@@ -186,7 +153,6 @@ public class ApiKeyManager extends UntypedActor  {
 			} else if (key.getKeyString() == "empty"){
 				sender().tell( ApiKey.Response.EMPTY_APIKEY, self());
 			}
-//		}
 		
 		if( !access.update ) {
 			ApiKey.Response res = key.check( access.call, access.volume );
@@ -207,7 +173,6 @@ public class ApiKeyManager extends UntypedActor  {
 	
 	private void onApiCreate( Create create ) {
 		// create apikey and return the secret
-		// create apikey for ip-pattern
 		
 		// create calls on apikey structures
 		if( StringUtils.isEmpty(create.dbId )) {
@@ -220,19 +185,11 @@ public class ApiKeyManager extends UntypedActor  {
 			if(create.proxyUserId!=null){
 				newKey.setProxyUserId(create.proxyUserId);
 			}
-			
-//			if( StringUtils.isEmpty(create.ip)) {
-				newKey.resetKey();
-				apiKeys.put( newKey.getKeyString(), newKey);
-//			} else {
-//				newKey.setIpPattern(create.ip);
-//				ipPatterns.add( newKey );
-//			}
+
+			newKey.resetKey();
+			apiKeys.put( newKey.getKeyString(), newKey);
 
 			writeKeysToDb();
-			
-			//answer( newKey.getDbId().toString());
-			//System.out.println("should not be null: " + newKey.getDbId());
 			
 			answer( newKey.getKeyString());
 		} else {			

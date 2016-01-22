@@ -98,7 +98,7 @@ class SessionFilter extends Filter {
            }
          }
       } else {
-    	  Future.successful( Results.BadRequest( "Session invalid, ip don't match" ))
+    	  Future.successful( Results.BadRequest( "Session invalid, please retry!" ).withSession(Session()))
       }
 
      }  

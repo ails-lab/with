@@ -44,31 +44,14 @@ import java.nio.charset.StandardCharsets
 class AccessFilter extends Filter {
   val log = Logger(this.getClass())
 
-  def effectiveUserIds(userId: Option[String], proxyId: Option[String]): Seq[String] = {
-    val result = scala.collection.mutable.ArrayBuffer.empty[String]
-    for (id <- userId) {
-      result.add(id)
-    }
-    for (proxy <- proxyId) {
-      result.add(proxy)
-    }
-    for (id <- userId) {
-      val user = DB.getUserDAO.get(new ObjectId(id))
-      val groupIds = user.getUserGroupsIds().map { x => x.toString() }
-      result.addAll(groupIds)
-    }
-    for (proxy <- proxyId) {
-      val user = DB.getUserDAO.get(new ObjectId(proxy))
-      val groupIds = user.getUserGroupsIds().map { x => x.toString() }
-      result.addAll(groupIds)
-    }
-    result.toSeq
-  }
-
-  def apiKeyCheck(next: (RequestHeader) => Future[Result], rh: RequestHeader): Future[Result] = {
+  
+   def apiKeyCheck(next: (RequestHeader) => Future[Result], rh: RequestHeader): Future[Result] = {
     implicit val timeout = new Timeout(1000.milliseconds)
-    val access = new ApiKeyManager.Access
 
+    /**
+     * Exor the right bits and return the apiKey string
+     */
+    
     def findApikey( time:String, auth:String, origin:String, params:String ): String = {
       log.debug( "Time: "+ time + " Auth:" + auth + " Origin:" + origin + " Params:" + params )
     	val authBytes = auth.grouped(2).map( Integer.parseInt( _, 16 ).byteValue()).toVector
@@ -106,6 +89,9 @@ class AccessFilter extends Filter {
     	new String(apiVec.toArray, "UTF8" )
     }
        
+    /**
+     * If there is an api key in the headers, extract it.
+     */
     def fromAuth( headers: Headers ): Option[String] = {
       // build the origin from referer      
       val origin = rh.headers.get( "Referer" ).flatMap( ".*://[^/]*".r.findFirstIn(_))
@@ -120,7 +106,7 @@ class AccessFilter extends Filter {
         case _ => { 
             rh.getQueryString("Xauth2") match {
               case Some( authParam ) => {
-                val strippedParams = "Xauth2=[0-9A-F]*".r.replaceFirstIn(rh.rawQueryString,"") 
+                val strippedParams = "Xauth2=[0-9A-F]*".r.replaceFirstIn(rh.path+rh.rawQueryString,"") 
                 Some( findApikey( "", authParam,"", strippedParams ))
               }
               case _ => None
@@ -135,65 +121,39 @@ class AccessFilter extends Filter {
         val ses = for (entry <- rh.session.data) yield entry._1 + ": " + entry._2
         log.debug("Session: " + ses.mkString("", "\n   ", "\n"))
       }
-    }
-
-    rh.queryString.get("apikey") match {
-      case Some(Seq(key, _*)) => access.apikey = key
-      case _ => {
-        rh.session.get("apikey") match {
-          case Some(key) => access.apikey = key
-          case None => { 
-            rh.headers.get("X-apikey") match {
-              case Some(key) => access.apikey = key
-              case None => {
-                fromAuth( rh.headers ) match {
-                  case Some(apikey) => access.apikey = apikey
-//                  case None => access.ip = rh.remoteAddress 
-                  case None => 
-		    log.info( "No KEY! ")
-		    access.apikey = "empty"
-		    
-                  
-                }
-              }  
-            }
-          }
-        }
-      }
-    }
-
-    val userId = rh.session.get("user")
+    } 
+    
+    // mostly this deals with apikeys that come plain with the request
+    val access = new ApiKeyManager.Access
     access.call = rh.path
+    access.apikey = rh.queryString.get("apikey") match {
+    case Some(Seq(key, _*)) => key
+    case _ => 
+      rh.session.get("apikey")
+        .orElse(rh.headers.get("X-apikey"))
+        // or from X-auth1,X-auth2 header, Xauth2
+        .orElse(fromAuth( rh.headers ))
+        .getOrElse( null )
+    }
+
     val apiActor = Akka.system.actorSelection("user/apiKeyManager");
+    
+    // 4 options . Allowed call, Allowed with proxy, Access not allowed, failed request for some reason
     (apiActor ? access).flatMap {
       response =>
         response match {
-          case o: ObjectId => {
-            val userIds = effectiveUserIds(userId, Some(o.toString())).mkString(",")
-            val sessionData = rh.session + (("effectiveUserIds", userIds))
+          case proxy: ObjectId => {
+        	  val sessionData = rh.session + (("proxy", proxy.toString()))
             val newRh = FilterUtils.withSession(rh, sessionData.data)
-            log.debug("EffectiveUserIds: " + userIds)
           
             next(newRh).map { result =>
               FilterUtils.outsession(result) match {
-                case Some(session) => result.withSession(Session(session) - ("effectiveUserIds"))
+                case Some(session) => result.withSession(Session(session) - ("proxy"))
                 case None => result
               }
             }
           }
-          case ApiKey.Response.ALLOWED => {
-            val userIds = effectiveUserIds(userId, None).mkString(",")
-            val sessionData = rh.session + (("effectiveUserIds", userIds ))
-            log.debug("EffectiveUserIds: " + userIds)
-
-            val newRh = FilterUtils.withSession(rh, sessionData.data)
-            next(newRh).map { result =>
-              FilterUtils.outsession(result) match {
-                case Some(session) => result.withSession(Session(session) - ("effectiveUserIds"))
-                case None => result
-              }
-            }
-          }
+          case ApiKey.Response.ALLOWED => next( rh )
           case r: ApiKey.Response => Future.successful(Results.BadRequest(r.toString()))
           case _ => Future.successful(Results.Forbidden)
         }
@@ -201,31 +161,19 @@ class AccessFilter extends Filter {
   }
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader) = {
-	//the author of this code struggled with scala
-	var s = false
-	if (DB.getConf().hasPath("apikey.ignorePattern2")){
-      		val pattern = DB.getConf().getString("apikey.ignorePattern2").r.unanchored
-      		(pattern findFirstIn rh.path) match {
-        		case Some(_) => s=true
-        		case None =>
-      		}
-	}
-
-	if (DB.getConf().hasPath("apikey.ignorePattern")){
-      		val pattern2 = DB.getConf().getString("apikey.ignorePattern").r.unanchored
-      		(pattern2 findFirstIn rh.path) match {
-        		case Some(_) => s=true
-        		case None => 
-      		}
-	} 
-	
-	if(s){
-		next(rh)
-	}else{
-		apiKeyCheck(next, rh)
-	}
+    if (DB.getConf().hasPath("apikey.ignorePattern")) {
+      val pattern = DB.getConf().getString("apikey.ignorePattern").r.unanchored
+      (pattern findFirstIn rh.path) match {
+        case Some(_) => next(rh)
+        case None => apiKeyCheck(next, rh)
+      }
+    } else {
+      apiKeyCheck(next, rh)
+    }
   }
 }
+
+
 
 object FilterUtils {
   /**
