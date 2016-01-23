@@ -62,16 +62,7 @@ class SessionFilter extends Filter {
     if( ignoreRequest || rh.session.isEmpty  ) {
       next( rh )  
     } else {
-      // check ip in cookie with remote address
       // expire session
-      val ip = rh.session.get( "sourceIp")
-      val sourceCheck = ip match {
-        case Some( sourceIp ) if( sourceIp==rh.remoteAddress ) => true
-        case Some( _ ) => false
-        case None => true
-      }
-      
-      if( sourceCheck ) {
     	  val timeout = rh.session.get( "lastAccessTime")
     			  .map { x => x.toLong }
     	      .map { t => (System.currentTimeMillis() > (t + sessionTimeout )) }
@@ -97,10 +88,6 @@ class SessionFilter extends Filter {
               } 
            }
          }
-      } else {
-    	  Future.successful( Results.BadRequest( "Session invalid, please retry!" ).withSession(Session()))
-      }
-
      }  
   }
 }
