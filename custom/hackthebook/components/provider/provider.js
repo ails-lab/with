@@ -79,6 +79,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","profile");
+	  setTimeout(function(){ WITHApp.init(); }, 600);
 	  self.id = ko.observable(params.id);	
 
 	  /*---*/
@@ -98,7 +99,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 	  self.totalCollections=ko.observable(0);
 	  self.totalExhibitions=ko.observable(0);
 	  var $container = $(".grid").isotope({
-			itemSelector: '.media',
+			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
 				columnWidth		: '.sizer',
@@ -293,6 +294,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
+		   // $container.isotope("layout");
 		    var scrollpos=sessionStorage.getItem("providerview"+self.id());
 		   if(scrollpos && $(".grid").height()>scrollpos){
  		    	 $(window).scrollTop(scrollpos);
@@ -313,8 +315,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 		  event.preventDefault();
 		  var scrollPosition = $(window).scrollTop();
 	      sessionStorage.setItem("providerview"+self.id(), scrollPosition);
-	      console.log("setting scrollpos to :"+scrollPosition);
-			var item = ko.utils.arrayFirst(self.collections(), function(coll) {
+	     	var item = ko.utils.arrayFirst(self.collections(), function(coll) {
 				   return coll.id === data;
 				});
 		  if (item.isExhibition) {

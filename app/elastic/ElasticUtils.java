@@ -288,7 +288,6 @@ public class ElasticUtils {
 			record.setCollectedIn(colIds);
 			record.setAllTags(tags);
 		}*/
-
 		return record;
 	}
 

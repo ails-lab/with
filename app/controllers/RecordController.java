@@ -139,12 +139,17 @@ public class RecordController extends Controller {
 			}
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(newRecord);
+			boolean valid = true;
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
 				result.put("message",
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
+				valid = false;
 			}
-			collection.getFirstEntries()
-					.add(newRecord.getPosition(), newRecord);
+			if( !valid ) return badRequest(result);
+			if (newRecord.getPosition() < 20) {
+				collection.getFirstEntries()
+				.add(newRecord.getPosition(), newRecord);	
+			}
 			if ((DB.getCollectionRecordDAO().makePermanent(newRecord) != null)
 					&& (DB.getCollectionDAO().makePermanent(collection) != null)) {
 
