@@ -62,8 +62,8 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("rights");
-		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("sourceResource.type")).get(0);
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0);
+		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("sourceResource.type")).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("object");
 		if (uri3!=null){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();

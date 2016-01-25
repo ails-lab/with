@@ -17,19 +17,42 @@
 package sources.core;
 
 public enum CommonFilters {
-		TYPE("media.type"), PROVIDER("provider"), CREATOR("Creator"), RIGHTS("media.withRights"),
-		COUNTRY("Country"), YEAR("dates"), CONTRIBUTOR("Contributor"), DATA_PROVIDER("dataProvide");
+		TYPE("media.type","Type"), 
+		PROVIDER("provider","Provider"), 
+		CREATOR("dccreator","Creator"), 
+		RIGHTS("media.withRights","Rights"),
+		COUNTRY("dctermsspatial","Spatial"), 
+		YEAR("dates","Dates"),
+		CONTRIBUTOR("dccontributor","Contributor"), 
+		DATA_PROVIDER("dataProvider","Data Provider");
 		
 		private final String text;
+		private final String id;
 
-	    private CommonFilters(final String text) {
-	        this.text = text;
+		private CommonFilters(final String id) {
+	        this.text = id;
+	        this.id = id;
+	    }
+		
+	    private CommonFilters(final String id, String text) {
+	    	this.id = id;
+	    	this.text = text;
 	    }
 
 		@Override
 	    public String toString() {
 	        return text;
-	    };
+	    }
+
+		public String getText() {
+			return text;
+		}
+
+		public String getId() {
+			return id;
+		}
+		
+		
 	
 	/*
 	//TODO: remove duplication

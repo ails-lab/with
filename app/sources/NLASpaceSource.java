@@ -42,6 +42,7 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
@@ -52,14 +53,14 @@ public class NLASpaceSource extends ISpaceSource {
 	public NLASpaceSource() {
 		LABEL = Sources.NLA.toString();
 		apiKey = "SECRET_KEY";
-		addDefaultQueryModifier(CommonFilters.TYPE.name(), qfwriter("format"));
-		addDefaultQueryModifier(CommonFilters.YEAR.name(), qfwriterYEAR());
+		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
+		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "Image", "Photograph",
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
 				"Poster, chart, other");
-		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "Video");
-		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "Sound", "Sheet music");
-		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "Books", "Article");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Video");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
 		formatreader = new NLARecordFormatter(vmap);
 
 	}
