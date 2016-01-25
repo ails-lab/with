@@ -69,7 +69,7 @@ import db.DB;
  * @author mariaral
  *
  */
-public class CollectionObjectController extends Controller {
+public class CollectionObjectController extends ResourceController {
 
 	public static final ALogger log = Logger
 			.of(CollectionObjectController.class);
@@ -321,14 +321,13 @@ public class CollectionObjectController extends Controller {
 		if (effectiveUserIds.isEmpty() || (isPublic.isDefined() && (isPublic.get() == true))) {// not logged or ask for public collections
 			// return all public collections
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB.getCollectionObjectDAO()
-					.getPublicWithACL(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
+					.getByPublicAndAcl(accessedByUserOrGroup, creatorId, isExhibitionBoolean, collectionHits, offset, count);
 			userCollections = info.x;
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
-				System.out.println("??? " + collection.getDescriptiveData().getLabel());
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
@@ -339,10 +338,10 @@ public class CollectionObjectController extends Controller {
 		} else { //logged in, check if super user, if not, restrict query to accessible by effectiveUserIds
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
 			if (!AccessManager.isSuperUser(effectiveUserIds.get(0))) 
-				info = DB.getCollectionObjectDAO().getByRestrictions(AccessManager.toObjectIds(effectiveUserIds), accessedByUserOrGroup, creatorId,
+				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(AccessManager.toObjectIds(effectiveUserIds), accessedByUserOrGroup, creatorId,
 						isExhibitionBoolean, collectionHits, offset, count);
 			else
-				info = DB.getCollectionObjectDAO().getByRestrictions(accessedByUserOrGroup, creatorId, isExhibitionBoolean,
+				info = DB.getCollectionObjectDAO().getByAcl(accessedByUserOrGroup, creatorId, isExhibitionBoolean,
 						collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
