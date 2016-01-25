@@ -69,7 +69,7 @@ import db.DB;
  * @author mariaral
  *
  */
-public class CollectionObjectController extends ResourceController {
+public class CollectionObjectController extends Controller {
 
 	public static final ALogger log = Logger
 			.of(CollectionObjectController.class);
