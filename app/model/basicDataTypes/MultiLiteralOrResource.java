@@ -16,8 +16,12 @@
 
 package model.basicDataTypes;
 
+import org.mongodb.morphia.annotations.Converters;
+
+import db.converters.MultiLiteralOrResourceConverter;
 import sources.core.Utils;
 
+@Converters(MultiLiteralOrResourceConverter.class)
 public class MultiLiteralOrResource extends MultiLiteral {
 
 	public MultiLiteralOrResource() {
