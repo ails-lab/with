@@ -19,8 +19,11 @@ package db.converters;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import model.basicDataTypes.MultiLiteralOrResource;
 
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.converters.TypeConverter;
@@ -28,13 +31,11 @@ import org.mongodb.morphia.mapping.MappedField;
 
 import com.mongodb.BasicDBList;
 
-import model.basicDataTypes.MultiLiteral;
+@Converters(MultiLiteralOrResourceConverter.class)
+public class MultiLiteralOrResourceConverter extends TypeConverter{
 
-@Converters(MultiLiteralConverter.class)
-public class MultiLiteralConverter extends TypeConverter{
-
-	public MultiLiteralConverter() {
-		super(MultiLiteral.class);
+	public MultiLiteralOrResourceConverter() {
+		super(MultiLiteralOrResource.class);
 	}
 
 	@Override
@@ -43,7 +44,7 @@ public class MultiLiteralConverter extends TypeConverter{
 		if (fromDBObject == null) 
             return null;
 		else {
-			MultiLiteral outMap = new MultiLiteral();
+			MultiLiteralOrResource outMap = new MultiLiteralOrResource();
 			for (Entry<String, BasicDBList> e: ((Map<String, BasicDBList>) fromDBObject).entrySet()) {
 				ArrayList<String> outList = new ArrayList<String>();
 				for (Object s: e.getValue()) {

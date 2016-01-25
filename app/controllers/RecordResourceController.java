@@ -49,7 +49,7 @@ import db.DB;
  * @author mariaral
  *
  */
-public class RecordResourceController extends Controller {
+public class RecordResourceController extends ResourceController {
 
 	public static final ALogger log = Logger.of(RecordResourceController.class);
 

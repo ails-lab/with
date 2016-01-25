@@ -258,11 +258,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		return this.createQuery().criteria("administrative.access.acl").hasThisElement(accessQuery);
 	}
 
-	/**
-	 * Create Mongo access criteria for the current logged in user
-	 * @param loggedInUserEffIds
-	 * @return
-	 */
+
 	protected CriteriaContainer loggedInUserWithAtLeastAccessQuery(List<ObjectId> loggedInUserEffIds, Access access) {
 		List<Criteria> criteria = new ArrayList<Criteria>();//new Criteria[loggedInUserEffIds.size()+1];
 		for (int i=0; i<loggedInUserEffIds.size(); i++) {
@@ -273,11 +269,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		return this.createQuery().or(criteria.toArray(new Criteria[criteria.size()]));
 	}
 
-	/**
-	 * Create general Mongo access criteria for users-access level specified
-	 * @param filterByUserAccess
-	 * @return
-	 */
+
 	protected CriteriaContainer atLeastAccessCriteria(List<Tuple<ObjectId, Access>> filterByUserAccess) {
 		Criteria[] criteria = new Criteria[0];
 		for (Tuple<ObjectId, Access> userAccess: filterByUserAccess) {
@@ -285,7 +277,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		}
 		return this.createQuery().or(criteria);
 	}
-
+	
 	/**
 	 * Create a basic Mongo query with withCreator field matching, offset, limit and criteria.
 	 * @param criteria

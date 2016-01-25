@@ -25,8 +25,9 @@ libraryDependencies ++= Seq(
  "com.google.code.gson" % "gson" % "2.2.4",
  "com.google.code.gson" % "gson" % "2.2.4",
  "commons-validator" % "commons-validator" % "1.4.0",
-// "org.apache.httpcomponents" % "httpclient" % "4.4",
- "org.elasticsearch" % "elasticsearch" % "1.5.1",
+ "org.apache.httpcomponents" % "httpclient" % "4.3.1",
+  "org.apache.httpcomponents" % "httpmime" % "4.3.1",
+  "org.elasticsearch" % "elasticsearch" % "1.5.1",
 // "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.5.1",
  // validate the token from the login on web browser
  // "com.google.api-client" % "google-api-client" % "1.19.1"
