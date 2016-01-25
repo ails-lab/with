@@ -73,7 +73,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		private MultiLiteralOrResource dccreator;
 		// for whom the resource is intended or useful
 		private MultiLiteralOrResource dctermsaudience;
-		// additional views of the timespan
+		// additional views of the timespan?
 		private MultiLiteralOrResource dclanguage;
 
 		// TODO: add link to external collection
