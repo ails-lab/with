@@ -49,25 +49,25 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.BritishLibrary.toString();
 		apiKey = "8bddf33bef4c14c98d469bfb1f8e78c7";
-		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("media"));
-		addDefaultWriter(CommonFilters.RIGHTS.name(), frwriter());
-		addDefaultComplexWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("media"));
+		addDefaultWriter(CommonFilters.RIGHTS.getId(), frwriter());
+		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
 		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 
 		setLicences();
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "photo");
-		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "video");
+		addMapping(CommonFilters.TYPE.getId(), RecordType.IMAGE.toString(), "photo");
+		addMapping(CommonFilters.TYPE.getId(), RecordType.VIDEO.toString(), "video");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.toString(), getLicence("0"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),
+		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.RR.toString(), getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),
 				getLicence("2"), getLicence("1"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), getLicence("1"), getLicence("2"),
+		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Modify.toString(), getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Creative.toString(), getLicence("1"), getLicence("2"),
 				getLicence("3"), getLicence("4"), getLicence("5"), getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.toString(), getLicence("7"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Public.toString(), getLicence("9"), getLicence("10"));
+		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.UNKNOWN.toString(), getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Public.toString(), getLicence("9"), getLicence("10"));
 		formatreader = new BritishLibraryRecordFormatter(vmap);
 
 	}

@@ -27,6 +27,8 @@ import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
@@ -57,16 +59,16 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DigitalNZ.toString();
 		apiKey = "SECRET_KEY";
-		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("and[category][]"));
-		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("and[creator][]"));
-		addDefaultWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
-		addDefaultWriter(CommonFilters.RIGHTS.name(), fwriter("and[usage][]"));
+		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("and[category][]"));
+		addDefaultWriter(CommonFilters.CREATOR.getId(), fwriter("and[creator][]"));
+		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("and[usage][]"));
 
 		// TODO: rights_url shows the license in the search
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "Images");
-		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "Audio");
-		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "Books");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books");
 
 		// addMapping(CommonFilters.RIGHTS.name(),
 		// RightsValues.Creative_Commercial,
@@ -89,11 +91,11 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.RR, "All rights
 		// reserved");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), "Share");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), "Modify");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), "Use commercially");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.UNKNOWN.toString(), "Unknown");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RR.toString(), "All rights reserved");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, "Share");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, "Modify");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, "Use commercially");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, "Unknown");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, "All rights reserved");
 
 		formatreader = new DNZBasicRecordFormatter(vmap);
 

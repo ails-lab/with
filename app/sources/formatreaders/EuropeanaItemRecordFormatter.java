@@ -46,7 +46,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		
-		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("type"));
+		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type"));
 		WithMediaType type = (WithMediaType) vals.get(0);
 		
 		rec.enterContext("proxies[0]");
@@ -68,7 +68,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
 		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
-		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(),
+		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
 		 rights.getURI()).get(0);
 		
 
