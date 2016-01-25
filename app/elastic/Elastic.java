@@ -21,11 +21,13 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import model.Collection;
 import model.CollectionRecord;
 
+import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
@@ -262,6 +264,14 @@ public class Elastic {
 				} catch( Exception e ) {
 					log.error( "ReIndexing problem", e );
 				}
+	}
+
+	public static void reindex_some(List<String> ids) {
+		for(String id: ids) {
+			CollectionRecord r = DB.getCollectionRecordDAO().get(new ObjectId(id));
+			ElasticIndexer ei = new ElasticIndexer(r);
+			ei.index();
+		}
 	}
 
 }

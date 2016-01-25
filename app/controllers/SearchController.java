@@ -19,10 +19,13 @@ package controllers;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -287,5 +290,19 @@ public class SearchController extends Controller {
 		});
 		return (ok());
 
+	}
+
+
+	public static Result reindex_some(String idsString) {
+		List<String> ids =  Arrays.asList(idsString.split(","));
+		Promise.promise(new Function0<String>() {
+			public String apply() throws Exception {
+				log.info("Reindex started");
+				Elastic.reindex_some(ids);
+				log.info("Reindex finished");
+				return "ok";
+			}
+		});
+		return (ok());
 	}
 }
