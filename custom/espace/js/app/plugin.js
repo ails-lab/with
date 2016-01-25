@@ -208,7 +208,8 @@ EUSpaceApp.ui = function( custom ){
 					// options
 					columnWidth		: settings.mSizer,
 					itemSelector	: settings.mItem,
-					percentPosition	: true,
+					percentPosition	: true
+					/*,
 					  onLayout: function( $elems, instance ) {
 						    // `this` refers to jQuery object of the container element
 						  console.log("onLayout");
@@ -218,7 +219,7 @@ EUSpaceApp.ui = function( custom ){
 							if( height > 0 ) { // or some other number
 								$( settings.mSelector ).height( height );
 							}
-				}
+				}*/
 				
 			});
 				$( settings.mSelector ).isotope("layout");

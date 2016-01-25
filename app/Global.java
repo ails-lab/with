@@ -22,6 +22,7 @@ import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
 import controllers.AccessFilter;
+import controllers.EffektiveUserFilter;
 import controllers.SessionFilter;
 import db.DB;
 import elastic.Elastic;
@@ -59,7 +60,7 @@ public class Global extends GlobalSettings {
 
 	//@Override
 	public <T extends EssentialFilter> Class<T>[] filters() {
-	    return new Class[] {AccessFilter.class, SessionFilter.class };
+	    return new Class[] {AccessFilter.class, SessionFilter.class, EffektiveUserFilter.class };
 	}
 
 	private void setupWithKey() {

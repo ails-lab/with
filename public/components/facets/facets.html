@@ -17,7 +17,7 @@
   <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
   
   <!-- ko foreach: $parent.filters -->
-  <!-- ko if: suggestedValues.length>0 -->
+  <!-- ko if: suggestedValues.length>0 && filterID != 'comesFrom' -->
   <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
   <!-- /ko -->
   <!-- /ko -->
