@@ -50,15 +50,20 @@ import model.basicDataTypes.ResourceType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-//import org.apache.http.HttpResponse;
-//import org.apache.http.ParseException;
-//import org.apache.http.client.HttpClient;
-//import org.apache.http.client.methods.HttpPost;
-//import org.apache.http.entity.ContentType;
-//import org.apache.http.entity.mime.HttpMultipartMode;
-//import org.apache.http.entity.mime.MultipartEntityBuilder;
-//import org.apache.http.impl.client.DefaultHttpClient;
-//import org.apache.http.util.EntityUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.bson.types.ObjectId;
 
 import play.Logger;
@@ -342,7 +347,7 @@ public class MediaController extends Controller {
 	private static void parseMediaCheckerReply(MediaObject med, JsonNode json) {
 
 		MediaType mime = MediaType.parse(json.get("mimetype").asText().toUpperCase());
-
+		
 		med.setMimeType(mime);
 
 		med.setHeight(json.get("height").asInt());
@@ -558,27 +563,27 @@ public class MediaController extends Controller {
 		return mthumb;
 	}
 
-	private static JsonNode parseMediaFile(File fileToParse, String fileName)  {
+	private static JsonNode parseMediaFile(File fileToParse, String fileName) {
 		// TODO: fix exception (add allrez)
 
 		// Logger.info("mediafile, " + "file://"+fileToParse.getName()+ ", " +
 		// fileToParse);
 	
-		
+//		
 //		HttpClient hc = new DefaultHttpClient();
 //
 //		JsonNode resp = Json.newObject();
-//		//try {
+//		try {
 //	
 //			HttpPost aFile = new HttpPost("http://mediachecker.image.ntua.gr/api/extractmetadata");
 //			File testFile = fileToParse;
 //			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 //			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-//			builder.addBinaryBody("upfile", testFile, ContentType.create("image/jpeg"), fileName);
+//			builder.addBinaryBody("mediafile", testFile, ContentType.create("image/jpeg"), fileName);
 //			aFile.setEntity(builder.build());
 //			HttpResponse response = hc.execute(aFile);
 //			String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF8");
-//			String id = JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
+//			//String id = JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
 //			aFile.releaseConnection();
 //			resp = Json.parse(jsonResponse);
 //			
@@ -586,31 +591,67 @@ public class MediaController extends Controller {
 //
 //			Logger.info(resp.asText());
 //
-//		//} catch (Exception e) {
+//		} catch (Exception e) {
 //		// TODO Auto-generated catch block
-//		// e.printStackTrace();
-//		//}
+//		 e.printStackTrace();
+//		}
+//		
+//		
+		Logger.info("filename: " + fileName);
+		
+		//HttpClient hc = new DefaultHttpClient();
 
-
+		CloseableHttpClient hc = HttpClients.createDefault();
 		
-		
-		
-		
-	
-		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata";
-		// Logger.info("URL: " + queryURL);
-		JsonNode response = null;
+		JsonNode resp = Json.newObject();
 		try {
-			// response = sources.core.HttpConnector.postFile(queryURL,
-			// fileToParse, "mediafile",
-			// "file://"+fileToParse.getAbsolutePath());
-			response = sources.core.HttpConnector.postMultiPartFormData(queryURL, fileToParse, "mediafile",
-					fileToParse.getName());
+	
+			HttpPost aFile = new HttpPost("http://mediachecker.image.ntua.gr/api/extractmetadata");
+			//File testFile = fileToParse;
+			FileBody fileBody = new FileBody(fileToParse);
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			//builder.addBinaryBody("mediafile", testFile, ContentType.create("image/jpeg"), fileName);
+			builder.addPart("mediafile", fileBody);
+			aFile.setEntity(builder.build());
+			CloseableHttpResponse response = hc.execute(aFile);
+			String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF8");
+			//String id = JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
+			resp = Json.parse(jsonResponse);
+			
+			Logger.info(jsonResponse);
+			
+			Logger.info("Called!");
+			aFile.releaseConnection();
+
+			response.close();
+			hc.close();
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			// e.printStackTrace();
+		// TODO Auto-generated catch block
+		 e.printStackTrace();
 		}
+		
+		
+		
+		return resp;
+
+		
+//	
+//		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata";
+//		// Logger.info("URL: " + queryURL);
+//		JsonNode response = null;
+//		try {
+//			// response = sources.core.HttpConnector.postFile(queryURL,
+//			// fileToParse, "mediafile",
+//			// "file://"+fileToParse.getAbsolutePath());
+//			response = sources.core.HttpConnector.postMultiPartFormData(queryURL, fileToParse, "mediafile",
+//					fileToParse.getName());
+//
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			// e.printStackTrace();
+//		}
 
 		// //String filename = fileToParse.getName();
 		//
@@ -631,6 +672,13 @@ public class MediaController extends Controller {
 		//
 		// try {
 		//
+
+
+
+
+
+
+
 		// response = sources.core.HttpConnector.postJson(queryURL, node);
 		//
 		// } catch (Exception e) {
@@ -640,7 +688,6 @@ public class MediaController extends Controller {
 
 		// Logger.info("response: " + response);
 
-		return response;
 	}
 
 	private static JsonNode parseMediaURL(String mediaURL) {
