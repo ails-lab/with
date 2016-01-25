@@ -102,18 +102,18 @@ public class ElasticSearcher {
 
 		public void addFilter(String key, String value) {
 			ArrayList<String> values = null;
-			if(filters.containsKey(key)) {
+			if (filters.containsKey(key)) {
 				values = filters.get(key);
 			} else {
 				values = new ArrayList<String>();
 				filters.put(key, values);
 			}
-
 			values.add(value);
 		}
 
 		public void setFilterType(String type) {
-			if(type.equalsIgnoreCase("or")) filterType = FILTER_OR;
+			if (type.equalsIgnoreCase("or"))
+				filterType = FILTER_OR;
 			else filterType = FILTER_AND;
 		}
 	}
@@ -143,6 +143,7 @@ public class ElasticSearcher {
 		TermsBuilder termAgg = AggregationBuilders.terms("types").field("type_all");
 		TermsBuilder providerAgg = AggregationBuilders.terms("providers").field("provider_all");
 		TermsBuilder dataProviderAgg = AggregationBuilders.terms("dataProviders").field("dataProvider_all");
+		TermsBuilder sourceAgg 	= AggregationBuilders.terms("source").field("source_all");
 		TermsBuilder creatorAgg = AggregationBuilders.terms("creators").field("creator_all");
 		TermsBuilder rightsAgg = AggregationBuilders.terms("rights").field("rights_all");
 		TermsBuilder countryAgg = AggregationBuilders.terms("countries").field("country_all");
@@ -151,6 +152,7 @@ public class ElasticSearcher {
 		search.addAggregation(termAgg)
 			  .addAggregation(providerAgg)
 			  .addAggregation(dataProviderAgg)
+			  .addAggregation(sourceAgg)
 			  .addAggregation(creatorAgg)
 			  .addAggregation(rightsAgg)
 			  .addAggregation(countryAgg)
@@ -324,7 +326,6 @@ public class ElasticSearcher {
 				  .setScroll(new TimeValue(60000))
 				  .setSize(100);
 		}
-		System.out.println("got in here!");
 		//search.addSort( new FieldSortBuilder("record.source").unmappedType("String").order(SortOrder.ASC).missing(""));
 		FilterBuilder filterBuilder = null;
 
@@ -333,24 +334,26 @@ public class ElasticSearcher {
 
 		if(options.filters.size() > 0) {
 			OrFilterBuilder accessibles = FilterBuilders.orFilter();
-			OrFilterBuilder sources 	= FilterBuilders.orFilter();
-			OrFilterBuilder others 		= FilterBuilders.orFilter();
+			AndFilterBuilder faceted 	= FilterBuilders.andFilter();
 			for(String key: options.filters.keySet()) {
-				for(String value: options.filters.get(key)) {
-					if(key.equals("isPublic") || key.equals("collections")) {
+				if(key.equals("isPublic") || key.equals("collections")) {
+					for(String value: options.filters.get(key)) {
 						accessibles.add(this.filter(key, value));
-					} else if(key.equals("source")) {
-						sources.add(this.filter(key, value));
-					} else {
-						others.add(this.filter(key, value));
 					}
+				} else {
+					OrFilterBuilder multiValues = FilterBuilders.orFilter();
+					for(String value: options.filters.get(key)) {
+						multiValues.add(this.filter(key, value));
+					}
+					faceted.add(multiValues);
 				}
 			}
+
 			if(options.filterType == FILTER_OR) {
-				((OrFilterBuilder) filterBuilder).add(accessibles).add(sources).add(others);
+				((OrFilterBuilder) filterBuilder).add(accessibles).add(faceted);
 			}
 			else {
-				((AndFilterBuilder) filterBuilder).add(accessibles).add(sources).add(others);
+				((AndFilterBuilder) filterBuilder).add(accessibles).add(faceted);
 			}
 			QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
 			search.setQuery(filtered);

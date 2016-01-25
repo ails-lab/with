@@ -127,8 +127,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	*/
 
 	/**
-	 * Retrieve records from specific collection using position
-	 * which is between lowerBound and upperBound
+	 * Retrieve records from specific collection whose position
+	 * is is between lowerBound and upperBound
 	 *
 	 * @param colId, lowrBound, upperBound
 	 * @return

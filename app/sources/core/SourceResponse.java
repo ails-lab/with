@@ -18,6 +18,7 @@ package sources.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import model.CollectionRecord;
 import model.ExternalBasicRecord;
@@ -32,6 +33,7 @@ import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import db.DB;
 import elastic.ElasticUtils;
 
 public class SourceResponse {
@@ -65,16 +67,32 @@ public class SourceResponse {
 		List<WithResource<?>> items = new ArrayList<>();
 		
 //		TODO make it using the new model...
-//		for (CollectionRecord r : elasticrecords) {
-//			ExternalBasicRecord item = new ExternalBasicRecord();
-//			Provider provider = new Provider(source);
-//			provider.providerName = source;
-//			item.addProvider(provider);
-//			item.setTitle(r.getTitle());
-//			item.setDescription(r.getDescription());
-//			item.setThumbnailUrl(r.getThumbnailUrl().toString());
-//			items.add(item);
-//		}
+//for (CollectionRecord er : elasticrecords) {
+//	ItemsResponse it = new ItemsResponse();
+//	List<CollectionRecord> rs = DB.getCollectionRecordDAO().getByExternalId(er.getExternalId());
+//	if (rs != null && !rs.isEmpty()) {
+//		CollectionRecord r = rs.get(0);
+//		it.comesFrom = r.getSource();
+//		it.title = r.getTitle();
+//		it.description = r.getDescription();
+//		it.id = r.getDbId().toString();
+//		if(r.getThumbnailUrl() != null)
+//			it.thumb = Arrays.asList(r.getThumbnailUrl().toString());
+//		if (r.getIsShownBy() != null)
+//			it.fullresolution = Arrays.asList(r.getIsShownBy().toString());
+//		it.url = new MyURL();
+//		it.url.fromSourceAPI = r.getSourceUrl();
+//		it.provider = r.getProvider();
+//		it.externalId = r.getExternalId();
+//		it.type = r.getType();
+//		it.rights = r.getItemRights();
+//		it.dataProvider = r.getDataProvider();
+//		it.creator = r.getCreator();
+//		it.year = new ArrayList<>(Arrays.asList(r.getYear()));
+//	    it.tags = er.getTags();
+//		items.add(it);
+//	}
+//}
 		this.items.setCulturalCHO(items);
 	}
 

@@ -65,20 +65,22 @@ public class AccessManager {
 		}*/
 		return false;
 	}
+	
+	public static boolean isSuperUser(String userId) {
+		 return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
+	}
 
-	public static boolean checkAccess(WithAccess rights,
-			List<String> userIds, Action action) {
-		/*for (String id : userIds) {
-			User user = DB.getUserDAO().getById(new ObjectId(id),
-					new ArrayList<String>(Arrays.asList("superUser")));
-			if (user != null && user.isSuperUser())
-				return true;
-			else if (rights.containsKey(new ObjectId(id))
-					&& (rights.get(new ObjectId(id)).ordinal() > action
-							.ordinal()))
-				return true;
-		}*/
-		return false;
+	public static boolean hasAccess(List<String> userIds, Action action, ObjectId resourceId) {
+		
+		return DB.getWithResourceDAO().hasAccess(toObjectIds(userIds), action, resourceId);
+	}
+	
+	public static List<ObjectId> toObjectIds(List<String> userIds) {
+		List<ObjectId> objectIds = new ArrayList<ObjectId>();
+		for (String userId: userIds) {
+			objectIds.add(new ObjectId(userId));
+		}
+		return objectIds;
 	}
 
 	public static boolean checkAccessRecursively(Map<ObjectId, Access> rights,
@@ -89,17 +91,17 @@ public class AccessManager {
 	public static Access getMaxAccess(WithAccess rights,
 			List<String> userIds) {
 		Access maxAccess = Access.NONE;
-		/*for (String id : userIds) {
+		for (String id : userIds) {
 			User user = DB.getUserDAO().getById(new ObjectId(id),
 					new ArrayList<String>(Arrays.asList("superUser")));
 			if (user != null && user.isSuperUser())
 				return Access.OWN;
-			else if (rights.containsKey(new ObjectId(id))) {
-				Access access = rights.get(new ObjectId(id));
+			else if (rights.getAcl().contains(new ObjectId(id))) {
+				Access access = rights.getAcl(new ObjectId(id));
 				if (access.ordinal() > maxAccess.ordinal())
 					maxAccess = access;
 			}
-		}*/
+		}
 		return maxAccess;
 	}
 
