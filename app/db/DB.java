@@ -45,8 +45,8 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 
 import db.converters.AccessEnumConverter;
+import db.converters.MultiLiteralOrResourceConverter;
 import db.converters.MultiLiteralConverter;
-import db.converters.RightsConverter;
 
 
 // get the DAOs from here
@@ -109,7 +109,9 @@ public class DB {
 			//morphia.mapPackage("model.usersAndGroups");
 			//morphia.map(User.class);
 			morphia.getMapper().getConverters()
-				.addConverter(new MultiLiteralConverter());
+				.addConverter(new MultiLiteralOrResourceConverter());
+			morphia.getMapper().getConverters()
+			.addConverter(new MultiLiteralConverter());
 			morphia.getMapper().getConverters()
 				.addConverter(new AccessEnumConverter());
 			//Mapper mapper = morphia.getMapper();

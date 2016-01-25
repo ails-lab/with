@@ -59,6 +59,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 
@@ -120,7 +121,67 @@ public class TestNewModelMediaController {
 		assertThat(image.getDbId()).isNotNull();
 		return image;
 	}
+	
+	
+	
 
+	@Test
+	// Testing file upload doesn't seem to be supported
+	public void testMediaParser() {
+		// make a user with password
+		User u = new User();
+		u.setEmail("my@you.me");
+		u.setUsername("cool_url");
+		// set password after email, email salts the password!
+		u.setPassword("secret");
+		DB.getUserDAO().makePermanent(u);
+
+		running(testServer(3333), () -> {
+			try {
+				HttpClient hc = new DefaultHttpClient();
+				HttpPost loginToWith = new HttpPost("http://localhost:3333/user/login");
+				String json = "{\"email\":\"my@you.me\",\"password\":\"secret\"}";
+				StringEntity se = new StringEntity(json, "UTF8");
+				loginToWith.setEntity(se);
+				loginToWith.addHeader("Content-type", "text/json");
+
+				HttpResponse response = hc.execute(loginToWith);
+				if (response.getStatusLine().getStatusCode() != 200) {
+					Assert.fail("Login failed");
+				}
+				loginToWith.releaseConnection();
+
+				// now try to upload a file
+				HttpPost aFile = new HttpPost("http://mediachecker.image.ntua.gr/api/extractmetadata");
+				File testFile = new File("public/images/dancer.jpg");
+				MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+				builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+				builder.addBinaryBody("upfile", testFile, ContentType.create("image/jpeg"), "testImage001.jpg");
+				aFile.setEntity(builder.build());
+				response = hc.execute(aFile);
+				String jsonResponse = EntityUtils.toString(response.getEntity(), "UTF8");
+				String id = JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
+				aFile.releaseConnection();
+				
+				System.out.println(jsonResponse);
+				
+				Logger.info(jsonResponse);
+				Logger.info(jsonResponse);
+
+				assertThat(id).isNotEmpty();
+
+
+			} catch (Exception e) {
+				Assert.fail(e.toString());
+			}
+		});
+	}
+
+	
+	
+	
+	
+/*
 	// @Test
 	public void testGetMetadata() {
 		MediaObject image = createImage();
@@ -313,5 +374,5 @@ public class TestNewModelMediaController {
 			}
 		});
 	}
-
+*/
 }
