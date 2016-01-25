@@ -36,6 +36,12 @@ public class CommonFilterLogic implements Cloneable {
 	
 	public CommonFilterLogic(String filter) {
 		this.data.filterID = filter;
+		this.data.filterName = filter;
+	}
+	
+	public CommonFilterLogic(String filter, String text) {
+		this.data.filterID = filter;
+		this.data.filterName = text;
 	}
 	
 	public void addValue(String value, int count) {

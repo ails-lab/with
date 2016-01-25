@@ -25,6 +25,18 @@ public class CommonFilterResponse {
 
 	public CommonFilterResponse() {
 	}
+	
+	public CommonFilterResponse(String filterID, String filterName) {
+		super();
+		this.filterID = filterID;
+		this.filterName = filterName;
+	}
+
+	public CommonFilterResponse(String filterID) {
+		super();
+		this.filterID = filterID;
+		this.filterName = filterID;
+	}
 
 	@Override
 	public String toString() {
