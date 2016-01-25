@@ -17,8 +17,8 @@
 package sources.core;
 
 public enum CommonFilters {
-		TYPE("Type"), PROVIDER("Provider"), CREATOR("Creator"), RIGHTS("Content Usage"),
-		COUNTRY("Country"), YEAR("Year"), CONTRIBUTOR("Contributor"), DATA_PROVIDER("Data Provider");
+		TYPE("media.type"), PROVIDER("provider"), CREATOR("Creator"), RIGHTS("media.withRights"),
+		COUNTRY("Country"), YEAR("dates"), CONTRIBUTOR("Contributor"), DATA_PROVIDER("dataProvide");
 		
 		private final String text;
 

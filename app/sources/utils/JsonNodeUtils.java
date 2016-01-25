@@ -62,8 +62,16 @@ public class JsonNodeUtils {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
 				JsonNode value = next.getValue();
-				for (int i = 0; i < value.size(); i++) {
-					res.addLiteral(language, value.get(i).asText());
+				if (language!=null){
+					for (int i = 0; i < value.size(); i++) {
+						res.addLiteral(language, value.get(i).asText());
+					}
+				} else {
+					List<String> asString = asStringArray(value);
+					for (int i = 0; i < asString.size(); i++) {
+						res.addLiteral(Language.DEF, asString.get(i));
+					}
+					System.out.println("Unknown Format!!! "+asString);
 				}
 			}
 			res.fillDEF();
@@ -92,7 +100,10 @@ public class JsonNodeUtils {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
 				JsonNode value = next.getValue();
-				res.addLiteral(language, value.get(0).asText());
+				if (language != null)
+					res.addLiteral(language, value.get(0).asText());
+				else
+					res.addLiteral(Language.DEF, asString(value));
 			}
 			res.fillDEF();
 			return res;

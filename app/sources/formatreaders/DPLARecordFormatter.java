@@ -16,14 +16,21 @@
 
 package sources.formatreaders;
 
+import java.util.List;
+
+import com.sun.javafx.animation.TickCalculation;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
+import sources.core.CommonFilters;
 import sources.utils.JsonContextRecord;
 
 public class DPLARecordFormatter extends CulturalRecordFormatter {
@@ -36,36 +43,50 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		
+		
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue("originalRecord.spatial"));
+		
 		model.setLabel(rec.getMultiLiteralValue("sourceResource.title"));
 		model.setDescription(rec.getMultiLiteralValue("sourceResource.description"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
+//		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
-		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
+//		model.setDates(rec.getWithDateArrayValue("year"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("sourceResource.creator"));
-
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("sourceResource.subject"));
+		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), uriAt,null));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name")));
+		String recID = rec.getStringValue("id");
+		String uri = "http://dp.la/item/"+recID;
 		object.addToProvenance(
-				new ProvenanceInfo(rec.getStringValue("provider.name"), null, rec.getStringValue("provider.@id")));
-		String id = rec.getStringValue("id");
-		object.addToProvenance(new ProvenanceInfo(Sources.DPLA.toString(), "http://dp.la/item/" + id, id));
-		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue("object"));
-		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		// TODO: add rights!
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
-		object.addMedia(MediaVersion.Original, med);
+				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
+		List<String> rights = rec.getStringArrayValue("rights");
+		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.name(), rec.getStringValue("sourceResource.type")).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.name(), rights.get(0)).get(0);
+		String uri3 = rec.getStringValue("object");
+		if (uri3!=null){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri3);
+			medThumb.setType(type);
+//			medThumb.setParentID(model.getIsShownBy().getURI());
+			if (rights!=null)
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setWithRights(withRights);
+			object.addMedia(MediaVersion.Thumbnail, medThumb);
+		}
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		if (uri2!=null){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setParentID("self");
+			med.setUrl(uri2);
+			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			med.setWithRights(withRights);
+			med.setType(type);
+			object.addMedia(MediaVersion.Original, med);
+		}
 		return object;
-		// //TODO: add type
-		// //TODO: add null checks
-		// object.setDescription(rec.getStringValue("sour
-		// ceResource.description"));
-		// object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-		// // TODO: add years
-		//// object.setYears(ListUtils.transform(rec.getStringArrayValue("year"),
-		// (String y)->{return Year.parse(y);}));
-		// // TODO: add rights
-		//// object.setItemRights(rec.getStringValue("sourceResource.rights"));
+		
 	}
 
 }

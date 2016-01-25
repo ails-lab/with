@@ -23,6 +23,8 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
@@ -73,27 +75,27 @@ public class DPLASpaceSource extends ISpaceSource {
 		 */
 
 		addDefaultWriter(CommonFilters.RIGHTS.name(), fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative_Not_Commercial, ".*creative.*nc.*",
 				".*non-commercial.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRPA.toString(), ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRRA.toString(), ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*rr-f.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RRPA, ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RRRA, ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RRFA, ".*rr-f.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RRFA, ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative_Not_Modify, ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), ".*(creative).*");
+		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative, ".*(creative).*");
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "image");
-		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "moving image");
-		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "sound");
-		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "text");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.IMAGE, "image");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.VIDEO, "moving image");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.AUDIO, "sound");
+		addMapping(CommonFilters.TYPE.name(), WithMediaType.TEXT, "text");
 
 		formatreader = new DPLARecordFormatter(vmap);
 
