@@ -414,8 +414,8 @@ public class UserManager extends Controller {
 	}
 
 	public static Result getUser(String id) {
-		try {
 			User user = DB.getUserDAO().getById(new ObjectId(id), null);
+			try {
 			if (user != null) {
 				ObjectNode result = (ObjectNode) Json.parse(Json.toJson(user).toString());
 				//result.put("favoritesId",
@@ -460,9 +460,7 @@ public class UserManager extends Controller {
 				return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
 			}
 		} catch (Exception e) {
-			ObjectNode error = Json.newObject();
-			error.put("error", e.getMessage());
-			return internalServerError(error);
+			return ok(Json.toJson(user));
 		}
 	}
 

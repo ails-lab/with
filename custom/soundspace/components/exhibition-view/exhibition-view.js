@@ -71,7 +71,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
 
     function EViewModel(params) {
         document.body.setAttribute("data-page","collection");
-        
+        setTimeout(function(){ WITHApp.init(); }, 300);
         var self = this;
 
         var $container = $(".grid");

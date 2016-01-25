@@ -96,7 +96,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  this.route = params.route;
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
-	  //setTimeout(function(){ WITHApp.init(); }, 300);
+	  setTimeout(function(){ WITHApp.init(); }, 300);
 	  self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featured=ko.observable(null);	
@@ -105,7 +105,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.totalExhibitions=ko.observable(0);
 	  self.hash=window.location.hash;
 	  var $container = $(".grid").isotope({
-			itemSelector: '.media',
+			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
 				columnWidth		: '.sizer',
@@ -290,6 +290,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
+		    $container.isotope( 'layout' );
 		    var scrollpos=sessionStorage.getItem("homemasonryscroll");
 			
 		    

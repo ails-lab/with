@@ -43,8 +43,6 @@ public class ApiKey {
 	public static final ALogger log = Logger.of(ApiKey.class);
 
 	public static enum Response {
-		// INVALID_xxxx have to be checked somewhere else
-//		INVALID_IP, EXPIRED_IP, INVALID_APIKEY, EXPIRED_APIKEY, BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED, ALLOWED
 		EMPTY_APIKEY, INVALID_APIKEY, EXPIRED_APIKEY, BLOCKED_CALL, COUNT_LIMIT_REACHED, VOLUME_LIMIT_REACHED, ALLOWED	
 	}
 
@@ -52,10 +50,19 @@ public class ApiKey {
 	// for a limited number of times
 	// or with limited transfer volume
 	public static class CallLimit implements Cloneable {
+		// how often was the pattern called
 		public long counter = 0l;
+		
+		// how much data was transfered in this pattern 
 		public long volume = 0l;
+		
+		// is there a limit on volume on this pattern
 		public long volumeLimit = -1l;
+		
+		// is there a number limit on this call
 		public long counterLimit = -1l;
+		
+		// the call follows this pattern
 		public String regexp;
 
 		// this shouldn't be stored in the db
@@ -264,14 +271,6 @@ public class ApiKey {
 	public void setExpires(Date expires) {
 		this.expires = expires;
 	}
-
-//	public String getIpPattern() {
-//		return ipPattern;
-//	}
-
-//	public void setIpPattern(String ipPattern) {
-//		this.ipPattern = ipPattern;
-//	}
 
 	public String getName() {
 		return name;

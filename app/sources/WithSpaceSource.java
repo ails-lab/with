@@ -60,16 +60,16 @@ import elastic.ElasticUtils;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
-	
+
 	//there should be a filter on source
 	//in general, more filters in new model for search within WITH db
 	public enum WithinFilters {
 		Provider("provider"), Type("type"), DataProvider("dataprovider"),
 		Creator("creator"), Rights("rights"),
 		Country("country"), Year("year");
-		
-		private String value;
-		
+
+		private final String value;
+
 		WithinFilters(String value) {
 	        this.value = value;
 	    }

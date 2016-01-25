@@ -55,7 +55,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 	function ProvidersViewModel(params) {
 		this.route = params.route;
 	    document.body.setAttribute("data-page","contentproviders");
-	    //setTimeout(function(){ EUSpaceUI.init(); }, 300);
+	    setTimeout(function(){ WITHApp.init(); }, 300);
 		var self = this;
 
 		var $container = $(".grid");

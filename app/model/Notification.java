@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
 import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 import model.basicDataTypes.WithAccess.Access;
 import utils.Serializer;
 
@@ -98,7 +99,14 @@ public class Notification {
 			return null;
 		}
 		User user = DB.getUserDAO().get(this.sender);
-		return user.getFirstName() + " " + user.getLastName();
+		if (user != null) {
+			return user.getFirstName() + " " + user.getLastName();
+		}
+		UserGroup group = DB.getUserGroupDAO().get(this.sender);
+		if (group != null) {
+			return group.getFriendlyName();
+		}
+		return "DELETED";
 	}
 
 	public void setSender(ObjectId sender) {
@@ -117,7 +125,11 @@ public class Notification {
 		if (this.collection == null) {
 			return null;
 		}
-		return DB.getCollectionDAO().get(this.collection).getTitle();
+		Collection col = DB.getCollectionDAO().get(this.collection);
+		if (col != null) {
+			return col.getTitle();
+		}
+		return "DELETED";
 	}
 
 	public ObjectId getGroup() {
@@ -132,7 +144,11 @@ public class Notification {
 		if (this.group == null) {
 			return null;
 		}
-		return DB.getUserGroupDAO().get(this.group).getFriendlyName();
+		UserGroup gr = DB.getUserGroupDAO().get(this.group);
+		if (gr != null) {
+			return gr.getFriendlyName();
+		}
+		return "DELETED";
 	}
 
 	public String getMessage() {
