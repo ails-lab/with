@@ -157,25 +157,27 @@ public class CollectionObjectController extends Controller {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			if (!DB.getWithResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.READ, collectionDbId)) {
-				result.put("error",
-						"User does not have read-access for the resource");
-				return forbidden(result);
-			}
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					new ObjectId(id));
-			if (collection == null) {
+			if (!DB.getWithResourceDAO().existsResource(collectionDbId)) {
 				log.error("Cannot retrieve resource from database");
 				result.put("error", "Cannot retrieve resource from database");
 				return internalServerError(result);
 			}
-			List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
-					.getFirstEntries(collectionDbId, 5);
-			result = (ObjectNode) Json.toJson(collection);
-			result.put("firstEntries", Json.toJson(firstEntries));
-			return ok(Json.toJson(collection));
+			else {
+				if (!DB.getWithResourceDAO().hasAccess(
+						AccessManager.effectiveUserDbIds(session().get(
+								"effectiveUserIds")), Action.READ, collectionDbId)) {
+					result.put("error",
+							"User does not have read-access for the resource");
+					return forbidden(result);
+				}
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						new ObjectId(id));
+				List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
+						.getFirstEntries(collectionDbId, 5);
+				result = (ObjectNode) Json.toJson(collection);
+				result.put("firstEntries", Json.toJson(firstEntries));
+				return ok(Json.toJson(collection));
+			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);

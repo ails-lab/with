@@ -24,9 +24,7 @@ import java.util.function.BiFunction;
 
 import model.DescriptiveData;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -34,9 +32,7 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.FieldEnd;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import com.mongodb.BasicDBObject;
@@ -296,7 +292,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	
 	public boolean hasAccess(List<ObjectId> effectiveIds,  Action action, ObjectId resourceId) {
 		CriteriaContainer criteria = loggedInUserWithAtLeastAccessQuery(effectiveIds, actionToAccess(action));
-		Query<T> q = this.createQuery().disableValidation().limit(1);
+		Query<T> q = this.createQuery();
 		q.field("_id").equal(resourceId);
 		q.or(criteria);
 		return (this.find(q).asList().size()==0? false: true);
