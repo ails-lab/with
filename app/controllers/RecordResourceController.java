@@ -51,27 +51,9 @@ import db.DB;
  * @author mariaral
  *
  */
-public class RecordResourceController extends Controller {
+public class RecordResourceController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(RecordResourceController.class);
-	
-	public static Status errorIfNoAccessToCollection(Action action, ObjectId collectionDbId) {
-		ObjectNode result = Json.newObject();
-		if (!DB.getRecordResourceDAO().existsResource(collectionDbId)) {
-			log.error("Cannot retrieve resource from database");
-			result.put("error", "Cannot retrieve resource from database");
-			return internalServerError(result);
-		}
-		else
-			if (!AccessManager.hasAccessToCollectionResource(session().get(
-					"effectiveUserIds"), action, collectionDbId)) {
-				result.put("error",
-					"User does not have read-access for the resource");
-				return forbidden(result);
-			}
-			else 
-				return ok();
-	}
 
 	/**
 	 * Retrieve a resource metadata. If the format is defined the specific
@@ -88,7 +70,7 @@ public class RecordResourceController extends Controller {
 		try {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-			Result response = errorIfNoAccessToCollection(Action.READ, new ObjectId(id));
+			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
 			if (!response.equals(ok()))
 				return response;
 			else {
@@ -134,7 +116,7 @@ public class RecordResourceController extends Controller {
 		try {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-			Result response = errorIfNoAccessToCollection(Action.DELETE, new ObjectId(id));
+			Result response = errorIfNoAccessToRecord(Action.DELETE, new ObjectId(id));
 			if (!response.equals(ok()))
 				return response;
 			else {
@@ -228,7 +210,7 @@ public class RecordResourceController extends Controller {
 			else {
 				RecordResource oldResource = DB.getRecordResourceDAO().get(
 						new ObjectId(id));
-				Result response = errorIfNoAccessToCollection(Action.EDIT, new ObjectId(id));
+				Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(id));
 				if (!response.equals(ok()))
 					return response;
 				else {

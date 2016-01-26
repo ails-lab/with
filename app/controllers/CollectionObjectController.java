@@ -69,28 +69,10 @@ import db.DB;
  * @author mariaral
  *
  */
-public class CollectionObjectController extends Controller {
+public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger
 			.of(CollectionObjectController.class);
-	
-	public static Status errorIfNoAccessToCollection(Action action, ObjectId collectionDbId) {
-		ObjectNode result = Json.newObject();
-		if (!DB.getCollectionObjectDAO().existsResource(collectionDbId)) {
-			log.error("Cannot retrieve resource from database");
-			result.put("error", "Cannot retrieve resource from database");
-			return internalServerError(result);
-		}
-		else
-			if (!AccessManager.hasAccessToCollectionResource(session().get(
-					"effectiveUserIds"), action, collectionDbId)) {
-				result.put("error",
-					"User does not have read-access for the resource");
-				return forbidden(result);
-			}
-			else 
-				return ok();
-	}
 
 	/**
 	 * Creates a new WITH resource from the JSON body

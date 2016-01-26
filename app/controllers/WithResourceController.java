@@ -42,6 +42,7 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.Results.Status;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.RecordJSONMetadata;
@@ -55,6 +56,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import db.WithResourceDAO;
 
 /**
  * @author mariaral
@@ -64,6 +66,32 @@ import db.DB;
 public class WithResourceController extends Controller {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
+	
+	public static Status errorIfNoAccessToWithResource(WithResourceDAO resourceDAO, Action action, ObjectId id) {
+		ObjectNode result = Json.newObject();
+		if (!resourceDAO.existsResource(id)) {
+			log.error("Cannot retrieve resource from database");
+			result.put("error", "Cannot retrieve resource from database");
+			return internalServerError(result);
+		}
+		else
+			if (!resourceDAO.hasAccess(AccessManager.effectiveUserDbIds(session().get(
+					"effectiveUserIds")), action, id)) {
+				result.put("error",
+					"User does not have read-access for the resource");
+				return forbidden(result);
+			}
+			else 
+				return ok();
+	}
+	
+	public static Status errorIfNoAccessToCollection(Action action, ObjectId collectionDbId) {
+		return errorIfNoAccessToWithResource(DB.getCollectionObjectDAO(), action, collectionDbId);
+	}
+	
+	public static Status errorIfNoAccessToRecord(Action action, ObjectId recordId) {
+		return errorIfNoAccessToWithResource(DB.getCollectionObjectDAO(), action, recordId);
+	}
 
 	/**
 	 * @param id
@@ -79,6 +107,7 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
 		try {
+			
 			if (!DB.getWithResourceDAO().hasAccess(
 					AccessManager.effectiveUserDbIds(session().get(
 							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
