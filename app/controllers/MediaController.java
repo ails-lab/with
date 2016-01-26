@@ -45,8 +45,6 @@ import model.ExternalBasicRecord.ItemRights;
 import model.Media;
 import model.MediaObject;
 import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.ResourceType;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
