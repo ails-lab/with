@@ -410,7 +410,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
 		CollectionInfo entry = new CollectionInfo(colId, position);
-		if(collectedIn == null)
+		if (collectedIn == null)
 			collectedIn = new ArrayList<CollectionInfo>();
 		collectedIn.add(entry);
 

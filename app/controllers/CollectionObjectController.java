@@ -386,7 +386,7 @@ public class CollectionObjectController extends WithResourceController {
 		for (CollectionObject collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(collection.getAdministrative().getAccess(), effectiveUserIds);
-			if (!collection.getDescriptiveData().getLabel().get(Language.DEF).equals("_favorites")) {
+			if (!collection.getDescriptiveData().getLabel().get(Language.DEFAULT).equals("_favorites")) {
 				if (maxAccess.equals(Access.NONE)) {
 					maxAccess = Access.READ;
 				}

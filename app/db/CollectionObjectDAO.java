@@ -52,6 +52,12 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public CollectionObjectDAO() {
 		super(CollectionObject.class);
 	}
+	
+	public boolean isFavorites(ObjectId dbId) {
+		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
+		q.field("descriptiveData.label.def").equal("favorites");
+		return (this.find(q).asList().size()==0? false: true);
+	}
 
 	/**
 	 * Increment entryCount (number of entries collected) in a CollectionObject
@@ -93,28 +99,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		updateFields("", json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
-	}
-
-	public void updateFields(String parentField, JsonNode node,
-			UpdateOperations<CollectionObject> updateOps) {
-		Iterator<String> fieldNames = node.fieldNames();
-		  while (fieldNames.hasNext()) {
-	         String fieldName = fieldNames.next();
-	         JsonNode fieldValue = node.get(fieldName);
-        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
-	         if (fieldValue.isObject()) {
-	        	 updateFields(newFieldName, fieldValue, updateOps);
-	         }
-	         else {//value
-				try {
-					ObjectMapper mapper = new ObjectMapper();
-					Object value = mapper.treeToValue(fieldValue, newFieldName.getClass());
-					updateOps.disableValidation().set(newFieldName, value);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}	 
-	         }
-	     }
 	}
 	
 	public List<CollectionObject> getBySpecificAccess(

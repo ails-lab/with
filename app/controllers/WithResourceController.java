@@ -17,11 +17,14 @@
 package controllers;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import jdk.management.resource.ResourceId;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -101,151 +104,96 @@ public class WithResourceController extends Controller {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static Result addRecordToCollection(String id,
+	public static Result addRecordToCollection(String colId,
 			Option<Integer> position) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
-		ObjectId collectionDbId = new ObjectId(id);
+		ObjectId collectionDbId = new ObjectId(colId);
 		try {
-			
-			if (!DB.getWithResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
-			}
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					collectionDbId);
-			if (collection == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
-			}
-			if (json == null) {
-				result.put("error", "Invalid JSON");
-				return badRequest(result);
-			}
-			RecordResource record = Json.fromJson(json, RecordResource.class);
-			int last = record.getProvenance().size() - 1;
-			Sources source = Sources.valueOf(((ProvenanceInfo) record
-					.getProvenance().get(last)).getProvider());
-			String sourceId = ((ProvenanceInfo) record.getProvenance()
-					.get(last)).getResourceId();
-			JsonNode administrative;
-			JsonNode externalIdNode;
-			if ((administrative = json.get("administrative")) != null
-					&& (externalIdNode = administrative.get("externalId")) != null) {
-				String externalId = externalIdNode.asText();
-				// It should be at the database
-				if (DB.getRecordResourceDAO().getByExternalId(externalId) != null) {
-					record = (RecordResource) DB.getRecordResourceDAO()
-							.getByExternalId(externalId);
+			Result response = errorIfNoAccessToRecord(Action.EDIT, collectionDbId);
+			if (!response.equals(ok()))
+				return response;
+			else {	
+				if (json == null) {
+					result.put("error", "Invalid JSON");
+					return badRequest(result);
 				}
-			} else if (sourceId != null
-					&& DB.getRecordResourceDAO().getByExternalId(sourceId) != null) {
-				record = (RecordResource) DB.getRecordResourceDAO()
-						.getByExternalId(sourceId);
-			} else {
-				ObjectNode errors;
-				record.getAdministrative().setExternalId(sourceId);
-				// Create a new record
-				switch (source) {
-				case UploadedByUser:
-					DB.getRecordResourceDAO().makePermanent(record);
-					((ProvenanceInfo) record.getProvenance().get(last))
-							.setResourceId(record.getDbId().toString());
-					((ProvenanceInfo) record.getProvenance().get(last))
-							.setUri("/records/" + record.getDbId().toString());
-					// Fill the EmbeddedMediaObject from the MediaObject that
-					// has been created
-					String mediaUrl;
-					WithMediaRights withRights;
-					EmbeddedMediaObject media;
-					EmbeddedMediaObject embeddedMedia;
-					for (MediaVersion version : MediaVersion.values()) {
-						if ((embeddedMedia = ((HashMap<MediaVersion, EmbeddedMediaObject>) record
-								.getMedia().get(0)).get(version)) != null) {
-							mediaUrl = embeddedMedia.getUrl();
-							withRights = embeddedMedia.getWithRights();
-							media = new EmbeddedMediaObject(DB
-									.getMediaObjectDAO().getByUrl(mediaUrl));
-							media.setWithRights(withRights);
-							record.addMedia(version, media);
+				RecordResource record = Json.fromJson(json, RecordResource.class);
+				int last = record.getProvenance().size() - 1;
+				Sources source = Sources.valueOf(((ProvenanceInfo) record
+						.getProvenance().get(last)).getProvider());
+				String externalId = ((ProvenanceInfo) record.getProvenance()
+						.get(last)).getResourceId();
+				ObjectId recordId = null;
+				if (externalId != null && DB.getRecordResourceDAO().existsWithExternalId(externalId)) {
+						//get dbId of existing resource
+						RecordResource resource = DB.getRecordResourceDAO().getByFieldAndValue("administrative.externalId", externalId, 
+								new ArrayList<String>(Arrays.asList("_id")));
+						recordId = resource.getDbId();
+						// In case the record already exists we overwrite the existing
+						// record's descriptive data
+						DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(), json.get("descriptiveData"));
+				} else {  //create new record in db
+					ObjectNode errors;
+					record.getAdministrative().setExternalId(externalId);
+					// Create a new record
+					ObjectId userId = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds")).get(0);
+					record.getAdministrative().setWithCreator(userId);
+					record.getAdministrative().setCreated(new Date());
+					switch (source) {
+					case UploadedByUser:
+						//DB.getRecordResourceDAO().makePermanent(record);
+
+						// Fill the EmbeddedMediaObject from the MediaObject that
+						// has been created
+						String mediaUrl;
+						WithMediaRights withRights;
+						EmbeddedMediaObject media;
+						EmbeddedMediaObject embeddedMedia;
+						for (MediaVersion version : MediaVersion.values()) {
+							if ((embeddedMedia = ((HashMap<MediaVersion, EmbeddedMediaObject>) record
+									.getMedia().get(0)).get(version)) != null) {
+								mediaUrl = embeddedMedia.getUrl();
+								withRights = embeddedMedia.getWithRights();
+								media = new EmbeddedMediaObject(DB
+										.getMediaObjectDAO().getByUrl(mediaUrl));
+								media.setWithRights(withRights);
+								record.addMedia(version, media);
+							}
 						}
+						DB.getRecordResourceDAO().makePermanent(record);
+						//update provenance chain based on record dbId
+						DB.getRecordResourceDAO().updateProvenance(record.getDbId(), last, new ProvenanceInfo("UploadedByUser", 
+								"/records/" + record.getDbId().toString(), record.getDbId().toString()));
+					case Mint:
+						errors = RecordResourceController.validateRecord(record);
+						if (errors != null) {
+							return badRequest(errors);
+						}
+						DB.getRecordResourceDAO().makePermanent(record);
+					default://imported first time from other sources
+						errors = RecordResourceController.validateRecord(record);
+						if (errors != null) {
+							return badRequest(errors);
+						}
+						DB.getRecordResourceDAO().makePermanent(record);
+						//TODO: how can record have a dbId?
+						addContentToRecord(record.getDbId(), source.toString(),
+								externalId);
 					}
 					DB.getRecordResourceDAO().makePermanent(record);
-					break;
-				case Mint:
-					record.getAdministrative().setCreated(new Date());
-					errors = RecordResourceController.validateRecord(record);
-					if (errors != null) {
-						return badRequest(errors);
-					}
-					DB.getRecordResourceDAO().makePermanent(record);
-					break;
-				default:
-					record.getAdministrative().setCreated(new Date());
-					errors = RecordResourceController.validateRecord(record);
-					if (errors != null) {
-						return badRequest(errors);
-					}
-					DB.getRecordResourceDAO().makePermanent(record);
-					addContentToRecord(record.getDbId(), source.toString(),
-							sourceId);
-					break;
+					recordId = record.getDbId();
 				}
+				// Update collection administrative metadata and record's usage metadata
+				if (position.isDefined() && recordId != null) {
+					Integer pos = position.get();
+					DB.getRecordResourceDAO().addToCollection(recordId, collectionDbId, pos);
+				} else {
+					DB.getRecordResourceDAO().appendToCollection(recordId, collectionDbId);
+				}				
+				result.put("message", "Record succesfully added to collection");
+				return ok(result);
 			}
-			// Add the record to the collection
-			if (position.isDefined()) {
-				Integer pos = position.get();
-				DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
-						pos);
-				record.addPositionToCollectedIn(collectionDbId, pos);
-			} else {
-				// If the position is not defined the record is added at the
-				// end of the collection
-				record.addPositionToCollectedIn(collectionDbId,
-						((CollectionAdmin) collection.getAdministrative())
-								.getEntryCount());
-			}
-			record.getAdministrative().setLastModified(new Date());
-			// In case the record already exists we modify the existing
-			// record
-			/*
-			 * if (DB.getRecordResourceDAO().getByExternalId(externalId) !=
-			 * null) { record = (RecordResource) DB.getRecordResourceDAO()
-			 * .getByExternalId(externalId); } else { record =
-			 * Json.fromJson(json, RecordResource.class);
-			 * record.getAdministrative().setCreated(new Date());
-			 * Set<ConstraintViolation<RecordResource>> violations = Validation
-			 * .getValidator().validate(record); if (!violations.isEmpty()) {
-			 * ArrayNode properties = Json.newObject().arrayNode(); for
-			 * (ConstraintViolation<RecordResource> cv : violations) {
-			 * properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\""
-			 * + cv.getMessage() + "\"}")); } result.put("error", properties);
-			 * return badRequest(result); } // Download the content of a record
-			 * from the source int last = record.getProvenance().size() - 1;
-			 * String source = ((ProvenanceInfo) record.getProvenance().get(
-			 * last)).getProvider(); String sourceId = ((ProvenanceInfo)
-			 * record.getProvenance().get( last)).getResourceId();
-			 * addContentToRecord(record.getDbId(), source, sourceId);
-			 * 
-			 * }
-			 */
-			// TODO modify access
-			if (collection.getDescriptiveData().getLabel().equals("_favorites")) {
-				record.getUsage().incLikes();
-			} else {
-				record.getUsage().incCollected();
-			}
-			DB.getRecordResourceDAO().makePermanent(record);
-			// Change the collection metadata as well
-			((CollectionAdmin) collection.getAdministrative()).incEntryCount();
-			collection.getAdministrative().setLastModified(new Date());
-			DB.getCollectionObjectDAO().makePermanent(collection);
-			result.put("message", "Record succesfully added to collection");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
