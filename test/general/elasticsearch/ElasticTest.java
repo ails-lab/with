@@ -35,6 +35,7 @@ import javax.imageio.stream.ImageInputStream;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -48,6 +49,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
@@ -65,6 +67,8 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.libs.Json;
@@ -83,12 +87,16 @@ public class ElasticTest {
 
 
 		RecordResource co = getRecordResource();
+		//CollectionObject co = DB.getCollectionObjectDAO().getById(new ObjectId("569e1f284f55a2655367ec1e"));
 		if (DB.getRecordResourceDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		Json.setObjectMapper(mapper);
 		System.out.println(Json.toJson(co));
 		System.out.println(ElasticUtils.transformRR(co));
 
-		ElasticIndexer.index(co.getDbId(), ElasticUtils.transformRR(co));
+		ElasticIndexer.index(Elastic.type, co.getDbId(), ElasticUtils.transformRR(co));
 
 	}
 
@@ -107,7 +115,7 @@ public class ElasticTest {
 			ids.add(rr.getDbId());
 			docs.add(ElasticUtils.transformRR(rr));
 		}
-		ElasticIndexer.indexMany(ids, docs);
+		ElasticIndexer.indexMany(Elastic.type, ids, docs);
 	}
 
 
@@ -115,7 +123,7 @@ public class ElasticTest {
 	public void testDeleteResource() {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
-		ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -145,8 +153,8 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().makePermanent(rr1);
 		DB.getRecordResourceDAO().makePermanent(rr2);
 
-		ElasticIndexer.index(rr1.getDbId(), ElasticUtils.transformRR(rr1));
-		ElasticIndexer.index(rr2.getDbId(), ElasticUtils.transformRR(rr2));
+		ElasticIndexer.index(Elastic.type, rr1.getDbId(), ElasticUtils.transformRR(rr1));
+		ElasticIndexer.index(Elastic.type, rr2.getDbId(), ElasticUtils.transformRR(rr2));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -187,7 +195,7 @@ public class ElasticTest {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -224,8 +232,8 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().makePermanent(rr2);
 
 
-		ElasticIndexer.index(rr1.getDbId(), ElasticUtils.transformRR(rr1));
-		ElasticIndexer.index(rr2.getDbId(), ElasticUtils.transformRR(rr2));
+		ElasticIndexer.index(Elastic.type, rr1.getDbId(), ElasticUtils.transformRR(rr1));
+		ElasticIndexer.index(Elastic.type, rr2.getDbId(), ElasticUtils.transformRR(rr2));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -284,7 +292,7 @@ public class ElasticTest {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -294,9 +302,10 @@ public class ElasticTest {
 				.execute().actionGet();
 
 		//assertEquals(resp.getHits().getTotalHits(), 1);
-
+		List<CollectionInfo> list = rr.getCollectedIn();
+		list.add(new CollectionInfo(new ObjectId(), 666));
 		try {
-			ElasticUpdater.addResourceToCollection(rr.getDbId().toString(), new ObjectId(), 666);
+			ElasticUpdater.addResourceToCollection(rr.getDbId().toString(), list);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -314,7 +323,7 @@ public class ElasticTest {
 		rr.setCollectedIn(collectedIn);
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -339,7 +348,7 @@ public class ElasticTest {
 		rr.setCollectedIn(collectedIn);
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -424,7 +433,7 @@ public class ElasticTest {
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		MultiLiteral label = new MultiLiteral(Language.EN, "MyTitle");
+		MultiLiteral label = new MultiLiteral(Language.EN, "This is title");
 		RecordDescriptiveData cdd = new RecordDescriptiveData();
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
@@ -491,7 +500,7 @@ public class ElasticTest {
 		//mo.setMimeType(MediaType.ANY_IMAGE_TYPE);
 		mo.setHeight(875);
 		mo.setWidth(1230);
-		LiteralOrResource lor = new LiteralOrResource(url.toString());
+		LiteralOrResource lor = new LiteralOrResource(Language.EN, url.toString());
 		mo.setOriginalRights(lor);
 		mo.setWithRights(WithMediaRights.Creative);
 		mo.setType(WithMediaType.IMAGE);

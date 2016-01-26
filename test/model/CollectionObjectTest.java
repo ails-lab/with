@@ -67,7 +67,8 @@ public class CollectionObjectTest {
 	@Test
 	public void modelCollection() {
 
-		RecordResource<RecordDescriptiveData> co = new RecordResource<RecordResource.RecordDescriptiveData>();
+		//RecordResource<RecordDescriptiveData> co = new RecordResource<RecordResource.RecordDescriptiveData>();
+		CollectionObject co = new CollectionObject();
 
 		/*
 		 * Owner of the CollectionObject
@@ -98,7 +99,8 @@ public class CollectionObjectTest {
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
 		MultiLiteral label = new MultiLiteral(Language.EN,"MyTitle");
-		RecordDescriptiveData cdd = new RecordDescriptiveData();
+		//RecordDescriptiveData cdd = new RecordDescriptiveData();
+		CollectionDescriptiveData cdd = new CollectionDescriptiveData();
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
@@ -113,12 +115,14 @@ public class CollectionObjectTest {
 		 */
 		EmbeddedMediaObject emo = new EmbeddedMediaObject();
 		co.addMedia(MediaVersion.Original, emo);
-		if (DB.getRecordResourceDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+		//if (DB.getRecordResourceDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 
 		System.out.println("Stored!");
 		System.out.println(Json.toJson(co));
 		System.out.println(ElasticUtils.transformRR(co));
-		RecordResource rr1 =  DB.getRecordResourceDAO().getById(co.getDbId());
+		//RecordResource rr1 =  DB.getRecordResourceDAO().getById(co.getDbId());
+		CollectionObject co1 = DB.getCollectionObjectDAO().getById(co.getDbId());
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
 		/*JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
