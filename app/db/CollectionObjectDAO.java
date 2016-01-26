@@ -27,6 +27,7 @@ import java.util.Map;
 import model.Collection;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
+import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
@@ -119,8 +120,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public List<CollectionObject> getBySpecificAccess(
 			List<ObjectId> effectiveIds, Access access, Boolean isExhibition,
 			int offset, int count) {
+		CollectionType collectionType = isExhibition ? CollectionType.Exhibition : CollectionType.SimpleCollection;
+		q.field("administrative.collectionType").equal(collectionType);
 		Query<CollectionObject> q = this.createQuery()
-				.field("administrative.isExhibition").equal(isExhibition)
+				.field("administrative.collectionType").equal(collectionType)
 				.order("-administrative.lastModified").offset(offset)
 				.limit(count);
 		Criteria[] criteria = new Criteria[effectiveIds
@@ -158,104 +161,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}*/
 	
-	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getCollectionsAndHits(Query<CollectionObject> q,
-			Boolean isExhibition) {
-		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
-		QueryResults<CollectionObject> result;
-		List<CollectionObject> collections = new ArrayList<CollectionObject>();
-		if (isExhibition == null) {
-			result = this.find(q);
-			collections = result.asList();
-			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("isExhibition").equal(true);
-			q.field("isExhibition").equal(false);
-			hits.x = (int) this.find(q).countAll();
-			hits.y = (int) this.find(q2).countAll();
-		}
-		else {
-			q.field("isExhibition").equal(isExhibition);
-			result = this.find(q);
-			collections = result.asList();
-			if (isExhibition)
-				hits.y = (int) result.countAll();
-			else
-				hits.x = (int) result.countAll();
-		}
-		return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(collections, hits);
-	}
-
-	public Tuple<Integer, Integer> getHits(Query<CollectionObject> q, Boolean isExhibition) {
-		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
-		if (isExhibition == null) {
-			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("isExhibition").equal(true);
-			q.field("isExhibition").equal(false);
-			hits.x = (int) this.find(q).countAll();
-			hits.y = (int) this.find(q2).countAll();
-		}
-		else {
-			q.field("isExhibition").equal(isExhibition);
-			if (isExhibition)
-				hits.y = (int) this.find(q).countAll();
-			else
-				hits.x = (int)  this.find(q).countAll();
-		}
-		return hits;
-	}
 	
-
-	/*public List<CollectionObject> getByAccessWithRestrictions(
-			List<ObjectId> effectiveIds, QueryOperator op1,  Access access,
-			Map<ObjectId, Access> restrictions, QueryOperator op2, Boolean isExhibition,
-			int offset, int count) {
-		Query<CollectionObject> q = this.createQuery()
-				.order("-administrative.lastModified").offset(offset)
-				.limit(count);
-		if (isExhibition != null)
-			q.field("isExhibition").equal(isExhibition);
-		if (!effectiveIds.isEmpty()) {
-			List<Criteria> criteriaOr = new ArrayList<Criteria>();
-			for (int i = 0; i < effectiveIds.size(); i++) {
-				criteriaOr.add(formAccessLevelQuery(new Tuple(effectiveIds.get(i), access), op1));
-			}
-			q.or(criteriaOr.toArray(new Criteria[criteriaOr.size()]));
-		}
-		else {
-			q.field("administrative.access.isPublic").equal(true);
-		}
-		if (!restrictions.isEmpty()) {
-			List<Criteria> criteriaAnd = new ArrayList<Criteria>();
-			for (ObjectId id : restrictions.keySet()) {
-				criteriaAnd.add(formAccessLevelQuery(new Tuple(id, restrictions.get(id)), op2));
-			}
-			q.and(criteriaAnd.toArray(new Criteria[criteriaAnd.size()]));
-		}
-		return this.find(q).asList();
-		
-	}
-	
-	public List<CollectionObject> getBySpecificAccessWithRestrictions(
-			List<ObjectId> effectiveIds, Access access,
-			Map<ObjectId, Access> restrictions, Boolean isExhibition,
-			int offset, int count) {
-		return getByAccessWithRestrictions(effectiveIds, QueryOperator.EQ, access, restrictions, QueryOperator.EQ, isExhibition, offset, count);
-	}
-	
-	public List<CollectionObject> getByMaxAccessWithRestrictions(
-			List<ObjectId> effectiveIds, Access access,
-			Map<ObjectId, Access> restrictions, Boolean isExhibition,
-			int offset, int count) {
-		return getByAccessWithRestrictions(effectiveIds, QueryOperator.GTE, access, restrictions, QueryOperator.EQ, isExhibition, offset, count);
-	}
-	*/
-	
-	/**
-	 * Return a tuple containing a list of CollectionObjects (usually bounded from a limit)
-	 * together with the total number of entities corresponded to the query.
-	 * @param q
-	 * @param isExhibition
-	 * @return
-	 */
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getCollectionsWithCount(Query<CollectionObject> q,
 			Boolean isExhibition) {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
@@ -265,13 +171,14 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			result = this.find(q);
 			collections = result.asList();
 			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("administrative.isExhibition").equal(true);
-			q.field("administrative.isExhibition").equal(false);
+			q2.field("administrative.collectionType").equal(CollectionType.Exhibition);
+			q.field("administrative.collectionType").equal(CollectionType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
 		else {
-			q.field("administrative.isExhibition").equal(isExhibition);
+			CollectionType collectionType = isExhibition ? CollectionType.Exhibition : CollectionType.SimpleCollection;
+			q.field("administrative.collectionType").equal(collectionType);
 			result = this.find(q);
 			collections = result.asList();
 			if (isExhibition)
@@ -281,7 +188,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 		return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(collections, hits);
 	}
-
+	
 	/**
 	 * Return the total number of CollectionObject entities for a specific query
 	 * @param q
@@ -292,13 +199,14 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
 		if (isExhibition == null) {
 			Query<CollectionObject> q2 = q.cloneQuery();
-			q2.field("administrative.isExhibition").equal(true);
-			q.field("administrative.isExhibition").equal(false);
+			q2.field("administrative.collectionType").equal(CollectionType.Exhibition);
+			q.field("administrative.collectionType").equal(CollectionType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
 		else {
-			q.field("administrative.isExhibition").equal(isExhibition);
+			CollectionType collectionType = isExhibition ? CollectionType.Exhibition : CollectionType.SimpleCollection;
+			q.field("administrative.collectionType").equal(collectionType);
 			if (isExhibition)
 				hits.y = (int) this.find(q).countAll();
 			else
@@ -306,7 +214,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 		return hits;
 	}
-
+	
 
 	/**
 	 * Return CollectionObjects (bounded by a limit) that satisfy the logged in user's access
@@ -364,8 +272,10 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			return getCollectionsWithCount(q, isExhibition);
 		}
 		else {
-			if (isExhibition != null)
-				q.field("administrative.isExhibition").equal(isExhibition);
+			if (isExhibition != null) {
+				CollectionType collectionType = isExhibition ? CollectionType.Exhibition : CollectionType.SimpleCollection;
+				q.field("administrative.collectionType").equal(collectionType);
+			}
 			return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
