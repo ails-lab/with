@@ -34,7 +34,7 @@ public class ElasticEraser {
 		try {
 			Elastic.getTransportClient().prepareDelete(
 					Elastic.index,
-					Elastic.type,
+					Elastic.typeResource,
 					dbId)
 				.setOperationThreaded(false)
 				.execute()
@@ -56,7 +56,7 @@ public class ElasticEraser {
 		} else if( ids.size() == 1 ) {
 				Elastic.getTransportClient().prepareDelete(
 								Elastic.index,
-								Elastic.type,
+								Elastic.typeResource,
 								ids.get(0))
 					 	.execute()
 					 	.actionGet();
@@ -65,7 +65,7 @@ public class ElasticEraser {
 				for(String id: ids) {
 					Elastic.getBulkProcessor().add(new DeleteRequest(
 							Elastic.index,
-							Elastic.type,
+							Elastic.typeResource,
 							id));
 				}
 				Elastic.getBulkProcessor().flush();

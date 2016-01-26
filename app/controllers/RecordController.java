@@ -119,8 +119,8 @@ public class RecordController extends Controller {
 
 		Collection collection = DB.getCollectionDAO().get(
 				oldRecord.getCollectionId());
-		if (!AccessManager.hasAccess(userIds,
-				Action.EDIT, new ObjectId(recordId))) {
+		if (!AccessManager.checkAccess(collection.getRights(), userIds.get(0),
+				Action.EDIT)) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
@@ -139,17 +139,12 @@ public class RecordController extends Controller {
 			}
 			Set<ConstraintViolation<CollectionRecord>> violations = Validation
 					.getValidator().validate(newRecord);
-			boolean valid = true;
 			for (ConstraintViolation<CollectionRecord> cv : violations) {
 				result.put("message",
 						"[" + cv.getPropertyPath() + "] " + cv.getMessage());
-				valid = false;
 			}
-			if( !valid ) return badRequest(result);
-			if (newRecord.getPosition() < 20) {
-				collection.getFirstEntries()
-				.add(newRecord.getPosition(), newRecord);	
-			}
+			collection.getFirstEntries()
+					.add(newRecord.getPosition(), newRecord);
 			if ((DB.getCollectionRecordDAO().makePermanent(newRecord) != null)
 					&& (DB.getCollectionDAO().makePermanent(collection) != null)) {
 
@@ -247,12 +242,12 @@ public class RecordController extends Controller {
 		/*
 		 * Search for available collections
 		 */
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.type);
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.typeResource);
 		SearchOptions elasticoptions = new SearchOptions(0, 1000);
 		List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId,Access>>>();
 
 		elasticoptions.accessList = accessFilters;
-		SearchResponse response = searcher.searchAccessibleCollectionsScanScroll(elasticoptions);
+		SearchResponse response = searcher.searchAccessibleCollections(elasticoptions);
 		List<Collection> colFields = ElasticUtils.getCollectionMetadaFromHit(response.getHits());
 
 		/*
@@ -261,12 +256,12 @@ public class RecordController extends Controller {
 		//elasticoptions = new SearchOptions(offset, count);
 		elasticoptions = new SearchOptions();
 		elasticoptions.addFilter("isPublic", "true");
-		searcher.setType(Elastic.type);
+		searcher.setType(Elastic.typeResource);
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}
 
-		SearchResponse resp = searcher.searchForSimilar(title, provider, externalId, elasticoptions);
+		SearchResponse resp = searcher.relatedWithDisMax(title, provider, externalId, elasticoptions);
 		searcher.closeClient();
 
 		List<WithResource> elasticrecords = new ArrayList<WithResource>();

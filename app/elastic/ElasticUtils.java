@@ -28,8 +28,10 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithDate;
+import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.search.SearchHit;
@@ -53,7 +55,7 @@ public class ElasticUtils {
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public static Map<String, Object> transformRR(RecordResource<RecordDescriptiveData> rr) {
+	public static Map<String, Object> transformRR(WithResource rr) {
 
 		JsonNode rr_json =  Json.toJson(rr);
 		ObjectNode idx_doc = Json.newObject();
@@ -172,21 +174,49 @@ public class ElasticUtils {
 		}
 
 		/*
+		 * User Rights structure in the document
+		 */
+		idx_doc.put("isPublic", rr.getAdministrative().getAccess().isPublic());
+		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
+
+		if((rr instanceof CollectionObject)) {
+			/*
+			 * Eliminate null values from the root document
+			 */
+			ObjectNode idx_copy = idx_doc.deepCopy();
+			Iterator<String> fieldNames = idx_copy.fieldNames();
+			while(fieldNames.hasNext()) {
+				String fName = fieldNames.next();
+				if(idx_copy.get(fName).isNull() ) {
+					idx_doc.remove(fName);
+				}
+			}
+
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.setSerializationInclusion(Include.NON_NULL);
+			Map<String, Object> idx_map = mapper.convertValue(idx_doc, Map.class);
+
+			return idx_map;
+		}
+
+		RecordResource<RecordDescriptiveData> rr_copy = (RecordResource<RecordDescriptiveData>) rr;
+
+		/*
 		 * CollectedIn field
 		 */
-		idx_doc.put("collectedIn", Json.toJson(rr.getCollectedIn()));
+		idx_doc.put("collectedIn", Json.toJson(rr_copy.getCollectedIn()));
 
 		/*
 		 * Add more fields to the Json
 		 */
-		idx_doc.put("metadataRights", Json.toJson(rr.getDescriptiveData().getMetadataRights()));
+		idx_doc.put("metadataRights", Json.toJson(rr_copy.getDescriptiveData().getMetadataRights()));
 		idx_doc.put("withCreator", rr_json.get("administrative.withCreator"));
-		if((rr.getProvenance() != null) && (rr.getProvenance().size() == 1)) {
-			idx_doc.put("dataProvider", Json.toJson(rr.getProvenance().get(0).getProvider()));
+		if((rr.getProvenance() != null) && (rr_copy.getProvenance().size() == 1)) {
+			idx_doc.put("dataProvider", Json.toJson(rr_copy.getProvenance().get(0).getProvider()));
 		}
-		if((rr.getProvenance() != null) && (rr.getProvenance().size() > 1)) {
-			idx_doc.put("dataProvider", Json.toJson(rr.getProvenance().get(0).getProvider()));
-			idx_doc.put("provider", Json.toJson(rr.getProvenance().get(1).getProvider()));
+		if((rr.getProvenance() != null) && (rr_copy.getProvenance().size() > 1)) {
+			idx_doc.put("dataProvider", Json.toJson(rr_copy.getProvenance().get(0).getProvider()));
+			idx_doc.put("provider", Json.toJson(rr_copy.getProvenance().get(1).getProvider()));
 		}
 		idx_doc.put("resourceType", rr_json.get("resourceType"));
 
@@ -196,9 +226,10 @@ public class ElasticUtils {
 		 * Format and add Media structure
 		 */
 		ArrayNode media_objects = Json.newObject().arrayNode();
-		if(rr.getMedia() != null) {
+		if((rr_copy.getMedia() != null) && !rr_copy.getMedia().isEmpty()
+				&& !rr_copy.getMedia().get(0).isEmpty() ) {
 			// take care about all EmbeddedMediaObjects
-			EmbeddedMediaObject emo = rr.getMedia().get(0).get(MediaVersion.Original);
+			EmbeddedMediaObject emo = rr_copy.getMedia().get(0).get(MediaVersion.Original);
 				ObjectNode media = Json.newObject();
 				media.put("withRights", Json.toJson(emo.getWithRights()));
 				media.put("withMediaType", Json.toJson(emo.getType()));
@@ -222,12 +253,6 @@ public class ElasticUtils {
 				}
 			idx_doc.put("media", media_objects);
 		}
-
-		/*
-		 * User Rights structure in the document
-		 */
-		idx_doc.put("isPublic", rr.getAdministrative().getAccess().isPublic());
-		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
 
 		/*
 		 * Eliminate null values from the root document
@@ -288,6 +313,7 @@ public class ElasticUtils {
 			record.setCollectedIn(colIds);
 			record.setAllTags(tags);
 		}*/
+
 		return record;
 	}
 

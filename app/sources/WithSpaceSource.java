@@ -60,16 +60,16 @@ import elastic.ElasticUtils;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
-
+	
 	//there should be a filter on source
 	//in general, more filters in new model for search within WITH db
 	public enum WithinFilters {
 		Provider("provider"), Type("type"), DataProvider("dataprovider"),
 		Creator("creator"), Rights("rights"),
 		Country("country"), Year("year");
-
-		private final String value;
-
+		
+		private String value;
+		
 		WithinFilters(String value) {
 	        this.value = value;
 	    }
@@ -90,7 +90,7 @@ public class WithSpaceSource extends ISpaceSource {
 		/*
 		 * Set the basic search parameters
 		 */
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.type);
+		ElasticSearcher searcher = new ElasticSearcher(Elastic.typeResource);
 		String term = q.getQuery();
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
@@ -117,9 +117,9 @@ public class WithSpaceSource extends ISpaceSource {
 		/*
 		 * Search index for accessible collections
 		 */
-		searcher.setType(Elastic.type);
+		searcher.addType(Elastic.typeResource);
 		SearchResponse response = searcher
-				.searchAccessibleCollectionsScanScroll(elasticoptions);
+				.searchAccessibleCollections(elasticoptions);
 		List<SearchHit> hits = getTotalHitsFromScroll(response);
 		colFields = getCollectionMetadataFromHit(hits);
 		/*
@@ -128,7 +128,7 @@ public class WithSpaceSource extends ISpaceSource {
 		 */
 		elasticoptions = new SearchOptions(offset, count);
 		elasticoptions.addFilter("isPublic", "true");
-		searcher.setType(Elastic.type);
+		searcher.addType(Elastic.typeResource);
 		for (Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId()
 					.toString());
