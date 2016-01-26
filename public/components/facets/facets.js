@@ -69,7 +69,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	self.numvalues([]);
     	var filterfound=ko.utils.arrayFirst(ko.contextFor(withsearchid).$data.filters(), function(item) {
     		
-		    if(item.filterID==="year"){
+		    if(item.filter==="YEAR"){
 		    	var years=item.suggestedvalues;
 		    	
 		       /*get rid of crap data , values larger than 3000l, or non numeric values*/	
@@ -175,7 +175,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		
     		var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
         	  if(item!=undefined)	{
-    		    if(item.filterID===id && id!="year"){
+    		    if(item.filter===id && id!="YEAR"){
     		    	var index=$.inArray(event.item.label, item.values);
     		    	if(index>-1){
     		    		item.values.splice(index,1);
@@ -188,7 +188,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		    		
     		    	}
     		    	
-    		    }else if(item.filterID===id && id=="year"){
+    		    }else if(item.filter===id && id=="YEAR"){
     		    	self.filters()[0].filters.splice(self.filters()[0].filters.indexOf(item),1);
     		    }
         	   }
@@ -196,11 +196,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
            
     		});
     		if(filterfound){
-    			
-            
     			self.visiblePanel(false);	 
-    	     	
-    	       
     		}
     		
     	}
@@ -224,9 +220,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		var id=$(event.target).parents('div.active').attr('id');
     		if(id=='datasources'){
     			self.initFacets();
-    			
     		}
-    		
     	}
     	 self.setFilters();
     	return true;
@@ -237,7 +231,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	var exists=false;
     	var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
     		
-    		    if(item.filterID===id && id!="year"){
+    		    if(item.filter===id && id!="YEAR"){
     		    	if($.inArray(newvalue, item.values)>-1){
     		    		//value is already there 
     		    		exists=true;
@@ -251,7 +245,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		        
     		    }
     		    
-    		    else if(item.filterID===id && id=="year"){
+    		    else if(item.filter===id && id=="YEAR"){
     		    	//break new value to two values if it is range
     		    	var val1=newvalue;
     		    	var val2="";
@@ -308,10 +302,10 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		
     		$("#facet_tags").tagsinput('add',{ id: id+'#0', label: newvalue });
         	var obj={};
-    		obj['filterID']=id;
-    		if(id!="year")
+    		obj['filter']=id;
+    		if(id!="YEAR")
     		  obj['values']=new Array(newvalue);
-    		else if(id=="year"){
+    		else if(id=="YEAR"){
     			var val2="";
 		    	if(newvalue.indexOf("-">0)){
 		    		val1=newvalue.substring(0,newvalue.indexOf("-")-1).trim().replace(' AD','');
@@ -348,7 +342,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	var link = $(e.target);
     	$('#f_search').val('');$('#f_search').removeAttr('value');
     	$("ul.list>li").css('display','block');
-    	$('#'+e.filterID).liveFilter('#f_search', 'li', {
+    	$('#'+e.filter).liveFilter('#f_search', 'li', {
     		  filterChildSelector: 'span'
     		});
     	
