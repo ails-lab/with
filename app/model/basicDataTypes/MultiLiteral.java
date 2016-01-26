@@ -76,7 +76,7 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 		if (!containsKey(defLang)){
 			int max = 0;
 			for (String k : this.keySet()) {
-				if (!k.equals(Language.DEF.toString())){
+				if (!k.equals(Language.DEFAULT.toString())){
 					int m = get(k).size();
 					if (max < m){
 						max = m;
@@ -87,7 +87,7 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 		}
 		if (defLang!=null)
 		for (String d : get(defLang)) {
-			add(Language.DEF.toString(), d);
+			add(Language.DEFAULT.toString(), d);
 		}
 	}
 }

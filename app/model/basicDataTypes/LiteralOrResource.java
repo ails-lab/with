@@ -16,8 +16,12 @@
 
 package model.basicDataTypes;
 
-import sources.core.Utils;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import sources.core.Utils;
+import utils.Deserializer.LiteralOrResourceDesiarilizer;
+
+@JsonDeserialize(using = LiteralOrResourceDesiarilizer.class)
 public class LiteralOrResource extends Literal {
 
 	public static final String URI = "uri";
@@ -38,7 +42,7 @@ public class LiteralOrResource extends Literal {
 	}
 	
 	public void addLiteral(Language lang, String value) {
-		if (lang.equals(Language.DEF) && Utils.isValidURL(value))
+		if (lang.equals(Language.DEFAULT) && Utils.isValidURL(value))
 			addURI(value);
 		else
 			super.addLiteral(lang, value);

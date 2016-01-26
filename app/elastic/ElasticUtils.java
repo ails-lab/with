@@ -74,7 +74,7 @@ public class ElasticUtils {
 			while(labels_it.hasNext()) {
 				Entry<String, JsonNode> e = labels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
@@ -105,7 +105,7 @@ public class ElasticUtils {
 			while(descs_it.hasNext()) {
 				Entry<String, JsonNode> e = descs_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getDescription().get(Language.UNKNOWN);
@@ -134,7 +134,7 @@ public class ElasticUtils {
 			while(keywords_it.hasNext()) {
 				Entry<String, JsonNode> e = keywords_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getKeywords().get(Language.UNKNOWN);
@@ -163,7 +163,7 @@ public class ElasticUtils {
 			while(altLabels_it.hasNext()) {
 				Entry<String, JsonNode> e = altLabels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
@@ -218,7 +218,7 @@ public class ElasticUtils {
 		 * Add more fields to the Json
 		 */
 		idx_doc.put("metadataRights", Json.toJson(rr.getDescriptiveData().getMetadataRights()));
-		idx_doc.put("isExhibition", Json.toJson(rr.getAdministrative().isExhibition()));
+		//idx_doc.put("isExhibition", Json.toJson(rr.getAdministrative().));
 		idx_doc.put("tags", Json.toJson(rr.getUsage().getTags()));
 		idx_doc.put("isShownAt", Json.toJson(rr.getDescriptiveData().getIsShownAt()));
 		if((rr.getProvenance() != null) && (rr.getProvenance().size() == 1)) {

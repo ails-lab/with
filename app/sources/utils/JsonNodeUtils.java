@@ -49,12 +49,12 @@ public class JsonNodeUtils {
 				node = node.get(0);
 			}
 			if (node.isTextual()) {
-				res.addLiteral(Language.DEF, node.asText());
+				res.addLiteral(Language.DEFAULT, node.asText());
 				return res;
 			} 
 			if (node.isArray()){
 				for (int i = 0; i < node.size(); i++) {
-					res.addLiteral(Language.DEF, node.get(i).asText());
+					res.addLiteral(Language.DEFAULT, node.get(i).asText());
 				}
 				return res;
 			}
@@ -69,7 +69,7 @@ public class JsonNodeUtils {
 				} else {
 					List<String> asString = asStringArray(value);
 					for (int i = 0; i < asString.size(); i++) {
-						res.addLiteral(Language.DEF, asString.get(i));
+						res.addLiteral(Language.DEFAULT, asString.get(i));
 					}
 					System.out.println("Unknown Format!!! "+asString);
 				}
@@ -89,11 +89,11 @@ public class JsonNodeUtils {
 				node = node.get(0);
 			}
 			if (node.isTextual()) {
-				res.addLiteral(Language.DEF, node.asText());
+				res.addLiteral(Language.DEFAULT, node.asText());
 				return res;
 			}
 			if (node.isArray()){
-				res.addLiteral(Language.DEF, node.get(0).asText());
+				res.addLiteral(Language.DEFAULT, node.get(0).asText());
 				return res;
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
@@ -103,7 +103,7 @@ public class JsonNodeUtils {
 				if (language != null)
 					res.addLiteral(language, value.get(0).asText());
 				else
-					res.addLiteral(Language.DEF, asString(value));
+					res.addLiteral(Language.DEFAULT, asString(value));
 			}
 			res.fillDEF();
 			return res;

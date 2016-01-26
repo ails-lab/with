@@ -30,6 +30,7 @@ import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
 import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
@@ -42,6 +43,7 @@ import sources.core.Utils;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DPLARecordFormatter;
+import sources.formatreaders.EuropeanaItemRecordFormatter;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
@@ -217,8 +219,11 @@ public class DPLASpaceSource extends ISpaceSource {
 		try {
 			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + apiKey);
 			JsonNode record = response.get("docs").get(0);
-			if (record != null)
+			if (record != null){
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));
+				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
 			return jsonMetadata;
 		} catch (Exception e) {
 			e.printStackTrace();

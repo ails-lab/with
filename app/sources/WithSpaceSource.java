@@ -63,7 +63,7 @@ public class WithSpaceSource extends ISpaceSource {
 	
 	//there should be a filter on source
 	//in general, more filters in new model for search within WITH db
-	public enum WithinFilters {
+	/*public enum WithinFilters {
 		Provider("provider"), Type("type"), DataProvider("dataprovider"),
 		Creator("creator"), Rights("rights"),
 		Country("country"), Year("year");
@@ -78,7 +78,7 @@ public class WithSpaceSource extends ISpaceSource {
 	    public String toString() {
 	        return value;
 	    }
-	}
+	}*/
 
 	@Override
 	public String getSourceName() {
@@ -148,7 +148,7 @@ public class WithSpaceSource extends ISpaceSource {
 			for (Aggregation agg : resp.getAggregations().asList()) {
 				InternalTerms aggTerm = (InternalTerms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
-					CommonFilterLogic filter = new CommonFilterLogic(CommonFilters.valueOf(agg.getName()));
+					CommonFilterLogic filter = new CommonFilterLogic(agg.getName());//CommonFilters.valueOf(agg.getName()));
 					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
 						countValue(filter, aggTerm.getBuckets().get(i).getKey(),
 							(int) aggTerm.getBuckets().get(0).getDocCount());

@@ -119,8 +119,9 @@ public class RecordController extends Controller {
 
 		Collection collection = DB.getCollectionDAO().get(
 				oldRecord.getCollectionId());
-		if (!AccessManager.checkAccess(collection.getRights(), userIds.get(0),
-				Action.EDIT)) {
+		if (!AccessManager.hasAccessToRecordResource(session().get(
+				"effectiveUserIds"),
+				Action.EDIT, new ObjectId(recordId))) {
 			result.put("error",
 					"User does not have permission to edit the collection");
 			return forbidden(result);
