@@ -18,8 +18,6 @@ package sources.formatreaders;
 
 import java.util.List;
 
-import com.sun.javafx.animation.TickCalculation;
-
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
