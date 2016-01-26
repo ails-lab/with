@@ -79,7 +79,7 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
 		try {
-			if (!DB.getWithResourceDAO().hasAccess(
+			if (!DB.getCollectionObjectDAO().hasAccess(
 					AccessManager.effectiveUserDbIds(session().get(
 							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
 				result.put("error",
