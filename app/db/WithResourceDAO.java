@@ -23,6 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import model.DescriptiveData;
+import model.EmbeddedMediaObject;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -354,6 +355,14 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		UpdateOperations<T> updateOps = this
 				.createUpdateOperations();
 		updateOps.set("descriptiveData", data);
+		this.update(q, updateOps);
+	}
+	
+	public void updateEmbeddedMedia(ObjectId recId, EmbeddedMediaObject media) {
+		Query<T> q = this.createQuery().field("_id").equal(recId);
+		UpdateOperations<T> updateOps = this
+				.createUpdateOperations();
+		updateOps.set("media", media);
 		this.update(q, updateOps);
 	}
 

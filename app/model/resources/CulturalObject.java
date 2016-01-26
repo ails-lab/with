@@ -74,9 +74,11 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		private MultiLiteralOrResource dcrights;
 		
 		// places are here
-		private MultiLiteralOrResource dcspatial;
+		private MultiLiteralOrResource dctermsspatial;
 		
 		private MultiLiteralOrResource dccreator;
+		
+		private MultiLiteralOrResource dccontributor;
 
 		public MultiLiteralOrResource getDcrights() {
 			return dcrights;
@@ -131,11 +133,11 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		}
 
 		public MultiLiteralOrResource getDcspatial() {
-			return dcspatial;
+			return dctermsspatial;
 		}
 
 		public void setDcspatial(MultiLiteralOrResource dcspatial) {
-			this.dcspatial = dcspatial;
+			this.dctermsspatial = dcspatial;
 		}
 
 		public MultiLiteralOrResource getDccreator() {
@@ -192,6 +194,14 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 
 		public void setEvents(List<CidocEvent> events) {
 			this.events = events;
+		}
+
+		public MultiLiteralOrResource getDccontributor() {
+			return dccontributor;
+		}
+
+		public void setDccontributor(MultiLiteralOrResource dccontributor) {
+			this.dccontributor = dccontributor;
 		}
 		
 	}

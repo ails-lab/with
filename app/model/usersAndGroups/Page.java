@@ -39,7 +39,7 @@ public class Page {
 
 	@Embedded
 	public static class Point {
-
+		
 		private double latitude;
 		private double longitude;
 
@@ -62,7 +62,9 @@ public class Page {
 	}
 
 	//HAVE TO TEST
-	private org.mongodb.morphia.geo.Point coordinates;
+//	private org.mongodb.morphia.geo.Point coordinates;
+	
+	private Point coordinates;
 	private String city;
 	private String country;
 	private String url;
@@ -124,11 +126,11 @@ public class Page {
 		this.city = city;
 	}
 
-	public org.mongodb.morphia.geo.Point getCoordinates() {
+	public Point getCoordinates() {
 		return coordinates;
 	}
 
-	public void setCoordinates(org.mongodb.morphia.geo.Point coordinates) {
+	public void setCoordinates(Point coordinates) {
 		this.coordinates = coordinates;
 	}
 

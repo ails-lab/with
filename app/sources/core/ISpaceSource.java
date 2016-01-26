@@ -82,7 +82,7 @@ public abstract class ISpaceSource {
 
 	protected void countValue(CommonFilterLogic type, String t, boolean toglobal, int count) {
 		if (toglobal){
-			String name = type.data.filter.name();
+			String name = type.data.filterID;
 			List<Object> translateToCommon = vmap.translateToCommon(name, t);
 			Function<Object, String> function = (Object x)-> x.toString();
 			List<String> transform = ListUtils.transform(translateToCommon, function);

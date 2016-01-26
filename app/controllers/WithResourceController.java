@@ -51,6 +51,7 @@ import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -334,7 +335,16 @@ public class WithResourceController extends Controller {
 								CulturalObjectData.class);
 						DB.getWithResourceDAO().updateDescriptiveData(recordId,
 								descriptiveData);
-						//TODO update media as well
+/*						ArrayNode jsonArray;
+						jsonArray = (ArrayNode) mapper.readTree(data.getJsonContent()).get(
+								"media");
+						for(JsonNode media : jsonArray) {
+							EmbeddedMediaObject embeddedMediaObject = Json
+									.fromJson(media, EmbeddedMediaObject.class);
+							allMedia.
+						}
+						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
+								embeddedMediaObject);*/
 					} else {
 						DB.getRecordResourceDAO().updateContent(
 								record.getDbId(), data.getFormat(),
@@ -343,7 +353,6 @@ public class WithResourceController extends Controller {
 				}
 				return true;
 			} catch (Exception e) {
-				// my class isn't there!
 				return false;
 			}
 		};

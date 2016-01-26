@@ -63,60 +63,43 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.Europeana.toString();
 		apiKey = "SECRET_KEY";
+		
+	    /*filtersSupportedBySource = new ArrayList<CommonFilters>(
+	    		Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY, CommonFilters.CREATOR, 
+	    				CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER, CommonFilters.RIGHTS,
+	    				CommonFilters.TYPE, CommonFilters.YEAR)
+	    		);
+	    sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
+	    		for (CommonFilters filter: filtersSupportedBySource) {
+	    			put(filter.name(), filter);
+	    		}
+	    	}};*/
 
-		addDefaultWriter(CommonFilters.PROVIDER.name(), qfwriter("PROVIDER"));
-		addDefaultWriter(CommonFilters.DATA_PROVIDER.name(), qfwriter("DATA_PROVIDER"));
-		addDefaultWriter(CommonFilters.COUNTRY.name(), qfwriter("COUNTRY"));
+		addDefaultWriter(CommonFilters.PROVIDER.getId(), qfwriter("PROVIDER"));
+		addDefaultWriter(CommonFilters.DATA_PROVIDER.getId(), qfwriter("DATA_PROVIDER"));
+		addDefaultWriter(CommonFilters.COUNTRY.getId(), qfwriter("COUNTRY"));
 
-		addDefaultWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
-		addDefaultWriter(CommonFilters.CREATOR.name(), qfwriter("CREATOR"));
+		addDefaultWriter(CommonFilters.CREATOR.getId(), qfwriter("CREATOR"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
 
-		addDefaultQueryModifier(CommonFilters.RIGHTS.name(), qrightwriter());
+		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
 
-		addDefaultWriter(CommonFilters.TYPE.name(), qfwriter("TYPE"));
+		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
 
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.IMAGE, "IMAGE");
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.VIDEO, "VIDEO");
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.AUDIO, "SOUND");
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.TEXT, "TEXT");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "IMAGE");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
 
-		// addDefaultQueryModifier(CommonFilters.REUSABILITY_ID,
-		// qreusabilitywriter());
-
-		// filtersSupportedBySource = new ArrayList<CommonFilters>(
-		// Arrays.asList(CommonFilters.PROVIDER, CommonFilters.COUNTRY,
-		// CommonFilters.CREATOR,
-		// CommonFilters.DATA_PROVIDER, CommonFilters.PROVIDER,
-		// CommonFilters.RIGHTS,
-		// CommonFilters.TYPE, CommonFilters.YEAR)
-		// );
-		// sourceToFiltersMappings = new HashMap<String, CommonFilters>(){{
-		// for (CommonFilters filter: filtersSupportedBySource) {
-		// put(filter.name(), filter);
-		// }
-		// }};
-		// filtersToSourceMappings = new HashMap<CommonFilters, String>(){{
-		// for (String key: sourceToFiltersMappings.keySet()) {
-		// put(sourceToFiltersMappings.get(key), key);
-		// }
-		// }};
-		// for (CommonFilters filterType: filtersSupportedBySource) {
-		// addDefaultWriter(filterType.name(),
-		// qfwriter(filtersToSourceMappings.get(filterType)));
-		// }
-		// for (RecordType type: RecordType.values()) {
-		// addMapping(CommonFilters.TYPE.name(), type.name(), type.name());
-		// }
-
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.UNKNOWN, ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
 		formatreader = new EuropeanaRecordFormatter(vmap);
 
 	}
@@ -230,15 +213,45 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	}
 
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
+		
+		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
+		for (JsonNode facet : response.path("facets")) {
+			String filterType = facet.path("name").asText();
+			CommonFilters withFilter = CommonFilters.valueOf(filterType);//sourceToFiltersMappings.get(filterType);
+			if (withFilter != null) {
+				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
+				for (JsonNode jsonNode : facet.path("fields")) {
+					String label = jsonNode.path("label").asText();
+					int count = jsonNode.path("count").asInt();
+					switch (filterType) {
+						case "TYPE": 
+						case "RIGHTS":
+							countValue(filter, label, count);
+							break;
+						case "DATA_PROVIDER": 
+						case "PROVIDER":
+						case "proxy_dc_creator":
+						case "COUNTRY":
+						case "YEAR":
+							countValue(filter, label, false, count);
+							break;
+						default:
+							break;
+					}
+					filters.add(filter);
+				}
+			}
+		}
+		return filters;
 
-		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
+		/*CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
 		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
 		CommonFilterLogic dataprovider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
 		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
 		CommonFilterLogic rights = new CommonFilterLogic(CommonFilters.RIGHTS);
 		CommonFilterLogic country = new CommonFilterLogic(CommonFilters.COUNTRY);
 		CommonFilterLogic year = new CommonFilterLogic(CommonFilters.YEAR);
-
+		
 		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
 		for (JsonNode facet : response.path("facets")) {
 			String filterType = facet.path("name").asText();
@@ -285,8 +298,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		filters.add(creator);
 		filters.add(rights);
 		filters.add(country);
-		filters.add(year);
-		return filters;
+		filters.add(year);*/
 	}
 
 	public ArrayList<WithResource<?>> getItems(JsonNode response) {
