@@ -53,6 +53,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setDates(rec.getWithDateArrayValue("year"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreatorLangAware"));
+		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt().getURI(),null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
