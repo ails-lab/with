@@ -30,7 +30,7 @@ public class Literal extends HashMap<String, String> {
 	public Literal(Language lang, String label) {
 		this.put(lang.toString(), label);
 		if (lang.equals(Language.ENG))
-			this.put(Language.DEF.toString(), label);
+			this.put(Language.DEFAULT.toString(), label);
 	}
 
 	public void addLiteral(Language lang, String value) {
@@ -61,6 +61,6 @@ public class Literal extends HashMap<String, String> {
 		if (!containsKey(defLang)){
 			defLang = this.keySet().toArray()[0].toString();
 		}
-		put(Language.DEF.toString(), get(defLang));
+		put(Language.DEFAULT.toString(), get(defLang));
 	}
 }
