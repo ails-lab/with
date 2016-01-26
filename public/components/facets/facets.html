@@ -17,8 +17,8 @@
   <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
   
   <!-- ko foreach: $parent.filters -->
-  <!-- ko if: suggestedValues.length>0 && filter!=undefined && filter != 'comesFrom' -->
-  <li><a data-bind="attr:{href:'#'+filter},text:filter,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
+  <!-- ko if: suggestedValues.length>0 && filterID != 'comesFrom' -->
+  <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
   <!-- /ko -->
   <!-- /ko -->
    
@@ -76,15 +76,15 @@
   </div>
   
    <!-- ko foreach: $parent.filters -->
-   <div class="tab-pane fade" data-bind="attr:{id:filter}">
-    <!-- ko if:(filter!="year" &&  suggestedValues.length>0) -->
+   <div class="tab-pane fade" data-bind="attr:{id:filterID}">
+    <!-- ko if:(filterID!="year" &&  suggestedValues.length>0) -->
     <ul class="thumbfilters list">
    
     
    
     <!-- ko foreach: suggestedValues -->
    
-    <li data-bind="click:function(){$parents[1].listSelect($parents[0].filter,value);}">
+    <li data-bind="click:function(){$parents[1].listSelect($parents[0].filterID,value);}">
       <span data-bind="text: value"></span>
       
      </li>
@@ -92,11 +92,11 @@
       </ul>
      <!-- /ko -->
      
-     <!-- ko if:(filter=="year" &&  suggestedValues.length>0) -->
+     <!-- ko if:(filterID=="year" &&  suggestedValues.length>0) -->
      
         <ul class="list chart">
          <!-- ko foreach:$parent.yaxis -->
-		    <li data-bind="attr:{'title': $data},click:function(){$parents[1].listSelect($parents[0].filter,$data);}">
+		    <li data-bind="attr:{'title': $data},click:function(){$parents[1].listSelect($parents[0].filterID,$data);}">
 		    <span class="label" data-bind="text:$parents[1].yaxislabels()[$index()]"></span>
 		    
 		    <span class="bar" data-bind="attr: { 'data-number': $parents[1].barheights()[$index()]}"></span></li>
