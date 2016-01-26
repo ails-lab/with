@@ -256,7 +256,7 @@ public class RecordController extends Controller {
 		//elasticoptions = new SearchOptions(offset, count);
 		elasticoptions = new SearchOptions();
 		elasticoptions.addFilter("isPublic", "true");
-		searcher.setType(Elastic.typeResource);
+		searcher.addType(Elastic.typeResource);
 		for(Collection collection : colFields) {
 			elasticoptions.addFilter("collections", collection.getDbId().toString());
 		}
