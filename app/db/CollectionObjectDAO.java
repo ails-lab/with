@@ -121,7 +121,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			List<ObjectId> effectiveIds, Access access, Boolean isExhibition,
 			int offset, int count) {
 		CollectionType collectionType = isExhibition ? CollectionType.Exhibition : CollectionType.SimpleCollection;
-		q.field("administrative.collectionType").equal(collectionType);
 		Query<CollectionObject> q = this.createQuery()
 				.field("administrative.collectionType").equal(collectionType)
 				.order("-administrative.lastModified").offset(offset)
