@@ -86,9 +86,9 @@ public class ElasticSearcher {
 
 	private final String name;
 	private List<String> types = new ArrayList<String>();
-	private Map<String, Float> fedSearchFieldsWithBoosts;
+	private final Map<String, Float> fedSearchFieldsWithBoosts;
 	private List<String> fieldsForSimilarity;
-	private List<String> aggregatedFields;
+	private final List<String> aggregatedFields;
 
 	private final Client client = null;
 	public static final int DEFAULT_COUNT = 10;
@@ -162,6 +162,16 @@ public class ElasticSearcher {
 	public ElasticSearcher(String type) {
 		this.name = Elastic.index;
 		this.types.add(type);
+
+		this.fedSearchFieldsWithBoosts = new HashMap<String, Float>();
+		fedSearchFieldsWithBoosts.put("label", 1.8f);
+		fedSearchFieldsWithBoosts.put("description", 1.5f);
+		fedSearchFieldsWithBoosts.put("keywords", 1.3f);
+
+		this.aggregatedFields = new ArrayList<String>();
+		aggregatedFields.add("label.en.all");
+		aggregatedFields.add("description.fr");
+		aggregatedFields.add("label");
 	}
 
 
@@ -182,6 +192,8 @@ public class ElasticSearcher {
 			TermsBuilder agg = AggregationBuilders.terms(aggName+"+aggregation").field(aggName);
 			search.addAggregation(agg);
 		}
+
+		System.out.println(search.toString());
 		return search.execute().actionGet();
 	}
 
@@ -189,34 +201,34 @@ public class ElasticSearcher {
 		SuggestRequestBuilder sugg = this.getSuggestRequestBuilder(suggestion, options);
 		return sugg.execute().actionGet();
 	}
-	
+
 	/* Query Constractors */
-	
+
 	/**
 	 * size defaults to DEFAULT_RESPONSE_COUNT (10).
 	 * @param term search term
 	 * @param from offset of results.
 	 * @return
 	 */
-	public SearchResponse search(String term, int from, int count) { 
-		return searchResourceWithWeights(term, new SearchOptions(from, count)); 
+	public SearchResponse search(String term, int from, int count) {
+		return searchResourceWithWeights(term, new SearchOptions(from, count));
 	}
-	
+
 	public SearchResponse search(String term, SearchOptions options) {
 		return searchResourceWithWeights(term, options);
 	}
-	
-	public SearchResponse search(String term) { 
-		return searchResourceWithWeights(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT)); 
+
+	public SearchResponse search(String term) {
+		return searchResourceWithWeights(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT));
 	}
 
-	
+
 
 	public SearchResponse searchResourceWithWeights(String term, SearchOptions options) {
 
 		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
 		for(Entry<String, Float> e: fedSearchFieldsWithBoosts.entrySet()) {
-			qstr.field(e.getKey(), e.getValue());
+			qstr.field(e.getKey()+".all", e.getValue());
 		}
 		qstr.useDisMax(true);
 		qstr.tieBreaker(0);
@@ -235,21 +247,19 @@ public class ElasticSearcher {
 		//qstr.minimumShouldMatch(minimumShouldMatch);
 		qstr.lenient(true);
 
-		addQueryPermissions(qstr, options);
 
 		FunctionScoreQueryBuilder func_score =  QueryBuilders.functionScoreQuery(qstr);
 
 		return this.executeWithAggs(func_score, options);
 	}
 
-	
+
 	/*
 	 * List all available collections of a User
 	 */
 	public SearchResponse searchAccessibleCollections(SearchOptions options) {
 
 		MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
-		addQueryPermissions(match_all, options);
 		return this.execute(match_all, options);
 	}
 
@@ -323,10 +333,10 @@ public class ElasticSearcher {
 
 
 	public SuggestResponse searchSuggestions(String term, SearchOptions options) {
-		
+
 		CompletionSuggestionBuilder sugg = SuggestBuilders.completionSuggestion(term);
 		sugg.text(term);
-		
+
 		return this.executeSuggestion(sugg, options);
 	}
 
@@ -345,15 +355,15 @@ public class ElasticSearcher {
 		}
 	}
 
-	private void addQueryPermissions(QueryBuilder q, SearchOptions options) {
+	private void addQueryPermissions(FilterBuilder f, SearchOptions options) {
 
 		AndFilterBuilder and_filter = FilterBuilders.andFilter();
 		for(List<Tuple<ObjectId, Access>> ands: options.accessList) {
 			OrFilterBuilder or_filter = FilterBuilders.orFilter();
 			for(Tuple<ObjectId, Access> t: ands) {
 				BoolFilterBuilder bool = FilterBuilders.boolFilter();
-				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("rights.access").gte(t.y.ordinal());
-				bool.must(this.filter("rights.user", t.x.toString()));
+				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("access.acl.level").gte(t.y.ordinal());
+				bool.must(this.filter("access.acl.user", t.x.toString()));
 				bool.must(range_filter);
 				or_filter.add(bool);
 			}
@@ -361,8 +371,14 @@ public class ElasticSearcher {
 		}
 
 		OrFilterBuilder outer_or = FilterBuilders.orFilter();
-		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("rights", and_filter);
+		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("access", and_filter);
 		outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
+		if(options.filterType == FILTER_OR) {
+			((OrFilterBuilder) f).add(outer_or);
+		}
+		else {
+			((AndFilterBuilder) f).add(outer_or);
+		}
 	}
 
 	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options) {
@@ -393,13 +409,15 @@ public class ElasticSearcher {
 					sameFieldFilter.add(this.filter(key, value));
 				}
 				if(options.filterType == FILTER_OR) {
-					((OrFilterBuilder) filterBuilder).add(sameFieldFilter);
+					((OrFilterBuilder) filterBuilder).add(sameFieldFilter).cache(true);
 				}
 				else {
-					((AndFilterBuilder) filterBuilder).add(sameFieldFilter);
+					((AndFilterBuilder) filterBuilder).add(sameFieldFilter).cache(true);
 				}
 			}
 		}
+
+		addQueryPermissions(filterBuilder, options);
 		QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
 		search.setQuery(filtered);
 
@@ -407,14 +425,15 @@ public class ElasticSearcher {
 	}
 
 	private SuggestRequestBuilder getSuggestRequestBuilder(SuggestionBuilder suggestion, SearchOptions options) {
-		
+
 		SuggestRequestBuilder sugg = Elastic.getTransportClient()
 									.prepareSuggest(name)
 									.addSuggestion(suggestion);
-		
+
+		System.out.println(suggestion.toString());
 		return sugg;
 	}
-	
+
 	private FilterBuilder filter(String key, String value) {
 		FilterBuilder filter = FilterBuilders.termFilter(key, value);
 		return filter;
