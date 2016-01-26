@@ -158,7 +158,7 @@ public class CollectionObjectController extends WithResourceController {
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
-			if (!response.equals(ok()))
+			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
@@ -188,7 +188,7 @@ public class CollectionObjectController extends WithResourceController {
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.DELETE, collectionDbId);
-			if (!response.equals(ok()))
+			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
@@ -218,7 +218,7 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectId collectionDbId = new ObjectId(id);
 		try {
 			Result response = errorIfNoAccessToCollection(Action.EDIT, collectionDbId);
-			if (!response.equals(ok()))
+			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				if (json == null) {
@@ -496,7 +496,7 @@ public class CollectionObjectController extends WithResourceController {
 		//TODO: don't have to get the whiole collection, use DAO method
 		//Collection collection = DB.getCollectionDAO().getById(colId);
 		Result response = errorIfNoAccessToCollection(Action.READ, colId);
-		if (!response.equals(ok()))
+		if (!response.toString().equals(ok().toString()))
 			return response;
 		else {
 			List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, count);

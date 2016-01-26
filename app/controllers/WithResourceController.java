@@ -16,7 +16,6 @@
 
 package controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -24,16 +23,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import jdk.management.resource.ResourceId;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
-import model.resources.CulturalObject;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.CollectionObject;
-import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 
@@ -45,17 +40,14 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Results.Status;
 import sources.core.ISpaceSource;
 import sources.core.ParallelAPICall;
 import sources.core.RecordJSONMetadata;
-import sources.core.RecordJSONMetadata.Format;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
@@ -84,8 +76,9 @@ public class WithResourceController extends Controller {
 					"User does not have read-access for the resource");
 				return forbidden(result);
 			}
-			else 
+			else {
 				return ok();
+			}
 	}
 	
 	public static Status errorIfNoAccessToCollection(Action action, ObjectId collectionDbId) {
@@ -110,9 +103,10 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
 		try {
-			Result response = errorIfNoAccessToRecord(Action.EDIT, collectionDbId);
-			if (!response.equals(ok()))
+			Status response = errorIfNoAccessToRecord(Action.EDIT, collectionDbId);
+			if (!response.toString().equals(ok().toString())) {
 				return response;
+			}
 			else {	
 				if (json == null) {
 					result.put("error", "Invalid JSON");
@@ -138,14 +132,13 @@ public class WithResourceController extends Controller {
 					record.getAdministrative().setExternalId(externalId);
 					// Create a new record
 					ObjectId userId = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds")).get(0);
-					record.getAdministrative().setWithCreator(userId);
 					record.getAdministrative().setCreated(new Date());
 					switch (source) {
 					case UploadedByUser:
 						//DB.getRecordResourceDAO().makePermanent(record);
-
 						// Fill the EmbeddedMediaObject from the MediaObject that
 						// has been created
+						record.getAdministrative().setWithCreator(userId);
 						String mediaUrl;
 						WithMediaRights withRights;
 						EmbeddedMediaObject media;
@@ -167,11 +160,14 @@ public class WithResourceController extends Controller {
 								"/records/" + record.getDbId().toString(), record.getDbId().toString()));
 					case Mint:
 						errors = RecordResourceController.validateRecord(record);
+						record.getAdministrative().setWithCreator(userId);
 						if (errors != null) {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
 					default://imported first time from other sources
+						//there is no withCreator and the record is public
+						record.getAdministrative().getAccess().setIsPublic(true);
 						errors = RecordResourceController.validateRecord(record);
 						if (errors != null) {
 							return badRequest(errors);
@@ -211,39 +207,27 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			if (!DB.getWithResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
+			Result response = errorIfNoAccessToRecord(Action.EDIT, collectionDbId);
+			ObjectId recordDbId = new ObjectId(recordId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				if (position.isDefined()) {
+					DB.getRecordResourceDAO().removeFromCollection(recordDbId, collectionDbId, position.get());
+					// record.removePositionFromCollectedIn(collectionDbId,
+					// position.get());
+				}
+				// TODO modify access
+				if (DB.getCollectionObjectDAO().isFavorites(collectionDbId))
+					DB.getRecordResourceDAO().decrementLikes(recordDbId);
+				else
+					DB.getRecordResourceDAO().decField("usage.collectedIn", recordDbId);
+				// Change the collection metadata as well
+				DB.getCollectionObjectDAO().incEntryCount(collectionDbId);
+				DB.getCollectionObjectDAO().updateField(collectionDbId, "administrative.lastModified", new Date());
+				result.put("message", "Record succesfully added to collection");
+				return ok(result);
 			}
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					collectionDbId);
-			if (collection == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
-			}
-			RecordResource record = DB.getRecordResourceDAO().get(
-					new ObjectId(recordId));
-			if (position.isDefined()) {
-				// record.removePositionFromCollectedIn(collectionDbId,
-				// position.get());
-			}
-			// TODO modify access
-			if (collection.getDescriptiveData().getLabel().equals("_favorites")) {
-				record.getUsage().decLikes();
-			} else {
-				record.getUsage().decCollected();
-			}
-			DB.getRecordResourceDAO().makePermanent(record);
-			// Change the collection metadata as well
-			((CollectionAdmin) collection.getAdministrative()).incEntryCount();
-			collection.getAdministrative().setLastModified(new Date());
-			DB.getCollectionObjectDAO().makePermanent(collection);
-			result.put("message", "Record succesfully added to collection");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -256,33 +240,23 @@ public class WithResourceController extends Controller {
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
 			ObjectId recordDbId = new ObjectId(recordId);
-			if (!DB.getWithResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.EDIT, collectionDbId)) {
-				result.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(result);
+			Result response = errorIfNoAccessToRecord(Action.EDIT, collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				if (oldPosition > newPosition) {
+					DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
+							newPosition, oldPosition - 1);
+				} else if (newPosition > oldPosition) {
+					DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
+							oldPosition + 1, newPosition - 1);
+				}
+				DB.getRecordResourceDAO().updatePosition(recordDbId,
+						collectionDbId, oldPosition, newPosition);
+				DB.getCollectionObjectDAO().updateField(collectionDbId, "administrative.lastModified", new Date());
+				result.put("message", "Record succesfully added to collection");
+				return ok(result);
 			}
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					collectionDbId);
-			if (collection == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
-			}
-			if (oldPosition > newPosition) {
-				DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
-						newPosition, oldPosition - 1);
-			} else if (newPosition > oldPosition) {
-				DB.getRecordResourceDAO().shiftRecordsToRight(collectionDbId,
-						oldPosition + 1, newPosition - 1);
-			}
-			DB.getRecordResourceDAO().updatePosition(recordDbId,
-					collectionDbId, oldPosition, newPosition);
-			collection.getAdministrative().setLastModified(new Date());
-			DB.getCollectionObjectDAO().makePermanent(collection);
-			result.put("message", "Record succesfully added to collection");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);

@@ -224,7 +224,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public CollectionObject updateCollectionAdmin(ObjectId colId) {
-		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations();
+		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
 		colUpdate.set("administrative.lastModified", new Date());
 		colUpdate.inc("administrative.entryCount");

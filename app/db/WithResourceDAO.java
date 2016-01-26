@@ -262,8 +262,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	
 	public void updateProvenance(ObjectId id, Integer index, ProvenanceInfo info) {
 		Query<T> q = this.createQuery().field("_id").equal(id);
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		updateOps.set("provevance."+index, info);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("provenance."+index, info);
 		this.update(q, updateOps);
 	}
 
@@ -411,6 +411,12 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		decField("usage.likes", dbId);
 	}
 
+	public void updateField(ObjectId id, String field, Object value) {
+		Query<T> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set(field, value);
+		this.update(q, updateOps);
+	}
 	/**
 	 * Increment the specified field in a CollectionObject
 	 * @param dbId

@@ -67,7 +67,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public void incEntryCount(ObjectId dbId) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<CollectionObject> updateOps = this
-				.createUpdateOperations();
+				.createUpdateOperations().disableValidation();
 		updateOps.set("administrative.lastModified", new Date());
 		updateOps.inc("administrative.entryCount");
 		this.update(q, updateOps);
@@ -81,7 +81,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public void decEntryCount(ObjectId dbId) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<CollectionObject> updateOps = this
-				.createUpdateOperations();
+				.createUpdateOperations().disableValidation();
 		updateOps.set("administrative.lastModified", new Date());
 		updateOps.dec("administrative.entryCount");
 		this.update(q, updateOps);

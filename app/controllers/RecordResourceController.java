@@ -71,7 +71,7 @@ public class RecordResourceController extends WithResourceController {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
 			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
-			if (!response.equals(ok()))
+			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				if (format.isDefined()) {
@@ -117,7 +117,7 @@ public class RecordResourceController extends WithResourceController {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
 			Result response = errorIfNoAccessToRecord(Action.DELETE, new ObjectId(id));
-			if (!response.equals(ok()))
+			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				if (format.isDefined() && resource.getContent().containsKey(format)) {
@@ -211,7 +211,7 @@ public class RecordResourceController extends WithResourceController {
 				RecordResource oldResource = DB.getRecordResourceDAO().get(
 						new ObjectId(id));
 				Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(id));
-				if (!response.equals(ok()))
+				if (!response.toString().equals(ok().toString()))
 					return response;
 				else {
 					// TODO change JSON at all its depth
