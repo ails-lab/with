@@ -16,12 +16,28 @@
 
 package model.resources;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 
+import play.libs.Json;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.CidocEvent;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
@@ -32,15 +48,15 @@ import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
-	
+
 	public CulturalObject() {
 		super();
 		this.administrative = new RecordAdmin();
 		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
 	}
-	
+
 	public static class RecordAdmin extends WithAdmin {
-				
+
 		// if this resource / record is derived (modified) from a different Record.
 		private ObjectId parentResourceId;
 
@@ -51,33 +67,33 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		public void setParentResourceId(ObjectId parentResourceId) {
 			this.parentResourceId = parentResourceId;
 		}
-		
+
 	}
-	
-	
+
+
 	public static class CulturalObjectData extends RecordDescriptiveData {
 
 		// provenance[0].recordId
 		private MultiLiteralOrResource dcidentifier;
-		
+
 		// language of object, if it has one. Not related to the metadata.
 		// eg. If the object is a book, its the language it is written in
 		// no language for most paintings, vases, sculptures ... etc
 		private MultiLiteral dclanguage;
-		
-		// Painting, Sculpture, Building, Book .... 
+
+		// Painting, Sculpture, Building, Book ....
 		private MultiLiteralOrResource dctype;
-		
+
 		// places or times
 		private MultiLiteralOrResource dccoverage;
-		
+
 		private MultiLiteralOrResource dcrights;
-		
+
 		// places are here
 		private MultiLiteralOrResource dctermsspatial;
-		
+
 		private MultiLiteralOrResource dccreator;
-		
+
 		private MultiLiteralOrResource dccontributor;
 
 		public MultiLiteralOrResource getDcrights() {
@@ -90,14 +106,14 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 
 		private List<WithDate> dccreated;
 		private List<WithDate> dcdate;
-		
+
 		//TODO: do we want multilinguality for dcformat and dctermsmedium?
 		private MultiLiteralOrResource dcformat;
 		private MultiLiteralOrResource dctermsmedium;
-		
-		
+
+
 		private MultiLiteralOrResource isRelatedTo;
-		
+
 		private List<CidocEvent> events;
 
 		public MultiLiteralOrResource getDcidentifier() {
@@ -203,7 +219,22 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		public void setDccontributor(MultiLiteralOrResource dccontributor) {
 			this.dccontributor = dccontributor;
 		}
-		
+
 	}
-	
+
+	/* Elastic Transformations */
+
+	/*
+	 * Currently we are indexing only Resources that represent
+	 * collected records
+	 */
+	public Map<String, Object> transformCU() {
+
+		Map<String, Object> idx_map = this.transformWR();
+
+		idx_map.put("dccreator", ((CulturalObjectData)getDescriptiveData()).getDccreator());
+
+		return idx_map;
+	}
+
 }

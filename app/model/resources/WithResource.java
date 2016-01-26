@@ -19,6 +19,7 @@ package model.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -34,17 +35,24 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
+import play.libs.Json;
 import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import db.converters.AccessEnumConverter;
+import elastic.ElasticUtils;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -508,7 +516,7 @@ public class WithResource<T extends DescriptiveData> {
 	public List<HashMap<MediaVersion, EmbeddedMediaObject>> getMedia() {
 		return media;
 	}
-	
+
 	public void setMedia(List<HashMap<MediaVersion, EmbeddedMediaObject>> media) {
 		this.media = media;
 	}
@@ -516,13 +524,13 @@ public class WithResource<T extends DescriptiveData> {
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
-	
+
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
 		e.put(mediaVersion, media);
 		this.media.add(e);
 	}
-	
+
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		this.media.get(0).put(mediaVersion, media);
 	}
@@ -549,5 +557,16 @@ public class WithResource<T extends DescriptiveData> {
 	 */
 	public User retrieveCreator() {
 		return DB.getUserDAO().getById(this.administrative.withCreator, null);
+	}
+
+
+	/* Elastic Transformations */
+
+	/*
+	 * Currently we are indexing only Resources that represent
+	 * collected records
+	 */
+	public Map<String, Object> transformWR() {
+		return ElasticUtils.basicTransformation(this);
 	}
 }

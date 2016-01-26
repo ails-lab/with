@@ -94,9 +94,9 @@ public class ElasticTest {
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		Json.setObjectMapper(mapper);
 		System.out.println(Json.toJson(co));
-		System.out.println(ElasticUtils.transformRR(co));
+		System.out.println(co.transformWR());
 
-		ElasticIndexer.index(Elastic.type, co.getDbId(), ElasticUtils.transformRR(co));
+		ElasticIndexer.index(Elastic.typeResource, co.getDbId(), co.transformWR());
 
 	}
 
@@ -113,9 +113,9 @@ public class ElasticTest {
 		ids.clear();
 		for(RecordResource rr: rrs) {
 			ids.add(rr.getDbId());
-			docs.add(ElasticUtils.transformRR(rr));
+			docs.add(rr.transformWR());
 		}
-		ElasticIndexer.indexMany(Elastic.type, ids, docs);
+		ElasticIndexer.indexMany(Elastic.typeResource, ids, docs);
 	}
 
 
@@ -123,7 +123,7 @@ public class ElasticTest {
 	public void testDeleteResource() {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
-		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -153,8 +153,8 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().makePermanent(rr1);
 		DB.getRecordResourceDAO().makePermanent(rr2);
 
-		ElasticIndexer.index(Elastic.type, rr1.getDbId(), ElasticUtils.transformRR(rr1));
-		ElasticIndexer.index(Elastic.type, rr2.getDbId(), ElasticUtils.transformRR(rr2));
+		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -195,7 +195,7 @@ public class ElasticTest {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -210,7 +210,7 @@ public class ElasticTest {
 		doc.put("label.en", "666 title");
 
 
-		ElasticUpdater.updateOne(rr.getDbId(), doc);
+		ElasticUpdater.updateOne(Elastic.typeResource, rr.getDbId(), doc);
 
 		termQ = QueryBuilders.termQuery("label.en", "666 title");
 		resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -232,8 +232,8 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().makePermanent(rr2);
 
 
-		ElasticIndexer.index(Elastic.type, rr1.getDbId(), ElasticUtils.transformRR(rr1));
-		ElasticIndexer.index(Elastic.type, rr2.getDbId(), ElasticUtils.transformRR(rr2));
+		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -263,7 +263,7 @@ public class ElasticTest {
 		docs.add(doc1);
 		docs.add(doc2);
 
-		ElasticUpdater.updateMany(ids, docs);
+		ElasticUpdater.updateMany(Elastic.typeResource, ids, docs);
 
 		termQ = QueryBuilders.termQuery("label", "This is the new 1 label");
 		resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -292,7 +292,7 @@ public class ElasticTest {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -323,7 +323,7 @@ public class ElasticTest {
 		rr.setCollectedIn(collectedIn);
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -348,7 +348,7 @@ public class ElasticTest {
 		rr.setCollectedIn(collectedIn);
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.type, rr.getDbId(), ElasticUtils.transformRR(rr));
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -390,6 +390,12 @@ public class ElasticTest {
 			//ElasticIndexer indexer = new ElasticIndexer(c);
 			//indexer.indexCollectionMetadata();
 		}
+	}
+
+	@Test
+	public void testTransformations() {
+		RecordResource<RecordDescriptiveData> rr = getRecordResource();
+		System.out.println(Json.toJson(rr.transformWR()));
 	}
 
 
