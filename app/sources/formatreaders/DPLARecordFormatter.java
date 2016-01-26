@@ -52,6 +52,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 //		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 //		model.setDates(rec.getWithDateArrayValue("year"));
+		model.setDccontributor(rec.getMultiLiteralOrResourceValue("sourceResource.contributor"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("sourceResource.creator"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("sourceResource.subject"));
 		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();

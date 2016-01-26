@@ -111,7 +111,7 @@ public class StringUtils {
 	}
 
 	public static void main(String[] args) {
-		// System.out.println(getYears("2011 BC"));
+		 System.out.println(parseDate("11-11-2011"));
 	}
 
 	public static int count(String text, String subtext) {

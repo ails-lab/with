@@ -16,8 +16,12 @@
 
 package model.basicDataTypes;
 
-import sources.core.Utils;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import sources.core.Utils;
+import utils.Deserializer.LiteralOrResourceDesiarilizer;
+
+@JsonDeserialize(using = LiteralOrResourceDesiarilizer.class)
 public class LiteralOrResource extends Literal {
 
 	public static final String URI = "uri";

@@ -28,16 +28,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
+import model.basicDataTypes.Literal;
+import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 
 import org.bson.types.ObjectId;
 
+import model.usersAndGroups.Page.Point;
+import model.basicDataTypes.Language;
 import play.libs.Json;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
@@ -52,8 +58,8 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class Deserializer {
 
-
-	public static class ExhibitionRecordDeserializer extends JsonDeserializer<ExhibitionRecord> {
+	public static class ExhibitionRecordDeserializer extends
+			JsonDeserializer<ExhibitionRecord> {
 
 		@Override
 		public ExhibitionRecord deserialize(JsonParser annot,
@@ -68,18 +74,21 @@ public class Deserializer {
 	public static class AccessDeserializer extends JsonDeserializer<Access> {
 
 		@Override
-		public Access deserialize(JsonParser accessOrdinal, DeserializationContext arg1)
-				throws IOException, JsonProcessingException {
+		public Access deserialize(JsonParser accessOrdinal,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
 			return Access.values()[accessOrdinal.readValueAs(Integer.class)];
 		}
 
 	}
 
-	public static class WithAccessDeserializer extends JsonDeserializer<WithAccess> {
+	public static class WithAccessDeserializer extends
+			JsonDeserializer<WithAccess> {
 
 		@Override
-		public WithAccess deserialize(JsonParser accessString, DeserializationContext arg1)
-				throws IOException, JsonProcessingException {
+		public WithAccess deserialize(JsonParser accessString,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
 			WithAccess rights = new WithAccess();
 			TreeNode treeNode = accessString.readValueAsTree();
 			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
@@ -88,40 +97,128 @@ public class Deserializer {
 			}
 			ObjectNode jsonAcl = (ObjectNode) treeNode.get("acl");
 			if (jsonAcl != null) {
-				ArrayList<AccessEntry> acl = jsonAcl.traverse().readValueAs(new TypeReference<AccessEntry>() {});
+				ArrayList<AccessEntry> acl = jsonAcl.traverse().readValueAs(
+						new TypeReference<AccessEntry>() {
+						});
 				rights.setAcl(acl);
-				//if (rightsMap != null)
-					//for(Entry<String, Integer> e : rightsMap.entrySet())
-					//rights.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
+				// if (rightsMap != null)
+				// for(Entry<String, Integer> e : rightsMap.entrySet())
+				// rights.put(new ObjectId(e.getKey()),
+				// Access.values()[e.getValue()]);
 			}
 			return rights;
 		}
 	}
-	
-	public static class MultiLiteralDesiarilizer extends JsonDeserializer<MultiLiteral> {
+
+	public static class MultiLiteralDesiarilizer extends
+			JsonDeserializer<MultiLiteral> {
 
 		@Override
-		public MultiLiteral deserialize(JsonParser string, DeserializationContext arg1)
-				throws IOException, JsonProcessingException {
+		public MultiLiteral deserialize(JsonParser string,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
 			Map<String, List<String>> outMap = new HashMap<String, List<String>>();
-			Map<String, String[]> map = string.readValueAs(new TypeReference<Map<String, String[]>>() {
-			});
-			for (Entry<String, String[]> e: map.entrySet()) {
-				outMap.put(e.getKey(), Arrays.asList(e.getValue()));
+			Map<String, String[]> map = string
+					.readValueAs(new TypeReference<Map<String, String[]>>() {
+					});
+			for (Entry<String, String[]> e : map.entrySet()) {
+				if (Language.contains(e.getKey())) {
+					outMap.put(e.getKey(), Arrays.asList(e.getValue()));
+				}
 			}
 			return (MultiLiteral) outMap;
 		}
 	}
-	
-	public static class AccessMapDeserializer extends JsonDeserializer<Map<ObjectId, Access>> {
+
+	public static class MultiLiteralOrResourceDesiarilizer extends
+			JsonDeserializer<MultiLiteralOrResource> {
 
 		@Override
-		public Map<ObjectId, Access> deserialize(JsonParser rights_string, DeserializationContext arg1)
-				throws IOException, JsonProcessingException {
-			Map<String, Integer> rights_map = rights_string.readValueAs(new TypeReference<Map<String, Integer>>() {
-			});
-			Map<ObjectId, Access> r = new HashMap<ObjectId,	Access>();
-			for(Entry<String, Integer> e : rights_map.entrySet()) {
+		public MultiLiteralOrResource deserialize(JsonParser string,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
+			Map<String, List<String>> outMap = new HashMap<String, List<String>>();
+			Map<String, String[]> map = string
+					.readValueAs(new TypeReference<Map<String, String[]>>() {
+					});
+			for (Entry<String, String[]> e : map.entrySet()) {
+				if (Language.contains(e.getKey())
+						|| e.getKey().equals(LiteralOrResource.URI)) {
+					outMap.put(e.getKey(), Arrays.asList(e.getValue()));
+				}
+			}
+			return (MultiLiteralOrResource) outMap;
+		}
+	}
+
+	public static class LiteralDesiarilizer extends JsonDeserializer<Literal> {
+
+		@Override
+		public Literal deserialize(JsonParser string,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
+			Map<String, String> outMap = new HashMap<String, String>();
+			Map<String, String> map = string
+					.readValueAs(new TypeReference<Map<String, String>>() {
+					});
+			for (Entry<String, String> e : map.entrySet()) {
+				if (Language.contains(e.getKey())) {
+					outMap.put(e.getKey(), e.getValue());
+				}
+			}
+			return (Literal) outMap;
+		}
+	}
+
+	public static class LiteralOrResourceDesiarilizer extends
+			JsonDeserializer<LiteralOrResource> {
+
+		@Override
+		public LiteralOrResource deserialize(JsonParser string,
+				DeserializationContext arg1) {
+			Map<String, String> map;
+			try {
+				map = string
+						.readValueAs(new TypeReference<Map<String, String>>() {
+						});
+			} catch (JsonProcessingException e1) {
+				try {
+					return new LiteralOrResource(string.getText());
+				} catch (Exception e2) {
+					return null;
+				}
+			} catch (IOException e1) {
+				return null;
+			}
+			for (Entry<String, String> e : map.entrySet()) {
+				if (Language.contains(e.getKey())) {
+					return new LiteralOrResource(Language.valueOf(e.getKey()),
+							e.getValue());
+				} else if (e.getKey().equals(LiteralOrResource.URI)) {
+					LiteralOrResource out = new LiteralOrResource();
+					out.addURI(e.getValue());
+					return out;
+				} else {
+					return new LiteralOrResource(e.getValue());
+				}
+			}
+			return new LiteralOrResource();
+
+		}
+	}
+
+	public static class AccessMapDeserializer extends
+			JsonDeserializer<Map<ObjectId, Access>> {
+
+		@Override
+		public Map<ObjectId, Access> deserialize(JsonParser rights_string,
+				DeserializationContext arg1) throws IOException,
+				JsonProcessingException {
+			Map<String, Integer> rights_map = rights_string
+					.readValueAs(new TypeReference<Map<String, Integer>>() {
+					});
+			Map<ObjectId, Access> r = new HashMap<ObjectId, Access>();
+			for (Entry<String, Integer> e : rights_map.entrySet()) {
 				r.put(new ObjectId(e.getKey()), Access.values()[e.getValue()]);
 			}
 			return r;
