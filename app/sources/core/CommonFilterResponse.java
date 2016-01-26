@@ -19,15 +19,28 @@ package sources.core;
 import java.util.List;
 
 public class CommonFilterResponse {
-	public CommonFilters filter;
+	public String filterName;
+	public String filterID;
 	public List<ValueCount> suggestedValues;
 
 	public CommonFilterResponse() {
 	}
+	
+	public CommonFilterResponse(String filterID, String filterName) {
+		super();
+		this.filterID = filterID;
+		this.filterName = filterName;
+	}
+
+	public CommonFilterResponse(String filterID) {
+		super();
+		this.filterID = filterID;
+		this.filterName = filterID;
+	}
 
 	@Override
 	public String toString() {
-		return "CommonFilterResponse [filterName=" + filter.toString() + ", suggestedValues=" + suggestedValues.size() + "]";
+		return "CommonFilterResponse [filterName=" + filterName.toString() + ", suggestedValues=" + suggestedValues.size() + "]";
 	}
 
 }

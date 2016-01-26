@@ -30,7 +30,18 @@ public class CommonFilterLogic implements Cloneable {
 	public CommonFilterResponse data = new CommonFilterResponse();
 
 	public CommonFilterLogic(CommonFilters filter) {
-		this.data.filter = filter;
+		this.data.filterID = filter.getId();
+		this.data.filterName = filter.getText();
+	}
+	
+	public CommonFilterLogic(String filter) {
+		this.data.filterID = filter;
+		this.data.filterName = filter;
+	}
+	
+	public CommonFilterLogic(String filter, String text) {
+		this.data.filterID = filter;
+		this.data.filterName = text;
 	}
 	
 	public void addValue(String value, int count) {
@@ -64,7 +75,7 @@ public class CommonFilterLogic implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "Filter [" + data.filter.toString() + ", values=" + counts.values().size() + "]";
+		return "Filter [" + data.filterID + ", values=" + counts.values().size() + "]";
 	}
 
 	public CommonFilterResponse export() {
@@ -75,7 +86,8 @@ public class CommonFilterLogic implements Cloneable {
 
 	@Override
 	protected CommonFilterLogic clone() {
-		CommonFilterLogic res = new CommonFilterLogic(this.data.filter);
+		CommonFilterLogic res = new CommonFilterLogic(this.data.filterID);
+		res.data.filterName = data.filterName;
 		res.counts = (HashMap<String, ValueCount>) counts.clone();
 		return res;
 	}

@@ -23,6 +23,8 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
@@ -60,40 +62,40 @@ public class DPLASpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DPLA.toString();
 		apiKey = "SECRET_KEY";
-		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
-		addDefaultWriter(CommonFilters.COUNTRY.name(), fwriter("sourceResource.spatial.country"));
-		addDefaultWriter(CommonFilters.CREATOR.name(), fwriter("sourceResource.creator"));
-		addDefaultWriter(CommonFilters.CONTRIBUTOR.name(), fwriter("sourceResource.contributor"));
-		addDefaultWriter(CommonFilters.PROVIDER.name(), fwriter("provider.name"));
-		addDefaultWriter(CommonFilters.TYPE.name(), fwriter("sourceResource.type"));
-		addDefaultComplexWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
+		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("sourceResource.spatial.country"));
+		addDefaultWriter(CommonFilters.CREATOR.getId(), fwriter("sourceResource.creator"));
+		addDefaultWriter(CommonFilters.CONTRIBUTOR.getId(), fwriter("sourceResource.contributor"));
+		addDefaultWriter(CommonFilters.PROVIDER.getId(), fwriter("provider.name"));
+		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
+		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
 		/**
 		 * TODO check this
 		 */
 
-		addDefaultWriter(CommonFilters.RIGHTS.name(), fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Commercial.toString(), ".*creative(?!.*nc).*");
+		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("sourceResource.rights"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
 		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Modify.toString(), ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Commercial.toString(), ".*creative.*nc.*",
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, ".*creative.*nc.*",
 				".*non-commercial.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRPA.toString(), ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRRA.toString(), ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*rr-f.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRPA, ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRRA, ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRFA, ".*rr-f.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.RRFA.toString(), ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRFA, ".*unknown.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative_Not_Modify.toString(), ".*creative.*nd.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Modify, ".*creative.*nd.*");
 
-		addMapping(CommonFilters.RIGHTS.name(), ItemRights.Creative.toString(), ".*(creative).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*(creative).*");
 
-		addMapping(CommonFilters.TYPE.name(), RecordType.IMAGE.toString(), "image");
-		addMapping(CommonFilters.TYPE.name(), RecordType.VIDEO.toString(), "moving image");
-		addMapping(CommonFilters.TYPE.name(), RecordType.SOUND.toString(), "sound");
-		addMapping(CommonFilters.TYPE.name(), RecordType.TEXT.toString(), "text");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "moving image");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "sound");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
 
 		formatreader = new DPLARecordFormatter(vmap);
 

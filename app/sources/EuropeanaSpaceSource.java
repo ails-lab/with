@@ -75,31 +75,31 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 	    		}
 	    	}};*/
 
-		addDefaultWriter(CommonFilters.PROVIDER.name(), qfwriter("PROVIDER"));
-		addDefaultWriter(CommonFilters.DATA_PROVIDER.name(), qfwriter("DATA_PROVIDER"));
-		addDefaultWriter(CommonFilters.COUNTRY.name(), qfwriter("COUNTRY"));
+		addDefaultWriter(CommonFilters.PROVIDER.getId(), qfwriter("PROVIDER"));
+		addDefaultWriter(CommonFilters.DATA_PROVIDER.getId(), qfwriter("DATA_PROVIDER"));
+		addDefaultWriter(CommonFilters.COUNTRY.getId(), qfwriter("COUNTRY"));
 
-		addDefaultWriter(CommonFilters.YEAR.name(), qfwriterYEAR());
+		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
-		addDefaultWriter(CommonFilters.CREATOR.name(), qfwriter("CREATOR"));
+		addDefaultWriter(CommonFilters.CREATOR.getId(), qfwriter("CREATOR"));
 
 		// addDefaultWriter(CommonFilters.CONTRIBUTOR_ID,
 		// qfwriter("proxy_dc_contributor"));
 
-		addDefaultQueryModifier(CommonFilters.RIGHTS.name(), qrightwriter());
+		addDefaultQueryModifier(CommonFilters.RIGHTS.getId(), qrightwriter());
 
-		addDefaultWriter(CommonFilters.TYPE.name(), qfwriter("TYPE"));
+		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
 
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.IMAGE, "IMAGE");
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.VIDEO, "VIDEO");
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.AUDIO, "SOUND");
-		addMapping(CommonFilters.TYPE.name(), WithMediaType.TEXT, "TEXT");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "IMAGE");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
 
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.name(), WithMediaRights.UNKNOWN, ".*unknown.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
 		formatreader = new EuropeanaRecordFormatter(vmap);
 
 	}

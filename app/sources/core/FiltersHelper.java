@@ -26,7 +26,7 @@ public class FiltersHelper {
 			for (CommonFilterLogic commonFilterResponse : newfilters) {
 				boolean merged = false;
 				for (CommonFilterLogic old : mergedfilters) {
-					if (old.data.filter.name().equals(commonFilterResponse.data.filter.name())) {
+					if (old.data.filterID.equals(commonFilterResponse.data.filterID)) {
 						merged = true;
 						// Do the merge
 						merge(old, commonFilterResponse);
