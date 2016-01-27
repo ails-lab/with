@@ -157,6 +157,10 @@ public class EmbeddedMediaObject {
 	public void setUrl(String url) {
 		this.url = url;
 	}
+	
+	public String getWithUrl() {
+		return "";
+	}
 
 	public LiteralOrResource getOriginalRights() {
 		return originalRights;
