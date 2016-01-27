@@ -17,11 +17,10 @@
 package model.usersAndGroups;
 
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+
+import model.Notification;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
@@ -33,18 +32,17 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
-import model.Notification;
-import db.DB;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Json;
+import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Json;
-import utils.Serializer;
+import db.DB;
 
 @Entity
 @Indexes({
@@ -58,8 +56,6 @@ public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
 
-	private static final int EMBEDDED_CAP = 20;
-
 	private enum Gender {
 		MALE, FEMALE, UNSPECIFIED
 	}
@@ -71,9 +67,7 @@ public class User extends UserOrGroup {
 
 	private Gender gender;
 
-	@JsonIgnore
 	private String facebookId;
-	@JsonIgnore
 	private String googleId;
 	@JsonIgnore
 	private String md5Password;
