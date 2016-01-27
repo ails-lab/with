@@ -296,9 +296,9 @@ public class User extends UserOrGroup {
 					groupInfo.put("id", groupId.toString());
 					groupInfo.put("username", group.getUsername());
 					groupInfo.put("friendlyName", group.getFriendlyName());
+					groups.add(groupInfo);
 				}
 			}
-			groups.add(groupInfo);
 			return groups;
 		} catch (Exception e) {
 			return groups;
@@ -316,9 +316,9 @@ public class User extends UserOrGroup {
 					groupInfo.put("id", groupId.toString());
 					groupInfo.put("username", group.getUsername());
 					groupInfo.put("friendlyName", group.getFriendlyName());
+					groups.add(groupInfo);
 				}
 			}
-			groups.add(groupInfo);
 			return groups;
 		} catch (Exception e) {
 			return groups;
@@ -335,9 +335,9 @@ public class User extends UserOrGroup {
 					groupInfo.put("id", groupId.toString());
 					groupInfo.put("username", group.getUsername());
 					groupInfo.put("friendlyName", group.getFriendlyName());
+					groups.add(groupInfo);
 				}
 			}
-			groups.add(groupInfo);
 			return groups;
 		} catch (Exception e) {
 			return groups;
