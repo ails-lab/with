@@ -28,9 +28,7 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithDate;
-import model.resources.CollectionObject;
 import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource;
 import model.DescriptiveData;
 
@@ -50,8 +48,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
 
-	public static Map<String, List<String>> lang_accumulators;
-
 	/*
 	 * Currently we are indexing only Resources that represent
 	 * collected records
@@ -61,13 +57,14 @@ public class ElasticUtils {
 		JsonNode rr_json =  Json.toJson(rr);
 		ObjectNode idx_doc = Json.newObject();
 
-		lang_accumulators = new HashMap<String, List<String>>();
+		Map<String, List<String>>lang_accumulators = new HashMap<String, List<String>>();
 
 		/*
 		 *  Label
 		 */
 		JsonNode label = rr_json.get("descriptiveData").get("label");
 		idx_doc.put("label", label);
+
 		if(label != null) {
 			Iterator<Entry<String, JsonNode>> labels_it = label.fields();
 			ArrayNode all_labels = Json.newObject().arrayNode();
@@ -79,14 +76,14 @@ public class ElasticUtils {
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
 					if(un != null)
-						for(String u: un) addToLangAll(e.getKey(), u);
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
 				}
 
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_labels.add(v);
 				}
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
-					addToLangAll(e.getKey(), v);
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("label_all", all_labels);
@@ -110,14 +107,14 @@ public class ElasticUtils {
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getDescription().get(Language.UNKNOWN);
 					if(un != null)
-						for(String u: un) addToLangAll(e.getKey(), u);
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
 				}
 
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_descs.add(v);
 				}
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
-					addToLangAll(e.getKey(), v);
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("description_all", all_descs);
@@ -139,14 +136,14 @@ public class ElasticUtils {
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getKeywords().get(Language.UNKNOWN);
 					if(un != null)
-						for(String u: un) addToLangAll(e.getKey(), u);
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
 				}
 
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_keywords.add(v);
 				}
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
-					addToLangAll(e.getKey(), v);
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("keywords_all", all_keywords);
@@ -168,14 +165,14 @@ public class ElasticUtils {
 				else if(e.getKey().equals(Language.UNKNOWN)) {
 					List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
 					if(un != null)
-						for(String u: un) addToLangAll(e.getKey(), u);
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
 				}
 
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_altLabels.add(v);
 				}
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
-					addToLangAll(e.getKey(), v);
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("altLabels_all", all_altLabels);
@@ -289,13 +286,13 @@ public class ElasticUtils {
 	 * the map containing the custom language specific
 	 * _all fields
 	 */
-	private static void addToLangAll(String lang, String value) {
-		if(lang_accumulators.get(lang) != null) {
-			lang_accumulators.get(lang).add(value);
+	private static void addToLangAll(Map<String, List<String>> lang_acc, String lang, String value) {
+		if(lang_acc.get(lang) != null) {
+			lang_acc.get(lang).add(value);
 		} else {
 			List<String> lang_values = new ArrayList<String>();
 			lang_values.add(value);
-			lang_accumulators.put(lang, lang_values);
+			lang_acc.put(lang, lang_values);
 		}
 	}
 

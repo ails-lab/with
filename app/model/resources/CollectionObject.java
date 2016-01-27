@@ -59,7 +59,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	}
 
 	public static class CollectionAdmin extends WithAdmin {
-		
+
 		public enum CollectionType {SimpleCollection, Exhibition};
 
 		private int entryCount = 0;
@@ -135,8 +135,9 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	 * collected records
 	 */
 	public Map<String, Object> transformCO() {
-		return this.transformWR();
-
+		Map<String, Object> idx_map =  this.transformWR();
+		idx_map.put("collectionType", ((CollectionAdmin)this.getAdministrative()).getCollectionType());
+		return idx_map;
 	}
 
 }
