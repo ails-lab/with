@@ -66,11 +66,14 @@ public class User extends UserOrGroup {
 	private String lastName;
 
 	private Gender gender;
+	
+	@JsonIgnore
 	private String facebookId;
+	@JsonIgnore
 	private String googleId;
-
+	@JsonIgnore
 	private String md5Password;
-
+	@JsonIgnore
 	private boolean superUser;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
@@ -79,7 +82,8 @@ public class User extends UserOrGroup {
 	private List<Search> searchHistory = new ArrayList<Search>();*/
 	@Embedded
 	private Page page;
-
+	
+	@JsonIgnore
 	private int exhibitionsCreated;
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
@@ -264,27 +268,22 @@ public class User extends UserOrGroup {
 		this.adminInGroups.remove(group);
 	}
 
-	@JsonIgnore
 	public Set<ObjectId> getAdminInGroups() {
 		return this.adminInGroups;
 	}
 
-	@JsonIgnore
 	public boolean isSuperUser() {
 		return superUser;
 	}
 
-	@JsonIgnore
 	public void setSuperUser(boolean isSuperUser) {
 		this.superUser = isSuperUser;
 	}
 
-	@JsonIgnore
 	public int getExhibitionsCreated() {
 		return exhibitionsCreated;
 	}
 
-	@JsonIgnore
 	public void setExhibitionsCreated(int exhibitionsCreated) {
 		this.exhibitionsCreated = exhibitionsCreated;
 	}
