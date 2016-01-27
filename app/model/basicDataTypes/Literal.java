@@ -33,11 +33,11 @@ public class Literal extends HashMap<String, String> {
 	}
 
 	public Literal(Language lang, String label) {
-		this.put(lang.toString(), label);
+		this.put(lang.getDefaultCode(), label);
 	}
 
 	public void addLiteral(Language lang, String value) {
-		this.put(lang.toString(), value);
+		this.put(lang.getDefaultCode(), value);
 	}
 
 	public void addLiteral(String value) {
@@ -59,12 +59,12 @@ public class Literal extends HashMap<String, String> {
 			return;
 		}
 		if (containsKey(Language.EN.getDefaultCode())) {
-			put(Language.DEFAULT.toString(), getLiteral(Language.EN));
+			put(Language.DEFAULT.getDefaultCode(), getLiteral(Language.EN));
 			return;
 		}
 		for (String lang : this.keySet()) {
 			if (Language.contains(lang)) {
-				put(Language.DEFAULT.toString(), get(lang));
+				put(Language.DEFAULT.getDefaultCode(), get(lang));
 				return;
 			}
 		}

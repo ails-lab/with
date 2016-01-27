@@ -40,7 +40,7 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 	}
 
 	public void addLiteral(Language lang, String value) {
-		add(lang.toString(), value);
+		add(lang.getDefaultCode(), value);
 	}
 
 	public void addMultiLiteral(Language lang, List<String> values) {
