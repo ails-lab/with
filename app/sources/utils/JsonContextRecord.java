@@ -250,7 +250,7 @@ public class JsonContextRecord {
 		System.out.println(Json.toJson(l).toString());
 		MultiLiteralOrResource ml = new MultiLiteralOrResource();
 		ml.addLiteral(Language.EN, "bye");
-		ml.addLiteral(Language.DEF, "http://www.google.com");
+		ml.addLiteral(Language.DEFAULT, "http://www.google.com");
 
 		System.out.println(Json.toJson(ml).toString());
 		System.out.println(r.getRootInformation().toString());

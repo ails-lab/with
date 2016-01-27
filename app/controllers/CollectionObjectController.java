@@ -69,7 +69,7 @@ import db.DB;
  * @author mariaral
  *
  */
-public class CollectionObjectController extends ResourceController {
+public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger
 			.of(CollectionObjectController.class);
@@ -157,25 +157,18 @@ public class CollectionObjectController extends ResourceController {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			if (!DB.getWithResourceDAO().hasAccess(
-					AccessManager.effectiveUserDbIds(session().get(
-							"effectiveUserIds")), Action.READ, collectionDbId)) {
-				result.put("error",
-						"User does not have read-access for the resource");
-				return forbidden(result);
+			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						new ObjectId(id));
+				List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
+						.getFirstEntries(collectionDbId, 5);
+				result = (ObjectNode) Json.toJson(collection);
+				result.put("firstEntries", Json.toJson(firstEntries));
+				return ok(Json.toJson(collection));
 			}
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					new ObjectId(id));
-			if (collection == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
-			}
-			List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
-					.getFirstEntries(collectionDbId, 5);
-			result = (ObjectNode) Json.toJson(collection);
-			result.put("firstEntries", Json.toJson(firstEntries));
-			return ok(Json.toJson(collection));
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -194,25 +187,16 @@ public class CollectionObjectController extends ResourceController {
 		ObjectNode result = Json.newObject();
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			if (!DB.getWithResourceDAO()
-					.hasAccess(
-							AccessManager.effectiveUserDbIds(session().get(
-									"effectiveUserIds")), Action.DELETE,
-							collectionDbId)) {
-				result.put("error",
-						"User does not have read-access for the resource");
-				return forbidden(result);
+			Result response = errorIfNoAccessToCollection(Action.DELETE, collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						collectionDbId);
+				DB.getCollectionObjectDAO().makeTransient(collection);
+				result.put("message", "Resource was deleted successfully");
+				return ok(result);
 			}
-			CollectionObject collection = DB.getCollectionObjectDAO().get(
-					collectionDbId);
-			if (collection == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
-			}
-			DB.getCollectionObjectDAO().makeTransient(collection);
-			result.put("message", "Resource was deleted successfully");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -233,21 +217,17 @@ public class CollectionObjectController extends ResourceController {
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
 		try {
-			if (!DB.getWithResourceDAO()
-					.hasAccess(
-							AccessManager.effectiveUserDbIds(session().get(
-									"effectiveUserIds")), Action.EDIT,
-							collectionDbId)) {
-				result.put("error",
-						"User does not have read-access for the resource");
-				return forbidden(result);
+			Result response = errorIfNoAccessToCollection(Action.EDIT, collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				if (json == null) {
+					result.put("error", "Invalid JSON");
+					return badRequest(result);
+				}
+				// TODO change JSON at all its depth
+				DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
 			}
-			if (json == null) {
-				result.put("error", "Invalid JSON");
-				return badRequest(result);
-			}
-			// TODO change JSON at all its depth
-			DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
 			/* 
 			 * ObjectMapper objectMapper = new ObjectMapper(); ObjectReader
 			 * updator = objectMapper .readerForUpdating(oldCollection);
@@ -406,7 +386,7 @@ public class CollectionObjectController extends ResourceController {
 		for (CollectionObject collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(collection.getAdministrative().getAccess(), effectiveUserIds);
-			if (!collection.getDescriptiveData().getLabel().get(Language.DEF).equals("_favorites")) {
+			if (!collection.getDescriptiveData().getLabel().get(Language.DEFAULT).equals("_favorites")) {
 				if (maxAccess.equals(Access.NONE)) {
 					maxAccess = Access.READ;
 				}
@@ -515,41 +495,36 @@ public class CollectionObjectController extends ResourceController {
 		ObjectId colId = new ObjectId(collectionId);
 		//TODO: don't have to get the whiole collection, use DAO method
 		//Collection collection = DB.getCollectionDAO().getById(colId);
-
-		if (DB.getCollectionObjectDAO().existsResource(colId)) {
-			result.put("error", "Invalid collection id");
-			return forbidden(result);
-		}
-		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-		if (!AccessManager.hasAccess(userIds, Action.READ, colId) && (!DB.getCollectionObjectDAO().isPublic(colId))) {
-			result.put("error", "User does not have read-access to the collection");
-			return forbidden(result);
-		}
-		List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, count);
-		if (records == null) {
-			result.put("message", "Cannot retrieve records from database!");
-			return internalServerError(result);
-		}
-		ArrayNode recordsList = Json.newObject().arrayNode();
-		for (RecordResource e : records) {
-			if (contentFormat.equals("contentOnly")) {
-				recordsList.add(Json.toJson(e.getContent()));
+		Result response = errorIfNoAccessToCollection(Action.READ, colId);
+		if (!response.toString().equals(ok().toString()))
+			return response;
+		else {
+			List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, count);
+			if (records == null) {
+				result.put("message", "Cannot retrieve records from database!");
+				return internalServerError(result);
 			}
-			else {
-				if (contentFormat.equals("noContent")) {
-					e.getContent().clear();
+			ArrayNode recordsList = Json.newObject().arrayNode();
+			for (RecordResource e : records) {
+				if (contentFormat.equals("contentOnly")) {
+					recordsList.add(Json.toJson(e.getContent()));
 				}
-				else if (e.getContent().containsKey(contentFormat)) {
-					HashMap<String, String> newContent = new HashMap<String, String>(1);
-					newContent.put(contentFormat, (String) e.getContent().get(contentFormat));
-					e.setContent(newContent);
+				else {
+					if (contentFormat.equals("noContent")) {
+						e.getContent().clear();
+					}
+					else if (e.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(1);
+						newContent.put(contentFormat, (String) e.getContent().get(contentFormat));
+						e.setContent(newContent);
+					}
+					recordsList.add(Json.toJson(e));
 				}
-				recordsList.add(Json.toJson(e));
 			}
+			result.put("itemCount", ((CollectionAdmin) ((CollectionObject) DB.getCollectionObjectDAO().getById(colId, 
+					new ArrayList<String>(Arrays.asList("administrative.entryCount")))).getAdministrative()).getEntryCount());
+			result.put("records", recordsList);
+			return ok(result);
 		}
-		result.put("itemCount", ((CollectionAdmin) ((CollectionObject) DB.getCollectionObjectDAO().getById(colId, 
-				new ArrayList<String>(Arrays.asList("administrative.entryCount")))).getAdministrative()).getEntryCount());
-		result.put("records", recordsList);
-		return ok(result);
 	}
 }

@@ -16,8 +16,10 @@
 
 package db;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -25,9 +27,8 @@ import java.util.function.BiFunction;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -35,11 +36,11 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.FieldEnd;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 
 import utils.Tuple;
@@ -86,9 +87,29 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		return this.findOne(q);
 	}
 	
-	public boolean existsResource(ObjectId id) {
-		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
+	public T getByFieldAndValue(String field, Object value) {
+		Query<T> q = this.createQuery().field(field).equal(value);
+		return this.findOne(q);
+	}
+	
+	public T getByFieldAndValue(String field, Object value, List<String> retrievedFields) {
+		Query<T> q = this.createQuery().field(field).equal(value);
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		return this.findOne(q);
+	}
+	
+	public boolean existsFieldWithValue(String field, Object value) {
+		Query<T> q = this.createQuery().field(field).equal(value).limit(1);
 		return (this.find(q).asList().size()==0? false: true);
+	}
+	
+	public boolean existsResource(ObjectId id) {
+		return existsFieldWithValue("_id", id);
+
+	}
+	
+	public boolean existsWithExternalId(String externalId) {
+		return existsFieldWithValue("administrative.externalId", externalId);
 	}
 
 	/**
@@ -147,7 +168,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByLabel(String lang, String title) {
-		if (lang == null) lang = "default";
+		if (lang == null) 
+			lang = Language.DEFAULT.toString();
 		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label" + lang)
 				.contains(title);
 		return this.find(q).asList();
@@ -237,6 +259,13 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		q.filter("provenance", elemMatch);
 		return this.find(q).countAll();
 	}
+	
+	public void updateProvenance(ObjectId id, Integer index, ProvenanceInfo info) {
+		Query<T> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("provenance."+index, info);
+		this.update(q, updateOps);
+	}
 
 	public boolean isPublic(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
@@ -297,7 +326,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	
 	public boolean hasAccess(List<ObjectId> effectiveIds,  Action action, ObjectId resourceId) {
 		CriteriaContainer criteria = loggedInUserWithAtLeastAccessQuery(effectiveIds, actionToAccess(action));
-		Query<T> q = this.createQuery().disableValidation().limit(1);
+		Query<T> q = this.createQuery();
 		q.field("_id").equal(resourceId);
 		q.or(criteria);
 		return (this.find(q).asList().size()==0? false: true);
@@ -382,6 +411,12 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		decField("usage.likes", dbId);
 	}
 
+	public void updateField(ObjectId id, String field, Object value) {
+		Query<T> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set(field, value);
+		this.update(q, updateOps);
+	}
 	/**
 	 * Increment the specified field in a CollectionObject
 	 * @param dbId
@@ -406,5 +441,26 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
+	public void updateFields(String parentField, JsonNode node,
+			UpdateOperations<T> updateOps) {
+		Iterator<String> fieldNames = node.fieldNames();
+		  while (fieldNames.hasNext()) {
+	         String fieldName = fieldNames.next();
+	         JsonNode fieldValue = node.get(fieldName);
+        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
+	         if (fieldValue.isObject()) {
+	        	 updateFields(newFieldName, fieldValue, updateOps);
+	         }
+	         else {//value
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					Object value = mapper.treeToValue(fieldValue, newFieldName.getClass());
+					updateOps.disableValidation().set(newFieldName, value);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}	 
+	         }
+	     }
+	}
 
 }

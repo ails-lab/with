@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +35,7 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.mvc.Results.Status;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
@@ -49,7 +51,7 @@ import db.DB;
  * @author mariaral
  *
  */
-public class RecordResourceController extends ResourceController {
+public class RecordResourceController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(RecordResourceController.class);
 
@@ -68,22 +70,31 @@ public class RecordResourceController extends ResourceController {
 		try {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-			if (resource == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
+			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				if (format.isDefined()) {
+					if (format.equals("allContent")) {
+						return ok(Json.toJson(resource.getContent()));
+					}
+					else {
+						if (format.equals("noContent")) {
+							resource.getContent().clear();
+							return ok(Json.toJson(resource));
+						}
+						else if (resource.getContent().containsKey(format)) {
+							return ok(resource.getContent().get(format).toString());
+						}
+						else {
+							result.put("error", "Resource does not contain representation for format" + format);
+							return play.mvc.Results.notFound(result);
+						}
+					}
+				}
+				else 
+					return ok(Json.toJson(resource));
 			}
-			if (!AccessManager.checkAccess(resource.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.READ)) {
-				result.put("error",
-						"User does not have read-access for the resource");
-				return forbidden(result);
-			}
-			if (format.isDefined() && resource.getContent().containsKey(format)) {
-				return ok(resource.getContent().get(format).toString());
-			}
-			return ok(Json.toJson(resource));
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -105,27 +116,22 @@ public class RecordResourceController extends ResourceController {
 		try {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-			if (resource == null) {
-				log.error("Cannot retrieve resource from database");
-				result.put("error", "Cannot retrieve resource from database");
-				return internalServerError(result);
+			Result response = errorIfNoAccessToRecord(Action.DELETE, new ObjectId(id));
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				if (format.isDefined() && resource.getContent().containsKey(format)) {
+					resource.getContent().remove(format);
+					result.put("message",
+							"Serialization of resource was deleted successfully");
+					return ok(result);
+				}
+				else {
+					DB.getRecordResourceDAO().makeTransient(resource);
+					result.put("message", "Resource was deleted successfully");
+					return ok(result);
+				}
 			}
-			if (!AccessManager.checkAccess(resource.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.DELETE)) {
-				result.put("error",
-						"User does not have the right to delete the resource");
-				return forbidden(result);
-			}
-			if (format.isDefined() && resource.getContent().containsKey(format)) {
-				resource.getContent().remove(format);
-				result.put("message",
-						"Serialization of resource was deleted successfully");
-				return ok(result);
-			}
-			DB.getRecordResourceDAO().makeTransient(resource);
-			result.put("message", "Resource was deleted successfully");
-			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -201,39 +207,34 @@ public class RecordResourceController extends ResourceController {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			RecordResource oldResource = DB.getRecordResourceDAO().get(
-					new ObjectId(id));
-			if (oldResource == null) {
-				log.error("Cannot retrieve resource from database");
-				error.put("error", "Cannot retrieve resource from database");
-				return internalServerError(error);
-			}
-			if (!AccessManager.checkAccess(oldResource.getAdministrative()
-					.getAccess(), session().get("effectiveUserIds"),
-					Action.EDIT)) {
-				error.put("error",
-						"User does not have the right to edit the resource");
-				return forbidden(error);
-			}
-			// TODO change JSON at all its depth
-			ObjectMapper objectMapper = new ObjectMapper();
-			ObjectReader updator = objectMapper.readerForUpdating(oldResource);
-			RecordResource newResource;
-			newResource = updator.readValue(json);
-			Set<ConstraintViolation<RecordResource>> violations = Validation
-					.getValidator().validate(newResource);
-			if (!violations.isEmpty()) {
-				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<RecordResource> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath()
-							+ "\":\"" + cv.getMessage() + "\"}"));
+			else {
+				RecordResource oldResource = DB.getRecordResourceDAO().get(
+						new ObjectId(id));
+				Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(id));
+				if (!response.toString().equals(ok().toString()))
+					return response;
+				else {
+					// TODO change JSON at all its depth
+					ObjectMapper objectMapper = new ObjectMapper();
+					ObjectReader updator = objectMapper.readerForUpdating(oldResource);
+					RecordResource newResource;
+					newResource = updator.readValue(json);
+					Set<ConstraintViolation<RecordResource>> violations = Validation
+							.getValidator().validate(newResource);
+					if (!violations.isEmpty()) {
+						ArrayNode properties = Json.newObject().arrayNode();
+						for (ConstraintViolation<RecordResource> cv : violations) {
+							properties.add(Json.parse("{\"" + cv.getPropertyPath()
+									+ "\":\"" + cv.getMessage() + "\"}"));
+						}
+						error.put("error", properties);
+						return badRequest(error);
+					}
+					newResource.getAdministrative().setLastModified(new Date());
+					DB.getRecordResourceDAO().makePermanent(newResource);
+					return ok(Json.toJson(newResource));
 				}
-				error.put("error", properties);
-				return badRequest(error);
 			}
-			newResource.getAdministrative().setLastModified(new Date());
-			DB.getRecordResourceDAO().makePermanent(newResource);
-			return ok(Json.toJson(newResource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
