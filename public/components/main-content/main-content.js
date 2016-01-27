@@ -50,7 +50,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	}};
 	
-					
+			
+	
 	function FeaturedExhibit(data){
 	  var fe=this;
 	  fe.title=ko.observable();
@@ -93,63 +94,108 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	}		
 			
-	 function Collection(data){
-		 var self = this;
+	
+	function Collection(data) {
+		var self=this;
+		self.isLoaded = ko.observable(false);
+		var mapping = {
+				create: function(options) {
+			    	var self=this;
+			        // use extend instead of map to avoid observables
+			    	
+			    	self=$.extend(self, options.data);
+			    	
+			    	self.title=findByLangValues(self.descriptiveData.label, "");
+			    	
+			        self.thumbnail = ko.computed(function() {
+			        	if(self.media){
+			        	var data=self.media.thumbnailUrl;
+			        	 if(data && data>0){
+			 				if (data.indexOf('/') === 0) {
+			 					return data;
+			 				} else {
+			 					var newurl='url=' + encodeURIComponent(data)+'&';
+			 					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
+			 				}}
+			 			   else{
+			 				   return "img/content/thumb-empty.png";
+			 			   }
+			        	}
+			        	return "img/content/thumb-empty.png";
+			        });
 
-
-		  self.collname='';
-		  self.id=-1;
-		  self.url='';
-		  self.owner='';
-		  self.ownerId=-1;
-		  self.itemCount=0;
-		  self.thumbnail='../assets/img/content/thumb-empty.png';
-		  self.description='';
-		  self.isLoaded = ko.observable(false);
-		  self.isExhibition=false;
-		  self.itemcss="item ";
-		  self.type="COLLECTION";
-		  self.load=function(data){
-			  if(data.title==undefined){
-					self.collname="No title";
-				}else{self.collname=data.title;}
-				self.id=data.dbId;
-				
-				self.url="#collectionview/"+self.id;
-				
-				self.description=data.description;
-				if(data.firstEntries.length>0){
-					self.thumbnail=data.firstEntries[0].thumbnailUrl;
-				}
-				self.isExhibition=data.isExhibition;
-				if(self.isExhibition){
-					self.itemcss+="exhibition";
-					self.type="EXHIBITION";
-				}
-				else{self.itemcss+="collection";}
-				if(data.owner!==undefined){
-						self.owner=data.owner;
-					}
-
+			        self.type=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.exhibition==false)
+			        		  return "COLLECTION";
+			        	    else return "EXHIBITION";
+			        	}else return "";
+			        });
+			        
+			        self.css=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.exhibition==false)
+			        		  return "item collection";
+			        	    else return "item exhibition";
+			        	}else return "item exhibition";
+			        });
+			        
+			        self.url=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.exhibition==true)
+				    		  return 'index.html#exhibitionview/'+ self.dbId;
+				    		else{
+				    			return 'index.html#collectionview/'+ self.dbId;
+				    		}
+			        	}else return "";
+			        });
+			        return self;
+			     }
 			  
-		  }
-		  self.cachedThumbnail = ko.pureComputed(function() {
-				
-			   if(self.thumbnail){
-				if (self.thumbnail.indexOf('/') === 0) {
-					return self.thumbnail;
-				} else {
-					var newurl='url=' + encodeURIComponent(self.thumbnail)+'&';
-					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-				}}
-			   else{
-				   return "img/content/thumb-empty.png";
-			   }
-			});
-		  if(data != undefined) self.load(data);
-		   
-		  
+		};
+		
+		
+		
+		
+		 
+		
+		findByLangValues = function (val,sellang) {
+	          selvalue="";
+	          
+		       if(sellang.length==0){
+						sellang="default";
+					}
+			      if(val){
+			       if (val[sellang]) {
+			    	   for(var i=0;i<val[sellang].length;i++){
+			                	if(selvalue.length>0){selvalue+=",";}
+			                	selvalue=val[sellang][i];
+			    	   }
+			        }
+			       else if (val["en"]) {
+			    	   selvalue=val["en"][0];
+			       }
+		          else{   selvalue=val.unknown;}  
+			      }
+	          
+	           return selvalue;
+	    }
+		
+		
+		self.collectionData = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":"","media":""}, mapping);
+		
+		
+		self.load = function(data) {
+			self.collectionData=ko.mapping.fromJS(data, mapping);
+			console.log(self.collectionData);
+			
+		};
+
+		
+		if(data != undefined) 
+			self.load(data);
 	}
+	
 	
   function MainContentModel(params) {
 	  this.route = params.route;
@@ -169,8 +215,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			
 			for (var i in data) {
 				var c=new Collection(
-						data[i]
-						);
+							data[i]				
+				);
+				
+				
 				self.homecollections().push(c);
 			}
 			self.homecollections.valueHasMutated();

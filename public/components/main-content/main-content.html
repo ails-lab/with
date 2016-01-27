@@ -274,14 +274,14 @@
 	             <!-- ko if: $index() === 0 -->
 	              <div class="sizer"></div>
 	              <!-- /ko -->
-	               <div data-bind=" css: itemcss">
+	               <div data-bind=" css:collectionData.css()">
 	              <div class="wrap">
-	                <!-- anchor--><a href="#" data-bind="click: $parent.loadCollectionOrExhibition"  title="view">
+	                <!-- anchor--><a data-bind="attr: {href:collectionData.url()}"  title="view">
 	                <!-- thumbnail-->
-	                  <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"></div>
+	                  <div class="thumb"><img data-bind="attr: {src: collectionData.thumbnail()}"></div>
 	                  <!-- info-->
-	                  <div class="info"><span class="type" data-bind="text:type"></span>
-	                    <h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
+	                  <div class="info"><span class="type" data-bind="text:collectionData.type()"></span>
+	                    <h1 class="title" data-bind="text: collectionData.title"></h1><span class="owner" data-bind="text: collectionData.administrative.withCreator"></span>
 	                  </div>
 	                  </a>
 	              </div>
