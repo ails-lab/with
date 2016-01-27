@@ -53,7 +53,7 @@ public class JsonNodeUtils {
 				for (int i = 0; i < node.size(); i++) {
 					readMultiLiteral(res, node.get(i));
 				}
-				return res.fillDEF();
+				return res.fillDEF(true);
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();

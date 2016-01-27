@@ -72,7 +72,12 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 
 
 	public MultiLiteral fillDEF() {
-		if (!containsKey(Language.DEFAULT.getDefaultCode())) {
+		return fillDEF(false);
+	}
+
+	public MultiLiteral fillDEF(boolean forced) {
+		if (forced || !containsKey(Language.DEFAULT.getDefaultCode())) {
+			remove(Language.DEFAULT.getDefaultCode());
 			String defLang = null;
 			if (containsKey(Language.EN.getDefaultCode())) {
 				defLang = Language.EN.getDefaultCode();
