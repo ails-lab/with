@@ -262,8 +262,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						});
 						//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 						if (self.params.request_ == "mycollections" ||( self.params.route &&  self.params.route().request_=="mycollections")) {
-							ko.contextFor(mycollections).$data.moreCollectionData(true);
-							ko.contextFor(mycollections).$data.nextCollections();
+							ko.contextFor(mycollections).$data.init();
 						}
 						if (callback) {
 							callback(data.dbId);
