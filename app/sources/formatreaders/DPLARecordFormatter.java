@@ -49,38 +49,41 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		
 		model.setLabel(rec.getMultiLiteralValue("sourceResource.title"));
 		model.setDescription(rec.getMultiLiteralValue("sourceResource.description"));
-//		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
-		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
-//		model.setDates(rec.getWithDateArrayValue("year"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("hasView.@id"));
+		model.setIsShownAt(rec.getLiteralOrResourceValue("isShownAt"));
+		model.setDates(rec.getWithDateArrayValue("sourceResource.date.begin"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("sourceResource.contributor"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("sourceResource.creator"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("sourceResource.subject"));
 		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), uriAt,null));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"), rec.getStringValue("provider.@id"), null));
 		String recID = rec.getStringValue("id");
 		String uri = "http://dp.la/item/"+recID;
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
 		List<String> rights = rec.getStringArrayValue("rights");
-		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("sourceResource.type")).get(0);
+		String stringValue = rec.getStringValue("sourceResource.type");
+		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		WithMediaType type = translateToCommon==null?null:(WithMediaType) translateToCommon.get(0);
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("object");
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (uri3!=null){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
-//			medThumb.setParentID(model.getIsShownBy().getURI());
-			if (rights!=null)
+			medThumb.setParentID(uri2);
+			if (rights!=null && rights.size()>0)
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (uri2!=null){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setParentID("self");
 			med.setUrl(uri2);
+			if (rights!=null && rights.size()>0)
 			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			med.setWithRights(withRights);
 			med.setType(type);

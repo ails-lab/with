@@ -1971,9 +1971,9 @@ public enum Language {
 
 
 
-	DEFAULT("default", "df", "def"),
+	DEFAULT("default", "def"),
 	
-	UNKNOWN("Unknown", "un", "unk");
+	UNKNOWN("Unknown", "unknown","un", "unk");
 
 	
 	
@@ -2005,7 +2005,7 @@ public enum Language {
 					return lang;
 			}
 		}
-		return Language.UNKNOWN;
+		return null;
 	}
 
 	public static boolean contains(String code) {

@@ -54,19 +54,20 @@ public class Literal extends HashMap<String, String> {
 		return get(lang.toString());
 	}
 
-	public void fillDEF() {
+	public Literal fillDEF() {
 		if (containsKey(Language.DEFAULT.getDefaultCode())) {
-			return;
+			return this;
 		}
 		if (containsKey(Language.EN.getDefaultCode())) {
 			put(Language.DEFAULT.getDefaultCode(), getLiteral(Language.EN));
-			return;
+			return this;
 		}
 		for (String lang : this.keySet()) {
 			if (Language.contains(lang)) {
 				put(Language.DEFAULT.getDefaultCode(), get(lang));
-				return;
+				return this;
 			}
 		}
+		return this;
 	}
 }
