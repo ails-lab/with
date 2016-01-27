@@ -263,6 +263,13 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 	}
 	
-	
+	public CollectionObject updateCollectionAdmin(ObjectId colId) {
+		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+		colUpdate.set("administrative.lastModified", new Date());
+		colUpdate.inc("administrative.entryCount");
+		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
+	}
+
 	
 }

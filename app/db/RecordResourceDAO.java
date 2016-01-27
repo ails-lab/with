@@ -225,16 +225,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public void shiftRecordsToRight(ObjectId colId, int startPosition, int stopPosition) {
 		BiConsumer<String, UpdateOperations> update = (String field, UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
 		shift(colId, startPosition, stopPosition, update);
-	}
-
-	public CollectionObject updateCollectionAdmin(ObjectId colId) {
-		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
-		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-		colUpdate.set("administrative.lastModified", new Date());
-		colUpdate.inc("administrative.entryCount");
-		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
-	}
-	
+	}	
 	public void updateRecordUsageCollectedAndRights(CollectionInfo colInfo, WithAccess access, ObjectId recordId, ObjectId colId) {
 		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 		UpdateOperations<RecordResource> recordUpdate = this.createUpdateOperations();
@@ -260,7 +251,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	//what if the append fails (for some strange reason, the record cannot be edited correctly)
 	//and the entry count has been increased already?
 	public void addToCollection(ObjectId recordId, ObjectId colId, int position, boolean changeRecRights) {
-		CollectionObject co = updateCollectionAdmin(colId);
+		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId);
@@ -270,13 +261,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	
 	public void appendToCollection(ObjectId recordId, ObjectId colId, boolean changeRecRights) {
 		//increase entry count
-		CollectionObject co = updateCollectionAdmin(colId);
+		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId);
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 	}
-	
+		
 	public WithAccess mergeParentCollectionRights(ObjectId recordId, ObjectId colId) {
 		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
 		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
@@ -285,26 +276,27 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			parentCollections.add(ci.getCollectionId());
 		}
 		parentCollections.add(colId);
-		WithAccess newRecAccess = record.getAdministrative().getAccess();
-		System.out.println(newRecAccess.getAcl());
-		
 		//hope there aren't too many collections containing the resource
+		return mergeParentCollectionRights(record.getAdministrative().getAccess(), parentCollections);
+	}
+	
+	public WithAccess mergeParentCollectionRights(WithAccess recordAccess, List<ObjectId> parentCollections) {
+		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
 		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
 			WithAccess colAccess = parentCollection.getAdministrative().getAccess();
 			if (colAccess.isPublic())
-				newRecAccess.setIsPublic(true);
+				recordAccess.setIsPublic(true);
 			for (AccessEntry colEntry: colAccess.getAcl()) {
-				if (!WithAccess.containsUser(newRecAccess.getAcl(), colEntry.getUser()))
-					newRecAccess.addToAcl(colEntry);
-				for (AccessEntry recEntry: newRecAccess.getAcl()) {
+				if (!WithAccess.containsUser(recordAccess.getAcl(), colEntry.getUser()))
+					recordAccess.addToAcl(colEntry);
+				for (AccessEntry recEntry: recordAccess.getAcl()) {
 					if (recEntry.getUser().equals(colEntry.getUser()))
 						if (colEntry.getLevel().ordinal() > recEntry.getLevel().ordinal())
 							recEntry.setLevel(colEntry.getLevel());
 				}
 			}
 		}
-		System.out.println(newRecAccess.getAcl());
-		return newRecAccess;
+		return recordAccess;
 	}
 
 	//TODO: have to test
