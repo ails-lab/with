@@ -77,12 +77,12 @@
 					  	<!-- TODO: Make the message look nicer -->
 					  	<div class="col-xs-6 col-sm-6 col-md-8 coll-message">
 					 	 <div class="row-fluid">
-					  	 <div class="imcontainer">
+					  	 <div class="imcontainer" data-bind="click: $parent.loadCollectionOrExhibition">
 							 <!--  ko if: $parent.showsExhibitions -->
-					  			<h5><a  data-bind="click: $parent.loadCollectionOrExhibition"> Drag and drop items from your collections to your exhibitions.</a></h5>
+					  			<h5> Drag and drop items from your collections to your exhibitions.</h5>
 							 <!-- /ko -->
 							 <!-- ko else -->
-								 <h5><a href="#search" onClick="toggleSearch('focus'); return false;"> Select items from search results to add to collection.</a></h5>
+								 <h5> Select items from search results to add to collection.</h5>
 							 <!-- /ko -->
 
 					  	</div>
