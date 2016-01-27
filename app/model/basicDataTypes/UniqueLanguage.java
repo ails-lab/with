@@ -767,8 +767,6 @@ public enum UniqueLanguage {
 	UNKNOWN("Unknown", "un", "unk");
 
 	
-	
-	
 	private String name;
 	private String[] codes;
 	

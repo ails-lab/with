@@ -38,8 +38,7 @@ public class UserDAO extends DAO<User> {
 	public User getById(ObjectId id, List<String> retrievedFields) {
 		Query<User> q = this.createQuery().field("_id").equal(id);
 		if (retrievedFields != null)
-			for (int i = 0; i < retrievedFields.size(); i++)
-				q.retrievedFields(true, retrievedFields.get(i));
+				q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
 
 	}

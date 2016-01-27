@@ -263,4 +263,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 	}
 	
+	
+	
 }

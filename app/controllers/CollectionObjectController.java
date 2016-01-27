@@ -307,7 +307,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
-			for (CollectionObject collection : userCollections) {
+			for (CollectionObject collection: userCollections) {
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
