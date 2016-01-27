@@ -22,9 +22,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.mongodb.morphia.annotations.Converters;
-import utils.Deserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import db.converters.MultiLiteralConverter;
 
@@ -44,8 +41,12 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 
 	public void addLiteral(Language lang, String value) {
 		add(lang.toString(), value);
-//		if (lang.equals(Language.EN) && !this.containsKey(Language.DEF.toString()))
-//			add(Language.DEF.toString(), value);
+	}
+
+	public void addMultiLiteral(Language lang, List<String> values) {
+		for (String value : values) {
+			addLiteral(lang, value);
+		}
 	}
 
 	public void addLiteral(String value) {
@@ -53,14 +54,15 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 	}
 
 	public List<String> get(Language lang) {
-		/*if(Language.ANY.equals(lang)) {
-			return this.get(this.keySet().toArray()[0]);
-
-		}
-		else*/
-			return get(lang.toString());
+		/*
+		 * if(Language.ANY.equals(lang)) { return
+		 * this.get(this.keySet().toArray()[0]);
+		 * 
+		 * } else
+		 */
+		return get(lang.toString());
 	}
-	
+
 	public void add(String key, String value) {
 		if (this.containsKey(key))
 			this.get(key).add(value);
@@ -68,26 +70,30 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 
-	public void fillDEF(){
-		String defLang = null;
-		if (containsKey(Language.EN.getDefaultCode())){
-			defLang = Language.EN.getDefaultCode();
-		}
-		if (!containsKey(defLang)){
-			int max = 0;
-			for (String k : this.keySet()) {
-				if (!k.equals(Language.DEFAULT.getDefaultCode())){
-					int m = get(k).size();
-					if (max < m){
-						max = m;
-						defLang = k;
+
+	public void fillDEF() {
+		if (!containsKey(Language.DEFAULT.getDefaultCode())) {
+			String defLang = null;
+			if (containsKey(Language.EN.getDefaultCode())) {
+				defLang = Language.EN.getDefaultCode();
+			}
+			if (!containsKey(defLang)) {
+				int max = 0;
+				for (String k : this.keySet()) {
+					if (!k.equals(Language.DEFAULT.toString())) {
+						int m = get(k).size();
+						if (max < m) {
+							max = m;
+							defLang = k;
+						}
 					}
 				}
 			}
-		}
-		if (defLang!=null)
-		for (String d : get(defLang)) {
-			add(Language.DEFAULT.getDefaultCode(), d);
+
+			if (defLang != null)
+				for (String d : get(defLang)) {
+					add(Language.DEFAULT.getDefaultCode(), d);
+				}
 		}
 	}
 }
