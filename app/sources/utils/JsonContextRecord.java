@@ -142,6 +142,8 @@ public class JsonContextRecord {
 			// is a index
 			try {
 				int index = Integer.parseInt(elements[1]);
+				if (p.equals(""))
+					return node.get(index);
 				return node.path(p).get(index);
 			} catch (NumberFormatException e) {
 				// should be a condition:
