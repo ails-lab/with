@@ -18,49 +18,55 @@ package model.basicDataTypes;
 
 import java.util.HashMap;
 
+import utils.Deserializer.LiteralDesiarilizer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(using = LiteralDesiarilizer.class)
 public class Literal extends HashMap<String, String> {
 
 	public Literal() {
 	}
-	
+
 	public Literal(String label) {
 		this.put(Language.UNKNOWN.toString(), label);
 	}
 
 	public Literal(Language lang, String label) {
 		this.put(lang.toString(), label);
-		if (lang.equals(Language.ENG))
-			this.put(Language.DEFAULT.toString(), label);
 	}
 
 	public void addLiteral(Language lang, String value) {
 		this.put(lang.toString(), value);
-//		if (lang.equals(Language.ENG) && !this.containsKey(Language.DEF.toString()))
-//			this.put(Language.DEF.toString(), value);
 	}
-	
+
 	public void addLiteral(String value) {
 		addLiteral(Language.UNKNOWN, value);
 	}
-	
+
 	/**
 	 * Don't request the "unknown" language, request "any" if you don't care
-		 * @param lang
+	 * 
+	 * @param lang
 	 * @return
 	 */
 	public String getLiteral(Language lang) {
-		/*=if(Language.ANY.equals(lang)) {
-			return this.get(this.keySet().toArray()[0]);
-		}
-		else*/
-			return get(lang.toString());
+		return get(lang.toString());
 	}
-	
-	public void fillDEF(){
-		String defLang = Language.EN.toString();
-		if (!containsKey(defLang)){
-			defLang = this.keySet().toArray()[0].toString();
+
+	public void fillDEF() {
+		if (containsKey(Language.DEFAULT.toString())) {
+			return;
 		}
-		put(Language.DEFAULT.toString(), get(defLang));
+		if (containsKey(Language.EN.toString())) {
+			put(Language.DEFAULT.toString(), getLiteral(Language.EN));
+			return;
+		}
+		for (String lang : this.keySet()) {
+			if (Language.contains(lang)) {
+				put(Language.DEFAULT.toString(), get(lang));
+				return;
+			}
+		}
 	}
 }

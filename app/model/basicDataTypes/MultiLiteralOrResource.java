@@ -16,6 +16,8 @@
 
 package model.basicDataTypes;
 
+import java.util.List;
+
 import org.mongodb.morphia.annotations.Converters;
 
 import db.converters.MultiLiteralOrResourceConverter;
@@ -49,4 +51,9 @@ public class MultiLiteralOrResource extends MultiLiteral {
 		add(LiteralOrResource.URI, uri);
 	}
 
+	public void addURI(List<String> uris) {
+		for (String uri : uris) {
+			addURI(uri);
+		}
+	}
 }
