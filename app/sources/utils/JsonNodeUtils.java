@@ -68,7 +68,7 @@ public class JsonNodeUtils {
 					for (int i = 0; i < asString.size(); i++) {
 						res.addLiteral(Language.UNKNOWN, asString.get(i));
 					}
-					System.out.println("Unknown Format!!! "+asString);
+					System.out.println("Unknown Format!!! "+next.toString());
 				}
 			}
 			return res.fillDEF();
