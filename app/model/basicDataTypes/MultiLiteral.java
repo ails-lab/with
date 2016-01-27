@@ -70,13 +70,13 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 
 	public void fillDEF(){
 		String defLang = null;
-		if (containsKey(Language.EN.toString())){
-			defLang = Language.EN.toString();
+		if (containsKey(Language.EN.getDefaultCode())){
+			defLang = Language.EN.getDefaultCode();
 		}
 		if (!containsKey(defLang)){
 			int max = 0;
 			for (String k : this.keySet()) {
-				if (!k.equals(Language.DEFAULT.toString())){
+				if (!k.equals(Language.DEFAULT.getDefaultCode())){
 					int m = get(k).size();
 					if (max < m){
 						max = m;
@@ -87,7 +87,7 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 		}
 		if (defLang!=null)
 		for (String d : get(defLang)) {
-			add(Language.DEFAULT.toString(), d);
+			add(Language.DEFAULT.getDefaultCode(), d);
 		}
 	}
 }

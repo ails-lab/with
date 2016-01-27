@@ -24,13 +24,13 @@ public class Literal extends HashMap<String, String> {
 	}
 	
 	public Literal(String label) {
-		this.put(Language.UNKNOWN.toString(), label);
+		this.put(Language.UNKNOWN.getDefaultCode(), label);
 	}
 
 	public Literal(Language lang, String label) {
 		this.put(lang.toString(), label);
-		if (lang.equals(Language.ENG))
-			this.put(Language.DEFAULT.toString(), label);
+		if (lang.equals(Language.EN))
+			this.put(Language.DEFAULT.getDefaultCode(), label);
 	}
 
 	public void addLiteral(Language lang, String value) {
@@ -57,10 +57,10 @@ public class Literal extends HashMap<String, String> {
 	}
 	
 	public void fillDEF(){
-		String defLang = Language.EN.toString();
+		String defLang = Language.EN.getDefaultCode();
 		if (!containsKey(defLang)){
 			defLang = this.keySet().toArray()[0].toString();
 		}
-		put(Language.DEFAULT.toString(), get(defLang));
+		put(Language.DEFAULT.getDefaultCode(), get(defLang));
 	}
 }
