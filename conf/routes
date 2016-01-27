@@ -108,4 +108,6 @@ GET      /user/apikey/create                       controllers.UserManager.apike
 # trigger reindex (for development / admin )
 GET      /api/reindex                              controllers.SearchController.reindex()
 GET      /api/reindex_records                      controllers.SearchController.reindex_records()
+GET      /api/reindex_some                	       controllers.SearchController.reindex_some(ids:String ?= "")
+
 
