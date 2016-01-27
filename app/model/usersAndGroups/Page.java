@@ -16,7 +16,10 @@
 
 package model.usersAndGroups;
 
+import java.util.HashMap;
 import java.util.List;
+
+import model.EmbeddedMediaObject.MediaVersion;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -73,6 +76,8 @@ public class Page {
 	private ObjectId coverImage;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId coverThumbnail;
+	
+	private HashMap<MediaVersion, String> cover;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private List<ObjectId> featuredCollections;
@@ -156,6 +161,14 @@ public class Page {
 
 	public void addFeaturedExhibition(ObjectId featuredExhibition) {
 		this.featuredExhibitions.add(featuredExhibition);
+	}
+
+	public HashMap<MediaVersion, String> getCover() {
+		return cover;
+	}
+
+	public void setCover(HashMap<MediaVersion, String> cover) {
+		this.cover = cover;
 	}
 
 }
