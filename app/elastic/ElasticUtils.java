@@ -33,6 +33,9 @@ import model.resources.WithResource;
 import model.resources.WithResource.WithAdmin;
 import model.resources.WithResource.WithResourceType;
 import model.DescriptiveData;
+import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.ThesaurusObject;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
@@ -285,6 +288,158 @@ public class ElasticUtils {
 		return idx_map;
 	}
 
+	public static Map<String, Object> transformTObject(ThesaurusObject to) {
+
+		JsonNode rr_json =  Json.toJson(to);
+		ObjectNode idx_doc = Json.newObject();
+
+		HashMap<String, List<String>> lang_accumulators = new HashMap<String, List<String>>();
+
+		/*
+		 *  Label
+		 */
+		JsonNode label = rr_json.get("semantic").get("prefLabel");
+		
+		idx_doc.put("prefLabel", label);
+		if(label != null) {
+			Iterator<Entry<String, JsonNode>> labels_it = label.fields();
+			ArrayNode all_labels = Json.newObject().arrayNode();
+			while(labels_it.hasNext()) {
+				Entry<String, JsonNode> e = labels_it.next();
+				System.out.println(e);
+//				// ignore "def" and "unknown" language
+//				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
+//					continue;
+//				all_labels.add(e.getValue().asText());
+//				addToLangAll(e.getKey(), e.getValue().asText());
+//				List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
+//				if(un != null) {
+//					for(String u: un)
+//						addToLangAll(e.getKey(), u);
+//				}
+			}
+//			idx_doc.put("prefLabel_all", all_labels);
+//
+//
+		}
+//
+//		/*
+//		 * AltLabels
+//		 */
+//		JsonNode altLabels = rr_json.get("semantic").get("altLabel");
+//		idx_doc.put("altLabel", altLabels);
+//		if(altLabels != null) {
+//			Iterator<Entry<String, JsonNode>> altLabels_it = altLabels.fields();
+//			ArrayNode all_altLabels = Json.newObject().arrayNode();
+//			while(altLabels_it.hasNext()) {
+//				Entry<String, JsonNode> e = altLabels_it.next();
+//				// ignore "def" and "unknown" language
+//				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
+//					continue;
+//				all_altLabels.add(e.getValue().asText());
+//				addToLangAll(e.getKey(), e.getValue().asText());
+//				List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
+//				if(un != null) {
+//					for(String u: un)
+//						addToLangAll(e.getKey(), u);
+//				}
+//			}
+//			idx_doc.put("altLabel_all", all_altLabels);
+//		}
+//
+//		for(Entry<String, List<String>> e: lang_accumulators.entrySet()) {
+//			JsonNode langs = Json.toJson(e.getValue());
+//			idx_doc.put("_all_" + e.getKey(), langs);
+//		}
+//
+//		ArrayNode dates = Json.newObject().arrayNode();
+//		if(rr.getDescriptiveData().getDates() != null) {
+//			for(WithDate d: rr.getDescriptiveData().getDates()) {
+//				dates.add(d.getYear());
+//			}
+//			idx_doc.put("dates", dates);
+//		}
+//
+//		/*
+//		 * CollectedIn field
+//		 */
+//		idx_doc.put("collectedIn", Json.toJson(rr.getCollectedIn()));
+//
+//		/*
+//		 * Add more fields to the Json
+//		 */
+//		idx_doc.put("metadataRights", Json.toJson(rr.getDescriptiveData().getMetadataRights()));
+//		idx_doc.put("withCreator", rr_json.get("administrative.withCreator"));
+//		if((rr.getProvenance() != null) && (rr.getProvenance().size() == 1)) {
+//			idx_doc.put("dataProvider", Json.toJson(rr.getProvenance().get(0).getProvider()));
+//		}
+//		if((rr.getProvenance() != null) && (rr.getProvenance().size() > 1)) {
+//			idx_doc.put("dataProvider", Json.toJson(rr.getProvenance().get(0).getProvider()));
+//			idx_doc.put("provider", Json.toJson(rr.getProvenance().get(1).getProvider()));
+//		}
+//		idx_doc.put("resourceType", rr_json.get("resourceType"));
+//
+//
+//
+//		/*
+//		 * Format and add Media structure
+//		 */
+//		ArrayNode media_objects = Json.newObject().arrayNode();
+//		if(rr.getMedia() != null) {
+//			// take care about all EmbeddedMediaObjects
+//			EmbeddedMediaObject emo = rr.getMedia().get(0).get(MediaVersion.Original);
+//				ObjectNode media = Json.newObject();
+//				media.put("withRights", Json.toJson(emo.getWithRights()));
+//				media.put("withMediaType", Json.toJson(emo.getType()));
+//				media.put("originalRights", Json.toJson(emo.getOriginalRights()));
+//				media.put("mimeType", Json.toJson(emo.getMimeType()));
+//				media.put("quality", Json.toJson(emo.getQuality()));
+//				media.put("width", emo.getWidth());
+//				media.put("height", emo.getHeight());
+//				media_objects.add(media);
+//
+//				/*
+//				 * Eliminate null values from Media json structures
+//				 */
+//				ObjectNode media_copy = media.deepCopy();
+//				Iterator<String> fieldNames = media_copy.fieldNames();
+//				while(fieldNames.hasNext()) {
+//					String fName = fieldNames.next();
+//					if(media_copy.get(fName).isNull() ) {
+//						media.remove(fName);
+//					}
+//				}
+//			idx_doc.put("media", media_objects);
+//		}
+//
+//		/*
+//		 * User Rights structure in the document
+//		 */
+//		idx_doc.put("isPublic", rr.getAdministrative().getAccess().isPublic());
+//		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
+//
+//		/*
+//		 * Eliminate null values from the root document
+//		 */
+//		ObjectNode idx_copy = idx_doc.deepCopy();
+//		Iterator<String> fieldNames = idx_copy.fieldNames();
+//		while(fieldNames.hasNext()) {
+//			String fName = fieldNames.next();
+//			if(idx_copy.get(fName).isNull() ) {
+//				idx_doc.remove(fName);
+//			}
+//		}
+//
+//		ObjectMapper mapper = new ObjectMapper();
+//		mapper.setSerializationInclusion(Include.NON_NULL);
+//		Map<String, Object> idx_map = mapper.convertValue(idx_doc, Map.class);
+
+			Map<String, Object> idx_map = new HashMap<>();
+		
+		return idx_map;
+	}
+
+	
 	/*
 	 * This method helps add a language specific value to
 	 * the map containing the custom language specific
