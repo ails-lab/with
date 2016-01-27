@@ -17,6 +17,7 @@
 package sources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import java.util.Set;
 import model.Collection;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.WithResource;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
@@ -42,6 +44,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.UnmappedTerms;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import db.DB;
 import play.Logger;
 import play.libs.Json;
 import sources.core.CommonFilter;
@@ -60,16 +63,16 @@ import elastic.ElasticUtils;
 
 public class WithSpaceSource extends ISpaceSource {
 	public static final Logger.ALogger log = Logger.of(WithSpaceSource.class);
-	
+
 	//there should be a filter on source
 	//in general, more filters in new model for search within WITH db
 	/*public enum WithinFilters {
 		Provider("provider"), Type("type"), DataProvider("dataprovider"),
 		Creator("creator"), Rights("rights"),
 		Country("country"), Year("year");
-		
+
 		private String value;
-		
+
 		WithinFilters(String value) {
 	        this.value = value;
 	    }
@@ -87,18 +90,19 @@ public class WithSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+
+		ElasticSearcher searcher = new ElasticSearcher();
+		SearchOptions elasticoptions = new SearchOptions();
+
 		/*
-		 * Set the basic search parameters
+		 * Get the search parameters from the query
 		 */
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.typeResource);
 		String term = q.getQuery();
+		List<String> types = q.getTypes();
 		int count = Integer.parseInt(q.pageSize);
 		int offset = (Integer.parseInt(q.page)-1)*count;
 
-		/*
-		 * Prepare access lists for searching
-		 */
-		SearchOptions elasticoptions = new SearchOptions();
+		/* Access parameters */
 		List<Collection> colFields = new ArrayList<Collection>();
 		List<String> userIds = q.getEffectiveUserIds();
 		List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
@@ -112,52 +116,92 @@ public class WithSpaceSource extends ISpaceSource {
 				q.getDirectlyAccessedByUserName());
 		if (!userAccess.isEmpty())
 			accessFilters.add(userAccess);
+
+
+		/*
+		 * Prepare options for searching
+		 */
+		searcher.setTypes(types);
+
+		elasticoptions.setCount(count);
+		elasticoptions.setOffset(offset);
+		elasticoptions.setScroll(false);
 		elasticoptions.accessList = accessFilters;
 
-		/*
-		 * Search index for accessible collections
-		 */
-		searcher.addType(Elastic.typeResource);
-		SearchResponse response = searcher
-				.searchAccessibleCollections(elasticoptions);
-		List<SearchHit> hits = getTotalHitsFromScroll(response);
-		colFields = getCollectionMetadataFromHit(hits);
-		/*
-		 * Search index for merged records according to collection ids gathered
-		 * above
-		 */
-		elasticoptions = new SearchOptions(offset, count);
+
+		/* Filters */
 		elasticoptions.addFilter("isPublic", "true");
-		searcher.addType(Elastic.typeResource);
-		for (Collection collection : colFields) {
-			elasticoptions.addFilter("collections", collection.getDbId()
-					.toString());
+		List<CommonFilter> filters = q.filters;
+		for (CommonFilter f: filters) {
+			for (String filterValue: f.values) {
+				elasticoptions.addFilter(f.filterID+"_all", filterValue);
+			}
 		}
 
-		SearchResponse resp = searcher.search(term, elasticoptions);
-		searcher.closeClient();
 
-		SourceResponse res = new SourceResponse(resp, offset);
+
+		/*
+		 * Search index for accessible resources
+		 */
+		SearchResponse elasticResponse = searcher
+				.searchResourceWithWeights(term, elasticoptions);
+		Map<String, List<ObjectId>> resourcesIds = getIdsOfHits(elasticResponse);
+		Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
+
+		for(Entry<String, List<ObjectId>> e: resourcesIds.entrySet()) {
+			switch (e.getKey()) {
+			case "resource":
+				resourcesPerType.put("resource" , DB.getRecordResourceDAO().getByIds(e.getValue()));
+				break;
+			case "collection":
+				resourcesPerType.put("collection" , DB.getRecordResourceDAO().getByIds(e.getValue()));
+				break;
+			default:
+				break;
+			}
+		}
+
+
+		/* Finalize the searcher client and create the SourceResponse */
+
+		searcher.closeClient();
+		SourceResponse sourceResponse = new SourceResponse();
+		sourceResponse.setResourcesPerType(resourcesPerType);
+
+
+		/* Check wheter we need the aggregated values or not */
 
 		if (checkFilters(q)) {
-			for (Entry<String, Aggregation> e : resp.getAggregations().asMap()
-					.entrySet()) {
-				e.getKey();
-			}
-			res.filtersLogic = new ArrayList<>();
-			for (Aggregation agg : resp.getAggregations().asList()) {
+			sourceResponse.filtersLogic = new ArrayList<CommonFilterLogic>();
+			for (Aggregation agg : elasticResponse.getAggregations().asList()) {
 				InternalTerms aggTerm = (InternalTerms) agg;
 				if (aggTerm.getBuckets().size() > 0) {
-					CommonFilterLogic filter = new CommonFilterLogic(agg.getName());//CommonFilters.valueOf(agg.getName()));
+					CommonFilterLogic filter = new CommonFilterLogic(agg.getName());
+					//CommonFilters.valueOf(agg.getName()));
 					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
 						countValue(filter, aggTerm.getBuckets().get(i).getKey(),
 							(int) aggTerm.getBuckets().get(0).getDocCount());
 					}
-					res.filtersLogic.add(filter);
+					sourceResponse.filtersLogic.add(filter);
 				}
 			}
 		}
-		return res;
+
+		return sourceResponse;
+	}
+
+	private Map<String, List<ObjectId>> getIdsOfHits(SearchResponse resp) {
+
+		Map<String, List<ObjectId>> idsOfEachType = new HashMap<String, List<ObjectId>>();
+		resp.getHits().forEach( (h) -> {
+			if(!idsOfEachType.containsKey(h.getType())) {
+				idsOfEachType.put(h.getType(), new ArrayList<ObjectId>() {{ add(new ObjectId(h.getId())); }});
+			} else {
+				idsOfEachType.get(h.getType()).add(new ObjectId(h.getId()));
+			}
+		});
+
+		return idsOfEachType;
 	}
 
 	private List<SearchHit> getTotalHitsFromScroll(SearchResponse scrollResp) {
@@ -174,28 +218,6 @@ public class WithSpaceSource extends ISpaceSource {
 				break;
 		}
 		return totalHits;
-	}
-
-	private List<Collection> getCollectionMetadataFromHit(List<SearchHit> hits) {
-		List<Collection> colFields = new ArrayList<Collection>();
-		for (SearchHit hit : hits) {
-			JsonNode json = Json.parse(hit.getSourceAsString());
-			JsonNode accessRights = json.get("rights");
-			if (!accessRights.isMissingNode()) {
-				ObjectNode ar = Json.newObject();
-				for (JsonNode r : accessRights) {
-					String user = r.get("user").asText();
-					String access = r.get("access").asText();
-					ar.put(user, access);
-				}
-				((ObjectNode) json).remove("rights");
-				((ObjectNode) json).put("rights", ar);
-			}
-			Collection collection = Json.fromJson(json, Collection.class);
-			collection.setDbId(new ObjectId(hit.getId()));
-			colFields.add(collection);
-		}
-		return colFields;
 	}
 
 	@Override

@@ -104,7 +104,6 @@ public class ElasticSearcher {
 		public int filterType = FILTER_AND;
 		public List<List<Tuple<ObjectId, Access>>> accessList = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		// used for method searchForCollections
-		public boolean _idSearch = false;
 
 		public SearchOptions() {
 		}
@@ -131,10 +130,6 @@ public class ElasticSearcher {
 			this.count = count;
 		}
 
-		public void set_idSearch(boolean value) {
-			this._idSearch = value;
-		}
-
 		public void addFilter(String key, String value) {
 			ArrayList<String> values = null;
 			if(filters.containsKey(key)) {
@@ -159,9 +154,8 @@ public class ElasticSearcher {
 		}
 	}
 
-	public ElasticSearcher(String type) {
+	public ElasticSearcher() {
 		this.name = Elastic.index;
-		this.types.add(type);
 
 		this.fedSearchFieldsWithBoosts = new HashMap<String, Float>();
 		fedSearchFieldsWithBoosts.put("label", 1.8f);
@@ -450,7 +444,12 @@ public class ElasticSearcher {
 	}
 
 	public void addType(String type) {
-		this.types.add(type);
+		if(types != null)
+			this.types.add(type);
+		else {
+			types = new ArrayList<String>();
+			types.add(type);
+		}
 	}
 
 }
