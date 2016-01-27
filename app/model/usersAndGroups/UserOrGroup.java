@@ -16,6 +16,9 @@
 
 package model.usersAndGroups;
 
+import java.util.HashMap;
+
+import model.EmbeddedMediaObject.MediaVersion;
 import model.Media;
 
 import org.bson.types.ObjectId;
@@ -35,6 +38,7 @@ public abstract class UserOrGroup {
 	private String username;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId thumbnail;
+	private HashMap<MediaVersion, String> avatar;
 	private String about;
 
 	public ObjectId getDbId() {
@@ -71,6 +75,14 @@ public abstract class UserOrGroup {
 
 	public void setAbout(String about) {
 		this.about = about;
+	}
+
+	public HashMap<MediaVersion, String> getAvatar() {
+		return avatar;
+	}
+
+	public void setAvatar(HashMap<MediaVersion, String> avatar) {
+		this.avatar = avatar;
 	}
 
 }

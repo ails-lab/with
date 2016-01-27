@@ -32,6 +32,15 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	public UserGroupDAO() {
 		super(UserGroup.class);
 	}
+	
+	public UserGroup getById(ObjectId id, List<String> retrievedFields) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(id);
+		if (retrievedFields != null)
+			for (int i = 0; i < retrievedFields.size(); i++)
+				q.retrievedFields(true, retrievedFields.get(i));
+		return this.findOne(q);
+
+	}
 
 	public UserGroup getByName(String name) {
 		return this.findOne("username", name);

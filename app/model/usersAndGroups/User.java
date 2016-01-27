@@ -18,6 +18,7 @@ package model.usersAndGroups;
 
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,25 +32,28 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
+
 import model.Notification;
 import db.DB;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.libs.Json;
 import utils.Serializer;
 
 @Entity
 @Indexes({
 		@Index(fields = @Field(value = "email", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "username", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "username", type = IndexType.TEXT), options = @IndexOptions(background=true, name="username_text")),
+		@Index(fields = @Field(value = "username", type = IndexType.TEXT), options = @IndexOptions(background = true, name = "username_text")),
 		@Index(fields = @Field(value = "facebookId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions())
-		})
+		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()) })
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
@@ -66,7 +70,7 @@ public class User extends UserOrGroup {
 	private String lastName;
 
 	private Gender gender;
-	
+
 	@JsonIgnore
 	private String facebookId;
 	@JsonIgnore
@@ -78,11 +82,12 @@ public class User extends UserOrGroup {
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
-	/*@Embedded
-	private List<Search> searchHistory = new ArrayList<Search>();*/
+	/*
+	 * @Embedded private List<Search> searchHistory = new ArrayList<Search>();
+	 */
 	@Embedded
 	private Page page;
-	
+
 	@JsonIgnore
 	private int exhibitionsCreated;
 
@@ -97,17 +102,13 @@ public class User extends UserOrGroup {
 	 *
 	 * @param search
 	 */
-	/*public void addToHistory(Search search) {
-		if (search.getDbID() == null) {
-			log.error("Search is  not saved!");
-			return;
-		}
-
-		searchHistory.add(search);
-		if (searchHistory.size() > EMBEDDED_CAP) {
-			searchHistory.remove(0);
-		}
-	}*/
+	/*
+	 * public void addToHistory(Search search) { if (search.getDbID() == null) {
+	 * log.error("Search is  not saved!"); return; }
+	 * 
+	 * searchHistory.add(search); if (searchHistory.size() > EMBEDDED_CAP) {
+	 * searchHistory.remove(0); } }
+	 */
 
 	/**
 	 * md5 the password and set it in the right field
@@ -185,13 +186,12 @@ public class User extends UserOrGroup {
 		this.md5Password = md5Password;
 	}
 
-	/*public List<Search> getSearchHistory() {
-		return searchHistory;
-	}
-
-	public void setSearchHistory(List<Search> searcHistory) {
-		this.searchHistory = searcHistory;
-	}*/
+	/*
+	 * public List<Search> getSearchHistory() { return searchHistory; }
+	 * 
+	 * public void setSearchHistory(List<Search> searcHistory) {
+	 * this.searchHistory = searcHistory; }
+	 */
 
 	public Page getPage() {
 		return page;
@@ -290,6 +290,64 @@ public class User extends UserOrGroup {
 
 	public void addExhibitionsCreated() {
 		this.exhibitionsCreated++;
+	}
+
+	public ArrayNode getOrganizations() {
+		ObjectNode groupInfo = Json.newObject();
+		ArrayNode groups = Json.newObject().arrayNode();
+		try {
+			for (ObjectId groupId : userGroupsIds) {
+				UserGroup group = DB.getUserGroupDAO().get(groupId);
+				if (group instanceof Organization) {
+					groupInfo.put("id", groupId.toString());
+					groupInfo.put("username", group.getUsername());
+					groupInfo.put("friendlyName", group.getFriendlyName());
+				}
+			}
+			groups.add(groupInfo);
+			return groups;
+		} catch (Exception e) {
+			return groups;
+		}
+
+	}
+
+	public ArrayNode getProjects() {
+		ObjectNode groupInfo = Json.newObject();
+		ArrayNode groups = Json.newObject().arrayNode();
+		try {
+			for (ObjectId groupId : userGroupsIds) {
+				UserGroup group = DB.getUserGroupDAO().get(groupId);
+				if (group instanceof Project) {
+					groupInfo.put("id", groupId.toString());
+					groupInfo.put("username", group.getUsername());
+					groupInfo.put("friendlyName", group.getFriendlyName());
+				}
+			}
+			groups.add(groupInfo);
+			return groups;
+		} catch (Exception e) {
+			return groups;
+		}
+	}
+
+	public ArrayNode getUsergroups() {
+		ObjectNode groupInfo = Json.newObject();
+		ArrayNode groups = Json.newObject().arrayNode();
+		try {
+			for (ObjectId groupId : userGroupsIds) {
+				UserGroup group = DB.getUserGroupDAO().get(groupId);
+				if (group.getClass().equals(UserGroup.class)) {
+					groupInfo.put("id", groupId.toString());
+					groupInfo.put("username", group.getUsername());
+					groupInfo.put("friendlyName", group.getFriendlyName());
+				}
+			}
+			groups.add(groupInfo);
+			return groups;
+		} catch (Exception e) {
+			return groups;
+		}
 	}
 
 	public Set<Notification> getNotifications() {
