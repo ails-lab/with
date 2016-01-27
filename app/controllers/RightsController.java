@@ -76,7 +76,7 @@ public class RightsController extends Controller {
 				.split(","));
 		ObjectId userId = new ObjectId(session().get("user"));
 		User admin = DB.getUserDAO().get(userId);
-		if (!AccessManager.hasAccess(userIds,
+		if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"),
 				Action.DELETE, new ObjectId(colId)) && !admin.isSuperUser()) {
 			result.put("error",
 					"Sorry! You do not own this collection so you cannot set rights. "

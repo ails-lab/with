@@ -70,8 +70,6 @@ public class WithResource<T extends DescriptiveData> {
 	})
 	public static class WithAdmin {
 
-		private boolean isExhibition;
-
 		//index
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
@@ -166,14 +164,6 @@ public class WithResource<T extends DescriptiveData> {
 				return DB.getUserDAO().getById(userId, null);
 			else
 				return null;
-		}
-
-		public boolean isExhibition() {
-			return isExhibition;
-		}
-
-		public void setExhibition(boolean isExhibition) {
-			this.isExhibition = isExhibition;
 		}
 
 		public String getExternalId() {
@@ -420,7 +410,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
 		CollectionInfo entry = new CollectionInfo(colId, position);
-		if(collectedIn == null)
+		if (collectedIn == null)
 			collectedIn = new ArrayList<CollectionInfo>();
 		collectedIn.add(entry);
 

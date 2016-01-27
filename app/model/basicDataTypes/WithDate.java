@@ -18,6 +18,7 @@ package model.basicDataTypes;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import play.Logger;
@@ -56,8 +57,11 @@ public class WithDate {
 		return isoDate;
 	}
 
-	public void setIsoDate(Date isoDate) {
-		this.isoDate = isoDate;
+	public void setIsoDate(Date d) {
+		this.isoDate = d;
+		Calendar instance = Calendar.getInstance();
+		instance.setTime(d);
+		year = instance.get(Calendar.YEAR);
 	}
 
 	public int getYear() {
@@ -122,18 +126,17 @@ public class WithDate {
 			this.year = Integer.parseInt(free.split("\\s")[0]);
 		} else if (free.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
 			try {
-				isoDate =  (new SimpleDateFormat("dd-mm-yyyy")).parse(free);
+				setIsoDate((new SimpleDateFormat("dd-mm-yyyy")).parse(free));
 			} catch (ParseException e) {
 				Logger.error("unrecognized date: " + free);
 			}
 		} else if (free.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
 			try {
-				isoDate =  (new SimpleDateFormat("yyyy-mm-dd")).parse(free);
+				setIsoDate((new SimpleDateFormat("yyyy-mm-dd")).parse(free));
 			} catch (ParseException e) {
 				Logger.error("unrecognized date: " + free);
 			}
-		}
-			else if (sources.core.Utils.isValidURL(free)) {
+		} else if (sources.core.Utils.isValidURL(free)) {
 			this.uri = free;
 			// this.uriType = ResourceType.uri;
 		} else {

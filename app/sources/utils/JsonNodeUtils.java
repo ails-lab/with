@@ -45,18 +45,15 @@ public class JsonNodeUtils {
 	}
 	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
-			if (node.isArray()) {
-				node = node.get(0);
-			}
 			if (node.isTextual()) {
-				res.addLiteral(Language.DEF, node.asText());
-				return res;
+				res.addLiteral(Language.UNKNOWN, node.asText());
+				return res.fillDEF();
 			} 
 			if (node.isArray()){
 				for (int i = 0; i < node.size(); i++) {
-					res.addLiteral(Language.DEF, node.get(i).asText());
+					readMultiLiteral(res, node.get(i));
 				}
-				return res;
+				return res.fillDEF(true);
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
@@ -69,13 +66,12 @@ public class JsonNodeUtils {
 				} else {
 					List<String> asString = asStringArray(value);
 					for (int i = 0; i < asString.size(); i++) {
-						res.addLiteral(Language.DEF, asString.get(i));
+						res.addLiteral(Language.UNKNOWN, asString.get(i));
 					}
-					System.out.println("Unknown Format!!! "+asString);
+					System.out.println("Unknown Format!!! "+next.toString());
 				}
 			}
-			res.fillDEF();
-			return res;
+			return res.fillDEF();
 		}
 		return null;
 	}
@@ -85,16 +81,13 @@ public class JsonNodeUtils {
 	}
 	public static Literal readLiteral(Literal res, JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
-			if (node.isArray()) {
-				node = node.get(0);
-			}
 			if (node.isTextual()) {
-				res.addLiteral(Language.DEF, node.asText());
-				return res;
+				res.addLiteral(Language.UNKNOWN, node.asText());
+				return res.fillDEF();
 			}
 			if (node.isArray()){
-				res.addLiteral(Language.DEF, node.get(0).asText());
-				return res;
+				res.addLiteral(Language.UNKNOWN, node.get(0).asText());
+				return res.fillDEF();
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
@@ -103,10 +96,9 @@ public class JsonNodeUtils {
 				if (language != null)
 					res.addLiteral(language, value.get(0).asText());
 				else
-					res.addLiteral(Language.DEF, asString(value));
+					res.addLiteral(Language.UNKNOWN, asString(value));
 			}
-			res.fillDEF();
-			return res;
+			return res.fillDEF();
 		}
 		return null;
 	}

@@ -45,8 +45,6 @@ import model.ExternalBasicRecord.ItemRights;
 import model.Media;
 import model.MediaObject;
 import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.ResourceType;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -324,7 +322,6 @@ public class MediaController extends Controller {
 
 	// TODO: move this to deserializer ?Hex
 	private static void parseMediaRights(MediaObject med, String rights) {
-
 		med.setWithRights(WithMediaRights.UNKNOWN);
 
 		for (WithMediaRights wmright : WithMediaRights.values()) {
@@ -332,16 +329,6 @@ public class MediaController extends Controller {
 				med.setWithRights(wmright);
 			}
 		}
-
-	}
-
-	private static ResourceType parseOriginalRights(String resourceType) {
-		for (ResourceType type : ResourceType.values()) {
-			if (StringUtils.equals(type.name().toLowerCase(), resourceType.toLowerCase())) {
-				return type;
-			}
-		}
-		return null;
 	}
 
 	private static void parseMediaCheckerReply(MediaObject med, JsonNode json) {

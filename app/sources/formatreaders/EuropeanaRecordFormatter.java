@@ -65,16 +65,16 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type")).get(0);
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("edmPreview");
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (uri3!=null){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
-			medThumb.setParentID(model.getIsShownBy().getURI());
+			medThumb.setParentID(uri2);
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (uri2!=null){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setParentID("self");
