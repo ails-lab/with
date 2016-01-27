@@ -212,6 +212,11 @@ public class MediaController extends Controller {
 					// in KB!
 					med.setSize(fp.getFile().length() / 1024);
 					parsed = parseMediaFile(fp.getFile(), fp.getFilename());
+					if(!fp.getFile().isFile()){
+						result.put("error", "file parameter does not contain file");
+						return badRequest(result);
+					}
+					
 					image = ImageIO.read(fp.getFile());
 
 				} else if (formData.containsKey("url")) {
@@ -223,6 +228,11 @@ public class MediaController extends Controller {
 					String g = "::" + HttpConnector.getURLContentAsFile(formData.get("url")[0]).isFile();
 					Logger.info(g);
 					File x = HttpConnector.getURLContentAsFile(formData.get("url")[0]);
+					if(!x.isFile()){
+						result.put("error", "url does not contain a file");
+						return badRequest(result);
+					}
+
 					image = ImageIO.read(x);
 						
 				} else {
