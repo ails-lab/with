@@ -38,41 +38,17 @@ public class AccessManager {
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
-
-	public static boolean checkAccess(WithAccess withAccess,
-			String effectiveUserIds, Action action) {
-		/*if (withAccess.isPublic() == true && action.equals(Action.READ)) {
-			return true;
-		}
-		if (effectiveUserIds == null || effectiveUserIds.equals("")) {
-			return false;
-		}
-		List<ObjectId> userOrGroupIds = new ArrayList<ObjectId>();
-		for (String ui : effectiveUserIds.split(",")) {
-			if (ui.trim().length() > 0)
-				userOrGroupIds.add(new ObjectId(ui));
-		}
-		User user = DB.getUserDAO().getById(userOrGroupIds.get(0),
-				new ArrayList<String>(Arrays.asList("superUser")));
-		if (user != null && user.isSuperUser()) {
-			return true;
-		}
-		for (ObjectId id : userOrGroupIds) {
-			if (withAccess.containsKey(id)
-					&& (withAccess.get(id).ordinal() > action.ordinal())) {
-				return true;
-			}
-		}*/
-		return false;
-	}
 	
 	public static boolean isSuperUser(String userId) {
 		 return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
 	}
 
-	public static boolean hasAccess(List<String> userIds, Action action, ObjectId resourceId) {
-		
-		return DB.getWithResourceDAO().hasAccess(toObjectIds(userIds), action, resourceId);
+	public static boolean hasAccessToRecordResource(String userIds, Action action, ObjectId resourceId) {
+		return DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(userIds), action, resourceId);
+	}
+	
+	public static boolean hasAccessToCollectionResource(String userIds, Action action, ObjectId resourceId) {
+		return DB.getCollectionObjectDAO().hasAccess(effectiveUserDbIds(userIds), action, resourceId);
 	}
 	
 	public static List<ObjectId> toObjectIds(List<String> userIds) {
@@ -105,7 +81,7 @@ public class AccessManager {
 		return maxAccess;
 	}
 
-	public static boolean increasedAccess(Access before, Access after) {
+	/*public static boolean increasedAccess(Access before, Access after) {
 		if (before == null) {
 			if (after == null) {
 				return false;
@@ -114,7 +90,7 @@ public class AccessManager {
 			}
 		}
 		return (after.ordinal() > before.ordinal());
-	}
+	}*/
 
 	/**
 	 * This methods supposes we have all user ids and all userGroup ids

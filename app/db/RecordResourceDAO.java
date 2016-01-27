@@ -26,6 +26,7 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 
 import model.CollectionRecord;
@@ -62,69 +63,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		super(RecordResource.class);
 	}
 
-	/*
-	 * DAO Methods
-	 */
 	public int deleteByCollection(ObjectId colId) {
 		Query<RecordResource> q = this.createQuery().field("collectedIn.coldId").exists();
 		return this.deleteByQuery(q).getN();
 	}
 
-	/*
-	 * ********************************************************
-	 * These are embedded classes for very specific queries   *
-	 * in the far future.                                     *
-	 * ********************************************************
-	 */
-	/*
-	public class AgentObjectDAO extends CommonResourceDAO<AgentObject> {
-
-		public AgentObjectDAO(Class<?> entityClass) {
-			super(entityClass);
-		}
-
-	}
-
-	public class CulturalObjectDAO extends CommonResourceDAO<CulturalObject> {
-
-		public CulturalObjectDAO(Class<?> entityClass) {
-			super(entityClass);
-		}
-
-	}
-
-	public class EuscreenObjectDAO extends CommonResourceDAO<EUscreenObject> {
-
-		public EuscreenObjectDAO(Class<?> entityClass) {
-			super(entityClass);
-		}
-
-	}
-
-	public class EventObjectDAO extends CommonResourceDAO<EventObject> {
-
-		public EventObjectDAO(Class<?> entityClass) {
-			super(entityClass);
-		}
-
-	}
-
-	public class PlaceObjectDAO extends CommonResourceDAO<PlaceObject> {
-
-		public PlaceObjectDAO(Class<?> entityClass) {
-			super(entityClass);
-		}
-
-	}
-
-	public class TimespanObjectDAO extends CommonResourceDAO<TimespanObject> {
-
-		public TimespanObjectDAO(Class<?> entityClass) {
-			super(entityClass);
-		}
-
-	}
-	*/
 
 	/**
 	 * Retrieve records from specific collection whose position
@@ -280,13 +223,32 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shift(colId, startPosition, stopPosition, update);
 	}
 
+	public CollectionObject updateCollectionAdmin(ObjectId colId) {
+		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+		colUpdate.set("administrative.lastModified", new Date());
+		colUpdate.inc("administrative.entryCount");
+		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion\
+	}
+	
+	public void updateRecordUsageAndCollected(CollectionInfo colInfo,  ObjectId recordId, ObjectId colId) {
+		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
+		UpdateOperations<RecordResource> recordUpdate = this.createUpdateOperations();
+		recordUpdate.add("collectedIn", colInfo);
+		if (DB.getCollectionObjectDAO().isFavorites(colId))
+			recordUpdate.inc("usage.likes");
+		else
+			recordUpdate.inc("usage.collected");
+		//shiftRecordsToRight(colId, position+1);
+		this.update(q, recordUpdate);
+
+	}
+	
 	//TODO: has to be atomic as a whole
 	public void addToCollection(ObjectId resourceId, ObjectId colId, int position) {
-		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
-		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
-		updateOps.add("collectedIn", new CollectionInfo(colId, position));
+		CollectionObject co = updateCollectionAdmin(colId);
+		updateRecordUsageAndCollected( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), resourceId, colId);
 		shiftRecordsToRight(colId, position+1);
-		this.update(q, updateOps);
 	}
 
 	//TODO: have to test
@@ -297,22 +259,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, oldPosition));
 		this.update(q, updateOps);
 	}
+	
 
 	//TODO: use findAndModify for entryCount of respective collection
 	//what if the append fails (for some strange reason, the record cannot be edited correctly)
 	//and the entry count has been increased already?
 	public void appendToCollection(ObjectId resourceId, ObjectId colId) {
 		//increase entry count
-		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations();
-		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-		colUpdate.set("administrative.lastModified", new Date());
-		colUpdate.inc("administrative.entryCount");
-		CollectionObject co = DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
-		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
-		UpdateOperations<RecordResource> recordUpdate = this.createUpdateOperations();
-		recordUpdate.add("collectedIn", new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()));
-		//shiftRecordsToRight(colId, position+1);
-		this.update(q, recordUpdate);
+		CollectionObject co = updateCollectionAdmin(colId);
+		updateRecordUsageAndCollected( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), resourceId, colId);
 	}
 
 
@@ -327,5 +282,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public RecordResource getByCollectionAndPosition(ObjectId colId, int position) {
 		Query<RecordResource> q = this.createQuery().field("collectedIn").hasThisElement(new CollectionInfo(colId, position));
 		return this.findOne(q);
+	}
+	
+	public void editRecord(String root, ObjectId dbId, JsonNode json) {
+		Query<RecordResource> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<RecordResource> updateOps = this
+				.createUpdateOperations();
+		updateFields(root, json, updateOps);
+		updateOps.set("administrative.lastModified", new Date());
+		this.update(q, updateOps);
 	}
 }

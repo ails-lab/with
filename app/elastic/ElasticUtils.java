@@ -71,7 +71,7 @@ public class ElasticUtils {
 			while(labels_it.hasNext()) {
 				Entry<String, JsonNode> e = labels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
 					continue;
 				all_labels.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
@@ -97,7 +97,7 @@ public class ElasticUtils {
 			while(descs_it.hasNext()) {
 				Entry<String, JsonNode> e = descs_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
 					continue;
 				all_descs.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
@@ -121,7 +121,7 @@ public class ElasticUtils {
 			while(keywords_it.hasNext()) {
 				Entry<String, JsonNode> e = keywords_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
 					continue;
 				all_keywords.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());
@@ -145,7 +145,7 @@ public class ElasticUtils {
 			while(altLabels_it.hasNext()) {
 				Entry<String, JsonNode> e = altLabels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEF) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
 					continue;
 				all_altLabels.add(e.getValue().asText());
 				addToLangAll(e.getKey(), e.getValue().asText());

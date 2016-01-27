@@ -22,39 +22,28 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
-import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 
 import org.bson.types.ObjectId;
 
-import model.usersAndGroups.Page.Point;
-import model.basicDataTypes.Language;
-import play.libs.Json;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.ValueNode;
 
 public class Deserializer {
 
@@ -130,43 +119,56 @@ public class Deserializer {
 		}
 	}
 
-	public static class MultiLiteralOrResourceDesiarilizer extends
-			JsonDeserializer<MultiLiteralOrResource> {
-
-		@Override
-		public MultiLiteralOrResource deserialize(JsonParser string,
-				DeserializationContext arg1) throws IOException,
-				JsonProcessingException {
-			Map<String, List<String>> outMap = new HashMap<String, List<String>>();
-			Map<String, String[]> map = string
-					.readValueAs(new TypeReference<Map<String, String[]>>() {
-					});
-			for (Entry<String, String[]> e : map.entrySet()) {
-				if (Language.contains(e.getKey())
-						|| e.getKey().equals(LiteralOrResource.URI)) {
-					outMap.put(e.getKey(), Arrays.asList(e.getValue()));
-				}
-			}
-			return (MultiLiteralOrResource) outMap;
-		}
-	}
-
+	/*
+	 * public static class MultiLiteralOrResourceDesiarilizer extends
+	 * JsonDeserializer<MultiLiteralOrResource> {
+	 * 
+	 * @Override public MultiLiteralOrResource deserialize(JsonParser string,
+	 * DeserializationContext arg1) { Map<String, String[]> map; try { map =
+	 * string .readValueAs(new TypeReference<Map<String, String[]>>() { }); }
+	 * catch (JsonProcessingException e1) { try { return new
+	 * MultiLiteralOrResource(string.getText()); } catch (Exception e2) { return
+	 * null; } } catch (IOException e1) { return null; } MultiLiteralOrResource
+	 * outMap = new MultiLiteralOrResource(); for (Entry<String, String[]> e :
+	 * map.entrySet()) { if (Language.contains(e.getKey())) {
+	 * outMap.addMultiLiteral(Language.valueOf(e.getKey()),
+	 * Arrays.asList(e.getValue())); } else if
+	 * (e.getKey().equals(LiteralOrResource.URI)) { LiteralOrResource out = new
+	 * MultiLiteralOrResource(); out.addURI(e.getValue()); return out; } else {
+	 * return new MultiLiteralOrResource(e.getValue()); } } return null;
+	 * 
+	 * } }
+	 */
 	public static class LiteralDesiarilizer extends JsonDeserializer<Literal> {
 
 		@Override
 		public Literal deserialize(JsonParser string,
-				DeserializationContext arg1) throws IOException,
-				JsonProcessingException {
-			Map<String, String> outMap = new HashMap<String, String>();
-			Map<String, String> map = string
-					.readValueAs(new TypeReference<Map<String, String>>() {
-					});
+				DeserializationContext arg1) {
+			Map<String, String> map;
+			Literal out = new Literal();
+			try {
+				map = string
+						.readValueAs(new TypeReference<Map<String, String>>() {
+						});
+			} catch (JsonProcessingException e1) {
+				try {
+					out = new Literal(string.getText());
+					out.fillDEF();
+					return out;
+				} catch (Exception e2) {
+					return null;
+				}
+			} catch (IOException e1) {
+				return null;
+			}
 			for (Entry<String, String> e : map.entrySet()) {
 				if (Language.contains(e.getKey())) {
-					outMap.put(e.getKey(), e.getValue());
+					out.addLiteral(Language.valueOf(e.getKey()), e.getValue());
 				}
 			}
-			return (Literal) outMap;
+			out.fillDEF();
+			return out;
+
 		}
 	}
 
@@ -177,13 +179,16 @@ public class Deserializer {
 		public LiteralOrResource deserialize(JsonParser string,
 				DeserializationContext arg1) {
 			Map<String, String> map;
+			LiteralOrResource out = new LiteralOrResource();
 			try {
 				map = string
 						.readValueAs(new TypeReference<Map<String, String>>() {
 						});
 			} catch (JsonProcessingException e1) {
 				try {
-					return new LiteralOrResource(string.getText());
+					out = new LiteralOrResource(string.getText());
+					out.fillDEF();
+					return out;
 				} catch (Exception e2) {
 					return null;
 				}
@@ -192,18 +197,13 @@ public class Deserializer {
 			}
 			for (Entry<String, String> e : map.entrySet()) {
 				if (Language.contains(e.getKey())) {
-					return new LiteralOrResource(Language.valueOf(e.getKey()),
-							e.getValue());
+					out.addLiteral(Language.valueOf(e.getKey()), e.getValue());
 				} else if (e.getKey().equals(LiteralOrResource.URI)) {
-					LiteralOrResource out = new LiteralOrResource();
 					out.addURI(e.getValue());
-					return out;
-				} else {
-					return new LiteralOrResource(e.getValue());
 				}
 			}
-			return new LiteralOrResource();
-
+			out.fillDEF();
+			return out;
 		}
 	}
 
