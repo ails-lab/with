@@ -26,9 +26,14 @@ import java.util.function.BiFunction;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.CollectionObject;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -187,7 +192,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @return
 	 */
 	public T getByOwnerAndLabel(ObjectId creatorId, String lang, String title) {
-		if(lang == null) lang = "en";
+		if (lang == null) lang = "default";
 		Query<T> q = this.createQuery().field("administrative.withCreator")
 				.equal(creatorId).field("descriptiveData.label." + lang).equal(title);
 		return this.findOne(q);
@@ -227,7 +232,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	public User getOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "administrative.withCreator");
-		return ((WithResource) findOne(q)).retrieveCreator();
+		return ((WithResource) findOne(q)).getWithCreatorInfo();
 	}
 
 	/**
@@ -462,5 +467,4 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	         }
 	     }
 	}
-
 }

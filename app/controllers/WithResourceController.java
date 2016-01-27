@@ -66,14 +66,14 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		if (!resourceDAO.existsResource(id)) {
 			log.error("Cannot retrieve resource from database");
-			result.put("error", "Cannot retrieve resource from database");
+			result.put("error", "Cannot retrieve resource " + id +  " from database");
 			return internalServerError(result);
 		}
 		else
 			if (!resourceDAO.hasAccess(AccessManager.effectiveUserDbIds(session().get(
 					"effectiveUserIds")), action, id)) {
 				result.put("error",
-					"User does not have read-access for the resource");
+					"User does not have " +  action + " access for resource " + id);
 				return forbidden(result);
 			}
 			else {
@@ -86,7 +86,7 @@ public class WithResourceController extends Controller {
 	}
 	
 	public static Status errorIfNoAccessToRecord(Action action, ObjectId recordId) {
-		return errorIfNoAccessToWithResource(DB.getCollectionObjectDAO(), action, recordId);
+		return errorIfNoAccessToWithResource(DB.getRecordResourceDAO(), action, recordId);
 	}
 
 	/**
@@ -103,39 +103,51 @@ public class WithResourceController extends Controller {
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
 		try {
-			Status response = errorIfNoAccessToRecord(Action.EDIT, collectionDbId);
+			Status response = errorIfNoAccessToCollection(Action.EDIT, collectionDbId);
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			}
-			else {	
+			else {
 				if (json == null) {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
 				RecordResource record = Json.fromJson(json, RecordResource.class);
-				int last = record.getProvenance().size() - 1;
-				Sources source = Sources.valueOf(((ProvenanceInfo) record
+				int last = 0;
+				Sources source = Sources.UploadedByUser;
+				if (record.getProvenance() != null && !record.getProvenance().isEmpty()) {
+					last = record.getProvenance().size() - 1;
+				    source = Sources.valueOf(((ProvenanceInfo) record
 						.getProvenance().get(last)).getProvider());
+				}
+				else 
+					record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays.asList(new ProvenanceInfo(source.toString()))));
 				String externalId = ((ProvenanceInfo) record.getProvenance()
 						.get(last)).getResourceId();
 				ObjectId recordId = null;
 				if (externalId != null && DB.getRecordResourceDAO().existsWithExternalId(externalId)) {
-						//get dbId of existing resource
-						RecordResource resource = DB.getRecordResourceDAO().getByFieldAndValue("administrative.externalId", externalId, 
-								new ArrayList<String>(Arrays.asList("_id")));
-						recordId = resource.getDbId();
+					//get dbId of existing resource
+					RecordResource resource = DB.getRecordResourceDAO().getByFieldAndValue("administrative.externalId", externalId, 
+							new ArrayList<String>(Arrays.asList("_id")));
+					recordId = resource.getDbId();
+					response = errorIfNoAccessToRecord(Action.READ, recordId);
+					if (!response.toString().equals(ok().toString())) {
+						return response;
+					}
+					else {
 						// In case the record already exists we overwrite the existing
-						// record's descriptive data
-						DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(), json.get("descriptiveData"));
+						// record's descriptive data, if the user has WRITE access.
+						if (DB.getRecordResourceDAO().hasAccess(AccessManager.effectiveUserDbIds(session().get(
+										"effectiveUserIds")), Action.EDIT, recordId) && (json.get("descriptiveData") != null))
+							DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(), json.get("descriptiveData"));
+					}
 				} else {  //create new record in db
 					ObjectNode errors;
-					record.getAdministrative().setExternalId(externalId);
 					// Create a new record
 					ObjectId userId = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds")).get(0);
 					record.getAdministrative().setCreated(new Date());
 					switch (source) {
 					case UploadedByUser:
-						//DB.getRecordResourceDAO().makePermanent(record);
 						// Fill the EmbeddedMediaObject from the MediaObject that
 						// has been created
 						record.getAdministrative().setWithCreator(userId);
@@ -155,9 +167,11 @@ public class WithResourceController extends Controller {
 							}
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
+						recordId = record.getDbId();
 						//update provenance chain based on record dbId
-						DB.getRecordResourceDAO().updateProvenance(record.getDbId(), last, new ProvenanceInfo("UploadedByUser", 
-								"/records/" + record.getDbId().toString(), record.getDbId().toString()));
+						DB.getRecordResourceDAO().updateProvenance(recordId, last, new ProvenanceInfo("UploadedByUser", 
+								"/records/" + recordId.toString(), record.getDbId().toString()));
+						DB.getRecordResourceDAO().updateField(recordId, "administrative.externalId","record/"+recordId);
 					case Mint:
 						errors = RecordResourceController.validateRecord(record);
 						record.getAdministrative().setWithCreator(userId);
@@ -165,6 +179,7 @@ public class WithResourceController extends Controller {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
+						recordId = record.getDbId();
 					default://imported first time from other sources
 						//there is no withCreator and the record is public
 						record.getAdministrative().getAccess().setIsPublic(true);
@@ -173,20 +188,24 @@ public class WithResourceController extends Controller {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
+						recordId = record.getDbId();
 						//TODO: how can record have a dbId?
 						addContentToRecord(record.getDbId(), source.toString(),
 								externalId);
 					}
-					DB.getRecordResourceDAO().makePermanent(record);
-					recordId = record.getDbId();
 				}
-				// Update collection administrative metadata and record's usage metadata
+				// Updates collection administrative metadata and record's usage and collectedIn
+				//the rights of all collections the resource belongs to are merged and are copied to the record
+				//only if the user OWNs the resource
+				boolean owns = DB.getRecordResourceDAO().hasAccess(AccessManager.effectiveUserDbIds(session().get(
+						"effectiveUserIds")), Action.DELETE, recordId);
 				if (position.isDefined() && recordId != null) {
 					Integer pos = position.get();
-					DB.getRecordResourceDAO().addToCollection(recordId, collectionDbId, pos);
+					DB.getRecordResourceDAO().addToCollection(recordId, collectionDbId, pos, owns);
 				} else {
-					DB.getRecordResourceDAO().appendToCollection(recordId, collectionDbId);
-				}				
+					DB.getRecordResourceDAO().appendToCollection(recordId, collectionDbId, owns);
+				}
+			    System.out.println("id");	
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}

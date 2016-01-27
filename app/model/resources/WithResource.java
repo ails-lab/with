@@ -17,6 +17,7 @@
 package model.resources;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -534,10 +535,8 @@ public class WithResource<T extends DescriptiveData> {
 		this.annotations = annotations;
 	}
 
-	/*
-	 * For collections or records uploaded by user
-	 */
-	public User retrieveCreator() {
-		return DB.getUserDAO().getById(this.administrative.withCreator, null);
+	//TODO: check whether this is indeed called by toJson, so that it is included to the josn returned to the ui
+	public User getWithCreatorInfo() {
+		return DB.getUserDAO().getById(this.administrative.withCreator, new ArrayList<String>(Arrays.asList("username")));
 	}
 }
