@@ -47,7 +47,7 @@ public interface ILiteral {
 			Optional<String> lang = StringUtils.getLanguageDetector().detect(textObject);
 			if (lang.isPresent()) {
 				addLiteral(Language.getLanguage(lang.get()), value);
-				Logger.warn("Detected ["+lang+"]for " + value);
+//				Logger.warn("Detected ["+lang.get()+"]for " + value);
 				return;
 			}
 			Logger.warn("Unknown Language for text " + value);

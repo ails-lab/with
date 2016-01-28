@@ -127,7 +127,7 @@ public class StringUtils {
 			
 			//build language detector:
 			languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
-			        .withProfiles(languageProfiles)
+			        .withProfiles(languageProfiles).minimalConfidence(0.8)
 			        .build();
 			} catch (IOException e) {
 				Logger.warn("problems loading language detector");
