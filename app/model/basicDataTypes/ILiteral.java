@@ -54,7 +54,7 @@ public interface ILiteral {
 					if (best.getProbability()<detectedLanguage.getProbability())
 						best = detectedLanguage;
 				}
-	            if (best.getProbability() >= 0.9) {
+	            if (best.getProbability() >= 0.95) {
 	            	addLiteral(Language.getLanguage(best.getLanguage()), value);
 					Logger.info("Detected ["+best.getLanguage()+"]for " + value);
 					return;
