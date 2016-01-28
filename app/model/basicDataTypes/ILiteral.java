@@ -16,7 +16,9 @@
 
 package model.basicDataTypes;
 
-import com.google.common.base.Optional;
+import java.util.List;
+
+import com.optimaize.langdetect.DetectedLanguage;
 import com.optimaize.langdetect.text.CommonTextObjectFactories;
 import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
@@ -44,12 +46,20 @@ public interface ILiteral {
 						CommonTextObjectFactories.forDetectingOnLargeText();
 			// query:
 			TextObject textObject = textObjectFactory.forText(value);
-			Optional<String> lang = StringUtils.getLanguageDetector().detect(textObject);
-			if (lang.isPresent()) {
-				addLiteral(Language.getLanguage(lang.get()), value);
-				Logger.info("Detected ["+lang.get()+"]for " + value);
-				return;
-			}
+			List<DetectedLanguage> probabilities = StringUtils.getLanguageDetector().getProbabilities(textObject);
+			
+	        if (!probabilities.isEmpty()) {
+	            DetectedLanguage best = probabilities.get(0);
+	            for (DetectedLanguage detectedLanguage : probabilities) {
+					if (best.getProbability()<detectedLanguage.getProbability())
+						best = detectedLanguage;
+				}
+	            if (best.getProbability() >= 0.9) {
+	            	addLiteral(Language.getLanguage(best.getLanguage()), value);
+					Logger.info("Detected ["+best.getLanguage()+"]for " + value);
+					return;
+	            } 
+	        }
 			Logger.warn("Unknown Language for text " + value);
 		}
 		addLiteral(Language.UNKNOWN, value);
