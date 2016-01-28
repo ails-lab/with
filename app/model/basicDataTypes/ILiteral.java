@@ -34,9 +34,12 @@ public interface ILiteral {
 	}
 	
 	default void addSmartLiteral(String value) {
+		boolean shortText = value.length()<20;
 		// create a text object factory
-		TextObjectFactory textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
-
+		TextObjectFactory textObjectFactory = shortText ?
+					CommonTextObjectFactories.forDetectingShortCleanText()
+				:
+					CommonTextObjectFactories.forDetectingOnLargeText();
 		// query:
 		TextObject textObject = textObjectFactory.forText(value);
 		Optional<String> lang = StringUtils.getLanguageDetector().detect(textObject);
