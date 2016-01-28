@@ -130,14 +130,16 @@ public class MediaController extends Controller {
 		Logger.info(g);
 		File img = HttpConnector.getURLContentAsFile(url);
 		image = ImageIO.read(img);
+		parseMediaCheckerReply(media, parsed);
+		media.setMediaVersion(version);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ImageIO.write(image, "jpg", baos);
 		baos.flush();
-		byte[] mediaBytes = baos.toByteArray();
-		baos.close();
-		media.setMediaBytes(mediaBytes);
-		parseMediaCheckerReply(media, parsed);
+		byte[] thumbByte = baos.toByteArray();
 		media.setMediaVersion(version);
+		media.setMediaBytes(thumbByte);
+		baos.close();
+
 		DB.getMediaObjectDAO().makePermanent(media);
 	}
 
