@@ -34,7 +34,16 @@ import model.basicDataTypes.LiteralOrResource;
 public class EmbeddedMediaObject {
 
 	public static enum MediaVersion {
-		Original, Medium, Thumbnail, Square, Tiny
+		Original, Medium, Thumbnail, Square, Tiny;
+
+		public static boolean contains(String version) {
+			for (MediaVersion v : MediaVersion.values()) {
+		        if (v.name().equals(version)) {
+		            return true;
+		        }
+		    }
+		    return false;
+		}
 	}
 
 	public static enum WithMediaType {

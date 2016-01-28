@@ -92,7 +92,8 @@ GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(g
 GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null)
 
 # Media Controller
-POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)
+POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)
+GET		/media/byUrl							controllers.MediaController.getMediaByUrl(url, version: String ?= "Original")
 GET 	/media/:id								controllers.MediaController.getMetadataOrFile(id, file: Boolean ?=true)
 POST 	/media/:id 								controllers.MediaController.editMetadataOrFile(id, file: Boolean ?=false)
 DELETE 	/media/:id								controllers.MediaController.deleteMedia(id)

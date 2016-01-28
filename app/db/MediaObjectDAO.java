@@ -33,6 +33,7 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
 
 public class MediaObjectDAO {
@@ -204,6 +205,20 @@ public class MediaObjectDAO {
 			return gridFsDbFileToMediaObj(media);
 		} catch (Exception e) {
 			log.error("Problem in find file from GridFS " + withUrl);
+			return null;
+		}
+	}
+	
+	public MediaObject getByUrlAndVersion(String url, MediaVersion version) {
+		GridFSDBFile media = null;
+		try {
+			// here I have to ask where we will use 'url' or 'withUrl' or both
+			BasicDBObject query = new BasicDBObject("url", url);
+			query.append("mediaVersion", version);
+			media = DB.getGridFs().findOne(query);
+			return gridFsDbFileToMediaObj(media);
+		} catch (Exception e) {
+			log.error("Problem in find file from GridFS " + url);
 			return null;
 		}
 	}
