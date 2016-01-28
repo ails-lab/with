@@ -16,9 +16,12 @@
 
 package model.resources;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -30,6 +33,7 @@ import utils.Serializer;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.MultiLiteral;
 
@@ -296,5 +300,143 @@ public class ThesaurusObject {
 		this.semantic = semantic;
 	}
 
-	
+	public Map<String, Object> createIndexMap() {
+
+		Map<String, Object> map = new HashMap<>();
+		map.put("uri", getSemantic().getUri());
+
+		Map<String, List<String>> langAcc = new HashMap<>();
+
+		Literal origPrefLabel = getSemantic().getPrefLabel();
+		MultiLiteral origAltLabel = getSemantic().getAltLabel();
+		
+		List<String> allPrefLabels = new ArrayList<>();
+
+		Map<String, String> prefLabel = new HashMap<>();
+		for (Map.Entry<String, String> entry : origPrefLabel.entrySet()) {
+			String k = entry.getKey();
+			String v = entry.getValue();
+			if (!k.equals(Language.DEFAULT) && v != null && v.length() > 0) {
+				prefLabel.put(k, v);
+				allPrefLabels.add(v);
+				addToLangAll(langAcc, k, v);
+			}
+		}
+
+		if (!prefLabel.isEmpty()) {
+			map.put("prefLabel", prefLabel);
+			map.put("prefLabel_all", allPrefLabels);
+		}
+
+		List<String> allAltLabels = new ArrayList<>();
+
+		Map<String, List<String>> altLabel = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : origAltLabel.entrySet()) {
+			String k = entry.getKey();
+			List<String> v = entry.getValue();
+			if (!k.equals(Language.DEFAULT) && v != null && v.size() > 0) {
+				ArrayList<String> vc = new ArrayList<>();
+				
+				for (String vv : v) {
+					if (vv != null && vv.length() > 0) {
+						vc.add(vv);
+						allAltLabels.add(vv);
+						addToLangAll(langAcc, k, vv);
+					}
+				}
+				
+				if (vc.size() > 0) {
+					altLabel.put(k, vc);
+				}
+			}
+		}
+
+		if (!altLabel.isEmpty()) {
+			map.put("altLabel", altLabel);
+			map.put("altLabel_all", allAltLabels);
+		}
+
+		List<String> broaderUris = new ArrayList<>();
+
+		Map<String, List<String>> broaderPrefLabelAcc = new HashMap<>();
+		Map<String, List<String>> broaderAltLabelAcc = new HashMap<>();
+		List<String> allBroaderPrefLabel = new ArrayList<>();
+		List<String> allBroaderAltLabel = new ArrayList<>();
+
+		for (SKOSTerm broader : getSemantic().getBroaderTransitive()) {
+			broaderUris.add(broader.getUri());
+
+			Literal broaderPrefLabel = broader.getPrefLabel();
+			if (broaderPrefLabel != null) {
+				for (Map.Entry<String, String> e : broaderPrefLabel.entrySet()) {
+					String k = e.getKey();
+					String v = e.getValue();
+					
+					if (!k.equals(Language.DEFAULT) && v != null && v.length() > 0) {
+						allBroaderPrefLabel.add(v);
+						addToLangAll(broaderPrefLabelAcc, k, v);
+						addToLangAll(langAcc, k, v);
+					}
+				}
+			}
+			
+			MultiLiteral broaderAltLabel = broader.getAltLabel();
+			if (broaderAltLabel != null) {
+				for (Map.Entry<String, List<String>> e : broaderAltLabel.entrySet()) {
+					String k = e.getKey();
+					List<String> v = e.getValue();
+					
+					if (!k.equals(Language.DEFAULT) && v != null && v.size() > 0) {
+						for (String vv : e.getValue()) {
+							if (vv != null && vv.length() > 0) {
+								allBroaderAltLabel.add(vv);
+								addToLangAll(broaderAltLabelAcc, k, vv);
+								addToLangAll(langAcc, k, vv);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		if (broaderUris.size() > 0) {
+			map.put("broaderTransitiveUri", broaderUris);
+		}
+
+		if (broaderAltLabelAcc.size() > 0) {
+			map.put("broaderTransitivePrefLabel", broaderPrefLabelAcc);
+		}
+		if (allBroaderPrefLabel.size() > 0) {
+			map.put("broaderTransitivePrefLabel_all", allBroaderPrefLabel);
+		}
+
+		if (broaderAltLabelAcc.size() > 0) {
+			map.put("broaderTransitiveAltLabel", broaderAltLabelAcc);
+		}
+		if (allBroaderAltLabel.size() > 0) {
+			map.put("broaderTransitiveAltLabel_all", allBroaderAltLabel);
+		}
+
+//		for (Map.Entry<String, Object> entry : map.entrySet()) {
+//			System.out.println(entry.getKey() + " " + entry.getValue().getClass());
+//			if (entry.getValue() instanceof Map) {
+//				for (Map.Entry<String, Object> entry2 : ((Map<String,Object>)entry.getValue()).entrySet()) {
+//					System.out.println(entry2.getKey() + " " + entry2.getValue().getClass());
+//				}
+//			}
+//		}
+		
+		return map;
+	}
+
+	private static void addToLangAll(Map<String, List<String>> map, String lang, String value) {
+		List<String> array = (List<String>)map.get(lang);
+		
+		if (array == null) {
+			array = new ArrayList<>();
+			map.put(lang, array);
+		}
+		
+		array.add(value);
+	}
 }
