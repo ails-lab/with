@@ -37,6 +37,7 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
 import model.basicDataTypes.ResourceType;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -63,6 +64,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
+import java.io.FileInputStream;
 
 import db.DB;
 
@@ -87,7 +89,7 @@ public class MediaController extends Controller {
 						media.getMimeType().toString());
 			}
 			// Cache media
-			cacheImage(url, mediaVersion);
+			downloadMedia(url, mediaVersion);
 			return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
@@ -95,44 +97,37 @@ public class MediaController extends Controller {
 		}
 	}
 
-	private static void downloadMedia(String url, MediaVersion version)
-			throws Exception {
-		JsonNode parsed = Json.newObject();
-		BufferedImage image;
-		MediaObject media = new MediaObject();
-		parsed = parseMediaURL(url);
-		String g = "::" + HttpConnector.getURLContentAsFile(url);
-		Logger.info(g);
-		File img = HttpConnector.getURLContentAsFile(url);
-		image = ImageIO.read(img);
-		editMediaAfterChecker(media, parsed);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(image, "jpg", baos);
-		baos.flush();
-		baos.close();
-		byte[] mediaBytes = baos.toByteArray();
-		media.setUrl(url);
-		media.setMediaBytes(mediaBytes);
-		if (version != null) {
-			media.setMediaVersion(version);
-			DB.getMediaObjectDAO().makePermanent(media);
-		} else {
-			makeThumbs(media, image);
-		}
-	}
-
-	private static void cacheImage(String externalUrl, MediaVersion version) {
+	private static void downloadMedia(String url, MediaVersion version){
 		BiFunction<String, MediaVersion, Boolean> methodQuery = (
 				String imageUrl, MediaVersion mediaVersion) -> {
 			try {
-				downloadMedia(externalUrl, version);
+				JsonNode parsed = Json.newObject();
+				BufferedImage image;
+				MediaObject media = new MediaObject();
+				parsed = parseMediaURL(url);
+				String g = "::" + HttpConnector.getURLContentAsFile(url);
+				Logger.info(g);
+				File img = HttpConnector.getURLContentAsFile(url);
+				image = ImageIO.read(img);
+				byte[] mediaBytes = IOUtils
+						.toByteArray(new FileInputStream(img));
+				editMediaAfterChecker(media, parsed);
+				media.setUrl(url);
+				media.setMediaBytes(mediaBytes);
+				if (version != null) {
+					media.setMediaVersion(version);
+					DB.getMediaObjectDAO().makePermanent(media);
+				} else {
+					makeThumbs(media, image);
+				}
 				return true;
 			} catch (Exception e) {
 				log.error("Couldn't cache image:" + e.getMessage());
 				return false;
 			}
+
 		};
-		ParallelAPICall.createPromise(methodQuery, externalUrl, version);
+		ParallelAPICall.createPromise(methodQuery, url, version);
 	}
 
 	/**
@@ -144,7 +139,7 @@ public class MediaController extends Controller {
 	 * @param fileData
 	 * @return
 	 */
-	public static Result createMedia() {
+	public static Result createMedia(boolean filedata) {
 		
 		List<String> userIds = AccessManager.effectiveUserIds(session().get(
 				"effectiveUserIds"));
@@ -159,6 +154,8 @@ public class MediaController extends Controller {
 
 		final Http.MultipartFormData multipartBody = request().body()
 				.asMultipartFormData();
+		
+		final JsonNode jsonn = request().body().asJson();
 		
 		if (multipartBody != null) {
 			try {
@@ -202,21 +199,20 @@ public class MediaController extends Controller {
 
 			}
 
+		
+		} else if (jsonn != null) {
 
-		} else if (!request().body().asJson().isNull()) {
 			
-			JsonNode json = request().body().asJson();
-			
-			if (json.hasNonNull("withMediaRights")) {
-				String withMediaRights = json.get("withMediaRights").asText();
+			if (jsonn.hasNonNull("withMediaRights")) {
+				String withMediaRights = jsonn.get("withMediaRights").asText();
 				parseMediaRights(med, withMediaRights);
 			} else {
 				med.setWithRights(WithMediaRights.UNKNOWN);
 			}
 
 			
-			if (json.hasNonNull("url")){
-				parsed = parseMediaURL(json.get("url").asText());
+			if (jsonn.hasNonNull("url")){
+				parsed = parseMediaURL(jsonn.get("url").asText());
 				editMediaAfterChecker(med, parsed);
 			} else {
 				result.put("error", "must provide a url in json request");
@@ -227,7 +223,7 @@ public class MediaController extends Controller {
 			try {
 
 				// image = HttpConnector.getContent(formData.get("url")[0]);
-				File x = HttpConnector.getURLContentAsFile(json.get("url").asText());
+				File x = HttpConnector.getURLContentAsFile(jsonn.get("url").asText());
 				result = storeMedia(med, x);
 				
 				return ok(result);
@@ -395,7 +391,6 @@ public class MediaController extends Controller {
 	private static ObjectNode makeThumbs(MediaObject med, BufferedImage image) throws Exception {
 
 		// makeThumb(med, image);
-		String dbid = med.getDbId().toString();
 		MediaObject tiny = new MediaObject();
 		MediaObject square = new MediaObject();
 		MediaObject thumbnail = new MediaObject();
@@ -464,6 +459,7 @@ public class MediaController extends Controller {
 			medium = makeThumb(med, image, 640, -1, false);
 		}
 
+		String dbid = med.getDbId().toString();
 		tiny.setParentID(dbid);
 		square.setParentID(dbid);
 		thumbnail.setParentID(dbid);
@@ -616,10 +612,6 @@ public class MediaController extends Controller {
 		}
 		return response;
 	}
-	
-	
-	
-	
 	
 	
 	
