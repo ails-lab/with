@@ -38,11 +38,11 @@ public class EmbeddedMediaObject {
 
 		public static boolean contains(String version) {
 			for (MediaVersion v : MediaVersion.values()) {
-		        if (v.name().equals(version)) {
-		            return true;
-		        }
-		    }
-		    return false;
+				if (v.name().equals(version)) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
@@ -166,9 +166,12 @@ public class EmbeddedMediaObject {
 	public void setUrl(String url) {
 		this.url = url;
 	}
-	
+
 	public String getWithUrl() {
-		return "";
+		if (url.startsWith("/")) {
+			return url;
+		}
+		return "/media/byUrl?url=" + url + "version=" + mediaVersion.toString();
 	}
 
 	public LiteralOrResource getOriginalRights() {
