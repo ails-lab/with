@@ -36,7 +36,7 @@ public interface ILiteral {
 	
 	default void addSmartLiteral(String value) {
 		if (!Utils.isValidURL(value)){
-			boolean shortText = value.length()<20;
+			boolean shortText = value.length()<100;
 			// create a text object factory
 			TextObjectFactory textObjectFactory = shortText ?
 						CommonTextObjectFactories.forDetectingShortCleanText()
