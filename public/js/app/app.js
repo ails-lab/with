@@ -299,6 +299,13 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		"facebookId": ko.observable(),
 		"googleId": ko.observable(),
 		"image": ko.observable(),
+		"avatar": {
+			"Original": ko.observable(),
+			"Medium": ko.observable(),
+			"Square": ko.observable(),
+			"Thumbnail": ko.observable(),
+			"Tiny": ko.observable()
+		},
 		"recordLimit": ko.observable(),
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
@@ -329,6 +336,13 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
+		if (data.avatar !== null) {
+			self.currentUser.avatar.Original(data.avatar.Original);
+			self.currentUser.avatar.Tiny(data.avatar.Tiny);
+			self.currentUser.avatar.Square(data.avatar.Square);
+			self.currentUser.avatar.Thumbnail(data.avatar.Thumbnail);
+			self.currentUser.avatar.Medium(data.avatar.Medium);
+		}
 		self.currentUser.favoritesId(data.favoritesId);
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);

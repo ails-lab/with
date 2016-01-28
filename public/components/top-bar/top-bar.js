@@ -4,8 +4,8 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		this.route         = params.route;
 		var self           = this;
 		self.notifications = ko.observableArray();
-		
-		
+
+
 		$("[data-toggle=popover]").popover({
 			html: true,
 			content: function() {
@@ -47,7 +47,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		});
 
 		self.username      = app.currentUser.username;
-		self.profileImage  = ko.computed(function() { return app.currentUser.image() ? app.currentUser.image() : 'images/user.png'; });
+		self.profileImage  = ko.computed(function() { return app.currentUser.avatar.Square() ? app.currentUser.avatar.Square() : 'images/user.png'; });
 		self.organizations = app.currentUser.organizations;
 		self.projects      = app.currentUser.projects;
 		self.usergroups    = app.currentUser.usergroups;

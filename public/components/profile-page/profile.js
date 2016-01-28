@@ -113,7 +113,6 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 					avatar    : self.avatar
 				};
 				var json = ko.toJSON(data);
-				console.log(json);
 				$.ajax({
 					type        : "put",
 					contentType : 'application/json',
