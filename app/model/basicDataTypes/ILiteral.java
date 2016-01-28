@@ -22,6 +22,7 @@ import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
 
 import play.Logger;
+import sources.core.Utils;
 import sources.utils.StringUtils;
 
 public interface ILiteral {
@@ -34,20 +35,23 @@ public interface ILiteral {
 	}
 	
 	default void addSmartLiteral(String value) {
-		boolean shortText = value.length()<20;
-		// create a text object factory
-		TextObjectFactory textObjectFactory = shortText ?
-					CommonTextObjectFactories.forDetectingShortCleanText()
-				:
-					CommonTextObjectFactories.forDetectingOnLargeText();
-		// query:
-		TextObject textObject = textObjectFactory.forText(value);
-		Optional<String> lang = StringUtils.getLanguageDetector().detect(textObject);
-		if (lang.isPresent()) {
-			addLiteral(Language.getLanguage(lang.get()), value);
-			return;
+		if (!Utils.isValidURL(value)){
+			boolean shortText = value.length()<20;
+			// create a text object factory
+			TextObjectFactory textObjectFactory = shortText ?
+						CommonTextObjectFactories.forDetectingShortCleanText()
+					:
+						CommonTextObjectFactories.forDetectingOnLargeText();
+			// query:
+			TextObject textObject = textObjectFactory.forText(value);
+			Optional<String> lang = StringUtils.getLanguageDetector().detect(textObject);
+			if (lang.isPresent()) {
+				addLiteral(Language.getLanguage(lang.get()), value);
+				Logger.warn("Detected ["+lang+"]for " + value);
+				return;
+			}
+			Logger.warn("Unknown Language for text " + value);
 		}
-		Logger.warn("Unknown Language for text " + value);
 		addLiteral(Language.UNKNOWN, value);
 	}
 
