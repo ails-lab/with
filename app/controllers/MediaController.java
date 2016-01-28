@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import javax.imageio.ImageIO;
@@ -96,7 +97,6 @@ public class MediaController extends Controller {
 
 	// Cache media based on url and media version
 	public static Result getMediaByUrl(String url, String version) {
-		ObjectNode result = Json.newObject();
 		MediaObject media;
 		try {
 			MediaVersion mediaVersion;
@@ -112,7 +112,7 @@ public class MediaController extends Controller {
 						media.getMimeType().toString());
 			}
 			// Cache media
-			cacheImage(url);
+			cacheImage(url, mediaVersion);
 			return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
@@ -143,17 +143,18 @@ public class MediaController extends Controller {
 		DB.getMediaObjectDAO().makePermanent(media);
 	}
 
-	private static void cacheImage(String externalUrl) {
-		Function<String, Boolean> methodQuery = (String imageUrl) -> {
+	private static void cacheImage(String externalUrl, MediaVersion version) {
+		BiFunction<String, MediaVersion, Boolean> methodQuery = (
+				String imageUrl, MediaVersion mediaVersion) -> {
 			try {
-				downloadMedia(externalUrl, null);
+				downloadMedia(externalUrl, version);
 				return true;
 			} catch (Exception e) {
-				log.error("Couldn't cache thumbnail:" + e.getMessage());
+				log.error("Couldn't cache image:" + e.getMessage());
 				return false;
 			}
 		};
-		ParallelAPICall.createPromise(methodQuery, externalUrl);
+		ParallelAPICall.createPromise(methodQuery, externalUrl, version);
 	}
 
 	/**
