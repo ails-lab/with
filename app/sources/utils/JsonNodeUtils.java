@@ -46,7 +46,7 @@ public class JsonNodeUtils {
 	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isTextual()) {
-				res.addLiteral(Language.UNKNOWN, node.asText());
+				res.addSmartLiteral(node.asText());
 				return res.fillDEF();
 			} 
 			if (node.isArray()){
@@ -66,7 +66,7 @@ public class JsonNodeUtils {
 				} else {
 					List<String> asString = asStringArray(value);
 					for (int i = 0; i < asString.size(); i++) {
-						res.addLiteral(Language.UNKNOWN, asString.get(i));
+						res.addSmartLiteral(asString.get(i));
 					}
 					System.out.println("Unknown Format!!! "+next.toString());
 				}
@@ -82,11 +82,11 @@ public class JsonNodeUtils {
 	public static Literal readLiteral(Literal res, JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isTextual()) {
-				res.addLiteral(Language.UNKNOWN, node.asText());
+				res.addSmartLiteral(node.asText());
 				return res.fillDEF();
 			}
 			if (node.isArray()){
-				res.addLiteral(Language.UNKNOWN, node.get(0).asText());
+				res.addSmartLiteral(node.get(0).asText());
 				return res.fillDEF();
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
@@ -96,7 +96,7 @@ public class JsonNodeUtils {
 				if (language != null)
 					res.addLiteral(language, value.get(0).asText());
 				else
-					res.addLiteral(Language.UNKNOWN, asString(value));
+					res.addSmartLiteral(asString(value));
 			}
 			return res.fillDEF();
 		}

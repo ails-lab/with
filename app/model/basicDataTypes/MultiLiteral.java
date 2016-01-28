@@ -26,7 +26,7 @@ import org.mongodb.morphia.annotations.Converters;
 import db.converters.MultiLiteralConverter;
 
 @Converters(MultiLiteralConverter.class)
-public class MultiLiteral extends HashMap<String, List<String>> {
+public class MultiLiteral extends HashMap<String, List<String>> implements ILiteral{
 
 	public MultiLiteral() {
 	}
@@ -39,6 +39,7 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 		addLiteral(lang, label);
 	}
 
+	@Override
 	public void addLiteral(Language lang, String value) {
 		add(lang.getDefaultCode(), value);
 	}
@@ -47,10 +48,6 @@ public class MultiLiteral extends HashMap<String, List<String>> {
 		for (String value : values) {
 			addLiteral(lang, value);
 		}
-	}
-
-	public void addLiteral(String value) {
-		addLiteral(Language.UNKNOWN, value);
 	}
 
 	public List<String> get(Language lang) {
