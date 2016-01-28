@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -47,7 +46,6 @@ import org.mongodb.morphia.query.UpdateOperations;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
-
 import utils.Tuple;
 import utils.AccessManager.Action;
 
@@ -90,27 +88,6 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
-	}
-	
-	public T getByFieldAndValue(String field, Object value) {
-		Query<T> q = this.createQuery().field(field).equal(value);
-		return this.findOne(q);
-	}
-	
-	public T getByFieldAndValue(String field, Object value, List<String> retrievedFields) {
-		Query<T> q = this.createQuery().field(field).equal(value);
-		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
-		return this.findOne(q);
-	}
-	
-	public boolean existsFieldWithValue(String field, Object value) {
-		Query<T> q = this.createQuery().field(field).equal(value).limit(1);
-		return (this.find(q).asList().size()==0? false: true);
-	}
-	
-	public boolean existsResource(ObjectId id) {
-		return existsFieldWithValue("_id", id);
-
 	}
 	
 	public boolean existsWithExternalId(String externalId) {
@@ -341,6 +318,54 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		return Access.values()[action.ordinal()+1];
 	}
 	
+	public void updateResourceRights(WithAccess access, ObjectId resourceId) {
+		Query<T> q = this.createQuery().field("_id").equal(resourceId);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("administrative.access", access);
+		this.update(q, updateOps);
+	}
+	
+
+	
+	public void changeAccess(ObjectId resourceId, ObjectId userId, Access newAccess) {
+		Query<T> q = this.createQuery().field("_id").equal(resourceId);
+		ArrayList<String> retrievedFields = new ArrayList<String>();
+		retrievedFields.add("administrative.access");
+		T resource  = this.findOne(q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()])));
+		WithAccess access = resource.getAdministrative().getAccess();
+		int index = 0;
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		for (AccessEntry entry: access.getAcl()) {
+			if (entry.getUser().equals(userId)) {
+				if (!access.equals(Access.NONE))
+					updateOps.set("administrative.access.acl."+index+".level", newAccess);
+				else
+					updateOps.unset("administrative.access.acl."+index);
+			}
+			index+=1;
+		}
+		this.update(this.createQuery().field("_id").equal(resourceId), updateOps);
+	}
+	
+	public WithAccess mergeParentCollectionRights(WithAccess recordAccess, List<ObjectId> parentCollections) {
+		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
+		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
+			WithAccess colAccess = parentCollection.getAdministrative().getAccess();
+			if (colAccess.isPublic())
+				recordAccess.setIsPublic(true);
+			for (AccessEntry colEntry: colAccess.getAcl()) {
+				if (!WithAccess.containsUser(recordAccess.getAcl(), colEntry.getUser()))
+					recordAccess.addToAcl(colEntry);
+				for (AccessEntry recEntry: recordAccess.getAcl()) {
+					if (recEntry.getUser().equals(colEntry.getUser()))
+						if (colEntry.getLevel().ordinal() > recEntry.getLevel().ordinal())
+							recEntry.setLevel(colEntry.getLevel());
+				}
+			}
+		}
+		return recordAccess;
+	}
+		
 	/**
 	 * Return the total number of likes for a resource.
 	 * @param id

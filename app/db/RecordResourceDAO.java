@@ -72,16 +72,25 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return this.deleteByQuery(q).getN();
 	}
 
-
-	/**
-	 * Retrieve records from specific collection whose position
-	 * is is between lowerBound and upperBound
-	 *
-	 * @param colId, lowrBound, upperBound
-	 * @return
-	 */
+	public List<RecordResource> getByCollectionBetweenPositions(ObjectId colId, int lowerBound, int upperBound, List<String> retrievedFields) {
+		Query<RecordResource> q = this.createQuery().retrievedFields(true,  retrievedFields.toArray(new String[retrievedFields.size()]));
+		return getByCollectionBetweenPositions(colId, lowerBound, upperBound, q);
+	}
+	
 	public List<RecordResource> getByCollectionBetweenPositions(ObjectId colId, int lowerBound, int upperBound) {
 		Query<RecordResource> q = this.createQuery();
+		return getByCollectionBetweenPositions(colId, lowerBound, upperBound, q);
+	}
+	
+	/**
+	 * Retrieve records from specific collection whose position
+	 * is between lowerBound and upperBound. If a record appears n times in a collection (in different positions), n copies will appear
+	 * in the returned list, in the respective positions.
+	 *
+	 * @param colId, lowerBound, upperBound
+	 * @return
+	 */
+	public List<RecordResource> getByCollectionBetweenPositions(ObjectId colId, int lowerBound, int upperBound, Query<RecordResource> q) {
 		BasicDBObject colIdQuery = new BasicDBObject();
 		colIdQuery.put("collectionId", colId);
 		BasicDBObject geq = new BasicDBObject();
@@ -125,18 +134,35 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		else
 			return new ArrayList<RecordResource>();
 	}
+	
+	
+	public List<RecordResource> getByCollection(ObjectId colId) {
+		Query<RecordResource> q = this.createQuery();
+		return getByCollection(colId, q);
+	}
+	
+	public List<RecordResource> getByCollection(ObjectId colId, List<String> retrievedFields) {
+		Query<RecordResource> q = this.createQuery().retrievedFields(true,  retrievedFields.toArray(new String[retrievedFields.size()]));
+		return getByCollection(colId, q);
+	}
 
 	/**
-	 * Retrieve all records from specific collection checking
-	 * out for duplicates and restore them.
+	 * Retrieve all records that belong to that collection. 
+	 * If a record is included several times in a collection, it will only appear a single time in the returned list
 	 *
 	 * @param colId
 	 * @return
 	 */
-	public List<RecordResource> getByCollection(ObjectId colId) {
-		int MAX = 10000;
-		return getByCollectionBetweenPositions(colId, 0, MAX);
+	public List<RecordResource> getByCollection(ObjectId colId, Query<RecordResource> q) {
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		return q.filter("collectedIn", elemMatch1).asList();
+		//int MAX = 10000;
+		//return getByCollectionBetweenPositions(colId, 0, MAX);
 	}
+	
 
 	public void shift(ObjectId colId, int position, BiConsumer<String, UpdateOperations> update) {
 		Query<RecordResource> q = this.createQuery();
@@ -151,7 +177,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		q.filter("collectedIn", elemMatch1);
 		List<RecordResource> resources  = this.find(q).asList();
 		for (RecordResource resource: resources) {
-			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
+			UpdateOperations<RecordResource> updateOps = this.createUpdateOperations().disableValidation();
 			List<CollectionInfo> collectedIn = resource.getCollectedIn();
 			int index = 0;
 			for (CollectionInfo ci: collectedIn) {
@@ -178,9 +204,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
-		List<RecordResource> resources  = this.find(q).asList();
+		ArrayList<String> retrievedFields = new ArrayList<String>();
+		retrievedFields.add("collectedIn");
+		List<RecordResource> resources  = this.find(q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]))).asList();
 		for (RecordResource resource: resources) {
-			UpdateOperations updateOps = this.createUpdateOperations().disableValidation();
+			UpdateOperations<RecordResource> updateOps = this.createUpdateOperations().disableValidation();
 			List<CollectionInfo> collectedIn = resource.getCollectedIn();
 			int index = 0;
 			for (CollectionInfo ci: collectedIn) {
@@ -243,7 +271,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			recordUpdate.inc("usage.collected");
 		//shiftRecordsToRight(colId, position+1);
 		this.update(q, recordUpdate);
-
 	}
 	
 	//TODO: has to be atomic as a whole
@@ -267,7 +294,17 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			newAccess = mergeParentCollectionRights(recordId, colId);
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 	}
-		
+	
+	public List<ObjectId> getParentCollections(ObjectId recordId) {
+		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
+		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
+		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
+		for (CollectionInfo ci: (List<CollectionInfo>) record.getCollectedIn()) {
+			parentCollections.add(ci.getCollectionId());
+		}
+		return parentCollections;
+	}
+	
 	public WithAccess mergeParentCollectionRights(ObjectId recordId, ObjectId colId) {
 		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
 		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
@@ -280,23 +317,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return mergeParentCollectionRights(record.getAdministrative().getAccess(), parentCollections);
 	}
 	
-	public WithAccess mergeParentCollectionRights(WithAccess recordAccess, List<ObjectId> parentCollections) {
-		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
-		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
-			WithAccess colAccess = parentCollection.getAdministrative().getAccess();
-			if (colAccess.isPublic())
-				recordAccess.setIsPublic(true);
-			for (AccessEntry colEntry: colAccess.getAcl()) {
-				if (!WithAccess.containsUser(recordAccess.getAcl(), colEntry.getUser()))
-					recordAccess.addToAcl(colEntry);
-				for (AccessEntry recEntry: recordAccess.getAcl()) {
-					if (recEntry.getUser().equals(colEntry.getUser()))
-						if (colEntry.getLevel().ordinal() > recEntry.getLevel().ordinal())
-							recEntry.setLevel(colEntry.getLevel());
-				}
-			}
+	public void updateMembersToMergedRights(ObjectId colId) {
+		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id", "administrative.access"));
+		List<RecordResource> memberRecords = DB.getRecordResourceDAO().getByCollection(colId, retrievedFields);
+		for (RecordResource r: memberRecords) {
+			List<ObjectId> parentCollections = DB.getRecordResourceDAO().getParentCollections(r.getDbId());
+			WithAccess mergedAccess = DB.getRecordResourceDAO().mergeParentCollectionRights(r.getAdministrative().getAccess(), parentCollections);
+			updateField(r.getDbId(), "administrative.access", mergedAccess);
 		}
-		return recordAccess;
 	}
 
 	//TODO: have to test
