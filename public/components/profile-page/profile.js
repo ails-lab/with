@@ -11,9 +11,16 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		self.firstName   = ko.observable().extend({ required: true });
 		self.lastName    = ko.observable().extend({ required: true });
 		self.about       = ko.observable();
-		self.imageURL    = ko.observable();
+		// self.imageURL    = ko.observable();
 		self.facebookId  = ko.observable();
 		self.googleId    = ko.observable();
+		self.avatar      = {
+			Original  : ko.observable(),
+			Tiny      : ko.observable(),
+			Square    : ko.observable(),
+			Thumbnail : ko.observable(),
+			Medium    : ko.observable()
+		};
 		self.hasGoogle   = ko.computed(function() { return self.googleId() ? true : false; });
 		self.hasFacebook = ko.computed(function() { return self.facebookId() ? true : false; });
 
@@ -23,15 +30,17 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		});
 
 		self.checkLogged=function(){
-			if(isLogged()==false){
-		
-			window.location='#login';
-			return;
-		  }else{self.init();}
-		}
-		
+			if (isLogged() === false) {
+
+			window.location = '#login';
+				return;
+		  	} /* else {
+		  		self.init();
+			} */
+		};
+
 		self.checkLogged();
-		
+
 		// Load the User information from the database and initialize the template
 		$.ajax({
 			type    : "get",
@@ -40,7 +49,14 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				self.firstName(data.firstName);
 				self.lastName(data.lastName);
 				self.about(data.about);
-				self.imageURL(data.image);
+				// self.imageURL(data.image);
+				if (data.avatar) {
+					self.avatar.Original(data.avatar.Original);
+					self.avatar.Tiny(data.avatar.Tiny);
+					self.avatar.Square(data.avatar.Square);
+					self.avatar.Thumbnail(data.avatar.Thumbnail);
+					self.avatar.Medium(data.avatar.Medium);
+				}
 				self.facebookId(data.facebookId);
 				self.googleId(data.googleId);
 			},
@@ -50,16 +66,37 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		});
 
 		$('#imageupload').fileupload({
-			add : function(e, data) {
-				if (data.files && data.files[0]) {
-					var reader    = new FileReader();
-					reader.onload = function(e) {
-						self.resizePhoto(e.target.result, 100, 100);
-					};
-					reader.readAsDataURL(data.files[0]);
-				}
+			type: "POST",
+			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 500000,
+			done: function (e, data) {
+				self.avatar.Original(data.result.original);
+				self.avatar.Tiny(data.result.tiny);
+				self.avatar.Square(data.result.square);
+				self.avatar.Thumbnail(data.result.thumbnail);
+				self.avatar.Medium(data.result.medium);
+			},
+			error: function (e, data) {
+				$.smkAlert({
+					text: 'Error uploading the file',
+					type: 'danger',
+					time: 10
+				});
 			}
 		});
+
+		// $('#imageupload').fileupload({
+		// 	add : function(e, data) {
+		// 		if (data.files && data.files[0]) {
+		// 			var reader    = new FileReader();
+		// 			reader.onload = function(e) {
+		// 				self.resizePhoto(e.target.result, 100, 100);
+		// 			};
+		// 			reader.readAsDataURL(data.files[0]);
+		// 		}
+		// 	}
+		// });
 
 		// Call the global closePopup function to dispose the component without saving the changes
 		self.closeWindow   = function() {
@@ -73,9 +110,10 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 					firstName : self.firstName,
 					lastName  : self.lastName,
 					about     : self.about,
-					image     : self.imageURL
+					avatar    : self.avatar
 				};
 				var json = ko.toJSON(data);
+				console.log(json);
 				$.ajax({
 					type        : "put",
 					contentType : 'application/json',
@@ -100,7 +138,8 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				"/" + self.facebookId() + "/picture?type=normal",
 				function(response) {
 					if (response && !response.error) {
-						self.imageURL(response.data.url);
+						// self.imageURL(response.data.url);
+						self.createMedia(response.data.url);
 					}
 				}
 			);
@@ -112,8 +151,36 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				url     : "https://www.googleapis.com/plus/v1/people/" + self.googleId() + "?key=AIzaSyA2X9H_PW8pfGnaHBc6VhQMjDPp7Yxaj5k",
 				success : function(data) {
 					var url = data.image.url;
-					url     = url.replace('sz=50', 'sz=100');	// Resize image
-					self.imageURL(url);
+					// url     = url.replace('sz=50', 'sz=100');	// Resize image
+					url     = url.replace('sz=50', 'sz=500');
+					// self.imageURL(url);
+					self.createMedia(url);
+				}
+			});
+		};
+
+		self.createMedia = function (remoteurl) {
+			$.ajax({
+				type : "POST",
+				url  : '/media/create',
+				data : {
+					url : remoteurl
+				},
+				done : function (e, data) {
+					console.log(e);
+					console.log(data);
+					self.avatar.Original(data.Original);
+					self.avatar.Tiny(data.Tiny);
+					self.avatar.Square(data.Square);
+					self.avatar.Thumbnail(data.Thumbnail);
+					self.avatar.Medium(data.Medium);
+				},
+				error: function (e, data) {
+					$.smkAlert({
+						text: 'Error uploading the file',
+						type: 'danger',
+						time: 10
+					});
 				}
 			});
 		};
