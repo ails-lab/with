@@ -22,6 +22,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -213,6 +215,7 @@ public class MediaController extends Controller {
 			
 			if (jsonn.hasNonNull("url")){
 				parsed = parseMediaURL(jsonn.get("url").asText());
+				Logger.info(parsed.toString());
 				editMediaAfterChecker(med, parsed);
 			} else {
 				result.put("error", "must provide a url in json request");
@@ -343,7 +346,7 @@ public class MediaController extends Controller {
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
 		MediaType mime = MediaType.parse(json.get("mimetype").asText()
-				.toUpperCase());
+				.toLowerCase());
 
 		med.setMimeType(mime);
 
@@ -600,12 +603,14 @@ public class MediaController extends Controller {
 
 	private static JsonNode parseMediaURL(String mediaURL) {
 
-		String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata?url="
-				+ mediaURL;
+		String url = "http://mediachecker.image.ntua.gr/api/extractmetadata";
+		
+		//String queryURL = "http://mediachecker.image.ntua.gr/api/extractmetadata?url="
+		//		+ mediaURL;
 		// Logger.info("URL: " + queryURL);
 		JsonNode response = null;
-		try {
-			response = HttpConnector.postURLContent(queryURL);
+		try {		
+			response = HttpConnector.postURLContent(url, mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
