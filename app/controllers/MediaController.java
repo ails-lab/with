@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
+import java.io.FileInputStream;
 
 import db.DB;
 
@@ -133,12 +134,9 @@ public class MediaController extends Controller {
 				Logger.info(g);
 				File img = HttpConnector.getURLContentAsFile(url);
 				image = ImageIO.read(img);
+				byte[] mediaBytes = IOUtils
+						.toByteArray(new FileInputStream(img));
 				parseMediaCheckerReply(media, parsed);
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ImageIO.write(image, media.getMimeType().subtype(), baos);
-				baos.flush();
-				baos.close();
-				byte[] mediaBytes = baos.toByteArray();
 				media.setUrl(url);
 				media.setMediaBytes(mediaBytes);
 				if (version != null) {
