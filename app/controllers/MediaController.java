@@ -134,12 +134,16 @@ public class MediaController extends Controller {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ImageIO.write(image, "jpg", baos);
 		baos.flush();
+		baos.close();
 		byte[] mediaBytes = baos.toByteArray();
-		media.setMediaVersion(version);
 		media.setUrl(url);
 		media.setMediaBytes(mediaBytes);
-		baos.close();
-		DB.getMediaObjectDAO().makePermanent(media);
+		if (version != null) {
+			media.setMediaVersion(version);
+			DB.getMediaObjectDAO().makePermanent(media);
+		} else {
+			imageUpload(media, image, null, media.getDbId().toString());
+		}
 	}
 
 	private static void cacheImage(String externalUrl, MediaVersion version) {
