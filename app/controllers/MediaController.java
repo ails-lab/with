@@ -37,6 +37,7 @@ import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
 import model.basicDataTypes.ResourceType;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -112,7 +113,7 @@ public class MediaController extends Controller {
 						media.getMimeType().toString());
 			}
 			// Cache media
-			cacheImage(url, mediaVersion);
+			downloadMedia(url, mediaVersion);
 			return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
@@ -120,44 +121,40 @@ public class MediaController extends Controller {
 		}
 	}
 
-	private static void downloadMedia(String url, MediaVersion version)
-			throws Exception {
-		JsonNode parsed = Json.newObject();
-		BufferedImage image;
-		MediaObject media = new MediaObject();
-		parsed = parseMediaURL(url);
-		String g = "::" + HttpConnector.getURLContentAsFile(url);
-		Logger.info(g);
-		File img = HttpConnector.getURLContentAsFile(url);
-		image = ImageIO.read(img);
-		parseMediaCheckerReply(media, parsed);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(image, "jpg", baos);
-		baos.flush();
-		baos.close();
-		byte[] mediaBytes = baos.toByteArray();
-		media.setUrl(url);
-		media.setMediaBytes(mediaBytes);
-		if (version != null) {
-			media.setMediaVersion(version);
-			DB.getMediaObjectDAO().makePermanent(media);
-		} else {
-			imageUpload(media, image, null, media.getDbId().toString());
-		}
-	}
-
-	private static void cacheImage(String externalUrl, MediaVersion version) {
+	private static void downloadMedia(String url, MediaVersion version) {
 		BiFunction<String, MediaVersion, Boolean> methodQuery = (
 				String imageUrl, MediaVersion mediaVersion) -> {
 			try {
-				downloadMedia(externalUrl, version);
+				JsonNode parsed = Json.newObject();
+				BufferedImage image;
+				MediaObject media = new MediaObject();
+				parsed = parseMediaURL(url);
+				String g = "::" + HttpConnector.getURLContentAsFile(url);
+				Logger.info(g);
+				File img = HttpConnector.getURLContentAsFile(url);
+				image = ImageIO.read(img);
+				parseMediaCheckerReply(media, parsed);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write(image, media.getMimeType().subtype(), baos);
+				baos.flush();
+				baos.close();
+				byte[] mediaBytes = baos.toByteArray();
+				media.setUrl(url);
+				media.setMediaBytes(mediaBytes);
+				if (version != null) {
+					media.setMediaVersion(version);
+					DB.getMediaObjectDAO().makePermanent(media);
+				} else {
+					imageUpload(media, image);
+				}
 				return true;
 			} catch (Exception e) {
 				log.error("Couldn't cache image:" + e.getMessage());
 				return false;
 			}
+
 		};
-		ParallelAPICall.createPromise(methodQuery, externalUrl, version);
+		ParallelAPICall.createPromise(methodQuery, url, version);
 	}
 
 	/**
@@ -351,8 +348,7 @@ public class MediaController extends Controller {
 
 					// Logger.info(med.getDbId().toString());
 
-					result = imageUpload(med, image, formData, med.getDbId()
-							.toString());
+					result = imageUpload(med, image);
 
 					// } else
 					// if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
@@ -482,8 +478,8 @@ public class MediaController extends Controller {
 	}
 
 	// TODO:don't hate i will clean it!
-	private static ObjectNode imageUpload(MediaObject med, BufferedImage image,
-			Map<String, String[]> formData, String dbid) throws Exception {
+	private static ObjectNode imageUpload(MediaObject med, BufferedImage image)
+			throws Exception {
 
 		// makeThumb(med, image);
 
@@ -555,6 +551,7 @@ public class MediaController extends Controller {
 			medium = makeThumb(med, image, 640, -1, false);
 		}
 
+		String dbid = med.getDbId().toString();
 		tiny.setParentID(dbid);
 		square.setParentID(dbid);
 		thumbnail.setParentID(dbid);
