@@ -45,7 +45,6 @@ import play.Logger.ALogger;
 import play.libs.Akka;
 import play.libs.Crypto;
 import play.libs.Json;
-import play.mvc.BodyParser;
 import play.mvc.Controller;
 import play.mvc.Result;
 import scala.concurrent.Await;
@@ -56,7 +55,10 @@ import akka.actor.ActorSelection;
 import akka.pattern.Patterns;
 import akka.util.Timeout;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -435,7 +437,7 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result editUser(String id) {
+	public static Result editUser(String id) throws JsonProcessingException, IOException {
 
 		// Only changes first and last name for testing purposes
 		//
@@ -462,83 +464,57 @@ public class UserManager extends Controller {
 
 		}
 		// If everything is ok store the user at the database
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				if (json.has("image")) {
-					String imageUpload = json.get("image").asText();
-					String mimeType = null;
-					byte[] imageBytes = null;
-					// check if image is given in bytes
-					if (imageUpload.startsWith("data")) {
-						String[] imageInfo = new String[2];
-						imageInfo = imageUpload.split(",");
-						String info = imageInfo[0];
-						mimeType = info.substring(5);
-						// check if image is encoded in base64 format
-						imageBytes = imageInfo[1].getBytes();
-
-						// check if image is given as URL
-					} else if (imageUpload.startsWith("http")) {
-						try {
-							URL url = new URL(imageUpload);
-							HttpsURLConnection connection = (HttpsURLConnection) url
-									.openConnection();
-							mimeType = connection
-									.getHeaderField("content-type");
-							imageBytes = IOUtils.toByteArray(connection
-									.getInputStream());
-						} catch (MalformedURLException e) {
-							return badRequest(e.getMessage());
-						} catch (IOException e) {
-							return badRequest(e.getMessage());
-						}
-					} else {
-						return badRequest(Json
-								.parse("{\"error\":\"Unknown image format\"}"));
-					}
-					// check if image is encoded in base64 format
-					if (mimeType.contains("base64")) {
-						imageBytes = Base64.decodeBase64(imageBytes);
-						mimeType = mimeType.replace(";base64", "");
-					}
-					Media media = new Media();
-					media.setType(Media.BaseType.valueOf("IMAGE"));
-					media.setMimeType(mimeType);
-					media.setHeight(100);
-					media.setWidth(100);
-					media.setOwnerId(user.getDbId());
-					media.setData(imageBytes);
-					try {
-						DB.getMediaDAO().makePermanent(media);
-						user.setThumbnail(media.getDbId());
-					} catch (Exception e) {
-						return badRequest(e.getMessage());
-					}
-				}
-				if (json.has("gender"))
-					user.setGender(json.get("gender").asText());
-				user.setFirstName(firstName);
-				user.setLastName(lastName);
-				if (json.has("about")) {
-					user.setAbout(json.get("about").asText());
-				}
-				/*
-				 * if (json.has("location")) {
-				 * user.setLocation(json.get("location").asText()); }
-				 */
-				DB.getUserDAO().makePermanent(user);
-				result = (ObjectNode) Json.parse(DB.getJson(user));
-				result.remove("md5Password");
-				return ok(Json.toJson(user));
-			} else {
-				return badRequest(Json
-						.parse("{\"error\":\"User does not exist\"}"));
-
-			}
-		} catch (IllegalArgumentException e) {
-			return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
-		}
+		User user = DB.getUserDAO().getById(new ObjectId(id), null);
+		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectReader updator = objectMapper.readerForUpdating(user);
+		updator.readValue(json);
+		DB.getUserDAO().makePermanent(user);
+		return ok(Json.toJson(user));
+		/*
+		 * try { User user = DB.getUserDAO().getById(new ObjectId(id), null); if
+		 * (user != null) { if (json.has("image")) { String imageUpload =
+		 * json.get("image").asText(); String mimeType = null; byte[] imageBytes
+		 * = null; // check if image is given in bytes if
+		 * (imageUpload.startsWith("data")) { String[] imageInfo = new
+		 * String[2]; imageInfo = imageUpload.split(","); String info =
+		 * imageInfo[0]; mimeType = info.substring(5); // check if image is
+		 * encoded in base64 format imageBytes = imageInfo[1].getBytes();
+		 * 
+		 * // check if image is given as URL } else if
+		 * (imageUpload.startsWith("http")) { try { URL url = new
+		 * URL(imageUpload); HttpsURLConnection connection =
+		 * (HttpsURLConnection) url .openConnection(); mimeType = connection
+		 * .getHeaderField("content-type"); imageBytes =
+		 * IOUtils.toByteArray(connection .getInputStream()); } catch
+		 * (MalformedURLException e) { return badRequest(e.getMessage()); }
+		 * catch (IOException e) { return badRequest(e.getMessage()); } } else {
+		 * return badRequest(Json
+		 * .parse("{\"error\":\"Unknown image format\"}")); } // check if image
+		 * is encoded in base64 format if (mimeType.contains("base64")) {
+		 * imageBytes = Base64.decodeBase64(imageBytes); mimeType =
+		 * mimeType.replace(";base64", ""); } Media media = new Media();
+		 * media.setType(Media.BaseType.valueOf("IMAGE"));
+		 * media.setMimeType(mimeType); media.setHeight(100);
+		 * media.setWidth(100); media.setOwnerId(user.getDbId());
+		 * media.setData(imageBytes); try {
+		 * DB.getMediaDAO().makePermanent(media);
+		 * user.setThumbnail(media.getDbId()); } catch (Exception e) { return
+		 * badRequest(e.getMessage()); } } if (json.has("gender"))
+		 * user.setGender(json.get("gender").asText());
+		 * user.setFirstName(firstName); user.setLastName(lastName); if
+		 * (json.has("about")) { user.setAbout(json.get("about").asText()); }
+		 * 
+		 * if (json.has("location")) {
+		 * user.setLocation(json.get("location").asText()); }
+		 * 
+		 * DB.getUserDAO().makePermanent(user); result = (ObjectNode)
+		 * Json.parse(DB.getJson(user)); result.remove("md5Password"); return
+		 * ok(Json.toJson(user)); } else { return badRequest(Json
+		 * .parse("{\"error\":\"User does not exist\"}"));
+		 * 
+		 * } } catch (IllegalArgumentException e) { return
+		 * badRequest(Json.parse("{\"error\":\"User does not exist\"}")); }
+		 */
 
 	}
 
