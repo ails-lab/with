@@ -124,7 +124,7 @@ public class MediaController extends Controller {
 			throws Exception {
 		JsonNode parsed = Json.newObject();
 		BufferedImage image;
-		ObjectNode result = Json.newObject();
+		//ObjectNode result = Json.newObject();
 		MediaObject media = new MediaObject();
 		parsed = parseMediaURL(url);
 		String g = "::" + HttpConnector.getURLContentAsFile(url);
@@ -133,6 +133,14 @@ public class MediaController extends Controller {
 		image = ImageIO.read(x);
 		parseMediaCheckerReply(media, parsed);
 		media.setMediaVersion(version);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ImageIO.write(image, "jpg", baos);
+		baos.flush();
+		byte[] thumbByte = baos.toByteArray();
+		media.setMediaBytes(thumbByte);
+
+		baos.close();
+
 		DB.getMediaObjectDAO().makePermanent(media);
 	}
 
