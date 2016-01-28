@@ -243,7 +243,8 @@ public class RecordController extends Controller {
 		/*
 		 * Search for available collections
 		 */
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.typeResource);
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(Elastic.typeResource);
 		SearchOptions elasticoptions = new SearchOptions(0, 1000);
 		List<List<Tuple<ObjectId, Access>>> accessFilters = new ArrayList<List<Tuple<ObjectId,Access>>>();
 

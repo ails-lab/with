@@ -57,7 +57,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData> exte
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public Map<String, Object> transformWR() {
+	public Map<String, Object> transformRR() {
 		return this.transformWR();
 
 	}

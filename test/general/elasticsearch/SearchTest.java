@@ -37,7 +37,8 @@ public class SearchTest {
 
 	@Test
 	public void testFederatedSearch() {
-		ElasticSearcher searcher = new ElasticSearcher(Elastic.typeResource);
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(Elastic.typeResource);
 
 		SearchOptions options = new SearchOptions(0, 10);
 		options.setScroll(false);
