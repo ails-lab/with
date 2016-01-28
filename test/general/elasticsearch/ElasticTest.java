@@ -47,6 +47,7 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithDate;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
@@ -86,44 +87,77 @@ public class ElasticTest {
 	public void testIndex() {
 
 
-		RecordResource co = getRecordResource();
+		RecordResource rr = getRecordResource();
 		//CollectionObject co = DB.getCollectionObjectDAO().getById(new ObjectId("569e1f284f55a2655367ec1e"));
-		if (DB.getRecordResourceDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
+		if (DB.getRecordResourceDAO().makePermanent(rr) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		Json.setObjectMapper(mapper);
-		System.out.println(Json.toJson(co));
-		System.out.println(co.transformWR());
+		System.out.println(Json.toJson(rr));
+		System.out.println(rr.transformRR());
 
-		ElasticIndexer.index(Elastic.typeResource, co.getDbId(), co.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 
 	}
 
 	@Test
 	public void testIndexMany() {
 		List<ObjectId> ids = new ArrayList<ObjectId>();
-		ids.add(new ObjectId("5697ad734f55a2518f8982cb"));
-		ids.add(new ObjectId("5697ae5f4f55a254f3b2a3d5"));
-		ids.add(new ObjectId("5694e7774f55a2444eec1c27"));
-		ids.add(new ObjectId("5694e98f4f55a24fb6d01e10"));
+		ids.add(new ObjectId("56aa0c994f55a23b71669814"));
+		ids.add(new ObjectId("56aa0c654f55a23a4494ace1"));
+		ids.add(new ObjectId("56aa0c334f55a238e81cb44a"));
+		ids.add(new ObjectId("56a8e76d2260ea229ed73886"));
 		List<RecordResource> rrs = DB.getRecordResourceDAO().getByIds(ids);
+		User u = DB.getUserDAO().getByUsername("qwerty");
+		if(u == null) {
+			System.out.println("No user found");
+			return;
+		}
+		for(RecordResource co: rrs) {
+			co.getAdministrative().setWithCreator(u.getDbId());
+		}
 
 		List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
 		ids.clear();
 		for(RecordResource rr: rrs) {
 			ids.add(rr.getDbId());
-			docs.add(rr.transformWR());
+			docs.add(rr.transformRR());
 		}
 		ElasticIndexer.indexMany(Elastic.typeResource, ids, docs);
 	}
 
+	@Test
+	public void testIndexManyCollections() {
+		List<ObjectId> ids = new ArrayList<ObjectId>();
+		ids.add(new ObjectId("56aa04aa4f55a2145bbc8e7f"));
+		ids.add(new ObjectId("56aa047c4f55a21327f10bbc"));
+		ids.add(new ObjectId("56aa04034f55a20fb7166f15"));
+		ids.add(new ObjectId("56aa03d94f55a20ed2ffcf81"));
+		List<CollectionObject> rrs = DB.getCollectionObjectDAO().getByIds(ids);
+		User u = DB.getUserDAO().getByUsername("qwerty");
+		if(u == null) {
+			System.out.println("No user found");
+			return;
+		}
+		for(CollectionObject co: rrs) {
+			co.getAdministrative().setWithCreator(u.getDbId());
+		}
+
+		List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
+		ids.clear();
+		for(CollectionObject rr: rrs) {
+			ids.add(rr.getDbId());
+			docs.add(rr.transformCO());
+		}
+		ElasticIndexer.indexMany(Elastic.typeCollection, ids, docs);
+	}
 
 	@Test
 	public void testDeleteResource() {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -153,8 +187,8 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().makePermanent(rr1);
 		DB.getRecordResourceDAO().makePermanent(rr2);
 
-		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transformWR());
-		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transformRR());
+		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -195,7 +229,7 @@ public class ElasticTest {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -207,7 +241,9 @@ public class ElasticTest {
 		//assertEquals(resp.getHits().getTotalHits(), 1);
 
 		Map<String, Object> doc = new HashMap<String, Object>();
-		doc.put("label.en", "666 title");
+		MultiLiteral label = new MultiLiteral();
+		label.add(Language.EN.toString(), "666989");
+		doc.put("label", label);
 
 
 		ElasticUpdater.updateOne(Elastic.typeResource, rr.getDbId(), doc);
@@ -232,8 +268,8 @@ public class ElasticTest {
 		DB.getRecordResourceDAO().makePermanent(rr2);
 
 
-		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transformWR());
-		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr1.getDbId(), rr1.transformRR());
+		ElasticIndexer.index(Elastic.typeResource, rr2.getDbId(), rr2.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr1.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -252,9 +288,13 @@ public class ElasticTest {
 		assertThat(resp.getHits().getTotalHits(), not(equalTo(0)));
 
 		Map<String, Object> doc1 = new HashMap<String, Object>();
-		doc1.put("label.en", "667 title");
+		MultiLiteral label1 = new MultiLiteral();
+		label1.add(Language.EN.toString(), "666989");
+		doc1.put("label", label1);
 		Map<String, Object> doc2 = new HashMap<String, Object>();
-		doc2.put("label.en", "667 title");
+		MultiLiteral label2 = new MultiLiteral();
+		label2.add(Language.EN.toString(), "666989");
+		doc2.put("label", label2);
 
 		List<ObjectId> ids = new ArrayList<ObjectId>();
 		List<Map<String, Object>> docs = new ArrayList<Map<String, Object>>();
@@ -288,11 +328,11 @@ public class ElasticTest {
 	}
 
 	@Test
-	public void testAddResourceToCollection() {
+	public  void testAddResourceToCollection() {
 		RecordResource rr = getRecordResource();
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -323,7 +363,7 @@ public class ElasticTest {
 		rr.setCollectedIn(collectedIn);
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -348,7 +388,7 @@ public class ElasticTest {
 		rr.setCollectedIn(collectedIn);
 		DB.getRecordResourceDAO().makePermanent(rr);
 
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformWR());
+		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 
 		TermQueryBuilder termQ = QueryBuilders.termQuery("_id", rr.getDbId());
 		SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
@@ -395,7 +435,7 @@ public class ElasticTest {
 	@Test
 	public void testTransformations() {
 		RecordResource<RecordDescriptiveData> rr = getRecordResource();
-		System.out.println(Json.toJson(rr.transformWR()));
+		System.out.println(Json.toJson(rr.transformRR()));
 	}
 
 
@@ -403,7 +443,7 @@ public class ElasticTest {
 
 
 	private RecordResource getRecordResource() {
-		RecordResource<RecordDescriptiveData> co = new RecordResource<RecordResource.RecordDescriptiveData>();
+		RecordResource<RecordDescriptiveData> rr = new RecordResource<RecordResource.RecordDescriptiveData>();
 
 		/*
 		 * Owner of the CollectionObject
@@ -418,23 +458,30 @@ public class ElasticTest {
 		/*
 		 * Administative metadata
 		 */
-		co.getAdministrative().setCreated(new Date());
+		rr.getAdministrative().setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
+		waccess.setIsPublic(false);
 		waccess.getAcl().add(new AccessEntry(u.getDbId(), Access.OWN));
-		co.getAdministrative().setAccess(waccess);
+		rr.getAdministrative().setWithCreator(u.getDbId());
+		rr.getAdministrative().setAccess(waccess);
 
 		//no externalCollections
 		List<ExternalCollection> ec;
 
 		//no provenance
-		List<ProvenanceInfo> prov;
+		ProvenanceInfo prov2 = new ProvenanceInfo("Europeana", "http://", "00");
+		ProvenanceInfo prov1 = new ProvenanceInfo("Mint", "http://", "001");
+		List<ProvenanceInfo> prov = new ArrayList<ProvenanceInfo>();
+		prov.add(prov2);
+		prov.add(prov1);
+		rr.setProvenance(prov);
 
 		//collectedIn
 		List<CollectionInfo> collectedIn = new ArrayList<CollectionInfo>();
 		CollectionInfo ci = new CollectionInfo(new ObjectId(), 42);
 		collectedIn.add(ci);
-		co.setCollectedIn(collectedIn);
+		rr.setCollectedIn(collectedIn);
 
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);
@@ -444,7 +491,20 @@ public class ElasticTest {
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
-		co.setDescriptiveData(cdd);
+
+		LiteralOrResource metaRights = new LiteralOrResource("CCO");
+		cdd.setMetadataRights(metaRights);
+
+		WithDate date = new WithDate();
+		date.setYear(1998);
+		List<WithDate> dates = new ArrayList<WithDate>();
+		dates.add(date);
+		WithDate date1 = new WithDate();
+		date1.setYear(2004);
+		dates.add(date1);
+		cdd.setDates(dates);
+
+		rr.setDescriptiveData(cdd);
 		/*
 		 * no content for the collection
 		 */
@@ -458,7 +518,7 @@ public class ElasticTest {
 		medias.add(emo);
 		//co.setMedia(medias);
 
-		return co;
+		return rr;
 	}
 
 

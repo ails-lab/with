@@ -19,6 +19,7 @@ package model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -37,30 +38,25 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ResourceType;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.basicDataTypes.WithDate;
 import model.resources.CollectionObject;
+import model.resources.CollectionObject.CollectionAdmin;
+import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.CollectionObject.CollectionDescriptiveData;
-import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
 import model.resources.WithResource.ExternalCollection;
+import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.User;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.bson.types.ObjectId;
 import org.junit.Test;
 
 import play.libs.Json;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import db.DB;
-import elastic.Elastic;
-import elastic.ElasticUtils;
 
 public class CollectionObjectTest {
 
@@ -84,9 +80,12 @@ public class CollectionObjectTest {
 		 * Administative metadata
 		 */
 		co.getAdministrative().setCreated(new Date());
+		((CollectionAdmin)co.getAdministrative()).setCollectionType(CollectionType.SimpleCollection);
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
+		waccess.setIsPublic(true);
 		waccess.addToAcl(new AccessEntry(u.getDbId(), Access.OWN));
+		co.getAdministrative().setWithCreator(u.getDbId());
 		co.getAdministrative().setAccess(waccess);
 
 		//no externalCollections
@@ -104,7 +103,27 @@ public class CollectionObjectTest {
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");
 		cdd.setDescription(desc);
+		LiteralOrResource metaRights = new LiteralOrResource("CCO");
+		cdd.setMetadataRights(metaRights);
+
+		WithDate date = new WithDate();
+		date.setYear(1998);
+		List<WithDate> dates = new ArrayList<WithDate>();
+		dates.add(date);
+		WithDate date1 = new WithDate();
+		date1.setYear(2004);
+		dates.add(date1);
+		cdd.setDates(dates);
+
+
 		co.setDescriptiveData(cdd);
+
+		/*
+		 * More information
+		 */
+		co.setResourceType(WithResourceType.CollectionObject);
+
+
 		/*
 		 * no content for the collection
 		 */
@@ -117,12 +136,12 @@ public class CollectionObjectTest {
 		co.addMedia(MediaVersion.Original, emo);
 		//if (DB.getRecordResourceDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
 		if (DB.getCollectionObjectDAO().makePermanent(co) == null) { System.out.println("No storage!"); return; }
-
-		System.out.println("Stored!");
+		CollectionObject co1 = DB.getCollectionObjectDAO().get(co.getDbId());
+		if((co1 != null))
+			System.out.println("Stored!");
 		System.out.println(Json.toJson(co));
-		System.out.println(ElasticUtils.transformRR(co));
+		System.out.println(co.transformCO());
 		//RecordResource rr1 =  DB.getRecordResourceDAO().getById(co.getDbId());
-		CollectionObject co1 = DB.getCollectionObjectDAO().getById(co.getDbId());
 		//if(DB.getCollectionObjectDAO().makeTransient(co) != -1 ) System.out.println("Deleted");
 
 		/*JsonNodeFactory nodeFactory = JsonNodeFactory.instance;

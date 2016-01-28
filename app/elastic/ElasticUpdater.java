@@ -20,6 +20,7 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.libs.Json;
+import scala.Array;
 import db.DB;
 
 public class ElasticUpdater {
@@ -100,8 +102,15 @@ public class ElasticUpdater {
 	 * Completes the whole update process of a merged document
 	 */
 	public static void addResourceToCollection(String id, List<CollectionInfo> newColIn) throws IOException {
-		XContentBuilder doc = jsonBuilder();
-		doc.startObject().array("collectedIn", newColIn).endObject();
+		Map<String, List<Object>> doc =  new HashMap<String, List<Object>>();
+		for(CollectionInfo ci: newColIn) {
+			Map<String, Object> colInfo = new HashMap<String, Object>();
+			colInfo.put("collectionId", ci.getCollectionId().toString());
+			colInfo.put("position", ci.getPosition());
+
+			if(doc.containsKey("collectedIn")) doc.get("collectedIn").add(colInfo);
+			else doc.put("collectedIn", new ArrayList<Object>() {{ add(colInfo); }});
+		}
 		try {
 			Elastic.getTransportClient().prepareUpdate()
 				.setIndex(Elastic.index)
