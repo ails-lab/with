@@ -145,21 +145,9 @@ public class WithSpaceSource extends ISpaceSource {
 		 */
 		SearchResponse elasticResponse = searcher
 				.searchResourceWithWeights(term, elasticoptions);
-		Map<String, List<ObjectId>> resourcesIds = getIdsOfHits(elasticResponse);
-		Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
+		Map<String, List<?>> resourcesPerType = ElasticUtils.getResourcesPerType(elasticResponse);
 
-		for(Entry<String, List<ObjectId>> e: resourcesIds.entrySet()) {
-			switch (e.getKey()) {
-			case "resource":
-				resourcesPerType.put("resource" , DB.getRecordResourceDAO().getByIds(e.getValue()));
-				break;
-			case "collection":
-				resourcesPerType.put("collection" , DB.getRecordResourceDAO().getByIds(e.getValue()));
-				break;
-			default:
-				break;
-			}
-		}
+
 
 
 		/* Finalize the searcher client and create the SourceResponse */
@@ -188,20 +176,6 @@ public class WithSpaceSource extends ISpaceSource {
 		}
 
 		return sourceResponse;
-	}
-
-	private Map<String, List<ObjectId>> getIdsOfHits(SearchResponse resp) {
-
-		Map<String, List<ObjectId>> idsOfEachType = new HashMap<String, List<ObjectId>>();
-		resp.getHits().forEach( (h) -> {
-			if(!idsOfEachType.containsKey(h.getType())) {
-				idsOfEachType.put(h.getType(), new ArrayList<ObjectId>() {{ add(new ObjectId(h.getId())); }});
-			} else {
-				idsOfEachType.get(h.getType()).add(new ObjectId(h.getId()));
-			}
-		});
-
-		return idsOfEachType;
 	}
 
 	private List<SearchHit> getTotalHitsFromScroll(SearchResponse scrollResp) {

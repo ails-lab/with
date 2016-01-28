@@ -33,6 +33,7 @@ import model.resources.WithResource;
 import model.DescriptiveData;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
@@ -44,6 +45,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
 
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
@@ -233,8 +236,8 @@ public class ElasticUtils {
 		 * Format and add Media structure
 		 */
 		ArrayNode media_objects = Json.newObject().arrayNode();
-		if((rr.getMedia() != null) && !rr.getMedia().isEmpty()
-				&& !rr.getMedia().get(0).isEmpty() ) {
+		if( (rr.getMedia() != null) && !rr.getMedia().isEmpty()
+				&& (rr.getMedia().get(0)!=null) && (!rr.getMedia().get(0).isEmpty())  ) {
 			// take care about all EmbeddedMediaObjects
 			EmbeddedMediaObject emo = rr.getMedia().get(0).get(MediaVersion.Original);
 				ObjectNode media = Json.newObject();
@@ -296,62 +299,39 @@ public class ElasticUtils {
 		}
 	}
 
+	/*
+	 * Retrieve from DB the resources that where returned
+	 * from an elastic query.
+	 * Returns a Map of List of Resources per Type.
+	 */
 
+	public static Map<String, List<?>> getResourcesPerType(SearchResponse resp) {
 
-
-
-	/* *********************** OLD CODE ********************************** */
-
-	public static RecordResource hitToRecord(SearchHit hit) {
-		JsonNode json = Json.parse(hit.getSourceAsString());
-		RecordResource record = Json.fromJson(json, RecordResource.class);
-		/*if (hit.type().equals(Elastic.type_general)) {
-			List<CollectionInfo> colIds = new ArrayList<CollectionInfo>();
-			List<String> tags = new ArrayList<String>();
-			ArrayNode ids = (ArrayNode) json.get("descriptiveData.collectedIn");
-			ArrayNode allTags = (ArrayNode) json.get("tags");
-
-			for (JsonNode id : ids)
-				if (!colIds.contains(id.asText()))
-					colIds.add(id.asText());
-			for (JsonNode t : allTags)
-				if (!tags.contains(t.asText()))
-					tags.add(t.asText());
-
-			record.setCollectedIn(colIds);
-			record.setAllTags(tags);
-		}*/
-
-		return record;
-	}
-
-	public static Collection hitToCollection(SearchHit hit) {
-		JsonNode json         = Json.parse(hit.getSourceAsString());
-		JsonNode accessRights = json.get("rights");
-		if(!accessRights.isMissingNode()) {
-			ObjectNode ar = Json.newObject();
-			for(JsonNode r: accessRights) {
-				String user   = r.get("user").asText();
-				String access = r.get("access").asText();
-				ar.put(user, access);
+		Map<String, List<ObjectId>> idsOfEachType = new HashMap<String, List<ObjectId>>();
+		resp.getHits().forEach( (h) -> {
+			if(!idsOfEachType.containsKey(h.getType())) {
+				idsOfEachType.put(h.getType(), new ArrayList<ObjectId>() {{ add(new ObjectId(h.getId())); }});
+			} else {
+				idsOfEachType.get(h.getType()).add(new ObjectId(h.getId()));
 			}
-			((ObjectNode)json).remove("rights");
-			((ObjectNode)json).put("rights", ar);
+		});
+
+		Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
+
+		for(Entry<String, List<ObjectId>> e: idsOfEachType.entrySet()) {
+			switch (e.getKey()) {
+			case "resource":
+				resourcesPerType.put("resource" , DB.getRecordResourceDAO().getByIds(e.getValue()));
+				break;
+			case "collection":
+				resourcesPerType.put("collection" , DB.getRecordResourceDAO().getByIds(e.getValue()));
+				break;
+			default:
+				break;
+			}
 		}
-		Collection collection = Json.fromJson(json, Collection.class);
-		return collection;
+
+		return resourcesPerType;
 	}
 
-	public static List<Collection> getCollectionMetadaFromHit(
-			SearchHits hits) {
-
-
-		List<Collection> colFields = new ArrayList<Collection>();
-		for(SearchHit hit: hits.getHits()) {
-			Collection collection = hitToCollection(hit);
-			collection.setDbId(new ObjectId(hit.getId()));
-			colFields.add(collection);
-		}
-		return colFields;
-	}
 }
