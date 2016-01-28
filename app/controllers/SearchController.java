@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.bson.types.ObjectId;
+
+import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
@@ -48,7 +51,11 @@ import utils.ListUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import db.DB;
 import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
+import elastic.ElasticUtils;
 
 public class SearchController extends Controller {
 
@@ -177,9 +184,9 @@ public class SearchController extends Controller {
 			System.out.println("got "+res);
 			return res;
 			};
-			
+
 			System.out.println(">>>>>>>>> requested "+q.source);
-			
+
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
 				List<CommonQuery> list = src.splitFilters(q);
@@ -216,6 +223,36 @@ public class SearchController extends Controller {
 
 		return ok(views.html.testsearch.render(userForm, res, merge1));
 	 */
+
+	public static Promise<Result> searchForRelatedItems() {
+		JsonNode json = request().body().asJson();
+
+		try {
+			List<String> ids = Arrays.asList(json.get("ids").asText().split(","));
+			List<String> fields = Arrays.asList(json.get("fields").asText().split(","));
+
+			SearchOptions options = new SearchOptions();
+			options.setOffset(json.get("page").asInt());
+			options.setCount(json.get("pageSize").asInt());
+
+			ElasticSearcher similar = new ElasticSearcher();
+			similar.setTypes(Arrays.asList(json.get("types").asText().split(",")));
+
+
+			org.elasticsearch.action.search.SearchResponse similars = similar.relatedWithMLT("", ids, fields, options);
+			Map<String, List<?>> resourcesPerType = ElasticUtils.getResourcesPerType(similars);
+
+			return Promise.pure((Result)ok(Json.toJson(resourcesPerType)));
+		} catch(NullPointerException npe) {
+
+			return Promise.pure((Result)badRequest("Some fields are missing from the provided json"));
+		} catch(Exception e) {
+
+			return Promise.pure((Result)internalServerError("We are sorry something happened excecuting your query!"));
+		}
+
+	}
+
 
 	public static Result reindex() {
 		Promise.promise(new Function0<String>() {
