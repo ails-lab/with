@@ -293,6 +293,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, co.getAdministrative().getAccess());
+		System.out.println(newAccess);
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 	}
 	
@@ -302,7 +303,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
 		List<WithAccess> parentColAccess = new ArrayList<WithAccess>(parentCollections.size()+1);
 		parentColAccess.add(newColAccess);
-		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
+		for (ObjectId colId: parentCollections) {
+			CollectionObject parentCollection = DB.getCollectionObjectDAO().getById(colId, new ArrayList<String>(Arrays.asList("administrative.access")));
 			parentColAccess.add(parentCollection.getAdministrative().getAccess());
 		}
 		//hope there aren't too many collections containing the resource

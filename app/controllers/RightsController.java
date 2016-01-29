@@ -68,7 +68,7 @@ public class RightsController extends WithResourceController {
 	public static Result shareCollection(String colId, String right, String username, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();
 		ObjectId colDbId = new ObjectId(colId);
-		Result response = errorIfNoAccessToRecord(Action.DELETE, colDbId);
+		Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
 		if (!response.toString().equals(ok().toString()))
 			return response;
 		else {//user is owner

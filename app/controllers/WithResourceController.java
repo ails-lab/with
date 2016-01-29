@@ -205,7 +205,6 @@ public class WithResourceController extends Controller {
 				} else {
 					DB.getRecordResourceDAO().appendToCollection(recordId, collectionDbId, owns);
 				}
-			    System.out.println("id");	
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
