@@ -16,14 +16,19 @@
 
 package sources.formatreaders;
 
+import java.util.List;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
+import sources.core.CommonFilters;
 import sources.utils.JsonContextRecord;
 
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
@@ -36,38 +41,66 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		// TODO read the language
+		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("description"));
-		// model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		// model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		model.setDccreator(rec.getMultiLiteralOrResourceValue(rec.getStringValue("creator")));
-
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider")));
-		object.addToProvenance(
-				new ProvenanceInfo(rec.getStringValue("provider.name"), null, rec.getStringValue("provider.@id")));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url"));
+		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
+		model.setDates(rec.getWithDateArrayValue("date"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
+		model.setDctype(rec.getMultiLiteralOrResourceValue("dctype"));
+//		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt().getURI(),null));
+//		object.addToProvenance(
+//				new ProvenanceInfo(rec.getStringValue("provider.name"), null, rec.getStringValue("provider.@id")));
 		String id = rec.getStringValue("id");
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
-		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue("thumbnail_url"));
-		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		EmbeddedMediaObject medFullSize = new EmbeddedMediaObject();
-		medFullSize.setUrl(rec.getStringValue("medFullSize"));
-		// TODO: add rights
-		// medFullSize.setWithRights(...);
-		object.addMedia(MediaVersion.Original, medThumb);
+		
+		
+		List<String> rights = rec.getStringArrayValue("rights_url");
+		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("category")).get(0);
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		
+		
+		
+		String uri3 = rec.getStringValue("thumbnail_url");
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		if (uri3!=null){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri3);
+			medThumb.setType(type);
+			medThumb.setParentID(uri2);
+			if (rights!=null && rights.size()>0)
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setWithRights(withRights);
+			object.addMedia(MediaVersion.Thumbnail, medThumb);
+		}
+		if (uri2!=null){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setParentID("self");
+			med.setUrl(uri2);
+			if (rights!=null && rights.size()>0)
+			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			med.setWithRights(withRights);
+			med.setType(type);
+			object.addMedia(MediaVersion.Original, med);
+		}
+		
+		uri3 = rec.getStringValue("large_thumbnail_url");
+		if (uri3!=null){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri3);
+			medThumb.setType(type);
+			medThumb.setParentID(uri2);
+			if (rights!=null && rights.size()>0)
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setWithRights(withRights);
+			object.addMediaView(MediaVersion.Thumbnail, medThumb);
+		}
+		
+		
 		return object;
-		// //TODO: add type
-		// //TODO: add null checks
-		// object.setContributors(rec.getStringArrayValue("sourceResource.contributor"));
-		// // TODO: add years here:
-		//// Utils.readArrayAttr(item, "issued",
-		// // true);
-		//// object.setYears(ListUtils.transform(rec.getStringArrayValue("year"),
-		// (String y)->{return Year.parse(y);}));
-		// // TODO: add rights
-		//// object.setItemRights(rec.getStringValue("rights_url"));
 	}
 
 }

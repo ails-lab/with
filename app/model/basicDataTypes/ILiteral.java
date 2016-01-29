@@ -41,6 +41,10 @@ public interface ILiteral {
 	
 	default void addSmartLiteral(String value, Language... suggestedLanguages) {
 		if (!Utils.isValidURL(value)){
+			if ((suggestedLanguages!=null && suggestedLanguages.length==1)){
+				addLiteral(suggestedLanguages[0], value);
+				return;
+			}
 			boolean shortText = value.length()<100;
 			// create a text object factory
 			TextObjectFactory textObjectFactory = shortText ?
@@ -55,10 +59,10 @@ public interface ILiteral {
 	        	System.out.println(probabilities);
 	        	boolean gotSome = false;
 	            for (DetectedLanguage detectedLanguage : probabilities) {
-					if (detectedLanguage.getProbability()>=THRESHOLD && 
+					if ((detectedLanguage.getProbability()>=THRESHOLD && 
 							(suggestedLanguages==null || suggestedLanguages.length==0 ||
 							ListUtils.anyof(suggestedLanguages, 
-									(Language l)-> l.belongsTo(detectedLanguage.getLanguage())))){
+									(Language l)-> l.belongsTo(detectedLanguage.getLanguage()))))){
 						addLiteral(Language.getLanguage(detectedLanguage.getLanguage()), value);
 						Logger.info("Detected ["+detectedLanguage.getLanguage()+"] for " + value);
 						gotSome = true;
