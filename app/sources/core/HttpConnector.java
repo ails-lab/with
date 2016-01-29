@@ -248,13 +248,16 @@ public class HttpConnector {
 		}
 	}
 
-public static <T> T postContent(String url) throws Exception {
+public static <T> T postContent(String url, String parameter, String paramName) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
-			Promise<T> jsonPromise = WS.url(url1).post(url).map(new Function<WSResponse, T>() {
+			//Promise<T> jsonPromise = WS.url(url1).post("content").map(new Function<WSResponse, T>() {
+			Promise<T> jsonPromise = WS.url(url1)
+					.setQueryParameter(paramName, parameter)
+					.post("content").map(new Function<WSResponse, T>() {
 				public T apply(WSResponse response) {
 //					System.out.println(response.getBody());
 					T json = (T) response.asJson();
@@ -282,8 +285,8 @@ public static <T> T postContent(String url) throws Exception {
 	}
 
 	
-	public static JsonNode postURLContent(String url) throws Exception {
-		return HttpConnector.<JsonNode>postContent(url);
+	public static JsonNode postURLContent(String url, String parameter, String paramName) throws Exception {
+		return HttpConnector.<JsonNode>postContent(url, parameter, paramName);
 	}
 
 	
