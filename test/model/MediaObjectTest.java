@@ -28,7 +28,6 @@ import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
 
 import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.ResourceType;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 

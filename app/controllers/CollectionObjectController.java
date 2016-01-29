@@ -213,6 +213,9 @@ public class CollectionObjectController extends WithResourceController {
 	 */
 	// TODO check restrictions (unique fields e.t.c)
 	public static Result editCollectionObject(String id) {
+		//TODO: this assumes that the frontend(json) has FULL information about the collection's descriptive data
+		//however, this may not be true, since we do not always return full data (but only some fields) of a resource to the frontend
+		//So, better iterate throught the json (in any case it should be small), and update only the fields specified in it.
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
@@ -250,37 +253,6 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-
-	/*
-	public static Result list(Option<String> userOrGroupName,
-			Option<String> access, Option<Boolean> isExhibition, int offset, int count) {
-
-		Access accessLevel;
-		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition.get() : null;
-		List<CollectionObject> collections;
-		accessLevel = Access.valueOf(access.get());
-		ObjectId userOrGroupId;
-		List<ObjectId> effectiveIds = AccessManager
-				.effectiveUserDbIds(session().get("effectiveUserIds"));
-		if (userOrGroupName.isDefined()) {
-			String name = userOrGroupName.get();
-			if (DB.getUserGroupDAO().getByName(name) != null) {
-				userOrGroupId = DB.getUserGroupDAO().getByName(name).getDbId();
-			} else {
-				userOrGroupId = DB.getUserDAO().getByUsername(name).getDbId();
-			}
-			HashMap<ObjectId, Access> restrictions = new HashMap<ObjectId, Access>();
-			restrictions.put(userOrGroupId, accessLevel);
-			collections = DB.getCollectionObjectDAO()
-					.getByMaxAccessWithRestrictions(effectiveIds, accessLevel,
-							restrictions, isExhibitionBoolean, offset, count);
-		} else {
-			collections = DB.getCollectionObjectDAO().getByMaxAccess(
-					effectiveIds, accessLevel, isExhibitionBoolean, offset, count);
-		}
-		return ok(Json.toJson(collections));
-	}
-*/
 	
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup, Option<String> creator, Option<Boolean> isPublic,
@@ -391,6 +363,7 @@ public class CollectionObjectController extends WithResourceController {
 					maxAccess = Access.READ;
 				}
 				c.put("access", maxAccess.toString());
+				//TODO: specifiy retrieved fields
 				User user = DB.getUserDAO().getById(collection.getAdministrative().getWithCreator(),
 						new ArrayList<String>(Arrays.asList("username")));
 				if (user != null) {
@@ -499,6 +472,8 @@ public class CollectionObjectController extends WithResourceController {
 		if (!response.toString().equals(ok().toString()))
 			return response;
 		else {
+			//TODO: specify retrieved fields!!!!!!
+			List<String> retrievedFields = new ArrayList<String>(Arrays.asList("descriptiveData.label", "descriptiveData.description"));//bytes of thumbnail???
 			List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start, count);
 			if (records == null) {
 				result.put("message", "Cannot retrieve records from database!");

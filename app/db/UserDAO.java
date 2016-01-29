@@ -27,6 +27,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 import play.Logger.ALogger;
+import utils.Tuple;
 
 public class UserDAO extends DAO<User> {
 	public static final ALogger log = Logger.of(UserDAO.class);
@@ -58,6 +59,7 @@ public class UserDAO extends DAO<User> {
 	public User getByGoogleId(String googleId) {
 		return this.findOne("googleId", googleId);
 	}
+	
 
 	/**
 	 * This method is updating one specific User. By default update method is
@@ -121,10 +123,11 @@ public class UserDAO extends DAO<User> {
 				.hasThisOne(groupId);
 		return find(q).asList();
 	}
-	
-	public boolean isSuperUser(ObjectId userId) {
-		Query<User> q = this.createQuery().field("_id").equal(userId).limit(1);
-		q.field("superUser").equal(true);
-		return (find(q).asList().size()==0? false: true);
+
+	public boolean isSuperUser(ObjectId id) {
+		ArrayList<Tuple<String, Object>> superUser = new ArrayList<Tuple<String, Object>>();
+		superUser.add(new Tuple("_id", id));
+		superUser.add(new Tuple("superUser", true));
+		return existsFieldsWithValues(superUser);
 	}
 }

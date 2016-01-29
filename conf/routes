@@ -88,8 +88,7 @@ PUT      /group/leave/:groupId                     controllers.UserAndGroupManag
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 
 # Rights Controller
-#GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
-GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null)
+GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia( file: Boolean ?= true)

@@ -64,7 +64,7 @@ public class WithResourceController extends Controller {
 	
 	public static Status errorIfNoAccessToWithResource(WithResourceDAO resourceDAO, Action action, ObjectId id) {
 		ObjectNode result = Json.newObject();
-		if (!resourceDAO.existsResource(id)) {
+		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
 			result.put("error", "Cannot retrieve resource " + id +  " from database");
 			return internalServerError(result);
@@ -127,7 +127,7 @@ public class WithResourceController extends Controller {
 				ObjectId recordId = null;
 				if (externalId != null && DB.getRecordResourceDAO().existsWithExternalId(externalId)) {
 					//get dbId of existing resource
-					RecordResource resource = DB.getRecordResourceDAO().getByFieldAndValue("administrative.externalId", externalId, 
+					RecordResource resource = DB.getRecordResourceDAO().getUniqueByFieldAndValue("administrative.externalId", externalId, 
 							new ArrayList<String>(Arrays.asList("_id")));
 					recordId = resource.getDbId();
 					response = errorIfNoAccessToRecord(Action.READ, recordId);
@@ -205,7 +205,6 @@ public class WithResourceController extends Controller {
 				} else {
 					DB.getRecordResourceDAO().appendToCollection(recordId, collectionDbId, owns);
 				}
-			    System.out.println("id");	
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
