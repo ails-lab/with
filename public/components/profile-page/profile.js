@@ -86,18 +86,6 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			}
 		});
 
-		// $('#imageupload').fileupload({
-		// 	add : function(e, data) {
-		// 		if (data.files && data.files[0]) {
-		// 			var reader    = new FileReader();
-		// 			reader.onload = function(e) {
-		// 				self.resizePhoto(e.target.result, 100, 100);
-		// 			};
-		// 			reader.readAsDataURL(data.files[0]);
-		// 		}
-		// 	}
-		// });
-
 		// Call the global closePopup function to dispose the component without saving the changes
 		self.closeWindow   = function() {
 			app.closePopup();
@@ -168,18 +156,17 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 				data : JSON.stringify({
 					'url': remoteurl
 				}),
-				done : function (e, data) {
-					console.log(e);
+				success : function (data) {
 					console.log(data);
-					self.avatar.Original(data.Original);
-					self.avatar.Tiny(data.Tiny);
-					self.avatar.Square(data.Square);
-					self.avatar.Thumbnail(data.Thumbnail);
-					self.avatar.Medium(data.Medium);
+					self.avatar.Original(data.original);
+					self.avatar.Tiny(data.tiny);
+					self.avatar.Square(data.square);
+					self.avatar.Thumbnail(data.thumbnail);
+					self.avatar.Medium(data.medium);
 				},
 				error: function (e, data) {
 					$.smkAlert({
-						text: 'Error uploading the file',
+						text: 'Error retrieving the photo!',
 						type: 'danger',
 						time: 10
 					});
