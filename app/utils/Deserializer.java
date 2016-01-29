@@ -34,8 +34,12 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
+import model.resources.CollectionObject.CollectionAdmin.CollectionType;
+import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
+
+import play.libs.Json;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,7 +47,11 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
+
+import db.DB;
 
 public class Deserializer {
 
@@ -70,6 +78,7 @@ public class Deserializer {
 		}
 
 	}
+	
 
 	public static class WithAccessDeserializer extends
 			JsonDeserializer<WithAccess> {
@@ -80,16 +89,34 @@ public class Deserializer {
 				JsonProcessingException {
 			WithAccess rights = new WithAccess();
 			TreeNode treeNode = accessString.readValueAsTree();
-			ObjectNode isPublic = (ObjectNode) treeNode.get("isPublic");
-			if (isPublic != null) {
+			if (treeNode.get("isPublic").isValueNode()) {
+				BooleanNode isPublic = (BooleanNode) treeNode.get("isPublic");
 				rights.setIsPublic(isPublic.asBoolean());
 			}
-			ObjectNode jsonAcl = (ObjectNode) treeNode.get("acl");
-			if (jsonAcl != null) {
-				ArrayList<AccessEntry> acl = jsonAcl.traverse().readValueAs(
-						new TypeReference<AccessEntry>() {
-						});
-				rights.setAcl(acl);
+			TreeNode jsonAcl = treeNode.get("acl");
+			if (jsonAcl.isArray()) {
+				for (int i=0; i< jsonAcl.size(); i++) {
+					TreeNode entry = jsonAcl.get(i);
+					if (entry.get("user").isValueNode() && entry.get("level").isValueNode()) {
+						String username = ((TextNode) entry.get("user")).asText();
+						User user = DB.getUserDAO().getByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id"))).get(0);
+						if (user != null) {
+							ObjectId userId = user.getDbId();
+							String acc = ((TextNode) entry.get("level")).asText();
+							Access access = Access.valueOf(acc);
+							if (access != null)
+								rights.addToAcl(userId, access);
+							else
+								return rights;
+						}
+						else 
+							return rights;
+					}
+					else 
+						return rights;
+				}
+				
+				//rights.setAcl(acl);
 				// if (rightsMap != null)
 				// for(Entry<String, Integer> e : rightsMap.entrySet())
 				// rights.put(new ObjectId(e.getKey()),
