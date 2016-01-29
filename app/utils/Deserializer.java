@@ -22,7 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -31,6 +30,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -104,41 +104,56 @@ public class Deserializer {
 
 		@Override
 		public MultiLiteral deserialize(JsonParser string,
-				DeserializationContext arg1) throws IOException,
-				JsonProcessingException {
-			Map<String, List<String>> outMap = new HashMap<String, List<String>>();
-			Map<String, String[]> map = string
-					.readValueAs(new TypeReference<Map<String, String[]>>() {
-					});
+				DeserializationContext arg1) {
+			MultiLiteral out = new MultiLiteral();
+			Map<String, String[]> map;
+			try {
+				map = string
+						.readValueAs(new TypeReference<Map<String, String[]>>() {
+						});
+			} catch (IOException e1) {
+				return null;
+			}
 			for (Entry<String, String[]> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					outMap.put(e.getKey(), Arrays.asList(e.getValue()));
+					out.addMultiLiteral(Language.getLanguage(e.getKey()),
+							Arrays.asList(e.getValue()));
 				}
 			}
-			return (MultiLiteral) outMap;
+			out.fillDEF();
+			return out;
 		}
 	}
 
-	/*
-	 * public static class MultiLiteralOrResourceDesiarilizer extends
-	 * JsonDeserializer<MultiLiteralOrResource> {
-	 * 
-	 * @Override public MultiLiteralOrResource deserialize(JsonParser string,
-	 * DeserializationContext arg1) { Map<String, String[]> map; try { map =
-	 * string .readValueAs(new TypeReference<Map<String, String[]>>() { }); }
-	 * catch (JsonProcessingException e1) { try { return new
-	 * MultiLiteralOrResource(string.getText()); } catch (Exception e2) { return
-	 * null; } } catch (IOException e1) { return null; } MultiLiteralOrResource
-	 * outMap = new MultiLiteralOrResource(); for (Entry<String, String[]> e :
-	 * map.entrySet()) { if (Language.contains(e.getKey())) {
-	 * outMap.addMultiLiteral(Language.valueOf(e.getKey()),
-	 * Arrays.asList(e.getValue())); } else if
-	 * (e.getKey().equals(LiteralOrResource.URI)) { LiteralOrResource out = new
-	 * MultiLiteralOrResource(); out.addURI(e.getValue()); return out; } else {
-	 * return new MultiLiteralOrResource(e.getValue()); } } return null;
-	 * 
-	 * } }
-	 */
+	public static class MultiLiteralOrResourceDesiarilizer extends
+			JsonDeserializer<MultiLiteralOrResource> {
+
+		@Override
+		public MultiLiteralOrResource deserialize(JsonParser string,
+				DeserializationContext arg1) {
+			// Map<String, String[]> map = new HashMap<String, String[]>>();
+			MultiLiteralOrResource out = new MultiLiteralOrResource();
+			Map<String, String[]> map;
+			try {
+				map = string
+						.readValueAs(new TypeReference<Map<String, String[]>>() {
+						});
+			} catch (IOException e1) {
+				return null;
+			}
+			for (Entry<String, String[]> e : map.entrySet()) {
+				if (Language.isLanguage(e.getKey())) {
+					out.addMultiLiteral(Language.getLanguage(e.getKey()),
+							Arrays.asList(e.getValue()));
+				} else if (e.getKey().equals(LiteralOrResource.URI)) {
+					out.addURI(Arrays.asList(e.getValue()));
+				}
+			}
+			out.fillDEF();
+			return out;
+		}
+	}
+
 	public static class LiteralDesiarilizer extends JsonDeserializer<Literal> {
 
 		@Override
@@ -152,7 +167,7 @@ public class Deserializer {
 						});
 			} catch (JsonProcessingException e1) {
 				try {
-					out = new Literal(string.getText());
+					out.addSmartLiteral(string.getText());
 					out.fillDEF();
 					return out;
 				} catch (Exception e2) {
@@ -163,12 +178,12 @@ public class Deserializer {
 			}
 			for (Entry<String, String> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					out.addLiteral(Language.valueOf(e.getKey()), e.getValue());
+					out.addLiteral(Language.getLanguage(e.getKey()),
+							e.getValue());
 				}
 			}
 			out.fillDEF();
 			return out;
-
 		}
 	}
 
@@ -197,7 +212,8 @@ public class Deserializer {
 			}
 			for (Entry<String, String> e : map.entrySet()) {
 				if (Language.isLanguage(e.getKey())) {
-					out.addLiteral(Language.valueOf(e.getKey()), e.getValue());
+					out.addLiteral(Language.getLanguage(e.getKey()),
+							e.getValue());
 				} else if (e.getKey().equals(LiteralOrResource.URI)) {
 					out.addURI(e.getValue());
 				}

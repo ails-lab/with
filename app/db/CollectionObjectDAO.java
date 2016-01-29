@@ -161,7 +161,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 		else {
 			CollectionType collectionType = isExhibition ? CollectionType.Exhibition : CollectionType.SimpleCollection;
-			q.field("administrative.collectionType").equal(collectionType);
+			q.disableValidation().field("administrative.collectionType").equal(collectionType);
 			result = this.find(q);
 			collections = result.asList();
 			if (isExhibition)
