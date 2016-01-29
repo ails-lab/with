@@ -68,7 +68,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books","Articles");
 
 		// addMapping(CommonFilters.RIGHTS.name(),
 		// RightsValues.Creative_Commercial,

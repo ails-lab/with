@@ -32,6 +32,7 @@ import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
@@ -107,7 +108,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
 		String uri3 = ro==null?null:ro.getURI();
-		if (uri3!=null){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri2);
 			medThumb.setType(type);
@@ -117,7 +118,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
 		
-		if (uri2!=null){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setType(type);
 			med.setParentID("self");
@@ -127,7 +128,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 			object.addMedia(MediaVersion.Original, med);
 		}
 		
-		if (theViews!=null && theViews.size()>0){
+		if (Utils.hasInfo(theViews)){
 			for (String string : theViews) {
 				EmbeddedMediaObject med = new EmbeddedMediaObject();
 				med.setType(type);
