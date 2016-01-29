@@ -23,7 +23,7 @@ import utils.Deserializer.LiteralDesiarilizer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = LiteralDesiarilizer.class)
-public class Literal extends HashMap<String, String> {
+public class Literal extends HashMap<String, String> implements ILiteral {
 
 	public Literal() {
 	}
@@ -36,10 +36,18 @@ public class Literal extends HashMap<String, String> {
 		this.put(lang.getDefaultCode(), label);
 	}
 
+	/* (non-Javadoc)
+	 * @see model.basicDataTypes.ILiteral#addLiteral(model.basicDataTypes.Language, java.lang.String)
+	 */
+	@Override
 	public void addLiteral(Language lang, String value) {
 		this.put(lang.getDefaultCode(), value);
 	}
 
+	/* (non-Javadoc)
+	 * @see model.basicDataTypes.ILiteral#addLiteral(java.lang.String)
+	 */
+	@Override
 	public void addLiteral(String value) {
 		addLiteral(Language.UNKNOWN, value);
 	}
@@ -54,19 +62,20 @@ public class Literal extends HashMap<String, String> {
 		return get(lang.toString());
 	}
 
-	public void fillDEF() {
+	public Literal fillDEF() {
 		if (containsKey(Language.DEFAULT.getDefaultCode())) {
-			return;
+			return this;
 		}
 		if (containsKey(Language.EN.getDefaultCode())) {
 			put(Language.DEFAULT.getDefaultCode(), getLiteral(Language.EN));
-			return;
+			return this;
 		}
 		for (String lang : this.keySet()) {
 			if (Language.contains(lang)) {
 				put(Language.DEFAULT.getDefaultCode(), get(lang));
-				return;
+				return this;
 			}
 		}
+		return this;
 	}
 }

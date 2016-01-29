@@ -17,9 +17,11 @@
 package db;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
@@ -32,6 +34,8 @@ import com.mongodb.BasicDBObject;
 import model.CollectionRecord;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.AgentObject;
 import model.resources.CollectionObject;
 import model.resources.CulturalObject;
@@ -228,13 +232,20 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
 		colUpdate.set("administrative.lastModified", new Date());
 		colUpdate.inc("administrative.entryCount");
-		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion\
+		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
 	}
 	
-	public void updateRecordUsageAndCollected(CollectionInfo colInfo,  ObjectId recordId, ObjectId colId) {
+	public void updateRecordUsageCollectedAndRights(CollectionInfo colInfo, WithAccess access, ObjectId recordId, ObjectId colId) {
 		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 		UpdateOperations<RecordResource> recordUpdate = this.createUpdateOperations();
 		recordUpdate.add("collectedIn", colInfo);
+		if (access!= null)
+			recordUpdate.set("administrative.access", access);
+		//recordUpdate.set("administrative.lastModified", new Date());//do we want to update lastModified?
+		//the rights of the collection are copied to the resource
+		// if the resource is added 
+		// to a collection whose owner is the owner of the resource
+		//CollectionObject co = DB.getCollectionObjectDAO().getById(colId, new ArrayList<String>(Arrays.asList("descriptiveData.label.default", "administrative.withCreator")));
 		if (DB.getCollectionObjectDAO().isFavorites(colId))
 			recordUpdate.inc("usage.likes");
 		else
@@ -245,10 +256,55 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	//TODO: has to be atomic as a whole
-	public void addToCollection(ObjectId resourceId, ObjectId colId, int position) {
+	//uses findAndModify for entryCount of respective collection
+	//what if the append fails (for some strange reason, the record cannot be edited correctly)
+	//and the entry count has been increased already?
+	public void addToCollection(ObjectId recordId, ObjectId colId, int position, boolean changeRecRights) {
 		CollectionObject co = updateCollectionAdmin(colId);
-		updateRecordUsageAndCollected( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), resourceId, colId);
+		WithAccess newAccess = null;
+		if (changeRecRights)
+			newAccess = mergeParentCollectionRights(recordId, colId);
+		updateRecordUsageCollectedAndRights( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 		shiftRecordsToRight(colId, position+1);
+	}
+	
+	public void appendToCollection(ObjectId recordId, ObjectId colId, boolean changeRecRights) {
+		//increase entry count
+		CollectionObject co = updateCollectionAdmin(colId);
+		WithAccess newAccess = null;
+		if (changeRecRights)
+			newAccess = mergeParentCollectionRights(recordId, colId);
+		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
+	}
+	
+	public WithAccess mergeParentCollectionRights(ObjectId recordId, ObjectId colId) {
+		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
+		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
+		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
+		for (CollectionInfo ci: (List<CollectionInfo>) record.getCollectedIn()) {
+			parentCollections.add(ci.getCollectionId());
+		}
+		parentCollections.add(colId);
+		WithAccess newRecAccess = record.getAdministrative().getAccess();
+		System.out.println(newRecAccess.getAcl());
+		
+		//hope there aren't too many collections containing the resource
+		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
+			WithAccess colAccess = parentCollection.getAdministrative().getAccess();
+			if (colAccess.isPublic())
+				newRecAccess.setIsPublic(true);
+			for (AccessEntry colEntry: colAccess.getAcl()) {
+				if (!WithAccess.containsUser(newRecAccess.getAcl(), colEntry.getUser()))
+					newRecAccess.addToAcl(colEntry);
+				for (AccessEntry recEntry: newRecAccess.getAcl()) {
+					if (recEntry.getUser().equals(colEntry.getUser()))
+						if (colEntry.getLevel().ordinal() > recEntry.getLevel().ordinal())
+							recEntry.setLevel(colEntry.getLevel());
+				}
+			}
+		}
+		System.out.println(newRecAccess.getAcl());
+		return newRecAccess;
 	}
 
 	//TODO: have to test
@@ -259,21 +315,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, oldPosition));
 		this.update(q, updateOps);
 	}
-	
 
-	//TODO: use findAndModify for entryCount of respective collection
-	//what if the append fails (for some strange reason, the record cannot be edited correctly)
-	//and the entry count has been increased already?
-	public void appendToCollection(ObjectId resourceId, ObjectId colId) {
-		//increase entry count
-		CollectionObject co = updateCollectionAdmin(colId);
-		updateRecordUsageAndCollected( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), resourceId, colId);
-	}
-
-
-	public void removeFromCollection(ObjectId resourceId, ObjectId colId, int position) {
+	public void removeFromCollection(ObjectId recordId, ObjectId colId, int position) {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
-		Query<RecordResource> q = this.createQuery().field("_id").equal(resourceId);
+		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
 		this.update(q, updateOps);
 		shiftRecordsToLeft(colId, position+1);
@@ -286,8 +331,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	
 	public void editRecord(String root, ObjectId dbId, JsonNode json) {
 		Query<RecordResource> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<RecordResource> updateOps = this
-				.createUpdateOperations();
+		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		updateFields(root, json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
