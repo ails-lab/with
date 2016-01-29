@@ -46,6 +46,7 @@ import org.mongodb.morphia.query.UpdateOperations;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
+
 import utils.Tuple;
 import utils.AccessManager.Action;
 
@@ -347,10 +348,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(this.createQuery().field("_id").equal(resourceId), updateOps);
 	}
 	
-	public WithAccess mergeParentCollectionRights(WithAccess recordAccess, List<ObjectId> parentCollections) {
-		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
-		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
-			WithAccess colAccess = parentCollection.getAdministrative().getAccess();
+	public WithAccess mergeRights(WithAccess recordAccess, List<WithAccess> parentColAccess) {
+		for (WithAccess colAccess: parentColAccess) {
 			if (colAccess.isPublic())
 				recordAccess.setIsPublic(true);
 			for (AccessEntry colEntry: colAccess.getAcl()) {
@@ -364,6 +363,15 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 			}
 		}
 		return recordAccess;
+	}
+	
+	public List<ObjectId> getParentCollections(ObjectId resourceId) {
+		T record = this.getById(resourceId, new ArrayList<String>(Arrays.asList("collectedIn")));
+		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
+		for (CollectionInfo ci: (List<CollectionInfo>) record.getCollectedIn()) {
+			parentCollections.add(ci.getCollectionId());
+		}
+		return parentCollections;
 	}
 		
 	/**

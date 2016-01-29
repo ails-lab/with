@@ -106,12 +106,12 @@ public class RightsController extends WithResourceController {
 				int downgrade = downgrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
 				if (downgrade > -1) //if downgrade == -1, the rights are not changed, do nothing
 					if (downgrade == 1 && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
+						DB.getRecordResourceDAO().updateMembersToNewAccess(colDbId, userOrGroupId, newAccess);
 						DB.getCollectionObjectDAO().changeAccess(colDbId, userOrGroupId, newAccess);
 					}
 					else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
-						//TODO: Urgent: the second operation should make sure that the first has finished. Is that ensured?
+						DB.getRecordResourceDAO().updateMembersToMergedRights(colDbId, new AccessEntry(userOrGroupId, newAccess));
 						DB.getCollectionObjectDAO().changeAccess(colDbId, userOrGroupId, newAccess);
-						DB.getRecordResourceDAO().updateMembersToMergedRights(colDbId);
 					}
 				return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, ownerId, newAccess);
 			}

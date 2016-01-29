@@ -35,6 +35,7 @@ import model.CollectionRecord;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess;
+import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.AgentObject;
 import model.resources.CollectionObject;
@@ -281,7 +282,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
 		WithAccess newAccess = null;
 		if (changeRecRights)
-			newAccess = mergeParentCollectionRights(recordId, colId);
+			newAccess = mergeParentCollectionRights(recordId, co.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 		shiftRecordsToRight(colId, position+1);
 	}
@@ -291,39 +292,39 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
 		WithAccess newAccess = null;
 		if (changeRecRights)
-			newAccess = mergeParentCollectionRights(recordId, colId);
+			newAccess = mergeParentCollectionRights(recordId, co.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 	}
 	
-	public List<ObjectId> getParentCollections(ObjectId recordId) {
-		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
+	public WithAccess mergeParentCollectionRights(ObjectId recordId, WithAccess newColAccess) {
 		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
-		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
-		for (CollectionInfo ci: (List<CollectionInfo>) record.getCollectedIn()) {
-			parentCollections.add(ci.getCollectionId());
-		}
-		return parentCollections;
-	}
-	
-	public WithAccess mergeParentCollectionRights(ObjectId recordId, ObjectId colId) {
+		List<ObjectId> parentCollections = getParentCollections(recordId);
 		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
-		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
-		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
-		for (CollectionInfo ci: (List<CollectionInfo>) record.getCollectedIn()) {
-			parentCollections.add(ci.getCollectionId());
+		List<WithAccess> parentColAccess = new ArrayList<WithAccess>(parentCollections.size()+1);
+		parentColAccess.add(newColAccess);
+		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
+			parentColAccess.add(parentCollection.getAdministrative().getAccess());
 		}
-		parentCollections.add(colId);
 		//hope there aren't too many collections containing the resource
-		return mergeParentCollectionRights(record.getAdministrative().getAccess(), parentCollections);
+		return mergeRights(record.getAdministrative().getAccess(), parentColAccess);
 	}
 	
-	public void updateMembersToMergedRights(ObjectId colId) {
+	public void updateMembersToMergedRights(ObjectId colId, AccessEntry newAccess) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id", "administrative.access"));
-		List<RecordResource> memberRecords = DB.getRecordResourceDAO().getByCollection(colId, retrievedFields);
+		WithAccess colAccess = DB.getCollectionObjectDAO().getById(colId, retrievedFields).getAdministrative().getAccess();
+		colAccess.getAcl().add(newAccess);
+		List<RecordResource> memberRecords = getByCollection(colId, retrievedFields);
 		for (RecordResource r: memberRecords) {
-			List<ObjectId> parentCollections = DB.getRecordResourceDAO().getParentCollections(r.getDbId());
-			WithAccess mergedAccess = DB.getRecordResourceDAO().mergeParentCollectionRights(r.getAdministrative().getAccess(), parentCollections);
+			WithAccess mergedAccess = mergeParentCollectionRights(r.getDbId(), colAccess);
 			updateField(r.getDbId(), "administrative.access", mergedAccess);
+		}
+	}
+	
+	public void updateMembersToNewAccess(ObjectId colId, ObjectId userId, Access newAccess) {
+		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id"));
+		List<RecordResource> memberRecords = getByCollection(colId, retrievedFields);
+		for (RecordResource r: memberRecords) {
+			changeAccess(r.getDbId(), userId, newAccess);
 		}
 	}
 

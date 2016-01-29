@@ -153,9 +153,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		if (isExhibition == null) {
 			result = this.find(q);
 			collections = result.asList();
-			Query<CollectionObject> q2 = q.cloneQuery();
+			Query<CollectionObject> q2 = q.cloneQuery().disableValidation();
 			q2.field("administrative.collectionType").equal(CollectionType.Exhibition);
-			q.field("administrative.collectionType").equal(CollectionType.SimpleCollection);
+			q.disableValidation().field("administrative.collectionType").equal(CollectionType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
