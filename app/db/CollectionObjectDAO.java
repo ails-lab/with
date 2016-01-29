@@ -153,9 +153,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		if (isExhibition == null) {
 			result = this.find(q);
 			collections = result.asList();
-			Query<CollectionObject> q2 = q.cloneQuery();
+			Query<CollectionObject> q2 = q.cloneQuery().disableValidation();
 			q2.field("administrative.collectionType").equal(CollectionType.Exhibition);
-			q.field("administrative.collectionType").equal(CollectionType.SimpleCollection);
+			q.disableValidation().field("administrative.collectionType").equal(CollectionType.SimpleCollection);
 			hits.x = (int) this.find(q).countAll();
 			hits.y = (int) this.find(q2).countAll();
 		}
@@ -263,6 +263,13 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 	}
 	
-	
+	public CollectionObject updateCollectionAdmin(ObjectId colId) {
+		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+		colUpdate.set("administrative.lastModified", new Date());
+		colUpdate.inc("administrative.entryCount");
+		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
+	}
+
 	
 }
