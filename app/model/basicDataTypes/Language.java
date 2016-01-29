@@ -2000,20 +2000,28 @@ public enum Language {
 
 	public static Language getLanguage(String code){
 		for (Language lang : Language.values()) {
-			for (String langcode: lang.getCodes()) {
-				if (code.equals(langcode))
-					return lang;
-			}
+			if (lang.belongsTo(code))
+				return lang;
 		}
 		return null;
 	}
 
-	public static boolean contains(String code) {
+	public static boolean isLanguage(String code) {
 		for (Language lang : Language.values()) {
-			for (String langcode: lang.getCodes()) {
-				if (code.equals(langcode))
-					return true;
-			}
+			lang.belongsTo(code);
+		}
+		return false;
+	}
+
+	/**
+	 * tells if the code is one of the codes to refer to this language.
+	 * @param code
+	 * @return true iff the code is used to refer to this language.
+	 */
+	public boolean belongsTo(String code) {
+		for (String langcode: this.getCodes()) {
+			if (code.equals(langcode))
+				return true;
 		}
 		return false;
 	}

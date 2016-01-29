@@ -26,9 +26,12 @@ import com.optimaize.langdetect.text.TextObjectFactory;
 import play.Logger;
 import sources.core.Utils;
 import sources.utils.StringUtils;
+import utils.ListUtils;
 
 public interface ILiteral {
 	
+
+	public static double THRESHOLD = 0.95;
 
 	void addLiteral(Language lang, String value);
 
@@ -36,7 +39,7 @@ public interface ILiteral {
 		addLiteral(Language.UNKNOWN, value);
 	}
 	
-	default void addSmartLiteral(String value) {
+	default void addSmartLiteral(String value, Language... suggestedLanguages) {
 		if (!Utils.isValidURL(value)){
 			boolean shortText = value.length()<100;
 			// create a text object factory
@@ -49,16 +52,20 @@ public interface ILiteral {
 			List<DetectedLanguage> probabilities = StringUtils.getLanguageDetector().getProbabilities(textObject);
 			
 	        if (!probabilities.isEmpty()) {
-	            DetectedLanguage best = probabilities.get(0);
+	        	System.out.println(probabilities);
+	        	boolean gotSome = false;
 	            for (DetectedLanguage detectedLanguage : probabilities) {
-					if (best.getProbability()<detectedLanguage.getProbability())
-						best = detectedLanguage;
+					if (detectedLanguage.getProbability()>=THRESHOLD && 
+							(suggestedLanguages==null || suggestedLanguages.length==0 ||
+							ListUtils.anyof(suggestedLanguages, 
+									(Language l)-> l.belongsTo(detectedLanguage.getLanguage())))){
+						addLiteral(Language.getLanguage(detectedLanguage.getLanguage()), value);
+						Logger.info("Detected ["+detectedLanguage.getLanguage()+"] for " + value);
+						gotSome = true;
+					}
 				}
-	            if (best.getProbability() >= 0.95) {
-	            	addLiteral(Language.getLanguage(best.getLanguage()), value);
-					Logger.info("Detected ["+best.getLanguage()+"]for " + value);
-					return;
-	            } 
+	            if (gotSome)
+	            	return;
 	        }
 			Logger.warn("Unknown Language for text " + value);
 		}

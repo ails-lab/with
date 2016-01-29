@@ -111,7 +111,7 @@ public class Deserializer {
 					.readValueAs(new TypeReference<Map<String, String[]>>() {
 					});
 			for (Entry<String, String[]> e : map.entrySet()) {
-				if (Language.contains(e.getKey())) {
+				if (Language.isLanguage(e.getKey())) {
 					outMap.put(e.getKey(), Arrays.asList(e.getValue()));
 				}
 			}
@@ -162,7 +162,7 @@ public class Deserializer {
 				return null;
 			}
 			for (Entry<String, String> e : map.entrySet()) {
-				if (Language.contains(e.getKey())) {
+				if (Language.isLanguage(e.getKey())) {
 					out.addLiteral(Language.valueOf(e.getKey()), e.getValue());
 				}
 			}
@@ -196,7 +196,7 @@ public class Deserializer {
 				return null;
 			}
 			for (Entry<String, String> e : map.entrySet()) {
-				if (Language.contains(e.getKey())) {
+				if (Language.isLanguage(e.getKey())) {
 					out.addLiteral(Language.valueOf(e.getKey()), e.getValue());
 				} else if (e.getKey().equals(LiteralOrResource.URI)) {
 					out.addURI(e.getValue());

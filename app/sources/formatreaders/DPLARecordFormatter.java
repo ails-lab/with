@@ -16,8 +16,10 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sun.javafx.animation.TickCalculation;
 
 import model.EmbeddedMediaObject;
@@ -25,13 +27,16 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import utils.ListUtils;
 
 public class DPLARecordFormatter extends CulturalRecordFormatter {
 
@@ -43,7 +48,16 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
-		
+		Language[] language = null;
+		if (rec.getValue("sourceResource.language")!=null){
+			JsonNode langs = rec.getValue("sourceResource.language");
+			language = new Language[langs.size()];
+			for (int i = 0; i < langs.size(); i++) {
+				language[i] = Language.getLanguage(langs.get(i).path("iso639_3").asText());
+			}
+			System.out.println(Arrays.toString(language));
+		}
+		rec.setLanguages(language);
 		
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("originalRecord.spatial"));
 		
