@@ -26,11 +26,15 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
+import utils.Deserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import model.DescriptiveData;
 import model.basicDataTypes.MultiLiteralOrResource;
 
 @Entity("CollectionObject")
-public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
+public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
 		super();
@@ -38,8 +42,9 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		this.resourceType = WithResourceType.valueOf(this.getClass()
 				.getSimpleName());
 	}
-
-	public static class CollectionAdmin extends WithAdmin {
+	
+	@Embedded
+	public static class CollectionAdmin extends WithResource.WithAdmin {
 		
 		public enum CollectionType {SimpleCollection, Exhibition};
 

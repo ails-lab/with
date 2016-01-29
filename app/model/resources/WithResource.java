@@ -64,7 +64,7 @@ import model.usersAndGroups.User;
 	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions())
 	})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
-public class WithResource<T extends DescriptiveData> {
+public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
 
 	@Indexes({
 		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions())
@@ -335,7 +335,7 @@ public class WithResource<T extends DescriptiveData> {
 	}
 
 	@Embedded
-	protected WithAdmin administrative;
+	protected U administrative;
 
 	@Embedded
 	private List<CollectionInfo > collectedIn;
@@ -373,7 +373,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	public WithResource() {
 		this.usage = new Usage();
-		this.administrative = new WithAdmin();
+		this.administrative = (U) new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
 		this.media = new ArrayList<>();
@@ -382,7 +382,7 @@ public class WithResource<T extends DescriptiveData> {
 
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
-		this.administrative = new WithAdmin();
+		this.administrative = (U) new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
 		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
@@ -393,11 +393,11 @@ public class WithResource<T extends DescriptiveData> {
 	/*
 	 * Getters/Setters
 	 */
-	public WithAdmin getAdministrative() {
+	public U getAdministrative() {
 		return administrative;
 	}
 
-	public void setAdministrative(WithAdmin administrative) {
+	public void setAdministrative(U administrative) {
 		this.administrative = administrative;
 	}
 
@@ -537,6 +537,6 @@ public class WithResource<T extends DescriptiveData> {
 
 	//TODO: check whether this is indeed called by toJson, so that it is included to the josn returned to the ui
 	public User getWithCreatorInfo() {
-		return DB.getUserDAO().getById(this.administrative.withCreator, new ArrayList<String>(Arrays.asList("username")));
+		return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
 	}
 }

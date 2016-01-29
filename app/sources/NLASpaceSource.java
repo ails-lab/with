@@ -137,7 +137,7 @@ public class NLASpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				// System.out.println(response.toString());
 				JsonNode pa = response.path("response").path("zone");
-				ArrayList<WithResource<?>> a = new ArrayList<>();
+				ArrayList<WithResource<?, ?>> a = new ArrayList<>();
 
 				for (int i = 0; i < pa.size(); i++) {
 					JsonNode o = pa.get(i);
