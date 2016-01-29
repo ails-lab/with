@@ -28,6 +28,8 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import play.libs.Json;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
 
@@ -299,10 +301,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public WithAccess mergeParentCollectionRights(ObjectId recordId, WithAccess newColAccess) {
 		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
 		List<ObjectId> parentCollections = getParentCollections(recordId);
-		Query<CollectionObject> qc = DB.getCollectionObjectDAO().createQuery().retrievedFields(true, "administrative.access");
-		List<WithAccess> parentColAccess = new ArrayList<WithAccess>(parentCollections.size()+1);
+		List<WithAccess> parentColAccess = new ArrayList<WithAccess>();
 		parentColAccess.add(newColAccess);
-		for (CollectionObject parentCollection: qc.field("_id").hasAnyOf(parentCollections).asList()) {
+		for (ObjectId colId: parentCollections) {
+			CollectionObject parentCollection = DB.getCollectionObjectDAO().getById(colId, new ArrayList<String>(Arrays.asList("administrative.access")));
 			parentColAccess.add(parentCollection.getAdministrative().getAccess());
 		}
 		//hope there aren't too many collections containing the resource

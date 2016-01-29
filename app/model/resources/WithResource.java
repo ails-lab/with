@@ -59,11 +59,11 @@ import model.basicDataTypes.WithAccess.AccessEntry;
 import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Entity("RecordResource")
 @Indexes({
 	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions())
 	})
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData> {
 
 	@Indexes({
