@@ -71,7 +71,7 @@ public class Literal extends HashMap<String, String> implements ILiteral {
 			return this;
 		}
 		for (String lang : this.keySet()) {
-			if (Language.contains(lang)) {
+			if (Language.isLanguage(lang)) {
 				put(Language.DEFAULT.getDefaultCode(), get(lang));
 				return this;
 			}
