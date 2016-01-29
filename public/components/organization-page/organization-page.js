@@ -356,7 +356,15 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		self.friendlyName = ko.observable().extend({
 			required: true
 		});
-		self.thumbnail = ko.observable();
+		// self.thumbnail = ko.observable();
+		self.avatar = {
+			Original: ko.observable(),
+			Tiny: ko.observable(),
+			Square: ko.observable(),
+			Thumbnail: ko.observable(),
+			Medium: ko.observable()
+		};
+
 		self.about = ko.observable().extend({
 			required: true
 		});
@@ -366,7 +374,6 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			friendlyName: self.friendlyName,
 			about: self.about
 		});
-		
 
 		// Page Fields
 		self.page = {
@@ -374,8 +381,13 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			city: ko.observable(),
 			country: ko.observable(),
 			url: ko.observable(),
-			coverImage: ko.observable(),
-			coverThumbnail: ko.observable(),
+			cover: {
+				Original: ko.observable(),
+				Tiny: ko.observable(),
+				Square: ko.observable(),
+				Thumbnail: ko.observable(),
+				Medium: ko.observable()
+			},
 			featuredCollections: ko.observableArray(),
 			coordinates: {
 				latitude: ko.observable(),
@@ -426,10 +438,15 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 50000,
 			done: function (e, data) {
-				console.log(e);
+				// console.log(e);
 				console.log(data);
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.thumbnail(urlID);
+				// var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				// self.thumbnail(urlID);
+				self.avatar.Original(data.result.original);
+				self.avatar.Tiny(data.result.tiny);
+				self.avatar.Square(data.result.square);
+				self.avatar.Thumbnail(data.result.thumbnail);
+				self.avatar.Medium(data.result.medium);
 			},
 			error: function (e, data) {
 				$.smkAlert({
@@ -447,11 +464,16 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 50000,
 			done: function (e, data) {
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.thumbnail(urlID);
+				// var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				// self.thumbnail(urlID);
+				self.avatar.Original(data.result.original);
+				self.avatar.Tiny(data.result.tiny);
+				self.avatar.Square(data.result.square);
+				self.avatar.Thumbnail(data.result.thumbnail);
+				self.avatar.Medium(data.result.medium);
 
 				var updateData = {
-					thumbnail: self.thumbnail()
+					avatar: self.avatar
 				};
 
 				$.ajax({
@@ -485,9 +507,14 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 500000,
 			done: function (e, data) {
-				self.page.coverImage(data.result.results[0].externalId);
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.page.coverThumbnail(urlID);
+				// self.page.coverImage(data.result.results[0].externalId);
+				// var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				// self.page.coverThumbnail(urlID);
+				self.page.cover.Original(data.result.original);
+				self.page.cover.Tiny(data.result.tiny);
+				self.page.cover.Square(data.result.square);
+				self.page.cover.Thumbnail(data.result.thumbnail);
+				self.page.cover.Medium(data.result.medium);
 			},
 			error: function (e, data) {
 				$.smkAlert({
@@ -504,14 +531,18 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 500000,
 			done: function (e, data) {
-				self.page.coverImage(data.result.results[0].externalId);
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.page.coverThumbnail(urlID);
+				// self.page.coverImage(data.result.results[0].externalId);
+				// var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				// self.page.coverThumbnail(urlID);
+				self.page.cover.Original(data.result.original);
+				self.page.cover.Tiny(data.result.tiny);
+				self.page.cover.Square(data.result.square);
+				self.page.cover.Thumbnail(data.result.thumbnail);
+				self.page.cover.Medium(data.result.medium);
 
 				var updateData = {
 					page: {
-						coverImage: self.page.coverImage(),
-						coverThumbnail: self.page.coverThumbnail()
+						cover: self.page.cover
 					}
 				};
 
@@ -523,8 +554,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					processData: false,
 					data: JSON.stringify(updateData),
 					success: function (data, text) {
-						console.log(self.page.coverImage());
-						$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
+						console.log(self.page.cover.Original());
+						$(".profilebar > .wrap").css('background-image', 'url(' + self.page.cover.Original() + ')');
 					},
 					error: function (request, status, error) {
 						// TODO: Show notification
@@ -656,7 +687,13 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 				self.username(data.username);
 				self.friendlyName(data.friendlyName);
-				self.thumbnail(data.thumbnail);
+				if (data.avatar) {
+					self.cover.Original(data.avatar.original);
+					self.cover.Tiny(data.avatar.tiny);
+					self.cover.Square(data.avatar.square);
+					self.cover.Thumbnail(data.avatar.thumbnail);
+					self.cover.Medium(data.avatar.medium);
+				}
 				self.about(data.about);
 				self.creator(data.creator);
 				self.adminIds = data.adminIds;
@@ -665,15 +702,20 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.page.city(data.page.city);
 				self.page.country(data.page.country);
 				self.page.url(data.page.url);
-				self.page.coverImage(data.page.coverImage);
-				self.page.coverThumbnail(data.page.coverThumbnail);
 				if (data.page.coordinates) {
 					self.page.coordinates.longitude(data.page.coordinates.longitude);
 					self.page.coordinates.latitude(data.page.coordinates.latitude);
 				}
+				if (data.page.cover) {
+					self.page.cover.Original(data.page.original);
+					self.page.cover.Tiny(data.page.tiny);
+					self.page.cover.Square(data.page.square);
+					self.page.cover.Thumbnail(data.page.thumbnail);
+					self.page.cover.Medium(data.page.medium);
+				}
 
-				if (self.page.coverImage()) {
-					$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
+				if (self.page.cover.Original()) {
+					$(".profilebar > .wrap").css('background-image', 'url(' + self.page.cover.Original() + ')');
 				}
 
 				if (!self.isCreator()) {

@@ -13,9 +13,9 @@
 						<!-- logo-->
 						<div class="logo">
 							<a href="javascript: void(0)" class="btn btn-image" style="outline: 0; padding: 0;">
-							<!-- ko if: thumbnail -->
-								<img data-bind="attr : { src: logo }" alt="provider">
-							<!-- /ko --><!-- ko ifnot: thumbnail -->
+							<!-- ko if: avatar.Square -->
+								<img data-bind="attr : { src: avatar.Square }" alt="provider">
+							<!-- /ko --><!-- ko ifnot: avatar.Square -->
 								<img src="images/no_image.jpg" alt="provider">
 							<!-- /ko -->
 								<input type="file" id="logoupdate" name="logo" style="right: 0" data-bind="enable: isCreator" />

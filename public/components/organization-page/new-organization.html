@@ -16,9 +16,9 @@
 							<center>
 								<div class="org-group" id="thumbnail">
 									<a href="javascript: void(0)" class="btn btn-image" style="outline: 0">
-									<!-- ko if: thumbnail -->
+									<!-- ko if: avatar -->
 										<img class="img-thumbnail" data-bind="attr: { src: logo }" />
-									<!-- /ko --><!-- ko ifnot: thumbnail -->
+									<!-- /ko --><!-- ko ifnot: avatar -->
 										<img src="images/no_image.jpg" class="img-thumbnail" />
 									<!-- /ko -->
 										<input type="file" id="imageupload" name="logo" />
@@ -30,9 +30,9 @@
 							<center>
 								<div class="org-group" id="coverImage">
 									<a href="javascript: void(0)" class="btn btn-image" style="outline: 0">
-									<!-- ko if: page.coverThumbnail -->
-										<img class="img-thumbnail" data-bind="attr: { src: coverThumbnail }" />
-									<!-- /ko --><!-- ko ifnot: page.coverThumbnail -->
+									<!-- ko if: page.cover -->
+										<img class="img-thumbnail" data-bind="attr: { src: page.cover.Thumbnail }" />
+									<!-- /ko --><!-- ko ifnot: page.cover -->
 										<img src="images/banner.jpg" class="img-thumbnail" />
 									<!-- /ko -->
 										<input type="file" id="coverupload" name="cover" />
