@@ -162,9 +162,12 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			$.ajax({
 				type : "POST",
 				url  : '/media/create',
-				data : {
-					url : remoteurl
-				},
+				contentType : 'application/json',
+				dataType    : 'json',
+				processData : false,
+				data : JSON.stringify({
+					'url': remoteurl
+				}),
 				done : function (e, data) {
 					console.log(e);
 					console.log(data);
