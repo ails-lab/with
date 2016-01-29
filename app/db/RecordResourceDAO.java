@@ -293,7 +293,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, co.getAdministrative().getAccess());
-		System.out.println(newAccess);
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 	}
 	
