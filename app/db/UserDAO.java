@@ -127,7 +127,7 @@ public class UserDAO extends DAO<User> {
 	public boolean isSuperUser(ObjectId id) {
 		ArrayList<Tuple<String, Object>> superUser = new ArrayList<Tuple<String, Object>>();
 		superUser.add(new Tuple("_id", id));
-		superUser.add(new Tuple("isSuperUser", true));
+		superUser.add(new Tuple("superUser", true));
 		return existsFieldsWithValues(superUser);
 	}
 }
