@@ -2008,7 +2008,8 @@ public enum Language {
 
 	public static boolean isLanguage(String code) {
 		for (Language lang : Language.values()) {
-			lang.belongsTo(code);
+			if (lang.belongsTo(code))
+				return true;
 		}
 		return false;
 	}

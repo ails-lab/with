@@ -71,6 +71,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			medThumb.setParentID(uri2);
+			if (rights!=null)
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
@@ -79,6 +80,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setParentID("self");
 			med.setUrl(uri2);
+			if (rights!=null)
 			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			med.setWithRights(withRights);
 			med.setType(type);
