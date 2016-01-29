@@ -20,10 +20,15 @@ import java.util.List;
 
 import org.mongodb.morphia.annotations.Converters;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import utils.Deserializer.MultiLiteralOrResourceDesiarilizer;
 import db.converters.MultiLiteralOrResourceConverter;
 import sources.core.Utils;
 
 @Converters(MultiLiteralOrResourceConverter.class)
+
+@JsonDeserialize(using = MultiLiteralOrResourceDesiarilizer.class)
 public class MultiLiteralOrResource extends MultiLiteral {
 
 	public MultiLiteralOrResource() {

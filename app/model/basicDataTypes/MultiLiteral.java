@@ -23,10 +23,15 @@ import java.util.List;
 
 import org.mongodb.morphia.annotations.Converters;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import db.converters.MultiLiteralConverter;
+import utils.Deserializer.MultiLiteralDesiarilizer;
 
 @Converters(MultiLiteralConverter.class)
-public class MultiLiteral extends HashMap<String, List<String>> implements ILiteral{
+@JsonDeserialize(using = MultiLiteralDesiarilizer.class)
+public class MultiLiteral extends HashMap<String, List<String>> implements
+		ILiteral {
 
 	public MultiLiteral() {
 	}
@@ -67,7 +72,6 @@ public class MultiLiteral extends HashMap<String, List<String>> implements ILite
 			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}
 
-
 	public MultiLiteral fillDEF() {
 		return fillDEF(false);
 	}
@@ -82,7 +86,8 @@ public class MultiLiteral extends HashMap<String, List<String>> implements ILite
 			if (!containsKey(defLang)) {
 				int max = 0;
 				for (String k : this.keySet()) {
-					if (!k.equals(Language.DEFAULT.getDefaultCode())) {
+					if (Language.isLanguage(k)
+							&& !k.equals(Language.DEFAULT.getDefaultCode())) {
 						int m = get(k).size();
 						if (max < m) {
 							max = m;

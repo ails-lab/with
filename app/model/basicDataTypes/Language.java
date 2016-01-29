@@ -1971,7 +1971,7 @@ public enum Language {
 
 
 
-	DEFAULT("default", "def"),
+	DEFAULT("Default", "default", "def"),
 	
 	UNKNOWN("Unknown", "unknown","un", "unk");
 
