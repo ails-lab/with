@@ -89,12 +89,13 @@ public class Deserializer {
 				JsonProcessingException {
 			WithAccess rights = new WithAccess();
 			TreeNode treeNode = accessString.readValueAsTree();
-			if (treeNode.get("isPublic").isValueNode()) {
+			TreeNode isPublicNode = treeNode.get("isPublic");
+			if (isPublicNode != null && isPublicNode.isValueNode()) {
 				BooleanNode isPublic = (BooleanNode) treeNode.get("isPublic");
 				rights.setIsPublic(isPublic.asBoolean());
 			}
 			TreeNode jsonAcl = treeNode.get("acl");
-			if (jsonAcl.isArray()) {
+			if (jsonAcl != null && jsonAcl.isArray()) {
 				for (int i=0; i< jsonAcl.size(); i++) {
 					TreeNode entry = jsonAcl.get(i);
 					if (entry.get("user").isValueNode() && entry.get("level").isValueNode()) {
