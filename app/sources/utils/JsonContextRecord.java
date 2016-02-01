@@ -152,16 +152,18 @@ public class JsonContextRecord {
 				for (int i = 0; i < node.size(); i++) {
 					JsonNode current = node.get(i);
 					elements = elements[1].split(",");
+					boolean ok = true;
 					for (int h = 0; h < elements.length; h++) {
 						String string = elements[h];
 						String[] splits = string.split("=");
 						String name = splits[0];
 						String vals = splits[1];
-						if (current.path(name).asText().matches(vals)) {
-							return current;
+						if (!current.path(name).asText().matches(vals)) {
+							ok = false;
 						}
 					}
-
+					if (ok)
+						return current;
 				}
 			}
 		}

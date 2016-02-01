@@ -30,8 +30,10 @@ import utils.ListUtils;
 
 public interface ILiteral {
 	
-
-	public static double THRESHOLD = 0.95;
+	/**
+	 * confidence for language detection
+	 */
+	public static double THRESHOLD = 0.99;
 
 	void addLiteral(Language lang, String value);
 
@@ -59,10 +61,12 @@ public interface ILiteral {
 	        	System.out.println(probabilities);
 	        	boolean gotSome = false;
 	            for (DetectedLanguage detectedLanguage : probabilities) {
-					if ((detectedLanguage.getProbability()>=THRESHOLD && 
-							(suggestedLanguages==null || suggestedLanguages.length==0 ||
-							ListUtils.anyof(suggestedLanguages, 
-									(Language l)-> l.belongsTo(detectedLanguage.getLanguage()))))){
+					if (
+							(Utils.hasInfo(suggestedLanguages) && ListUtils.anyof(suggestedLanguages, 
+							(Language l)-> l.belongsTo(detectedLanguage.getLanguage())))
+							||
+							detectedLanguage.getProbability()>=THRESHOLD
+							){
 						addLiteral(Language.getLanguage(detectedLanguage.getLanguage()), value);
 						Logger.info("Detected ["+detectedLanguage.getLanguage()+"] for " + value);
 						gotSome = true;
