@@ -168,6 +168,9 @@ public class EmbeddedMediaObject {
 	}
 
 	public String getWithUrl() {
+		if (url == null) {
+			return null;
+		}
 		if (url.startsWith("/")) {
 			return url;
 		}
