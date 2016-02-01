@@ -79,7 +79,7 @@ public class DDBSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
 				// res.startIndex = Utils.readIntAttr(response, "offset", true);
-				ArrayList<WithResource<?>> a = new ArrayList<>();
+				ArrayList<WithResource<?, ?>> a = new ArrayList<>();
 
 				for (JsonNode item : docs) {
 					res.addItem(formatreader.readObjectFrom(item));

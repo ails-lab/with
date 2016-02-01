@@ -39,21 +39,6 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
 	}
 	
-	public static class RecordAdmin extends WithAdmin {
-				
-		// if this resource / record is derived (modified) from a different Record.
-		private ObjectId parentResourceId;
-
-		public ObjectId getParentResourceId() {
-			return parentResourceId;
-		}
-
-		public void setParentResourceId(ObjectId parentResourceId) {
-			this.parentResourceId = parentResourceId;
-		}
-		
-	}
-	
 	
 	public static class CulturalObjectData extends RecordDescriptiveData {
 

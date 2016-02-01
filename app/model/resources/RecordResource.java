@@ -16,13 +16,32 @@
 
 package model.resources;
 
+import org.bson.types.ObjectId;
+
 import model.DescriptiveData;
 
 
-public class RecordResource<T extends RecordResource.RecordDescriptiveData> extends WithResource<RecordResource.RecordDescriptiveData> {
+public class RecordResource<T extends RecordResource.RecordDescriptiveData>
+	extends WithResource<RecordResource.RecordDescriptiveData, RecordResource.RecordAdmin> {
 
 	public static class RecordDescriptiveData extends DescriptiveData {
 
 	}
+	
+	public static class RecordAdmin extends WithResource.WithAdmin {
+		
+		// if this resource / record is derived (modified) from a different Record.
+		private ObjectId parentResourceId;
+
+		public ObjectId getParentResourceId() {
+			return parentResourceId;
+		}
+
+		public void setParentResourceId(ObjectId parentResourceId) {
+			this.parentResourceId = parentResourceId;
+		}
+		
+	}
+
 
 }

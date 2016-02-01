@@ -23,7 +23,7 @@ import model.resources.WithResource;
 
 public class ItemsGrouping {
 	
-	private List<WithResource<?>> culturalCHO;
+	private List<WithResource<?, ?>> culturalCHO;
 	
 	
 
@@ -32,11 +32,11 @@ public class ItemsGrouping {
 		culturalCHO = new ArrayList<>();
 	}
 
-	public List<WithResource<?>> getCulturalCHO() {
+	public List<WithResource<?, ?>> getCulturalCHO() {
 		return culturalCHO;
 	}
 
-	public void setCulturalCHO(List<WithResource<?>> culturalHO) {
+	public void setCulturalCHO(List<WithResource<?, ?>> culturalHO) {
 		this.culturalCHO = culturalHO;
 	}
 

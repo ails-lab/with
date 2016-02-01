@@ -38,7 +38,7 @@ public class LiteralOrResource extends Literal {
 		if (Utils.isValidURL(label)) {
 			addURI(label);
 		} else {
-			addLiteral(label);
+			addSmartLiteral(label);
 		}
 	}
 

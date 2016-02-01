@@ -29,6 +29,7 @@ import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
@@ -58,29 +59,39 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
 		
 		
-		List<String> rights = rec.getStringArrayValue("rights_url");
-		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("category")).get(0);
+		List<String> rights = rec.getStringArrayValue("usage");
+		String stringValue = rec.getStringValue("category");
+		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		WithMediaType type = null;
+		for (Object object : translateToCommon) {
+			WithMediaType type2 = WithMediaType.getType(object.toString());
+			if (type2!=null){
+				type = type2;
+				if (!type.equals(WithMediaType.OTHER))
+				break;
+			}
+		}
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		
 		
 		
 		String uri3 = rec.getStringValue("thumbnail_url");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
-		if (uri3!=null){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			medThumb.setParentID(uri2);
-			if (rights!=null && rights.size()>0)
+			if (Utils.hasInfo(rights))
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
-		if (uri2!=null){
+		if (Utils.hasInfo(uri2)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setParentID("self");
 			med.setUrl(uri2);
-			if (rights!=null && rights.size()>0)
+			if (Utils.hasInfo(rights))
 			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			med.setWithRights(withRights);
 			med.setType(type);
@@ -88,12 +99,12 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		}
 		
 		uri3 = rec.getStringValue("large_thumbnail_url");
-		if (uri3!=null){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			medThumb.setParentID(uri2);
-			if (rights!=null && rights.size()>0)
+			if (Utils.hasInfo(rights))
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMediaView(MediaVersion.Thumbnail, medThumb);

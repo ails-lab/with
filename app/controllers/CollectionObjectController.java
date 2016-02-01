@@ -95,8 +95,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			User creator = DB.getUserDAO().get(creatorDbId);
-			CollectionObject collection = Json.fromJson(json,
-					CollectionObject.class);
+			CollectionObject collection = Json.fromJson(json, CollectionObject.class);
 			if (exhibition) {
 				collection.getDescriptiveData().setLabel(
 						getAvailableTitle(creator));

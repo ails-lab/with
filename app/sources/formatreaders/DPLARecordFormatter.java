@@ -83,21 +83,21 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("object");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
-		if (uri3!=null){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			medThumb.setParentID(uri2);
-			if (rights!=null && rights.size()>0)
+			if (Utils.hasInfo(rights))
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
-		if (uri2!=null){
+		if (Utils.hasInfo(uri2)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setParentID("self");
 			med.setUrl(uri2);
-			if (rights!=null && rights.size()>0)
+			if (Utils.hasInfo(rights))
 			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			med.setWithRights(withRights);
 			med.setType(type);

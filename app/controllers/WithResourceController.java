@@ -29,6 +29,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 
@@ -112,7 +113,7 @@ public class WithResourceController extends Controller {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				RecordResource record = Json.fromJson(json, RecordResource.class);
+				RecordResource record = Json.fromJson(json, CulturalObject.class);
 				int last = 0;
 				Sources source = Sources.UploadedByUser;
 				if (record.getProvenance() != null && !record.getProvenance().isEmpty()) {
