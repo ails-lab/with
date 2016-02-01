@@ -214,7 +214,7 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result editCollectionObject(String id) {
 		//TODO: this assumes that the frontend(json) has FULL information about the collection's descriptive data
 		//however, this may not be true, since we do not always return full data (but only some fields) of a resource to the frontend
-		//So, better iterate throught the json (in any case it should be small), and update only the fields specified in it.
+		//So, better iterate through the json (in any case it should be small), and update only the fields specified in it.
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
@@ -357,7 +357,8 @@ public class CollectionObjectController extends WithResourceController {
 		for (CollectionObject collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(collection.getAdministrative().getAccess(), effectiveUserIds);
-			if (!collection.getDescriptiveData().getLabel().get(Language.DEFAULT).equals("_favorites")) {
+			List<String> titles = collection.getDescriptiveData().getLabel().get(Language.DEFAULT);
+			if (titles!= null && !titles.get(0).equals("_favorites")) {
 				if (maxAccess.equals(Access.NONE)) {
 					maxAccess = Access.READ;
 				}

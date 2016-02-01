@@ -138,6 +138,8 @@ public class WithResourceController extends Controller {
 					else {
 						// In case the record already exists we overwrite the existing
 						// record's descriptive data, if the user has WRITE access.
+						//TODO: this assumes that the json has FULL information about the collection's descriptive data
+						//Better iterate through the json (in any case it should be small), and update only the fields specified in it.
 						if (DB.getRecordResourceDAO().hasAccess(AccessManager.effectiveUserDbIds(session().get(
 										"effectiveUserIds")), Action.EDIT, recordId) && (json.get("descriptiveData") != null))
 							DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(), json.get("descriptiveData"));
