@@ -59,7 +59,7 @@ public class Literal extends HashMap<String, String> implements ILiteral {
 	 * @return
 	 */
 	public String getLiteral(Language lang) {
-		return get(lang.toString());
+		return get(lang.getDefaultCode());
 	}
 
 	public Literal fillDEF() {

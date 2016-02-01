@@ -153,6 +153,11 @@ public class WithResourceController extends Controller {
 						// existing
 						// record's descriptive data, if the user has WRITE
 						// access.
+						// TODO: this assumes that the json has FULL information
+						// about the collection's descriptive data
+						// Better iterate through the json (in any case it
+						// should be small), and update only the fields
+						// specified in it.
 						if (DB.getRecordResourceDAO().hasAccess(
 								AccessManager.effectiveUserDbIds(session().get(
 										"effectiveUserIds")), Action.EDIT,
@@ -163,6 +168,7 @@ public class WithResourceController extends Controller {
 									json.get("descriptiveData"));
 					}
 				} else { // create new record in db
+
 					ObjectNode errors;
 					// Create a new record
 					ObjectId userId = AccessManager.effectiveUserDbIds(
@@ -355,8 +361,8 @@ public class WithResourceController extends Controller {
 										mediaString,
 										new TypeReference<List<HashMap<MediaVersion, EmbeddedMediaObject>>>() {
 										});
-						 DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
-						media);
+						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
+								media);
 					} else {
 						DB.getRecordResourceDAO().updateContent(
 								record.getDbId(), data.getFormat(),

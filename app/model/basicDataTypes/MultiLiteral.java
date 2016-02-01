@@ -62,7 +62,7 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 		 * 
 		 * } else
 		 */
-		return get(lang.toString());
+		return get(lang.getDefaultCode());
 	}
 
 	public void add(String key, String value) {
