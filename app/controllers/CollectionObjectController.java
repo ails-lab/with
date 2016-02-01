@@ -288,7 +288,7 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		} else { //logged in, check if super user, if not, restrict query to accessible by effectiveUserIds
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info;
-			if (!AccessManager.isSuperUser(effectiveUserIds.get(0))) 
+			if (!AccessManager.isSuperUser(effectiveUserIds.get(0)))
 				info = DB.getCollectionObjectDAO().getByLoggedInUsersAndAcl(AccessManager.toObjectIds(effectiveUserIds), accessedByUserOrGroup, creatorId,
 						isExhibitionBoolean, collectionHits, offset, count);
 			else
