@@ -19,20 +19,19 @@ package db;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.CollectionObject;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -43,12 +42,12 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import utils.AccessManager.Action;
+import utils.Tuple;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
-
-import utils.Tuple;
-import utils.AccessManager.Action;
 
 /*
  * The class consists of methods that can be both query
@@ -425,7 +424,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
-	public void updateEmbeddedMedia(ObjectId recId, EmbeddedMediaObject media) {
+	public void updateEmbeddedMedia(ObjectId recId, List<HashMap<MediaVersion, EmbeddedMediaObject>> media) {
 		Query<T> q = this.createQuery().field("_id").equal(recId);
 		UpdateOperations<T> updateOps = this
 				.createUpdateOperations();
