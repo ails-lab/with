@@ -19,7 +19,6 @@ package model.usersAndGroups;
 import java.util.HashMap;
 
 import model.EmbeddedMediaObject.MediaVersion;
-import model.Media;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
@@ -28,8 +27,6 @@ import utils.Serializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import db.DB;
-
 public abstract class UserOrGroup {
 
 	@Id
@@ -37,7 +34,6 @@ public abstract class UserOrGroup {
 	private ObjectId dbId;
 	private String username;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId thumbnail;
 	private HashMap<MediaVersion, String> avatar;
 	private String about;
 
@@ -55,18 +51,6 @@ public abstract class UserOrGroup {
 
 	public void setUsername(String name) {
 		this.username = name;
-	}
-
-	public ObjectId getThumbnail() {
-		return this.thumbnail;
-	}
-
-	public Media retrieveThumbnail() {
-		return DB.getMediaDAO().findById(this.thumbnail);
-	}
-
-	public void setThumbnail(ObjectId thumbnail) {
-		this.thumbnail = thumbnail;
 	}
 
 	public String getAbout() {
