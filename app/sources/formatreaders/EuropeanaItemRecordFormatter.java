@@ -110,18 +110,16 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		String uri3 = ro==null?null:ro.getURI();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-			medThumb.setUrl(uri2);
+			medThumb.setUrl(uri3);
 			medThumb.setType(type);
-			medThumb.setParentID(uri3);
 			medThumb.setOriginalRights(rights);
 			medThumb.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
 		
-		if (Utils.hasInfo(uri3)){
+		if (Utils.hasInfo(uri2)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setType(type);
-			med.setParentID("self");
 			med.setUrl(uri2);
 			med.setOriginalRights(rights);
 			med.setWithRights(withMediaRights);
@@ -132,7 +130,6 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 			for (String string : theViews) {
 				EmbeddedMediaObject med = new EmbeddedMediaObject();
 				med.setType(type);
-				med.setParentID("self");
 				med.setUrl(string);
 				med.setOriginalRights(rights);
 				med.setWithRights(withMediaRights);
