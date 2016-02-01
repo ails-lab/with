@@ -18,18 +18,24 @@ package sources;
 
 import java.util.ArrayList;
 
+import org.w3c.dom.Document;
+
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
+import sources.core.RecordJSONMetadata;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.core.RecordJSONMetadata.Format;
 import sources.formatreaders.RijksmuseumRecordFormatter;
+import utils.Serializer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.ExternalBasicRecord;
 import model.Provider.Sources;
+import play.libs.Json;
 
 public class RijksmuseumSpaceSource extends ISpaceSource {
 
@@ -140,6 +146,28 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		// type.addValue(vmap.translateToCommon(type.filterID, t));
 		// }
 		return res;
+	}
+	
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			response = HttpConnector.getURLContent(
+					"https://www.rijksmuseum.nl/api/en/collection/" + recordId + "?key=" + apiKey + "&format=json");
+			JsonNode record = response;
+			if (record != null) {
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RIJ, record.toString()));
+				// TODO make another reader
+				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
+			Document xmlResponse = HttpConnector.getURLContentAsXML(
+					"https://www.rijksmuseum.nl/api/en/collection/" + recordId + "?key=" + apiKey + "&format=xml");
+			jsonMetadata.add(new RecordJSONMetadata(Format.XML_NLA, Serializer.serializeXML(xmlResponse)));
+			return jsonMetadata;
+		} catch (Exception e) {
+			return jsonMetadata;
+		}
 	}
 
 }

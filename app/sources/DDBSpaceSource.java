@@ -18,6 +18,7 @@ package sources;
 
 import java.util.ArrayList;
 
+import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
@@ -29,6 +30,7 @@ import sources.formatreaders.DDBRecordFormatter;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.ExternalBasicRecord;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
 import model.resources.WithResource;
 
@@ -38,6 +40,14 @@ public class DDBSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DDB.toString();
 		apiKey = "SECRET_KEY";
+		
+		
+		
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
+		
+		
 		formatreader = new DDBRecordFormatter(vmap);
 	}
 
@@ -75,6 +85,9 @@ public class DDBSpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(res.query);
+				System.out.println("-------------------------------------------------------------");
+				System.out.println(response.toString());
+				System.out.println("-------------------------------------------------------------");
 				JsonNode docs = response.path("results").get(0).path("docs");
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
