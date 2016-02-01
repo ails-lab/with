@@ -569,7 +569,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	 function findByLangValues(val,sellang) {
 	          selvalue="";
 	          if(sellang.length==0){
-					sellang="def";
+					sellang="default";
 				}
 		      if(val){
 		       if (val[sellang]) {
@@ -660,7 +660,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	 function findResOrLit(data,sellang) {
 			selvalue="";
 			if(sellang.length==0){
-				sellang="def";
+				sellang="default";
 			}
 			if(data[sellang]){
 				

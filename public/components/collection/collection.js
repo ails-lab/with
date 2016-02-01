@@ -211,11 +211,27 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		self.save = function (formElement) {
 			if (self.validationModel.isValid()) {
 
-				var jsondata = JSON.stringify({
+				/*var jsondata = JSON.stringify({
 					ownerId: currentUser._id(),
 					title: self.collname(),
 					description: self.description(),
 					isPublic: $("#publiccoll .active").data("value")
+				});*/
+				var jsondata = JSON.stringify({
+					administrative: { access: {
+				        isPublic: $("#publiccoll .active").data("value")},
+				        collectionType: "SimpleCollection"},
+				        descriptiveData : {
+				        	 label : {
+						            default : [self.collname()],
+						            en : [self.collname()]
+						        },
+						     description : {
+					            default : [self.description()],
+					            en : [self.description()]
+				            }
+				        }
+					
 				});
 				if (!self.record()) {
 					/*new collection with no item saved inside, changed for mycolllections page*/
@@ -241,7 +257,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				        xhr.setRequestHeader('X-auth1', utc );
 				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
 				},
-				"url": "/collection/create",
+				"url": "/collection",
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
@@ -294,19 +310,34 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				} else {
 					/*otherwise save this collection and then add the item */
 
-					var jsondata = JSON.stringify({
+				/*	var jsondata = JSON.stringify({
 						ownerId: currentUser._id(),
 						title: item,
 						description: '',
 						public: false
 					});
+					
+					*/
+					var jsondata = JSON.stringify({
+						administrative: { access: {
+				        isPublic: $("#publiccoll .active").data("value")},
+				        collectionType: "SimpleCollection"},
+				        descriptiveData : {
+				        	 label : {
+						            default : [item],
+						            en : [item]
+						        }
+				        }});
 					self.saveCollection(jsondata, self.addRecord);
 				}
 			});
 		};
 
 		self.addRecord = function (collid) {
-			var jsondata = JSON.stringify({
+		   var jsondata = JSON.stringify({ provenance : [{ provider : self.record().source(), 
+				resourceId: self.record().externalId()}]
+				});
+			/*var jsondata = JSON.stringify({
 				source: self.record().source(),
 				sourceId: self.record().recordId(),
 				title: self.record().title(),
@@ -321,7 +352,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				collectionId: collid,
 				externalId: self.record().externalId()
 			});
-
+            */
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
@@ -373,6 +404,8 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 
 			$(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
 		};
+		
+
 	}
 
 	return {

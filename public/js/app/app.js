@@ -596,7 +596,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "offset=0&count=500&isExhibition=false&directlyAccessedByUserName=" + JSON.stringify([{
+			/* for now take out isExhibition=false parameter so it doesnt throw 500 */
+			data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 				user: self.currentUser.username(),
 				rights: "WRITE"
 			}]),
@@ -612,7 +613,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				var temparray=[];
 				array.forEach(function (item) {
 					temparray.push({
-						title: item.title,
+						title: findByLangValues(item.descriptiveData.label,""),
 						dbId: item.dbId
 					});
 				});
@@ -815,6 +816,26 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 	
 	self.checkLogged();
+	
+	
+	function findByLangValues(val,sellang) {
+        selvalue="";
+        if(sellang.length==0){
+				sellang="default";
+			}
+	      if(val){
+	       if (val[sellang]) {
+	    	   for(var i=0;i<val[sellang].length;i++){
+	                	if(selvalue.length>0){selvalue+=",";}
+	                	selvalue=val[sellang][i];
+	    	   }
+	        }
+        else{   selvalue=val.unknown;}  
+	      }
+	        
+         return selvalue;
+  }
+
 	
 	//self.reloadUser(); // Reloads the user on refresh
 	
