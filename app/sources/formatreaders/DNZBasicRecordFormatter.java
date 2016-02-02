@@ -51,9 +51,9 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dctype"));
-//		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt().getURI(),null));
-//		object.addToProvenance(
-//				new ProvenanceInfo(rec.getStringValue("provider.name"), null, rec.getStringValue("provider.@id")));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("collection[0]"), rec.getStringValue("landing_url"),null));
+		object.addToProvenance(
+				new ProvenanceInfo(rec.getStringValue("content_partner[0]")));
 		String id = rec.getStringValue("id");
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
