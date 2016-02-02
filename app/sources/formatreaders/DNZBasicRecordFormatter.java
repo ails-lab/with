@@ -71,6 +71,10 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("description"));
+		//TODO Needs to be fixed. Pick one of object_url, thumbnail_url, large_thumbnail_url that is not null
+		//TODO altLabels <-alternative_title 
+		//TODO description <- additional_description
+		//TODO dcidentifier <- dc_identifier
 		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
 		model.setDates(rec.getWithDateArrayValue("date"));
@@ -83,7 +87,8 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
 		
-		
+		//TODO keywords <- category
+		//TODO EmbeddedMediaObject.originalRights <- rights_url
 		List<String> rights = rec.getStringArrayValue("usage");
 		String stringValue = rec.getStringValue("category");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
@@ -100,7 +105,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		
 		
 		
-		String uri3 = rec.getStringValue("thumbnail_url");
+		String uri3 = rec.getStringValue("thumbnail_url");//TODO MediaVersion.Thumbnail <- thumbnail_url or object_url
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
@@ -112,7 +117,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
-		if (Utils.hasInfo(uri2)){
+		if (Utils.hasInfo(uri2)){  //TODO  MediaVersion.Original <- large_thumbnail_url
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setParentID("self");
 			med.setUrl(uri2);
