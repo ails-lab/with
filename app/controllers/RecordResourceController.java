@@ -23,6 +23,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
@@ -256,11 +257,20 @@ public class RecordResourceController extends WithResourceController {
 	 */
 	public static Result getFavorites() {
 		ObjectNode result = Json.newObject();
+		if (session().get("user") == null) {
+			return forbidden();
+		}
 		ObjectId userId = new ObjectId(session().get("user"));
-		ObjectId fav = DB.getCollectionObjectDAO()
-				.getByOwnerAndLabel(userId, null, "_favorites").getDbId();
+		CollectionObject favorite;
+		ObjectId favoritesId;
+		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,
+				null, "_favorites")) == null) {
+			favoritesId = CollectionObjectController.createFavorites(userId);
+		} else {
+			favoritesId = favorite.getDbId();
+		}
 		List<RecordResource> records = DB.getRecordResourceDAO()
-				.getByCollection(fav);
+				.getByCollection(favoritesId);
 		if (records == null) {
 			result.put("error", "Cannot retrieve records from database");
 			return internalServerError(result);
