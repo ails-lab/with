@@ -35,7 +35,6 @@ import model.EmbeddedMediaObject.Quality;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.MediaObject;
-import model.basicDataTypes.ResourceType;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -330,7 +329,7 @@ public class MediaController extends Controller {
 
 	}
 
-	private static ResourceType parseOriginalRights(String resourceType) {
+/*	private static ResourceType parseOriginalRights(String resourceType) {
 		for (ResourceType type : ResourceType.values()) {
 			if (StringUtils.equals(type.name().toLowerCase(),
 					resourceType.toLowerCase())) {
@@ -338,7 +337,7 @@ public class MediaController extends Controller {
 			}
 		}
 		return null;
-	}
+	}*/
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 

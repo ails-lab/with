@@ -16,12 +16,19 @@
 
 package model.basicDataTypes;
 
+import java.util.List;
+
 import org.mongodb.morphia.annotations.Converters;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import utils.Deserializer.MultiLiteralOrResourceDesiarilizer;
 import db.converters.MultiLiteralOrResourceConverter;
 import sources.core.Utils;
 
 @Converters(MultiLiteralOrResourceConverter.class)
+
+@JsonDeserialize(using = MultiLiteralOrResourceDesiarilizer.class)
 public class MultiLiteralOrResource extends MultiLiteral {
 
 	public MultiLiteralOrResource() {
@@ -39,7 +46,7 @@ public class MultiLiteralOrResource extends MultiLiteral {
 	}
 
 	public void addLiteral(Language lang, String value) {
-		if (lang.equals(Language.DEF) && Utils.isValidURL(value))
+		if (Utils.isValidURL(value))
 			addURI(value);
 		else
 			super.addLiteral(lang, value);
@@ -49,4 +56,9 @@ public class MultiLiteralOrResource extends MultiLiteral {
 		add(LiteralOrResource.URI, uri);
 	}
 
+	public void addURI(List<String> uris) {
+		for (String uri : uris) {
+			addURI(uri);
+		}
+	}
 }

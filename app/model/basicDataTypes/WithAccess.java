@@ -19,6 +19,7 @@ package model.basicDataTypes;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
@@ -27,8 +28,8 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
-import model.basicDataTypes.WithAccess.Access;
 
+import model.basicDataTypes.WithAccess.Access;
 import db.converters.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
@@ -114,6 +115,11 @@ public class WithAccess  {
 
 	public void addToAcl(ObjectId userId, Access access) {
 		AccessEntry accessEntry = new AccessEntry(userId, access);
+		for (AccessEntry entry: acl)
+			if (entry.getUser().equals(userId)) {
+				entry.setLevel(access);
+				return;
+			}
 		this.acl.add(accessEntry);
 	}
 	
@@ -137,5 +143,13 @@ public class WithAccess  {
 		}
 		return Access.NONE;
 	}
+	
+	public static boolean containsUser(List<AccessEntry> acl, ObjectId userId) {
+		for (AccessEntry entry: acl) {
+			if (entry.getUser().equals(userId))
+				return true;
+		}
+		return false;
+	};
 
 }

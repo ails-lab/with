@@ -301,8 +301,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		filters.add(year);*/
 	}
 
-	public ArrayList<WithResource<?>> getItems(JsonNode response) {
-		ArrayList<WithResource<?>> items = new ArrayList<>();
+	public ArrayList<WithResource<?, ?>> getItems(JsonNode response) {
+		ArrayList<WithResource<?, ?>> items = new ArrayList<>();
 		try {
 			if (response.path("success").asBoolean()) {
 				for (JsonNode item : response.path("items")) {

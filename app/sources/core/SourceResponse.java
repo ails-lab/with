@@ -54,7 +54,7 @@ public class SourceResponse {
 	}
 
 	public SourceResponse(SearchResponse resp, int offset) {
-		List<WithResource> elasticrecords = new ArrayList<WithResource>();
+		List<WithResource<?, ?>> elasticrecords = new ArrayList<WithResource<?, ?>>();
 		this.totalCount = (int) resp.getHits().getTotalHits();
 		for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(ElasticUtils.hitToRecord(hit));
@@ -64,7 +64,7 @@ public class SourceResponse {
 		this.source = "WITHin";
 		this.count = elasticrecords.size();
 		this.startIndex = offset;
-		List<WithResource<?>> items = new ArrayList<>();
+		List<WithResource<?, ?>> items = new ArrayList<>();
 		
 //		TODO make it using the new model...
 //for (CollectionRecord er : elasticrecords) {
@@ -117,7 +117,7 @@ public class SourceResponse {
 		return res;
 	}
 
-	public void addItem(WithResource<?> record) {
+	public void addItem(WithResource<?, ?> record) {
 		if (record!=null){
 		if (record instanceof CulturalObject)
 			items.getCulturalCHO().add(record);

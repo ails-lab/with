@@ -34,6 +34,7 @@ import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
 import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
@@ -68,7 +69,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books","Articles");
 
 		// addMapping(CommonFilters.RIGHTS.name(),
 		// RightsValues.Creative_Commercial,
@@ -218,7 +219,11 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 			response = HttpConnector
 					.getURLContent("http://api.digitalnz.org/v3/records/" + recordId + ".json?api_key=" + apiKey);
 			JsonNode record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record.toString()));
+			if (record!=null){
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_DNZ, record.toString()));
+				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
 			Document xmlResponse = HttpConnector
 					.getURLContentAsXML("http://api.digitalnz.org/v3/records/" + recordId + ".xml?api_key=" + apiKey);
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_DNZ, Serializer.serializeXML(xmlResponse)));

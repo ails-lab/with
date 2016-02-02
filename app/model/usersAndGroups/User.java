@@ -38,6 +38,7 @@ import play.libs.Json;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -52,6 +53,8 @@ import db.DB;
 		@Index(fields = @Field(value = "facebookId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()) })
+		
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);

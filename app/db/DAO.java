@@ -226,5 +226,41 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	public List<E> getAll() {
 		return find().asList();
 	}
+	
+	public E getUniqueByFieldAndValue(String field, Object value) {
+		Query<E> q = this.createQuery().field(field).equal(value);
+		return this.findOne(q);
+	}
+	
+	public E getUniqueByFieldAndValue(String field, Object value, List<String> retrievedFields) {
+		Query<E> q = this.createQuery().field(field).equal(value);
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		return this.findOne(q);
+	}
+	
+	public List<E> getByFieldAndValue(String field, Object value, List<String> retrievedFields) {
+		Query<E> q = this.createQuery().field(field).equal(value);
+		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		return this.find(q).asList();
+	}
 
+
+	public boolean existsFieldWithValue(String field, Object value) {
+		Query<E> q = this.createQuery().field(field).equal(value).limit(1);
+		return (this.find(q).asList().size()==0? false: true);
+	}
+	
+	public boolean existsFieldsWithValues(List<Tuple<String, Object>> fieldValues) {
+		Query<E> q = this.createQuery().limit(1);
+		for (Tuple<String, Object> tuple: fieldValues) {
+			q.field(tuple.x).equal(tuple.y);
+		}
+		return (this.find(q).asList().size()==0? false: true);
+	}
+
+	
+	public boolean existsEntity(ObjectId id) {
+		return existsFieldWithValue("_id", id);
+
+	}
 }

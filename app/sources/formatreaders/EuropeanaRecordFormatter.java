@@ -29,6 +29,7 @@ import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 import utils.ListUtils;
@@ -55,7 +56,7 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreatorLangAware"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
-		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt().getURI(),null));
+		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().getURI(),null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider")));
 		String recID = rec.getStringValue("id");
 		String uri = "http://www.europeana.eu/portal/record"+recID+".html";
@@ -65,20 +66,20 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		WithMediaType type = (WithMediaType) getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type")).get(0);
 		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("edmPreview");
-		if (uri3!=null){
+		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
-			medThumb.setParentID(model.getIsShownBy().getURI());
+			if (Utils.hasInfo(rights))
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
-		if (uri2!=null){
+		if (Utils.hasInfo(uri2)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
-			med.setParentID("self");
 			med.setUrl(uri2);
+			if (Utils.hasInfo(rights))
 			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			med.setWithRights(withRights);
 			med.setType(type);

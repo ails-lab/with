@@ -95,7 +95,7 @@ public class CollectionController extends Controller {
 				return internalServerError(result);
 			}
 
-			if (!AccessManager.hasAccess(userIds, Action.READ, id) && !c.getIsPublic()) {
+			if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"), Action.READ, id) && !c.getIsPublic()) {
 				result.put("error", "User does not have read-access for the collection");
 				return forbidden(result);
 			}
@@ -138,7 +138,7 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 		try {
 			c = DB.getCollectionDAO().getById(new ObjectId(id));
-			if (!AccessManager.hasAccess(userIds, Action.DELETE, new ObjectId(id))) {
+			if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"), Action.DELETE, new ObjectId(id))) {
 				result.put("error", "User does not have permission to delete the collection");
 				return forbidden(result);
 			}
@@ -179,7 +179,7 @@ public class CollectionController extends Controller {
 			return badRequest(result);
 		}
 		Collection oldVersion = DB.getCollectionDAO().getById(new ObjectId(id));
-		if (!AccessManager.hasAccess(userIds, Action.EDIT, new ObjectId(id))) {
+		if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"), Action.EDIT, new ObjectId(id))) {
 			result.put("error", "User does not have permission to edit the collection");
 			return forbidden(result);
 		}
@@ -656,7 +656,7 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 
 		Collection c = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-		if (!AccessManager.hasAccess(userIds, Action.EDIT, new ObjectId(collectionId))) {
+		if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"), Action.EDIT, new ObjectId(collectionId))) {
 			result.put("error", "User does not have permission to edit the collection");
 			return forbidden(result);
 		}
@@ -897,7 +897,7 @@ public class CollectionController extends Controller {
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 
 		Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
-		if (!AccessManager.hasAccess(userIds, Action.EDIT, new ObjectId(collectionId))) {
+		if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"), Action.EDIT, new ObjectId(collectionId))) {
 			result.put("error", "User does not have permission to edit the collection");
 			return forbidden(result);
 		}
@@ -970,7 +970,7 @@ public class CollectionController extends Controller {
 			return forbidden(result);
 		}
 		List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-		if (!AccessManager.hasAccess(userIds, Action.READ, new ObjectId(collectionId)) && (!collection.getIsPublic())) {
+		if (!AccessManager.hasAccessToCollectionResource(session().get("effectiveUserIds"), Action.READ, new ObjectId(collectionId)) && (!collection.getIsPublic())) {
 			result.put("error", "User does not have read-access to the collection");
 			return forbidden(result);
 		}

@@ -17,6 +17,7 @@
 package utils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
@@ -66,6 +67,15 @@ public class ListUtils {
 		}
 		return false;
 	}
+	
+	public static <T> boolean anyof(T[] c, Function<T, Boolean> condition) {
+		return anyof(Arrays.asList(c), condition);
+	}
+	
+	public static <T> boolean allof(T[] c, Function<T, Boolean> condition) {
+		return allof(Arrays.asList(c), condition);
+	}
+
 
 	public static <T, R> List<R> transform(Collection<T> objects, Function<T, R> function) {
 		List<R> res = new ArrayList<>();

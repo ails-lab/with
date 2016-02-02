@@ -34,14 +34,14 @@ DELETE	/record/:id							controllers.RecordResourceController.deleteRecordResour
 #PUT		/collections/liked						controllers.CollectionObjectController.addToFavorites()			
 # Collection Controller (tested except some methods)
 #GET 	 /collection/list						controllers.CollectionObjectController.list(userOrGroupName: play.libs.F.Option[String], access: String ? "OWN", exhibitions: play.libs.F.Option[Boolean], offset: Integer ?=0, count: Integer ?=10)
-GET 	/collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
-POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean ?= false)
-POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
+GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
+POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
+POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean ?= false)
+GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="", start: Integer ?=0, count: Integer ?=10)
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
-GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="", start: Integer ?=0, count: Integer ?=10)
 
 GET 	 /collection/listShared					controllers.CollectionController.listShared(direct: Boolean ?= true, directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/featured					controllers.CollectionController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
@@ -88,8 +88,7 @@ PUT      /group/leave/:groupId                     controllers.UserAndGroupManag
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 
 # Rights Controller
-#GET 	/rights/list							controllers.RightsController.listRights(ownerId: String ?="")
-GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null)
+GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)
