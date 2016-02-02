@@ -32,7 +32,7 @@ import db.converters.ProvenanceInfoConverter;
 public class ProvenanceInfo {
 
 	public enum Sources {
-		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UpladedByUser"),
+		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UploadedByUser"),
 		BritishLibrary("The British Library"), DDB("DDB"),
 		DigitalNZ("DigitalNZ"), DPLA("DPLA"), EFashion("EFashion"), NLA("NLA"),
 		Rijksmuseum("Rijksmuseum");

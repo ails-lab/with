@@ -34,8 +34,8 @@ import utils.Serializer;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.ExternalBasicRecord;
-import model.Provider.Sources;
 import play.libs.Json;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 
 public class RijksmuseumSpaceSource extends ISpaceSource {
 

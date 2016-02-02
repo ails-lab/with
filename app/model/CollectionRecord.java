@@ -28,7 +28,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.Provider;
+import model.basicDataTypes.ProvenanceInfo;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
@@ -59,7 +59,7 @@ public class CollectionRecord extends ExternalBasicRecord {
 	
 	private ExhibitionRecord exhibitionRecord;
 	
-	private Provider importedFrom;
+	private ProvenanceInfo importedFrom;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId collectionId;
@@ -189,11 +189,11 @@ public class CollectionRecord extends ExternalBasicRecord {
 		return extraFields;
 	}
 
-	public Provider getImportedFrom() {
+	public ProvenanceInfo getImportedFrom() {
 		return importedFrom;
 	}
 
-	public void setImportedFrom(Provider importedFrom) {
+	public void setImportedFrom(ProvenanceInfo importedFrom) {
 		this.importedFrom = importedFrom;
 	}
 

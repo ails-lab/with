@@ -100,7 +100,7 @@ public class Serializer {
 		public void serialize(Object rights, JsonGenerator jsonGen,
 				SerializerProvider arg2) throws IOException,
 				JsonProcessingException {
-			boolean isPublic = ((WithAccess) rights).isPublic();
+			boolean isPublic = ((WithAccess) rights).getIsPublic();
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode json = mapper.createObjectNode();
 			json.put("isPublic", isPublic);

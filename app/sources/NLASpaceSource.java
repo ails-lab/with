@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.RecordType;
-import model.Provider.Sources;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
 import play.libs.Json;
 

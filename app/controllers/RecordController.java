@@ -243,7 +243,7 @@ public class RecordController extends Controller {
 		ArrayNode result = Json.newObject().arrayNode();
 		CollectionRecord r = DB.getCollectionRecordDAO().getByExternalId(externalId).get(0);
 		String title = r.getTitle();
-		String provider = r.getProvenanceChain().get(0).providerName;
+		String provider = r.getProvenanceChain().get(0).getProvider();
 
 		/*
 		 * Search for available collections

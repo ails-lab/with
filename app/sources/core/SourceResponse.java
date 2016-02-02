@@ -22,7 +22,7 @@ import java.util.Set;
 
 import model.CollectionRecord;
 import model.ExternalBasicRecord;
-import model.Provider;
+import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.WithResource;
 
