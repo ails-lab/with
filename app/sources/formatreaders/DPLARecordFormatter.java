@@ -87,7 +87,6 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
-			medThumb.setParentID(uri2);
 			if (Utils.hasInfo(rights))
 			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
 			medThumb.setWithRights(withRights);
@@ -95,7 +94,6 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		}
 		if (Utils.hasInfo(uri2)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
-			med.setParentID("self");
 			med.setUrl(uri2);
 			if (Utils.hasInfo(rights))
 			med.setOriginalRights(new LiteralOrResource(rights.get(0)));

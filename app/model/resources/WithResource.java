@@ -356,7 +356,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	// metadata
 	@Embedded
-	private T descriptiveData;
+	protected T descriptiveData;
 
 	// All the available content serializations
 	// all keys in here should be understood by the WITH system

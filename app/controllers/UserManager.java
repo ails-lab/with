@@ -29,6 +29,8 @@ import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
 import model.Media;
+import model.basicDataTypes.MultiLiteral;
+import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 
@@ -217,16 +219,13 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		/*
-		 * CollectionObject fav = new CollectionObject();
-		 * fav.getAdministrative().setCreated(new Date());
-		 * fav.getAdministrative().setWithCreator(user.getDbId());
-		 * fav.getDescriptiveData(); fav.setDescriptiveData(new
-		 * CollectionDescriptiveData());
-		 * DB.getCollectionObjectDAO().makePermanent(fav);
-		 */
-		// ElasticIndexer indexer = new ElasticIndexer(fav);
-		// indexer.indexCollectionMetadata();
+		
+		CollectionObject fav = new CollectionObject();
+		fav.getAdministrative().setCreated(new Date());
+		fav.getAdministrative().setWithCreator(user.getDbId());
+		fav.getDescriptiveData().setLabel(new MultiLiteral("_favorites"));
+		DB.getCollectionObjectDAO().makePermanent(fav);
+
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
 		session().put("lastAccessTime",
