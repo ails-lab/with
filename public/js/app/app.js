@@ -336,7 +336,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
-		if (data.avatar !== null) {
+		if (typeof data.avatar != 'undefined') {	// New users don't have avatars
 			self.currentUser.avatar.Original(data.avatar.Original);
 			self.currentUser.avatar.Tiny(data.avatar.Tiny);
 			self.currentUser.avatar.Square(data.avatar.Square);
@@ -356,7 +356,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		$(".collect").each(function () {
 			$(this).css("display", "");
 		});
-		// self.loadFavorites();
+		self.loadFavorites();
 
 		isLogged(true);
 
