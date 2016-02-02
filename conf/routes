@@ -35,6 +35,7 @@ DELETE	/record/:id							controllers.RecordResourceController.deleteRecordResour
 GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET		 /collection/favorites					controllers.RecordResourceController.getFavorites()
 GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="", start: Integer ?=0, count: Integer ?=10)
+GET		 /collection/favoriteCollection			controllers.CollectionObjectController.getFavoriteCollection()
 
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
@@ -50,7 +51,6 @@ DELETE   /collection/:id	                    controllers.CollectionObjectControl
 GET 	 /collection/listShared					controllers.CollectionController.listShared(direct: Boolean ?= true, directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/featured					controllers.CollectionController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
-GET		 /collection/favoriteCollection			controllers.CollectionController.getFavoriteCollection()
 
 # Cache Controller
 GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)

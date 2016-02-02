@@ -219,12 +219,7 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		
-		CollectionObject fav = new CollectionObject();
-		fav.getAdministrative().setCreated(new Date());
-		fav.getAdministrative().setWithCreator(user.getDbId());
-		fav.getDescriptiveData().setLabel(new MultiLiteral("_favorites"));
-		DB.getCollectionObjectDAO().makePermanent(fav);
+		CollectionObjectController.createFavorites(user.getDbId());
 
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
@@ -435,7 +430,8 @@ public class UserManager extends Controller {
 		}
 	}
 
-	public static Result editUser(String id) throws JsonProcessingException, IOException {
+	public static Result editUser(String id) throws JsonProcessingException,
+			IOException {
 
 		// Only changes first and last name for testing purposes
 		//
