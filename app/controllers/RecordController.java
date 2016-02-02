@@ -267,10 +267,10 @@ public class RecordController extends Controller {
 		searcher.closeClient();
 
 		List<WithResource> elasticrecords = new ArrayList<WithResource>();
-		for (SearchHit hit : resp.getHits().hits()) {
+		/*for (SearchHit hit : resp.getHits().hits()) {
 			elasticrecords.add(ElasticUtils.hitToRecord(hit));
 			result.add(Json.toJson(ElasticUtils.hitToRecord(hit)));
-		}
+		}*/
 
 
 		return ok(result);
