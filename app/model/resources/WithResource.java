@@ -131,6 +131,9 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 		public void setCreated(Date created) {
 			this.created = created;
+			if (this.lastModified == null) {
+				this.lastModified = created;
+			}
 		}
 
 		public Date getLastModified() {
