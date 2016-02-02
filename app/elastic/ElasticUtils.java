@@ -30,6 +30,7 @@ import model.basicDataTypes.Language;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource;
 import model.resources.WithResource;
+import model.resources.WithResource.WithAdmin;
 import model.DescriptiveData;
 
 import org.bson.types.ObjectId;
@@ -55,7 +56,7 @@ public class ElasticUtils {
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public static <T extends DescriptiveData> Map<String, Object> basicTransformation(WithResource<T> rr) {
+	public static <T extends DescriptiveData, A extends WithAdmin> Map<String, Object> basicTransformation(WithResource<T, A> rr) {
 
 		JsonNode rr_json =  Json.toJson(rr);
 		ObjectNode idx_doc = Json.newObject();
@@ -210,8 +211,8 @@ public class ElasticUtils {
 		 * Add the username and email of the creator
 		 * NOT the dbId
 		 */
-		idx_doc.put("creatorUsername", rr.retrieveCreator().getUsername());
-		idx_doc.put("creatorEmail", rr.retrieveCreator().getEmail());
+		idx_doc.put("creatorUsername", rr.getWithCreatorInfo().getUsername());
+		idx_doc.put("creatorEmail", rr.getWithCreatorInfo().getEmail());
 
 
 		/*
@@ -332,6 +333,12 @@ public class ElasticUtils {
 		}
 
 		return resourcesPerType;
+	}
+
+	///// OLD CODE ////
+	public static List<Collection> getCollectionMetadaFromHit(SearchHits hits) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

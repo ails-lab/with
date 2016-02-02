@@ -133,13 +133,13 @@ public class ElasticUpdater {
 				.setId(id)
 			.addScriptParam("colId", colId.toString())
 			.addScriptParam("pos", position)
-			.setScript("info = null"
-					+ "ctx._source.collectedIn.each {"
-					+ " if( it.collectionId.equals(colId) &&"
-					+ "    it.position == pos) { "
-					+ "      info = it "
-					+ " } "
-					+ "  }"
+			.setScript("info = null;"
+					+ "for(el in ctx._source.collectedIn) {"
+					+ " if(el.collectionId.equals(colId) &&"
+					+ "    el.position == pos) { "
+					+ "      info = el; "
+					+ "  } "
+					+ "};"
 					+ "ctx._source.collectedIn.remove(info) ", ScriptType.INLINE)
 			.setRetryOnConflict(5)
 			.execute().actionGet();
@@ -158,12 +158,12 @@ public class ElasticUpdater {
 			.addScriptParam("colId", colId.toString())
 			.addScriptParam("old_pos", old_position)
 			.addScriptParam("new_pos", new_position)
-			.setScript("ctx._source.collectedIn.each {"
-					+ " if( it.collectionId.equals(colId) &&"
-					+ "    it.position == old_pos) { "
-					+ "      position = new_pos "
+			.setScript("for(el in ctx._source.collectedIn) {"
+					+ "   if( el.collectionId.equals(colId) &&"
+					+ "    el.position == old_pos) { "
+					+ "      el.position = new_pos; "
 					+ " } "
-					+ "  }", ScriptType.INLINE)
+					+ "  };", ScriptType.INLINE)
 			.setRetryOnConflict(5)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {

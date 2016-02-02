@@ -74,6 +74,7 @@ import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilder.SuggestionBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.gson.JsonObject;
@@ -267,17 +268,22 @@ public class ElasticSearcher {
 		if(terms == null) terms = "";
 
 		DisMaxQueryBuilder dis_max_q = QueryBuilders.disMaxQuery();
-		MatchQueryBuilder title_match = QueryBuilders.matchQuery("title", terms);
-		MatchQueryBuilder desc_match = QueryBuilders.matchQuery("description", terms);
+		MatchQueryBuilder title_match = QueryBuilders.matchQuery("label_all", terms);
+		MatchQueryBuilder desc_match = QueryBuilders.matchQuery("description_all", terms);
 		MatchQueryBuilder provider_match = QueryBuilders.matchQuery("provider", provider);
 
 		dis_max_q.add(title_match).add(desc_match).add(provider_match);
 		dis_max_q.tieBreaker(0.3f);
 
-		NotFilterBuilder not_filter = FilterBuilders.notFilter(this.filter("_id", exclude));
-		FilteredQueryBuilder filtered = new FilteredQueryBuilder(dis_max_q, not_filter);
+		if(exclude != null) {
+			NotFilterBuilder not_filter = FilterBuilders.notFilter(this.filter("_id", exclude));
+			FilteredQueryBuilder filtered = new FilteredQueryBuilder(dis_max_q, not_filter);
+			return this.execute(filtered);
+		}
+		else
+			return this.execute(dis_max_q);
 
-		return this.execute(filtered);
+
 	}
 
 	public SearchResponse relatedWithMLT(String text, List<String> ids, List<String> fields, SearchOptions options) {
@@ -295,7 +301,7 @@ public class ElasticSearcher {
 		mlt.maxQueryTerms(20);
 		mlt.minTermFreq(1);
 
-		return this.execute(mlt);
+		return this.execute(mlt, options);
 	}
 
 	public SearchResponse relatedWithShouldClauses(List<JsonNode> records) {
@@ -326,10 +332,11 @@ public class ElasticSearcher {
 	}
 
 
-	public SuggestResponse searchSuggestions(String term, SearchOptions options) {
+	public SuggestResponse searchSuggestions(String term, String field, SearchOptions options) {
 
-		CompletionSuggestionBuilder sugg = SuggestBuilders.completionSuggestion(term);
+		TermSuggestionBuilder sugg = SuggestBuilders.termSuggestion(term);
 		sugg.text(term);
+		sugg.field(field);
 
 		return this.executeSuggestion(sugg, options);
 	}
