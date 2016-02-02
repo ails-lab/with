@@ -86,9 +86,6 @@ public class EmbeddedMediaObject {
 	// the media object URL
 	private String url;
 
-	// If this is a thumbnail, the parentID field refers to
-	// the parent media object, else it should be "self".
-	private String parentID;
 
 	private MediaVersion mediaVersion;
 
@@ -197,14 +194,6 @@ public class EmbeddedMediaObject {
 		return width;
 	}
 
-	public String getParentID() {
-		return parentID;
-	}
-
-	public void setParentID(String parentID) {
-		this.parentID = parentID;
-	}
-
 	public void setWidth(int width) {
 		this.width = width;
 	}
@@ -218,7 +207,7 @@ public class EmbeddedMediaObject {
 	}
 
 	public EmbeddedMediaObject(int width, int height, WithMediaType type,
-			WithMediaRights withRights, String url, String parentID,
+			WithMediaRights withRights, String url,
 			MediaVersion mediaVersion, LiteralOrResource originalRights,
 			MediaType mimeType, long size, Quality quality) {
 		this.width = width;
@@ -226,7 +215,6 @@ public class EmbeddedMediaObject {
 		this.type = type;
 		this.withRights = withRights;
 		this.url = url;
-		this.parentID = parentID;
 		this.mediaVersion = mediaVersion;
 		this.originalRights = originalRights;
 		this.mimeType = mimeType;
@@ -239,7 +227,7 @@ public class EmbeddedMediaObject {
 	 */
 	public EmbeddedMediaObject(EmbeddedMediaObject media) {
 		this(media.getWidth(), media.getHeight(), media.getType(), media
-				.getWithRights(), media.getUrl(), media.getParentID(), media
+				.getWithRights(), media.getUrl(), media
 				.getMediaVersion(), media.getOriginalRights(), media
 				.getMimeType(), media.getSize(), media.getQuality());
 	}

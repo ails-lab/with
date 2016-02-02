@@ -21,14 +21,12 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import javax.imageio.ImageIO;
 
@@ -66,7 +64,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.net.MediaType;
-import java.io.FileInputStream;
 
 import db.DB;
 
@@ -386,7 +383,7 @@ public class MediaController extends Controller {
 
 		med.setMediaVersion(MediaVersion.Original);
 
-		med.setParentID("self");
+		med.setParentId(med.getDbId());
 
 	}
 
@@ -462,11 +459,11 @@ public class MediaController extends Controller {
 			medium = makeThumb(med, image, 640, -1, false);
 		}
 
-		String dbid = med.getDbId().toString();
-		tiny.setParentID(dbid);
-		square.setParentID(dbid);
-		thumbnail.setParentID(dbid);
-		medium.setParentID(dbid);
+		ObjectId dbid = med.getDbId();
+		tiny.setParentId(dbid);
+		square.setParentId(dbid);
+		thumbnail.setParentId(dbid);
+		medium.setParentId(dbid);
 
 		DB.getMediaObjectDAO().makePermanent(tiny);
 		DB.getMediaObjectDAO().makePermanent(square);

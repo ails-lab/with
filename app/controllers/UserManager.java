@@ -228,11 +228,10 @@ public class UserManager extends Controller {
 		// ElasticIndexer indexer = new ElasticIndexer(fav);
 		// indexer.indexCollectionMetadata();
 		session().put("user", user.getDbId().toHexString());
-		result = (ObjectNode) Json.parse(DB.getJson(user));
-		result.remove("md5Password");
-		// result.put("favoritesId", fav.getDbId().toString());
-		return ok(result);
-
+		session().put("sourceIp", request().remoteAddress());
+		session().put("lastAccessTime",
+				Long.toString(System.currentTimeMillis()));
+		return ok(Json.toJson(user));
 	}
 
 	private static Result googleLogin(String googleId, String accessToken) {

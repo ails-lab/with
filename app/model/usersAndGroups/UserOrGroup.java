@@ -33,7 +33,6 @@ public abstract class UserOrGroup {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId dbId;
 	private String username;
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private HashMap<MediaVersion, String> avatar;
 	private String about;
 
