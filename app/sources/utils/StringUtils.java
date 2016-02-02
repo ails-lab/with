@@ -27,12 +27,18 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.optimaize.langdetect.DetectedLanguage;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.LanguageDetectorBuilder;
 import com.optimaize.langdetect.ngram.NgramExtractors;
 import com.optimaize.langdetect.profiles.LanguageProfile;
 import com.optimaize.langdetect.profiles.LanguageProfileReader;
+import com.optimaize.langdetect.text.CommonTextObjectFactories;
+import com.optimaize.langdetect.text.TextObject;
+import com.optimaize.langdetect.text.TextObjectFactory;
 
+import model.basicDataTypes.ILiteral;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
@@ -136,6 +142,30 @@ public class StringUtils {
 		}
 		return languageDetector;
 	}
+
+	public static List<Language> getLanguages(String text, double confidenceTH){
+		boolean shortText = text.length()<100;
+		// create a text object factory
+		TextObjectFactory textObjectFactory = shortText ?
+					CommonTextObjectFactories.forDetectingShortCleanText()
+				:
+					CommonTextObjectFactories.forDetectingOnLargeText();
+		// query:
+		TextObject textObject = textObjectFactory.forText(text);
+		List<DetectedLanguage> probabilities = StringUtils.getLanguageDetector().getProbabilities(textObject);
+		List<Language> res = new ArrayList<>();
+        for (DetectedLanguage language : probabilities) {
+			if (language.getProbability()>=confidenceTH)
+			res.add(Language.getLanguage(language.getLanguage()));
+		}
+//        Logger.info("Languages Probs " + probabilities);
+        return res;
+	}
+	
+	public static List<Language> getLanguages(String text){
+		return getLanguages(text, ILiteral.THRESHOLD);
+	}
+	
 
 	public static void main(String[] args) {
 		 Literal l = new Literal();

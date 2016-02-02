@@ -47,6 +47,7 @@ import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.RecordType;
 import model.Provider.Sources;
 import model.resources.WithResource;
+import play.libs.Json;
 
 public class NLASpaceSource extends ISpaceSource {
 
@@ -209,7 +210,11 @@ public class NLASpaceSource extends ISpaceSource {
 			response = HttpConnector.getURLContent(
 					"http://api.trove.nla.gov.au/work/" + recordId + "?key=" + apiKey + "&encoding=json&reclevel=full");
 			JsonNode record = response;
-			jsonMetadata.add(new RecordJSONMetadata(Format.JSON_NLA, record.toString()));
+			if (record != null) {
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_NLA, record.toString()));
+				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
 			Document xmlResponse = HttpConnector.getURLContentAsXML(
 					"http://api.trove.nla.gov.au/work/" + recordId + "?key=" + apiKey + "&encoding=xml&reclevel=full");
 			jsonMetadata.add(new RecordJSONMetadata(Format.XML_NLA, Serializer.serializeXML(xmlResponse)));

@@ -122,8 +122,10 @@ public class WithDate {
 		// code to init the other Date representations
 		if (sources.core.Utils.isNumericInteger(free)) {
 			this.year = Integer.parseInt(free);
-		} else if (free.matches("[0-9]+\\s+(bc|BC)")) {
+		} else if (free.matches("\\d+\\s+(bc|BC)")) {
 			this.year = Integer.parseInt(free.split("\\s")[0]);
+		} else if (free.matches("\\d\\d\\d\\d-\\d\\d\\d\\d")) {
+			this.year = Integer.parseInt(free.split("-")[0]);
 		} else if (free.matches("\\d\\d-\\d\\d-\\d\\d\\d\\d")) {
 			try {
 				setIsoDate((new SimpleDateFormat("dd-mm-yyyy")).parse(free));

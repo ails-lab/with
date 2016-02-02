@@ -24,6 +24,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 
 public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
@@ -43,30 +44,39 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("principalOrFirstMaker"));
 
-		// object.addToProvenance(new
-		// ProvenanceInfo(rec.getStringValue("dataProvider")));
-		// object.addToProvenance(new
-		// ProvenanceInfo(rec.getStringValue("provider")));
 		String id = rec.getStringValue("objectNumber");
 		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), 
 				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/" + id + ",0", id));
-		EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-		medThumb.setUrl(rec.getStringValue("webImage.url"));
-		object.addMedia(MediaVersion.Thumbnail, medThumb);
-		// TODO: add rights!
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl(rec.getStringValue("edmIsShownBy"));
-		med.setWidth(rec.getIntValue("webImage.width"));
-		med.setHeight(rec.getIntValue("webImage.height"));
-		object.addMedia(MediaVersion.Original, med);
-		// med.setUrl(rec.getStringValue("edmIsShownBy"));
+		
+		
+		
+		String uri3 = rec.getStringValue("headerImage.url");
+		String uri2 = rec.getStringValue("webImage.url");
+		if (Utils.hasInfo(uri3)){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri3);
+			medThumb.setWidth(rec.getIntValue("headerImage.width"));
+			medThumb.setHeight(rec.getIntValue("headerImage.height"));
+//			medThumb.setType(type);
+//			if (Utils.hasInfo(rights))
+//			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+//			medThumb.setWithRights(withRights);
+			object.addMedia(MediaVersion.Thumbnail, medThumb);
+		}
+		
+		if (Utils.hasInfo(uri2)){
+			EmbeddedMediaObject med = new EmbeddedMediaObject();
+			med.setUrl(uri2);
+			med.setWidth(rec.getIntValue("webImage.width"));
+			med.setHeight(rec.getIntValue("webImage.height"));
+//			if (Utils.hasInfo(rights))
+//			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+//			med.setWithRights(withRights);
+//			med.setType(type);
+			object.addMedia(MediaVersion.Original, med);
+		}
+		
 		return object;
-		//// record.setContributors(rec.getStringArrayValue("contributor"));
-		// // TODO: add years
-		// object.setYears(ListUtils.transform(rec.getStringArrayValue("year"),
-		//// (String y)->{return Year.parse(y);}));
-		// // TODO: add rights
-		//// record.setItemRights(rec.getStringValue("rights"));
 	}
 
 }

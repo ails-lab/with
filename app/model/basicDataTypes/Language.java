@@ -2000,7 +2000,7 @@ public enum Language {
 
 	public static Language getLanguage(String code){
 		for (Language lang : Language.values()) {
-			if (lang.belongsTo(code))
+			if (lang.belongsTo(code) || lang.name.equals(code))
 				return lang;
 		}
 		return null;
