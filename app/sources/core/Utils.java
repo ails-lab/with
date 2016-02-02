@@ -17,6 +17,7 @@
 package sources.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.validator.routines.UrlValidator;
@@ -293,6 +294,14 @@ public class Utils {
 
 	public static boolean hasInfo(String string) {
 		return !(string==null || string.equals("") || string.equals("null"));
+	}
+	
+	public static <T> boolean hasInfo(T[] array) {
+		return !(array==null || array.length==0 );
+	}
+	
+	public static <T> boolean hasInfo(Collection<T> array) {
+		return !(array==null || array.isEmpty());
 	}
 
 	public static <T> List<T> asList(T... a) {

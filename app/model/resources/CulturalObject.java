@@ -16,35 +16,15 @@
 
 package model.resources;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
 
-import play.libs.Json;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.CidocEvent;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.Literal;
-import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource.RecordDescriptiveData;
-import model.resources.WithResource.WithResourceType;
 
 @Entity("RecordResource")
 public class CulturalObject extends RecordResource<CulturalObject.CulturalObjectData>{
@@ -54,22 +34,6 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		this.administrative = new RecordAdmin();
 		this.resourceType = WithResourceType.valueOf(this.getClass().getSimpleName());
 	}
-
-	public static class RecordAdmin extends WithAdmin {
-
-		// if this resource / record is derived (modified) from a different Record.
-		private ObjectId parentResourceId;
-
-		public ObjectId getParentResourceId() {
-			return parentResourceId;
-		}
-
-		public void setParentResourceId(ObjectId parentResourceId) {
-			this.parentResourceId = parentResourceId;
-		}
-
-	}
-
 
 	public static class CulturalObjectData extends RecordDescriptiveData {
 

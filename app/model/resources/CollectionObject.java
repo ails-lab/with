@@ -16,40 +16,14 @@
 
 package model.resources;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Field;
-import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.IndexOptions;
-import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.utils.IndexType;
-
-import play.libs.Json;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import elastic.ElasticUtils;
 import model.DescriptiveData;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteralOrResource;
-import model.basicDataTypes.WithDate;
-import model.resources.RecordResource.RecordDescriptiveData;
 
 @Entity("CollectionObject")
-public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData> {
+public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
 
 	public CollectionObject() {
 		super();
@@ -58,7 +32,9 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 				.getSimpleName());
 	}
 
-	public static class CollectionAdmin extends WithAdmin {
+
+	@Embedded
+	public static class CollectionAdmin extends WithResource.WithAdmin {
 
 		public enum CollectionType {SimpleCollection, Exhibition};
 
@@ -136,7 +112,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	 */
 	public Map<String, Object> transformCO() {
 		Map<String, Object> idx_map =  this.transformWR();
-		idx_map.put("collectionType", ((CollectionAdmin)this.getAdministrative()).getCollectionType());
+		idx_map.put("collectionType", this.getAdministrative().getCollectionType());
 		return idx_map;
 	}
 

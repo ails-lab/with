@@ -43,20 +43,17 @@ public class JsonNodeUtils {
 		}
 		return null;
 	}
-	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node) {
+	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node, Language... suggestedLanguages) {
 		if (node != null && !node.isMissingNode()) {
-			if (node.isArray()) {
-				node = node.get(0);
-			}
 			if (node.isTextual()) {
-				res.addLiteral(Language.DEFAULT, node.asText());
-				return res;
+				res.addSmartLiteral(node.asText(),suggestedLanguages);
+				return res.fillDEF();
 			} 
 			if (node.isArray()){
 				for (int i = 0; i < node.size(); i++) {
-					res.addLiteral(Language.DEFAULT, node.get(i).asText());
+					readMultiLiteral(res, node.get(i),suggestedLanguages);
 				}
-				return res;
+				return res.fillDEF(true);
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
@@ -69,32 +66,28 @@ public class JsonNodeUtils {
 				} else {
 					List<String> asString = asStringArray(value);
 					for (int i = 0; i < asString.size(); i++) {
-						res.addLiteral(Language.DEFAULT, asString.get(i));
+						res.addSmartLiteral(asString.get(i),suggestedLanguages);
 					}
-					System.out.println("Unknown Format!!! "+asString);
+					System.out.println("Unknown Format!!! "+next.toString());
 				}
 			}
-			res.fillDEF();
-			return res;
+			return res.fillDEF();
 		}
 		return null;
 	}
 
-	public static MultiLiteral asMultiLiteral(JsonNode node) {
-		return readMultiLiteral(new MultiLiteral(), node);
+	public static MultiLiteral asMultiLiteral(JsonNode node, Language... suggestedLanguages) {
+		return readMultiLiteral(new MultiLiteral(), node, suggestedLanguages);
 	}
-	public static Literal readLiteral(Literal res, JsonNode node) {
+	public static Literal readLiteral(Literal res, JsonNode node, Language... suggestedLanguages) {
 		if (node != null && !node.isMissingNode()) {
-			if (node.isArray()) {
-				node = node.get(0);
-			}
 			if (node.isTextual()) {
-				res.addLiteral(Language.DEFAULT, node.asText());
-				return res;
+				res.addSmartLiteral(node.asText());
+				return res.fillDEF();
 			}
 			if (node.isArray()){
-				res.addLiteral(Language.DEFAULT, node.get(0).asText());
-				return res;
+				res.addSmartLiteral(node.get(0).asText(),suggestedLanguages);
+				return res.fillDEF();
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
@@ -103,23 +96,22 @@ public class JsonNodeUtils {
 				if (language != null)
 					res.addLiteral(language, value.get(0).asText());
 				else
-					res.addLiteral(Language.DEFAULT, asString(value));
+					res.addSmartLiteral(asString(value),suggestedLanguages);
 			}
-			res.fillDEF();
-			return res;
+			return res.fillDEF();
 		}
 		return null;
 	}
 	
-	public static Literal asLiteral(JsonNode node) {
+	public static Literal asLiteral(JsonNode node, Language... suggestedLanguages) {
 		return readLiteral(new Literal(), node);
 	}
-	public static LiteralOrResource asLiteralOrResource(JsonNode node) {
-		return (LiteralOrResource) readLiteral(new LiteralOrResource(), node);
+	public static LiteralOrResource asLiteralOrResource(JsonNode node, Language... suggestedLanguages) {
+		return (LiteralOrResource) readLiteral(new LiteralOrResource(), node,suggestedLanguages);
 	}
 
-	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node) {
-		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node);
+	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node, Language... suggestedLanguages) {
+		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node,suggestedLanguages);
 	}
 	
 	public static List<WithDate> asWithDateArray(JsonNode node) {

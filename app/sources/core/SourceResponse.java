@@ -57,10 +57,11 @@ public class SourceResponse {
 	//source refers to the external APIs and the WITH db
 	//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 	public SourceResponse(SearchResponse resp, int offset) {
+
 		this.totalCount = (int) resp.getHits().getTotalHits();
 		this.source = "WITHin";
 		this.startIndex = offset;
-		List<WithResource<?>> items = new ArrayList<WithResource<?>>();
+		List<WithResource<?, ?>> items = new ArrayList<WithResource<?, ?>>();
 
 
 //		TODO make it using the new model...
@@ -123,7 +124,7 @@ public class SourceResponse {
 		return res;
 	}
 
-	public void addItem(WithResource<?> record) {
+	public void addItem(WithResource<?, ?> record) {
 		if (record!=null){
 		if (record instanceof CulturalObject)
 			items.getCulturalCHO().add(record);

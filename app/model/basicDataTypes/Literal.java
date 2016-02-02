@@ -18,49 +18,64 @@ package model.basicDataTypes;
 
 import java.util.HashMap;
 
-public class Literal extends HashMap<String, String> {
+import utils.Deserializer.LiteralDesiarilizer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(using = LiteralDesiarilizer.class)
+public class Literal extends HashMap<String, String> implements ILiteral {
 
 	public Literal() {
 	}
-	
+
 	public Literal(String label) {
-		this.put(Language.UNKNOWN.toString(), label);
+		this.put(Language.UNKNOWN.getDefaultCode(), label);
 	}
 
 	public Literal(Language lang, String label) {
-		this.put(lang.toString(), label);
-		if (lang.equals(Language.ENG))
-			this.put(Language.DEFAULT.toString(), label);
+		this.put(lang.getDefaultCode(), label);
 	}
 
+	/* (non-Javadoc)
+	 * @see model.basicDataTypes.ILiteral#addLiteral(model.basicDataTypes.Language, java.lang.String)
+	 */
+	@Override
 	public void addLiteral(Language lang, String value) {
-		this.put(lang.toString(), value);
-//		if (lang.equals(Language.ENG) && !this.containsKey(Language.DEF.toString()))
-//			this.put(Language.DEF.toString(), value);
+		this.put(lang.getDefaultCode(), value);
 	}
-	
+
+	/* (non-Javadoc)
+	 * @see model.basicDataTypes.ILiteral#addLiteral(java.lang.String)
+	 */
+	@Override
 	public void addLiteral(String value) {
 		addLiteral(Language.UNKNOWN, value);
 	}
-	
+
 	/**
 	 * Don't request the "unknown" language, request "any" if you don't care
-		 * @param lang
+	 * 
+	 * @param lang
 	 * @return
 	 */
 	public String getLiteral(Language lang) {
-		/*=if(Language.ANY.equals(lang)) {
-			return this.get(this.keySet().toArray()[0]);
-		}
-		else*/
-			return get(lang.toString());
+		return get(lang.getDefaultCode());
 	}
-	
-	public void fillDEF(){
-		String defLang = Language.EN.toString();
-		if (!containsKey(defLang)){
-			defLang = this.keySet().toArray()[0].toString();
+
+	public Literal fillDEF() {
+		if (containsKey(Language.DEFAULT.getDefaultCode())) {
+			return this;
 		}
-		put(Language.DEFAULT.toString(), get(defLang));
+		if (containsKey(Language.EN.getDefaultCode())) {
+			put(Language.DEFAULT.getDefaultCode(), getLiteral(Language.EN));
+			return this;
+		}
+		for (String lang : this.keySet()) {
+			if (Language.isLanguage(lang)) {
+				put(Language.DEFAULT.getDefaultCode(), get(lang));
+				return this;
+			}
+		}
+		return this;
 	}
 }

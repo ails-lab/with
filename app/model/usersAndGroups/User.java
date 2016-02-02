@@ -31,10 +31,12 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
+
 import model.Notification;
 import db.DB;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import play.Logger;
@@ -50,6 +52,7 @@ import utils.Serializer;
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions())
 		})
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);

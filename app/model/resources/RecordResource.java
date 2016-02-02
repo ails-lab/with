@@ -16,37 +16,34 @@
 
 package model.resources;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import org.bson.types.ObjectId;
 
-import play.libs.Json;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import elastic.ElasticUtils;
 import model.DescriptiveData;
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.MultiLiteral;
-import model.basicDataTypes.WithDate;
 
 
-public class RecordResource<T extends RecordResource.RecordDescriptiveData> extends WithResource<RecordResource.RecordDescriptiveData> {
+public class RecordResource<T extends RecordResource.RecordDescriptiveData>
+	extends WithResource<RecordResource.RecordDescriptiveData, RecordResource.RecordAdmin> {
 
 	public static class RecordDescriptiveData extends DescriptiveData {
 
 	}
+
+	public static class RecordAdmin extends WithResource.WithAdmin {
+
+		// if this resource / record is derived (modified) from a different Record.
+		private ObjectId parentResourceId;
+
+		public ObjectId getParentResourceId() {
+			return parentResourceId;
+		}
+
+		public void setParentResourceId(ObjectId parentResourceId) {
+			this.parentResourceId = parentResourceId;
+		}
+
+	}
+
 
 
 	/*

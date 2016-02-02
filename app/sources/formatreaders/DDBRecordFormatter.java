@@ -18,18 +18,23 @@ package sources.formatreaders;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
 import sources.BritishLibrarySpaceSource;
 import sources.DDBSpaceSource;
 import sources.FilterValuesMap;
+import sources.core.CommonFilters;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.MediaObject;
 import model.Provider;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -48,31 +53,29 @@ public class DDBRecordFormatter extends CulturalRecordFormatter {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("subtitle"));
-		// model.setIsShownBy(rec.getStringValue("edmIsShownBy"));
-		// model.setIsShownAt(rec.getStringValue("edmIsShownAt"));
-		// model.setYear(Integer.parseInt(rec.getStringValue("year")));
-		// model.setDccreator(Arrays.asList(new
-		// LiteralOrResource(rec.getStringValue("principalOrFirstMaker"))));
-
-		// object.addToProvenance(new
-		// ProvenanceInfo(rec.getStringValue("dataProvider")));
-		// object.addToProvenance(new
-		// ProvenanceInfo(rec.getStringValue("provider.name"),null,rec.getStringValue("provider.@id")));
+		
 		String id = rec.getStringValue("id");
 		object.addToProvenance(new ProvenanceInfo(Sources.DDB.toString(),
 				"https://www.deutsche-digitale-bibliothek.de/item/" + id, id));
-		EmbeddedMediaObject med = new EmbeddedMediaObject();
-		med.setUrl("https://www.deutsche-digitale-bibliothek.de/" + rec.getStringValue("thumbnail"));
-		object.addMedia(MediaVersion.Thumbnail, med);
-		// med.setHeight(Integer.parseInt(rec.getStringValue("height_s")));
-		// med.setWidth(Integer.parseInt(rec.getStringValue("width_s")));
-		// object.setCreator(rec.getStringValue("principalOrFirstMaker"));
-		//// object.setContributors(rec.getStringArrayValue("contributor"));
-		// // TODO: add years
-		//// object.setYears(ListUtils.transform(rec.getStringArrayValue("year"),
-		// (String y)->{return Year.parse(y);}));
-		// // TODO: add rights
-		//// object.setItemRights(rec.getStringValue("rights"));
+		
+		List<String> rights = rec.getStringArrayValue("license.@resource");
+		String stringValue = rec.getStringValue("media");
+		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
+		WithMediaType type = WithMediaType.getType(translateToCommon.get(0).toString());
+		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		String uri3 = "https://www.deutsche-digitale-bibliothek.de/" + rec.getStringValue("thumbnail");
+		
+		if (Utils.hasInfo(uri3)){
+			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
+			medThumb.setUrl(uri3);
+			medThumb.setType(type);
+			if (Utils.hasInfo(rights))
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setWithRights(withRights);
+			object.addMedia(MediaVersion.Thumbnail, medThumb);
+		}
+		
+
 		return object;
 	}
 

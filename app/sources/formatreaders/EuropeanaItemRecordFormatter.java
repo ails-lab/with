@@ -30,6 +30,7 @@ import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
+import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
 
@@ -105,31 +106,28 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		LiteralOrResource isShownBy = model.getIsShownBy();
 		String uri2 = isShownBy==null?null:isShownBy.getURI();
 		String uri3 = ro==null?null:ro.getURI();
-		if (uri3!=null){
+		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
-			medThumb.setUrl(uri2);
+			medThumb.setUrl(uri3);
 			medThumb.setType(type);
-			medThumb.setParentID(uri3);
 			medThumb.setOriginalRights(rights);
 			medThumb.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
 		
-		if (uri2!=null){
+		if (Utils.hasInfo(uri2)){
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setType(type);
-			med.setParentID("self");
 			med.setUrl(uri2);
 			med.setOriginalRights(rights);
 			med.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Original, med);
 		}
 		
-		if (theViews!=null && theViews.size()>0){
+		if (Utils.hasInfo(theViews)){
 			for (String string : theViews) {
 				EmbeddedMediaObject med = new EmbeddedMediaObject();
 				med.setType(type);
-				med.setParentID("self");
 				med.setUrl(string);
 				med.setOriginalRights(rights);
 				med.setWithRights(withMediaRights);

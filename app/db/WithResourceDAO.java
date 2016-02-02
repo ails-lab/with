@@ -19,16 +19,19 @@ package db;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -39,12 +42,12 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import utils.AccessManager.Action;
+import utils.Tuple;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
-
-import utils.Tuple;
-import utils.AccessManager.Action;
 
 /*
  * The class consists of methods that can be both query
@@ -85,27 +88,6 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
-	}
-	
-	public T getByFieldAndValue(String field, Object value) {
-		Query<T> q = this.createQuery().field(field).equal(value);
-		return this.findOne(q);
-	}
-	
-	public T getByFieldAndValue(String field, Object value, List<String> retrievedFields) {
-		Query<T> q = this.createQuery().field(field).equal(value);
-		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
-		return this.findOne(q);
-	}
-	
-	public boolean existsFieldWithValue(String field, Object value) {
-		Query<T> q = this.createQuery().field(field).equal(value).limit(1);
-		return (this.find(q).asList().size()==0? false: true);
-	}
-	
-	public boolean existsResource(ObjectId id) {
-		return existsFieldWithValue("_id", id);
-
 	}
 	
 	public boolean existsWithExternalId(String externalId) {
@@ -187,7 +169,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @return
 	 */
 	public T getByOwnerAndLabel(ObjectId creatorId, String lang, String title) {
-		if(lang == null) lang = "en";
+		if (lang == null) lang = "default";
 		Query<T> q = this.createQuery().field("administrative.withCreator")
 				.equal(creatorId).field("descriptiveData.label." + lang).equal(title);
 		return this.findOne(q);
@@ -227,7 +209,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	public User getOwner(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id)
 				.retrievedFields(true, "administrative.withCreator");
-		return ((WithResource) findOne(q)).retrieveCreator();
+		return ((WithResource) findOne(q)).getWithCreatorInfo();
 	}
 
 	/**
@@ -336,6 +318,61 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		return Access.values()[action.ordinal()+1];
 	}
 	
+	public void updateResourceRights(WithAccess access, ObjectId resourceId) {
+		Query<T> q = this.createQuery().field("_id").equal(resourceId);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("administrative.access", access);
+		this.update(q, updateOps);
+	}
+	
+
+	
+	public void changeAccess(ObjectId resourceId, ObjectId userId, Access newAccess) {
+		Query<T> q = this.createQuery().field("_id").equal(resourceId);
+		ArrayList<String> retrievedFields = new ArrayList<String>();
+		retrievedFields.add("administrative.access");
+		T resource  = this.findOne(q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()])));
+		WithAccess access = resource.getAdministrative().getAccess();
+		int index = 0;
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		for (AccessEntry entry: access.getAcl()) {
+			if (entry.getUser().equals(userId)) {
+				if (!access.equals(Access.NONE))
+					updateOps.set("administrative.access.acl."+index+".level", newAccess);
+				else
+					updateOps.unset("administrative.access.acl."+index);
+			}
+			index+=1;
+		}
+		this.update(this.createQuery().field("_id").equal(resourceId), updateOps);
+	}
+	
+	public WithAccess mergeRights(WithAccess recordAccess, List<WithAccess> parentColAccess) {
+		for (WithAccess colAccess: parentColAccess) {
+			if (colAccess.isPublic())
+				recordAccess.setIsPublic(true);
+			for (AccessEntry colEntry: colAccess.getAcl()) {
+				if (!WithAccess.containsUser(recordAccess.getAcl(), colEntry.getUser()))
+					recordAccess.addToAcl(colEntry);
+				for (AccessEntry recEntry: recordAccess.getAcl()) {
+					if (recEntry.getUser().equals(colEntry.getUser()))
+						if (colEntry.getLevel().ordinal() > recEntry.getLevel().ordinal())
+							recEntry.setLevel(colEntry.getLevel());
+				}
+			}
+		}
+		return recordAccess;
+	}
+	
+	public List<ObjectId> getParentCollections(ObjectId resourceId) {
+		T record = this.getById(resourceId, new ArrayList<String>(Arrays.asList("collectedIn")));
+		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
+		for (CollectionInfo ci: (List<CollectionInfo>) record.getCollectedIn()) {
+			parentCollections.add(ci.getCollectionId());
+		}
+		return parentCollections;
+	}
+		
 	/**
 	 * Return the total number of likes for a resource.
 	 * @param id
@@ -387,7 +424,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
-	public void updateEmbeddedMedia(ObjectId recId, EmbeddedMediaObject media) {
+	public void updateEmbeddedMedia(ObjectId recId, List<HashMap<MediaVersion, EmbeddedMediaObject>> media) {
 		Query<T> q = this.createQuery().field("_id").equal(recId);
 		UpdateOperations<T> updateOps = this
 				.createUpdateOperations();
@@ -462,5 +499,4 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	         }
 	     }
 	}
-
 }

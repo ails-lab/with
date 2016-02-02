@@ -16,6 +16,7 @@
 
 package sources.utils;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,10 +27,22 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.hibernate.validator.internal.constraintvalidators.URLValidator;
+import com.optimaize.langdetect.DetectedLanguage;
+import com.optimaize.langdetect.LanguageDetector;
+import com.optimaize.langdetect.LanguageDetectorBuilder;
+import com.optimaize.langdetect.ngram.NgramExtractors;
+import com.optimaize.langdetect.profiles.LanguageProfile;
+import com.optimaize.langdetect.profiles.LanguageProfileReader;
+import com.optimaize.langdetect.text.CommonTextObjectFactories;
+import com.optimaize.langdetect.text.TextObject;
+import com.optimaize.langdetect.text.TextObjectFactory;
 
+import model.basicDataTypes.ILiteral;
+import model.basicDataTypes.Language;
+import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.WithDate;
+import play.Logger;
 
 public class StringUtils {
 
@@ -109,9 +122,55 @@ public class StringUtils {
 	public static List<WithDate> getYearsDate(String... dates) {
 		return getDates(Arrays.asList(dates));
 	}
+	
+	private static LanguageDetector languageDetector;
+
+	public static LanguageDetector getLanguageDetector(){
+		if (languageDetector==null){
+			List<LanguageProfile> languageProfiles;
+			try {
+				languageProfiles = new LanguageProfileReader().readAll();
+			
+			//build language detector:
+			languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
+			        .withProfiles(languageProfiles).minimalConfidence(0.8)
+			        .build();
+			} catch (IOException e) {
+				Logger.warn("problems loading language detector");
+				e.printStackTrace();
+			}
+		}
+		return languageDetector;
+	}
+
+	public static List<Language> getLanguages(String text, double confidenceTH){
+		boolean shortText = text.length()<100;
+		// create a text object factory
+		TextObjectFactory textObjectFactory = shortText ?
+					CommonTextObjectFactories.forDetectingShortCleanText()
+				:
+					CommonTextObjectFactories.forDetectingOnLargeText();
+		// query:
+		TextObject textObject = textObjectFactory.forText(text);
+		List<DetectedLanguage> probabilities = StringUtils.getLanguageDetector().getProbabilities(textObject);
+		List<Language> res = new ArrayList<>();
+        for (DetectedLanguage language : probabilities) {
+			if (language.getProbability()>=confidenceTH)
+			res.add(Language.getLanguage(language.getLanguage()));
+		}
+//        Logger.info("Languages Probs " + probabilities);
+        return res;
+	}
+	
+	public static List<Language> getLanguages(String text){
+		return getLanguages(text, ILiteral.THRESHOLD);
+	}
+	
 
 	public static void main(String[] args) {
-		 System.out.println(parseDate("11-11-2011"));
+		 Literal l = new Literal();
+		 l.addSmartLiteral("hello world. this is an english text. Maybe?");
+		 System.out.println(l.toString());
 	}
 
 	public static int count(String text, String subtext) {

@@ -41,6 +41,7 @@ public class JsonContextRecord {
 
 	private JsonNode rootInformation;
 	private List<String> context;
+	private Language[] languages;
 
 	public JsonContextRecord(JsonNode rootInformation) {
 		this.context = new ArrayList<>();
@@ -142,6 +143,8 @@ public class JsonContextRecord {
 			// is a index
 			try {
 				int index = Integer.parseInt(elements[1]);
+				if (p.equals(""))
+					return node.get(index);
 				return node.path(p).get(index);
 			} catch (NumberFormatException e) {
 				// should be a condition:
@@ -149,16 +152,18 @@ public class JsonContextRecord {
 				for (int i = 0; i < node.size(); i++) {
 					JsonNode current = node.get(i);
 					elements = elements[1].split(",");
+					boolean ok = true;
 					for (int h = 0; h < elements.length; h++) {
 						String string = elements[h];
 						String[] splits = string.split("=");
 						String name = splits[0];
 						String vals = splits[1];
-						if (current.path(name).asText().matches(vals)) {
-							return current;
+						if (!current.path(name).asText().matches(vals)) {
+							ok = false;
 						}
 					}
-
+					if (ok)
+						return current;
 				}
 			}
 		}
@@ -176,6 +181,14 @@ public class JsonContextRecord {
 		else
 			return null;
 	}
+	
+	public Language[] getLanguages() {
+		return languages;
+	}
+
+	public void setLanguages(Language[] languages) {
+		this.languages = languages;
+	}
 
 	public int getIntValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
@@ -189,7 +202,7 @@ public class JsonContextRecord {
 	public MultiLiteral getMultiLiteralValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
-			return JsonNodeUtils.asMultiLiteral(node);
+			return JsonNodeUtils.asMultiLiteral(node,languages);
 		else
 			return null;
 	}
@@ -197,7 +210,7 @@ public class JsonContextRecord {
 	public Literal getLiteralValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
-			return JsonNodeUtils.asLiteral(node);
+			return JsonNodeUtils.asLiteral(node,languages);
 		else
 			return null;
 	}
@@ -205,7 +218,7 @@ public class JsonContextRecord {
 	public MultiLiteralOrResource getMultiLiteralOrResourceValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
-			return JsonNodeUtils.asMultiLiteralOrResource(node);
+			return JsonNodeUtils.asMultiLiteralOrResource(node,languages);
 		else
 			return null;
 	}
@@ -213,7 +226,7 @@ public class JsonContextRecord {
 	public LiteralOrResource getLiteralOrResourceValue(String... path) {
 		JsonNode node = getValue(buildpaths(path));
 		if (node != null)
-			return JsonNodeUtils.asLiteralOrResource(node);
+			return JsonNodeUtils.asLiteralOrResource(node,languages);
 		else
 			return null;
 	}
