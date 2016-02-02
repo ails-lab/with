@@ -20,13 +20,20 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.suggest.SuggestResponse;
+import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.suggest.Suggest;
 import org.junit.Test;
+
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
 
 import utils.Tuple;
 import elastic.Elastic;
@@ -63,4 +70,71 @@ public class SearchTest {
 		System.out.println(resp.getHits().getTotalHits());
 	}
 
+	@Test
+	public void testRelatedWithDisMax() {
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(Elastic.typeResource);
+
+		SearchOptions options = new SearchOptions(0, 10);
+		options.setScroll(false);
+		options.setFilterType("and");
+		/*options.addFilter("dataProvider", "");
+		options.addFilter("dataProvider", "");
+		options.addFilter("provider", "");*/
+
+		SearchResponse resp = searcher.relatedWithDisMax("eirinirecord1", "mint", null, options);
+		for(SearchHit h: resp.getHits().getHits()) {
+			System.out.println(h.getSourceAsString());
+		}
+
+	}
+
+
+	@Test
+	public void testRelatedWithMLT() {
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(Elastic.typeResource);
+
+		SearchOptions options = new SearchOptions(0, 10);
+		options.setScroll(false);
+		options.setFilterType("or");
+		options.addFilter("isPublic", "false");
+
+		/*options.addFilter("dataProvider", "");
+		options.addFilter("dataProvider", "");
+		options.addFilter("provider", "");*/
+
+		List<String> fields = new ArrayList<String>() {{ add("label_all");add("description_all");add("provider"); }};
+		SearchResponse resp = searcher.relatedWithMLT("title Mint", null, fields, options);
+		for(SearchHit h: resp.getHits().getHits()) {
+			System.out.println(h.getSourceAsString());
+		}
+	}
+
+	@Test
+	public void testRelatedWithShouldClauses() {
+
+	}
+
+	@Test
+	public void testSearchAccessibleCollections() {
+
+	}
+
+	@Test
+	public void testSearchSuggestions() {
+		ElasticSearcher searcher = new ElasticSearcher();
+		searcher.addType(Elastic.typeResource);
+
+		SearchOptions options = new SearchOptions(0, 10);
+		options.setScroll(false);
+	  /*options.addFilter("dataProvider", "");
+		options.addFilter("dataProvider", "");
+		options.addFilter("provider", "");*/
+
+		SuggestResponse resp = searcher.searchSuggestions("eirimnnirecord1", "label_all", options);
+		resp.getSuggest().getSuggestion("eirimnnirecord1").forEach( (o) ->  (o.forEach( (s) -> (
+								System.out.println(s.getText() + " with score " + s.getScore())) )) );
+		System.out.println("done");
+	}
 }
