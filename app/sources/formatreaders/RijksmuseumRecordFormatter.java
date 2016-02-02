@@ -16,13 +16,19 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Provider.Sources;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
@@ -36,6 +42,11 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		Language[] language = null;
+		language = getLanguagesFromText(rec.getStringValue("title"), 
+				rec.getStringValue("longTitle"));
+		rec.setLanguages(language);
+		
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("longTitle"));

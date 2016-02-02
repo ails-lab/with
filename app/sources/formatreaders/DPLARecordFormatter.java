@@ -57,6 +57,11 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 			}
 			System.out.println(Arrays.toString(language));
 		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("sourceResource.title"),
+											rec.getStringValue("sourceResource.description"),
+											rec.getStringValue("sourceResource.subject"));
+		}
 		rec.setLanguages(language);
 		
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("originalRecord.spatial"));

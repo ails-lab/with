@@ -16,17 +16,22 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.Provider.Sources;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
@@ -41,8 +46,28 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
+		
+		String id = rec.getStringValue("id");
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		// TODO read the language
+		Language[] language = null;
+		if (rec.getValue("language")!=null){
+			JsonNode langs = rec.getValue("language");
+			language = new Language[langs.size()];
+			for (int i = 0; i < langs.size(); i++) {
+				language[i] = Language.getLanguage(langs.get(i).asText());
+			}
+			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("title"),
+											rec.getStringValue("description"),
+											rec.getStringValue("additional_description"),
+											rec.getStringValue("fulltext"));
+		}
+		rec.setLanguages(language);
+		
+		
 		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("description"));
@@ -50,11 +75,11 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue("contributor"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dctype"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("collection[0]"), rec.getStringValue("landing_url"),null));
 		object.addToProvenance(
 				new ProvenanceInfo(rec.getStringValue("content_partner[0]")));
-		String id = rec.getStringValue("id");
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
 		
