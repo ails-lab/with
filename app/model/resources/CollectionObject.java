@@ -113,6 +113,11 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	public Map<String, Object> transformCO() {
 		Map<String, Object> idx_map =  this.transformWR();
 		idx_map.put("collectionType", this.getAdministrative().getCollectionType());
+
+		idx_map.put("dccreator", this.getDescriptiveData().getDccreator());
+		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
+		idx_map.put("dclanguage", this.getDescriptiveData().getDclanguage());
+
 		return idx_map;
 	}
 

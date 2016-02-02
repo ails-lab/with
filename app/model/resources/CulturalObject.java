@@ -60,14 +60,6 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 
 		private MultiLiteralOrResource dccontributor;
 
-		public MultiLiteralOrResource getDcrights() {
-			return dcrights;
-		}
-
-		public void setDcrights(MultiLiteralOrResource dcrights) {
-			this.dcrights = dcrights;
-		}
-
 		private List<WithDate> dccreated;
 		private List<WithDate> dcdate;
 
@@ -102,6 +94,14 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 
 		public void setDctype(MultiLiteralOrResource dctype) {
 			this.dctype = dctype;
+		}
+
+		public MultiLiteralOrResource getDcrights() {
+			return dcrights;
+		}
+
+		public void setDcrights(MultiLiteralOrResource dcrights) {
+			this.dcrights = dcrights;
 		}
 
 		public MultiLiteralOrResource getDccoverage() {
@@ -194,9 +194,21 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	 */
 	public Map<String, Object> transformCU() {
 
-		Map<String, Object> idx_map = this.transformWR();
+		Map<String, Object> idx_map = this.transformRR();
 
 		idx_map.put("dccreator", ((CulturalObjectData)getDescriptiveData()).getDccreator());
+		idx_map.put("dcidentifier", ((CulturalObjectData)getDescriptiveData()).getDcidentifier());
+		idx_map.put("dclanguage", ((CulturalObjectData)getDescriptiveData()).getDclanguage());
+		idx_map.put("dctype", ((CulturalObjectData)getDescriptiveData()).getDctype());
+		idx_map.put("dccoverage", ((CulturalObjectData)getDescriptiveData()).getDccoverage());
+		idx_map.put("dcrights", ((CulturalObjectData)getDescriptiveData()).getDcrights());
+		idx_map.put("dctermsspatial", ((CulturalObjectData)getDescriptiveData()).getDcspatial());
+		idx_map.put("dccontributor", ((CulturalObjectData)getDescriptiveData()).getDccontributor());
+		idx_map.put("dcformat", ((CulturalObjectData)getDescriptiveData()).getDcformat());
+		idx_map.put("dctermsmedium", ((CulturalObjectData)getDescriptiveData()).getDctermsmedium());
+		idx_map.put("isRelatedTo", ((CulturalObjectData)getDescriptiveData()).getIsRelatedTo());
+		idx_map.put("events", ((CulturalObjectData)getDescriptiveData()).getEvents());
+
 
 		return idx_map;
 	}
