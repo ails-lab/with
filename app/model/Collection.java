@@ -133,7 +133,7 @@ public class Collection {
 	}
 
 	public boolean getIsPublic() {
-		return rights.isPublic();
+		return rights.getIsPublic();
 	}
 
 	public void setIsPublic(boolean isPublic) {

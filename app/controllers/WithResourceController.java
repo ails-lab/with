@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 import model.DescriptiveData;
@@ -127,13 +128,14 @@ public class WithResourceController extends Controller {
 				if (record.getProvenance() != null
 						&& !record.getProvenance().isEmpty()) {
 					last = record.getProvenance().size() - 1;
-					source = Sources.valueOf(((ProvenanceInfo) record
-							.getProvenance().get(last)).getProvider());
-				} else
-					record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
-							.asList(new ProvenanceInfo(source.toString()))));
-				String externalId = ((ProvenanceInfo) record.getProvenance()
-						.get(last)).getResourceId();
+				    source = Sources.valueOf(((ProvenanceInfo) record
+						.getProvenance().get(last)).getProvider());
+				}
+				else 
+					record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays.asList(new ProvenanceInfo(source.toString()))));
+				String externalId = ((ProvenanceInfo) record.getProvenance().get(last)).getResourceId();
+				if (externalId == null)
+					externalId = record.getAdministrative().getExternalId();
 				ObjectId recordId = null;
 				if (externalId != null
 						&& DB.getRecordResourceDAO().existsWithExternalId(
@@ -176,9 +178,8 @@ public class WithResourceController extends Controller {
 					record.getAdministrative().setCreated(new Date());
 					switch (source) {
 					case UploadedByUser:
-						// Fill the EmbeddedMediaObject from the MediaObject
-						// that
-						// has been created
+						ObjectId recordDbId = record.getDbId();
+						// Fill the EmbeddedMediaObject from the MediaObject that has been created
 						record.getAdministrative().setWithCreator(userId);
 						String mediaUrl;
 						WithMediaRights withRights;
@@ -197,49 +198,47 @@ public class WithResourceController extends Controller {
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
 						recordId = record.getDbId();
-						// update provenance chain based on record dbId
-						DB.getRecordResourceDAO().updateProvenance(
-								recordId,
-								last,
-								new ProvenanceInfo("UploadedByUser",
-										"/records/" + recordId.toString(),
-										record.getDbId().toString()));
-						DB.getRecordResourceDAO().updateField(recordId,
-								"administrative.externalId",
-								"record/" + recordId);
+						//setting of provevance's resourceId and externalId (based on recordDbId) is taken care by postLoad in WithResource
+						DB.getRecordResourceDAO().updateProvenance(recordId, last, new ProvenanceInfo("UploadedByUser", 
+								"record/" + recordId, recordId.toString()));
+						DB.getRecordResourceDAO().updateField(recordId, "administrative.externalId", recordId.toString());
+						//DB.getRecordResourceDAO().updateField(recordId, "administrative.externalId", recordId.toString());
+						break;
 					case Mint:
 						errors = RecordResourceController
 								.validateRecord(record);
 						record.getAdministrative().setWithCreator(userId);
+						List<ProvenanceInfo> provenance = record.getProvenance();
+						record.getAdministrative().setExternalId(provenance.get(last).getResourceId());
 						if (errors != null) {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
 						recordId = record.getDbId();
-					default:// imported first time from other sources
-						// there is no withCreator and the record is public
-						record.getAdministrative().getAccess()
-								.setIsPublic(true);
-						errors = RecordResourceController
-								.validateRecord(record);
+						break;
+					default://imported first time from other sources
+						//there is no withCreator and the record is public
+						record.getAdministrative().getAccess().setIsPublic(true);
+						errors = RecordResourceController.validateRecord(record);
+						provenance = record.getProvenance();
+						record.getAdministrative().setExternalId(provenance.get(last).getResourceId());
 						if (errors != null) {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
 						recordId = record.getDbId();
-						// TODO: how can record have a dbId?
 						addContentToRecord(record.getDbId(), source.toString(),
 								externalId);
+						break;
 					}
 				}
-				// Updates collection administrative metadata and record's usage
-				// and collectedIn
-				// the rights of all collections the resource belongs to are
-				// merged and are copied to the record
-				// only if the user OWNs the resource
-				boolean owns = DB.getRecordResourceDAO().hasAccess(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Action.DELETE, recordId);
+				// Updates collection administrative metadata and record's usage and collectedIn
+				//the rights of all collections the resource belongs to are merged and are copied to the record
+				//only if the user OWNs the resource
+				boolean owns = DB.getRecordResourceDAO().hasAccess(AccessManager.effectiveUserDbIds(session().get(
+						"effectiveUserIds")), Action.DELETE, recordId);
+				//make sure that update is called after record has been saved in the db
+				//while (!record.isPostPersist()) {};
 				if (position.isDefined() && recordId != null) {
 					Integer pos = position.get();
 					DB.getRecordResourceDAO().addToCollection(recordId,

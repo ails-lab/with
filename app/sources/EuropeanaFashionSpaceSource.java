@@ -30,7 +30,7 @@ import sources.core.QueryModifier;
 import sources.core.RecordJSONMetadata;
 import sources.core.SourceResponse;
 import sources.core.RecordJSONMetadata.Format;
-import model.Provider.Sources;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 
 import com.fasterxml.jackson.databind.JsonNode;
 

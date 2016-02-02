@@ -28,9 +28,9 @@ import com.optimaize.langdetect.text.TextObjectFactory;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.Provider.Sources;
 import model.basicDataTypes.ILiteral;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;

@@ -16,12 +16,14 @@
 
 package db;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -34,11 +36,14 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 
 import play.Logger;
 import play.libs.F.Callback;
 import utils.Tuple;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
@@ -261,6 +266,59 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	
 	public boolean existsEntity(ObjectId id) {
 		return existsFieldWithValue("_id", id);
-
 	}
+	
+	public void updateField(ObjectId id, String field, Object value) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<E> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set(field, value);
+		this.updateFirst(q, updateOps);
+	}
+	
+	/**
+	 * Increment the specified field in a CollectionObject
+	 * @param dbId
+	 * @param fieldName
+	 */
+	public void incField( String fieldName, ObjectId dbId) {
+		Query<E> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<E> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.inc(fieldName);
+		this.updateFirst(q, updateOps);
+	}
+
+	/**
+	 * Decrement the specified field in a CollectionObject
+	 * @param dbId
+	 * @param fieldName
+	 */
+	public void decField(String fieldName, ObjectId dbId) {
+		Query<E> q = this.createQuery().field("_id").equal(dbId);
+		UpdateOperations<E> updateOps = this.createUpdateOperations();
+		updateOps.dec(fieldName);
+		this.updateFirst(q, updateOps);
+	}
+	
+	public void updateFields(String parentField, JsonNode node,
+			UpdateOperations<E> updateOps) {
+		Iterator<String> fieldNames = node.fieldNames();
+		  while (fieldNames.hasNext()) {
+	         String fieldName = fieldNames.next();
+	         JsonNode fieldValue = node.get(fieldName);
+        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
+	         if (fieldValue.isObject()) {
+	        	 updateFields(newFieldName, fieldValue, updateOps);
+	         }
+	         else {//value
+				try {
+					ObjectMapper mapper = new ObjectMapper();
+					Object value = mapper.treeToValue(fieldValue, newFieldName.getClass());
+					updateOps.disableValidation().set(newFieldName, value);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}	 
+	         }
+	     }
+	}
+
 }

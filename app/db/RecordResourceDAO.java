@@ -284,7 +284,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
 		WithAccess newAccess = null;
 		if (changeRecRights)
-			newAccess = mergeParentCollectionRights(recordId, co.getAdministrative().getAccess());
+			newAccess = mergeParentCollectionRights(recordId, colId, co.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 		shiftRecordsToRight(colId, position+1);
 	}
@@ -294,30 +294,34 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
 		WithAccess newAccess = null;
 		if (changeRecRights)
-			newAccess = mergeParentCollectionRights(recordId, co.getAdministrative().getAccess());
+			newAccess = mergeParentCollectionRights(recordId, colId, co.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
 	}
 	
-	public WithAccess mergeParentCollectionRights(ObjectId recordId, WithAccess newColAccess) {
-		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access")));
+	public WithAccess mergeParentCollectionRights(ObjectId recordId, ObjectId newColId, WithAccess newColAccess) {
+		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access.isPublic", "administrative.withCreator")));
 		List<ObjectId> parentCollections = getParentCollections(recordId);
 		List<WithAccess> parentColAccess = new ArrayList<WithAccess>();
-		parentColAccess.add(newColAccess);
 		for (ObjectId colId: parentCollections) {
-			CollectionObject parentCollection = DB.getCollectionObjectDAO().getById(colId, new ArrayList<String>(Arrays.asList("administrative.access")));
-			parentColAccess.add(parentCollection.getAdministrative().getAccess());
+			if (colId.equals(newColId)) 
+				parentColAccess.add(newColAccess);
+			else {
+				CollectionObject parentCollection = DB.getCollectionObjectDAO().getById(colId, new ArrayList<String>(Arrays.asList("administrative.access")));
+				parentColAccess.add(parentCollection.getAdministrative().getAccess());
+			}
 		}
 		//hope there aren't too many collections containing the resource
-		return mergeRights(record.getAdministrative().getAccess(), parentColAccess);
+		//if the record is public, it should remain public. Acl rights are determined by the collections the record belongs to
+		return mergeRights(parentColAccess, record.getAdministrative().getWithCreator(), record.getAdministrative().getAccess().getIsPublic());
 	}
 	
 	public void updateMembersToMergedRights(ObjectId colId, AccessEntry newAccess) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id", "administrative.access"));
 		WithAccess colAccess = DB.getCollectionObjectDAO().getById(colId, retrievedFields).getAdministrative().getAccess();
-		colAccess.getAcl().add(newAccess);
+		colAccess.addToAcl(newAccess);
 		List<RecordResource> memberRecords = getByCollection(colId, retrievedFields);
 		for (RecordResource r: memberRecords) {
-			WithAccess mergedAccess = mergeParentCollectionRights(r.getDbId(), colAccess);
+			WithAccess mergedAccess = mergeParentCollectionRights(r.getDbId(), colId, colAccess);
 			updateField(r.getDbId(), "administrative.access", mergedAccess);
 		}
 	}
@@ -359,4 +363,23 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
 	}
+	
+	public void removeAllRecordsFromCollection(ObjectId colId) {
+		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id", "collectedIn"));
+		List<RecordResource> memberRecords = getByCollection(colId, retrievedFields);
+		for (RecordResource record: memberRecords) {
+			ObjectId recordId = record.getDbId();
+			List<CollectionInfo> collectedIn = record.getCollectedIn();
+			if (collectedIn.size() > 1) {
+				UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
+				Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
+				//TODO: check that the null value indeed works for ignoring position
+				updateOps.removeAll("collectedIn", new CollectionInfo(colId, null));
+				this.update(q, updateOps);
+			}
+			else
+				deleteById(recordId);
+		}
+	}
+	
 }

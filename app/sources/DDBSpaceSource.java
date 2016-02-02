@@ -31,7 +31,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.ExternalBasicRecord;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.Provider.Sources;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
 
 public class DDBSpaceSource extends ISpaceSource {

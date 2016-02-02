@@ -38,7 +38,7 @@ GET 	 /collection/list 						controllers.CollectionObjectController.list(directl
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean ?= false)
-GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="", start: Integer ?=0, count: Integer ?=10)
+GET      /collection/:id/list		   	        controllers.CollectionObjectController.listRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
@@ -66,9 +66,7 @@ DELETE   /collection/:id	                    controllers.CollectionController.de
 # Record Controller (tested)
 
 GET		/record/similar/:externalId				controllers.RecordController.getSimilar(externalId)
-GET		/record/:id								controllers.RecordController.getRecord(id, format: play.libs.F.Option[String])
 PUT 	/record/:id								controllers.RecordController.updateRecord(id, format ?= null)
-DELETE	/record/:id								controllers.RecordController.deleteRecord(id, format: String ?="XML-EDM")
 
 #Group Manager
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")

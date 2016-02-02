@@ -22,10 +22,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.Provider.Sources;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;

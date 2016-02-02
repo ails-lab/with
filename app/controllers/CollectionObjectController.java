@@ -195,7 +195,8 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						collectionDbId);
-				DB.getCollectionObjectDAO().makeTransient(collection);
+				//TODO: have to test that this works
+				DB.getRecordResourceDAO().removeAllRecordsFromCollection(collectionDbId);
 				result.put("message", "Resource was deleted successfully");
 				return ok(result);
 			}
@@ -420,7 +421,7 @@ public class CollectionObjectController extends WithResourceController {
 			ObjectId id = colls.get(index);
 			CollectionObject c = DB.getCollectionObjectDAO().getById(id);
 			if (effectiveUserIds.isEmpty()) {
-				if (c.getAdministrative().getAccess().isPublic())
+				if (c.getAdministrative().getAccess().getIsPublic())
 					collectionsOrExhibitions.add(c);
 			} else {
 				Access maxAccess = AccessManager.getMaxAccess(c
@@ -532,19 +533,17 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			ArrayNode recordsList = Json.newObject().arrayNode();
 			for (RecordResource e : records) {
-				if (contentFormat.equals("contentOnly")) {
+				if (contentFormat.equals("contentOnly") && e.getContent()!= null) {
 					recordsList.add(Json.toJson(e.getContent()));
-				} else {
-					if (e.getContent() != null) {
-						if (contentFormat.equals("noContent")) {
-							e.getContent().clear();
-						} else if (e.getContent().containsKey(contentFormat)) {
-							HashMap<String, String> newContent = new HashMap<String, String>(
-									1);
-							newContent.put(contentFormat, (String) e
-									.getContent().get(contentFormat));
-							e.setContent(newContent);
-						}
+				}
+				else {
+					if (contentFormat.equals("noContent")) {
+						e.getContent().clear();
+					}
+					else if ( e.getContent()!= null && e.getContent().containsKey(contentFormat)) {
+						HashMap<String, String> newContent = new HashMap<String, String>(1);
+						newContent.put(contentFormat, (String) e.getContent().get(contentFormat));
+						e.setContent(newContent);
 					}
 					recordsList.add(Json.toJson(e));
 				}

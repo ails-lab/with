@@ -95,7 +95,7 @@ public class WithAccess  {
 	private boolean isPublic;
 	private List<AccessEntry> acl = new ArrayList<AccessEntry>();
 
-	public boolean isPublic() {
+	public boolean getIsPublic() {
 		return isPublic;
 	}
 
@@ -110,7 +110,7 @@ public class WithAccess  {
 	}
 
 	public void addToAcl(AccessEntry accessEntry) {
-		this.acl.add(accessEntry);
+		addToAcl(accessEntry.getUser(), accessEntry.getLevel());
 	}
 
 	public void addToAcl(ObjectId userId, Access access) {
@@ -144,7 +144,7 @@ public class WithAccess  {
 		return Access.NONE;
 	}
 	
-	public static boolean containsUser(List<AccessEntry> acl, ObjectId userId) {
+	public boolean containsUser(ObjectId userId) {
 		for (AccessEntry entry: acl) {
 			if (entry.getUser().equals(userId))
 				return true;
