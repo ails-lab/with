@@ -1,6 +1,10 @@
 define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugin','./js/app/params','smoke'], function (ko, FB, imagesLoaded, moment,plugin,params) {
 
 	var self = this;
+	
+	//hold the selected lang value from ui
+	self.lang=ko.observable("");
+	
 	self.WITHApp = "";
 
 	self.settings = $.extend({
@@ -341,7 +345,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		$(".collect").each(function () {
 			$(this).css("display", "");
 		});
-		self.loadFavorites();
+		//self.loadFavorites();
 
 		
 
@@ -613,7 +617,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				var temparray=[];
 				array.forEach(function (item) {
 					temparray.push({
-						title: findByLangValues(item.descriptiveData.label,""),
+						title: self.findByLang(item.descriptiveData.label),
 						dbId: item.dbId
 					});
 				});
@@ -818,16 +822,17 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	self.checkLogged();
 	
 	
-	function findByLangValues(val,sellang) {
+	self.findByLang=function(val) {
         selvalue="";
-        if(sellang.length==0){
-				sellang="default";
+        var uilang="";
+        if(self.lang().length==0){
+				uilang="default";
 			}
 	      if(val){
-	       if (val[sellang]) {
-	    	   for(var i=0;i<val[sellang].length;i++){
+	       if (val[uilang]) {
+	    	   for(var i=0;i<val[uilang].length;i++){
 	                	if(selvalue.length>0){selvalue+=",";}
-	                	selvalue=val[sellang][i];
+	                	selvalue=val[uilang][i];
 	    	   }
 	        }
         else{   selvalue=val.unknown;}  
@@ -836,6 +841,102 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
          return selvalue;
   }
 
+	 self.findProvenanceValues=function(array, selection) {
+			selvalue="";
+			if(selection=="dataProvider"){
+			  if(array.length>1 && array[0].provider)
+				  selvalue=array[0].provider; 
+				  
+			     
+			 }
+			else if(selection=="dataProvider_uri"){
+				  if(array.length>1){
+					  selvalue=array[0].uri; 
+					  
+					  if(array[0].uri && array[0].uri.length>0){
+						  selvalue=array[0].uri; 
+			        	}
+			              
+				 }}
+			else if (selection=="provider"){
+				  if(array.length==3){
+					  selvalue=array[1].provider; 
+					  
+					  if(array[1].uri && array[1].uri.length>0){
+			        		if(array[1].provider && array[1].provider.length>0){
+			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
+			        		}
+			        		else{
+			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
+			        		}
+			        	}else if(array[1].provider){
+			              selvalue+=array[1].provider;}
+					  
+				     }	
+			}
+			else if (selection=="provider_uri"){
+				  if(array.length==3)
+					  if(array[1].uri && array[1].uri.length>0){
+			        		
+			        			selvalue=array[1].uri;
+			        		}
+			        		
+			        	
+			}
+			else if (selection=="source"){
+				var size=array.length-1;
+				if(array[size].provider){
+	              selvalue+=array[size].provider;}
+			  
+		     }
+			else if (selection=="source_uri"){
+				var size=array.length-1;
+				if(array[size].uri && array[size].uri.length>0){
+	        		
+	        			selvalue=array[size].uri;
+	        		
+	        		
+	        	}
+			  
+		     }
+			else if (selection=="id"){
+				var size=array.length-1;
+				if(array[size].resourceId && array[size].resourceId.length>0){
+	        		
+	        			selvalue+=array[size].resourceId;
+	        		}
+	        	
+			  
+		     }
+			return selvalue;
+				
+		}
+	 
+	 
+	 self.findResOrLit=function(data) {
+		 
+			selvalue="";
+			var uilang="";
+		    if(self.lang().length==0){
+						uilang="default";
+					}
+			     
+			if(data){
+			if(data[uilang]){
+				
+			   for(var i=0;i<data[uilang].length;i++){
+			                	if(selvalue.length>0){selvalue+=",";}
+			                	selvalue=data[uilang][i];
+			     }
+			    
+			}
+			else if(data.uri){
+				selvalue=data.uri;
+			}}
+			return selvalue;
+			
+		}
+			 
 	
 	//self.reloadUser(); // Reloads the user on refresh
 	
@@ -860,6 +961,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		reloadUser: reloadUser,
 		showPopup: showPopup,
 		closePopup: closePopup,
+		findByLang: findByLang,
+		findProvenanceValues: findProvenanceValues,
+		findResOrLit: findResOrLit,
 		autoCompleteUserName: autoCompleteUserName,
 		logout: logout,
 		getUserCollections: getUserCollections,

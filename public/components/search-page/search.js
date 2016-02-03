@@ -471,10 +471,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						//recordId: result.recordId || result.id,
 						thumb: media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 						fullres: media!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
-						title: findByLangValues(descdata.label,self.lang()),
-						description: findByLangValues(descdata.description,self.lang()),
+						title: app.findByLang(descdata.label),
+						description: app.findByLang(descdata.description),
 						view_url: findProvenanceValues(provenance,"source_uri"),
-						creator: findByLangValues(descdata.dccreator,self.lang()),
+						creator: app.findByLang(descdata.dccreator),
 						dataProvider: findProvenanceValues(provenance,"dataProvider"),
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
@@ -566,23 +566,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			});
 		};
 
-	 function findByLangValues(val,sellang) {
-	          selvalue="";
-	          if(sellang.length==0){
-					sellang="default";
-				}
-		      if(val){
-		       if (val[sellang]) {
-		    	   for(var i=0;i<val[sellang].length;i++){
-		                	if(selvalue.length>0){selvalue+=",";}
-		                	selvalue=val[sellang][i];
-		    	   }
-		        }
-	          else{   selvalue=val.unknown;}  
-		      }
-		        
-	           return selvalue;
-	    }
+	
         
 	 
 	 function findProvenanceValues(array, selection) {

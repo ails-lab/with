@@ -3,7 +3,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	$.bridget('isotope', Isotope);
 	
-	
+	self.loading=ko.observable(false);
 		
 	ko.bindingHandlers.homeisotope = {
 					init: app.initOrUpdate('init'),
@@ -97,7 +97,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	
 	function Collection(data) {
 		var self=this;
-		self.isLoaded = ko.observable(false);
 		var mapping = {
 				create: function(options) {
 			    	var self=this;
@@ -105,7 +104,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			    	
 			    	self=$.extend(self, options.data);
 			    	
-			    	self.title=findByLangValues(self.descriptiveData.label, "");
+			    	self.title=findByLang(self.descriptiveData.label);
 			    	
 			        self.thumbnail = ko.computed(function() {
 			        	if(self.media){
@@ -155,45 +154,58 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		};
 		
 		
-		
-		
-		 
-		
-		findByLangValues = function (val,sellang) {
-	          selvalue="";
-	          
-		       if(sellang.length==0){
-						sellang="default";
-					}
-			      if(val){
-			       if (val[sellang]) {
-			    	   for(var i=0;i<val[sellang].length;i++){
-			                	if(selvalue.length>0){selvalue+=",";}
-			                	selvalue=val[sellang][i];
-			    	   }
+		var recmapping={
+				'dbId': {
+					key: function(data) {
+			            return ko.utils.unwrapObservable(data.dbId);
 			        }
-			       else if (val["en"]) {
-			    	   selvalue=val["en"][0];
-			       }
-		          else{   selvalue=val.unknown;}  
-			      }
-	          
-	           return selvalue;
-	    }
+				 }};
+		self.isLoaded = ko.observable(false);
+		self.records=ko.mapping.fromJS([], recmapping);
 		
 		
-		self.collectionData = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":"","media":""}, mapping);
+		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":"","media":""}, mapping);
 		
 		
 		self.load = function(data) {
-			self.collectionData=ko.mapping.fromJS(data, mapping);
-			console.log(self.collectionData);
+			self.data=ko.mapping.fromJS(data, mapping);
+			console.log(self.data);
+			self.loadRecords(0,30);
 			
 		};
 
+		self.loadRecords= function(offset,count){
+			loading(true);
+			var promise=self.getCollectionRecords(0,30);
+			 $.when(promise).done(function(responseRecords) {
+				 ko.mapping.fromJS(responseRecords.records,recmapping,self.records);
+				 loading(false);
+				 console.log(self.records());
+			 });
+		}
 		
-		if(data != undefined) 
+		self.more= function(){
+			var offset=self.records().length;
+			self.loadRecords(offset,30);
+		}
+		
+		self.getCollectionRecords = function (offset,count) {
+			//call should be replaced with space collections+exhibitions
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/"+self.data.dbId+"/list",
+				processData: false,
+				data: "start="+offset+"&count="+count,
+			}).success (function(){
+			});
+		};
+		
+		if(data != undefined){ 
 			self.load(data);
+			
+		}
 	}
 	
 	
@@ -202,7 +214,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  var self = this;
 	  
 	  $("div[role='main']").toggleClass( "homepage", true );
-	  self.loading = ko.observable(false);
+	 // self.loading = ko.observable(false);
 	  self.exhibitloaded=ko.observable(false);
 	  self.featuredExhibition=ko.observable(null);	
 	  self.featuredCollection=ko.observable(null);
@@ -211,7 +223,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.totalExhibitions=ko.observable(0);
 	 	
 	  self.revealItems = function (data) {
-		  if(data.length==0){ self.loading(false);$(".loadmore").text("no more results");}
+		  if(data.length==0){ loading(false);$(".loadmore").text("no more results");}
 			
 			for (var i in data) {
 				var c=new Collection(
@@ -227,7 +239,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
-		   self.loading(true);
+		   loading(true);
 		 
 		  var promiseCollections = self.getSpaceCollections();
 		  $.when(promiseCollections).done(function(responseCollections) {
@@ -292,11 +304,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		};
 
 		self.moreCollections = function () {
-			if (self.loading === true) {
+			if (loading() === true) {
 				setTimeout(self.moreCollections(), 1000);
 			}
-			if (self.loading() === false) {
-				self.loading(true);
+			if (loading() === false) {
+				loading(true);
 				var offset = self.homecollections().length+1;
 				$.ajax({
 					"url": "/collection/list?isPublic=true&count=20&offset=" + offset,
@@ -307,7 +319,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 						
 					},
 					"error": function (result) {
-						self.loading(false);
+						loading(false);
 					}
 				});
 			}
