@@ -271,7 +271,7 @@ public class CollectionObjectController extends WithResourceController {
 				|| (isPublic.isDefined() && (isPublic.get() == true))) {
 			//if not logged or ask for public collections, return all public collections
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
-					.getCollectionObjectDAO().getByPublicAndAcl(
+					.getCollectionObjectDAO().getPublicAndByAcl(
 							accessedByUserOrGroup, creatorId,
 							isExhibitionBoolean, collectionHits, offset, count);
 			userCollections = info.x;
@@ -305,6 +305,45 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			List<ObjectNode> collections = collectionWithUserData(info.x,
 					effectiveUserIds);
+			for (ObjectNode c : collections)
+				collArray.add(c);
+			result.put("collectionsOrExhibitions", collArray);
+			return ok(result);
+		}
+	}
+	
+	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup, Option<Boolean> isExhibition, boolean collectionHits,
+			int offset, int count) {
+		ObjectNode result = Json.newObject().objectNode();
+		ArrayNode collArray = Json.newObject().arrayNode();
+		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition.get() : null;
+		if (effectiveUserIds.isEmpty()) {
+			return forbidden(Json.parse("\"error\", \"Must specify user for the collection\""));
+		} else {
+			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
+			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
+			accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserOrGroup, recursivelyAccessedByUserOrGroup);
+			List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
+			if (direct) {
+				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId, Access.READ));
+				accessedByUserOrGroup.add(accessedByLoggedInUser);
+			} else {// indirectly: include collections for which user has access
+					// via userGoup sharing
+				for (String effectiveId : effectiveUserIds) {
+					accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(new ObjectId(effectiveId), Access.READ));
+				}
+				accessedByUserOrGroup.add(accessedByLoggedInUser);
+			}
+			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB.getCollectionObjectDAO().getSharedAndByAcl(
+					userId, accessedByUserOrGroup, isExhibitionBoolean, collectionHits, offset, count);
+			if (info.y != null) {
+				result.put("totalCollections", info.y.x);
+				result.put("totalExhibitions", info.y.y);
+			}
+
+			List<ObjectNode> collections = collectionWithUserData(info.x, effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("collectionsOrExhibitions", collArray);

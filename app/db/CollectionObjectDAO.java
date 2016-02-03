@@ -229,12 +229,17 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	 * @param count
 	 * @return
 	 */
-	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByPublicAndAcl(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getPublicAndByAcl(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(this.createQuery().criteria("administrative.access.isPublic").equal(true)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition, totalHits, offset, count);
 	}
 	
+	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
+			Boolean isExhibition,  boolean totalHits, int offset, int count) {
+		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(this.createQuery().criteria("administrative.withCreator").notEqual(creator)));
+		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition, totalHits, offset, count);
+	}
 	
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
@@ -270,6 +275,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		colUpdate.inc("administrative.entryCount");
 		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
 	}
+	
 
 	
 }
