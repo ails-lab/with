@@ -1,0 +1,30 @@
+{
+	"resource": {
+	  "dynamic_date_formats" : ["yyyy-MM-dd", "dd-MM-yyyy"],
+	  "dynamic_templates": [
+	    {
+	       "access": {
+	      	"match": "access",
+	      	"mapping": {
+	      		"type": "nested"
+	      	}
+	       }
+	      },
+	      {
+	       "strings": {
+	        "match_mapping_type": "string",
+	        "mapping": {
+	          "type": "string",
+	          "fields": {
+	            "all": {
+	              "type": "string",
+	              "index": "not_analyzed",
+	              "ignore_above": 512
+	            }
+	          }
+	        } 
+	      }
+	    }
+	  ]
+  }
+}

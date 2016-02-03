@@ -21,8 +21,13 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import model.Collection;
 import model.resources.RecordResource;
+
+import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -66,11 +71,19 @@ public class Elastic {
 	public static String shards   		    = getConf().getString("elasticsearch.index.num_of_shards");
 	public static String replicas  		    = getConf().getString("elasticsearch.index.num_of_replicas");
 	public static String alias   		    = getConf().getString("elasticsearch.alias.name");
-	public static String typeResource       = getConf().getString("elasticsearch.index.type.resource");
 	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
-	public static String typeCollection     = getConf().getString("elasticsearch.index.type.collection");
-	public static String mappingCollection  = getConf().getString("elasticsearch.index.mapping.collection");
 
+	public static final String typeResource       = "resource";
+	public static final String typeCollection     = "collection";
+	public static final String typeCultural       = "cultural";
+	public static final String typeAgent          = "agent";
+	public static final String typeEvent		  = "event";
+	public static final String typePlace	      = "place";
+	public static final String typeTimespan	      = "timespan";
+	public static final String typeEuscreen	      = "euscreen";
+	public static final List<String> allTypes 	  = new ArrayList<String>() {{
+														add(typeResource); add(typeCollection); add(typeCultural);
+														add(typeAgent); add(typeEvent); add(typePlace); add(typeTimespan); }};
 
 
 
@@ -217,10 +230,18 @@ public class Elastic {
 
 		// create the index and put the alias to it
 		try {
-			Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index)
-					.setSettings(Elastic.getIndexSettings())
-					.addMapping(typeResource, resourceMapping.toString())
-					.execute().actionGet();
+			CreateIndexRequestBuilder index_builder = Elastic.getTransportClient()
+					.admin().indices().prepareCreate(Elastic.index)
+					.setSettings(Elastic.getIndexSettings());
+
+			/* Add mappings for all fields */
+			for(String type: allTypes)
+					index_builder.addMapping(type, resourceMapping.toString());
+
+			/* Excecute the request */
+					index_builder.execute().actionGet();
+
+
 			if(!old_index.equals(""))
 				Elastic.getTransportClient().admin().indices().prepareAliases()
 						.removeAlias("old_index", alias)

@@ -85,10 +85,8 @@ public class SearchController extends Controller {
 			// Parse the query.
 			try {
 				final CommonQuery q = Utils.parseJson(json);
-				List<String> elasticTypes = new ArrayList<String>();
-				elasticTypes.add(Elastic.typeResource);
 				//elasticTypes.add(Elastic.typeCollection);
-				q.setTypes(elasticTypes);
+				q.setTypes(Elastic.allTypes);
 				if (session().containsKey("effectiveUserIds")) {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
