@@ -31,7 +31,9 @@ import model.Collection;
 import model.CollectionRecord;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
+import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.RecordResource;
@@ -41,6 +43,7 @@ import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import model.usersAndGroups.UserOrGroup;
 
 import org.bson.types.ObjectId;
 
@@ -549,5 +552,45 @@ public class CollectionObjectController extends WithResourceController {
 			result.put("records", recordsList);
 			return ok(result);
 		}
+	}
+	
+	public static Result listUsersWithRights(String collectionId) {
+		ArrayNode result = Json.newObject().arrayNode();
+		List<String> retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(new ObjectId(collectionId), retrievedFields);
+		WithAccess access = collection.getAdministrative().getAccess();
+		for (AccessEntry ae: access.getAcl()) {
+			ObjectId userId = ae.getUser();
+			User user = DB.getUserDAO().getById(userId, null);
+			Access accessRights = ae.getLevel();
+			if (user != null) {
+				result.add(userOrGroupJson(user, accessRights));
+			} else {
+				UserGroup usergroup = DB.getUserGroupDAO().get(userId);
+				if (usergroup != null)
+					result.add(userOrGroupJson(usergroup, accessRights));
+				else
+					return internalServerError("User with id " + userId + " cannot be retrieved from db");
+			}
+		}
+		return ok(result);
+	}
+	
+	private static ObjectNode userOrGroupJson(UserOrGroup user, Access accessRights) {
+		ObjectNode userJSON = Json.newObject();
+		userJSON.put("userId", user.getDbId().toString());
+		userJSON.put("username", user.getUsername());
+		if (user instanceof User) {
+			userJSON.put("category", "user");
+			userJSON.put("firstName", ((User) user).getFirstName());
+			userJSON.put("lastName", ((User) user).getLastName());
+		} else
+			userJSON.put("category", "group");
+		String image = UserAndGroupManager.getImageBase64(user);
+		userJSON.put("accessRights", accessRights.toString());
+		if (image != null) {
+			userJSON.put("image", image);
+		}
+		return userJSON;
 	}
 }
