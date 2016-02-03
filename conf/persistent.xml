@@ -8,7 +8,7 @@
 
     <persistence-unit name="with_persist">
 
-        <provider>com.impetus.kundera.KunderaPersistence</provider>
+        <ProvenanceInfo>com.impetus.kundera.KunderaPersistence</provider>
 
         <properties>
 

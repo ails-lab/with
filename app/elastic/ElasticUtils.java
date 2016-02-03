@@ -226,7 +226,7 @@ public class ElasticUtils {
 		/*
 		 * User Rights structure in the document
 		 */
-		idx_doc.put("isPublic", rr.getAdministrative().getAccess().isPublic());
+		idx_doc.put("isPublic", rr.getAdministrative().getAccess().getIsPublic());
 		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
 
 		/*

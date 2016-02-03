@@ -75,7 +75,7 @@ public class RecordResourceController extends WithResourceController {
 				return response;
 			else {
 				if (format.isDefined()) {
-					if (format.equals("allContent")) {
+					if (format.equals("contentOnly")) {
 						return ok(Json.toJson(resource.getContent()));
 					}
 					else {
@@ -83,7 +83,7 @@ public class RecordResourceController extends WithResourceController {
 							resource.getContent().clear();
 							return ok(Json.toJson(resource));
 						}
-						else if (resource.getContent().containsKey(format)) {
+						else if (resource.getContent() != null && resource.getContent().containsKey(format)) {
 							return ok(resource.getContent().get(format).toString());
 						}
 						else {

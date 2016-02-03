@@ -246,7 +246,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
 		updateOps.set("provenance."+index, info);
-		this.update(q, updateOps);
+		this.updateFirst(q, updateOps);
 	}
 
 	public boolean isPublic(ObjectId id) {
@@ -337,31 +337,43 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
 		for (AccessEntry entry: access.getAcl()) {
 			if (entry.getUser().equals(userId)) {
-				if (!access.equals(Access.NONE))
-					updateOps.set("administrative.access.acl."+index+".level", newAccess);
-				else
-					updateOps.unset("administrative.access.acl."+index);
+				//userExists = true;
+				break;
 			}
 			index+=1;
+		}
+		if (index < access.getAcl().size())
+			if (!newAccess.equals(Access.NONE))
+				updateOps.set("administrative.access.acl."+index, new AccessEntry(userId, newAccess));
+			else
+				updateOps.removeAll("administrative.access.acl", new AccessEntry(userId, null));
+		else {
+			updateOps.add("administrative.access.acl", new AccessEntry(userId, newAccess));
 		}
 		this.update(this.createQuery().field("_id").equal(resourceId), updateOps);
 	}
 	
-	public WithAccess mergeRights(WithAccess recordAccess, List<WithAccess> parentColAccess) {
+	public WithAccess mergeRights(List<WithAccess> parentColAccess, ObjectId recordWithCreator, boolean recordIsPublic) {
+		WithAccess newRecordAccess = new WithAccess();
+		newRecordAccess.setIsPublic(recordIsPublic);
+		//initially fill in rewRecordData with most liberal rights of parent collections
 		for (WithAccess colAccess: parentColAccess) {
-			if (colAccess.isPublic())
-				recordAccess.setIsPublic(true);
+			if (colAccess.getIsPublic())
+				newRecordAccess.setIsPublic(true);
 			for (AccessEntry colEntry: colAccess.getAcl()) {
-				if (!WithAccess.containsUser(recordAccess.getAcl(), colEntry.getUser()))
-					recordAccess.addToAcl(colEntry);
-				for (AccessEntry recEntry: recordAccess.getAcl()) {
+				if (!newRecordAccess.containsUser(colEntry.getUser()) && colEntry.getLevel() != Access.NONE)
+					newRecordAccess.addToAcl(colEntry);
+				for (AccessEntry recEntry: newRecordAccess.getAcl()) {
 					if (recEntry.getUser().equals(colEntry.getUser()))
 						if (colEntry.getLevel().ordinal() > recEntry.getLevel().ordinal())
 							recEntry.setLevel(colEntry.getLevel());
 				}
 			}
 		}
-		return recordAccess;
+		//withCreator of record should always maintain OWN rights (?)
+		if (recordWithCreator != null)
+			newRecordAccess.addToAcl(recordWithCreator, Access.OWN);
+		return newRecordAccess;
 	}
 	
 	public List<ObjectId> getParentCollections(ObjectId resourceId) {
@@ -448,55 +460,4 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		decField("usage.likes", dbId);
 	}
 
-	public void updateField(ObjectId id, String field, Object value) {
-		Query<T> q = this.createQuery().field("_id").equal(id);
-		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
-		updateOps.set(field, value);
-		this.update(q, updateOps);
-	}
-	/**
-	 * Increment the specified field in a CollectionObject
-	 * @param dbId
-	 * @param fieldName
-	 */
-	public void incField( String fieldName, ObjectId dbId) {
-		Query<T> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
-		updateOps.inc(fieldName);
-		this.update(q, updateOps);
-	}
-
-	/**
-	 * Decrement the specified field in a CollectionObject
-	 * @param dbId
-	 * @param fieldName
-	 */
-	public void decField(String fieldName, ObjectId dbId) {
-		Query<T> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<T> updateOps = this.createUpdateOperations();
-		updateOps.dec(fieldName);
-		this.update(q, updateOps);
-	}
-	
-	public void updateFields(String parentField, JsonNode node,
-			UpdateOperations<T> updateOps) {
-		Iterator<String> fieldNames = node.fieldNames();
-		  while (fieldNames.hasNext()) {
-	         String fieldName = fieldNames.next();
-	         JsonNode fieldValue = node.get(fieldName);
-        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
-	         if (fieldValue.isObject()) {
-	        	 updateFields(newFieldName, fieldValue, updateOps);
-	         }
-	         else {//value
-				try {
-					ObjectMapper mapper = new ObjectMapper();
-					Object value = mapper.treeToValue(fieldValue, newFieldName.getClass());
-					updateOps.disableValidation().set(newFieldName, value);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}	 
-	         }
-	     }
-	}
 }

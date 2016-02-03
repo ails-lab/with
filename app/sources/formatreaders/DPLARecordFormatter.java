@@ -26,7 +26,7 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.Provider.Sources;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -56,6 +56,11 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 				language[i] = Language.getLanguage(langs.get(i).path("iso639_3").asText());
 			}
 			System.out.println(Arrays.toString(language));
+		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("sourceResource.title"),
+											rec.getStringValue("sourceResource.description"),
+											rec.getStringValue("sourceResource.subject"));
 		}
 		rec.setLanguages(language);
 		

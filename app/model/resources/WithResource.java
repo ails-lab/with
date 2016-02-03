@@ -32,9 +32,14 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.annotations.PostLoad;
+import org.mongodb.morphia.annotations.PostPersist;
+import org.mongodb.morphia.annotations.PrePersist;
+import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
+import scala.xml.dtd.ExternalID;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -106,7 +111,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		// recordId of last entry of provenance chain id the resource has been
 		// imported from external resource
 		// dbId if uploaded by user
-		private String externalId;
+		protected String externalId;
 
 		public WithAccess getAccess() {
 			return access;
@@ -535,8 +540,39 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.annotations = annotations;
 	}
 
-	//TODO: check whether this is indeed called by toJson, so that it is included to the josn returned to the ui
 	public User getWithCreatorInfo() {
 		return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
 	}
+	
+	/*@PostPersist void postPersist() {
+		try {
+			if (postPersist == false) {//first time to be saved
+				ProvenanceInfo info =  provenance.get(provenance.size()-1);
+				if (info.getProvider().equals("UploadedByUser") && info.getResourceId() == null) {
+					System.out.println("1 " + dbId);
+					DB.getRecordResourceDAO().updateProvenance(dbId, provenance.size()-1, new ProvenanceInfo("UploadedByUser", 
+						"record/" + dbId, dbId.toString()));
+				}
+				if (administrative.getExternalId() == null ||administrative.getExternalId().isEmpty()) {
+					System.out.println("2 " + dbId);
+					DB.getRecordResourceDAO().updateField(dbId, "administrative.externalId", dbId.toString());
+				}
+				System.out.println("finished");
+				postPersist = true;
+			}
+		} catch(Exception e) {
+			System.out.println(e.getCause());
+		}
+		
+	}
+	
+	public boolean isPostPersist() {
+		return postPersist;
+	}*/
+	
+	/*@PostLoad void prePersist() {
+		if (provenance != null && !provenance.isEmpty())
+			administrative.externalId = provenance.get(provenance.size()-1).getResourceId();
+	}*/
+
 }

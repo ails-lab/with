@@ -20,7 +20,7 @@ import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Provider;
+import model.basicDataTypes.ProvenanceInfo;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -99,7 +99,7 @@ public class ExternalBasicRecord {
 	
 	private List<Year> years;
 	
-	private List<Provider> provenanceChain = new ArrayList<Provider>();
+	private List<ProvenanceInfo> provenanceChain = new ArrayList<ProvenanceInfo>();
 		
 	private String subject;
 	
@@ -237,38 +237,38 @@ public class ExternalBasicRecord {
 		this.type = type;
 	}
 
-	public List<Provider> getProvenanceChain() {
+	public List<ProvenanceInfo> getProvenanceChain() {
 		return provenanceChain;
 	}
 	
 	public void setProvenanceChain() {
 	}
 	
-	public void addProvider(Provider provider, int position) {
+	public void addProvider(ProvenanceInfo provider, int position) {
 		provenanceChain.add(position, provider);
 	}
 	
-	public void addProvider(Provider provider) {
+	public void addProvider(ProvenanceInfo provider) {
 		provenanceChain.add(provider);
 	}
 	
 	public String getSource() {
 		if (!provenanceChain.isEmpty())
-			return provenanceChain.get(provenanceChain.size()-1).providerName;
+			return provenanceChain.get(provenanceChain.size()-1).getProvider();
 		else 
 			return "";
 	}
 	
 	public String getRecordIdInSource() {
 		if (!provenanceChain.isEmpty())
-			return provenanceChain.get(provenanceChain.size()-1).recordId;
+			return provenanceChain.get(provenanceChain.size()-1).getResourceId();
 		else 
 			return "";
 	}
 	
 	public String getRecordUrlInSource() {
 		if (!provenanceChain.isEmpty())
-			return provenanceChain.get(provenanceChain.size()-1).recordUrl;
+			return provenanceChain.get(provenanceChain.size()-1).getUri();
 		else 
 			return "";
 	}

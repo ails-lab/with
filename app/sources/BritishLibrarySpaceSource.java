@@ -27,7 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
-import model.Provider.Sources;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
