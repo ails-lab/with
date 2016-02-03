@@ -16,8 +16,10 @@
 
 package model.resources;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import org.mongodb.morphia.annotations.Entity;
 
 import model.basicDataTypes.CidocEvent;
@@ -208,6 +210,14 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		idx_map.put("dctermsmedium", ((CulturalObjectData)getDescriptiveData()).getDctermsmedium());
 		idx_map.put("isRelatedTo", ((CulturalObjectData)getDescriptiveData()).getIsRelatedTo());
 		idx_map.put("events", ((CulturalObjectData)getDescriptiveData()).getEvents());
+
+		List<Integer> dccreated = new ArrayList<Integer>();
+		((CulturalObjectData)getDescriptiveData()).getDccreated().forEach( (d) -> dccreated.add(d.getYear()));
+		idx_map.put("dccreated", dccreated);
+
+		List<Integer> dcdate = new ArrayList<Integer>();
+		((CulturalObjectData)getDescriptiveData()).getDcdate().forEach( (d) -> dcdate.add(d.getYear()));
+		idx_map.put("dcdate", dcdate);
 
 
 		return idx_map;
