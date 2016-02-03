@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import model.EmbeddedMediaObject.Quality;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
@@ -40,6 +41,10 @@ import model.basicDataTypes.WithDate;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 public class DescriptiveData {
+	
+	public static enum Quality {
+		POOR, AVERAGE, GOOD, EXCELLENT
+	}
 
 	public DescriptiveData() {
 	}
@@ -77,6 +82,18 @@ public class DescriptiveData {
 
 	// alternative title or name or placename
 	private MultiLiteral altLabels;
+	
+	// The country at which the resource is currently located
+	//in case of Agents, Places, Timespan
+	private MultiLiteralOrResource country;
+
+	// The city at which the resource is currently located
+	//in case of Agents, Places, Timespan
+	private MultiLiteralOrResource city;
+	
+	private org.mongodb.morphia.geo.Point coordinates;
+	
+	private Quality metadataQuality;
 
 	
 	public MultiLiteral getLabel() {
@@ -157,5 +174,37 @@ public class DescriptiveData {
 
 	public void setAltLabels(MultiLiteral altLabels) {
 		this.altLabels = altLabels;
+	}
+	
+	public MultiLiteralOrResource getCountry() {
+		return country;
+	}
+
+	public void setCountry(MultiLiteralOrResource country) {
+		this.country = country;
+	}
+
+	public MultiLiteralOrResource getCity() {
+		return city;
+	}
+
+	public void setCity(MultiLiteralOrResource city) {
+		this.city = city;
+	}
+
+	public org.mongodb.morphia.geo.Point getCoordinates() {
+		return coordinates;
+	}
+
+	public void setCoordinates(org.mongodb.morphia.geo.Point coordinates) {
+		this.coordinates = coordinates;
+	}
+
+	public Quality getMetadataQuality() {
+		return metadataQuality;
+	}
+
+	public void setMetadataQuality(Quality metadataQuality) {
+		this.metadataQuality = metadataQuality;
 	}
 }

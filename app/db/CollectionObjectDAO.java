@@ -284,7 +284,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	//it may happen that e.g. the thumbnail of the 4th instead of the 3d record of the media appears in the collections's (3) media 
 	public void addCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
 		//int entryCount = updateCollectionAdmin(colId).getAdministrative().getEntryCount();//old entry count
-		if (position <=3) {
+		if (position < 3) {
 			RecordResource record = DB.getRecordResourceDAO().getById(recordId, new ArrayList<String>(Arrays.asList("media")));
 			if (record.getMedia() != null) {
 				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
@@ -296,6 +296,31 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				colUpdate.set("media."+position, colMedia);
 				this.update(cq,  colUpdate);
 			}
+		}
+	}	
+	
+	public void removeCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
+		if (position < 3) {
+			//new Media should be based on records' positions before shifting.
+			List<RecordResource> newFollowingRecords = new ArrayList<RecordResource>();
+			for (int i = position+1; i<3; i++) {
+				RecordResource record = DB.getRecordResourceDAO().getByCollectionAndPosition(colId, position+1);
+				if (record != null)
+					newFollowingRecords.add(record);
+			}
+			UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+			for (int i=position; i<3; i++) {
+				if (i-position < newFollowingRecords.size()) {
+					RecordResource record = newFollowingRecords.get(i-position);
+					HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
+					EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
+					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
+					     put(MediaVersion.Thumbnail, thumbnail);}};
+					colUpdate.set("media."+i, colMedia);
+				}
+			}
+			this.update(cq,  colUpdate);
 		}
 	}	
 }

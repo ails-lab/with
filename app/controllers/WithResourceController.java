@@ -289,7 +289,8 @@ public class WithResourceController extends Controller {
 				}
 				//TODO: if position undefined, remove from all Positions. shift other records will be harder in that case though.
 				//modify record's access: the record gets the most liberal rights of the collections it belongs to after the removal
-				DB.getRecordResourceDAO().updateRecordRightsUponRemovalFromCollection(recordDbId, collectionDbId);				
+				DB.getRecordResourceDAO().updateRecordRightsUponRemovalFromCollection(recordDbId, collectionDbId);
+				DB.getCollectionObjectDAO().removeCollectionMedia(collectionDbId, recordDbId, position.get());
 				if (DB.getCollectionObjectDAO().isFavorites(collectionDbId))
 					DB.getRecordResourceDAO().decrementLikes(recordDbId);
 				else
@@ -372,15 +373,7 @@ public class WithResourceController extends Controller {
 										});
 						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
 								media);
-						mediaString = mapper
-								.readTree(data.getJsonContent()).get("provenance")
-								.toString();
-						List<ProvenanceInfo> provenance = new ObjectMapper()
-						.readValue(
-								mediaString,
-								new TypeReference<List<ProvenanceInfo>>() {
-								});
-						DB.getWithResourceDAO().updateProvenance(recordId, provenance);
+					} else {
 						DB.getRecordResourceDAO().updateContent(
 								record.getDbId(), data.getFormat(),
 								data.getJsonContent());
