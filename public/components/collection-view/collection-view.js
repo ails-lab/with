@@ -51,48 +51,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.collected=0;
 		self.collectedIn=[];
 		self.dbId="";
-		var mapping = {
-				create: function(options) {
-			    	var self=this;
-			        // use extend instead of map to avoid observables
-			    	
-			    	var admindata=options.administrative;
-					var descdata=options.descriptiveData;
-					var media=options.media;
-					var provenance=options.provenance;
-					var usage=options.usage;
-			    	
-			    	self=$.extend(self, options.data);
-							
-			    	if(descdata){
-			    	  self.title=findByLang(descdata.label);
-			    	  self.description=findByLang(descdata.description);
-			    	  self.rights=findResOrLit(descdata.metadataRights);
-			    	  self.creator=findByLang(descdata.dccreator);
-				 	}
-				    	
-			    	self.dbId=options.dbId;
-			    	if(provenance){
-				    	self.view_url=findProvenanceValues(provenance,"source_uri");
-				    	self.dataProvider=findProvenanceValues(provenance,"dataProvider");
-				    	self.provider=findProvenanceValues(provenance,"provider");
-				    	self.source=findProvenanceValues(provenance,"source");}
-			    	
-			    	
-			    	self.externalId=admindata.externalid;
-			    	if(usage){
-				    	self.likes=usage.likes;
-				    	self.collected=usage.collected;
-				    	self.collectedIn=usage.collectedIn;}
-			    	
-			    	self.thumb=media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:null;
-		        	self.fullres=media!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : null,
-		        	self.isLoaded = ko.observable(false);
-		    				
-			       
-				}};
-		
-		
 		 self.thumbnail = ko.pureComputed(function() {
 		        
 	        	if(self.thumb){
@@ -216,12 +174,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.entryCount = ko.observable(0);
 		self.citems = ko.observableArray();
 		self.selectedRecord = ko.observable(false);
-
+	    self.loggedUser=app.isLogged();
+		
 	
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
 		self.showAPICalls = ko.observable(false);
-		var $container = $(".grid").isotope({
+		var $container = $(".grid#"+self.id()).isotope({
 			itemSelector: '.media',
 			transitionDuration: transDuration,
 			masonry: {
@@ -380,14 +339,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				});
 			}
 		};
-		
-		/*self.recordSelect= function (e){
-        	$( '.itemview' ).fadeIn();
-			itemShow(e);
-
-		}
-*/
-		
+	
 
 		self.addCollectionRecord = function (e) {
 			self.citems.push(e);
@@ -481,9 +433,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 		
 		function getItem(record) {
-			
 		
-			 var tile= '<div class="item media" id="'+record.dbId+'"> <div class="wrap">';
+			 var tile= '<div class="item media"> <div class="wrap">';
 			 if(isLogged()){
 				    if(record.isLiked()){
 				    	 tile+='<span class="star active">';
@@ -504,11 +455,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.dbId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					
 			 }
-                    tile+='<a href="#" onclick="recordSelect(\''+record.dbId+'\',event)">'
+                    tile+='<a href="#" data-view="inline"  onclick="recordSelect(\''+record.dbId+'\',event)">'
                      +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
-                     +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
-                     +'<span class="rights">'+record.sourceCredits()+'</span>'
-                    +'</a></div> </div>';
+                     +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div></a>'
+                     + "<div class='sourceCredits'><a href='"+record.view_url+ "' target='_new'>"+record.sourceCredits()+"</a></div></div></div>";
+ 					
+ 					
 			return tile;
 			
 		}
@@ -522,7 +474,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
      	}
        
        
-       self.recordSelect = function (data,event) {
+       recordSelect = function (data,event) {
        	
        	event.preventDefault();
 			var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
@@ -533,25 +485,27 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 		}
 
-       self.refresh=function(){
-    	   loading(true);
-    	   var items=self.citems();
-			
-			if(items.length>0){
-				 var $newitems=getItems(items);
-			     
-				 self.isotopeImagesReveal( $container,$newitems );
-
-				}
-			loading(false);
-    	   
-       }
-		
+     	
 		
 		 self.isotopeImagesReveal = function( $container,$items ) {
+			 $container=$(".grid#"+self.id());
 	 		  var iso = $container.data('isotope');
-	 		  var itemSelector = iso.options.itemSelector;
-	 		  
+	 		 var itemSelector=null;
+	 		  if(iso) 
+	 		      itemSelector = iso.options.itemSelector;
+	 		  else{
+	 			$container = $(".grid#"+self.id()).isotope({
+	 				itemSelector: '.media',
+	 				transitionDuration: transDuration,
+	 				masonry: {
+	 					columnWidth		: '.sizer',
+	 					percentPosition	: true
+	 				
+	 				}
+	 			});
+	 			iso = $container.data('isotope');
+	 			 itemSelector = iso.options.itemSelector;
+	 		  }
 	 		  // append to container
 	 		 $container.append( $items );
 	 		// hide by default
@@ -562,13 +516,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	 		    // un-hide item
 	 		    $item.show();
 	 		    iso.appended( $item );
-	 		  // $container.isotope("layout");
 	 		   var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
-	 			if(scrollpos && $(".grid").height()>scrollpos){
+	 			if(scrollpos && $(".grid#"+self.id()).height()>scrollpos){
 	 		    	 $(window).scrollTop(scrollpos);
 	 		    	 sessionStorage.removeItem("collection-viewscroll"+self.id());
-	 		    }else if(scrollpos && $(".grid").height()<scrollpos){
-	 		    	$(window).scrollTop($(".grid").height());	
+	 		    }else if(scrollpos && $(".grid#"+self.id()).height()<scrollpos){
+	 		    	$(window).scrollTop($(".grid#"+self.id()).height());	
 	 		    	
 	 		    }
 				 
@@ -576,12 +529,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	 		  }).always(function(){
 				  
 	 			 var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
-	  			if(scrollpos && $(".grid").height()>scrollpos){
+	  			if(scrollpos && $(".grid#"+self.id()).height()>scrollpos){
 	  		    	 $(window).scrollTop(scrollpos);
 	  		    	 sessionStorage.removeItem("collection-viewscroll"+self.id());
-	  		    }else if(scrollpos && $(".grid").height()<scrollpos){
-	  		    	$(window).scrollTop($(".grid").height());	
-	  		    	if(scrollpos!=null && $(".grid").height()>scrollpos)
+	  		    }else if(scrollpos && $(".grid#"+self.id()).height()<scrollpos){
+	  		    	$(window).scrollTop($(".grid#"+self.id()).height());	
+	  		    	if(scrollpos!=null && $(".grid#"+self.id()).height()>scrollpos)
 			    		sessionStorage.removeItem("collection-viewscroll"+self.id());
 	  		    }
 	 			 

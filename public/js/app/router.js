@@ -21,6 +21,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
 			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } },
+			{ url: 'collectionview/{id}/count/{count}',     params: { page: 'collection-view',    title: 'Collection View' } },
 			{ url: 'exhibitionview/{id}',     params: { page: 'exhibition-view',    title: 'Exhibition View' } },
 			{ url: 'reset/{token}', params: { page: 'new-password', title: 'Reset Password' } },
 			{ url: 'exhibition-edit',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
@@ -50,7 +51,26 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	function activateCrossroads() {
 		//temp fix: scrollbar moves to top when route changes
 		function resetScroll(){document.body.scrollTop = document.documentElement.scrollTop = 0;}
-		function parseHash(newHash, oldHash) { crossroads.parse(newHash);}
+		function parseHash(newHash, oldHash) { 
+			if(oldHash)
+				if(oldHash.indexOf("provider/")==0){
+					 var scrollPosition = $(window).scrollTop();
+					 oldHash=oldHash.substring(9);
+					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
+					 sessionStorage.setItem("provider"+oldHash, scrollPosition);
+				}
+				else if (oldHash.indexOf("collectionview/")==0){
+					var scrollPosition = $(window).scrollTop();
+					 oldHash=oldHash.substring(15);
+					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
+					 
+					 console.log("collection-viewscroll"+oldHash);
+					 sessionStorage.setItem("collection-viewscroll"+oldHash, scrollPosition);
+				     
+				}
+			crossroads.parse(newHash);
+		
+		}
 		
 		crossroads.ignoreState= true; 
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;

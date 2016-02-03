@@ -40,7 +40,7 @@ a {
 .listing .grid .item .wrap a:focus {
   text-decoration: none;
   opacity: 1;
-  filter: alpha(opacity=100);
+  /*filter: alpha(opacity=100);*/
 }
 .listing .grid .sizer .wrap .thumb,
 .listing .grid .item .wrap .thumb {
