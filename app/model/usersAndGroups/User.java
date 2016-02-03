@@ -53,14 +53,33 @@ import db.DB;
 		@Index(fields = @Field(value = "facebookId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "googleId", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "userGroupsIds", type = IndexType.ASC), options = @IndexOptions()) })
-		
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class User extends UserOrGroup {
 
 	public static final ALogger log = Logger.of(User.class);
 
 	private enum Gender {
-		MALE, FEMALE, UNSPECIFIED
+		MALE("Male"), FEMALE("Female"), UNSPECIFIED("Unspecified");
+
+		private final String name;
+
+		private Gender(String name) {
+			this.name = name;
+		}
+
+		public static Gender getGender(String string) {
+			for (Gender v : Gender.values()) {
+				if (v.toString().equals(string))
+					return v;
+			}
+			return UNSPECIFIED;
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+
 	}
 
 	private String email;
@@ -206,27 +225,12 @@ public class User extends UserOrGroup {
 		this.facebookId = facebookId;
 	}
 
-	private String genderToString(Gender gender) {
-		String genderString = String.valueOf(gender);
-		String first = genderString.substring(0, 1).toUpperCase();
-		return first + genderString.substring(1).toLowerCase();
-	}
-
 	public String getGender() {
-		if (gender != null) {
-			return genderToString(gender);
-		} else {
-			return genderToString(Gender.UNSPECIFIED);
-		}
+		return gender.toString();
 	}
 
 	public void setGender(String gender) {
-		try {
-			Gender genderType = Gender.valueOf(gender);
-			this.gender = genderType;
-		} catch (IllegalArgumentException ex) {
-			this.gender = Gender.UNSPECIFIED;
-		}
+		this.gender = Gender.getGender(gender);
 	}
 
 	public String getGoogleId() {

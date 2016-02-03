@@ -48,22 +48,16 @@ GET	     /collection/:id 	        			controllers.CollectionObjectController.getC
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)
 
+# Exhibition Controller
+POST     /exhibition/create                     controllers.CollectionObjectController.createCollectionObject(exhibition: Boolean?= true)
+
 GET 	 /collection/listShared					controllers.CollectionController.listShared(direct: Boolean ?= true, directlyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], directlyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByGroupName: play.libs.F.Option[controllers.parameterTypes.MyPlayList], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
 GET 	 /collection/featured					controllers.CollectionController.getFeatured(groupOrUserName: String, isExhibition: play.libs.F.Option[java.lang.Boolean], offset: Integer ?=0, countPerType: Integer ?=10)
 POST     /collection/listByUser			        controllers.CollectionController.listFirstRecordsOfUserCollections()
-
-# Cache Controller
-GET		 /cache/byUrl							controllers.CacheController.getImage(url, thumbnail: Boolean ?= true)
-DELETE   /cache/clear							controllers.CacheController.clearCache()
-
-# Exhibition Controller
-POST     /exhibition/create                     controllers.ExhibitionController.createExhibition()
-
 GET      /collection/:id/listUsers				controllers.CollectionController.listUsersWithRights(id)
 
 # Record Controller (tested)
-
-GET		/record/similar/:externalId				controllers.RecordController.getSimilar(externalId)
+#GET		/record/similar/:externalId				controllers.RecordController.getSimilar(externalId)
 
 #Group Manager
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
