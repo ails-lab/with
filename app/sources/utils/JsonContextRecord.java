@@ -36,6 +36,7 @@ import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import play.libs.Json;
 import scala.collection.mutable.HashMap;
+import sources.core.Utils;
 
 public class JsonContextRecord {
 
@@ -174,14 +175,24 @@ public class JsonContextRecord {
 		return getValue(buildpaths(path));
 	}
 
+	/**
+	 * returns any of the paths that has information on it.
+	 * @param path
+	 * @return
+	 * @see Utils.hasInfo(...)
+	 */
 	public String getStringValue(String... path) {
-		JsonNode node = getValue(buildpaths(path));
-		if (node != null)
-			return JsonNodeUtils.asString(node);
-		else
-			return null;
+		for (String spath : path) {
+			JsonNode node = getValue(buildpaths(spath));
+			if (node != null) {
+				String res = JsonNodeUtils.asString(node);
+				if (Utils.hasInfo(res))
+					return res;
+			}
+		}
+		return null;
 	}
-	
+
 	public Language[] getLanguages() {
 		return languages;
 	}
@@ -199,42 +210,82 @@ public class JsonContextRecord {
 		}
 	}
 
+	/**
+	 * gets the combined information of all the paths.
+	 * @param path
+	 * @return
+	 */
 	public MultiLiteral getMultiLiteralValue(String... path) {
-		JsonNode node = getValue(buildpaths(path));
-		if (node != null)
-			return JsonNodeUtils.asMultiLiteral(node,languages);
-		else
-			return null;
-	}
-	
-	public Literal getLiteralValue(String... path) {
-		JsonNode node = getValue(buildpaths(path));
-		if (node != null)
-			return JsonNodeUtils.asLiteral(node,languages);
-		else
-			return null;
+		MultiLiteral res = null;
+		for (String spath : path) {
+			JsonNode node = getValue(buildpaths(spath));
+			if (node != null)
+				res = merge(res, JsonNodeUtils.asMultiLiteral(node, languages));
+		}
+		return res;
 	}
 
-	public MultiLiteralOrResource getMultiLiteralOrResourceValue(String... path) {
-		JsonNode node = getValue(buildpaths(path));
-		if (node != null)
-			return JsonNodeUtils.asMultiLiteralOrResource(node,languages);
-		else
-			return null;
+	/**
+	 * gets any of the paths that has information.
+	 * @param path
+	 * @return
+	 */
+	public Literal getLiteralValue(String... path) {
+		for (String spath : path) {
+			JsonNode node = getValue(buildpaths(spath));
+			if (node != null) {
+				Literal res = JsonNodeUtils.asLiteral(node, languages);
+				if (Utils.hasInfo(res))
+					return res;
+			}
+		}
+		return null;
 	}
-	
-	public LiteralOrResource getLiteralOrResourceValue(String... path) {
-		JsonNode node = getValue(buildpaths(path));
-		if (node != null)
-			return JsonNodeUtils.asLiteralOrResource(node,languages);
+
+	/**
+	 * gets the combined information of all the paths.
+	 * @param path
+	 * @return
+	 */
+	public MultiLiteralOrResource getMultiLiteralOrResourceValue(String... path) {
+		MultiLiteralOrResource res = null;
+		for (String spath : path) {
+			JsonNode node = getValue(buildpaths(spath));
+			if (node != null)
+				res = merge(res, JsonNodeUtils.asMultiLiteralOrResource(node, languages));
+		}
+		return res;
+	}
+
+	private <T extends MultiLiteral> T merge(T res, T other) {
+		if (!Utils.hasInfo(res))
+			res = other;
 		else
-			return null;
+			res.merge(other);
+		return res;
+	}
+
+	/**
+	 * gets one of the paths with information on it.
+	 * @param path
+	 * @return
+	 */
+	public LiteralOrResource getLiteralOrResourceValue(String... path) {
+		for (String spath : path) {
+			JsonNode node = getValue(buildpaths(spath));
+			if (node != null) {
+				LiteralOrResource res = JsonNodeUtils.asLiteralOrResource(node, languages);
+				if (Utils.hasInfo(res))
+					return res;
+			}
+		}
+		return null;
 	}
 
 	public List<String> getStringArrayValue(String... path) {
 		return JsonNodeUtils.asStringArray(getValue(buildpaths(path)));
 	}
-	
+
 	public List<WithDate> getWithDateArrayValue(String... path) {
 		return JsonNodeUtils.asWithDateArray(getValue(buildpaths(path)));
 	}

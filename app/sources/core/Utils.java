@@ -18,6 +18,7 @@ package sources.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.validator.routines.UrlValidator;
@@ -25,6 +26,8 @@ import org.apache.commons.validator.routines.UrlValidator;
 import play.libs.Json;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import model.basicDataTypes.MultiLiteralOrResource;
 
 public class Utils {
 
@@ -311,6 +314,10 @@ public class Utils {
 				list.add(o);
 		}
 		return list;
+	}
+
+	public static <K,T> boolean hasInfo(HashMap<K,T> res) {
+		return res!=null && !res.isEmpty();
 	}
 
 }

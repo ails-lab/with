@@ -66,28 +66,24 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 											rec.getStringValue("fulltext"));
 		}
 		rec.setLanguages(language);
-		
-		
-		
 		model.setLabel(rec.getMultiLiteralValue("title"));
-		model.setDescription(rec.getMultiLiteralValue("description"));
-		//TODO Needs to be fixed. Pick one of object_url, thumbnail_url, large_thumbnail_url that is not null
-		//TODO altLabels <-alternative_title 
-		//TODO description <- additional_description
-		//TODO dcidentifier <- dc_identifier
-		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url"));
+		model.setDescription(rec.getMultiLiteralValue("description","additional_description"));
+		model.setAltLabels(rec.getMultiLiteralValue("alternative_title"));
+		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dc_identifier"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url","humbnail_url", "large_thumbnail_url"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("contributor"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dctype"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("category"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("collection[0]"), rec.getStringValue("landing_url"),null));
 		object.addToProvenance(
 				new ProvenanceInfo(rec.getStringValue("content_partner[0]")));
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
 		
-		//TODO keywords <- category
+		
 		//TODO EmbeddedMediaObject.originalRights <- rights_url
 		List<String> rights = rec.getStringArrayValue("usage");
 		String stringValue = rec.getStringValue("category");
@@ -105,8 +101,8 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		
 		
 		
-		String uri3 = rec.getStringValue("thumbnail_url");//TODO MediaVersion.Thumbnail <- thumbnail_url or object_url
-		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
+		String uri3 = rec.getStringValue("thumbnail_url","object_url");//TODO MediaVersion.Thumbnail <- thumbnail_url or object_url
+		String uri2 = rec.getStringValue("large_thumbnail_url");
 		if (Utils.hasInfo(uri3)){
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
