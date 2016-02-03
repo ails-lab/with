@@ -183,6 +183,9 @@ public class EmbeddedMediaObject {
 		if (url.startsWith("/")) {
 			return url;
 		}
+		if (mediaVersion == null) {
+			return null;
+		}
 		return "/media/byUrl?url=" + url + "version=" + mediaVersion.toString();
 	}
 
