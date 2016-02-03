@@ -195,8 +195,9 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						collectionDbId);
-				//TODO: have to test that this works
-				DB.getRecordResourceDAO().removeAllRecordsFromCollection(collectionDbId);
+				// TODO: have to test that this works
+				DB.getRecordResourceDAO().removeAllRecordsFromCollection(
+						collectionDbId);
 				result.put("message", "Resource was deleted successfully");
 				return ok(result);
 			}
@@ -533,17 +534,20 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			ArrayNode recordsList = Json.newObject().arrayNode();
 			for (RecordResource e : records) {
-				if (contentFormat.equals("contentOnly") && e.getContent()!= null) {
+				if (contentFormat.equals("contentOnly")
+						&& e.getContent() != null) {
 					recordsList.add(Json.toJson(e.getContent()));
-				}
-				else {
-					if (contentFormat.equals("noContent")) {
-						e.getContent().clear();
-					}
-					else if ( e.getContent()!= null && e.getContent().containsKey(contentFormat)) {
-						HashMap<String, String> newContent = new HashMap<String, String>(1);
-						newContent.put(contentFormat, (String) e.getContent().get(contentFormat));
-						e.setContent(newContent);
+				} else {
+					if (e.getContent() != null) {
+						if (contentFormat.equals("noContent")) {
+							e.getContent().clear();
+						} else if (e.getContent().containsKey(contentFormat)) {
+							HashMap<String, String> newContent = new HashMap<String, String>(
+									1);
+							newContent.put(contentFormat, (String) e
+									.getContent().get(contentFormat));
+							e.setContent(newContent);
+						}
 					}
 					recordsList.add(Json.toJson(e));
 				}
