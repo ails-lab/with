@@ -29,96 +29,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		return observable;
 	};
 
-/*	function Record(data) {
-		var self = this;
-	    self.recordId = "";
-		self.title = "";
-		self.description="";
-		self.thumb = "";
-		self.fullres="";
-		self.view_url="";
-		self.source="";
-		self.creator="";
-		self.provider="";
-		self.rights="";
-		self.dataProvider="";
-		self.url="";
-		self.externalId = "";
-		self.isLoaded = ko.observable(false);
-		self.isLiked = ko.pureComputed(function () {
-			return app.isLiked(self.externalId);
-		});
-		self.load = function(data) {
-			if(data.title==undefined){
-				self.title="No title";
-			}else{self.title=data.title;}
-			self.url="#item/"+data.id;
-			self.view_url=data.view_url;
-			self.thumb=data.thumb;
-			self.fullres=data.fullres;
-			self.description=data.description;
-			self.dataProvider=data.dataProvider;
-			self.source=data.source;
-			console.log("source:"+self.source);
-			self.creator=data.creator;
-			self.provider=data.provider;
-			self.rights=data.rights;
-			self.recordId=data.id;
-			self.externalId=data.externalId;
-		};
 
-		self.cachedThumbnail = ko.pureComputed(function() {
-			
-		   if(self.thumb){
-			if (self.thumb.indexOf('/') === 0) {
-				return self.thumb;
-			} else {
-				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
-				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-			}}
-		   else{
-			   return "img/content/thumb-empty.png";
-		   }
-		});
-		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source) {
-			    case "DPLA":
-			    	return "dp.la";
-			    case "Europeana":
-			    	return "europeana.eu";
-			    case "NLA":
-			    	return "nla.gov.au";
-			    case "DigitalNZ":
-			    	return "digitalnz.org";
-			    case "EFashion":
-			    	return "europeanafashion.eu";
-			    case "YouTube": 
-			    	return "youtube.com";
-			    case "Mint":
-			    	return "mint";
-			    case "Rijksmuseum":
-					return "www.rijksmuseum.nl";
-			    default: return "";
-			 }
-			});
-		self.displayTitle = ko.pureComputed(function() {
-			var distitle="";
-			distitle=self.title;
-			if(self.creator!==undefined && self.creator.length>0)
-				distitle+=", by "+self.creator;
-			if(self.provider!==undefined && self.provider.length>0 && self.provider!=self.creator)
-				distitle+=", "+self.provider;
-			return distitle;
-		});
-
-		if(data != undefined) self.load(data);
-		
-	}*/
-	
 	function Record(data) {
 		var self = this;
-		var self = this;
-	    self.recordId = "";
+		
 		self.title = "";
 		self.description="";
 		self.thumb = "";
@@ -512,18 +426,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			});
 		};
 
-/*		self.likeRecord = function (rec) {
-			
-			app.likeItem(rec, function (status) {
-				if (status) {
-					$('#' + rec.recordId).addClass('active');
-				} else {
-					$('#' + rec.recordId).removeClass('active');
-				}
-			});
-		};
-*/
-		
 
 		self.uploadItem = function() {
 			app.showPopup('image-upload', { collectionId: self.id() });
@@ -579,32 +481,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 		
 		function getItem(record) {
-			
-			/* <div class="item media" data-bind="visible: isLoaded(), attr: { id: recordId}">
-             <div class="wrap">
-             <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()">
-						<span class="fa-stack fa-fw" title="add to favorites" data-bind="visible:externalId!=null,event: { click: function() { $parent.likeRecord(this); } }">
-							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
-						</span>
-					</span>
-				
-					 <span class="collect" title="remove" data-bind="visible: isLogged() && ($parent.access()=='WRITE' || $parent.access()=='OWN'), event: { click: function(){ $parent.removeRecord(recordId )}}"><i class="fa fa-trash-o fa-inverse"></i>
-						</span>
-			    <!-- anchor--><a href="#" data-view="inline"  data-bind="event: {click: function(){$parent.recordSelect($data)}}">
-                 <!-- thumbnail-->
-                 <div class="thumb"><img data-bind="attr: {src: cachedThumbnail()}"  onError="this.src='img/content/thumb-empty.png'"></div>
-                 <!-- info-->
-                 <div class="info">
-                   <h1 class="title" data-bind="text: displayTitle()"></h1><span class="owner" data-bind="text: provider"></span>
-                 </div>
-               </a>
-              <div class="sourceCredits">
-					
-					<a data-bind="text:sourceCredits(),attr: { href: view_url }" target="_new"></a></div>
-                
-             </div>
-           </div>	*/
-			
 			
 		
 			 var tile= '<div class="item media" id="'+record.dbId+'"> <div class="wrap">';
