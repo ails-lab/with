@@ -164,9 +164,18 @@ public class ElasticSearcher {
 		fedSearchFieldsWithBoosts.put("keywords", 1.3f);
 
 		this.aggregatedFields = new ArrayList<String>();
-		aggregatedFields.add("label.en.all");
-		aggregatedFields.add("description.fr");
-		aggregatedFields.add("label");
+		aggregatedFields.add("resourceType.all");
+		aggregatedFields.add("provider.all");
+		aggregatedFields.add("dataProvider.all");
+		aggregatedFields.add("media.type.all");
+		aggregatedFields.add("dccreator.all");
+		aggregatedFields.add("dccontributor.all");
+		aggregatedFields.add("dctermsspatial.all");
+		aggregatedFields.add("contentusage.all");
+		aggregatedFields.add("dates");
+		aggregatedFields.add("media.type.all");
+		aggregatedFields.add("media.withRights.all");
+
 	}
 
 
