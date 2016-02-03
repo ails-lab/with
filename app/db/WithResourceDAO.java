@@ -444,6 +444,14 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 
+	public void updateProvenance(ObjectId recId, List<ProvenanceInfo> provenance) {
+		Query<T> q = this.createQuery().field("_id").equal(recId);
+		UpdateOperations<T> updateOps = this
+				.createUpdateOperations();
+		updateOps.set("provenance", provenance);
+		this.update(q, updateOps);
+	}
+	
 	/**
 	 * Increment likes for this specific resource
 	 * @param externalId

@@ -362,7 +362,15 @@ public class WithResourceController extends Controller {
 										});
 						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
 								media);
-					} else {
+						mediaString = mapper
+								.readTree(data.getJsonContent()).get("provenance")
+								.toString();
+						List<ProvenanceInfo> provenance = new ObjectMapper()
+						.readValue(
+								mediaString,
+								new TypeReference<List<ProvenanceInfo>>() {
+								});
+						DB.getWithResourceDAO().updateProvenance(recordId, provenance);
 						DB.getRecordResourceDAO().updateContent(
 								record.getDbId(), data.getFormat(),
 								data.getJsonContent());
