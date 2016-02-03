@@ -44,7 +44,6 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
-import model.basicDataTypes.ResourceType;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -90,7 +89,6 @@ public class DAOsTests {
 		CollectionAdmin wa = new CollectionObject.CollectionAdmin();
 		wa.setCreated(new Date());
 		wa.setWithCreator(u.getDbId());
-		wa.setExhibition(false);
 		WithAccess waccess = new WithAccess();
 		AccessEntry ae1 = new AccessEntry(u.getDbId(), Access.OWN);
 		AccessEntry ae2 = new AccessEntry(u1.getDbId(), Access.READ);
@@ -104,7 +102,6 @@ public class DAOsTests {
 		CollectionAdmin wa2 = new CollectionObject.CollectionAdmin();
 		wa2.setCreated(new Date());
 		wa2.setWithCreator(u.getDbId());
-		wa2.setExhibition(false);
 		WithAccess waccess2 = new WithAccess();
 		ae1 = new AccessEntry(u1.getDbId(), Access.OWN);
 		ae2 = new AccessEntry(u2.getDbId(), Access.READ);
@@ -118,7 +115,6 @@ public class DAOsTests {
 		CollectionAdmin wa3 = new CollectionObject.CollectionAdmin();
 		wa3.setCreated(new Date());
 		wa3.setWithCreator(u.getDbId());
-		wa3.setExhibition(false);
 		WithAccess waccess3 = new WithAccess();
 		ae1 = new AccessEntry(u2.getDbId(), Access.OWN);
 		ae2 = new AccessEntry(u.getDbId(), Access.READ);
@@ -269,8 +265,7 @@ public class DAOsTests {
 		List<Tuple<ObjectId, Access>> or2 = new ArrayList<Tuple<ObjectId,Access>>();
 		access.add(or1);
 		//access.add(or2);
-		Tuple<List<CollectionObject>, Tuple<Integer, Integer>> c08 = DB.getCollectionObjectDAO().
-				getByACL(access, u.getDbId(), false, true, 0, 10);
+		Tuple<List<CollectionObject>, Tuple<Integer, Integer>> c08 = DB.getCollectionObjectDAO().getByAcl(access, u.getDbId(), false, true, 0, 10);
 		System.out.println("Retrieve by ACL " + c08.y.x + " " + c08.y.y + " resources.\n" + Json.toJson(c08.x));
 
 

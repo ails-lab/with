@@ -29,9 +29,12 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
+import model.resources.WithResource;
+import model.resources.WithResource.WithAdmin;
+import model.DescriptiveData;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
@@ -44,41 +47,47 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import db.DB;
+
 public class ElasticUtils {
 	static private final Logger.ALogger log = Logger.of(ElasticUtils.class);
-
-	public static Map<String, List<String>> lang_accumulators;
 
 	/*
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public static Map<String, Object> transformRR(RecordResource<RecordDescriptiveData> rr) {
+	public static <T extends DescriptiveData, A extends WithAdmin> Map<String, Object> basicTransformation(WithResource<T, A> rr) {
 
 		JsonNode rr_json =  Json.toJson(rr);
 		ObjectNode idx_doc = Json.newObject();
 
-		lang_accumulators = new HashMap<String, List<String>>();
+		Map<String, List<String>>lang_accumulators = new HashMap<String, List<String>>();
 
 		/*
 		 *  Label
 		 */
 		JsonNode label = rr_json.get("descriptiveData").get("label");
 		idx_doc.put("label", label);
+
 		if(label != null) {
 			Iterator<Entry<String, JsonNode>> labels_it = label.fields();
 			ArrayNode all_labels = Json.newObject().arrayNode();
 			while(labels_it.hasNext()) {
 				Entry<String, JsonNode> e = labels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
-				all_labels.add(e.getValue().asText());
-				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
-				if(un != null) {
-					for(String u: un)
-						addToLangAll(e.getKey(), u);
+				else if(e.getKey().equals(Language.UNKNOWN)) {
+					List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
+					if(un != null)
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
+				}
+
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					all_labels.add(v);
+				}
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("label_all", all_labels);
@@ -97,14 +106,19 @@ public class ElasticUtils {
 			while(descs_it.hasNext()) {
 				Entry<String, JsonNode> e = descs_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
-				all_descs.add(e.getValue().asText());
-				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getDescription().get(Language.UNKNOWN);
-				if(un != null) {
-					for(String u: un)
-						addToLangAll(e.getKey(), u);
+				else if(e.getKey().equals(Language.UNKNOWN)) {
+					List<String> un = rr.getDescriptiveData().getDescription().get(Language.UNKNOWN);
+					if(un != null)
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
+				}
+
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					all_descs.add(v);
+				}
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("description_all", all_descs);
@@ -121,14 +135,19 @@ public class ElasticUtils {
 			while(keywords_it.hasNext()) {
 				Entry<String, JsonNode> e = keywords_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
-				all_keywords.add(e.getValue().asText());
-				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getKeywords().get(Language.UNKNOWN);
-				if(un != null) {
-					for(String u: un)
-						addToLangAll(e.getKey(), u);
+				else if(e.getKey().equals(Language.UNKNOWN)) {
+					List<String> un = rr.getDescriptiveData().getKeywords().get(Language.UNKNOWN);
+					if(un != null)
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
+				}
+
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					all_keywords.add(v);
+				}
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("keywords_all", all_keywords);
@@ -145,14 +164,19 @@ public class ElasticUtils {
 			while(altLabels_it.hasNext()) {
 				Entry<String, JsonNode> e = altLabels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT) || e.getKey().equals(Language.UNKNOWN))
+				if(e.getKey().equals(Language.DEFAULT))
 					continue;
-				all_altLabels.add(e.getValue().asText());
-				addToLangAll(e.getKey(), e.getValue().asText());
-				List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
-				if(un != null) {
-					for(String u: un)
-						addToLangAll(e.getKey(), u);
+				else if(e.getKey().equals(Language.UNKNOWN)) {
+					List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
+					if(un != null)
+						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
+				}
+
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					all_altLabels.add(v);
+				}
+				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
+					addToLangAll(lang_accumulators, e.getKey(), v);
 				}
 			}
 			idx_doc.put("altLabels_all", all_altLabels);
@@ -172,15 +196,32 @@ public class ElasticUtils {
 		}
 
 		/*
+		 * User Rights structure in the document
+		 */
+		idx_doc.put("isPublic", rr.getAdministrative().getAccess().getIsPublic());
+		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
+
+
+		/*
 		 * CollectedIn field
 		 */
 		idx_doc.put("collectedIn", Json.toJson(rr.getCollectedIn()));
 
 		/*
+		 * Add the username and email of the creator
+		 * NOT the dbId
+		 */
+		idx_doc.put("creatorUsername", rr.getWithCreatorInfo().getUsername());
+		idx_doc.put("creatorEmail", rr.getWithCreatorInfo().getEmail());
+
+
+		/*
 		 * Add more fields to the Json
 		 */
 		idx_doc.put("metadataRights", Json.toJson(rr.getDescriptiveData().getMetadataRights()));
-		idx_doc.put("withCreator", rr_json.get("administrative.withCreator"));
+		//idx_doc.put("isExhibition", Json.toJson(rr.getAdministrative().));
+		idx_doc.put("tags", Json.toJson(rr.getUsage().getTags()));
+		idx_doc.put("isShownAt", Json.toJson(rr.getDescriptiveData().getIsShownAt()));
 		if((rr.getProvenance() != null) && (rr.getProvenance().size() == 1)) {
 			idx_doc.put("dataProvider", Json.toJson(rr.getProvenance().get(0).getProvider()));
 		}
@@ -196,7 +237,8 @@ public class ElasticUtils {
 		 * Format and add Media structure
 		 */
 		ArrayNode media_objects = Json.newObject().arrayNode();
-		if(rr.getMedia() != null) {
+		if( (rr.getMedia() != null) && !rr.getMedia().isEmpty()
+				&& (rr.getMedia().get(0)!=null) && (!rr.getMedia().get(0).isEmpty())  ) {
 			// take care about all EmbeddedMediaObjects
 			EmbeddedMediaObject emo = rr.getMedia().get(0).get(MediaVersion.Original);
 				ObjectNode media = Json.newObject();
@@ -204,6 +246,7 @@ public class ElasticUtils {
 				media.put("withMediaType", Json.toJson(emo.getType()));
 				media.put("originalRights", Json.toJson(emo.getOriginalRights()));
 				media.put("mimeType", Json.toJson(emo.getMimeType()));
+				media.put("url", Json.toJson(emo.getUrl()));
 				media.put("quality", Json.toJson(emo.getQuality()));
 				media.put("width", emo.getWidth());
 				media.put("height", emo.getHeight());
@@ -224,12 +267,15 @@ public class ElasticUtils {
 		}
 
 		/*
+<<<<<<< HEAD
 		 * User Rights structure in the document
 		 */
 		idx_doc.put("isPublic", rr.getAdministrative().getAccess().getIsPublic());
 		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
 
 		/*
+=======
+>>>>>>> remodel/elasticImpl
 		 * Eliminate null values from the root document
 		 */
 		ObjectNode idx_copy = idx_doc.deepCopy();
@@ -253,71 +299,55 @@ public class ElasticUtils {
 	 * the map containing the custom language specific
 	 * _all fields
 	 */
-	private static void addToLangAll(String lang, String value) {
-		if(lang_accumulators.get(lang) != null) {
-			lang_accumulators.get(lang).add(value);
+	private static void addToLangAll(Map<String, List<String>> lang_acc, String lang, String value) {
+		if(lang_acc.get(lang) != null) {
+			lang_acc.get(lang).add(value);
 		} else {
 			List<String> lang_values = new ArrayList<String>();
 			lang_values.add(value);
-			lang_accumulators.put(lang, lang_values);
+			lang_acc.put(lang, lang_values);
 		}
 	}
 
+	/*
+	 * Retrieve from DB the resources that where returned
+	 * from an elastic query.
+	 * Returns a Map of List of Resources per Type.
+	 */
 
+	public static Map<String, List<?>> getResourcesPerType(SearchResponse resp) {
 
-
-
-	/* *********************** OLD CODE ********************************** */
-
-	public static RecordResource hitToRecord(SearchHit hit) {
-		JsonNode json = Json.parse(hit.getSourceAsString());
-		RecordResource record = Json.fromJson(json, RecordResource.class);
-		/*if (hit.type().equals(Elastic.type_general)) {
-			List<CollectionInfo> colIds = new ArrayList<CollectionInfo>();
-			List<String> tags = new ArrayList<String>();
-			ArrayNode ids = (ArrayNode) json.get("descriptiveData.collectedIn");
-			ArrayNode allTags = (ArrayNode) json.get("tags");
-
-			for (JsonNode id : ids)
-				if (!colIds.contains(id.asText()))
-					colIds.add(id.asText());
-			for (JsonNode t : allTags)
-				if (!tags.contains(t.asText()))
-					tags.add(t.asText());
-
-			record.setCollectedIn(colIds);
-			record.setAllTags(tags);
-		}*/
-		return record;
-	}
-
-	public static Collection hitToCollection(SearchHit hit) {
-		JsonNode json         = Json.parse(hit.getSourceAsString());
-		JsonNode accessRights = json.get("rights");
-		if(!accessRights.isMissingNode()) {
-			ObjectNode ar = Json.newObject();
-			for(JsonNode r: accessRights) {
-				String user   = r.get("user").asText();
-				String access = r.get("access").asText();
-				ar.put(user, access);
+		Map<String, List<ObjectId>> idsOfEachType = new HashMap<String, List<ObjectId>>();
+		resp.getHits().forEach( (h) -> {
+			if(!idsOfEachType.containsKey(h.getType())) {
+				idsOfEachType.put(h.getType(), new ArrayList<ObjectId>() {{ add(new ObjectId(h.getId())); }});
+			} else {
+				idsOfEachType.get(h.getType()).add(new ObjectId(h.getId()));
 			}
-			((ObjectNode)json).remove("rights");
-			((ObjectNode)json).put("rights", ar);
+		});
+
+		Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
+
+		for(Entry<String, List<ObjectId>> e: idsOfEachType.entrySet()) {
+			switch (e.getKey()) {
+			case "resource":
+				resourcesPerType.put("resource" , DB.getRecordResourceDAO().getByIds(e.getValue()));
+				break;
+			case "collection":
+				resourcesPerType.put("collection" , DB.getRecordResourceDAO().getByIds(e.getValue()));
+				break;
+			default:
+				break;
+			}
 		}
-		Collection collection = Json.fromJson(json, Collection.class);
-		return collection;
+
+		return resourcesPerType;
 	}
 
-	public static List<Collection> getCollectionMetadaFromHit(
-			SearchHits hits) {
-
-
-		List<Collection> colFields = new ArrayList<Collection>();
-		for(SearchHit hit: hits.getHits()) {
-			Collection collection = hitToCollection(hit);
-			collection.setDbId(new ObjectId(hit.getId()));
-			colFields.add(collection);
-		}
-		return colFields;
+	///// OLD CODE ////
+	public static List<Collection> getCollectionMetadaFromHit(SearchHits hits) {
+		// TODO Auto-generated method stub
+		return null;
 	}
+
 }

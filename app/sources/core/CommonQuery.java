@@ -34,7 +34,7 @@ import db.DB;
 import utils.Tuple;
 
 public class CommonQuery {
-	
+
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
 	public String facetsMode = FacetsModes.DEFAULT;
@@ -47,6 +47,7 @@ public class CommonQuery {
 	private List<String> effectiveUserIds;//not set in JSON
 
 	public List<CommonFilter> filters;
+	private List<String> types;
 
 	public CommonQuery(String generalQueryBody) {
 		this.searchTerm = generalQueryBody;
@@ -54,7 +55,7 @@ public class CommonQuery {
 
 	public CommonQuery() {
 	}
-	
+
 	private List<Tuple<ObjectId, Access>> transformList(ObjectNode[] inputList, boolean group) {
 		List<Tuple<ObjectId, Access>> list = new ArrayList<Tuple<ObjectId, Access>>();
 		for (int i=0; i<inputList.length; i++) {
@@ -82,7 +83,7 @@ public class CommonQuery {
 		}
 		return list;
 	}
-	
+
 	public List<Tuple<ObjectId, Access>> getDirectlyAccessedByUserName() {
 		return directlyAccessedByUserName;
 	}
@@ -90,7 +91,7 @@ public class CommonQuery {
 	public void setDirectlyAccessedByUserName(ObjectNode[]  list) {
 		directlyAccessedByUserName = transformList(list, false);
 	}
-	
+
 	public List<Tuple<ObjectId, Access>> getDirectlyAccessedByGroupName() {
 		return directlyAccessedByGroupName;
 	}
@@ -161,5 +162,23 @@ public class CommonQuery {
 
 	public List<String> getEffectiveUserIds() {
 		return effectiveUserIds;
+	}
+
+	public List<String> getTypes() {
+		return types;
+	}
+
+	public void setTypes(List<String> types) {
+		this.types = types;
+	}
+
+	public void addType(String type) {
+		if(types != null)
+			types.add(type);
+		else {
+			types = new ArrayList<String>();
+			types.add(type);
+		}
+
 	}
 }

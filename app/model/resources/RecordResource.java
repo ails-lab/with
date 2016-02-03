@@ -16,6 +16,7 @@
 
 package model.resources;
 
+import java.util.Map;
 import org.bson.types.ObjectId;
 
 import model.DescriptiveData;
@@ -27,9 +28,9 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	public static class RecordDescriptiveData extends DescriptiveData {
 
 	}
-	
+
 	public static class RecordAdmin extends WithResource.WithAdmin {
-		
+
 		// if this resource / record is derived (modified) from a different Record.
 		private ObjectId parentResourceId;
 
@@ -40,8 +41,21 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		public void setParentResourceId(ObjectId parentResourceId) {
 			this.parentResourceId = parentResourceId;
 		}
-		
+
 	}
 
 
+
+	/*
+	 * Elastic transformations
+	 */
+
+	/*
+	 * Currently we are indexing only Resources that represent
+	 * collected records
+	 */
+	public Map<String, Object> transformRR() {
+		return this.transformWR();
+
+	}
 }

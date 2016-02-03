@@ -18,6 +18,7 @@ package sources.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import model.CollectionRecord;
@@ -43,6 +44,7 @@ public class SourceResponse {
 	public int startIndex;
 	public int count;
 	public ItemsGrouping items;
+	public Map<String, List<?>> resourcesPerType;
 	public String source;
 	public JsonNode facets;
 	public List<CommonFilterResponse> filters;
@@ -52,20 +54,16 @@ public class SourceResponse {
 		items = new ItemsGrouping();
 		filters = new ArrayList<>();
 	}
-
+	//source refers to the external APIs and the WITH db
+	//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 	public SourceResponse(SearchResponse resp, int offset) {
-		List<WithResource<?, ?>> elasticrecords = new ArrayList<WithResource<?, ?>>();
+
 		this.totalCount = (int) resp.getHits().getTotalHits();
-		for (SearchHit hit : resp.getHits().hits()) {
-			elasticrecords.add(ElasticUtils.hitToRecord(hit));
-		}
-		//source refers to the external APIs and the WITH db
-		//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 		this.source = "WITHin";
-		this.count = elasticrecords.size();
 		this.startIndex = offset;
-		List<WithResource<?, ?>> items = new ArrayList<>();
-		
+		List<WithResource<?, ?>> items = new ArrayList<WithResource<?, ?>>();
+
+
 //		TODO make it using the new model...
 //for (CollectionRecord er : elasticrecords) {
 //	ItemsResponse it = new ItemsResponse();
@@ -95,6 +93,15 @@ public class SourceResponse {
 //}
 		this.items.setCulturalCHO(items);
 	}
+
+
+	public Map<String, List<?>> getResourcesPerType() {
+		return resourcesPerType;
+	}
+	public void setResourcesPerType(Map<String, List<?>> resourcesPerType) {
+		this.resourcesPerType = resourcesPerType;
+	}
+
 
 	public SourceResponse merge(SourceResponse r2) {
 		SourceResponse res = new SourceResponse();
@@ -128,5 +135,5 @@ public class SourceResponse {
 	public String toString() {
 		return "SourceResponse [source=" + source + ", query=" + query + ", totalCount=" + totalCount + "]";
 	}
-	
+
 }

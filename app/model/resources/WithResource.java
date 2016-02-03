@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -40,17 +41,24 @@ import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
 import scala.xml.dtd.ExternalID;
+import play.libs.Json;
 import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
 import db.converters.AccessEnumConverter;
+import elastic.ElasticUtils;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -507,7 +515,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public List<HashMap<MediaVersion, EmbeddedMediaObject>> getMedia() {
 		return media;
 	}
-	
+
 	public void setMedia(List<HashMap<MediaVersion, EmbeddedMediaObject>> media) {
 		this.media = media;
 	}
@@ -515,13 +523,13 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
-	
+
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
 		e.put(mediaVersion, media);
 		this.media.add(e);
 	}
-	
+
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		this.media.get(0).put(mediaVersion, media);
 	}
@@ -546,36 +554,15 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public User getWithCreatorInfo() {
 		return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
 	}
-	
-	/*@PostPersist void postPersist() {
-		try {
-			if (postPersist == false) {//first time to be saved
-				ProvenanceInfo info =  provenance.get(provenance.size()-1);
-				if (info.getProvider().equals("UploadedByUser") && info.getResourceId() == null) {
-					System.out.println("1 " + dbId);
-					DB.getRecordResourceDAO().updateProvenance(dbId, provenance.size()-1, new ProvenanceInfo("UploadedByUser", 
-						"record/" + dbId, dbId.toString()));
-				}
-				if (administrative.getExternalId() == null ||administrative.getExternalId().isEmpty()) {
-					System.out.println("2 " + dbId);
-					DB.getRecordResourceDAO().updateField(dbId, "administrative.externalId", dbId.toString());
-				}
-				System.out.println("finished");
-				postPersist = true;
-			}
-		} catch(Exception e) {
-			System.out.println(e.getCause());
-		}
-		
-	}
-	
-	public boolean isPostPersist() {
-		return postPersist;
-	}*/
-	
-	/*@PostLoad void prePersist() {
-		if (provenance != null && !provenance.isEmpty())
-			administrative.externalId = provenance.get(provenance.size()-1).getResourceId();
-	}*/
 
+
+	/* Elastic Transformations */
+
+	/*
+	 * Currently we are indexing only Resources that represent
+	 * collected records
+	 */
+	public Map<String, Object> transformWR() {
+		return ElasticUtils.basicTransformation(this);
+	}
 }

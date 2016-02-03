@@ -58,13 +58,13 @@ public class ElasticIndexer {
 	 *
 	 * If the document is not indexed the method return "null"
 	 */
-	public static IndexResponse index(ObjectId dbId, Map<String, Object> doc) {
+	public static IndexResponse index(String type, ObjectId dbId, Map<String, Object> doc) {
 
 		IndexResponse response = null;
 		try {
 			response = Elastic.getTransportClient().prepareIndex(
 					Elastic.index,
-					"resource",
+					type,
 					dbId.toString()
 					)
 			.setSource(doc)
@@ -84,7 +84,7 @@ public class ElasticIndexer {
 	 * If the indexing process is not completed for any reason the method
 	 * returns "null"
 	 */
-	public static String indexMany(List<ObjectId> ids, List<Map<String, Object>> docs) {
+	public static String indexMany(String type, List<ObjectId> ids, List<Map<String, Object>> docs) {
 		if(ids.size() != docs.size()) {
 			log.error("Size of two provided lists is not equal");
 			return null;
@@ -94,7 +94,7 @@ public class ElasticIndexer {
 			for(int i=0; i<ids.size(); i++) {
 				Elastic.getBulkProcessor().add(new IndexRequest(
 						Elastic.index,
-						"resource",
+						type,
 						ids.get(i).toString())
 				.source(docs.get(i)));
 			}

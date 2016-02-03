@@ -62,8 +62,8 @@ public class ElasticReindexer {
 			Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i*1000).limit(1000);
 			List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
 			for(RecordResource rr: resourceCursor) {
-				bulk.add(new IndexRequest(Elastic.index, Elastic.type, rr.getDbId().toString())
-						.source(ElasticUtils.transformRR(rr)));
+				bulk.add(new IndexRequest(Elastic.index, Elastic.typeResource, rr.getDbId().toString())
+						.source(rr.transformRR()));
 			}
 			bulk.flush();
 		}
@@ -71,8 +71,8 @@ public class ElasticReindexer {
 		Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset((int)(countAll/1000)*1000).limit(1000);
 		List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
 		for(RecordResource rr: resourceCursor) {
-			bulk.add(new IndexRequest(Elastic.index, Elastic.type, rr.getDbId().toString())
-					.source(ElasticUtils.transformRR(rr)));
+			bulk.add(new IndexRequest(Elastic.index, Elastic.typeResource, rr.getDbId().toString())
+					.source(rr.transformRR()));
 		}
 		bulk.close();
 
@@ -100,8 +100,8 @@ public class ElasticReindexer {
 
 			if(resp.getHits().getTotalHits() == 0) {
 				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(k.getId().toString()));
-				bulk.add(new IndexRequest(Elastic.index, Elastic.type, rr.getDbId().toString())
-					.source(ElasticUtils.transformRR(rr)));
+				bulk.add(new IndexRequest(Elastic.index, Elastic.typeResource, rr.getDbId().toString())
+					.source(rr.transformRR()));
 			}
 		}
 		bulk.close();

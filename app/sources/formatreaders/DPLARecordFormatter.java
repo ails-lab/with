@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.javafx.animation.TickCalculation;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -63,9 +62,9 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 											rec.getStringValue("sourceResource.subject"));
 		}
 		rec.setLanguages(language);
-		
+
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("originalRecord.spatial"));
-		
+
 		model.setLabel(rec.getMultiLiteralValue("sourceResource.title"));
 		model.setDescription(rec.getMultiLiteralValue("sourceResource.description"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("hasView.@id"));
@@ -85,7 +84,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		String stringValue = rec.getStringValue("sourceResource.type");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
 		WithMediaType type = translateToCommon==null?null:(WithMediaType) translateToCommon.get(0);
-		WithMediaRights withRights = (rights==null || rights.size()==0)?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
 		String uri3 = rec.getStringValue("object");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){
@@ -107,7 +106,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 			object.addMedia(MediaVersion.Original, med);
 		}
 		return object;
-		
+
 	}
 
 }
