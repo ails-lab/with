@@ -337,7 +337,7 @@ public class CollectionObjectController extends WithResourceController {
 				accessedByUserOrGroup.add(accessedByLoggedInUser);
 			}
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB.getCollectionObjectDAO().getSharedAndByAcl(
-					userId, accessedByUserOrGroup, isExhibitionBoolean, collectionHits, offset, count);
+					accessedByUserOrGroup, userId, isExhibitionBoolean, collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
