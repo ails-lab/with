@@ -149,8 +149,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * Retrieve a resource metadata. If the format is defined the specific
 	 * serialization of the object is returned
 	 *
-	 * @param id
-	 *            the resource id
+	 * @param id the resource id
 	 * @return the resource metadata
 	 */
 	public static Result getCollectionObject(String id) {
@@ -236,28 +235,9 @@ public class CollectionObjectController extends WithResourceController {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				// TODO change JSON at all its depth
-				DB.getCollectionObjectDAO()
-						.editCollection(collectionDbId, json);
+				DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
 			}
-			/*
-			 * ObjectMapper objectMapper = new ObjectMapper(); ObjectReader
-			 * updator = objectMapper .readerForUpdating(oldCollection);
-			 * CollectionObject newCollection; newCollection =
-			 * updator.readValue(json);
-			 * Set<ConstraintViolation<CollectionObject>> violations =
-			 * Validation .getValidator().validate(newCollection); if
-			 * (!violations.isEmpty()) { ArrayNode properties =
-			 * Json.newObject().arrayNode(); for
-			 * (ConstraintViolation<CollectionObject> cv : violations) {
-			 * properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\""
-			 * + cv.getMessage() + "\"}")); } error.put("error", properties);
-			 * return badRequest(error); }
-			 * newCollection.getAdministrative().setLastModified(new Date());
-			 * DB.getCollectionObjectDAO().makePermanent(newCollection);
-			 */
-			return ok(Json.toJson(DB.getCollectionObjectDAO().get(
-					collectionDbId)));
+			return ok(Json.toJson(DB.getCollectionObjectDAO().get(collectionDbId)));
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -285,14 +265,8 @@ public class CollectionObjectController extends WithResourceController {
 				creatorId = creatorUser.getDbId();
 		}
 		if (effectiveUserIds.isEmpty()
-				|| (isPublic.isDefined() && (isPublic.get() == true))) {// not
-																		// logged
-																		// or
-																		// ask
-																		// for
-																		// public
-																		// collections
-			// return all public collections
+				|| (isPublic.isDefined() && (isPublic.get() == true))) {
+			//if not logged or ask for public collections, return all public collections
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
 					.getCollectionObjectDAO().getByPublicAndAcl(
 							accessedByUserOrGroup, creatorId,
@@ -540,11 +514,9 @@ public class CollectionObjectController extends WithResourceController {
 		if (!response.toString().equals(ok().toString()))
 			return response;
 		else {
-			// TODO: specify retrieved fields!!!!!!
 			List<String> retrievedFields = new ArrayList<String>(Arrays.asList(
-					"descriptiveData.label", "descriptiveData.description"));// bytes
-																				// of
-																				// thumbnail???
+					"descriptiveData.label", "descriptiveData.description"));
+			//bytes of thumbnail???											
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(colId, start, count);
 			if (records == null) {
@@ -571,15 +543,9 @@ public class CollectionObjectController extends WithResourceController {
 					recordsList.add(Json.toJson(e));
 				}
 			}
-			result.put(
-					"itemCount",
-					((CollectionAdmin) ((CollectionObject) DB
-							.getCollectionObjectDAO()
-							.getById(
-									colId,
-									new ArrayList<String>(
-											Arrays.asList("administrative.entryCount"))))
-							.getAdministrative()).getEntryCount());
+			result.put("itemCount", ((CollectionAdmin) ((CollectionObject) DB.getCollectionObjectDAO()
+				.getById(colId, new ArrayList<String>(Arrays.asList("administrative.entryCount"))))
+				.getAdministrative()).getEntryCount());
 			result.put("records", recordsList);
 			return ok(result);
 		}

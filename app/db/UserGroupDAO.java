@@ -57,10 +57,10 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	}
 
 	public List<UserGroup> findByUserIdPublic(ObjectId userId,
-			GroupType groupType) {
+			GroupType groupType, boolean privateGroup) {
 		Query<UserGroup> q = createQuery().disableValidation().field("users")
 				.hasThisOne(userId);
-		q.and(q.criteria("privateGroup").equal(false));
+		q.and(q.criteria("privateGroup").equal(privateGroup));
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
@@ -68,17 +68,6 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
-	public List<UserGroup> findByUserIdPrivate(ObjectId userId,
-			GroupType groupType) {
-		Query<UserGroup> q = createQuery().disableValidation().field("users")
-				.hasThisOne(userId);
-		q.and(q.criteria("privateGroup").equal(true));
-		if (groupType.equals(GroupType.All)) {
-			return find(q).asList();
-		}
-		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
-		return find(q).asList();
-	}
 
 	public List<UserGroup> findByParent(ObjectId parentId, GroupType groupType) {
 		Query<UserGroup> q = createQuery().disableValidation()
