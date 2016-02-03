@@ -92,7 +92,9 @@
 								<!-- ko foreach: organizations -->
 								<li><a data-bind="attr: { href: '#organization/' + id }, text: friendlyName"></a></li>
 								<!-- /ko -->
+								<!-- ko if: organizations().length -->
 								<li class="divider"></li>
+								<!-- /ko -->
 								<li><a href="#" onclick="newOrganization(); return false;">New Organization...</a></li>
 							</ul>
 						</li>
@@ -102,7 +104,9 @@
 								<!-- ko foreach: projects -->
 								<li><a data-bind="attr: { href: '#project/' + id }, text: friendlyName"></a></li>
 								<!-- /ko -->
+								<!-- ko if: projects().length -->
 								<li class="divider"></li>
+								<!-- /ko -->
 								<li><a href="#" onclick="newProject(); return false;">New Project...</a></li>
 							</ul>
 						</li>
