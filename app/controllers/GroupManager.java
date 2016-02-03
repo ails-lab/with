@@ -334,25 +334,6 @@ public class GroupManager extends Controller {
 		}
 	}
 
-	public static Result getUserOrGroupThumbnail(String id) {
-		try {
-			User user = DB.getUserDAO().getById(new ObjectId(id), null);
-			if (user != null) {
-				ObjectId photoId = user.getThumbnail();
-				return MediaController.getMetadataOrFile(photoId.toString(), true);
-			} else {
-				UserGroup userGroup = DB.getUserGroupDAO().get(new ObjectId(id));
-				if (userGroup != null) {
-					ObjectId photoId = user.getThumbnail();
-					return MediaController.getMetadataOrFile(photoId.toString(), true);
-				} else
-					return badRequest(Json.parse("{\"error\":\"User does not exist\"}"));
-			}
-		} catch (Exception e) {
-			return badRequest(Json.parse("{\"error\":\"" + e.getMessage() + "\"}"));
-		}
-	}
-
 	/**
 	 * @param name
 	 *            the group name

@@ -47,8 +47,6 @@ public class MediaObject extends EmbeddedMediaObject {
 	public static enum Orientation {
 		PORTRAIT, LANDSCAPE
 	}
-	
-	
 
 	@Id
 	@JsonIgnore
@@ -90,6 +88,10 @@ public class MediaObject extends EmbeddedMediaObject {
 	
 	private int sampleRate;
 	
+	// If this is a thumbnail, the parentID field refers to
+	// the parent media object, else it should be the id of the media object
+	// itself
+	private ObjectId parentId;
 	
 	// Setters/Getters
 	public ObjectId getDbId() {
@@ -205,6 +207,14 @@ public class MediaObject extends EmbeddedMediaObject {
 
 	public void setAudioChannelNumber(int audioChannelNumber) {
 		this.audioChannelNumber = audioChannelNumber;
+	}
+
+	public ObjectId getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(ObjectId parentId) {
+		this.parentId = parentId;
 	}
 
 

@@ -16,7 +16,10 @@
 
 package model.usersAndGroups;
 
+import java.util.HashMap;
 import java.util.List;
+
+import model.EmbeddedMediaObject.MediaVersion;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -69,10 +72,7 @@ public class Page {
 	private String country;
 	private String url;
 
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId coverImage;
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId coverThumbnail;
+	private HashMap<MediaVersion, String> cover;
 
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private List<ObjectId> featuredCollections;
@@ -92,22 +92,6 @@ public class Page {
 
 	public void setUrl(String url) {
 		this.url = url;
-	}
-
-	public ObjectId getCoverImage() {
-		return coverImage;
-	}
-
-	public void setCoverImage(ObjectId bgImg) {
-		this.coverImage = bgImg;
-	}
-
-	public ObjectId getCoverThumbnail() {
-		return coverThumbnail;
-	}
-
-	public void setCoverThumbnail(ObjectId coverThumbnail) {
-		this.coverThumbnail = coverThumbnail;
 	}
 
 	public String getCountry() {
@@ -156,6 +140,14 @@ public class Page {
 
 	public void addFeaturedExhibition(ObjectId featuredExhibition) {
 		this.featuredExhibitions.add(featuredExhibition);
+	}
+
+	public HashMap<MediaVersion, String> getCover() {
+		return cover;
+	}
+
+	public void setCover(HashMap<MediaVersion, String> cover) {
+		this.cover = cover;
 	}
 
 }

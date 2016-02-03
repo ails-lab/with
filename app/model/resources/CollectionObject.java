@@ -39,6 +39,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	public CollectionObject() {
 		super();
 		this.administrative = new CollectionAdmin();
+		this.descriptiveData = new CollectionDescriptiveData();
 		this.resourceType = WithResourceType.valueOf(this.getClass()
 				.getSimpleName());
 	}

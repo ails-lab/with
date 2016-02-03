@@ -500,12 +500,31 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return
 	 */
 	public static Result getFavoriteCollection() {
+		if (session().get("user") == null) {
+			return forbidden();
+		}
 		ObjectId userId = new ObjectId(session().get("user"));
-		String fav = DB.getCollectionObjectDAO()
-				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
-				.toString();
-		return getCollectionObject(fav);
+		CollectionObject favorite;
+		ObjectId favoritesId;
+		if ((favorite = DB.getCollectionObjectDAO().getByOwnerAndLabel(userId,
+				null, "_favorites")) == null) {
+			favoritesId = createFavorites(userId);
+		} else {
+			favoritesId = favorite.getDbId();
+		}
+		return getCollectionObject(favoritesId.toString());
 
+	}
+
+	public static ObjectId createFavorites(ObjectId userId) {
+		CollectionObject fav = new CollectionObject();
+		fav.getAdministrative().setCreated(new Date());
+		fav.getAdministrative().setWithCreator(userId);
+		fav.getDescriptiveData().setLabel(
+				new MultiLiteral(Language.DEFAULT, "_favorites"));
+		DB.getCollectionObjectDAO().makePermanent(fav);
+		DB.getCollectionObjectDAO().makePermanent(fav);
+		return fav.getDbId();
 	}
 
 	/**
