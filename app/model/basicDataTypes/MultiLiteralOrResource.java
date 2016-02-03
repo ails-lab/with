@@ -61,4 +61,10 @@ public class MultiLiteralOrResource extends MultiLiteral {
 			addURI(uri);
 		}
 	}
+	
+	public MultiLiteralOrResource merge(MultiLiteral other) {
+		this.putAll(other);
+		return this;
+	}
+
 }

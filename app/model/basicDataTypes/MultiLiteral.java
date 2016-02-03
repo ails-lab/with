@@ -104,4 +104,9 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 		}
 		return this;
 	}
+	
+	public MultiLiteral merge(MultiLiteral other) {
+		this.putAll(other);
+		return this;
+	}
 }
