@@ -33,6 +33,7 @@ import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
+import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 
@@ -121,8 +122,13 @@ public class WithResourceController extends Controller {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				RecordResource record = Json.fromJson(json,
-						CulturalObject.class);
+				String resourceType = null;
+				if (json.has("resourceType"))
+					resourceType = json.get("resourceType").asText();
+				if (resourceType == null || WithResourceType.valueOf(resourceType) == null)
+					resourceType = WithResourceType.CulturalObject.toString();
+				Class<?> clazz = Class.forName("model.resources."+resourceType);
+				RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 				int last = 0;
 				Sources source = Sources.UploadedByUser;
 				if (record.getProvenance() != null
@@ -273,13 +279,18 @@ public class WithResourceController extends Controller {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				if (position.isDefined()) {
+				if (!position.isDefined()) {
+					result.put("error", "The position in the collection from which the record is to be removed, must be specified");
+					return badRequest(result);
+				}
+				else {
 					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
 							collectionDbId, position.get());
-					// record.removePositionFromCollectedIn(collectionDbId,
-					// position.get());
 				}
-				// TODO modify access
+				//TODO: if position undefined, remove from all Positions. shift other records will be harder in that case though.
+				//modify record's access: the record gets the most liberal rights of the collections it belongs to after the removal
+				DB.getRecordResourceDAO().updateRecordRightsUponRemovalFromCollection(recordDbId, collectionDbId);
+				DB.getCollectionObjectDAO().removeCollectionMedia(collectionDbId, recordDbId, position.get());
 				if (DB.getCollectionObjectDAO().isFavorites(collectionDbId))
 					DB.getRecordResourceDAO().decrementLikes(recordDbId);
 				else

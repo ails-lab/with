@@ -226,6 +226,8 @@ public class User extends UserOrGroup {
 	}
 
 	public String getGender() {
+		if (gender == null)
+			return null;
 		return gender.toString();
 	}
 

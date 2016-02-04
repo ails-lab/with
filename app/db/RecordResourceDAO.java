@@ -278,24 +278,29 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	
 	//TODO: has to be atomic as a whole
 	//uses findAndModify for entryCount of respective collection
-	//what if the append fails (for some strange reason, the record cannot be edited correctly)
-	//and the entry count has been increased already?
 	public void addToCollection(ObjectId recordId, ObjectId colId, int position, boolean changeRecRights) {
 		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
+		int entryCount = co.getAdministrative().getEntryCount();//old entry count (before addition)
+		if (position > entryCount)
+			position = entryCount;
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId, position);
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId, co.getAdministrative().getAccess());
-		updateRecordUsageCollectedAndRights( new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
-		shiftRecordsToRight(colId, position+1);
+		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, position), newAccess, recordId, colId);
+		shiftRecordsToRight(colId, position);
 	}
+	
 	
 	public void appendToCollection(ObjectId recordId, ObjectId colId, boolean changeRecRights) {
 		//increase entry count
 		CollectionObject co = DB.getCollectionObjectDAO().updateCollectionAdmin(colId);
+		int entryCount = ((CollectionAdmin) co.getAdministrative()).getEntryCount();//old entry count (before addition)
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId, entryCount);
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId, co.getAdministrative().getAccess());
-		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, ((CollectionAdmin) co.getAdministrative()).getEntryCount()), newAccess, recordId, colId);
+		updateRecordUsageCollectedAndRights(new CollectionInfo(colId, entryCount), newAccess, recordId, colId);
 	}
 	
 	public WithAccess mergeParentCollectionRights(ObjectId recordId, ObjectId newColId, WithAccess newColAccess) {
@@ -324,6 +329,19 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			WithAccess mergedAccess = mergeParentCollectionRights(r.getDbId(), colId, colAccess);
 			updateField(r.getDbId(), "administrative.access", mergedAccess);
 		}
+	}
+	
+	public void updateRecordRightsUponRemovalFromCollection(ObjectId recordId, ObjectId colId) {
+		RecordResource record = this.getById(recordId, new ArrayList<String>(Arrays.asList("collectedIn", "administrative.access.isPublic", "administrative.withCreator")));
+		List<ObjectId> parentCollections = getParentCollections(recordId);
+		parentCollections.remove(colId);
+		List<WithAccess> parentColAccess = new ArrayList<WithAccess>();
+		for (ObjectId parentId: parentCollections) {
+			CollectionObject parentCollection = DB.getCollectionObjectDAO().getById(parentId, new ArrayList<String>(Arrays.asList("administrative.access")));
+			parentColAccess.add(parentCollection.getAdministrative().getAccess());
+		}
+		WithAccess mergedAccess =  mergeRights(parentColAccess, record.getAdministrative().getWithCreator(), record.getAdministrative().getAccess().getIsPublic());
+		updateField(recordId, "administrative.access", mergedAccess);
 	}
 	
 	public void updateMembersToNewAccess(ObjectId colId, ObjectId userId, Access newAccess) {

@@ -167,7 +167,7 @@ public class CollectionObjectController extends WithResourceController {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
 				List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
-						.getFirstEntries(collectionDbId, 5);
+						.getFirstEntries(collectionDbId, 3);
 				result = (ObjectNode) Json.toJson(collection);
 				result.put("firstEntries", Json.toJson(firstEntries));
 				return ok(Json.toJson(collection));

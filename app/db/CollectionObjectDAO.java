@@ -20,11 +20,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import model.Collection;
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
@@ -88,7 +91,9 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	}
 	
 	public List<RecordResource> getFirstEntries(ObjectId dbId, int upperBound) {
-		return DB.getRecordResourceDAO().getByCollectionBetweenPositions(dbId, 0, upperBound);
+		ArrayList<String> retrievedFields = new ArrayList<String>();
+		retrievedFields.add("media");
+		return DB.getRecordResourceDAO().getByCollectionBetweenPositions(dbId, 0, upperBound, retrievedFields);
 	}
 
 
@@ -276,6 +281,46 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
 	}
 	
-
+	//it may happen that e.g. the thumbnail of the 4th instead of the 3d record of the media appears in the collections's (3) media 
+	public void addCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
+		//int entryCount = updateCollectionAdmin(colId).getAdministrative().getEntryCount();//old entry count
+		if (position < 3) {
+			RecordResource record = DB.getRecordResourceDAO().getById(recordId, new ArrayList<String>(Arrays.asList("media")));
+			if (record.getMedia() != null) {
+				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
+				EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
+				UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+				Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+				HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
+				     put(MediaVersion.Thumbnail, thumbnail);}};
+				colUpdate.set("media."+position, colMedia);
+				this.update(cq,  colUpdate);
+			}
+		}
+	}	
 	
+	public void removeCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
+		if (position < 3) {
+			//new Media should be based on records' positions before shifting.
+			List<RecordResource> newFollowingRecords = new ArrayList<RecordResource>();
+			for (int i = position+1; i<3; i++) {
+				RecordResource record = DB.getRecordResourceDAO().getByCollectionAndPosition(colId, position+1);
+				if (record != null)
+					newFollowingRecords.add(record);
+			}
+			UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+			for (int i=position; i<3; i++) {
+				if (i-position < newFollowingRecords.size()) {
+					RecordResource record = newFollowingRecords.get(i-position);
+					HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
+					EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
+					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
+					     put(MediaVersion.Thumbnail, thumbnail);}};
+					colUpdate.set("media."+i, colMedia);
+				}
+			}
+			this.update(cq,  colUpdate);
+		}
+	}	
 }

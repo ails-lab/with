@@ -335,7 +335,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public static enum WithResourceType {
-		WithResource, CollectionObject, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
+		WithResource, CollectionObject, RecordResource, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
 	}
 
 	@Id
@@ -383,6 +383,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
+	@Embedded
 	private ArrayList<ContextAnnotation> contextAnnotation;
 
 	private ArrayList<Annotation> annotations;
