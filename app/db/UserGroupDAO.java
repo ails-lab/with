@@ -32,14 +32,26 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	public UserGroupDAO() {
 		super(UserGroup.class);
 	}
+	
+	public UserGroup getById(ObjectId id, List<String> retrievedFields) {
+		Query<UserGroup> q = this.createQuery().field("_id").equal(id);
+		if (retrievedFields != null)
+			for (int i = 0; i < retrievedFields.size(); i++)
+				q.retrievedFields(true, retrievedFields.get(i));
+		return this.findOne(q);
+
+	}
 
 	public UserGroup getByName(String name) {
 		return this.findOne("username", name);
 	}
 
-	public List<UserGroup> findByUserIdAll(ObjectId userId, GroupType groupType) {
+	public List<UserGroup> findByUserId(ObjectId userId,
+			GroupType groupType, Boolean privateGroup) {
 		Query<UserGroup> q = createQuery().disableValidation().field("users")
 				.hasThisOne(userId);
+		if (privateGroup != null)
+			q.and(q.criteria("privateGroup").equal(privateGroup));
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
@@ -47,29 +59,6 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
-	public List<UserGroup> findByUserIdPublic(ObjectId userId,
-			GroupType groupType) {
-		Query<UserGroup> q = createQuery().disableValidation().field("users")
-				.hasThisOne(userId);
-		q.and(q.criteria("privateGroup").equal(false));
-		if (groupType.equals(GroupType.All)) {
-			return find(q).asList();
-		}
-		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
-		return find(q).asList();
-	}
-
-	public List<UserGroup> findByUserIdPrivate(ObjectId userId,
-			GroupType groupType) {
-		Query<UserGroup> q = createQuery().disableValidation().field("users")
-				.hasThisOne(userId);
-		q.and(q.criteria("privateGroup").equal(true));
-		if (groupType.equals(GroupType.All)) {
-			return find(q).asList();
-		}
-		q.and(q.criteria("className").equal("model.usersAndGroups." + groupType.toString()));
-		return find(q).asList();
-	}
 
 	public List<UserGroup> findByParent(ObjectId parentId, GroupType groupType) {
 		Query<UserGroup> q = createQuery().disableValidation()

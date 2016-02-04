@@ -19,12 +19,14 @@ package sources.core;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 
 import sources.core.Utils;
@@ -69,6 +71,34 @@ public class HttpConnector {
 			throw e;
 		}
 	}
+	
+	public static <T> T getContentAsFile(String url) throws Exception {
+		try {
+			Logger.debug("calling: " + url);
+			long time = System.currentTimeMillis();
+			String url1 = Utils.replaceQuotes(url);
+			
+			Promise<T> filePromise = WS.url(url1).get().map(new Function<WSResponse, T>() {
+				public T apply(WSResponse response) throws IOException {
+//					System.out.println(response.getBody());
+					File tmp = new File("temp");
+					FileUtils.writeByteArrayToFile(tmp, response.asByteArray());
+					//T file = (T) response.asByteArray();
+					T file = (T) tmp;
+					long ftime = (System.currentTimeMillis() - time)/1000;
+					Logger.debug("waited "+ftime+" sec for: " + url);
+					return file;
+				}
+			});
+			return (T) filePromise.get(TIMEOUT_CONNECTION);
+		} catch (Exception e) {
+			Logger.error("calling: " + url);
+			Logger.error("msg: " + e.getMessage());
+
+			throw e;
+		}
+	}
+
 	
 	public static <T> T postFileContent(String url, File file, String paramName, String paramValue) throws Exception {
 		try {
@@ -218,13 +248,16 @@ public class HttpConnector {
 		}
 	}
 
-public static <T> T postContent(String url) throws Exception {
+public static <T> T postContent(String url, String parameter, String paramName) throws Exception {
 		try {
 			Logger.debug("calling: " + url);
 			long time = System.currentTimeMillis();
 			String url1 = Utils.replaceQuotes(url);
 			
-			Promise<T> jsonPromise = WS.url(url1).post(url).map(new Function<WSResponse, T>() {
+			//Promise<T> jsonPromise = WS.url(url1).post("content").map(new Function<WSResponse, T>() {
+			Promise<T> jsonPromise = WS.url(url1)
+					.setQueryParameter(paramName, parameter)
+					.post("content").map(new Function<WSResponse, T>() {
 				public T apply(WSResponse response) {
 //					System.out.println(response.getBody());
 					T json = (T) response.asJson();
@@ -247,8 +280,13 @@ public static <T> T postContent(String url) throws Exception {
 		return HttpConnector.<JsonNode>getContent(url);
 	}
 	
-	public static JsonNode postURLContent(String url) throws Exception {
-		return HttpConnector.<JsonNode>postContent(url);
+	public static File getURLContentAsFile(String url) throws Exception {
+		return HttpConnector.<File>getContentAsFile(url);
+	}
+
+	
+	public static JsonNode postURLContent(String url, String parameter, String paramName) throws Exception {
+		return HttpConnector.<JsonNode>postContent(url, parameter, paramName);
 	}
 
 	

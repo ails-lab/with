@@ -20,16 +20,24 @@ package elastic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
+import model.resources.RecordResource.RecordDescriptiveData;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.suggest.SuggestRequestBuilder;
+import org.elasticsearch.action.suggest.SuggestResponse;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.AndFilterBuilder;
 import org.elasticsearch.index.query.BoolFilterBuilder;
@@ -40,6 +48,8 @@ import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.index.query.NotFilterBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
@@ -48,6 +58,11 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.RangeFilterBuilder;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
+import org.elasticsearch.index.query.functionscore.fieldvaluefactor.FieldValueFactorFunctionBuilder;
+import org.elasticsearch.index.search.MultiMatchQuery;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
@@ -55,6 +70,14 @@ import org.elasticsearch.search.facet.FacetBuilder;
 import org.elasticsearch.search.facet.FacetBuilders;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilder.SuggestionBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
+import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.gson.JsonObject;
 
 import elastic.ElasticSearcher.SearchOptions;
 import utils.Tuple;
@@ -63,7 +86,10 @@ public class ElasticSearcher {
 	public static final int DEFAULT_RESPONSE_COUNT = 10;
 
 	private final String name;
-	private String type;
+	private List<String> types = new ArrayList<String>();
+	private final Map<String, Float> fedSearchFieldsWithBoosts;
+	private List<String> fieldsForSimilarity;
+	private final List<String> aggregatedFields;
 
 	private final Client client = null;
 	public static final int DEFAULT_COUNT = 10;
@@ -72,13 +98,13 @@ public class ElasticSearcher {
 	public static final int FILTER_OR = 2;
 
 	public static class SearchOptions {
+		public boolean scroll;
 		public int offset = 0;
 		public int count = DEFAULT_COUNT;
 		public HashMap<String, ArrayList<String>> filters = new HashMap<String, ArrayList<String>>();
 		public int filterType = FILTER_AND;
 		public List<List<Tuple<ObjectId, Access>>> accessList = new ArrayList<List<Tuple<ObjectId, Access>>>();
 		// used for method searchForCollections
-		public boolean _idSearch = false;
 
 		public SearchOptions() {
 		}
@@ -88,6 +114,15 @@ public class ElasticSearcher {
 			this.count = count;
 		}
 
+		public boolean isScroll() {
+			return scroll;
+		}
+
+		public void setScroll(boolean scroll) {
+			this.scroll = scroll;
+		}
+
+
 		public void setOffset(int offset) {
 			this.offset = offset;
 		}
@@ -96,24 +131,20 @@ public class ElasticSearcher {
 			this.count = count;
 		}
 
-		public void set_idSearch(boolean value) {
-			this._idSearch = value;
-		}
-
 		public void addFilter(String key, String value) {
 			ArrayList<String> values = null;
-			if (filters.containsKey(key)) {
+			if(filters.containsKey(key)) {
 				values = filters.get(key);
 			} else {
 				values = new ArrayList<String>();
 				filters.put(key, values);
 			}
+
 			values.add(value);
 		}
 
 		public void setFilterType(String type) {
-			if (type.equalsIgnoreCase("or"))
-				filterType = FILTER_OR;
+			if(type.equalsIgnoreCase("or")) filterType = FILTER_OR;
 			else filterType = FILTER_AND;
 		}
 	}
@@ -124,58 +155,58 @@ public class ElasticSearcher {
 		}
 	}
 
-	public ElasticSearcher(String type) {
+	public ElasticSearcher() {
 		this.name = Elastic.index;
-		this.type = type;
+
+		this.fedSearchFieldsWithBoosts = new HashMap<String, Float>();
+		fedSearchFieldsWithBoosts.put("label", 1.8f);
+		fedSearchFieldsWithBoosts.put("description", 1.5f);
+		fedSearchFieldsWithBoosts.put("keywords", 1.3f);
+
+		this.aggregatedFields = new ArrayList<String>();
+		aggregatedFields.add("resourceType.all");
+		aggregatedFields.add("provider.all");
+		aggregatedFields.add("dataProvider.all");
+		aggregatedFields.add("media.type.all");
+		aggregatedFields.add("dccreator.all");
+		aggregatedFields.add("dccontributor.all");
+		aggregatedFields.add("dctermsspatial.all");
+		aggregatedFields.add("contentusage.all");
+		aggregatedFields.add("dates");
+		aggregatedFields.add("media.type.all");
+		aggregatedFields.add("media.withRights.all");
+
 	}
+
+
+	/* Query Execution */
 
 	public SearchResponse execute(QueryBuilder query) {
-		return this.execute(query, new SearchOptions(0, DEFAULT_RESPONSE_COUNT), false);
+		return this.execute(query, new SearchOptions(0, DEFAULT_RESPONSE_COUNT));
 	}
 
-	public SearchResponse execute(QueryBuilder query, SearchOptions options, boolean scroll) {
-		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, scroll);
+	public SearchResponse execute(QueryBuilder query, SearchOptions options) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
 		return search.execute().actionGet();
 	}
 
-	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options, boolean scroll) {
-		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, scroll);
-		TermsBuilder termAgg = AggregationBuilders.terms("types").field("type_all");
-		TermsBuilder providerAgg = AggregationBuilders.terms("providers").field("provider_all");
-		TermsBuilder dataProviderAgg = AggregationBuilders.terms("dataProviders").field("dataProvider_all");
-		TermsBuilder sourceAgg 	= AggregationBuilders.terms("source").field("source_all");
-		TermsBuilder creatorAgg = AggregationBuilders.terms("creators").field("creator_all");
-		TermsBuilder rightsAgg = AggregationBuilders.terms("rights").field("rights_all");
-		TermsBuilder countryAgg = AggregationBuilders.terms("countries").field("country_all");
-		TermsBuilder yearAgg = AggregationBuilders.terms("years").field("year_all");
-		TermsBuilder reuseAgg = AggregationBuilders.terms("reusability").field("reusability_all");
-		search.addAggregation(termAgg)
-			  .addAggregation(providerAgg)
-			  .addAggregation(dataProviderAgg)
-			  .addAggregation(sourceAgg)
-			  .addAggregation(creatorAgg)
-			  .addAggregation(rightsAgg)
-			  .addAggregation(countryAgg)
-			  .addAggregation(yearAgg)
-			  .addAggregation(reuseAgg);
+	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
+		for(String aggName: aggregatedFields) {
+			TermsBuilder agg = AggregationBuilders.terms(aggName+"+aggregation").field(aggName);
+			search.addAggregation(agg);
+		}
+
+		System.out.println(search.toString());
 		return search.execute().actionGet();
 	}
 
-	public SearchResponse executeWithFacets(QueryBuilder query, SearchOptions options) {
-		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options, false)
-		.addFacet(this.facet("Designers", "Facets.Designers.text", "Facets.Designers"))
-		.addFacet(this.facet("objectType", "Facets.objectType.uri", "Facets.objectType"))
-		.addFacet(this.facet("colour", "Facets.colours.uri", "Facets.colours"))
-		.addFacet(this.facet("techniques", "Facets.techniques.uri", "Facets.techniques"))
-		.addFacet(this.facet("type", "Facets.type.value", "Facets.type"))
-		.addFacet(this.facet("contemporaryDates", "Facets.datesContemporary.text", "Facets.datesContemporary"))
-		.addFacet(this.facet("periods", "Facets.datesPeriod.text", "Facets.datesPeriods"))
-		.addFacet(this.facet("periods", "Facets.datesPeriod.text", "Facets.datesPeriods"))
-		.addFacet(this.facet("dataProviders", "Facets.dataProviders.text", "Facets.dataProviders"));
-//		System.out.println("QUERY: " + search.toString());
-
-		return search.execute().actionGet();
+	public SuggestResponse executeSuggestion(SuggestionBuilder suggestion, SearchOptions options) {
+		SuggestRequestBuilder sugg = this.getSuggestRequestBuilder(suggestion, options);
+		return sugg.execute().actionGet();
 	}
+
+	/* Query Constractors */
 
 	/**
 	 * size defaults to DEFAULT_RESPONSE_COUNT (10).
@@ -183,99 +214,120 @@ public class ElasticSearcher {
 	 * @param from offset of results.
 	 * @return
 	 */
-	public SearchResponse search(String term, int from, int count){ return search(term, new SearchOptions(from, count)); }
-	public SearchResponse search(String term) { return search(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT)); }
+	public SearchResponse search(String term, int from, int count) {
+		return searchResourceWithWeights(term, new SearchOptions(from, count));
+	}
 
+	public SearchResponse search(String term, SearchOptions options) {
+		return searchResourceWithWeights(term, options);
+	}
+
+	public SearchResponse search(String term) {
+		return searchResourceWithWeights(term, new SearchOptions(0, DEFAULT_RESPONSE_COUNT));
+	}
+
+
+
+	public SearchResponse searchResourceWithWeights(String term, SearchOptions options) {
+
+		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
+		for(Entry<String, Float> e: fedSearchFieldsWithBoosts.entrySet()) {
+			qstr.field(e.getKey()+".all", e.getValue());
+		}
+		qstr.useDisMax(true);
+		qstr.tieBreaker(0);
+		qstr.defaultOperator(Operator.OR);
+		qstr.defaultField("_all");
+		qstr.analyzer("standard");
+		qstr.analyzeWildcard(false);
+		//
+		qstr.fuzzyMaxExpansions(50);
+		qstr.fuzziness(Fuzziness.AUTO);
+		qstr.fuzzyPrefixLength(0);
+		//
+		qstr.phraseSlop(0);
+		qstr.autoGeneratePhraseQueries(false);
+		qstr.maxDeterminizedStates(10000);
+		//qstr.minimumShouldMatch(minimumShouldMatch);
+		qstr.lenient(true);
+
+
+		FunctionScoreQueryBuilder func_score =  QueryBuilders.functionScoreQuery(qstr);
+
+		return this.executeWithAggs(func_score, options);
+	}
+
+
+	/*
+	 * List all available collections of a User
+	 */
 	public SearchResponse searchAccessibleCollections(SearchOptions options) {
-		return searchAccessibleCollections(options, false);
-	}
-
-	public SearchResponse searchAccessibleCollectionsScanScroll(SearchOptions options) {
-		return searchAccessibleCollections(options, true);
-	}
-
-	public SearchResponse searchAccessibleCollections(SearchOptions options, boolean scroll) {
 
 		MatchAllQueryBuilder match_all = QueryBuilders.matchAllQuery();
-
-		AndFilterBuilder and_filter = FilterBuilders.andFilter();
-		for(List<Tuple<ObjectId, Access>> ands: options.accessList) {
-			OrFilterBuilder or_filter = FilterBuilders.orFilter();
-			for(Tuple<ObjectId, Access> t: ands) {
-				BoolFilterBuilder bool = FilterBuilders.boolFilter();
-				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("rights.access").gte(t.y.ordinal());
-				bool.must(this.filter("rights.user", t.x.toString()));
-				bool.must(range_filter);
-				or_filter.add(bool);
-			}
-			and_filter.add(or_filter);
-		}
-
-		OrFilterBuilder outer_or = FilterBuilders.orFilter();
-		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("rights", and_filter);
-		outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
-		FilteredQueryBuilder filtered = QueryBuilders.filteredQuery(match_all, outer_or);
-		return this.execute(filtered, options, scroll);
+		return this.execute(match_all, options);
 	}
 
-	public SearchResponse searchForCollections(String terms, SearchOptions options) {
 
-		if(terms == null) terms = "";
+	/*
+	 * Search for related records
+	 */
 
-		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
-		str.defaultOperator(Operator.OR);
-		str.defaultField("_id");
-		bool.must(str);
-
-		return this.execute(bool, options, false);
-	}
-
-	public SearchResponse search(String terms, SearchOptions options){
-		if(terms == null) terms = "";
-
-		BoolQueryBuilder bool = QueryBuilders.boolQuery();
-		/*
-		List<String> list = new ArrayList<String>();
-		Matcher m = Pattern.compile("([^\"]\\S*|\".+?\")\\s*").matcher(terms);
-		while (m.find()) list.add(m.group(1)); // Add .replace("\"", "") to remove surrounding quotes.
-		 */
-		//implementation with query_string query
-		QueryStringQueryBuilder str = QueryBuilders.queryStringQuery(terms);
-		str.defaultOperator(Operator.OR);
-		if(options._idSearch)
-			str.defaultField("_id");
-
-		bool.must(str);
-		//return this.execute(bool, options, false);
-		return this.executeWithAggs(bool, options, false);
-	}
-
-	public SearchResponse searchForSimilar(String terms, String provider, String exclude, SearchOptions elasticoptions) {
+	public SearchResponse relatedWithDisMax(String terms, String provider, String exclude, SearchOptions elasticoptions) {
 
 		if(terms == null) terms = "";
 
 		DisMaxQueryBuilder dis_max_q = QueryBuilders.disMaxQuery();
-		MatchQueryBuilder title_match = QueryBuilders.matchQuery("title", terms);
-		MatchQueryBuilder desc_match = QueryBuilders.matchQuery("description", terms);
+		MatchQueryBuilder title_match = QueryBuilders.matchQuery("label_all", terms);
+		MatchQueryBuilder desc_match = QueryBuilders.matchQuery("description_all", terms);
 		MatchQueryBuilder provider_match = QueryBuilders.matchQuery("provider", provider);
 
 		dis_max_q.add(title_match).add(desc_match).add(provider_match);
 		dis_max_q.tieBreaker(0.3f);
 
-		NotFilterBuilder not_filter = FilterBuilders.notFilter(this.filter("_id", exclude));
-		FilteredQueryBuilder filtered = new FilteredQueryBuilder(dis_max_q, not_filter);
+		if(exclude != null) {
+			NotFilterBuilder not_filter = FilterBuilders.notFilter(this.filter("_id", exclude));
+			FilteredQueryBuilder filtered = new FilteredQueryBuilder(dis_max_q, not_filter);
+			return this.execute(filtered);
+		}
+		else
+			return this.execute(dis_max_q);
 
-		return this.execute(filtered);
+
 	}
 
-	/*public SearchResponse related(Record record) {
-		JsonNode object = record.getJsonObject(false);
-		Set<String> creators = JSONUtils.getLabelsFromObject(object.get("creator"));
-		Set<String> contributors = JSONUtils.getLabelsFromObject(object.get("contributor"));
-		Set<String> types = JSONUtils.getLabelsFromObject(object.get("type"));
-		Set<String> subjects = JSONUtils.getLabelsFromObject(object.get("subject"));
-		Set<String> dataProviders = JSONUtils.getLabelsFromObject(object.get("dataProvider"));
+	public SearchResponse relatedWithMLT(String text, List<String> ids, List<String> fields, SearchOptions options) {
+
+		if(text == null) text = "";
+
+		MoreLikeThisQueryBuilder mlt;
+		if(fields != null)
+			mlt = QueryBuilders.moreLikeThisQuery(fields.toArray(new String[fields.size()]));
+		else
+			mlt = QueryBuilders.moreLikeThisQuery();
+
+		mlt.likeText(text);
+		if(ids != null) mlt.ids(ids.toArray(new String[ids.size()]));
+		mlt.maxQueryTerms(20);
+		mlt.minTermFreq(1);
+
+		return this.execute(mlt, options);
+	}
+
+	public SearchResponse relatedWithShouldClauses(List<JsonNode> records) {
+
+		Set<String> creators = new HashSet<String>();
+		Set<String> contributors = new HashSet<String>();
+		Set<String> types = new HashSet<String>();
+		Set<String> subjects = new HashSet<String>();
+		Set<String> dataProviders = new HashSet<String>();
+
+		for(JsonNode rr: records) {
+			creators.add(rr.get("descriptiveData.dccreator").asText());
+			contributors.add(rr.get("").asText());
+			types.add(rr.get("").asText());
+			subjects.add(rr.get("").asText());
+			dataProviders.add(rr.get("").asText());
+		}
 
 		BoolQueryBuilder bool = QueryBuilders.boolQuery();
 		this.populateBoolFromSet(bool, 1.8f, creators);
@@ -286,7 +338,19 @@ public class ElasticSearcher {
 
 //		System.out.println(bool.toString());
 		return this.execute(bool);
-	}*/
+	}
+
+
+	public SuggestResponse searchSuggestions(String term, String field, SearchOptions options) {
+
+		TermSuggestionBuilder sugg = SuggestBuilders.termSuggestion(term);
+		sugg.text(term);
+		sugg.field(field);
+
+		return this.executeSuggestion(sugg, options);
+	}
+
+	/* Private utility methods */
 
 	private void populateBoolFromSet(BoolQueryBuilder bool, float boost, Set<String> set) {
 //		System.out.println(set);
@@ -301,23 +365,39 @@ public class ElasticSearcher {
 		}
 	}
 
-	// private utility methods
+	private void addQueryPermissions(FilterBuilder f, SearchOptions options) {
 
-	private Client getClient() {
-		return Elastic.getTransportClient();
+		AndFilterBuilder and_filter = FilterBuilders.andFilter();
+		for(List<Tuple<ObjectId, Access>> ands: options.accessList) {
+			OrFilterBuilder or_filter = FilterBuilders.orFilter();
+			for(Tuple<ObjectId, Access> t: ands) {
+				BoolFilterBuilder bool = FilterBuilders.boolFilter();
+				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("access.acl.level").gte(t.y.ordinal());
+				bool.must(this.filter("access.acl.user", t.x.toString()));
+				bool.must(range_filter);
+				or_filter.add(bool);
+			}
+			and_filter.add(or_filter);
+		}
+
+		OrFilterBuilder outer_or = FilterBuilders.orFilter();
+		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("access", and_filter);
+		outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
+		if(options.filterType == FILTER_OR) {
+			((OrFilterBuilder) f).add(outer_or);
+		}
+		else {
+			((AndFilterBuilder) f).add(outer_or);
+		}
 	}
 
-	private SearchRequestBuilder getSearchRequestBuilder(String type) {
-		return this.getClient()
-		.prepareSearch(this.name)
-		.setTypes(type)
-		.setSearchType(SearchType.QUERY_THEN_FETCH);
-	}
+	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options) {
 
-	private SearchRequestBuilder getSearchRequestBuilder(QueryBuilder query, SearchOptions options, boolean scroll) {
+		SearchRequestBuilder search = Elastic.getTransportClient()
+									.prepareSearch(name)
+									.setTypes(types.toArray(new String[types.size()]));
 
-		SearchRequestBuilder search = this.getSearchRequestBuilder(type);
-		if(!scroll) {
+		if(!options.isScroll()) {
 			search.setFrom(options.offset)
 				  .setSearchType(SearchType.DFS_QUERY_THEN_FETCH)
 				  .setSize(options.count);
@@ -333,44 +413,35 @@ public class ElasticSearcher {
 		else filterBuilder = FilterBuilders.andFilter();
 
 		if(options.filters.size() > 0) {
-			OrFilterBuilder accessibles = FilterBuilders.orFilter();
-			AndFilterBuilder faceted 	= FilterBuilders.andFilter();
 			for(String key: options.filters.keySet()) {
-				if(key.equals("isPublic") || key.equals("collections")) {
-					for(String value: options.filters.get(key)) {
-						accessibles.add(this.filter(key, value));
-					}
-				} else {
-					OrFilterBuilder multiValues = FilterBuilders.orFilter();
-					for(String value: options.filters.get(key)) {
-						multiValues.add(this.filter(key, value));
-					}
-					faceted.add(multiValues);
+				OrFilterBuilder sameFieldFilter	= FilterBuilders.orFilter();
+				for(String value: options.filters.get(key)) {
+					sameFieldFilter.add(this.filter(key, value));
+				}
+				if(options.filterType == FILTER_OR) {
+					((OrFilterBuilder) filterBuilder).add(sameFieldFilter).cache(true);
+				}
+				else {
+					((AndFilterBuilder) filterBuilder).add(sameFieldFilter).cache(true);
 				}
 			}
-
-			if(options.filterType == FILTER_OR) {
-				((OrFilterBuilder) filterBuilder).add(accessibles).add(faceted);
-			}
-			else {
-				((AndFilterBuilder) filterBuilder).add(accessibles).add(faceted);
-			}
-			QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
-			search.setQuery(filtered);
-		} else {
-			search.setQuery(query);
 		}
+
+		addQueryPermissions(filterBuilder, options);
+		QueryBuilder filtered = QueryBuilders.filteredQuery(query, filterBuilder);
+		search.setQuery(filtered);
 
 		return search;
 	}
 
-	private FacetBuilder facet(String facetName, String fieldName, String nestedField) {
-		FacetBuilder builder = FacetBuilders.termsFacet(facetName).field(fieldName).size(100);
-		if(nestedField != null){
-			builder.nested(nestedField);
-		}
+	private SuggestRequestBuilder getSuggestRequestBuilder(SuggestionBuilder suggestion, SearchOptions options) {
 
-		return builder;
+		SuggestRequestBuilder sugg = Elastic.getTransportClient()
+									.prepareSuggest(name)
+									.addSuggestion(suggestion);
+
+		System.out.println(suggestion.toString());
+		return sugg;
 	}
 
 	private FilterBuilder filter(String key, String value) {
@@ -384,10 +455,17 @@ public class ElasticSearcher {
 		return nested;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setTypes(List<String> types) {
+		this.types = types;
 	}
 
-
+	public void addType(String type) {
+		if(types != null)
+			this.types.add(type);
+		else {
+			types = new ArrayList<String>();
+			types.add(type);
+		}
+	}
 
 }

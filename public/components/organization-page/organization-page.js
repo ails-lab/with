@@ -9,7 +9,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 	}
 
 	// Settings for X-Editable
-	$.fn.editable.defaults.url = function(params) {
+	$.fn.editable.defaults.url = function (params) {
 		var d = new $.Deferred();
 		console.log(params);
 		var data = {};
@@ -53,10 +53,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 	};
 	$.fn.editableutils.inherit(Address, $.fn.editabletypes.abstractinput);
 	$.extend(Address.prototype, {
-		render: function() {					// Renders input from tpl
+		render: function () { // Renders input from tpl
 			this.$input = this.$tpl.find('input');
 		},
-		value2html: function(value, element) {	// Default method to show value in element
+		value2html: function (value, element) { // Default method to show value in element
 			if (!value) {
 				$(element).empty();
 				return;
@@ -72,10 +72,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 			$(element).html(html);
 		},
-		html2value: function(html) {
+		html2value: function (html) {
 			return null;
 		},
-		value2str: function(value) {
+		value2str: function (value) {
 			var str = '';
 			if (value) {
 				for (var k in value) {
@@ -84,10 +84,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			}
 			return str;
 		},
-		str2value: function(str) {
+		str2value: function (str) {
 			return str;
 		},
-		value2input: function(value) {
+		value2input: function (value) {
 			if (!value) {
 				return;
 			}
@@ -95,17 +95,17 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			this.$input.filter('[name="city"]').val(value.city);
 			this.$input.filter('[name="country"]').val(value.country);
 		},
-		input2value: function() {
+		input2value: function () {
 			return {
 				address: this.$input.filter('[name="address"]').val(),
 				city: this.$input.filter('[name="city"]').val(),
 				country: this.$input.filter('[name="country"]').val()
 			};
 		},
-		activate: function() {
+		activate: function () {
 			this.$input.filter('[name="address"]').focus();
 		},
-		autosubmit: function() {
+		autosubmit: function () {
 			this.$input.keydown(function (e) {
 				if (e.which === 13) {
 					$(this).closest('form').submit();
@@ -114,9 +114,9 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		}
 	});
 	Address.defaults = $.extend({}, $.fn.editabletypes.abstractinput.defaults, {
-		tpl: '<div class="editable-address"><label class="address"><span>Address: </span><input type="text" name="address" class="form-control" data-bind="value: page.address"></label></div>'+
-			 '<div class="editable-address"><label class="address"><span>City: </span><input type="text" name="city" class="form-control" data-bind="value: page.city"></label></div>'+
-			 '<div class="editable-address"><label class="address"><span>Country: </span><input type="text" name="country" class="form-control" data-bind="value: page.country"></label></div>',
+		tpl: '<div class="editable-address"><label class="address"><span>Address: </span><input type="text" name="address" class="form-control" data-bind="value: page.address"></label></div>' +
+			'<div class="editable-address"><label class="address"><span>City: </span><input type="text" name="city" class="form-control" data-bind="value: page.city"></label></div>' +
+			'<div class="editable-address"><label class="address"><span>Country: </span><input type="text" name="country" class="form-control" data-bind="value: page.country"></label></div>',
 
 		inputclass: ''
 	});
@@ -320,17 +320,18 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 	/* Custom bindingHandler for error message */
 	ko.bindingHandlers.validationCore = {
-		init: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+		init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 			var span = document.createElement('SPAN');
 			span.className = 'help-block';
-			var parent = $(element).parent().closest
-			(".input-group");
+			var parent = $(element).parent().closest(".input-group");
 			if (parent.length > 0) {
 				$(parent).after(span);
 			} else {
 				$(element).after(span);
 			}
-			ko.applyBindingsToNode(span, { validationMessage: valueAccessor() });
+			ko.applyBindingsToNode(span, {
+				validationMessage: valueAccessor()
+			});
 		}
 	};
 
@@ -341,9 +342,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		// self.id = ko.observable(params.id);
 
 		// Generic Parameters
-		self.type = ko.observable('organization');	// Default is organization. If user gives a different parameter, that changes
-		self.baseURL = ko.computed(function () {	// TODO: Dynamically get the address
-			return 'www.with.image.ntua.gr/assets/index.html#' + self.type() + '/';
+		self.type = ko.observable('organization'); // Default is organization. If user gives a different parameter, that changes
+		self.baseURL = ko.pureComputed(function () { // TODO: Dynamically get the address
+			return window.location.origin + '/assets/index.html#' + self.type() + '/';
+			// return 'www.with.image.ntua.gr/assets/index.html#' + self.type() + '/';
 		});
 
 		// UserGroup Fields
@@ -356,7 +358,15 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		self.friendlyName = ko.observable().extend({
 			required: true
 		});
-		self.thumbnail = ko.observable();
+		// self.thumbnail = ko.observable();
+		self.avatar = {
+			Original: ko.observable(),
+			Tiny: ko.observable(),
+			Square: ko.observable(),
+			Thumbnail: ko.observable(),
+			Medium: ko.observable()
+		};
+
 		self.about = ko.observable().extend({
 			required: true
 		});
@@ -366,7 +376,6 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			friendlyName: self.friendlyName,
 			about: self.about
 		});
-		
 
 		// Page Fields
 		self.page = {
@@ -374,8 +383,13 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			city: ko.observable(),
 			country: ko.observable(),
 			url: ko.observable(),
-			coverImage: ko.observable(),
-			coverThumbnail: ko.observable(),
+			cover: {
+				Original: ko.observable(),
+				Tiny: ko.observable(),
+				Square: ko.observable(),
+				Thumbnail: ko.observable(),
+				Medium: ko.observable()
+			},
 			featuredCollections: ko.observableArray(),
 			coordinates: {
 				latitude: ko.observable(),
@@ -399,7 +413,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 		self.coverThumbnail = ko.computed(function () {
 			return self.page.coverThumbnail ? '/media/' + self.page.coverThumbnail() : null;
 		});
-		self.logo = ko.computed(function() {
+		self.logo = ko.computed(function () {
 			return self.thumbnail ? '/media/' + self.thumbnail() : false;
 		});
 		self.coords = ko.computed(function () {
@@ -409,16 +423,20 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				return null;
 			}
 		});
-		self.isCreator = ko.computed(function() {
+		self.isCreator = ko.computed(function () {
 			return isLogged() && app.currentUser._id() === self.creator();
 		});
 
-		self.isAdmin = ko.computed(function() {
+		self.isAdmin = ko.computed(function () {
 			return isLogged() && $.inArray(app.currentUser._id(), self.adminIds);
 		});
 
-		if (params.id !== undefined) { self.id(params.id); }
-		if (params.type !== undefined) { self.type(params.type); }
+		if (params.id !== undefined) {
+			self.id(params.id);
+		}
+		if (params.type !== undefined) {
+			self.type(params.type);
+		}
 
 		$('#imageupload').fileupload({
 			type: "POST",
@@ -426,10 +444,15 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 50000,
 			done: function (e, data) {
-				console.log(e);
+				// console.log(e);
 				console.log(data);
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.thumbnail(urlID);
+				// var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				// self.thumbnail(urlID);
+				self.avatar.Original(data.result.original);
+				self.avatar.Tiny(data.result.tiny);
+				self.avatar.Square(data.result.square);
+				self.avatar.Thumbnail(data.result.thumbnail);
+				self.avatar.Medium(data.result.medium);
 			},
 			error: function (e, data) {
 				$.smkAlert({
@@ -440,18 +463,23 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			}
 		});
 
-
 		$('#logoupdate').fileupload({
 			type: "POST",
 			url: '/media/create',
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 50000,
 			done: function (e, data) {
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.thumbnail(urlID);
+				// var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
+				// self.thumbnail(urlID);
 
 				var updateData = {
-					thumbnail: self.thumbnail()
+					avatar: {
+						Original: data.result.original,
+						Tiny: data.result.tiny,
+						Square: data.result.square,
+						Thumbnail: data.result.thumbnail,
+						Medium: data.result.medium
+					}
 				};
 
 				$.ajax({
@@ -462,7 +490,11 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					processData: false,
 					data: JSON.stringify(updateData),
 					success: function (data, text) {
-						// TODO: Show the thumbnail
+						self.avatar.Original(data.avatar.Original);
+						self.avatar.Tiny(data.avatar.Tiny);
+						self.avatar.Square(data.avatar.Square);
+						self.avatar.Thumbnail(data.avatar.Thumbnail);
+						self.avatar.Medium(data.avatar.Medium);
 					},
 					error: function (request, status, error) {
 						// TODO: Show notification
@@ -485,9 +517,11 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 500000,
 			done: function (e, data) {
-				self.page.coverImage(data.result.results[0].externalId);
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.page.coverThumbnail(urlID);
+				self.page.cover.Original(data.result.original);
+				self.page.cover.Tiny(data.result.tiny);
+				self.page.cover.Square(data.result.square);
+				self.page.cover.Thumbnail(data.result.thumbnail);
+				self.page.cover.Medium(data.result.medium);
 			},
 			error: function (e, data) {
 				$.smkAlert({
@@ -504,14 +538,15 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
 			maxFileSize: 500000,
 			done: function (e, data) {
-				self.page.coverImage(data.result.results[0].externalId);
-				var urlID = data.result.results[0].thumbnailUrl.substring('/media/'.length);
-				self.page.coverThumbnail(urlID);
-
 				var updateData = {
 					page: {
-						coverImage: self.page.coverImage(),
-						coverThumbnail: self.page.coverThumbnail()
+						cover: {
+							Original: data.result.original,
+							Tiny: data.result.tiny,
+							Square: data.result.square,
+							Thumbnail: data.result.thumbnail,
+							Medium: data.result.medium
+						}
 					}
 				};
 
@@ -523,8 +558,13 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					processData: false,
 					data: JSON.stringify(updateData),
 					success: function (data, text) {
-						console.log(self.page.coverImage());
-						$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
+						self.page.cover.Original(data.page.cover.Original);
+						self.page.cover.Tiny(data.page.cover.Tiny);
+						self.page.cover.Square(data.page.cover.Square);
+						self.page.cover.Thumbnail(data.page.cover.Thumbnail);
+						self.page.cover.Medium(data.page.cover.Medium);
+
+						$(".profilebar > .wrap").css('background-image', 'url(' + self.page.cover.Original() + ')');
 					},
 					error: function (request, status, error) {
 						// TODO: Show notification
@@ -572,8 +612,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				} else {
 					console.log('Unknown type: ' + type);
 				}
-			}
-			else {
+			} else {
 				self.validationModel.errors.showAllMessages();
 			}
 		};
@@ -630,7 +669,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			});
 		};
 
-		self.manageMembersPopup = function() {
+		self.manageMembersPopup = function () {
 			app.showPopup('members-popup', params);
 		};
 
@@ -656,7 +695,13 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 
 				self.username(data.username);
 				self.friendlyName(data.friendlyName);
-				self.thumbnail(data.thumbnail);
+				if (data.avatar) {
+					self.avatar.Original(data.avatar.Original);
+					self.avatar.Tiny(data.avatar.Tiny);
+					self.avatar.Square(data.avatar.Square);
+					self.avatar.Thumbnail(data.avatar.Thumbnail);
+					self.avatar.Medium(data.avatar.Medium);
+				}
 				self.about(data.about);
 				self.creator(data.creator);
 				self.adminIds = data.adminIds;
@@ -665,15 +710,20 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.page.city(data.page.city);
 				self.page.country(data.page.country);
 				self.page.url(data.page.url);
-				self.page.coverImage(data.page.coverImage);
-				self.page.coverThumbnail(data.page.coverThumbnail);
 				if (data.page.coordinates) {
 					self.page.coordinates.longitude(data.page.coordinates.longitude);
 					self.page.coordinates.latitude(data.page.coordinates.latitude);
 				}
+				if (data.page.cover) {
+					self.page.cover.Original(data.page.cover.Original);
+					self.page.cover.Tiny(data.page.cover.Tiny);
+					self.page.cover.Square(data.page.cover.Square);
+					self.page.cover.Thumbnail(data.page.cover.Thumbnail);
+					self.page.cover.Medium(data.page.cover.Medium);
+				}
 
-				if (self.page.coverImage()) {
-					$(".profilebar > .wrap").css('background-image', 'url(/media/' + self.page.coverImage() + ')');
+				if (self.page.cover.Original()) {
+					$(".profilebar > .wrap").css('background-image', 'url(' + self.page.cover.Original() + ')');
 				}
 
 				if (!self.isCreator()) {
@@ -687,7 +737,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					self.revealItems(data.collectionsOrExhibitions);
 					initProfileScroll();
 				});
-			}).fail(function(jqXHR, textStatus, errorThrown) {
+			}).fail(function (jqXHR, textStatus, errorThrown) {
 				// window.location.href = "/assets/index.html";
 				$.smkAlert({
 					text: 'Page not found!',

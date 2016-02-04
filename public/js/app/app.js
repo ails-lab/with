@@ -33,12 +33,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			self.WITHApp = new plugin.WITHApp.ui({
 				// page name
 				page: $('body').attr('data-page'),
-	
+
 				// masonry
 				mSelector: '.grid',
 				mItem: '.item',
 				mSizer: '.sizer',
-	
+
 				// mobile menu
 				mobileSelector: '.mobilemenu',
 				mobileMenu: '.main .menu'
@@ -61,14 +61,14 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 		 		// mobile menu
 		 		mobileSelector : '.mobilemenu',
-		 		mobileMenu 	   : '.main .menu'	
+		 		mobileMenu 	   : '.main .menu'
 		 	})
 
 		 self.WITHApp.projectName = params._args.projectName;
 		 self.WITHApp.projectId = params._args.projectId;
 		 self.WITHApp.featuredExhibition=params._args.featuredExhibition;
 		 setTimeout(function(){ WITHApp.init(); }, 1000);
-		
+
 		 return {
 				WITHApp: self.WITHApp
 			};
@@ -303,6 +303,13 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		"facebookId": ko.observable(),
 		"googleId": ko.observable(),
 		"image": ko.observable(),
+		"avatar": {
+			"Original": ko.observable(),
+			"Medium": ko.observable(),
+			"Square": ko.observable(),
+			"Thumbnail": ko.observable(),
+			"Tiny": ko.observable()
+		},
 		"recordLimit": ko.observable(),
 		"collectedRecords": ko.observable(),
 		"storageLimit": ko.observable(),
@@ -333,24 +340,30 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.collectedRecords(data.collectedRecords);
 		self.currentUser.storageLimit(data.storageLimit);
 		self.currentUser.image(data.image);
+		if (typeof data.avatar != 'undefined') {	// New users don't have avatars
+			self.currentUser.avatar.Original(data.avatar.Original);
+			self.currentUser.avatar.Tiny(data.avatar.Tiny);
+			self.currentUser.avatar.Square(data.avatar.Square);
+			self.currentUser.avatar.Thumbnail(data.avatar.Thumbnail);
+			self.currentUser.avatar.Medium(data.avatar.Medium);
+		}
 		self.currentUser.favoritesId(data.favoritesId);
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
 
 		self.loadNotifications(data.notifications);
+
 		$(".star").each(function () {
 			$(this).css("display", "");
 		});
 		$(".collect").each(function () {
 			$(this).css("display", "");
 		});
-		//self.loadFavorites();
-
-		
+		self.loadFavorites();
 
 		isLogged(true);
-		
+
 		localStorage.setItem('logged_in', true);
 		waitForConnection(function () {
 			self.notificationSocket.send('{"action":"login","id":"' + data.dbId + '"}');
@@ -370,9 +383,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
 			success: function (data, text) {
-				
+
 				loadUser(data, false, false);
-				
+
 			}
 		});
 	};
@@ -384,7 +397,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			})
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
-				
+
 				for (var i in data) {
 					if ($("#" + data[i])) {
 						$("#" + data[i]).addClass('active');
@@ -781,7 +794,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		loadUser(storageData, true);
 	}*/
 
-	
+
 	function readCookie(name) {
 	    var nameEQ = encodeURIComponent(name) + "=";
 	    var ca = document.cookie.split(';');
@@ -792,7 +805,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	    }
 	    return null;
 	}
-	  
+
 	function ExtractQueryString(cookie) {
 	    var oResult = {};
 	    var aQueryString = cookie.replace(/\"/g, "").split("&");
@@ -803,24 +816,23 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	        }
 	    }
 	    return oResult;
-	} 
-	
+	}
+
 	self.checkLogged=function(){
 		var user=null;
 		var usercookie=readCookie("PLAY_SESSION");
 		if(usercookie)
 		usercookie.replace(/\"/g, "");
 		if(usercookie!=null){
-		   var keys=ExtractQueryString(usercookie);	
+		   var keys=ExtractQueryString(usercookie);
 		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
 		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
 		    return (keys["user"]==undefined ? false : true);
 		}else{return false;}
-		
+
 	};
-	
+
 	self.checkLogged();
-	
 	
 	self.findByLang=function(val) {
         selvalue="";
@@ -936,21 +948,19 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			return selvalue;
 			
 		}
-			 
-	
-	//self.reloadUser(); // Reloads the user on refresh
-	
+//self.reloadUser(); // Reloads the user on refresh
+
 	/* function to alert all tabs on log in changes*/
 	function storageChange(event) {
 		if(event.key == 'logged_in' ) {
 			//console.log("logged in:"+event.newValue);
-			
+
 				window.location.reload();
 				if(event.newValue=="true"){
 					console.log("just logare");
-					
+
 				}
-			
+
 	    }
 	}
 	window.addEventListener('storage', storageChange, false);

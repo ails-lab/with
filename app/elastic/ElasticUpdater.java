@@ -20,6 +20,7 @@ import static org.elasticsearch.common.xcontent.XContentFactory.jsonBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.libs.Json;
+import scala.Array;
 import db.DB;
 
 public class ElasticUpdater {
@@ -51,10 +53,10 @@ public class ElasticUpdater {
 	/*
 	 * Update one document with the structure provided.
 	 */
-	public static void updateOne(ObjectId id, Map<String, Object> doc) {
+	public static void updateOne(String type, ObjectId id, Map<String, Object> doc) {
 		Elastic.getTransportClient().prepareUpdate(
 				Elastic.index,
-				Elastic.type,
+				type,
 				id.toString())
 				.setDoc(doc)
 				.get();
@@ -65,7 +67,7 @@ public class ElasticUpdater {
 	 * Bulk updates. Updates all documents provided with the structure
 	 * provided.
 	 */
-	public static void updateMany(List<ObjectId> ids, List<Map<String, Object>> docs) throws Exception {
+	public static void updateMany(String type, List<ObjectId> ids, List<Map<String, Object>> docs) throws Exception {
 
 		if(ids.size() != docs.size()) {
 			throw new Exception("Error: ids list does not have the same size with upDocs list");
@@ -76,7 +78,7 @@ public class ElasticUpdater {
 		} else if( ids.size() == 1 ) {
 					Elastic.getTransportClient().prepareUpdate(
 							Elastic.index,
-							Elastic.type,
+							type,
 							ids.get(0).toString())
 							.setDoc(docs.get(0))
 							.get();
@@ -86,7 +88,7 @@ public class ElasticUpdater {
 				for(Map<String, Object> doc: docs) {
 					Elastic.getBulkProcessor().add(new UpdateRequest(
 							Elastic.index,
-							Elastic.type,
+							type,
 							ids.get(i).toString())
 					.doc(doc));
 					i++;
@@ -99,15 +101,23 @@ public class ElasticUpdater {
 	/*
 	 * Completes the whole update process of a merged document
 	 */
-	public static void addResourceToCollection(String id, ObjectId colId, int position) throws IOException {
+	public static void addResourceToCollection(String id, List<CollectionInfo> newColIn) throws IOException {
+		Map<String, List<Object>> doc =  new HashMap<String, List<Object>>();
+		for(CollectionInfo ci: newColIn) {
+			Map<String, Object> colInfo = new HashMap<String, Object>();
+			colInfo.put("collectionId", ci.getCollectionId().toString());
+			colInfo.put("position", ci.getPosition());
+
+			if(doc.containsKey("collectedIn")) doc.get("collectedIn").add(colInfo);
+			else doc.put("collectedIn", new ArrayList<Object>() {{ add(colInfo); }});
+		}
 		try {
 			Elastic.getTransportClient().prepareUpdate()
 				.setIndex(Elastic.index)
-				.setType(Elastic.type)
+				.setType(Elastic.typeResource)
 				.setId(id)
-			//.addScriptParam("colInfo", new CollectionInfo(colId, position))
-			.addScriptParam("colInfo", jsonBuilder().startObject().field("collectionId", colId).field("position", position).endObject())
-			.setScript("ctx._source.collectedIn.add(colInfo)", ScriptType.INLINE)
+			.setDoc(doc)
+			.setRetryOnConflict(5)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
 			log.error("Cannot add entry to collectedIn and update document!", e);
@@ -119,18 +129,19 @@ public class ElasticUpdater {
 		try {
 			Elastic.getTransportClient().prepareUpdate()
 				.setIndex(Elastic.index)
-				.setType(Elastic.type)
+				.setType(Elastic.typeResource)
 				.setId(id)
 			.addScriptParam("colId", colId.toString())
 			.addScriptParam("pos", position)
-			.setScript("info = null"
-					+ "ctx._source.collectedIn.each {"
-					+ " if( it.collectionId.equals(colId) &&"
-					+ "    it.position == pos) { "
-					+ "      info = it "
-					+ " } "
-					+ "  }"
+			.setScript("info = null;"
+					+ "for(el in ctx._source.collectedIn) {"
+					+ " if(el.collectionId.equals(colId) &&"
+					+ "    el.position == pos) { "
+					+ "      info = el; "
+					+ "  } "
+					+ "};"
 					+ "ctx._source.collectedIn.remove(info) ", ScriptType.INLINE)
+			.setRetryOnConflict(5)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
 			log.error("Cannot remove entry from collectedIn and update document!", e);
@@ -142,17 +153,18 @@ public class ElasticUpdater {
 		try {
 			Elastic.getTransportClient().prepareUpdate()
 				.setIndex(Elastic.index)
-				.setType(Elastic.type)
+				.setType(Elastic.typeResource)
 				.setId(id)
 			.addScriptParam("colId", colId.toString())
 			.addScriptParam("old_pos", old_position)
 			.addScriptParam("new_pos", new_position)
-			.setScript("ctx._source.collectedIn.each {"
-					+ " if( it.collectionId.equals(colId) &&"
-					+ "    it.position == old_pos) { "
-					+ "      position = new_pos "
+			.setScript("for(el in ctx._source.collectedIn) {"
+					+ "   if( el.collectionId.equals(colId) &&"
+					+ "    el.position == old_pos) { "
+					+ "      el.position = new_pos; "
 					+ " } "
-					+ "  }", ScriptType.INLINE)
+					+ "  };", ScriptType.INLINE)
+			.setRetryOnConflict(5)
 			.execute().actionGet();
 		} catch (ElasticsearchException  e) {
 			log.error("Cannot update merged record document!", e);
@@ -163,11 +175,11 @@ public class ElasticUpdater {
 	/*
 	 * Update rights on a collection
 	 */
-	public static void updateCollectionRights(ObjectId id) {
+	public static void updateCollectionRights(String type, ObjectId id) {
 		try {
 			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
-						Elastic.type,
+						type,
 						id.toString())
 				.setDoc(prepareUpdateOnRights(id))
 				.execute().actionGet();		} catch (Exception e) {
@@ -222,7 +234,7 @@ public class ElasticUpdater {
 	 * Or when a Collection becomes private the all the resources become private unless that resources that
 	 * belong in public collections.
 	 */
-	public static void updateVisibility(List<ObjectId> ids, List<Boolean> visibility) throws Exception {
+	public static void updateVisibility(String type, List<ObjectId> ids, List<Boolean> visibility) throws Exception {
 
 		if(ids.size() != visibility.size()) {
 			throw new Exception("Error: ids list does not have the same size with upDocs list");
@@ -244,7 +256,7 @@ public class ElasticUpdater {
 
 			Elastic.getTransportClient().prepareUpdate(
 					Elastic.index,
-					Elastic.type,
+					type,
 					ids.get(0).toString())
 				.setDoc(doc)
 				.get();
@@ -260,7 +272,7 @@ public class ElasticUpdater {
 					}
 					Elastic.getBulkProcessor().add(new UpdateRequest(
 							Elastic.index,
-							Elastic.type,
+							type,
 							ids.get(i).toString())
 						.doc(doc));
 				}
@@ -273,11 +285,11 @@ public class ElasticUpdater {
 	 * Increment likes on collection type
 	 */
 
-	public static void incLikes(ObjectId id) {
+	public static void incLikes(String type, ObjectId id) {
 		try {
 			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
-						Elastic.type,
+						type,
 						id.toString())
 				.setScript("ctx._source.usage.likes++;", ScriptType.INLINE)
 				.execute().actionGet();
@@ -289,11 +301,11 @@ public class ElasticUpdater {
 	/*
 	 * Decrement likes on collection type
 	 */
-	public static void decLikes(ObjectId id) {
+	public static void decLikes(String type, ObjectId id) {
 		try {
 			Elastic.getTransportClient().prepareUpdate(
 						Elastic.index,
-						Elastic.type,
+						type,
 						id.toString())
 				.setScript("ctx._source.usage.likes--;", ScriptType.INLINE)
 				.execute().actionGet();

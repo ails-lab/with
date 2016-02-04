@@ -21,19 +21,13 @@ import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.List;
 
 import model.Collection;
-import model.CollectionRecord;
 import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
 
-import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
-import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
-import org.elasticsearch.action.admin.indices.get.GetIndexRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsRequest;
-import org.elasticsearch.action.admin.indices.mapping.get.GetMappingsResponse;
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -41,7 +35,6 @@ import org.elasticsearch.client.Client;
 import org.elasticsearch.client.node.NodeClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.cluster.metadata.IndexMetaData;
-import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
@@ -78,8 +71,19 @@ public class Elastic {
 	public static String shards   		    = getConf().getString("elasticsearch.index.num_of_shards");
 	public static String replicas  		    = getConf().getString("elasticsearch.index.num_of_replicas");
 	public static String alias   		    = getConf().getString("elasticsearch.alias.name");
-	public static String type				= getConf().getString("elasticsearch.index.type.resource");
-	public static String mapping 			= getConf().getString("elasticsearch.index.mapping.resource");
+	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
+
+	public static final String typeResource       = "resource";
+	public static final String typeCollection     = "collection";
+	public static final String typeCultural       = "cultural";
+	public static final String typeAgent          = "agent";
+	public static final String typeEvent		  = "event";
+	public static final String typePlace	      = "place";
+	public static final String typeTimespan	      = "timespan";
+	public static final String typeEuscreen	      = "euscreen";
+	public static final List<String> allTypes 	  = new ArrayList<String>() {{
+														add(typeResource); add(typeCollection); add(typeCultural);
+														add(typeAgent); add(typeEvent); add(typePlace); add(typeTimespan); }};
 
 
 
@@ -218,7 +222,7 @@ public class Elastic {
 		// take custom mappings
 		JsonNode resourceMapping = null;
 		try {
-			resourceMapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mapping))));
+			resourceMapping = Json.parse(new String(Files.readAllBytes(Paths.get("conf/"+mappingResource))));
 		} catch (IOException e) {
 			log.error("Cannot read mapping from file!", e);
 			return;
@@ -226,10 +230,18 @@ public class Elastic {
 
 		// create the index and put the alias to it
 		try {
-			Elastic.getTransportClient().admin().indices().prepareCreate(Elastic.index)
-					.setSettings(Elastic.getIndexSettings())
-					.addMapping(type, resourceMapping.toString())
-					.execute().actionGet();
+			CreateIndexRequestBuilder index_builder = Elastic.getTransportClient()
+					.admin().indices().prepareCreate(Elastic.index)
+					.setSettings(Elastic.getIndexSettings());
+
+			/* Add mappings for all fields */
+			for(String type: allTypes)
+					index_builder.addMapping(type, resourceMapping.toString());
+
+			/* Excecute the request */
+					index_builder.execute().actionGet();
+
+
 			if(!old_index.equals(""))
 				Elastic.getTransportClient().admin().indices().prepareAliases()
 						.removeAlias("old_index", alias)
@@ -301,7 +313,7 @@ public class Elastic {
 				Callback<RecordResource> callback = new Callback<RecordResource>() {
 				@Override
 					public void invoke(RecordResource rr ) throws Throwable {
-						ElasticIndexer.index(rr.getDbId(), ElasticUtils.transformRR(rr));
+						ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
 						}
 				};
 				try {

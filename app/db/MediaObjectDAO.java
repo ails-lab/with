@@ -33,6 +33,7 @@ import com.mongodb.DBObject;
 import com.mongodb.gridfs.GridFSDBFile;
 import com.mongodb.gridfs.GridFSFile;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
 
 public class MediaObjectDAO {
@@ -60,7 +61,8 @@ public class MediaObjectDAO {
 					.getMapper()
 					.fromDBObject(MediaObject.class, gridfsDbFile,
 							new DefaultEntityCache());
-			media.setMediaBytes(IOUtils.toByteArray(gridfsDbFile.getInputStream()));
+			media.setMediaBytes(IOUtils.toByteArray(gridfsDbFile
+					.getInputStream()));
 			return media;
 		} catch (IOException e) {
 			log.error(
@@ -74,6 +76,7 @@ public class MediaObjectDAO {
 
 	/**
 	 * Retrieve a MediaObject from GridFS using the dbId
+	 * 
 	 * @param dbId
 	 * @return
 	 */
@@ -95,6 +98,7 @@ public class MediaObjectDAO {
 
 	/**
 	 * Delete a MediaObject file from GridFS using it's dbId
+	 * 
 	 * @param dbId
 	 */
 	public void deleteById(ObjectId dbId) {
@@ -107,8 +111,10 @@ public class MediaObjectDAO {
 	}
 
 	/**
-	 * Stores the MediaObject to GridFS filesystem.
-	 * This method internally converts the MediaObject POJO to a GridFSFile and then stores it to GridFS.
+	 * Stores the MediaObject to GridFS filesystem. This method internally
+	 * converts the MediaObject POJO to a GridFSFile and then stores it to
+	 * GridFS.
+	 * 
 	 * @param media
 	 * @throws Exception
 	 */
@@ -120,14 +126,14 @@ public class MediaObjectDAO {
 			if (media.getDbId() != null) {
 				mediaGridFsFile = DB.getGridFs().find(media.getDbId());
 			} else {
-				if(media.getMediaBytes()==null){
-				    String tmp = new String();   // an empty string
-				    
+				if (media.getMediaBytes() == null) {
+					String tmp = new String(); // an empty string
+
 					mediaGridFsFile = DB.getGridFs().createFile(
-					        new ByteArrayInputStream(tmp.getBytes()));
-				}
-				else
-					mediaGridFsFile = DB.getGridFs().createFile(media.getMediaBytes());
+							new ByteArrayInputStream(tmp.getBytes()));
+				} else
+					mediaGridFsFile = DB.getGridFs().createFile(
+							media.getMediaBytes());
 			}
 			DBObject mediaDbObj = DB.getMorphia().getMapper().toDBObject(media);
 			// remove stuff we don't want on the media object
@@ -150,6 +156,7 @@ public class MediaObjectDAO {
 
 	/**
 	 * Deletes a MediaObject from GridFS.
+	 * 
 	 * @param media
 	 */
 	public void makeTransient(MediaObject media) {
@@ -163,8 +170,9 @@ public class MediaObjectDAO {
 
 	/**
 	 * Retrive a MediaObject from GridFS according to it's external url.
-	 * According to the value specified, we return either the thumbnail
-	 * or the original media.
+	 * According to the value specified, we return either the thumbnail or the
+	 * original media.
+	 * 
 	 * @param externalUrl
 	 * @param thumbnail
 	 * @return
@@ -173,9 +181,10 @@ public class MediaObjectDAO {
 		GridFSDBFile media = null;
 		try {
 			// here I have to ask where we will use 'url' or 'withUrl' or both
-			BasicDBObject query = new BasicDBObject("withThumbnailUrl", withThumbUrl);
+			BasicDBObject query = new BasicDBObject("withThumbnailUrl",
+					withThumbUrl);
 			media = DB.getGridFs().findOne(query);
-			if(media.containsField("mediaBytes"))
+			if (media.containsField("mediaBytes"))
 				media.removeField("mediaBytes");
 			return gridFsDbFileToMediaObj(media);
 		} catch (Exception e) {
@@ -184,11 +193,11 @@ public class MediaObjectDAO {
 		}
 	}
 
-
 	/**
 	 * Retrive a MediaObject from GridFS according to it's external url.
-	 * According to the value specified, we return either the thumbnail
-	 * or the original media.
+	 * According to the value specified, we return either the thumbnail or the
+	 * original media.
+	 * 
 	 * @param externalUrl
 	 * @param thumbnail
 	 * @return
@@ -199,7 +208,7 @@ public class MediaObjectDAO {
 			// here I have to ask where we will use 'url' or 'withUrl' or both
 			BasicDBObject query = new BasicDBObject("url", withUrl);
 			media = DB.getGridFs().findOne(query);
-			if(media.containsField("thumbnailBytes"))
+			if (media.containsField("thumbnailBytes"))
 				media.removeField("thumbnailBytes");
 			return gridFsDbFileToMediaObj(media);
 		} catch (Exception e) {
@@ -208,8 +217,23 @@ public class MediaObjectDAO {
 		}
 	}
 
+	public MediaObject getByUrlAndVersion(String url, MediaVersion version) {
+		GridFSDBFile media = null;
+		try {
+			// here I have to ask where we will use 'url' or 'withUrl' or both
+			BasicDBObject query = new BasicDBObject("url", url);
+			query.append("mediaVersion", version.toString());
+			media = DB.getGridFs().findOne(query);
+			return gridFsDbFileToMediaObj(media);
+		} catch (Exception e) {
+			log.error("Problem in find file from GridFS " + url);
+			return null;
+		}
+	}
+
 	/**
 	 * Count all documents that match the query specified
+	 * 
 	 * @param query
 	 * @return
 	 */

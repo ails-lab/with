@@ -16,20 +16,9 @@
 
 package model.resources;
 
-import java.util.ArrayList;
-
+import java.util.Map;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Field;
-import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.IndexOptions;
-import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.utils.IndexType;
-
-import utils.Deserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-
 import model.DescriptiveData;
 import model.basicDataTypes.MultiLiteralOrResource;
 
@@ -39,13 +28,15 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	public CollectionObject() {
 		super();
 		this.administrative = new CollectionAdmin();
+		this.descriptiveData = new CollectionDescriptiveData();
 		this.resourceType = WithResourceType.valueOf(this.getClass()
 				.getSimpleName());
 	}
-	
+
+
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
-		
+
 		public enum CollectionType {SimpleCollection, Exhibition};
 
 		private int entryCount = 0;
@@ -109,6 +100,26 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 			this.dclanguage = dclanguage;
 		}
 
+	}
+
+
+	/*
+	 * Elastic transformations
+	 */
+
+	/*
+	 * Currently we are indexing only Resources that represent
+	 * collected records
+	 */
+	public Map<String, Object> transformCO() {
+		Map<String, Object> idx_map =  this.transformWR();
+		idx_map.put("collectionType", this.getAdministrative().getCollectionType());
+
+		idx_map.put("dccreator", this.getDescriptiveData().getDccreator());
+		idx_map.put("dctermsaudience", this.getDescriptiveData().getDctermsaudience());
+		idx_map.put("dclanguage", this.getDescriptiveData().getDclanguage());
+
+		return idx_map;
 	}
 
 }
