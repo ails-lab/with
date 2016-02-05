@@ -54,6 +54,15 @@ public class SourceResponse {
 		items = new ItemsGrouping();
 		filters = new ArrayList<>();
 	}
+
+	public SourceResponse(int totalHits, int offset, int count) {
+
+		items = new ItemsGrouping();
+		filters = new ArrayList<>();
+		this.totalCount = totalHits;
+		this.startIndex = offset;
+		this.count = count;
+	}
 	//source refers to the external APIs and the WITH db
 	//comesFrom in each record in the WITH db indicates where it was imported from, i.e. external APIs, Mint or UploadedByUser
 	public SourceResponse(SearchResponse resp, int offset) {
@@ -93,7 +102,6 @@ public class SourceResponse {
 //}
 		this.items.setCulturalCHO(items);
 	}
-
 
 	public Map<String, List<?>> getResourcesPerType() {
 		return resourcesPerType;

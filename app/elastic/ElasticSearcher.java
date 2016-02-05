@@ -173,7 +173,6 @@ public class ElasticSearcher {
 		aggregatedFields.add("dctermsspatial.all");
 		aggregatedFields.add("contentusage.all");
 		aggregatedFields.add("dates");
-		aggregatedFields.add("media.type.all");
 		aggregatedFields.add("media.withRights.all");
 
 	}
@@ -193,7 +192,7 @@ public class ElasticSearcher {
 	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options) {
 		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
 		for(String aggName: aggregatedFields) {
-			TermsBuilder agg = AggregationBuilders.terms(aggName+"+aggregation").field(aggName);
+			TermsBuilder agg = AggregationBuilders.terms(aggName+"_aggregation").field(aggName);
 			search.addAggregation(agg);
 		}
 
@@ -232,7 +231,7 @@ public class ElasticSearcher {
 
 		QueryStringQueryBuilder qstr = QueryBuilders.queryStringQuery(term);
 		for(Entry<String, Float> e: fedSearchFieldsWithBoosts.entrySet()) {
-			qstr.field(e.getKey()+".all", e.getValue());
+			qstr.field(e.getKey()+"_all", e.getValue());
 		}
 		qstr.useDisMax(true);
 		qstr.tieBreaker(0);
