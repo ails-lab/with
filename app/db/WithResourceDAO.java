@@ -325,7 +325,12 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		this.update(q, updateOps);
 	}
 	
-
+	public void updateWithURI(ObjectId resourceId, String uri) {
+		Query<T> q = this.createQuery().field("_id").equal(resourceId);
+		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
+		updateOps.set("administrative.withURI", uri);
+		this.update(q, updateOps);
+	}
 	
 	public void changeAccess(ObjectId resourceId, ObjectId userId, Access newAccess) {
 		Query<T> q = this.createQuery().field("_id").equal(resourceId);

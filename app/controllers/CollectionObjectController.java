@@ -128,9 +128,9 @@ public class CollectionObjectController extends WithResourceController {
 				((CollectionAdmin) collection.getAdministrative())
 						.setEntryCount(0);
 			}
-			// TODO: withURI?
-			// TODO: maybe moderate usage statistics?
 			DB.getCollectionObjectDAO().makePermanent(collection);
+			DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
+					"/collection/" + collection.getDbId());
 			return ok(Json.toJson(collection));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
@@ -152,7 +152,8 @@ public class CollectionObjectController extends WithResourceController {
 	 * Retrieve a resource metadata. If the format is defined the specific
 	 * serialization of the object is returned
 	 *
-	 * @param id the resource id
+	 * @param id
+	 *            the resource id
 	 * @return the resource metadata
 	 */
 	public static Result getCollectionObject(String id) {
@@ -166,10 +167,12 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
-				/*List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
-						.getFirstEntries(collectionDbId, 3);
-				result = (ObjectNode) Json.toJson(collection);
-				result.put("firstEntries", Json.toJson(firstEntries));*/
+				/*
+				 * List<RecordResource> firstEntries =
+				 * DB.getCollectionObjectDAO() .getFirstEntries(collectionDbId,
+				 * 3); result = (ObjectNode) Json.toJson(collection);
+				 * result.put("firstEntries", Json.toJson(firstEntries));
+				 */
 				return ok(Json.toJson(collection));
 			}
 		} catch (Exception e) {
@@ -238,9 +241,11 @@ public class CollectionObjectController extends WithResourceController {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				DB.getCollectionObjectDAO().editCollection(collectionDbId, json);
+				DB.getCollectionObjectDAO()
+						.editCollection(collectionDbId, json);
 			}
-			return ok(Json.toJson(DB.getCollectionObjectDAO().get(collectionDbId)));
+			return ok(Json.toJson(DB.getCollectionObjectDAO().get(
+					collectionDbId)));
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -269,7 +274,8 @@ public class CollectionObjectController extends WithResourceController {
 		}
 		if (effectiveUserIds.isEmpty()
 				|| (isPublic.isDefined() && (isPublic.get() == true))) {
-			//if not logged or ask for public collections, return all public collections
+			// if not logged or ask for public collections, return all public
+			// collections
 			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
 					.getCollectionObjectDAO().getPublicAndByAcl(
 							accessedByUserOrGroup, creatorId,
@@ -311,39 +317,51 @@ public class CollectionObjectController extends WithResourceController {
 			return ok(result);
 		}
 	}
-	
-	public static Result listShared(Boolean direct, Option<MyPlayList> directlyAccessedByUserOrGroup,
-			Option<MyPlayList> recursivelyAccessedByUserOrGroup, Option<Boolean> isExhibition, boolean collectionHits,
-			int offset, int count) {
+
+	public static Result listShared(Boolean direct,
+			Option<MyPlayList> directlyAccessedByUserOrGroup,
+			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
+			Option<Boolean> isExhibition, boolean collectionHits, int offset,
+			int count) {
 		ObjectNode result = Json.newObject().objectNode();
 		ArrayNode collArray = Json.newObject().arrayNode();
-		List<String> effectiveUserIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
-		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition.get() : null;
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		Boolean isExhibitionBoolean = isExhibition.isDefined() ? isExhibition
+				.get() : null;
 		if (effectiveUserIds.isEmpty()) {
-			return forbidden(Json.parse("\"error\", \"Must specify user for the collection\""));
+			return forbidden(Json
+					.parse("\"error\", \"Must specify user for the collection\""));
 		} else {
 			ObjectId userId = new ObjectId(effectiveUserIds.get(0));
 			List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup = new ArrayList<List<Tuple<ObjectId, Access>>>();
-			accessedByUserOrGroup = accessibleByUserOrGroup(directlyAccessedByUserOrGroup, recursivelyAccessedByUserOrGroup);
+			accessedByUserOrGroup = accessibleByUserOrGroup(
+					directlyAccessedByUserOrGroup,
+					recursivelyAccessedByUserOrGroup);
 			List<Tuple<ObjectId, Access>> accessedByLoggedInUser = new ArrayList<Tuple<ObjectId, Access>>();
 			if (direct) {
-				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId, Access.READ));
+				accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(userId,
+						Access.READ));
 				accessedByUserOrGroup.add(accessedByLoggedInUser);
 			} else {// indirectly: include collections for which user has access
 					// via userGoup sharing
 				for (String effectiveId : effectiveUserIds) {
-					accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(new ObjectId(effectiveId), Access.READ));
+					accessedByLoggedInUser.add(new Tuple<ObjectId, Access>(
+							new ObjectId(effectiveId), Access.READ));
 				}
 				accessedByUserOrGroup.add(accessedByLoggedInUser);
 			}
-			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB.getCollectionObjectDAO().getSharedAndByAcl(
-					accessedByUserOrGroup, userId, isExhibitionBoolean, collectionHits, offset, count);
+			Tuple<List<CollectionObject>, Tuple<Integer, Integer>> info = DB
+					.getCollectionObjectDAO().getSharedAndByAcl(
+							accessedByUserOrGroup, userId, isExhibitionBoolean,
+							collectionHits, offset, count);
 			if (info.y != null) {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
 
-			List<ObjectNode> collections = collectionWithUserData(info.x, effectiveUserIds);
+			List<ObjectNode> collections = collectionWithUserData(info.x,
+					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
 			result.put("collectionsOrExhibitions", collArray);
@@ -558,7 +576,7 @@ public class CollectionObjectController extends WithResourceController {
 		else {
 			List<String> retrievedFields = new ArrayList<String>(Arrays.asList(
 					"descriptiveData.label", "descriptiveData.description"));
-			//bytes of thumbnail???											
+			// bytes of thumbnail???
 			List<RecordResource> records = DB.getRecordResourceDAO()
 					.getByCollectionBetweenPositions(colId, start, count);
 			if (records == null) {
@@ -585,20 +603,28 @@ public class CollectionObjectController extends WithResourceController {
 					recordsList.add(Json.toJson(e));
 				}
 			}
-			result.put("itemCount", ((CollectionAdmin) ((CollectionObject) DB.getCollectionObjectDAO()
-				.getById(colId, new ArrayList<String>(Arrays.asList("administrative.entryCount"))))
-				.getAdministrative()).getEntryCount());
+			result.put(
+					"itemCount",
+					((CollectionAdmin) ((CollectionObject) DB
+							.getCollectionObjectDAO()
+							.getById(
+									colId,
+									new ArrayList<String>(
+											Arrays.asList("administrative.entryCount"))))
+							.getAdministrative()).getEntryCount());
 			result.put("records", recordsList);
 			return ok(result);
 		}
 	}
-	
+
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
-		List<String> retrievedFields = new ArrayList<String>(Arrays.asList("administrative.access"));
-		CollectionObject collection = DB.getCollectionObjectDAO().getById(new ObjectId(collectionId), retrievedFields);
+		List<String> retrievedFields = new ArrayList<String>(
+				Arrays.asList("administrative.access"));
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				new ObjectId(collectionId), retrievedFields);
 		WithAccess access = collection.getAdministrative().getAccess();
-		for (AccessEntry ae: access.getAcl()) {
+		for (AccessEntry ae : access.getAcl()) {
 			ObjectId userId = ae.getUser();
 			User user = DB.getUserDAO().getById(userId, null);
 			Access accessRights = ae.getLevel();
@@ -609,13 +635,15 @@ public class CollectionObjectController extends WithResourceController {
 				if (usergroup != null)
 					result.add(userOrGroupJson(usergroup, accessRights));
 				else
-					return internalServerError("User with id " + userId + " cannot be retrieved from db");
+					return internalServerError("User with id " + userId
+							+ " cannot be retrieved from db");
 			}
 		}
 		return ok(result);
 	}
-	
-	private static ObjectNode userOrGroupJson(UserOrGroup user, Access accessRights) {
+
+	private static ObjectNode userOrGroupJson(UserOrGroup user,
+			Access accessRights) {
 		ObjectNode userJSON = Json.newObject();
 		userJSON.put("userId", user.getDbId().toString());
 		userJSON.put("username", user.getUsername());
