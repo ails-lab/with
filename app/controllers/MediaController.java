@@ -47,6 +47,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.bson.types.ObjectId;
+import org.im4java.core.ConvertCmd;
+import org.im4java.core.IM4JavaException;
+import org.im4java.core.IMOperation;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -264,6 +267,8 @@ public class MediaController extends Controller {
 		BufferedImage image = ImageIO.read(x);
 
 		
+		
+		
 		if (med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)) {
 
 			med.setType(WithMediaType.IMAGE);
@@ -399,64 +404,74 @@ public class MediaController extends Controller {
 		thumbnail.setDbId(null);
 		medium.setDbId(null);
 
-		if (med.getWidth() <= 100) {
-			tiny.setMediaBytes(med.getMediaBytes());
-			if (med.getHeight() < 150) {
-				square = makeThumb(med, image, -1, 150, true);
-			} else {
-				square.setMediaBytes(med.getMediaBytes());
-				square.setMimeType(med.getMimeType());
-			}
-			thumbnail.setMediaBytes(med.getMediaBytes());
-			thumbnail.setMimeType(med.getMimeType());
-			medium.setMediaBytes(med.getMediaBytes());
-			medium.setMimeType(med.getMimeType());
+		
+		
+		//if (med.getWidth() <= 100) {
+		//	tiny.setMediaBytes(med.getMediaBytes());
+		//	//if (med.getHeight() < 150) {
+		//	//	square = makeThumb(med, image, -1, 150, true);
+		//	//} else {
+		//	//	square.setMediaBytes(med.getMediaBytes());
+		//	//	square.setMimeType(med.getMimeType());
+		//	//}
+		//	thumbnail.setMediaBytes(med.getMediaBytes());
+		//	thumbnail.setMimeType(med.getMimeType());
+		//	medium.setMediaBytes(med.getMediaBytes());
+		//	medium.setMimeType(med.getMimeType());
+        //
+		//} else if (med.getWidth() <= 150 && med.getHeight() <= 150) {
+		//	tiny = makeThumb(med, image, 100, -1, false);
+        //
+		//	square.setMediaBytes(med.getMediaBytes());
+		//	square.setMimeType(med.getMimeType());
+		//	thumbnail.setMediaBytes(med.getMediaBytes());
+		//	thumbnail.setMimeType(med.getMimeType());
+		//	medium.setMediaBytes(med.getMediaBytes());
+		//	medium.setMimeType(med.getMimeType());
+        //
+		//} else if (med.getWidth() <= 300) {
+		//	tiny = makeThumb(med, image, 100, -1, false);
+		//	//if (med.getHeight() < med.getWidth()) {
+		//	//	square = makeThumb(med, image, -1, 150, true);
+		//	//} else {
+		//	//	square = makeThumb(med, image, 150, -1, true);
+		//	//}
+        //
+		//	thumbnail.setMediaBytes(med.getMediaBytes());
+		//	thumbnail.setMimeType(med.getMimeType());
+		//	medium.setMediaBytes(med.getMediaBytes());
+		//	medium.setMimeType(med.getMimeType());
+        //
+		//} else if (med.getWidth() <= 640) {
+		//	tiny = makeThumb(med, image, 100, -1, false);
+		//	//if (med.getHeight() < med.getWidth()) {
+		//	//	square = makeThumb(med, image, -1, 150, true);
+		//	//} else {
+		//	//	square = makeThumb(med, image, 150, -1, true);
+		//	//}
+		//	thumbnail = makeThumb(med, image, 300, -1, false);
+        //
+		//	medium.setMediaBytes(med.getMediaBytes());
+		//	medium.setMimeType(med.getMimeType());
+        //
+		//} else {
+		//	tiny = makeThumb(med, image, 100, -1, false);
+		//	//if (med.getHeight() < med.getWidth()) {
+		//	//	square = makeThumb(med, image, -1, 150, true);
+		//	//} else {
+		//	//	square = makeThumb(med, image, 150, -1, true);
+		//	//}
+		//	thumbnail = makeThumb(med, image, 300, -1, false);
+		//	medium = makeThumb(med, image, 640, -1, false);
+		//}
+		
+		
+		
+		tiny = makeThumb(med, image, 100, false);
+		square = makeThumb(med, image, 150, true);
+		thumbnail = makeThumb(med, image, 300,false);
+		medium = makeThumb(med, image, 640, false);
 
-		} else if (med.getWidth() <= 150 && med.getHeight() <= 150) {
-			tiny = makeThumb(med, image, 100, -1, false);
-
-			square.setMediaBytes(med.getMediaBytes());
-			square.setMimeType(med.getMimeType());
-			thumbnail.setMediaBytes(med.getMediaBytes());
-			thumbnail.setMimeType(med.getMimeType());
-			medium.setMediaBytes(med.getMediaBytes());
-			medium.setMimeType(med.getMimeType());
-
-		} else if (med.getWidth() <= 300) {
-			tiny = makeThumb(med, image, 100, -1, false);
-			if (med.getHeight() < med.getWidth()) {
-				square = makeThumb(med, image, -1, 150, true);
-			} else {
-				square = makeThumb(med, image, 150, -1, true);
-			}
-
-			thumbnail.setMediaBytes(med.getMediaBytes());
-			thumbnail.setMimeType(med.getMimeType());
-			medium.setMediaBytes(med.getMediaBytes());
-			medium.setMimeType(med.getMimeType());
-
-		} else if (med.getWidth() <= 640) {
-			tiny = makeThumb(med, image, 100, -1, false);
-			if (med.getHeight() < med.getWidth()) {
-				square = makeThumb(med, image, -1, 150, true);
-			} else {
-				square = makeThumb(med, image, 150, -1, true);
-			}
-			thumbnail = makeThumb(med, image, 300, -1, false);
-
-			medium.setMediaBytes(med.getMediaBytes());
-			medium.setMimeType(med.getMimeType());
-
-		} else {
-			tiny = makeThumb(med, image, 100, -1, false);
-			if (med.getHeight() < med.getWidth()) {
-				square = makeThumb(med, image, -1, 150, true);
-			} else {
-				square = makeThumb(med, image, 150, -1, true);
-			}
-			thumbnail = makeThumb(med, image, 300, -1, false);
-			medium = makeThumb(med, image, 640, -1, false);
-		}
 
 		ObjectId dbid = med.getDbId();
 		tiny.setParentId(dbid);
@@ -506,14 +521,15 @@ public class MediaController extends Controller {
 	// use the libraries we will use for video editing!
 	// TODO
 	private static MediaObject makeThumb(MediaObject med, BufferedImage image,
-			int width, int height, boolean crop) throws IOException {
-
-		// 211, -1
-		Image ithumb = image.getScaledInstance(width, height,
-				Image.SCALE_SMOOTH);
-		// Create a buffered image with transparency
-		BufferedImage thumb = new BufferedImage(ithumb.getWidth(null),
-				ithumb.getHeight(null), image.getType());
+			int width, boolean crop) throws IOException {
+		
+		
+	//	// 211, -1
+	//	Image ithumb = image.getScaledInstance(width, height,
+	//			Image.SCALE_SMOOTH);
+	//	// Create a buffered image with transparency
+	//	BufferedImage thumb = new BufferedImage(ithumb.getWidth(null),
+	//			ithumb.getHeight(null), image.getType());
 
 		// Logger.info("Width: " + thumb.getWidth() + ", x = "+
 		// (((thumb.getWidth() - 150)/2)-1));
@@ -534,15 +550,92 @@ public class MediaController extends Controller {
 		// }
 
 		// Draw the image on to the buffered image
-		Graphics2D bGr = thumb.createGraphics();
-		bGr.drawImage(ithumb, 0, 0, null);
-		bGr.dispose();
+	//	Graphics2D bGr = thumb.createGraphics();
+	//	bGr.drawImage(ithumb, 0, 0, null);
+	//	bGr.dispose();
+	//	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	//	ImageIO.write(thumb, "jpg", baos);
+	//	baos.flush();
+	//	byte[] thumbByte = baos.toByteArray();
+	//	baos.close();
+
+		
+		IMOperation op = new IMOperation();
+		op.addImage();                        // input
+		//op.blur(2.0).paint(10.0);
+		//image.getHeight();
+		//image.getWidth();
+		if(crop){
+			op.resize(width,width, "^");
+			//op.gravity("center");
+
+			//op.extent(width, width);
+			//op.crop(width, width);
+			
+		}else{
+			op.resize(width,width, ">");
+
+		}
+		op.addImage();                        // output
+		
+		
+		//GraphicsMagickCmd cmd = new GraphicsMagickCmd("convert");
+		
+		ConvertCmd cmd = new ConvertCmd();
+		
+		String outfile = "tempImage2";
+		
+		try {
+			cmd.run(op,image,outfile);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IM4JavaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
+
+		
+		File newFile = new File("tempImage2");
+		
+		BufferedImage ithumb = ImageIO.read(newFile);
+ 		
+		if(crop){
+			 op = new IMOperation();
+				op.addImage();                        // input
+				op.gravity("center");
+				//op.crop(width);
+				op.extent(width);
+				op.addImage();  
+				ConvertCmd cmd2 = new ConvertCmd();
+				String outfile2 = "tempImage2";
+				try {
+					cmd2.run(op,ithumb,outfile2);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IM4JavaException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				newFile = new File("tempImage2");
+				
+				ithumb = ImageIO.read(newFile);
+
+
+		}
+
+		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(thumb, "jpg", baos);
+		ImageIO.write(ithumb, "jpg", baos);
 		baos.flush();
 		byte[] thumbByte = baos.toByteArray();
 		baos.close();
 
+		
 		MediaObject mthumb = new MediaObject();
 		mthumb.setMimeType(med.getMimeType());
 		mthumb.setDbId(null);
