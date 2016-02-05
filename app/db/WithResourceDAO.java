@@ -89,7 +89,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
 	}
-	
+
 	public boolean existsWithExternalId(String externalId) {
 		return existsFieldWithValue("administrative.externalId", externalId);
 	}
@@ -150,7 +150,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 	 * @return
 	 */
 	public List<T> getByLabel(String lang, String title) {
-		if (lang == null) 
+		if (lang == null)
 			lang = Language.DEFAULT.toString();
 		Query<T> q = this.createQuery().disableValidation().field("descriptiveData.label" + lang)
 				.contains(title);
@@ -241,7 +241,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		q.filter("provenance", elemMatch);
 		return this.find(q).countAll();
 	}
-	
+
 	public void updateProvenance(ObjectId id, Integer index, ProvenanceInfo info) {
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
@@ -288,7 +288,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		}
 		return this.createQuery().or(criteria);
 	}
-	
+
 	/**
 	 * Create a basic Mongo query with withCreator field matching, offset, limit and criteria.
 	 * @param criteria
@@ -305,7 +305,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 			q.and(criteria);
 		return q;
 	}
-	
+
 	public boolean hasAccess(List<ObjectId> effectiveIds,  Action action, ObjectId resourceId) {
 		CriteriaContainer criteria = loggedInUserWithAtLeastAccessQuery(effectiveIds, actionToAccess(action));
 		Query<T> q = this.createQuery();
@@ -313,11 +313,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		q.or(criteria);
 		return (this.find(q).asList().size()==0? false: true);
 	}
-	
+
 	public Access actionToAccess(Action action) {
 		return Access.values()[action.ordinal()+1];
 	}
-	
+
 	public void updateResourceRights(WithAccess access, ObjectId resourceId) {
 		Query<T> q = this.createQuery().field("_id").equal(resourceId);
 		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
@@ -357,7 +357,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		}
 		this.update(this.createQuery().field("_id").equal(resourceId), updateOps);
 	}
-	
+
 	public WithAccess mergeRights(List<WithAccess> parentColAccess, ObjectId recordWithCreator, boolean recordIsPublic) {
 		WithAccess newRecordAccess = new WithAccess();
 		newRecordAccess.setIsPublic(recordIsPublic);
@@ -366,7 +366,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 			if (colAccess.getIsPublic())
 				newRecordAccess.setIsPublic(true);
 			for (AccessEntry colEntry: colAccess.getAcl()) {
-				if (!newRecordAccess.containsUser(colEntry.getUser()) && colEntry.getLevel() != Access.NONE)
+				if (!newRecordAccess.containsUser(colEntry.getUser()) && (colEntry.getLevel() != Access.NONE))
 					newRecordAccess.addToAcl(colEntry);
 				for (AccessEntry recEntry: newRecordAccess.getAcl()) {
 					if (recEntry.getUser().equals(colEntry.getUser()))
@@ -380,7 +380,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 			newRecordAccess.addToAcl(recordWithCreator, Access.OWN);
 		return newRecordAccess;
 	}
-	
+
 	public List<ObjectId> getParentCollections(ObjectId resourceId) {
 		T record = this.getById(resourceId, new ArrayList<String>(Arrays.asList("collectedIn")));
 		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
@@ -389,7 +389,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		}
 		return parentCollections;
 	}
-		
+
 	/**
 	 * Return the total number of likes for a resource.
 	 * @param id
@@ -432,7 +432,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		updateOps.set("content."+format, content);
 		this.update(q, updateOps);
 	}
-	
+
 	public void updateDescriptiveData(ObjectId recId, DescriptiveData data) {
 		Query<T> q = this.createQuery().field("_id").equal(recId);
 		UpdateOperations<T> updateOps = this
@@ -440,7 +440,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		updateOps.set("descriptiveData", data);
 		this.update(q, updateOps);
 	}
-	
+
 	public void updateEmbeddedMedia(ObjectId recId, List<HashMap<MediaVersion, EmbeddedMediaObject>> media) {
 		Query<T> q = this.createQuery().field("_id").equal(recId);
 		UpdateOperations<T> updateOps = this
@@ -456,7 +456,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		updateOps.set("provenance", provenance);
 		this.update(q, updateOps);
 	}
-	
+
 	/**
 	 * Increment likes for this specific resource
 	 * @param externalId

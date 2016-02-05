@@ -130,7 +130,7 @@ public class WithSpaceSource extends ISpaceSource {
 
 
 		/* Filters */
-		elasticoptions.addFilter("isPublic", "true");
+		//elasticoptions.addFilter("isPublic", "true");
 		List<CommonFilter> filters = q.filters;
 		for (CommonFilter f: filters) {
 			for (String filterValue: f.values) {
@@ -153,7 +153,8 @@ public class WithSpaceSource extends ISpaceSource {
 		/* Finalize the searcher client and create the SourceResponse */
 
 		searcher.closeClient();
-		SourceResponse sourceResponse = new SourceResponse();
+		SourceResponse sourceResponse =
+				new SourceResponse((int)elasticResponse.getHits().getTotalHits(), offset, count);
 		sourceResponse.setResourcesPerType(resourcesPerType);
 
 
@@ -161,18 +162,19 @@ public class WithSpaceSource extends ISpaceSource {
 
 		if (checkFilters(q)) {
 			sourceResponse.filtersLogic = new ArrayList<CommonFilterLogic>();
-			for (Aggregation agg : elasticResponse.getAggregations().asList()) {
-				InternalTerms aggTerm = (InternalTerms) agg;
-				if (aggTerm.getBuckets().size() > 0) {
-					CommonFilterLogic filter = new CommonFilterLogic(agg.getName());
-					//CommonFilters.valueOf(agg.getName()));
-					for (int i=0; i< aggTerm.getBuckets().size(); i++) {
-						countValue(filter, aggTerm.getBuckets().get(i).getKey(),
-							(int) aggTerm.getBuckets().get(0).getDocCount());
+			if(elasticResponse.getAggregations() != null)
+				for (Aggregation agg : elasticResponse.getAggregations().asList()) {
+					InternalTerms aggTerm = (InternalTerms) agg;
+					if (aggTerm.getBuckets().size() > 0) {
+						CommonFilterLogic filter = new CommonFilterLogic(agg.getName());
+						//CommonFilters.valueOf(agg.getName()));
+						for (int i=0; i< aggTerm.getBuckets().size(); i++) {
+							countValue(filter, aggTerm.getBuckets().get(i).getKey(),
+								(int) aggTerm.getBuckets().get(0).getDocCount());
+						}
+						sourceResponse.filtersLogic.add(filter);
 					}
-					sourceResponse.filtersLogic.add(filter);
 				}
-			}
 		}
 
 		return sourceResponse;
