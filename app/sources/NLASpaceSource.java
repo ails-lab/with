@@ -20,9 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
@@ -32,22 +36,13 @@ import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
 import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
 import sources.formatreaders.NLARecordFormatter;
 import utils.ListUtils;
 import utils.Serializer;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import model.EmbeddedMediaObject.WithMediaType;
-import model.ExternalBasicRecord;
-import model.ExternalBasicRecord.RecordType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.WithResource;
-import play.libs.Json;
 
 public class NLASpaceSource extends ISpaceSource {
 
@@ -57,12 +52,8 @@ public class NLASpaceSource extends ISpaceSource {
 		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
-				"Poster, chart, other");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Video");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
-		formatreader = new NLARecordFormatter(vmap);
+		vmap = FilterValuesMap.getNLAMap();
+		formatreader = new NLARecordFormatter();
 
 	}
 

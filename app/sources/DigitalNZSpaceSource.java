@@ -22,18 +22,11 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.ExternalBasicRecord;
-import model.ExternalBasicRecord.ItemRights;
-import model.ExternalBasicRecord.RecordType;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.WithResource;
 import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
@@ -42,9 +35,9 @@ import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DNZBasicRecordFormatter;
 import utils.ListUtils;
@@ -67,36 +60,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		// TODO: rights_url shows the license in the search
 
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books","Articles");
-
-		// addMapping(CommonFilters.RIGHTS.name(),
-		// RightsValues.Creative_Commercial,
-		// "");
-		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.Creative_Modify,
-		// ".*creative(?!.*nd).*");
-
-		// addMapping(CommonFilters.RIGHTS.name(),
-		// RightsValues.Creative_Not_Commercial,
-		// "http://creativecommons.org/licenses/by-nc/3.0/nz/",
-		// "http://creativecommons.org/licenses/by-nc-sa/3.0/",
-		// "This work is licensed under a Creative Commons
-		// Attribution-Noncommercial 3.0 New Zealand License");
-		//
-		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.UNKNOWN, "No
-		// known
-		// copyright restrictions\nCopyright Expired",
-		// "No known copyright restrictions");
-		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.RR, "All rights
-		// reserved");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, "Share");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, "Modify");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, "Use commercially");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, "Unknown");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, "All rights reserved");
+		vmap = FilterValuesMap.getDNZMap();
 
 		formatreader = new DNZBasicRecordFormatter(vmap);
 

@@ -20,12 +20,9 @@ import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
 import play.libs.Json;
-import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
@@ -34,8 +31,8 @@ import sources.core.RecordJSONMetadata;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.formatreaders.DDBItemRecordFormatter;
 import sources.formatreaders.DDBRecordFormatter;
-import sources.formatreaders.EuropeanaItemRecordFormatter;
 
 public class DDBSpaceSource extends ISpaceSource {
 
@@ -43,23 +40,8 @@ public class DDBSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DDB.toString();
 		apiKey = "SECRET_KEY";
-		
-		
-		
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image","IMAGE");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio","SOUND");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text","TEXT");		
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
-		
-		
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
-		
-		
-		formatreader = new DDBRecordFormatter(vmap);
+		vmap = FilterValuesMap.getDDBMap();
+		formatreader = new DDBRecordFormatter();
 	}
 
 	@Override
@@ -142,7 +124,7 @@ public class DDBSpaceSource extends ISpaceSource {
 			JsonNode record = response;
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
-				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter(vmap);
+				DDBItemRecordFormatter f = new DDBItemRecordFormatter();
 				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}

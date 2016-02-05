@@ -20,22 +20,21 @@ import java.util.ArrayList;
 
 import org.w3c.dom.Document;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import model.ExternalBasicRecord;
+import model.basicDataTypes.ProvenanceInfo.Sources;
+import play.libs.Json;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import sources.core.RecordJSONMetadata.Format;
 import sources.formatreaders.RijksmuseumRecordFormatter;
 import utils.Serializer;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import model.ExternalBasicRecord;
-import play.libs.Json;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 
 public class RijksmuseumSpaceSource extends ISpaceSource {
 
@@ -58,7 +57,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		formatreader = new RijksmuseumRecordFormatter(vmap);
+		formatreader = new RijksmuseumRecordFormatter(FilterValuesMap.getRijksMap());
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);

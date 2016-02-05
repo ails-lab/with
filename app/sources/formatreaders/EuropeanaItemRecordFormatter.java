@@ -22,22 +22,20 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.LiteralOrResource;
-import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
-import sources.utils.StringUtils;
 
 public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
-	public EuropeanaItemRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public EuropeanaItemRecordFormatter() {
+		super(FilterValuesMap.getEuropeanaMap());
 		object = new CulturalObject();
 	}
 

@@ -34,8 +34,8 @@ import sources.utils.JsonContextRecord;
 
 public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 
-	public DDBItemRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DDBItemRecordFormatter() {
+		super(FilterValuesMap.getDDBMap());
 		object = new CulturalObject();
 	}
 
@@ -57,7 +57,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 //		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setLabel(rec.getMultiLiteralValue("ProvidedCHO.title"));
 //		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("ProvidedCHO.subject","Concept"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("Concept"));
 		model.setDates(rec.getWithDateArrayValue("ProvidedCHO.issued"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("WebResource.type"));
 //		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));

@@ -16,36 +16,27 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
-import sources.BritishLibrarySpaceSource;
-import sources.DDBSpaceSource;
-import sources.FilterValuesMap;
-import sources.core.CommonFilters;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
 import model.EmbeddedMediaObject;
-import model.ExternalBasicRecord;
-import model.MediaObject;
-import model.basicDataTypes.ProvenanceInfo;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import sources.FilterValuesMap;
+import sources.core.CommonFilters;
+import sources.core.Utils;
+import sources.utils.JsonContextRecord;
 
 public class DDBRecordFormatter extends CulturalRecordFormatter {
 
-	public DDBRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DDBRecordFormatter() {
+		super(FilterValuesMap.getDDBMap());
 		object = new CulturalObject();
 	}
 
