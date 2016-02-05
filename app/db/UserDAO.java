@@ -36,14 +36,6 @@ public class UserDAO extends DAO<User> {
 		super(User.class);
 	}
 
-	public User getById(ObjectId id, List<String> retrievedFields) {
-		Query<User> q = this.createQuery().field("_id").equal(id);
-		if (retrievedFields != null)
-				q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
-		return this.findOne(q);
-
-	}
-
 	public User getByEmail(String email) {
 		return this.findOne("email", email);
 	}
@@ -60,7 +52,6 @@ public class UserDAO extends DAO<User> {
 		return this.findOne("googleId", googleId);
 	}
 	
-
 	/**
 	 * This method is updating one specific User. By default update method is
 	 * invoked to all documents of a collection.

@@ -67,46 +67,6 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		super(entityClass);
 	}
 
-	/**
-	 * Retrieve a resource from DB using its dbId
-	 * @param id
-	 * @return
-	 */
-	public T getById(ObjectId id) {
-		Query<T> q = this.createQuery().field("_id").equal(id);
-		return this.findOne(q);
-	}
-
-	/**
-	 * Get a resource by the dbId and retrieve
-	 * only a bunch of fields from the whole document
-	 * @param id
-	 * @param retrievedFields
-	 * @return
-	 */
-	public T getById(ObjectId id, List<String> retrievedFields) {
-		Query<T> q = this.createQuery().field("_id").equal(id);
-		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
-		return this.findOne(q);
-	}
-
-	public boolean existsWithExternalId(String externalId) {
-		return existsFieldWithValue("administrative.externalId", externalId);
-	}
-
-	/**
-	 * Remove a CollectionObject and all collected resources using the dbId
-	 * @param id
-	 * @return
-	 */
-	public int removeById(ObjectId id) {
-		/*
-		 * 0 - no documents returned
-		 * * - number of documents returned
-		 */
-		return this.deleteById(id).getN();
-	}
-
 	public Query<T> createColIdElemMatchQuery(ObjectId colId) {
 		Query<T> q = this.createQuery();
 		BasicDBObject colIdQuery = new BasicDBObject();
