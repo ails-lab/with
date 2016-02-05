@@ -54,12 +54,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		 self.thumbnail = ko.pureComputed(function() {
 		        
 	        	if(self.thumb){
-	    			if (self.thumb.indexOf('/') === 0) {
+	        		return self.thumb;
+	    			/*image caching not working yet
+	    			 * if (self.thumb.indexOf('/') === 0) {
 	    				return self.thumb;
 	    			} else {
 	    				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
 	    				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-	    			}}
+	    			}*/}
 	    		   else{
 	    			   return "img/content/thumb-empty.png";
 	    		   }

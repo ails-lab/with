@@ -146,7 +146,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		/* to be used if site becomes multilingual*/
 		self.lang=ko.observable("");
 		self.sourceview=ko.observable(true);
-		self.sources= ko.observableArray([ "Rijksmuseum","DigitalNZ","DDB","The British Library","DPLA","Europeana"]);
+		self.sources= ko.observableArray([ "Rijksmuseum","DigitalNZ","DDB","The British Library","DPLA","Europeana","WITHin"]);
 		//self.sources= ko.observableArray([ "Europeana"]);
 		self.mixresults=ko.observableArray([]);
 		
@@ -471,14 +471,14 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						//recordId: result.recordId || result.id,
 						thumb: media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 						fullres: media!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
-						title: app.findByLang(descdata.label),
-						description: app.findByLang(descdata.description),
+						title: findByLang(descdata.label),
+						description: findByLang(descdata.description),
 						view_url: findProvenanceValues(provenance,"source_uri"),
-						creator: app.findByLang(descdata.dccreator),
+						creator: findByLang(descdata.dccreator),
 						dataProvider: findProvenanceValues(provenance,"dataProvider"),
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
-						rights: findResOrLit(descdata.metadataRights,self.lang()),
+						rights: findResOrLit(descdata.metadataRights),
 						externalId: admindata.externalId,
 						source: findProvenanceValues(provenance,"source"),
 						likes: usage.likes,
@@ -567,103 +567,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		};
 
 	
-        
-	 
-	 function findProvenanceValues(array, selection) {
-			selvalue="";
-			if(selection=="dataProvider"){
-			  if(array.length>1 && array[0].provider)
-				  selvalue=array[0].provider; 
-				  
-			     
-			 }
-			else if(selection=="dataProvider_uri"){
-				  if(array.length>1){
-					  selvalue=array[0].uri; 
-					  
-					  if(array[0].uri && array[0].uri.length>0){
-						  selvalue=array[0].uri; 
-			        	}
-			              
-				 }}
-			else if (selection=="provider"){
-				  if(array.length==3){
-					  selvalue=array[1].provider; 
-					  
-					  if(array[1].uri && array[1].uri.length>0){
-			        		if(array[1].provider && array[1].provider.length>0){
-			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
-			        		}
-			        		else{
-			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
-			        		}
-			        	}else if(array[1].provider){
-			              selvalue+=array[1].provider;}
-					  
-				     }	
-			}
-			else if (selection=="provider_uri"){
-				  if(array.length==3)
-					  if(array[1].uri && array[1].uri.length>0){
-			        		
-			        			selvalue=array[1].uri;
-			        		}
-			        		
-			        	
-			}
-			else if (selection=="source"){
-				var size=array.length-1;
-				if(array[size].provider){
-	              selvalue+=array[size].provider;}
-			  
-		     }
-			else if (selection=="source_uri"){
-				var size=array.length-1;
-				if(array[size].uri && array[size].uri.length>0){
-	        		
-	        			selvalue=array[size].uri;
-	        		
-	        		
-	        	}
-			  
-		     }
-			else if (selection=="id"){
-				var size=array.length-1;
-				if(array[size].resourceId && array[size].resourceId.length>0){
-	        		
-	        			selvalue+=array[size].resourceId;
-	        		}
-	        	
-			  
-		     }
-			return selvalue;
-				
-		}
-	 
-	 
-	 function findResOrLit(data,sellang) {
-			selvalue="";
-			if(sellang.length==0){
-				sellang="default";
-			}
-			if(data[sellang]){
-				
-			   for(var i=0;i<data[sellang].length;i++){
-			                	if(selvalue.length>0){selvalue+=",";}
-			                	selvalue=data[sellang][i];
-			     }
-			    
-			}
-			else if(data.uri){
-				selvalue=data.uri;
-			}
-			return selvalue;
-			
-		}
-			 
-			
-	 
-
+     
 
 
   }
