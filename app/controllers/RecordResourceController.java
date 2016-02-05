@@ -17,7 +17,6 @@
 package controllers;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -34,10 +33,7 @@ import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Results.Status;
-import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -182,8 +178,9 @@ public class RecordResourceController extends WithResourceController {
 			DB.getRecordResourceDAO().makePermanent(resource);
 			resource.getAdministrative().setWithURI(
 					request().host() + resource.getDbId().toString());
-			// TODO: maybe moderate usage statistics?
 			DB.getRecordResourceDAO().makePermanent(resource);
+			DB.getRecordResourceDAO().updateWithURI(resource.getDbId(),
+					"/collection/" + resource.getDbId());
 			return ok(Json.toJson(resource));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());

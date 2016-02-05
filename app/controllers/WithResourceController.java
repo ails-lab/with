@@ -184,7 +184,6 @@ public class WithResourceController extends Controller {
 					record.getAdministrative().setCreated(new Date());
 					switch (source) {
 					case UploadedByUser:
-						ObjectId recordDbId = record.getDbId();
 						// Fill the EmbeddedMediaObject from the MediaObject that has been created
 						record.getAdministrative().setWithCreator(userId);
 						String mediaUrl;
@@ -205,6 +204,7 @@ public class WithResourceController extends Controller {
 						DB.getRecordResourceDAO().makePermanent(record);
 						recordId = record.getDbId();
 						//setting of provevance's resourceId and externalId (based on recordDbId) is taken care by postLoad in WithResource
+						DB.getRecordResourceDAO().updateWithURI(recordId, "/record/"+recordId);
 						DB.getRecordResourceDAO().updateProvenance(recordId, last, new ProvenanceInfo("UploadedByUser", 
 								"record/" + recordId, recordId.toString()));
 						DB.getRecordResourceDAO().updateField(recordId, "administrative.externalId", recordId.toString());
@@ -220,6 +220,7 @@ public class WithResourceController extends Controller {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
+						DB.getRecordResourceDAO().updateWithURI(recordId, "/record/"+recordId);
 						recordId = record.getDbId();
 						break;
 					default://imported first time from other sources
@@ -233,6 +234,7 @@ public class WithResourceController extends Controller {
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
 						recordId = record.getDbId();
+						DB.getRecordResourceDAO().updateWithURI(recordId, "/record/"+recordId);
 						addContentToRecord(record.getDbId(), source.toString(),
 								externalId);
 						break;
