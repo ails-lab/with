@@ -22,52 +22,27 @@ import java.util.List;
 import model.EmbeddedMediaObject.MediaVersion;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.utils.IndexType;
 
+import utils.Serializer;
+import utils.Deserializer.PointDeserializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import utils.Serializer;
-
-@Indexes({
-	@Index(fields = @Field(value = "coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background=true))
-	})
+@Indexes({ @Index(fields = @Field(value = "coordinates", type = IndexType.GEO2DSPHERE), options = @IndexOptions(background = true)) })
 public class Page {
 
 	private String address;
 
-	@Embedded
-	public static class Point {
-		
-		private double latitude;
-		private double longitude;
-
-		public double getLatitude() {
-			return latitude;
-		}
-
-		public void setLatitude(double latitude) {
-			this.latitude = latitude;
-		}
-
-		public double getLongitude() {
-			return longitude;
-		}
-
-		public void setLongitude(double longitude) {
-			this.longitude = longitude;
-		}
-
-	}
-
-	//HAVE TO TEST
-//	private org.mongodb.morphia.geo.Point coordinates;
-	
+	@JsonDeserialize(using = PointDeserializer.class)
 	private Point coordinates;
+
 	private String city;
 	private String country;
 	private String url;
@@ -78,6 +53,7 @@ public class Page {
 	private List<ObjectId> featuredCollections;
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private List<ObjectId> featuredExhibitions;
+
 	public String getAddress() {
 		return address;
 	}

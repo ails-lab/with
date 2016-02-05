@@ -27,6 +27,7 @@ import javax.validation.ConstraintViolation;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 
@@ -41,7 +42,6 @@ import model.Collection;
 import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
-import model.usersAndGroups.Page.Point;
 import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
@@ -78,7 +78,8 @@ public class GroupManager extends Controller {
 	 *            the administrator username
 	 * @return the JSON of the new group
 	 */
-	public static Result createGroup(String adminId, String adminUsername, String groupType) {
+	public static Result createGroup(String adminId, String adminUsername,
+			String groupType) {
 
 		ObjectId admin;
 		UserGroup newGroup = null;
@@ -89,17 +90,22 @@ public class GroupManager extends Controller {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
-			if (AccessManager.effectiveUserId(session().get("effectiveUserIds")).isEmpty()) {
+			if (AccessManager
+					.effectiveUserId(session().get("effectiveUserIds"))
+					.isEmpty()) {
 				error.put("error", "No rights for group creation");
 				return forbidden(error);
 			}
-			ObjectId creator = new ObjectId(AccessManager.effectiveUserId(session().get("effectiveUserIds")));
+			ObjectId creator = new ObjectId(
+					AccessManager.effectiveUserId(session().get(
+							"effectiveUserIds")));
 			if (!json.has("username")) {
 				error.put("error", "Must specify name for the group");
 				return badRequest(error);
 			}
 			if (!uniqueGroupName(json.get("username").asText())) {
-				error.put("error", "Group name already exists! Please specify another name");
+				error.put("error",
+						"Group name already exists! Please specify another name");
 				return badRequest(error);
 			}
 			Class<?> clazz = Class.forName("model.usersAndGroups." + groupType);
@@ -122,11 +128,13 @@ public class GroupManager extends Controller {
 			administartor.addGroupForAdministration(newGroup.getDbId());
 			administartor = DB.getUserDAO().get(admin);
 			administartor.addGroupForAdministration(newGroup.getDbId());
-			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newGroup);
+			Set<ConstraintViolation<UserGroup>> violations = Validation
+					.getValidator().validate(newGroup);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
 				for (ConstraintViolation<UserGroup> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+					properties.add(Json.parse("{\"" + cv.getPropertyPath()
+							+ "\":\"" + cv.getMessage() + "\"}"));
 				}
 				error.put("error", properties);
 				return badRequest(error);
@@ -151,11 +159,13 @@ public class GroupManager extends Controller {
 	}
 
 	private static boolean uniqueGroupName(String name) {
-		return ((DB.getUserGroupDAO().getByName(name) == null) && (DB.getUserDAO().getByUsername(name) == null));
+		return ((DB.getUserGroupDAO().getByName(name) == null) && (DB
+				.getUserDAO().getByUsername(name) == null));
 	}
 
 	private static String capitalizeFirst(String str) {
-		return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+		return str.substring(0, 1).toUpperCase()
+				+ str.substring(1).toLowerCase();
 	}
 
 	/**
@@ -172,9 +182,11 @@ public class GroupManager extends Controller {
 		ObjectNode json = (ObjectNode) request().body().asJson();
 		ObjectNode result = Json.newObject();
 
-		String adminId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+		String adminId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
 		if ((adminId == null) || (adminId.equals(""))) {
-			result.put("error", "Only creator of the group has the right to edit the group");
+			result.put("error",
+					"Only creator of the group has the right to edit the group");
 			return forbidden(result);
 		}
 		try {
@@ -184,13 +196,16 @@ public class GroupManager extends Controller {
 				result.put("error", "Cannot retrieve group from database!");
 				return internalServerError(result);
 			}
-			if (!group.getCreator().equals(new ObjectId(adminId)) && (!admin.isSuperUser())) {
-				result.put("error", "Only creator of group has the right to edit the group");
+			if (!group.getCreator().equals(new ObjectId(adminId))
+					&& (!admin.isSuperUser())) {
+				result.put("error",
+						"Only creator of group has the right to edit the group");
 				return forbidden(result);
 			}
 			if (json.has("username")) {
 				if (json.get("username") != null) {
-					if (!group.getUsername().equals(json.get("username").asText())) {
+					if (!group.getUsername().equals(
+							json.get("username").asText())) {
 						if (!uniqueGroupName(json.get("username").asText())) {
 							return badRequest("Group name already exists! Please specify another name.");
 						}
@@ -198,7 +213,8 @@ public class GroupManager extends Controller {
 				}
 			}
 			// Update user page
-			if (json.has("page") && ((group instanceof Organization) || (group instanceof Project))) {
+			if (json.has("page")
+					&& ((group instanceof Organization) || (group instanceof Project))) {
 				String address = null, city = null, country = null;
 				Page oldPage = null;
 				JsonNode newPage = json.get("page");
@@ -210,29 +226,31 @@ public class GroupManager extends Controller {
 				}
 				// Update Page
 				ObjectMapper pageObjectMapper = new ObjectMapper();
-				ObjectReader pageUpdator = pageObjectMapper.readerForUpdating(oldPage);
+				ObjectReader pageUpdator = pageObjectMapper
+						.readerForUpdating(oldPage);
 				Page page;
 				page = pageUpdator.readValue(newPage);
 				// In case that the location has changed we need to calculate
 				// the new coordinates
-				if (((json.get("page").get("address") != null) || (json.get("page").get("city") != null)
-						|| (json.get("page").get("country") != null))) {
+				if (((json.get("page").get("address") != null)
+						|| (json.get("page").get("city") != null) || (json.get(
+						"page").get("country") != null))) {
 					address = page.getAddress();
 					city = page.getCity();
 					country = page.getCountry();
-					String fullAddress = ((address == null) ? "" : address) + "," + ((city == null) ? "" : city) + ","
+					String fullAddress = ((address == null) ? "" : address)
+							+ "," + ((city == null) ? "" : city) + ","
 							+ ((country == null) ? "" : country);
 					fullAddress = fullAddress.replace(" ", "+");
 					try {
-						JsonNode response = HttpConnector.getURLContent(
-								"https://maps.googleapis.com/maps/api/geocode/json?address=" + fullAddress);
-						Point coordinates =new Point();
-						coordinates.setLatitude(response.get("results").get(0).get("geometry").get("location").get("lat").asDouble());
-						coordinates.setLongitude(response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());
-						/*coordinates.setLatitude(
-								response.get("results").get(0).get("geometry").get("location").get("lat").asDouble());
-						coordinates.setLongitude(
-								response.get("results").get(0).get("geometry").get("location").get("lng").asDouble());*/
+						JsonNode response = HttpConnector
+								.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
+										+ fullAddress);
+						Point coordinates = GeoJson.point(
+								response.get("results").get(0).get("geometry")
+										.get("location").get("lat").asDouble(),
+								response.get("results").get(0).get("geometry")
+										.get("location").get("lng").asDouble());
 						page.setCoordinates(coordinates);
 					} catch (Exception e) {
 						log.error("Cannot update coordinates of group Page", e);
@@ -251,11 +269,13 @@ public class GroupManager extends Controller {
 			ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
 			UserGroup newVersion;
 			newVersion = updator.readValue(json);
-			Set<ConstraintViolation<UserGroup>> violations = Validation.getValidator().validate(newVersion);
+			Set<ConstraintViolation<UserGroup>> violations = Validation
+					.getValidator().validate(newVersion);
 			if (!violations.isEmpty()) {
 				ArrayNode properties = Json.newObject().arrayNode();
 				for (ConstraintViolation<UserGroup> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath() + "\":\"" + cv.getMessage() + "\"}"));
+					properties.add(Json.parse("{\"" + cv.getPropertyPath()
+							+ "\":\"" + cv.getMessage() + "\"}"));
 				}
 				result.put("error", properties);
 				return badRequest(result);
@@ -289,15 +309,18 @@ public class GroupManager extends Controller {
 	public static Result deleteGroup(String groupId) {
 
 		ObjectNode result = Json.newObject();
-		String userId = AccessManager.effectiveUserId(session().get("effectiveUserIds"));
+		String userId = AccessManager.effectiveUserId(session().get(
+				"effectiveUserIds"));
 		if ((userId == null) || (userId.equals(""))) {
-			result.put("error", "Only creator of the group has the right to delete the group");
+			result.put("error",
+					"Only creator of the group has the right to delete the group");
 			return forbidden(result);
 		}
 		try {
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
 			if (!group.getCreator().equals(new ObjectId(userId))) {
-				result.put("error", "Only creator of the group has the right to delete the group");
+				result.put("error",
+						"Only creator of the group has the right to delete the group");
 				return forbidden(result);
 			}
 			Set<ObjectId> ancestorGroups = group.getAncestorGroups();
@@ -346,9 +369,11 @@ public class GroupManager extends Controller {
 			groupJSON.put("username", group.getUsername());
 			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(new ObjectId(collectionId));
+				Collection collection = DB.getCollectionDAO().getById(
+						new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getRights().getAcl(group.getDbId());
+					Access accessRights = collection.getRights().getAcl(
+							group.getDbId());
 					if (accessRights != null)
 						groupJSON.put("accessRights", accessRights.toString());
 					else
@@ -361,20 +386,25 @@ public class GroupManager extends Controller {
 		return getGroupJson.apply(group);
 	}
 
-	public static ArrayNode groupsAsJSON(List<UserGroup> groups, ObjectId restrictedById, boolean collectionHits) {
+	public static ArrayNode groupsAsJSON(List<UserGroup> groups,
+			ObjectId restrictedById, boolean collectionHits) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 			if (collectionHits) {
 				Query<Collection> q = DB.getCollectionDAO().createQuery();
 				CriteriaContainer[] criteria = new CriteriaContainer[3];
-				criteria[0] = DB.getCollectionDAO().createQuery().criteria("rights." + restrictedById.toHexString())
+				criteria[0] = DB.getCollectionDAO().createQuery()
+						.criteria("rights." + restrictedById.toHexString())
 						.greaterThanOrEq(1);
-				criteria[1] = DB.getCollectionDAO().createQuery().criteria("rights." + group.getDbId().toHexString())
+				criteria[1] = DB.getCollectionDAO().createQuery()
+						.criteria("rights." + group.getDbId().toHexString())
 						.equal(3);
-				criteria[2] = DB.getCollectionDAO().createQuery().criteria("rights.isPublic").equal(true);
+				criteria[2] = DB.getCollectionDAO().createQuery()
+						.criteria("rights.isPublic").equal(true);
 				q.and(criteria);
-				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q, null);
+				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q,
+						null);
 				g.put("totalCollections", hits.x);
 				g.put("totalExhibitions", hits.y);
 			}
@@ -383,12 +413,15 @@ public class GroupManager extends Controller {
 		return result;
 	}
 
-	public static Set<UserGroup> recursiveDescendants(Set<UserGroup> list, GroupType type) {
+	public static Set<UserGroup> recursiveDescendants(Set<UserGroup> list,
+			GroupType type) {
 		Set<UserGroup> descendantGroups = new HashSet<UserGroup>();
-		for (UserGroup group: list) {
-			List<UserGroup> descendants = DB.getUserGroupDAO().findByParent(group.getDbId(), type);
-			if ( descendants != null) {
-				Set<UserGroup> descendantsSet = recursiveDescendants(new HashSet<UserGroup>(descendants), type);
+		for (UserGroup group : list) {
+			List<UserGroup> descendants = DB.getUserGroupDAO().findByParent(
+					group.getDbId(), type);
+			if (descendants != null) {
+				Set<UserGroup> descendantsSet = recursiveDescendants(
+						new HashSet<UserGroup>(descendants), type);
 				descendantGroups.addAll(descendantsSet);
 			}
 			descendantGroups.add(group);
@@ -396,16 +429,17 @@ public class GroupManager extends Controller {
 		return descendantGroups;
 	}
 
-
 	/**
 	 * Return child groups or all descedant groups according to group type.
+	 * 
 	 * @param groupId
 	 * @param groupType
 	 * @param direct
 	 * @param collectionHits
 	 * @return
 	 */
-	public static Result getDescendantGroups(String groupId, String groupType, boolean direct, boolean collectionHits) {
+	public static Result getDescendantGroups(String groupId, String groupType,
+			boolean direct, boolean collectionHits) {
 		List<UserGroup> childrenGroups;
 		List<UserGroup> descendantGroups;
 		ObjectId parentId = new ObjectId(groupId);
@@ -414,14 +448,16 @@ public class GroupManager extends Controller {
 
 		if (childrenGroups != null) {
 			if (direct) {
-				return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId), collectionHits));
+				return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId),
+						collectionHits));
+			} else {
+				descendantGroups = new ArrayList<UserGroup>(
+						recursiveDescendants(new HashSet<UserGroup>(
+								childrenGroups), type));
+				return ok(groupsAsJSON(descendantGroups, new ObjectId(groupId),
+						collectionHits));
 			}
-			else {
-				descendantGroups = new ArrayList<UserGroup>(recursiveDescendants(new HashSet<UserGroup>(childrenGroups), type));
-				return ok(groupsAsJSON(descendantGroups, new ObjectId(groupId), collectionHits));
-			}
-		}
-		else
+		} else
 			return ok();
 	}
 
@@ -429,15 +465,14 @@ public class GroupManager extends Controller {
 	 * This call returns extra info about members of a group either they are
 	 * users or groups.
 	 *
-	 * Category specifies either if we want only users information or groups or both.
+	 * Category specifies either if we want only users information or groups or
+	 * both.
 	 *
 	 * @param groupId
-	 * @param category (possible values: 'users', 'groups', 'both'
-	 * @return A json stucture  like the following
-	 * 			{
-	 * 				"users": [ {...}, {...},...],
-	 * 				"groups": [ {...}, {...},...]
-	 * 			}
+	 * @param category
+	 *            (possible values: 'users', 'groups', 'both'
+	 * @return A json stucture like the following { "users": [ {...},
+	 *         {...},...], "groups": [ {...}, {...},...] }
 	 */
 	public static Result getGroupUsersInfo(String groupId, String category) {
 
@@ -445,47 +480,43 @@ public class GroupManager extends Controller {
 		ArrayNode users = Json.newObject().arrayNode();
 		ArrayNode groups = Json.newObject().arrayNode();
 
-		if(!category.equals("users")
-			&& !category.equals("groups")
-			&& !category.equals("both")) {
+		if (!category.equals("users") && !category.equals("groups")
+				&& !category.equals("both")) {
 
 			result.put("message", "Invalid category name");
 			log.error("Invalid category name");
 			return badRequest(result);
-			}
+		}
 
 		UserGroup group;
-		if( (group = DB.getUserGroupDAO().get(new ObjectId(groupId))) == null) {
+		if ((group = DB.getUserGroupDAO().get(new ObjectId(groupId))) == null) {
 			result.put("message", "There is no such a group");
 			log.error("There is no such a group");
 			return badRequest(result);
 		}
-		if((category.equals("users") || category.equals("both"))
+		if ((category.equals("users") || category.equals("both"))
 				&& (group.getUsers().size() > group.getAdminIds().size())) {
 			group.getUsers().removeAll(group.getAdminIds());
 			User u;
-			for(ObjectId oid : group.getUsers()) {
-				if((u = DB.getUserDAO().get(oid)) == null) {
+			for (ObjectId oid : group.getUsers()) {
+				if ((u = DB.getUserDAO().get(oid)) == null) {
 					log.error("Not a User with dbId: " + oid);
 				}
 				users.add(userOrGroupJson(u));
 			}
 		}
-		if((category.equals("groups") || category.equals("both"))) {
-			List<UserGroup> children =
-					DB.getUserGroupDAO().findByParent(new ObjectId(groupId), GroupType.All);
-			for(UserGroup g: children) {
+		if ((category.equals("groups") || category.equals("both"))) {
+			List<UserGroup> children = DB.getUserGroupDAO().findByParent(
+					new ObjectId(groupId), GroupType.All);
+			for (UserGroup g : children) {
 				groups.add(userOrGroupJson(g));
 			}
 		}
-
-
 
 		result.put("users", users);
 		result.put("groups", groups);
 		return ok(result);
 	}
-
 
 	private static ObjectNode userOrGroupJson(UserOrGroup user) {
 		ObjectNode userJSON = Json.newObject();
