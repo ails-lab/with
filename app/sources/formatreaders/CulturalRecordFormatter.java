@@ -16,21 +16,11 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.optimaize.langdetect.DetectedLanguage;
-import com.optimaize.langdetect.text.CommonTextObjectFactories;
-import com.optimaize.langdetect.text.TextObject;
-import com.optimaize.langdetect.text.TextObjectFactory;
 
-import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.ILiteral;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
@@ -41,7 +31,6 @@ import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
-import utils.ListUtils;
 
 public abstract class CulturalRecordFormatter extends JsonContextRecordFormatReader<CulturalObject> {
 
@@ -63,8 +52,8 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
         Logger.info("["+full+"] Item Detected Languages " + res);
 		return res.toArray(new Language[]{});
 	}
-
-	public CulturalObject readObjectFrom(JsonNode text) {
+	
+	public CulturalObject readObjectFrom(JsonContextRecord text) {
 		object = new CulturalObject();
 		object.getAdministrative().getAccess().setIsPublic(true);
 
@@ -81,6 +70,10 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		object.getAdministrative().setExternalId(resourceId);
 
 		return object;
+	}
+
+	public CulturalObject readObjectFrom(JsonNode text) {
+		return readObjectFrom(new JsonContextRecord(text));
 	}
 
 	public FilterValuesMap getValuesMap() {

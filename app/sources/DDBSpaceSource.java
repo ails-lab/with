@@ -18,21 +18,24 @@ package sources;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
+import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.formatreaders.DDBRecordFormatter;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import model.ExternalBasicRecord;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.WithResource;
+import sources.formatreaders.EuropeanaItemRecordFormatter;
 
 public class DDBSpaceSource extends ISpaceSource {
 
@@ -43,9 +46,17 @@ public class DDBSpaceSource extends ISpaceSource {
 		
 		
 		
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image","IMAGE");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio","SOUND");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text","TEXT");		
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		
+		
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
 		
 		
 		formatreader = new DDBRecordFormatter(vmap);
@@ -114,6 +125,32 @@ public class DDBSpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+	
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			
+			
+			QueryBuilder builder = new QueryBuilder();
+			builder.setBaseUrl("http://api.deutsche-digitale-bibliothek.de/items/"+recordId+"/edm");
+			builder.addSearchParam("oauth_consumer_key", apiKey);
+			response = HttpConnector
+					.getURLContent(builder.getHttp());
+			// todo read the other format;
+			JsonNode record = response;
+			if (response != null) {
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter(vmap);
+				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
+
+			return jsonMetadata;
+		} catch (Exception e) {
+			return jsonMetadata;
+		}
 	}
 
 }

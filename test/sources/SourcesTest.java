@@ -16,19 +16,15 @@
 
 package sources;
 
-import static org.junit.Assert.*;
-
 import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-
 import model.resources.CulturalObject;
 import play.libs.Json;
-import sources.formatreaders.EuropeanaItemRecordFormatter;
+import sources.formatreaders.DDBItemRecordFormatter;
 import sources.utils.JsonContextRecord;
 
 public class SourcesTest {
@@ -36,9 +32,9 @@ public class SourcesTest {
 	@Test
 	public void test() throws IOException {
 		String text = FileUtils.readFileToString(new File("record.json"));
-		EuropeanaSpaceSource e = new EuropeanaSpaceSource();
-		EuropeanaItemRecordFormatter rec = new EuropeanaItemRecordFormatter(e.getVmap());
-		CulturalObject obj = rec.readObjectFrom(new JsonContextRecord(text).getValue("object"));
+		DDBSpaceSource e = new DDBSpaceSource();
+		DDBItemRecordFormatter rec = new DDBItemRecordFormatter(e.getVmap());
+		CulturalObject obj = rec.readObjectFrom(new JsonContextRecord(text));
 		System.out.println(Json.toJson(obj));
 	}
 

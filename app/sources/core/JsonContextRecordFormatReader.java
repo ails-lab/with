@@ -38,8 +38,9 @@ public abstract class JsonContextRecordFormatReader<T extends WithResource> {
 	protected abstract T fillObjectFrom(JsonContextRecord text);
 
 	public T readObjectFrom(JsonNode text) {
-		return fillObjectFrom(text);
+		return readObjectFrom(new JsonContextRecord(text));
 	}
+	
 	public T readObjectFrom(JsonContextRecord text) {
 		return fillObjectFrom(text);
 	}
