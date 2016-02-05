@@ -166,10 +166,10 @@ public class CollectionObjectController extends WithResourceController {
 			else {
 				CollectionObject collection = DB.getCollectionObjectDAO().get(
 						new ObjectId(id));
-				List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
+				/*List<RecordResource> firstEntries = DB.getCollectionObjectDAO()
 						.getFirstEntries(collectionDbId, 3);
 				result = (ObjectNode) Json.toJson(collection);
-				result.put("firstEntries", Json.toJson(firstEntries));
+				result.put("firstEntries", Json.toJson(firstEntries));*/
 				return ok(Json.toJson(collection));
 			}
 		} catch (Exception e) {
