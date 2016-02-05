@@ -18,19 +18,18 @@ package model.annotations;
 
 import org.mongodb.morphia.annotations.Entity;
 
-import model.annotations.Annotation.AnnotationType;
 import model.basicDataTypes.Literal;
+import model.annotations.ContextData.ContextDataBody;
 
-@Entity("Αnnotation")
-public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation.ExhibitionAnnotationBody> {
+public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
 	
-	public ExhibitionAnnotation() {
+	public ExhibitionData() {
 		super();
 		this.body = new ExhibitionAnnotationBody();
-		this.annotationType = AnnotationType.valueOf(this.getClass().getSimpleName());
+		this.contextDataType = ContextDataType.valueOf(this.getClass().getSimpleName());
 	}
 	
-	public static class ExhibitionAnnotationBody extends Annotation.AnnotationBody {
+	public static class ExhibitionAnnotationBody extends ContextDataBody {
 		Literal exhibitionDescription;
 		String audioUrl;
 		String videoUrl;

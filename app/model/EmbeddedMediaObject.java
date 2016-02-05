@@ -60,21 +60,17 @@ public class EmbeddedMediaObject {
 
 	// this needs work
 	public static enum WithMediaRights {
-		Public("Attribution Alone"), Restricted("Restricted"), Permission("Permission"), Modify(
-				"Allow re-use and modifications"), Commercial(
-						"Allow re-use for commercial"), Creative_Commercial_Modify(
-								"use for commercial purposes modify, adapt, or build upon"), Creative_Not_Commercial(
-										"NOT Comercial"), Creative_Not_Modify(
-												"NOT Modify"), Creative_Not_Commercial_Modify(
-														"not modify, adapt, or build upon, not for commercial purposes"), Creative_SA(
-																"share alike"), Creative_BY(
-																		"use by attribution"), Creative(
-																				"Allow re-use"), RR(
-																						"Rights Reserved"), RRPA(
-																								"Rights Reserved - Paid Access"), RRRA(
-																										"Rights Reserved - Restricted Access"), RRFA(
-																												"Rights Reserved - Free Access"), UNKNOWN(
-																														"Unknown");
+		Public("Attribution Alone"), Restricted("Restricted"), Permission(
+				"Permission"), Modify("Allow re-use and modifications"), Commercial(
+				"Allow re-use for commercial"), Creative_Commercial_Modify(
+				"use for commercial purposes modify, adapt, or build upon"), Creative_Not_Commercial(
+				"NOT Comercial"), Creative_Not_Modify("NOT Modify"), Creative_Not_Commercial_Modify(
+				"not modify, adapt, or build upon, not for commercial purposes"), Creative_SA(
+				"share alike"), Creative_BY("use by attribution"), Creative(
+				"Allow re-use"), RR("Rights Reserved"), RRPA(
+				"Rights Reserved - Paid Access"), RRRA(
+				"Rights Reserved - Restricted Access"), RRFA(
+				"Rights Reserved - Free Access"), UNKNOWN("Unknown");
 
 		private final String text;
 
@@ -86,7 +82,6 @@ public class EmbeddedMediaObject {
 		public String toString() {
 			return text;
 		}
-
 	}
 
 	private int width, height;
@@ -97,7 +92,6 @@ public class EmbeddedMediaObject {
 
 	// the media object URL
 	private String url;
-
 
 	private MediaVersion mediaVersion;
 
@@ -222,9 +216,9 @@ public class EmbeddedMediaObject {
 	}
 
 	public EmbeddedMediaObject(int width, int height, WithMediaType type,
-			WithMediaRights withRights, String url,
-			MediaVersion mediaVersion, LiteralOrResource originalRights,
-			MediaType mimeType, long size, Quality quality) {
+			WithMediaRights withRights, String url, MediaVersion mediaVersion,
+			LiteralOrResource originalRights, MediaType mimeType, long size,
+			Quality quality) {
 		this.width = width;
 		this.height = height;
 		this.type = type;
@@ -242,9 +236,9 @@ public class EmbeddedMediaObject {
 	 */
 	public EmbeddedMediaObject(EmbeddedMediaObject media) {
 		this(media.getWidth(), media.getHeight(), media.getType(), media
-				.getWithRights(), media.getUrl(), media
-				.getMediaVersion(), media.getOriginalRights(), media
-				.getMimeType(), media.getSize(), media.getQuality());
+				.getWithRights(), media.getUrl(), media.getMediaVersion(),
+				media.getOriginalRights(), media.getMimeType(),
+				media.getSize(), media.getQuality());
 	}
 
 	public EmbeddedMediaObject() {

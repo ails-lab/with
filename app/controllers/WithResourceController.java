@@ -30,14 +30,16 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
-import model.annotations.Annotation;
-import model.annotations.ContextAnnotation;
-import model.annotations.ExhibitionAnnotation;
+import model.annotations.ContextData.ContextDataType;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ExhibitionData;
 
 import org.bson.types.ObjectId;
 
@@ -60,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.parameterTypes.StringTuple;
 import db.DB;
 import db.WithResourceDAO;
 
@@ -170,31 +173,7 @@ public class WithResourceController extends Controller {
 							DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(),
 								json.get("descriptiveData"));
 						//TODO: if record has annotations, update/add annotations
-						List<ContextAnnotation> annotations = record.getContextAnnotations();
-						if (annotations != null) {
-							for (ContextAnnotation contextAnn: annotations) {
-									ObjectId exhAnnId = ((ExhibitionAnnotation) contextAnn).getTarget().getCollectionId();
-									if (collectionDbId.equals(exhAnnId)) {//ignore annotations that refer to other collections! to be faster
-										ObjectId annId = contextAnn.getDbId();
-										if (annId != null) {
-											Annotation ann = DB.getAnnotationDAO().getById(annId);
-											if (ann != null) {
-												result.put("error", "There exists no context annotation with dbid " + annId);
-												return badRequest(result);
-											}
-											else { //annotation already in DB, update
-												JsonNode newAnnJson = Json.toJson(contextAnn);
-												DB.getAnnotationDAO().editAnnotationBody(annId, newAnnJson);
-											}
-										}
-										else {//create new annotation document in DB, add id ref in record
-											contextAnn.setCreated(new Date());
-											contextAnn.setWithCreator(userId);
-											(()contextAnn.getTarget()).set
-										}
-									}
-							}
-						}
+						
 					}
 				} else { // create new record in db
 					ObjectNode errors;
@@ -282,6 +261,45 @@ public class WithResourceController extends Controller {
 			return internalServerError(result);
 		}
 	}
+	
+	public static void updateContextDatas(JsonNode contextAnnsJson, WithResource record, ObjectId colId, ObjectId userId) {
+		List<ContextData> ContextDatas = getContextDataFromJson(contextAnnsJson);
+		for (ContextData contextAnn: ContextDatas) {
+			ObjectId contextAnnId = contextAnn.getTarget().getCollectionId();
+			if (colId.equals(contextAnnId)) {//ignore annotations that refer to other collections! to be faster
+				for (ContextData ca: (List<ContextData>) record.getContextData()) {
+					if (ca.getTarget().getCollectionId().equals(contextAnnId)) {
+						ca = contextAnn;
+					}
+				}
+			}
+		}
+	}
+	
+	public static List<ContextData> getContextDataFromJson(JsonNode contextAnnsJson) {
+		ArrayList<ContextData> ContextDatas = new ArrayList<ContextData>();
+		if (contextAnnsJson != null && contextAnnsJson.isArray()) {
+			for (final JsonNode contextAnnJson: contextAnnsJson) {
+				JsonNode annTypeJson = contextAnnJson.get("contextDataType");
+				if (annTypeJson != null && annTypeJson.isValueNode()) {
+					String annTypeString = annTypeJson.asText();
+					ContextDataType annType = ContextDataType.valueOf(annTypeString);
+					if (annType != null) {
+						Class<?> clazz;
+						try {
+							clazz = Class.forName("model.annotations." + annType);
+							ContextData contextAnn = (ContextData) Json.fromJson(contextAnnJson, clazz);
+							ContextDatas.add(contextAnn);
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}	
+		}
+		return ContextDatas;
+	}
+			
 
 	/**
 	 * @param id
@@ -330,6 +348,7 @@ public class WithResourceController extends Controller {
 		}
 	}
 
+	//TODO: update collection's media
 	public static Result moveRecordInCollection(String id, String recordId,
 			int oldPosition, int newPosition) {
 		ObjectNode result = Json.newObject();

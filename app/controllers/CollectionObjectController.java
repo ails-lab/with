@@ -24,11 +24,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.annotations.ContextData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -369,7 +371,7 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	// input parameter lists' (directlyAccessedByUserName etc) intended meaning
+	// input parameter lists' (directlyAccessedByUserOrGroup etc) intended meaning
 	// is AND of its entries
 	// returned list of lists accessedByUserOrGroup represents AND of OR entries
 	// i.e. each entry in directlyAccessedByUserName for example has to be
@@ -584,7 +586,17 @@ public class CollectionObjectController extends WithResourceController {
 				return internalServerError(result);
 			}
 			ArrayNode recordsList = Json.newObject().arrayNode();
-			for (RecordResource e : records) {
+			int position = start;
+			for (RecordResource e: records) {
+				//filter out all context annotations that do not refer to this collection
+				List<ContextData> contextAnns = e.getContextData();
+				List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+				for (ContextData ca: contextAnns) {
+					if (ca.getTarget().getCollectionId().equals(colId) &&
+							ca.getTarget().getPosition() == position)
+						filteredContextAnns.add(ca);
+				}
+				e.setContextData(filteredContextAnns);
 				if (contentFormat.equals("contentOnly")
 						&& e.getContent() != null) {
 					recordsList.add(Json.toJson(e.getContent()));
@@ -602,6 +614,7 @@ public class CollectionObjectController extends WithResourceController {
 					}
 					recordsList.add(Json.toJson(e));
 				}
+				position+=1;
 			}
 			result.put(
 					"itemCount",

@@ -16,25 +16,37 @@
 
 package model.annotations;
 
+
 import org.bson.types.ObjectId;
 
 import utils.Serializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import model.annotations.Annotation.AnnotationTarget;
-import model.annotations.Annotation.AnnotationBody;
-import model.resources.WithResource.WithResourceType;
 
-public class ContextAnnotation<T1 extends AnnotationBody> extends Annotation<AnnotationBody, ContextAnnotation.ContextAnnotationTarget> {
+public class ContextData<T1 extends ContextData.ContextDataBody> {
 	
-	public ContextAnnotation() {
-		super();
-		this.target = new ContextAnnotationTarget();
+	public static enum ContextDataType {
+		ExhibitionAnnotation
+	}
+		
+	public static class ContextDataBody {
 	}
 	
-	public static class ContextAnnotationTarget extends AnnotationTarget {
-		
+	public ContextData() {
+		super();
+		this.target = new ContextDataTarget();
+	}
+	
+	public ContextData(ObjectId colId, int position) {
+		super();
+		this.target = new ContextDataTarget();
+		this.target.collectionId = colId;
+		this.target.position = position;
+		this.body = (T1) new ContextDataBody();
+	}
+	
+	public static class ContextDataTarget {		
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		ObjectId collectionId;
 		int position;
@@ -51,7 +63,35 @@ public class ContextAnnotation<T1 extends AnnotationBody> extends Annotation<Ann
 		public void setPosition(int position) {
 			this.position = position;
 		}
+	}
+	
+	T1 body;
+	ContextDataTarget target;
+	
+	ContextDataType contextDataType;
 
+	public T1 getBody() {
+		return body;
+	}
+
+	public void setBody(T1 body) {
+		this.body = body;
+	}
+
+	public ContextDataTarget getTarget() {
+		return target;
+	}
+
+	public void setTarget(ContextDataTarget target) {
+		this.target = target;
+	}
+
+	public ContextDataType getContextDataType() {
+		return contextDataType;
+	}
+
+	public void setContextDataType(ContextDataType contextDataType) {
+		this.contextDataType = contextDataType;
 	}
 
 }
