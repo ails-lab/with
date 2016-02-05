@@ -26,9 +26,10 @@ public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation
 	
 	public ExhibitionAnnotation() {
 		super();
+		this.body = new ExhibitionAnnotationBody();
 		this.annotationType = AnnotationType.valueOf(this.getClass().getSimpleName());
 	}
-
+	
 	public static class ExhibitionAnnotationBody extends Annotation.AnnotationBody {
 		Literal exhibitionDescription;
 		String audioUrl;

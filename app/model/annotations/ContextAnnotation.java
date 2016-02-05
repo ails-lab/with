@@ -27,7 +27,12 @@ import model.annotations.Annotation.AnnotationBody;
 import model.resources.WithResource.WithResourceType;
 
 public class ContextAnnotation<T1 extends AnnotationBody> extends Annotation<AnnotationBody, ContextAnnotation.ContextAnnotationTarget> {
-
+	
+	public ContextAnnotation() {
+		super();
+		this.target = new ContextAnnotationTarget();
+	}
+	
 	public static class ContextAnnotationTarget extends AnnotationTarget {
 		
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)

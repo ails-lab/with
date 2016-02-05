@@ -33,7 +33,11 @@ import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
+import model.annotations.Annotation;
+import model.annotations.ContextAnnotation;
+import model.annotations.ExhibitionAnnotation;
 
 import org.bson.types.ObjectId;
 
@@ -123,6 +127,8 @@ public class WithResourceController extends Controller {
 					return badRequest(result);
 				}
 				String resourceType = null;
+				ObjectId userId = AccessManager.effectiveUserDbIds(
+						session().get("effectiveUserIds")).get(0);
 				if (json.has("resourceType"))
 					resourceType = json.get("resourceType").asText();
 				if (resourceType == null || WithResourceType.valueOf(resourceType) == null)
@@ -143,45 +149,58 @@ public class WithResourceController extends Controller {
 				if (externalId == null)
 					externalId = record.getAdministrative().getExternalId();
 				ObjectId recordId = null;
-				if (externalId != null
-						&& DB.getRecordResourceDAO().existsWithExternalId(
-								externalId)) {
-					// get dbId of existing resource
-					RecordResource resource = DB
-							.getRecordResourceDAO()
-							.getUniqueByFieldAndValue(
-									"administrative.externalId", externalId,
-									new ArrayList<String>(Arrays.asList("_id")));
+				if (externalId != null && DB.getRecordResourceDAO().existsWithExternalId(
+								externalId)) {// get dbId of existing resource
+					RecordResource resource = DB.getRecordResourceDAO()
+						.getUniqueByFieldAndValue("administrative.externalId", externalId,
+							new ArrayList<String>(Arrays.asList("_id")));
 					recordId = resource.getDbId();
 					response = errorIfNoAccessToRecord(Action.READ, recordId);
 					if (!response.toString().equals(ok().toString())) {
 						return response;
 					} else {
 						// In case the record already exists we overwrite the
-						// existing
-						// record's descriptive data, if the user has WRITE
+						// existing record's descriptive data for the fields included
+						//in the json, if the user has WRITE.
 						// access.
-						// TODO: this assumes that the json has FULL information
-						// about the collection's descriptive data
-						// Better iterate through the json (in any case it
-						// should be small), and update only the fields
-						// specified in it.
 						if (DB.getRecordResourceDAO().hasAccess(
-								AccessManager.effectiveUserDbIds(session().get(
-										"effectiveUserIds")), Action.EDIT,
-								recordId)
-								&& (json.get("descriptiveData") != null))
-							DB.getRecordResourceDAO().editRecord(
-									"descriptiveData", resource.getDbId(),
-									json.get("descriptiveData"));
+							AccessManager.effectiveUserDbIds(session().get(
+									"effectiveUserIds")), Action.EDIT,recordId)
+							&& (json.get("descriptiveData") != null))
+							DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(),
+								json.get("descriptiveData"));
+						//TODO: if record has annotations, update/add annotations
+						List<ContextAnnotation> annotations = record.getContextAnnotations();
+						if (annotations != null) {
+							for (ContextAnnotation contextAnn: annotations) {
+									ObjectId exhAnnId = ((ExhibitionAnnotation) contextAnn).getTarget().getCollectionId();
+									if (collectionDbId.equals(exhAnnId)) {//ignore annotations that refer to other collections! to be faster
+										ObjectId annId = contextAnn.getDbId();
+										if (annId != null) {
+											Annotation ann = DB.getAnnotationDAO().getById(annId);
+											if (ann != null) {
+												result.put("error", "There exists no context annotation with dbid " + annId);
+												return badRequest(result);
+											}
+											else { //annotation already in DB, update
+												JsonNode newAnnJson = Json.toJson(contextAnn);
+												DB.getAnnotationDAO().editAnnotationBody(annId, newAnnJson);
+											}
+										}
+										else {//create new annotation document in DB, add id ref in record
+											contextAnn.setCreated(new Date());
+											contextAnn.setWithCreator(userId);
+											(()contextAnn.getTarget()).set
+										}
+									}
+							}
+						}
 					}
 				} else { // create new record in db
-
 					ObjectNode errors;
 					// Create a new record
-					ObjectId userId = AccessManager.effectiveUserDbIds(
-							session().get("effectiveUserIds")).get(0);
 					record.getAdministrative().setCreated(new Date());
+					//TODO: if record has annotations, update/add annotations
 					switch (source) {
 					case UploadedByUser:
 						// Fill the EmbeddedMediaObject from the MediaObject that has been created

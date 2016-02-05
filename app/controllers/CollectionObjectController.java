@@ -36,6 +36,7 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
+import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.Organization;
@@ -84,11 +85,12 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return the newly created resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
-	public static Result createCollectionObject(boolean exhibition) {
+	public static Result createCollectionObject(String collectionType) {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
+		CollectionType colType = CollectionType.valueOf(collectionType);
 		try {
-			if (exhibition == false && json == null) {
+			if (colType == null && json == null) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
@@ -100,13 +102,11 @@ public class CollectionObjectController extends WithResourceController {
 			User creator = DB.getUserDAO().get(creatorDbId);
 			CollectionObject collection = Json.fromJson(json,
 					CollectionObject.class);
-			if (exhibition) {
+			if (colType.equals(CollectionType.Exhibition)) {
 				collection.getDescriptiveData().setLabel(
-						getAvailableTitle(creator));
+						createExhibitionDummyTitle());
 				collection.getDescriptiveData().setDescription(
 						new MultiLiteral("Description"));
-				creator.addExhibitionsCreated();
-				DB.getUserDAO().makePermanent(creator);
 			}
 			Set<ConstraintViolation<CollectionObject>> violations = Validation
 					.getValidator().validate(collection);
@@ -120,6 +120,7 @@ public class CollectionObjectController extends WithResourceController {
 				return badRequest(error);
 			}
 			// Fill with all the administrative metadata
+			collection.getAdministrative().setCollectionType(colType);
 			collection.setResourceType(WithResourceType.CollectionObject);
 			collection.getAdministrative().setWithCreator(creatorDbId);
 			collection.getAdministrative().setCreated(new Date());
@@ -143,9 +144,8 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param user
 	 * @return
 	 */
-	private static MultiLiteral getAvailableTitle(User user) {
-		int exhibitionNum = user.getExhibitionsCreated();
-		return new MultiLiteral("DummyTitle" + exhibitionNum);
+	private static MultiLiteral createExhibitionDummyTitle() {
+		return new MultiLiteral("DummyTitle_" + new Date());
 	}
 
 	/**

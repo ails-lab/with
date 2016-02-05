@@ -59,6 +59,37 @@ public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotat
 	//what is this, smth like annotation/id?
 	String withUrl;
 	
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+	Date created;
+	
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+	Date lastModified;
+
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	ObjectId withCreator; // a with user
+	
+	public static enum AnnotationType {
+		ExhibitionAnnotation, TextAnnotation
+	}
+	
+	AnnotationType annotationType;
+	// body and target depend on the annotation type
+	
+	@Embedded
+	T1 body;
+	@Embedded
+	T2 target;
+	
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+	
 	public String getWithUrl() {
 		return withUrl;
 	}
@@ -90,7 +121,15 @@ public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotat
 	public void setAnnotationType(AnnotationType annotationType) {
 		this.annotationType = annotationType;
 	}
+	
+	public Date getLastModified() {
+		return lastModified;
+	}
 
+	public void setLastModified(Date lastModified) {
+		this.lastModified = lastModified;
+	}
+	
 	public T1 getBody() {
 		return body;
 	}
@@ -107,36 +146,10 @@ public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotat
 		this.target = target;
 	}
 
-	@JsonSerialize(using = Serializer.DateSerializer.class)
-	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
-	Date created;
-	
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	ObjectId withCreator; // a with user
-	
-	public static enum AnnotationType {
-		ExhibitionAnnotation, TextAnnotation
-	}
-	
-	AnnotationType annotationType;
-	// body and target depend on the annotation type
-	
-	@Embedded
-	T1 body;
-	@Embedded
-	T2 target;
-	
-	public ObjectId getDbId() {
-		return dbId;
-	}
-
-	public void setDbId(ObjectId dbId) {
-		this.dbId = dbId;
-	}
-	
-	
 	
 	public Annotation() {
+		this.target = (T2) new AnnotationTarget();
+		this.body = (T1) new AnnotationBody();
 	}
 	
 	public Annotation(Class<?> clazz) {

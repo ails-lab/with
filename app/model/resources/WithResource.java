@@ -384,7 +384,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	// embedded for some or all, not sure
 	// key is CollectionInfo.toString()
 	@Embedded
-	private ArrayList<ContextAnnotation> contextAnnotation;
+	private ArrayList<ContextAnnotation> contextAnnotations;
 
 	private ArrayList<Annotation> annotations;
 
@@ -535,13 +535,13 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media.get(0).put(mediaVersion, media);
 	}
 
-	public ArrayList<ContextAnnotation> getContextAnnotation() {
-		return contextAnnotation;
+	public ArrayList<ContextAnnotation> getContextAnnotations() {
+		return contextAnnotations;
 	}
 
-	public void setContextAnnotation(
-			ArrayList<ContextAnnotation> contextAnnotation) {
-		this.contextAnnotation = contextAnnotation;
+	public void setContextAnnotations(
+			ArrayList<ContextAnnotation> contextAnnotations) {
+		this.contextAnnotations = contextAnnotations;
 	}
 
 	public ArrayList<Annotation> getAnnotations() {
