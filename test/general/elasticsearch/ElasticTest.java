@@ -461,7 +461,7 @@ public class ElasticTest {
 		rr.getAdministrative().setCreated(new Date());
 		//wa.setWithCreator(u.getDbId());
 		WithAccess waccess = new WithAccess();
-		waccess.setIsPublic(false);
+		waccess.setIsPublic(true);
 		waccess.getAcl().add(new AccessEntry(u.getDbId(), Access.OWN));
 		rr.getAdministrative().setWithCreator(u.getDbId());
 		rr.getAdministrative().setAccess(waccess);
@@ -486,7 +486,7 @@ public class ElasticTest {
 		//resourceType is collectionObject
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
-		MultiLiteral label = new MultiLiteral(Language.EN, "This is title");
+		MultiLiteral label = new MultiLiteral(Language.EN, "Grass field");
 		RecordDescriptiveData cdd = new RecordDescriptiveData();
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");

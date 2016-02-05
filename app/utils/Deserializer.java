@@ -36,6 +36,8 @@ import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -73,7 +75,6 @@ public class Deserializer {
 		}
 
 	}
-	
 
 	public static class WithAccessDeserializer extends
 			JsonDeserializer<WithAccess> {
@@ -91,28 +92,35 @@ public class Deserializer {
 			}
 			TreeNode jsonAcl = treeNode.get("acl");
 			if (jsonAcl != null && jsonAcl.isArray()) {
-				for (int i=0; i< jsonAcl.size(); i++) {
+				for (int i = 0; i < jsonAcl.size(); i++) {
 					TreeNode entry = jsonAcl.get(i);
-					if (entry.get("user").isValueNode() && entry.get("level").isValueNode()) {
-						String username = ((TextNode) entry.get("user")).asText();
-						User user = DB.getUserDAO().getByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id"))).get(0);
+					if (entry.get("user").isValueNode()
+							&& entry.get("level").isValueNode()) {
+						String username = ((TextNode) entry.get("user"))
+								.asText();
+						User user = DB
+								.getUserDAO()
+								.getByFieldAndValue(
+										"username",
+										username,
+										new ArrayList<String>(Arrays
+												.asList("_id"))).get(0);
 						if (user != null) {
 							ObjectId userId = user.getDbId();
-							String acc = ((TextNode) entry.get("level")).asText();
+							String acc = ((TextNode) entry.get("level"))
+									.asText();
 							Access access = Access.valueOf(acc);
 							if (access != null)
 								rights.addToAcl(userId, access);
 							else
 								return rights;
-						}
-						else 
+						} else
 							return rights;
-					}
-					else 
+					} else
 						return rights;
 				}
-				
-				//rights.setAcl(acl);
+
+				// rights.setAcl(acl);
 				// if (rightsMap != null)
 				// for(Entry<String, Integer> e : rightsMap.entrySet())
 				// rights.put(new ObjectId(e.getKey()),
@@ -276,6 +284,25 @@ public class Deserializer {
 				e.printStackTrace();
 				return null;
 			}
+		}
+	}
+
+	public static class PointDeserializer extends JsonDeserializer<Point> {
+
+		@Override
+		public Point deserialize(JsonParser string, DeserializationContext arg1) {
+			Map<String, Double> map;
+			Point point;
+			try {
+				map = string
+						.readValueAs(new TypeReference<Map<String, Double>>() {
+						});
+				point = GeoJson
+						.point(map.get("latitude"), map.get("longitude"));
+			} catch (Exception e) {
+				return null;
+			}
+			return point;
 		}
 	}
 }
