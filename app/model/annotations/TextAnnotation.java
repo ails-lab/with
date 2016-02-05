@@ -18,14 +18,18 @@ package model.annotations;
 
 import model.annotations.Annotation.AnnotationTarget;
 import model.annotations.Annotation.AnnotationBody;
+import model.basicDataTypes.Language;
 
 
 public class TextAnnotation extends Annotation<AnnotationBody, TextAnnotation.TextAnnotationTarget>{
 	
 	public static class TextAnnotationTarget extends AnnotationTarget {
+		//full json path (?)
 		String propertyName;
-		String language;
+		Language language;
+		//why store original value, it is in the record
 		String originalValue;
+		//what is start end?
 		int start, end;
 	}
 

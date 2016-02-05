@@ -17,14 +17,36 @@
 package model.annotations;
 
 import org.bson.types.ObjectId;
+
+import utils.Serializer;
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import model.annotations.Annotation.AnnotationTarget;
 import model.annotations.Annotation.AnnotationBody;
+import model.resources.WithResource.WithResourceType;
 
 public class ContextAnnotation<T1 extends AnnotationBody> extends Annotation<AnnotationBody, ContextAnnotation.ContextAnnotationTarget> {
-	
+
 	public static class ContextAnnotationTarget extends AnnotationTarget {
+		
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		ObjectId collectionId;
 		int position;
+		
+		public ObjectId getCollectionId() {
+			return collectionId;
+		}
+		public void setCollectionId(ObjectId collectionId) {
+			this.collectionId = collectionId;
+		}
+		public int getPosition() {
+			return position;
+		}
+		public void setPosition(int position) {
+			this.position = position;
+		}
+
 	}
 
 }

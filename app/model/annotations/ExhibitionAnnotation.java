@@ -16,15 +16,42 @@
 
 package model.annotations;
 
+import org.mongodb.morphia.annotations.Entity;
+
+import model.annotations.Annotation.AnnotationType;
 import model.basicDataTypes.Literal;
 
+@Entity("Αnnotation")
 public class ExhibitionAnnotation extends ContextAnnotation<ExhibitionAnnotation.ExhibitionAnnotationBody> {
+	
+	public ExhibitionAnnotation() {
+		super();
+		this.annotationType = AnnotationType.valueOf(this.getClass().getSimpleName());
+	}
 
 	public static class ExhibitionAnnotationBody extends Annotation.AnnotationBody {
 		Literal exhibitionDescription;
 		String audioUrl;
 		String videoUrl;
+		
+		public Literal getExhibitionDescription() {
+			return exhibitionDescription;
+		}
+		public void setExhibitionDescription(Literal exhibitionDescription) {
+			this.exhibitionDescription = exhibitionDescription;
+		}
+		public String getAudioUrl() {
+			return audioUrl;
+		}
+		public void setAudioUrl(String audioUrl) {
+			this.audioUrl = audioUrl;
+		}
+		public String getVideoUrl() {
+			return videoUrl;
+		}
+		public void setVideoUrl(String videoUrl) {
+			this.videoUrl = videoUrl;
+		}
 	}
-
 
 }

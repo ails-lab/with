@@ -16,10 +16,32 @@
 
 package model.annotations;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+
+import model.EmbeddedMediaObject;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.ProvenanceInfo;
+import model.resources.WithResource.Usage;
+import model.resources.WithResource.WithAdmin;
+import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Id;
 
+import utils.Deserializer;
+import utils.Serializer;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Entity("Annotation")
 public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotation.AnnotationTarget> {
 	
 	// marker base class for possible annotations
@@ -30,17 +52,94 @@ public class Annotation<T1 extends Annotation.AnnotationBody, T2 extends Annotat
 	public static class AnnotationTarget {
 	}
 	
+	@Id
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	ObjectId dbId;
 	
+	//what is this, smth like annotation/id?
 	String withUrl;
-	Date created;
-	ObjectId creator; // a with user
-	public static enum Type {
-		EXHIBITION, OTHERS
-	}
-	Type type;
 	
+	public String getWithUrl() {
+		return withUrl;
+	}
+
+	public void setWithUrl(String withUrl) {
+		this.withUrl = withUrl;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
+	}
+
+	public ObjectId getWithCreator() {
+		return withCreator;
+	}
+
+	public void setWithCreator(ObjectId withCreator) {
+		this.withCreator = withCreator;
+	}
+
+	public AnnotationType getAnnotationType() {
+		return annotationType;
+	}
+
+	public void setAnnotationType(AnnotationType annotationType) {
+		this.annotationType = annotationType;
+	}
+
+	public T1 getBody() {
+		return body;
+	}
+
+	public void setBody(T1 body) {
+		this.body = body;
+	}
+
+	public T2 getTarget() {
+		return target;
+	}
+
+	public void setTarget(T2 target) {
+		this.target = target;
+	}
+
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
+	Date created;
+	
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	ObjectId withCreator; // a with user
+	
+	public static enum AnnotationType {
+		ExhibitionAnnotation, TextAnnotation
+	}
+	
+	AnnotationType annotationType;
 	// body and target depend on the annotation type
+	
+	@Embedded
 	T1 body;
+	@Embedded
 	T2 target;
+	
+	public ObjectId getDbId() {
+		return dbId;
+	}
+
+	public void setDbId(ObjectId dbId) {
+		this.dbId = dbId;
+	}
+	
+	
+	
+	public Annotation() {
+	}
+	
+	public Annotation(Class<?> clazz) {
+		annotationType = AnnotationType.valueOf(clazz.getSimpleName());
+	}
 }
