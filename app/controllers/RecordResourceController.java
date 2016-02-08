@@ -235,6 +235,7 @@ public class RecordResourceController extends WithResourceController {
 				if (!response.toString().equals(ok().toString()))
 					return response;
 				else {
+				//	DB.getRecordResourceDAO().editRecord("", dbId, json);
 					// TODO change JSON at all its depth
 					ObjectMapper objectMapper = new ObjectMapper();
 					ObjectReader updator = objectMapper.readerForUpdating(oldResource);

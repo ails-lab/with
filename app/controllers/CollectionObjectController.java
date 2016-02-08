@@ -580,7 +580,7 @@ public class CollectionObjectController extends WithResourceController {
 					"descriptiveData.label", "descriptiveData.description"));
 			// bytes of thumbnail???
 			List<RecordResource> records = DB.getRecordResourceDAO()
-					.getByCollectionBetweenPositions(colId, start, count);
+					.getByCollectionBetweenPositions(colId, start, start+count);
 			if (records == null) {
 				result.put("message", "Cannot retrieve records from database!");
 				return internalServerError(result);

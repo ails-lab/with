@@ -26,10 +26,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.rights="";
 		self.url="";
 		self.externalId = "";
-		self.cachedThumbnail="";
 		self.likes=0;
 		self.collected=0;
 		self.collectedIn=[];
+		self.data=ko.observable("");
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
 		});
@@ -42,7 +42,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			//self.url="#item/"+data.recordId;
 			self.view_url=data.view_url;
 			self.thumb=data.thumb;
-			//self.imageThumb(data.thumb);
 			self.fullres=data.fullres;
 			self.description=data.description;
 			self.source=data.source;
@@ -56,6 +55,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			self.likes=data.likes;
 			self.collected=data.collected;
 			self.collectedIn=data.collectedIn;
+			self.data(data.data);
 			var likeval=app.isLiked(self.externalId);
 		 
 		};
@@ -248,30 +248,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
-						if(data[i].items!=null && data[i].items.culturalCHO.length==self.pageSize() && moreitems==false){
+						if(data[i].items!=null && data[i].items.culturalCHO!=null && data[i].items.culturalCHO.length==self.pageSize() && moreitems==false){
 							moreitems=true;
 						}
 						var items = [];
-						/*for(var j in data[i].items){
-						 var result = data[i].items[j];
-
-						 if(result !=null ){
-							 //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
-						 var record = new Record({
-							recordId: result.recordId || result.id,
-							thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-							fullres: result.fullresolution,
-							title: result.title!=null ? result.title : "",
-							view_url: result.url.fromSourceAPI,
-							description: result.description,
-							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-							provider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-							externalId: result.externalId,
-							source: result.comesFrom!=null ? result.comesFrom : source
-						  });
-						 items.push(record);}
-						}*/
+						
 						items=self.revealItems(data[i].items.culturalCHO);
 						api_console="";
 						if(source=="Europeana"){
@@ -483,7 +464,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						source: findProvenanceValues(provenance,"source"),
 						likes: usage.likes,
 						collected: usage.collected,
-						collectedIn:result.collectedIn
+						collectedIn:result.collectedIn,
+						data: result
 					  });
 					  
 					 

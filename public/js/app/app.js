@@ -847,7 +847,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	                	selvalue=val[uilang][i];
 	    	   }
 	        }
-        else{   selvalue=val.unknown;}  
+           else{   selvalue=val.unknown;}  
 	      }
 	        
          return selvalue;
@@ -872,15 +872,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				 }}
 			else if (selection=="provider"){
 				  if(array.length==3){
-					  selvalue=array[1].provider; 
 					  
 					  if(array[1].uri && array[1].uri.length>0){
 			        		if(array[1].provider && array[1].provider.length>0){
-			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
+			        			selvalue="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
 			        		}
-			        		else{
-			        			selvalue+="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
-			        		}
+			        		
 			        	}else if(array[1].provider){
 			              selvalue+=array[1].provider;}
 					  

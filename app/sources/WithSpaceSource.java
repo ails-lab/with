@@ -155,7 +155,11 @@ public class WithSpaceSource extends ISpaceSource {
 		searcher.closeClient();
 		SourceResponse sourceResponse =
 				new SourceResponse((int)elasticResponse.getHits().getTotalHits(), offset, count);
+		sourceResponse.source = getSourceName();
+
 		sourceResponse.setResourcesPerType(resourcesPerType);
+
+		sourceResponse.transformResourcesToItems();
 
 
 		/* Check wheter we need the aggregated values or not */

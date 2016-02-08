@@ -58,10 +58,12 @@ public class WithDate {
 	}
 
 	public void setIsoDate(Date d) {
-		this.isoDate = d;
-		Calendar instance = Calendar.getInstance();
-		instance.setTime(d);
-		year = instance.get(Calendar.YEAR);
+		if (d != null) {
+			this.isoDate = d;
+			Calendar instance = Calendar.getInstance();
+			instance.setTime(d);
+			year = instance.get(Calendar.YEAR);
+		}
 	}
 
 	public int getYear() {
@@ -95,6 +97,7 @@ public class WithDate {
 	public void setUri(String uri) {
 		this.uri = uri;
 	}
+
 	//
 	// public ResourceType getUriType() {
 	// return uriType;

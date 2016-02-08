@@ -333,13 +333,13 @@ public class WithResourceController extends Controller {
 				if (DB.getCollectionObjectDAO().isFavorites(collectionDbId))
 					DB.getRecordResourceDAO().decrementLikes(recordDbId);
 				else
-					DB.getRecordResourceDAO().decField("usage.collectedIn",
+					DB.getRecordResourceDAO().decField("usage.collected",
 							recordDbId);
 				// Change the collection metadata as well
-				DB.getCollectionObjectDAO().incEntryCount(collectionDbId);
+				DB.getCollectionObjectDAO().decEntryCount(collectionDbId);
 				DB.getCollectionObjectDAO().updateField(collectionDbId,
 						"administrative.lastModified", new Date());
-				result.put("message", "Record succesfully added to collection");
+				result.put("message", "Record succesfully removed from collection");
 				return ok(result);
 			}
 		} catch (Exception e) {

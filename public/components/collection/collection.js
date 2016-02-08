@@ -310,14 +310,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				} else {
 					/*otherwise save this collection and then add the item */
 
-				/*	var jsondata = JSON.stringify({
-						ownerId: currentUser._id(),
-						title: item,
-						description: '',
-						public: false
-					});
-					
-					*/
+			
 					var jsondata = JSON.stringify({
 						administrative: { access: {
 				        isPublic: $("#publiccoll .active").data("value")},
@@ -334,25 +327,16 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		};
 
 		self.addRecord = function (collid) {
-		   var jsondata = JSON.stringify({ provenance : [{ provider : self.record().source(), 
-				resourceId: self.record().externalId()}]
-				});
-			/*var jsondata = JSON.stringify({
-				source: self.record().source(),
-				sourceId: self.record().recordId(),
-				title: self.record().title(),
-				provider: self.record().provider(),
-				dataProvider: self.record().dataProvider(),
-				creator: self.record().creator(),
-				description: self.record().description(),
-				rights: self.record().rights(),
-				type: '',
-				thumbnailUrl: self.record().thumb(),
-				sourceUrl: self.record().view_url(),
-				collectionId: collid,
-				externalId: self.record().externalId()
-			});
-            */
+			 var jsondata = JSON.stringify({ 
+				    provenance : [{ provider : self.record().source(), 
+					resourceId: self.record().externalId()}]
+			        
+			        
+					});
+			if(self.record().data()){
+				jsondata=JSON.stringify(self.record().data());
+			}
+		
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
@@ -366,9 +350,10 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"data": jsondata,
 				"success": function (data) {
 					self.ajaxConnections--;
-					if (self.params.request_ == "collectionview/" + collid ||( self.params.route &&  self.params.route().request_ == "collectionview/" + collid)) {
+					if ((self.params.request_  && self.params.request_ .indexOf( "collectionview/" + collid)==0) ||( self.params.route &&  self.params.route().request_.indexOf("collectionview/" + collid))==0) {
 						//self.params.recordId(data.dbId);
 						ko.contextFor(withcollection).$data.loadNext();
+						ko.contextFor(withcollection).$data.reloadEntryCount();
 					} else if (self.params.request_ == "mycollections" ||( self.params.route &&  self.params.route().request_ == "mycollections" )) {
 						var obj = null;
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
