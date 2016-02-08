@@ -18,21 +18,21 @@ package sources;
 
 import java.util.ArrayList;
 
-import sources.core.CommonFilters;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.WithResource;
+import play.libs.Json;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
+import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.formatreaders.DDBItemRecordFormatter;
 import sources.formatreaders.DDBRecordFormatter;
-
-import com.fasterxml.jackson.databind.JsonNode;
-
-import model.ExternalBasicRecord;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.WithResource;
 
 public class DDBSpaceSource extends ISpaceSource {
 
@@ -40,15 +40,8 @@ public class DDBSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DDB.toString();
 		apiKey = "SECRET_KEY";
-		
-		
-		
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
-		
-		
-		formatreader = new DDBRecordFormatter(vmap);
+		vmap = FilterValuesMap.getDDBMap();
+		formatreader = new DDBRecordFormatter();
 	}
 
 	@Override
@@ -114,6 +107,32 @@ public class DDBSpaceSource extends ISpaceSource {
 		}
 
 		return res;
+	}
+	
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
+		JsonNode response;
+		try {
+			
+			
+			QueryBuilder builder = new QueryBuilder();
+			builder.setBaseUrl("http://api.deutsche-digitale-bibliothek.de/items/"+recordId+"/edm");
+			builder.addSearchParam("oauth_consumer_key", apiKey);
+			response = HttpConnector
+					.getURLContent(builder.getHttp());
+			// todo read the other format;
+			JsonNode record = response;
+			if (response != null) {
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
+				DDBItemRecordFormatter f = new DDBItemRecordFormatter();
+				String json = Json.toJson(f.readObjectFrom(record)).toString();
+				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
+			}
+
+			return jsonMetadata;
+		} catch (Exception e) {
+			return jsonMetadata;
+		}
 	}
 
 }

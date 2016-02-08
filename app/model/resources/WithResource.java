@@ -63,7 +63,7 @@ import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
-import model.annotations.ContextAnnotation;
+import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
@@ -381,10 +381,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	// all attached media Objects (their embedded part)
 	private List<HashMap<MediaVersion, EmbeddedMediaObject>> media;
 
-	// embedded for some or all, not sure
-	// key is CollectionInfo.toString()
 	@Embedded
-	private ArrayList<ContextAnnotation> contextAnnotation;
+	private List<ContextData> contextData = new ArrayList<ContextData>();
 
 	private ArrayList<Annotation> annotations;
 
@@ -398,13 +396,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public WithResource(Class<?> clazz) {
-		this.usage = new Usage();
-		this.administrative = (U) new WithAdmin();
-		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new ArrayList<CollectionInfo>();
-		resourceType = WithResourceType.valueOf(clazz.getSimpleName());
-		this.media = new ArrayList<>();
-		this.media.add(new HashMap<MediaVersion, EmbeddedMediaObject>());
+		new WithResource();
+		this.resourceType = WithResourceType.valueOf(clazz.getSimpleName());
 	}
 
 	/*
@@ -535,16 +528,16 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media.get(0).put(mediaVersion, media);
 	}
 
-	public ArrayList<ContextAnnotation> getContextAnnotation() {
-		return contextAnnotation;
+	public List<ContextData> getContextData() {
+		return contextData;
 	}
 
-	public void setContextAnnotation(
-			ArrayList<ContextAnnotation> contextAnnotation) {
-		this.contextAnnotation = contextAnnotation;
+	public void setContextData(
+			List<ContextData> contextData) {
+		this.contextData = contextData;
 	}
 
-	public ArrayList<Annotation> getAnnotations() {
+	public List<Annotation> getAnnotations() {
 		return annotations;
 	}
 

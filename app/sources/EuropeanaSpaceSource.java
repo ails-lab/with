@@ -17,8 +17,6 @@
 package sources;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -29,15 +27,13 @@ import org.json.JSONObject;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.ExternalBasicRecord.ItemRights;
-import model.ExternalBasicRecord.RecordType;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
 import sources.core.AutocompleteResponse;
+import sources.core.AutocompleteResponse.DataJSON;
+import sources.core.AutocompleteResponse.Suggestion;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
@@ -47,11 +43,9 @@ import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.QueryModifier;
 import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import sources.core.AutocompleteResponse.DataJSON;
-import sources.core.AutocompleteResponse.Suggestion;
-import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
 import sources.formatreaders.EuropeanaItemRecordFormatter;
 import sources.formatreaders.EuropeanaRecordFormatter;
@@ -90,17 +84,9 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
 
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "IMAGE");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
-		formatreader = new EuropeanaRecordFormatter(vmap);
+		vmap = FilterValuesMap.getEuropeanaMap();
+		
+		formatreader = new EuropeanaRecordFormatter();
 
 	}
 
@@ -384,7 +370,7 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 			JsonNode record = response.get("object");
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
-				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter(vmap);
+				EuropeanaItemRecordFormatter f = new EuropeanaItemRecordFormatter();
 				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}

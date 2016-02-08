@@ -118,7 +118,6 @@ public class SearchController extends Controller {
 				}
 				Iterable<Promise<SourceResponse>> promises = callSources(q);
 				// compose all futures, blocks until all futures finish
-
 				Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
 					return o.export();
 				};
@@ -185,14 +184,11 @@ public class SearchController extends Controller {
 			SourceResponse res = src
 				.getResults(cq);
 			if (res.source==null){
-				System.out.println("Errooooooor "+src.getSourceName());
+				System.out.println("Error "+src.getSourceName());
 			}
 			System.out.println("got "+res);
 			return res;
 			};
-
-			System.out.println(">>>>>>>>> requested "+q.source);
-
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {
 				List<CommonQuery> list = src.splitFilters(q);

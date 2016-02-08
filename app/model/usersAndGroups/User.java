@@ -104,8 +104,8 @@ public class User extends UserOrGroup {
 	@Embedded
 	private Page page;
 
-	@JsonIgnore
-	private int exhibitionsCreated;
+	//@JsonIgnore
+	//private int exhibitionsCreated;
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
@@ -283,7 +283,7 @@ public class User extends UserOrGroup {
 		this.superUser = isSuperUser;
 	}
 
-	public int getExhibitionsCreated() {
+	/*public int getExhibitionsCreated() {
 		return exhibitionsCreated;
 	}
 
@@ -293,7 +293,7 @@ public class User extends UserOrGroup {
 
 	public void addExhibitionsCreated() {
 		this.exhibitionsCreated++;
-	}
+	}*/
 
 	public ArrayNode getOrganizations() {
 		ObjectNode groupInfo = Json.newObject();

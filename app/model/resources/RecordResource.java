@@ -43,9 +43,6 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 		}
 
 	}
-
-
-
 	/*
 	 * Elastic transformations
 	 */

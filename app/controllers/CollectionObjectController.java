@@ -24,11 +24,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
 import model.Collection;
 import model.CollectionRecord;
+import model.annotations.ContextData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -36,6 +38,7 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
+import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.Organization;
@@ -84,11 +87,12 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return the newly created resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
-	public static Result createCollectionObject(boolean exhibition) {
+	public static Result createCollectionObject(String collectionType) {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
+		CollectionType colType = CollectionType.valueOf(collectionType);
 		try {
-			if (exhibition == false && json == null) {
+			if (colType == null && json == null) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
@@ -100,13 +104,11 @@ public class CollectionObjectController extends WithResourceController {
 			User creator = DB.getUserDAO().get(creatorDbId);
 			CollectionObject collection = Json.fromJson(json,
 					CollectionObject.class);
-			if (exhibition) {
+			if (colType.equals(CollectionType.Exhibition)) {
 				collection.getDescriptiveData().setLabel(
-						getAvailableTitle(creator));
+						createExhibitionDummyTitle());
 				collection.getDescriptiveData().setDescription(
 						new MultiLiteral("Description"));
-				creator.addExhibitionsCreated();
-				DB.getUserDAO().makePermanent(creator);
 			}
 			Set<ConstraintViolation<CollectionObject>> violations = Validation
 					.getValidator().validate(collection);
@@ -120,6 +122,7 @@ public class CollectionObjectController extends WithResourceController {
 				return badRequest(error);
 			}
 			// Fill with all the administrative metadata
+			collection.getAdministrative().setCollectionType(colType);
 			collection.setResourceType(WithResourceType.CollectionObject);
 			collection.getAdministrative().setWithCreator(creatorDbId);
 			collection.getAdministrative().setCreated(new Date());
@@ -143,9 +146,8 @@ public class CollectionObjectController extends WithResourceController {
 	 * @param user
 	 * @return
 	 */
-	private static MultiLiteral getAvailableTitle(User user) {
-		int exhibitionNum = user.getExhibitionsCreated();
-		return new MultiLiteral("DummyTitle" + exhibitionNum);
+	private static MultiLiteral createExhibitionDummyTitle() {
+		return new MultiLiteral("DummyTitle_" + new Date());
 	}
 
 	/**
@@ -369,7 +371,7 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	// input parameter lists' (directlyAccessedByUserName etc) intended meaning
+	// input parameter lists' (directlyAccessedByUserOrGroup etc) intended meaning
 	// is AND of its entries
 	// returned list of lists accessedByUserOrGroup represents AND of OR entries
 	// i.e. each entry in directlyAccessedByUserName for example has to be
@@ -584,7 +586,17 @@ public class CollectionObjectController extends WithResourceController {
 				return internalServerError(result);
 			}
 			ArrayNode recordsList = Json.newObject().arrayNode();
-			for (RecordResource e : records) {
+			int position = start;
+			for (RecordResource e: records) {
+				//filter out all context annotations that do not refer to this collection
+				List<ContextData> contextAnns = e.getContextData();
+				List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+				for (ContextData ca: contextAnns) {
+					if (ca.getTarget().getCollectionId().equals(colId) &&
+							ca.getTarget().getPosition() == position)
+						filteredContextAnns.add(ca);
+				}
+				e.setContextData(filteredContextAnns);
 				if (contentFormat.equals("contentOnly")
 						&& e.getContent() != null) {
 					recordsList.add(Json.toJson(e.getContent()));
@@ -602,6 +614,7 @@ public class CollectionObjectController extends WithResourceController {
 					}
 					recordsList.add(Json.toJson(e));
 				}
+				position+=1;
 			}
 			result.put(
 					"itemCount",

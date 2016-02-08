@@ -35,6 +35,7 @@ import com.mongodb.BasicDBObject;
 
 import model.CollectionRecord;
 import model.resources.CollectionObject.CollectionAdmin;
+import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -365,6 +366,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
+		updateOps.removeAll("ContextDatas", new ContextData(colId, position));
 		this.update(q, updateOps);
 		shiftRecordsToLeft(colId, position+1);
 	}

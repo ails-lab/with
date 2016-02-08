@@ -22,6 +22,7 @@ import java.util.Map;
 import model.ApiKey;
 import model.Collection;
 import model.CollectionRecord;
+import model.annotations.Annotation;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.ThesaurusObject;
@@ -189,6 +190,10 @@ public class DB {
 
 	public static RecordResourceDAO getRecordResourceDAO() {
 		return (RecordResourceDAO) getDAO(RecordResource.class);
+	}
+	
+	public static AnnotationDAO getAnnotationDAO() {
+		return (AnnotationDAO) getDAO(Annotation.class);
 	}
 
 	public static WithResourceDAO<WithResource> getWithResourceDAO() {

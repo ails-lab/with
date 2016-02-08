@@ -23,13 +23,7 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
-import model.ExternalBasicRecord;
-import model.ExternalBasicRecord.ItemRights;
-import model.ExternalBasicRecord.RecordType;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.WithResource;
 import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
@@ -38,12 +32,11 @@ import sources.core.HttpConnector;
 import sources.core.ISpaceSource;
 import sources.core.QueryBuilder;
 import sources.core.RecordJSONMetadata;
+import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
-import sources.core.RecordJSONMetadata.Format;
 import sources.core.Utils.Pair;
 import sources.formatreaders.DPLARecordFormatter;
-import sources.formatreaders.EuropeanaItemRecordFormatter;
 import utils.ListUtils;
 
 public class DPLASpaceSource extends ISpaceSource {
@@ -71,33 +64,9 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultWriter(CommonFilters.PROVIDER.getId(), fwriter("provider.name"));
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
 		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
-
-		/**
-		 * TODO check this
-		 */
-
 		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("sourceResource.rights"));
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
-		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, ".*creative.*nc.*",
-				".*non-commercial.*");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRPA, ".*rr-p.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRRA, ".*rr-r.*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRFA, ".*rr-f.*");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRFA, ".*unknown.*");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Modify, ".*creative.*nd.*");
-
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*(creative).*");
-
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "moving image");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "sound");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
+		
+		vmap = FilterValuesMap.getDPLAMap();
 
 		formatreader = new DPLARecordFormatter(vmap);
 
@@ -219,7 +188,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		try {
 			response = HttpConnector.getURLContent("http://api.dp.la/v2/items?id=" + recordId + "&api_key=" + apiKey);
 			JsonNode record = response.get("docs").get(0);
-			if (record != null){
+			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSONLD_DPLA, record.toString()));
 				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));

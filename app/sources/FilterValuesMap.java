@@ -22,13 +22,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import sources.core.CommonFilters;
 import sources.core.QueryModifier;
-import sources.core.Utils.Pair;
 import utils.ListUtils;
 
 public class FilterValuesMap {
 
+	private static FilterValuesMap europeanaMap;
+	private static FilterValuesMap dplaMap;
+	private static FilterValuesMap nlaMap;
+	private static FilterValuesMap ddbMap;
+	private static FilterValuesMap dnzMap;
+	private static FilterValuesMap rijksMap;
+	
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
 	private HashMap<String, List<Object>> commonvalues;
@@ -135,6 +143,163 @@ public class FilterValuesMap {
 
 	public Boolean containsFilter(String filterID) {
 		return writters.containsKey(filterID);
+	}
+	
+	
+	private void fillEuropeana(){
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "IMAGE");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
+	}
+	
+	
+	private void addMapping(String id, Object obj, String... string) {
+		addMap(id, obj, string);
+	}
+
+	public static FilterValuesMap getEuropeanaMap(){
+		if (europeanaMap==null){
+			europeanaMap = new FilterValuesMap();
+			europeanaMap.fillEuropeana();
+		}
+		return europeanaMap;
+	}
+	
+	public static FilterValuesMap getDPLAMap(){
+		if (dplaMap==null){
+			dplaMap = new FilterValuesMap();
+			dplaMap.fillDPLA();
+		}
+		return dplaMap;
+	}
+	
+	public static FilterValuesMap getNLAMap(){
+		if (nlaMap==null){
+			nlaMap = new FilterValuesMap();
+			nlaMap.fillNLA();
+		}
+		return nlaMap;
+	}
+	
+	public static FilterValuesMap getDDBMap(){
+		if (ddbMap==null){
+			ddbMap = new FilterValuesMap();
+			ddbMap.fillDDB();
+		}
+		return ddbMap;
+	}
+
+	private void fillNLA() {
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
+				"Poster, chart, other");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Video");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Sound", "Sheet music");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books", "Article");
+	}
+
+	private void fillDDB() {
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image","IMAGE");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio","SOUND");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text","TEXT");		
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
+		
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
+		
+	}
+	
+	
+	private void fillDPLA() {
+		/**
+		 * TODO check this
+		 */
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, ".*creative.*nc.*",
+				".*non-commercial.*");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRPA, ".*rr-p.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRRA, ".*rr-r.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRFA, ".*rr-f.*");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RRFA, ".*unknown.*");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Modify, ".*creative.*nd.*");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*(creative).*");
+
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "image");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "moving image");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "sound");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "text");
+	}
+	
+	private void fillDNZ() {
+
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books","Articles");
+
+		// addMapping(CommonFilters.RIGHTS.name(),
+		// RightsValues.Creative_Commercial,
+		// "");
+		// ok RIGHTS:*creative* AND NOT RIGHTS:*nd*
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.Creative_Modify,
+		// ".*creative(?!.*nd).*");
+
+		// addMapping(CommonFilters.RIGHTS.name(),
+		// RightsValues.Creative_Not_Commercial,
+		// "http://creativecommons.org/licenses/by-nc/3.0/nz/",
+		// "http://creativecommons.org/licenses/by-nc-sa/3.0/",
+		// "This work is licensed under a Creative Commons
+		// Attribution-Noncommercial 3.0 New Zealand License");
+		//
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.UNKNOWN, "No
+		// known
+		// copyright restrictions\nCopyright Expired",
+		// "No known copyright restrictions");
+		// addMapping(CommonFilters.RIGHTS.name(), RightsValues.RR, "All rights
+		// reserved");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, "Share");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, "Modify");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, "Use commercially");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, "Unknown");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, "All rights reserved");
+	}
+
+	public static FilterValuesMap getDNZMap() {
+		if (dnzMap==null){
+			dnzMap = new FilterValuesMap();
+			dnzMap.fillDNZ();
+		}
+		return dnzMap;
+	}
+	
+	public static FilterValuesMap getRijksMap() {
+		if (rijksMap==null){
+			rijksMap = new FilterValuesMap();
+			rijksMap.fillRijks();
+		}
+		return rijksMap;
+	}
+
+	private void fillRijks() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

@@ -273,6 +273,13 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 	}
 	
+	public List<CollectionObject> getAtLeastCollections(List<ObjectId> loggeInEffIds, Access access, int offset, int count) {
+		CriteriaContainer criteria =  loggedInUserWithAtLeastAccessQuery(loggeInEffIds, access);
+		Query<CollectionObject> q = this.createQuery().offset(offset).limit(count+1).retrievedFields(true, "_id");
+		q.and(criteria);
+		return this.find(q).asList();
+	}
+	
 	public CollectionObject updateCollectionAdmin(ObjectId colId) {
 		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);

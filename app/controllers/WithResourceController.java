@@ -30,10 +30,16 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
+import model.annotations.ContextData.ContextDataType;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ExhibitionData;
 
 import org.bson.types.ObjectId;
 
@@ -56,6 +62,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.parameterTypes.StringTuple;
 import db.DB;
 import db.WithResourceDAO;
 
@@ -123,6 +130,8 @@ public class WithResourceController extends Controller {
 					return badRequest(result);
 				}
 				String resourceType = null;
+				ObjectId userId = AccessManager.effectiveUserDbIds(
+						session().get("effectiveUserIds")).get(0);
 				if (json.has("resourceType"))
 					resourceType = json.get("resourceType").asText();
 				if (resourceType == null || WithResourceType.valueOf(resourceType) == null)
@@ -143,45 +152,34 @@ public class WithResourceController extends Controller {
 				if (externalId == null)
 					externalId = record.getAdministrative().getExternalId();
 				ObjectId recordId = null;
-				if (externalId != null
-						&& DB.getRecordResourceDAO().existsWithExternalId(
-								externalId)) {
-					// get dbId of existing resource
-					RecordResource resource = DB
-							.getRecordResourceDAO()
-							.getUniqueByFieldAndValue(
-									"administrative.externalId", externalId,
-									new ArrayList<String>(Arrays.asList("_id")));
+				if (externalId != null && DB.getRecordResourceDAO().existsWithExternalId(
+								externalId)) {// get dbId of existing resource
+					RecordResource resource = DB.getRecordResourceDAO()
+						.getUniqueByFieldAndValue("administrative.externalId", externalId,
+							new ArrayList<String>(Arrays.asList("_id")));
 					recordId = resource.getDbId();
 					response = errorIfNoAccessToRecord(Action.READ, recordId);
 					if (!response.toString().equals(ok().toString())) {
 						return response;
 					} else {
 						// In case the record already exists we overwrite the
-						// existing
-						// record's descriptive data, if the user has WRITE
+						// existing record's descriptive data for the fields included
+						//in the json, if the user has WRITE.
 						// access.
-						// TODO: this assumes that the json has FULL information
-						// about the collection's descriptive data
-						// Better iterate through the json (in any case it
-						// should be small), and update only the fields
-						// specified in it.
 						if (DB.getRecordResourceDAO().hasAccess(
-								AccessManager.effectiveUserDbIds(session().get(
-										"effectiveUserIds")), Action.EDIT,
-								recordId)
-								&& (json.get("descriptiveData") != null))
-							DB.getRecordResourceDAO().editRecord(
-									"descriptiveData", resource.getDbId(),
-									json.get("descriptiveData"));
+							AccessManager.effectiveUserDbIds(session().get(
+									"effectiveUserIds")), Action.EDIT,recordId)
+							&& (json.get("descriptiveData") != null))
+							DB.getRecordResourceDAO().editRecord("descriptiveData", resource.getDbId(),
+								json.get("descriptiveData"));
+						//TODO: if record has annotations, update/add annotations
+						
 					}
 				} else { // create new record in db
-
 					ObjectNode errors;
 					// Create a new record
-					ObjectId userId = AccessManager.effectiveUserDbIds(
-							session().get("effectiveUserIds")).get(0);
 					record.getAdministrative().setCreated(new Date());
+					//TODO: if record has annotations, update/add annotations
 					switch (source) {
 					case UploadedByUser:
 						// Fill the EmbeddedMediaObject from the MediaObject that has been created
@@ -263,6 +261,45 @@ public class WithResourceController extends Controller {
 			return internalServerError(result);
 		}
 	}
+	
+	public static void updateContextDatas(JsonNode contextAnnsJson, WithResource record, ObjectId colId, ObjectId userId) {
+		List<ContextData> ContextDatas = getContextDataFromJson(contextAnnsJson);
+		for (ContextData contextAnn: ContextDatas) {
+			ObjectId contextAnnId = contextAnn.getTarget().getCollectionId();
+			if (colId.equals(contextAnnId)) {//ignore annotations that refer to other collections! to be faster
+				for (ContextData ca: (List<ContextData>) record.getContextData()) {
+					if (ca.getTarget().getCollectionId().equals(contextAnnId)) {
+						ca = contextAnn;
+					}
+				}
+			}
+		}
+	}
+	
+	public static List<ContextData> getContextDataFromJson(JsonNode contextAnnsJson) {
+		ArrayList<ContextData> ContextDatas = new ArrayList<ContextData>();
+		if (contextAnnsJson != null && contextAnnsJson.isArray()) {
+			for (final JsonNode contextAnnJson: contextAnnsJson) {
+				JsonNode annTypeJson = contextAnnJson.get("contextDataType");
+				if (annTypeJson != null && annTypeJson.isValueNode()) {
+					String annTypeString = annTypeJson.asText();
+					ContextDataType annType = ContextDataType.valueOf(annTypeString);
+					if (annType != null) {
+						Class<?> clazz;
+						try {
+							clazz = Class.forName("model.annotations." + annType);
+							ContextData contextAnn = (ContextData) Json.fromJson(contextAnnJson, clazz);
+							ContextDatas.add(contextAnn);
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}	
+		}
+		return ContextDatas;
+	}
+			
 
 	/**
 	 * @param id
@@ -311,6 +348,7 @@ public class WithResourceController extends Controller {
 		}
 	}
 
+	//TODO: update collection's media
 	public static Result moveRecordInCollection(String id, String recordId,
 			int oldPosition, int newPosition) {
 		ObjectNode result = Json.newObject();

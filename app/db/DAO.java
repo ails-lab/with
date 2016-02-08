@@ -232,6 +232,43 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		return find().asList();
 	}
 	
+	/**
+	 * Retrieve a resource from DB using its dbId
+	 * @param id
+	 * @return
+	 */
+	public E getById(ObjectId id) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		return this.findOne(q);
+	}
+
+	/**
+	 * Get a resource by the dbId and retrieve
+	 * only a bunch of fields from the whole document
+	 * @param id
+	 * @param retrievedFields
+	 * @return
+	 */
+	public E getById(ObjectId id, List<String> retrievedFields) {
+		Query<E> q = this.createQuery().field("_id").equal(id);
+		if (retrievedFields != null)
+			q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		return this.findOne(q);
+	}
+	
+	public boolean existsWithExternalId(String externalId) {
+		return existsFieldWithValue("administrative.externalId", externalId);
+	}
+
+	/**
+	 * Remove an entiry by dbId
+	 * @param id
+	 * @return
+	 */
+	public int removeById(ObjectId id) {
+		return this.deleteById(id).getN();
+	}
+	
 	public E getUniqueByFieldAndValue(String field, Object value) {
 		Query<E> q = this.createQuery().field(field).equal(value);
 		return this.findOne(q);

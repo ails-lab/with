@@ -16,14 +16,20 @@
 
 package controllers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 
+import model.annotations.ContextData;
+import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -34,6 +40,7 @@ import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Result;
+import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -65,23 +72,26 @@ public class RecordResourceController extends WithResourceController {
 	public static Result getRecordResource(String id, Option<String> format) {
 		ObjectNode result = Json.newObject();
 		try {
-			RecordResource resource = DB.getRecordResourceDAO().get(
+			RecordResource record = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
+			
 			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
+				//filter out all context annotations refering to collections to which the user has no read access rights
+				filterContextData(record);
 				if (format.isDefined()) {
 					if (format.equals("contentOnly")) {
-						return ok(Json.toJson(resource.getContent()));
+						return ok(Json.toJson(record.getContent()));
 					}
 					else {
 						if (format.equals("noContent")) {
-							resource.getContent().clear();
-							return ok(Json.toJson(resource));
+							record.getContent().clear();
+							return ok(Json.toJson(record));
 						}
-						else if (resource.getContent() != null && resource.getContent().containsKey(format)) {
-							return ok(resource.getContent().get(format).toString());
+						else if (record.getContent() != null && record.getContent().containsKey(format)) {
+							return ok(record.getContent().get(format).toString());
 						}
 						else {
 							result.put("error", "Resource does not contain representation for format" + format);
@@ -90,12 +100,25 @@ public class RecordResourceController extends WithResourceController {
 					}
 				}
 				else 
-					return ok(Json.toJson(resource));
+					return ok(Json.toJson(record));
 			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}
+	}
+	
+	public static void filterContextData(WithResource record) {
+		List<ContextData> contextAnns = record.getContextData();
+		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+		List<CollectionObject> accessibleCols = DB.getCollectionObjectDAO().getAtLeastCollections(AccessManager.effectiveUserDbIds(session().get(
+					"effectiveUserIds")), Access.READ, 0, Integer.MAX_VALUE);
+		List<ObjectId> accessibleColIds = accessibleCols.stream().map(e -> e.getDbId()).collect(Collectors.toList());
+		for (ContextData contextAnn: contextAnns) {
+			if (accessibleColIds.contains(contextAnn.getTarget().getCollectionId()))
+				filteredContextAnns.add(contextAnn);
+		}
+		record.setContextData(filteredContextAnns);
 	}
 
 	/**

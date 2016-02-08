@@ -82,7 +82,7 @@ public class ExhibitionController extends Controller {
 		//ElasticIndexer indexer = new ElasticIndexer(newExhibition);
 		//indexer.indexCollectionMetadata();
 
-		owner.addExhibitionsCreated();
+		//owner.addExhibitionsCreated();
 		DB.getUserDAO().makePermanent(owner);
 		ObjectNode c = (ObjectNode) Json.toJson(newExhibition);
 		c.put("access", Access.OWN.toString());
@@ -94,8 +94,8 @@ public class ExhibitionController extends Controller {
 
 	/* Find a unique dummy title for the user exhibition */
 	private static String getAvailableTitle(User user) {
-		int exhibitionNum = user.getExhibitionsCreated();
-		return "DummyTitle" + exhibitionNum;
+		//int exhibitionNum = user.getExhibitionsCreated();
+		return "DummyTitle";// + exhibitionNum;
 	}
 
 	public static Result listMyExhibitions(int offset, int count) {

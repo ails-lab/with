@@ -31,13 +31,11 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
-import sources.utils.StringUtils;
-import utils.ListUtils;
 
 public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
-	public EuropeanaRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public EuropeanaRecordFormatter() {
+		super(FilterValuesMap.getEuropeanaMap());
 		object = new CulturalObject();
 	}
 

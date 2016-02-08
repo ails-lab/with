@@ -16,40 +16,31 @@
 
 package sources.formatreaders;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
-import sources.DPLASpaceSource;
-import sources.FilterValuesMap;
-import sources.NLASpaceSource;
-import sources.core.CommonFilters;
-import sources.core.Utils;
-import sources.utils.JsonContextRecord;
-import sources.utils.StringUtils;
 import model.EmbeddedMediaObject;
-import model.ExternalBasicRecord;
-import model.MediaObject;
-import model.basicDataTypes.ProvenanceInfo;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import sources.FilterValuesMap;
+import sources.core.CommonFilters;
+import sources.core.Utils;
+import sources.utils.JsonContextRecord;
 
 public class NLARecordFormatter extends CulturalRecordFormatter {
 
-	public NLARecordFormatter(FilterValuesMap map) {
-		super(map);
+	public NLARecordFormatter() {
+		super(FilterValuesMap.getNLAMap());
 		object = new CulturalObject();
 	}
 
