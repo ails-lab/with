@@ -20,12 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Field;
@@ -33,31 +31,19 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.annotations.PostLoad;
-import org.mongodb.morphia.annotations.PostPersist;
-import org.mongodb.morphia.annotations.PrePersist;
-import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
-import scala.xml.dtd.ExternalID;
-import play.libs.Json;
 import utils.Deserializer;
 import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import db.converters.AccessEnumConverter;
 import elastic.ElasticUtils;
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -68,7 +54,6 @@ import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
-import model.basicDataTypes.WithAccess.AccessEntry;
 import model.usersAndGroups.User;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -78,9 +63,13 @@ import model.usersAndGroups.User;
 	})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
-
+	
+	
+	//TODO: compound indexes for common queries on multiple fields
 	@Indexes({
-		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions())
+		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions(unique = true)),
+		@Index(fields = @Field(value = "access.user ,access.level"))//compound/multikey index for access
 	})
 	public static class WithAdmin {
 
@@ -344,6 +333,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	public ObjectId getDbId() {
 		return dbId;
+		//TODO: fill in withURI (with postLoad?)
 	}
 
 	public void setDbId(ObjectId dbId) {
