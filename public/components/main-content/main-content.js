@@ -170,7 +170,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		self.load = function(data) {
 			self.data=ko.mapping.fromJS(data, mapping);
 			console.log(self.data);
-			self.loadRecords(0,30);
+			//self.loadRecords(0,30);
 			
 		};
 
@@ -248,6 +248,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
 				    initFilterStick();
 				    WITHApp.initIsotope();
+				    loading(false);
 					
 			});
 		  var promise2 = self.getFeatured("5624a338569e4959735d8558");
@@ -268,7 +269,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	
         	  WITHApp.initCharacterLimiter();
           });
-		  
+		  $.when(promiseCollections,promise2,promise3).done(function(data){
+			  console.log("all promises done");
+			  loading(false);
+		  });
 		};
 		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
 		self.getSpaceCollections = function () {
