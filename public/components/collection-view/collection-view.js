@@ -55,13 +55,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		        
 	        	if(self.thumb){
 	        		return self.thumb;
-	    			/*image caching not working yet
-	    			 * if (self.thumb.indexOf('/') === 0) {
-	    				return self.thumb;
-	    			} else {
-	    				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
-	    				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-	    			}*/}
+	    			}
 	    		   else{
 	    			   return "img/content/thumb-empty.png";
 	    		   }
@@ -487,8 +481,21 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 		}
 
-     	
-		
+     
+       self.reloadEntryCount=function(){
+       $.ajax({
+			"url": "/collection/" + self.id(),
+			"method": "get",
+			"contentType": "application/json",
+			"success": function (data) {
+				
+		    	self.entryCount(data.administrative.entryCount);
+		    	
+			}
+       });
+       }
+       
+       
 		 self.isotopeImagesReveal = function( $container,$items ) {
 			 $container=$(".grid#"+self.id());
 	 		  var iso = $container.data('isotope');

@@ -17,10 +17,9 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.rights="";
 		self.url="";
 		self.externalId = "";
-		self.cachedThumbnail="";
 		self.likes=0;
 		self.collected=0;
-		
+		self.data=ko.observable('');
 		self.collectedIn =  [];
 		self.isLiked = ko.pureComputed(function () {
 			return app.isLiked(self.externalId);
@@ -36,7 +35,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			if ( data.fullres && data.fullres.length > 0 ) {
 				self.fullres=data.fullres;
 			} else {
-				self.fullres=self.cachedThumbnail();
+				self.fullres=self.calcThumbnail();
 			}
 			//self.fullres=data.fullres;
 			self.description=data.description;
@@ -51,6 +50,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.likes=data.likes;
 			self.collected=data.collected;
 			self.collectedIn=data.collectedIn;
+			self.data(data.data);
 			var likeval=app.isLiked(self.externalId);
 			
 		 
@@ -60,16 +60,12 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.isLike(true);
 		}
 		
-		self.cachedThumbnail = ko.pureComputed(function() {
+		self.calcThumbnail = ko.pureComputed(function() {
 
 
 			   if(self.thumb){
-				if (self.thumb.indexOf('//') === 0) {
 					return self.thumb;
-				} else {
-					var newurl='url=' + encodeURIComponent(self.thumb)+'&';
-					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-				}}
+				}
 			   else{
 				   return "images/no_image.jpg";
 			   }
@@ -115,166 +111,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		if(data != undefined) self.load(data);
 	}
 	
-	/*
-	function Record(data,showMeta) {
-		var self = this;
-		self.recordId = ko.observable("");
-		self.title = ko.observable(false);
-		self.description = ko.observable(false);
-		self.thumb = ko.observable(false);
-		self.fullres = ko.observable(false);
-		self.view_url = ko.observable(false);
-		self.source = ko.observable(false);
-		self.creator = ko.observable("");
-		self.dataProvider=ko.observable("");
-		self.provider = ko.observable("");
-		self.rights = ko.observable("");
-		self.url = ko.observable("");
-		self.id = ko.observable("");
-		self.externalId = ko.observable("");
-		self.collectedCount = ko.observable("");
-		self.liked = ko.observable("");
-		self.collections =  ko.observableArray([]);
-
-		self.cachedThumbnail = ko.pureComputed(function() {
-
-
-			   if(self.thumb()){
-				if (self.thumb().indexOf('//') === 0) {
-					return self.thumb();
-				} else {
-					var newurl='url=' + encodeURIComponent(self.thumb())+'&';
-					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-				}}
-			   else{
-				   return "images/no_image.jpg";
-			   }
-			});
-		self.load = function (data) {
-			if (data.title) {
-				self.title(data.title);
-				
-			} else {
-				self.title("No title");
-			}
-
-			if (data.id) {
-				self.recordId(data.id);
-			} else {
-				self.recordId(data.recordId);
-			}
-
-			self.url("#item/" + self.recordId());
-			self.view_url(data.view_url);
-			self.thumb(data.thumb);
-
-			if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0].length > 0 && data.fullres != "null") {
-				self.fullres(data.fullres[0]);
-			} else {
-				self.fullres(self.cachedThumbnail());
-			}
-
-			if (data.description) {
-				self.description(data.description);
-				
-			} else {
-				self.description(data.title);
-			}
-
-			if (data.creator) {
-				self.creator(data.creator);
-			}
-
-			if (data.provider) {
-				self.provider(data.provider);
-			}
-			if (data.dataProvider) {
-				self.dataProvider(data.dataProvider);
-			}
-			if (data.rights) {
-				self.rights(data.rights);
-			}
-
-			self.externalId(data.externalId);
-			self.source(data.source);
-			
-			
-			
-			if (showMeta){
-			$.ajax({
-				type    : "get",
-				url     : "/record/merged/"+self.externalId(),
-				success : function(result) {
-					self.collectedCount(result.count);
-					self.liked(result.liked);
-					self.collections(result.collections);
-				},
-				error   : function(request, status, error) {
-					console.log(request);
-				}
-			});
-			}
-		};
-
-		self.sourceImage = ko.pureComputed(function () {
-			switch (self.source()) {
-			case "DPLA":
-				return "images/logos/dpla.png";
-			case "Europeana":
-				return "images/logos/europeana.jpeg";
-			case "NLA":
-				return "images/logos/nla_logo.png";
-			case "DigitalNZ":
-				return "images/logos/digitalnz.png";
-			case "EFashion":
-				return "images/logos/eufashion.png";
-			case "YouTube":
-				{
-					return "images/logos/youtube.jpg";
-				}
-			case "Mint":
-				return "images/logos/mint_logo.png";
-			case "Rijksmuseum":
-				return "images/logos/Rijksmuseum.png";
-			default:
-				return "images/logos/mint_logo.png";
-			}
-		});
-
-		self.sourceCredits = ko.pureComputed(function () {
-			switch (self.source()) {
-			case "DPLA":
-				return "dpla.eu";
-			case "Europeana":
-				return "europeana.eu";
-			case "NLA":
-				return "nla.gov.au";
-			case "DigitalNZ":
-				return "digitalnz.org";
-			case "EFashion":
-				return "europeanafashion.eu";
-			case "YouTube":
-				{
-					return "youtube.com";
-				}
-			case "Mint":
-				return "mint";
-			default:
-				return "";
-			}
-		});
-
-		self.displayTitle = ko.pureComputed(function () {
-			var distitle = "";
-			distitle = self.title();
-			if (self.creator() && self.creator().length > 0)
-				distitle += ", by " + self.creator();
-			
-			return distitle;
-		});
-
-		if (data) self.load(data);
-	}*/
+	
 
 	function ItemViewModel(params) {
 		var self = this;
@@ -310,7 +147,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.changeSource = function (item) {
-			item.record().fullres=item.record().cachedThumbnail();
+			item.record().fullres=item.record().calcThumbnail();
 		};
 
 		self.collect = function (item) {
