@@ -19,23 +19,16 @@ package sources.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import model.CollectionRecord;
-import model.ExternalBasicRecord;
-import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
 
 import utils.ListUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
-import db.DB;
-import elastic.ElasticUtils;
 
 public class SourceResponse {
 
@@ -142,6 +135,11 @@ public class SourceResponse {
 	@Override
 	public String toString() {
 		return "SourceResponse [source=" + source + ", query=" + query + ", totalCount=" + totalCount + "]";
+	}
+
+	public void transformResourcesToItems() {
+		List<WithResource<?, ?>> resources = (List<WithResource<?, ?>>) resourcesPerType.get("resource");
+		items.setCulturalCHO(resources);
 	}
 
 }
