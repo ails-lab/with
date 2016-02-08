@@ -25,6 +25,7 @@ import org.junit.Test;
 import model.resources.CulturalObject;
 import play.libs.Json;
 import sources.formatreaders.DDBItemRecordFormatter;
+import sources.formatreaders.RijksmuseumItemRecordFormatter;
 import sources.utils.JsonContextRecord;
 
 public class SourcesTest {
@@ -32,8 +33,7 @@ public class SourcesTest {
 	@Test
 	public void test() throws IOException {
 		String text = FileUtils.readFileToString(new File("record.json"));
-		DDBSpaceSource e = new DDBSpaceSource();
-		DDBItemRecordFormatter rec = new DDBItemRecordFormatter(e.getVmap());
+		RijksmuseumItemRecordFormatter rec = new RijksmuseumItemRecordFormatter();
 		CulturalObject obj = rec.readObjectFrom(new JsonContextRecord(text));
 		System.out.println(Json.toJson(obj));
 	}
