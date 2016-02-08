@@ -469,8 +469,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					var usage=result.usage;
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
-						thumb: media!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
-						fullres: media!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+						fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
 						title: findByLang(descdata.label),
 						description: findByLang(descdata.description),
 						view_url: findProvenanceValues(provenance,"source_uri"),
