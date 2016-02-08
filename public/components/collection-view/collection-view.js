@@ -171,7 +171,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.citems = ko.observableArray();
 		self.selectedRecord = ko.observable(false);
 	    self.loggedUser=app.isLogged();
-		
+	    if(params.count)
+	       self.count=ko.observable(params.count);
+	      
+	    else{
+	    	self.count=ko.observable(10);
+	    	sessionStorage.removeItem("collection-viewscroll"+self.id());
+	    }
 	
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
@@ -249,9 +255,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					self.desc(self.description());
 			    	
 					
-					if(self.entryCount() && self.entryCount()>0){
+					if(self.count() && self.count()>0){
 						$.ajax({
-							"url": "/collection/" + self.id() + "/list?count="+self.entryCount()+"&start=0",
+							"url": "/collection/" + self.id() + "/list?count="+self.count()+"&start=0",
 							"method": "get",
 							"contentType": "application/json",
 							"success": function (data) {
@@ -314,7 +320,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				loading(true);
 				var offset = self.citems().length;
 				$.ajax({
-					"url": "/collection/" + self.id() + "/list?count=40&start=" + offset,
+					"url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
