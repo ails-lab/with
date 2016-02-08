@@ -267,15 +267,12 @@ public class ElasticUtils {
 		}
 
 		/*
-<<<<<<< HEAD
 		 * User Rights structure in the document
 		 */
 		idx_doc.put("isPublic", rr.getAdministrative().getAccess().getIsPublic());
 		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
 
 		/*
-=======
->>>>>>> remodel/elasticImpl
 		 * Eliminate null values from the root document
 		 */
 		ObjectNode idx_copy = idx_doc.deepCopy();

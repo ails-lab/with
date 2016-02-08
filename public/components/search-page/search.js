@@ -248,7 +248,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
-						if(data[i].items!=null && data[i].items.culturalCHO.length==self.pageSize() && moreitems==false){
+						if(data[i].items!=null && data[i].items.culturalCHO!=null && data[i].items.culturalCHO.length==self.pageSize() && moreitems==false){
 							moreitems=true;
 						}
 						var items = [];
