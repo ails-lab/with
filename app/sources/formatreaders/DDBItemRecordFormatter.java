@@ -46,6 +46,8 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("ProvidedCHO.type"));
 		WithMediaType type = WithMediaType.getType(vals.get(0).toString());
 		
+		// TODO read the language
+		
 //		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 //		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 //		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));

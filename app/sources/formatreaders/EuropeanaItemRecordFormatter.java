@@ -16,17 +16,22 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
@@ -47,6 +52,26 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		WithMediaType type = (WithMediaType) vals.get(0);
 		
 		rec.enterContext("proxies[0]");
+		
+
+//		String id = rec.getStringValue("objectNumber");
+		
+		Language[] language = null;
+		if (rec.getValue("dcLanguage")!=null){
+			JsonNode langs = rec.getValue("dcLanguage");
+			language = new Language[langs.size()];
+			for (int i = 0; i < langs.size(); i++) {
+				language[i] = Language.getLanguage(langs.get(i).asText());
+			}
+//			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("dcTitle"),
+											rec.getStringValue("titles"),
+											rec.getStringValue("dcSubject"));
+		}
+
+		rec.setLanguages(language);
 
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));

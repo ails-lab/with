@@ -16,17 +16,22 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
@@ -44,6 +49,30 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		rec.enterContext("artObject");
+
+		String id = rec.getStringValue("objectNumber");
+		
+		Language[] language = null;
+		if (rec.getValue("language")!=null){
+			JsonNode langs = rec.getValue("language");
+			language = new Language[langs.size()];
+			for (int i = 0; i < langs.size(); i++) {
+				language[i] = Language.getLanguage(langs.get(i).asText());
+			}
+			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("title"),
+											rec.getStringValue("titles"),
+											rec.getStringValue("longTitle"),
+											rec.getStringValue("description"));
+		}
+
+		rec.setLanguages(language);
+		
+//		TODO model.setDclanguage("");
+
+		
 		// List<Object> vals =
 		// getValuesMap().translateToCommon(CommonFilters.TYPE.getId(),
 		// rec.getStringValue("ProvidedCHO.type"));
@@ -52,7 +81,7 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		// model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		// model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		// model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
-		// model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue("location"));
 		// model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		// model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
 		// model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
@@ -75,7 +104,6 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 //		model.setIsShownAt(rec.getLiteralOrResourceValue("Aggregation.isShownAt"));
 //		model.setIsShownBy(rec.getLiteralOrResourceValue("Aggregation.isShownBy"));
 
-		String id = rec.getStringValue("objectNumber");
 		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), 
 				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/" + id + ",0", id));
 		
