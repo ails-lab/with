@@ -52,22 +52,23 @@ import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 
 public class DAO<E> extends BasicDAO<E, ObjectId> {
-	
-	public enum QueryOperator {GT("$gt"), EQ("$eq"), GTE( "$gte");
-	
+
+	public enum QueryOperator {
+		GT("$gt"), EQ("$eq"), GTE("$gte");
+
 		private final String text;
-	
+
 		private QueryOperator(final String text) {
 			this.text = text;
 		}
-	
+
 		@Override
 		public String toString() {
 			return text;
 		}
-		
+
 	}
-	
+
 	static private final Logger.ALogger log = Logger.of(DAO.class);
 
 	protected final Class<E> entityClass;
@@ -231,9 +232,10 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	public List<E> getAll() {
 		return find().asList();
 	}
-	
+
 	/**
 	 * Retrieve a resource from DB using its dbId
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -243,8 +245,9 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	/**
-	 * Get a resource by the dbId and retrieve
-	 * only a bunch of fields from the whole document
+	 * Get a resource by the dbId and retrieve only a bunch of fields from the
+	 * whole document
+	 * 
 	 * @param id
 	 * @param retrievedFields
 	 * @return
@@ -252,80 +255,89 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	public E getById(ObjectId id, List<String> retrievedFields) {
 		Query<E> q = this.createQuery().field("_id").equal(id);
 		if (retrievedFields != null)
-			q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+			q.retrievedFields(true,
+					retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
 	}
-	
+
 	public boolean existsWithExternalId(String externalId) {
 		return existsFieldWithValue("administrative.externalId", externalId);
 	}
 
 	/**
 	 * Remove an entiry by dbId
+	 * 
 	 * @param id
 	 * @return
 	 */
 	public int removeById(ObjectId id) {
 		return this.deleteById(id).getN();
 	}
-	
+
 	public E getUniqueByFieldAndValue(String field, Object value) {
 		Query<E> q = this.createQuery().field(field).equal(value);
 		return this.findOne(q);
 	}
-	
-	public E getUniqueByFieldAndValue(String field, Object value, List<String> retrievedFields) {
+
+	public E getUniqueByFieldAndValue(String field, Object value,
+			List<String> retrievedFields) {
 		Query<E> q = this.createQuery().field(field).equal(value);
-		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		q.retrievedFields(true,
+				retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.findOne(q);
 	}
-	
-	public List<E> getByFieldAndValue(String field, Object value, List<String> retrievedFields) {
+
+	public List<E> getByFieldAndValue(String field, Object value,
+			List<String> retrievedFields) {
 		Query<E> q = this.createQuery().field(field).equal(value);
-		q.retrievedFields(true, retrievedFields.toArray(new String[retrievedFields.size()]));
+		q.retrievedFields(true,
+				retrievedFields.toArray(new String[retrievedFields.size()]));
 		return this.find(q).asList();
 	}
 
-
 	public boolean existsFieldWithValue(String field, Object value) {
 		Query<E> q = this.createQuery().field(field).equal(value).limit(1);
-		return (this.find(q).asList().size()==0? false: true);
-	}
-	
-	public boolean existsFieldsWithValues(List<Tuple<String, Object>> fieldValues) {
-		Query<E> q = this.createQuery().limit(1);
-		for (Tuple<String, Object> tuple: fieldValues) {
-			q.field(tuple.x).equal(tuple.y);
-		}
-		return (this.find(q).asList().size()==0? false: true);
+		return (this.find(q).asList().size() == 0 ? false : true);
 	}
 
-	
+	public boolean existsFieldsWithValues(
+			List<Tuple<String, Object>> fieldValues) {
+		Query<E> q = this.createQuery().limit(1);
+		for (Tuple<String, Object> tuple : fieldValues) {
+			q.field(tuple.x).equal(tuple.y);
+		}
+		return (this.find(q).asList().size() == 0 ? false : true);
+	}
+
 	public boolean existsEntity(ObjectId id) {
 		return existsFieldWithValue("_id", id);
 	}
-	
+
 	public void updateField(ObjectId id, String field, Object value) {
 		Query<E> q = this.createQuery().field("_id").equal(id);
-		UpdateOperations<E> updateOps = this.createUpdateOperations().disableValidation();
+		UpdateOperations<E> updateOps = this.createUpdateOperations()
+				.disableValidation();
 		updateOps.set(field, value);
 		this.updateFirst(q, updateOps);
 	}
-	
+
 	/**
 	 * Increment the specified field in a CollectionObject
+	 * 
 	 * @param dbId
 	 * @param fieldName
 	 */
-	public void incField( String fieldName, ObjectId dbId) {
+	public void incField(String fieldName, ObjectId dbId) {
 		Query<E> q = this.createQuery().field("_id").equal(dbId);
-		UpdateOperations<E> updateOps = this.createUpdateOperations().disableValidation();
+		UpdateOperations<E> updateOps = this.createUpdateOperations()
+				.disableValidation();
 		updateOps.inc(fieldName);
 		this.updateFirst(q, updateOps);
 	}
 
 	/**
 	 * Decrement the specified field in a CollectionObject
+	 * 
 	 * @param dbId
 	 * @param fieldName
 	 */
@@ -335,27 +347,30 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		updateOps.dec(fieldName);
 		this.updateFirst(q, updateOps);
 	}
-	
+
 	public void updateFields(String parentField, JsonNode node,
 			UpdateOperations<E> updateOps) {
 		Iterator<String> fieldNames = node.fieldNames();
-		  while (fieldNames.hasNext()) {
-	         String fieldName = fieldNames.next();
-	         JsonNode fieldValue = node.get(fieldName);
-        	 String newFieldName = parentField.isEmpty() ? fieldName : parentField + "." + fieldName;
-	         if (fieldValue.isObject()) {
-	        	 updateFields(newFieldName, fieldValue, updateOps);
-	         }
-	         else {//value
-				try {
-					ObjectMapper mapper = new ObjectMapper();
-					Object value = mapper.treeToValue(fieldValue, newFieldName.getClass());
-					updateOps.disableValidation().set(newFieldName, value);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}	 
-	         }
-	     }
+		while (fieldNames.hasNext()) {
+			String fieldName = fieldNames.next();
+			JsonNode fieldValue = node.get(fieldName);
+			String newFieldName = parentField.isEmpty() ? fieldName
+					: parentField + "." + fieldName;
+			if (fieldValue.isObject()) {
+				updateFields(newFieldName, fieldValue, updateOps);
+			} else {
+				if (fieldValue.isArray()) {
+					String[] values = new String[fieldValue.size()];
+					for (int i = 0; i < fieldValue.size(); i++) {
+						values[i] = fieldValue.get(i).asText();
+					}
+					updateOps.disableValidation().set(newFieldName, values);
+				} else {
+					updateOps.disableValidation().set(newFieldName,
+							fieldValue.asText());
+				}
+			}
+		}
 	}
 
 }
