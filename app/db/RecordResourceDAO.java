@@ -395,6 +395,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 				//TODO: check that the null value indeed works for ignoring position
 				updateOps.removeAll("collectedIn", new CollectionInfo(colId, null));
+				//TODO See if it is collected in the same collection more than once
+				updateOps.dec("usage.collected");
 				this.update(q, updateOps);
 			}
 			else

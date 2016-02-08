@@ -74,32 +74,34 @@ public class RecordResourceController extends WithResourceController {
 		try {
 			RecordResource record = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-			
-			Result response = errorIfNoAccessToRecord(Action.READ, new ObjectId(id));
+
+			Result response = errorIfNoAccessToRecord(Action.READ,
+					new ObjectId(id));
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				//filter out all context annotations refering to collections to which the user has no read access rights
+				// filter out all context annotations refering to collections to
+				// which the user has no read access rights
 				filterContextData(record);
 				if (format.isDefined()) {
 					if (format.equals("contentOnly")) {
 						return ok(Json.toJson(record.getContent()));
-					}
-					else {
+					} else {
 						if (format.equals("noContent")) {
 							record.getContent().clear();
 							return ok(Json.toJson(record));
-						}
-						else if (record.getContent() != null && record.getContent().containsKey(format)) {
-							return ok(record.getContent().get(format).toString());
-						}
-						else {
-							result.put("error", "Resource does not contain representation for format" + format);
+						} else if (record.getContent() != null
+								&& record.getContent().containsKey(format)) {
+							return ok(record.getContent().get(format)
+									.toString());
+						} else {
+							result.put("error",
+									"Resource does not contain representation for format"
+											+ format);
 							return play.mvc.Results.notFound(result);
 						}
 					}
-				}
-				else 
+				} else
 					return ok(Json.toJson(record));
 			}
 		} catch (Exception e) {
@@ -107,15 +109,20 @@ public class RecordResourceController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
-	
+
 	public static void filterContextData(WithResource record) {
 		List<ContextData> contextAnns = record.getContextData();
 		List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-		List<CollectionObject> accessibleCols = DB.getCollectionObjectDAO().getAtLeastCollections(AccessManager.effectiveUserDbIds(session().get(
-					"effectiveUserIds")), Access.READ, 0, Integer.MAX_VALUE);
-		List<ObjectId> accessibleColIds = accessibleCols.stream().map(e -> e.getDbId()).collect(Collectors.toList());
-		for (ContextData contextAnn: contextAnns) {
-			if (accessibleColIds.contains(contextAnn.getTarget().getCollectionId()))
+		List<CollectionObject> accessibleCols = DB.getCollectionObjectDAO()
+				.getAtLeastCollections(
+						AccessManager.effectiveUserDbIds(session().get(
+								"effectiveUserIds")), Access.READ, 0,
+						Integer.MAX_VALUE);
+		List<ObjectId> accessibleColIds = accessibleCols.stream()
+				.map(e -> e.getDbId()).collect(Collectors.toList());
+		for (ContextData contextAnn : contextAnns) {
+			if (accessibleColIds.contains(contextAnn.getTarget()
+					.getCollectionId()))
 				filteredContextAnns.add(contextAnn);
 		}
 		record.setContextData(filteredContextAnns);
@@ -136,17 +143,18 @@ public class RecordResourceController extends WithResourceController {
 		try {
 			RecordResource resource = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-			Result response = errorIfNoAccessToRecord(Action.DELETE, new ObjectId(id));
+			Result response = errorIfNoAccessToRecord(Action.DELETE,
+					new ObjectId(id));
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				if (format.isDefined() && resource.getContent().containsKey(format)) {
+				if (format.isDefined()
+						&& resource.getContent().containsKey(format)) {
 					resource.getContent().remove(format);
 					result.put("message",
 							"Serialization of resource was deleted successfully");
 					return ok(result);
-				}
-				else {
+				} else {
 					DB.getRecordResourceDAO().makeTransient(resource);
 					result.put("message", "Resource was deleted successfully");
 					return ok(result);
@@ -192,7 +200,7 @@ public class RecordResourceController extends WithResourceController {
 				}
 				error.put("error", properties);
 				return badRequest(error);
-			} 
+			}
 			// Fill with all the administrative metadata
 			resource.setResourceType(WithResourceType.valueOf(resourceType));
 			resource.getAdministrative().setWithCreator(creator);
@@ -222,39 +230,21 @@ public class RecordResourceController extends WithResourceController {
 	// TODO check restrictions (unique fields e.t.c)
 	public static Result editRecordResource(String id) {
 		ObjectNode error = Json.newObject();
+		ObjectId recordDbId = new ObjectId(id);
 		JsonNode json = request().body().asJson();
 		try {
 			if (json == null) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
-			}
-			else {
-				RecordResource oldResource = DB.getRecordResourceDAO().get(
+			} else {
+				Result response = errorIfNoAccessToRecord(Action.EDIT,
 						new ObjectId(id));
-				Result response = errorIfNoAccessToRecord(Action.EDIT, new ObjectId(id));
 				if (!response.toString().equals(ok().toString()))
 					return response;
 				else {
-				//	DB.getRecordResourceDAO().editRecord("", dbId, json);
-					// TODO change JSON at all its depth
-					ObjectMapper objectMapper = new ObjectMapper();
-					ObjectReader updator = objectMapper.readerForUpdating(oldResource);
-					RecordResource newResource;
-					newResource = updator.readValue(json);
-					Set<ConstraintViolation<RecordResource>> violations = Validation
-							.getValidator().validate(newResource);
-					if (!violations.isEmpty()) {
-						ArrayNode properties = Json.newObject().arrayNode();
-						for (ConstraintViolation<RecordResource> cv : violations) {
-							properties.add(Json.parse("{\"" + cv.getPropertyPath()
-									+ "\":\"" + cv.getMessage() + "\"}"));
-						}
-						error.put("error", properties);
-						return badRequest(error);
-					}
-					newResource.getAdministrative().setLastModified(new Date());
-					DB.getRecordResourceDAO().makePermanent(newResource);
-					return ok(Json.toJson(newResource));
+					DB.getRecordResourceDAO().editRecord("", recordDbId, json);
+					return ok(Json.toJson(DB.getRecordResourceDAO().get(
+							recordDbId)));
 				}
 			}
 		} catch (Exception e) {

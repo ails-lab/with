@@ -205,6 +205,7 @@ public class CollectionObjectController extends WithResourceController {
 				// TODO: have to test that this works
 				DB.getRecordResourceDAO().removeAllRecordsFromCollection(
 						collectionDbId);
+				DB.getCollectionObjectDAO().makeTransient(collection);
 				result.put("message", "Resource was deleted successfully");
 				return ok(result);
 			}
@@ -224,12 +225,6 @@ public class CollectionObjectController extends WithResourceController {
 	 */
 	// TODO check restrictions (unique fields e.t.c)
 	public static Result editCollectionObject(String id) {
-		// TODO: this assumes that the frontend(json) has FULL information about
-		// the collection's descriptive data
-		// however, this may not be true, since we do not always return full
-		// data (but only some fields) of a resource to the frontend
-		// So, better iterate through the json (in any case it should be small),
-		// and update only the fields specified in it.
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(id);
