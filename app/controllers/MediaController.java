@@ -404,69 +404,6 @@ public class MediaController extends Controller {
 		thumbnail.setDbId(null);
 		medium.setDbId(null);
 
-		
-		
-		//if (med.getWidth() <= 100) {
-		//	tiny.setMediaBytes(med.getMediaBytes());
-		//	//if (med.getHeight() < 150) {
-		//	//	square = makeThumb(med, image, -1, 150, true);
-		//	//} else {
-		//	//	square.setMediaBytes(med.getMediaBytes());
-		//	//	square.setMimeType(med.getMimeType());
-		//	//}
-		//	thumbnail.setMediaBytes(med.getMediaBytes());
-		//	thumbnail.setMimeType(med.getMimeType());
-		//	medium.setMediaBytes(med.getMediaBytes());
-		//	medium.setMimeType(med.getMimeType());
-        //
-		//} else if (med.getWidth() <= 150 && med.getHeight() <= 150) {
-		//	tiny = makeThumb(med, image, 100, -1, false);
-        //
-		//	square.setMediaBytes(med.getMediaBytes());
-		//	square.setMimeType(med.getMimeType());
-		//	thumbnail.setMediaBytes(med.getMediaBytes());
-		//	thumbnail.setMimeType(med.getMimeType());
-		//	medium.setMediaBytes(med.getMediaBytes());
-		//	medium.setMimeType(med.getMimeType());
-        //
-		//} else if (med.getWidth() <= 300) {
-		//	tiny = makeThumb(med, image, 100, -1, false);
-		//	//if (med.getHeight() < med.getWidth()) {
-		//	//	square = makeThumb(med, image, -1, 150, true);
-		//	//} else {
-		//	//	square = makeThumb(med, image, 150, -1, true);
-		//	//}
-        //
-		//	thumbnail.setMediaBytes(med.getMediaBytes());
-		//	thumbnail.setMimeType(med.getMimeType());
-		//	medium.setMediaBytes(med.getMediaBytes());
-		//	medium.setMimeType(med.getMimeType());
-        //
-		//} else if (med.getWidth() <= 640) {
-		//	tiny = makeThumb(med, image, 100, -1, false);
-		//	//if (med.getHeight() < med.getWidth()) {
-		//	//	square = makeThumb(med, image, -1, 150, true);
-		//	//} else {
-		//	//	square = makeThumb(med, image, 150, -1, true);
-		//	//}
-		//	thumbnail = makeThumb(med, image, 300, -1, false);
-        //
-		//	medium.setMediaBytes(med.getMediaBytes());
-		//	medium.setMimeType(med.getMimeType());
-        //
-		//} else {
-		//	tiny = makeThumb(med, image, 100, -1, false);
-		//	//if (med.getHeight() < med.getWidth()) {
-		//	//	square = makeThumb(med, image, -1, 150, true);
-		//	//} else {
-		//	//	square = makeThumb(med, image, 150, -1, true);
-		//	//}
-		//	thumbnail = makeThumb(med, image, 300, -1, false);
-		//	medium = makeThumb(med, image, 640, -1, false);
-		//}
-		
-		
-		
 		tiny = makeThumb(med, image, 100, false);
 		square = makeThumb(med, image, 150, true);
 		thumbnail = makeThumb(med, image, 300,false);
@@ -523,42 +460,17 @@ public class MediaController extends Controller {
 	private static MediaObject makeThumb(MediaObject med, BufferedImage image,
 			int width, boolean crop) throws IOException {
 		
+		if(image.getWidth()<=150&&image.getHeight()<=150){
+			crop = false;
+		}
 		
-	//	// 211, -1
-	//	Image ithumb = image.getScaledInstance(width, height,
-	//			Image.SCALE_SMOOTH);
-	//	// Create a buffered image with transparency
-	//	BufferedImage thumb = new BufferedImage(ithumb.getWidth(null),
-	//			ithumb.getHeight(null), image.getType());
+		Boolean res = true;
+		
+		if(image.getWidth()<=150^image.getHeight()<=150){
+			res = false;
+		}
 
-		// Logger.info("Width: " + thumb.getWidth() + ", x = "+
-		// (((thumb.getWidth() - 150)/2)-1));
-
-		// BufferedImage thumb2 = null;
-
-		// if(crop){
-		// if(thumb.getHeight()>150){
-		// int y = ((thumb.getHeight() - 150)/2)-1;
-		// thumb2 = thumb.getSubimage(0, y, 150, 150);
-
-		// }else if(thumb.getWidth()>150){
-		// int x = ((thumb.getWidth() - 150)/2)-1;
-		// thumb2 = thumb.getSubimage(x, 0, 150, 150);
-		// }
-
-		// thumb = thumb2;
-		// }
-
-		// Draw the image on to the buffered image
-	//	Graphics2D bGr = thumb.createGraphics();
-	//	bGr.drawImage(ithumb, 0, 0, null);
-	//	bGr.dispose();
-	//	ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	//	ImageIO.write(thumb, "jpg", baos);
-	//	baos.flush();
-	//	byte[] thumbByte = baos.toByteArray();
-	//	baos.close();
-
+		//TODO: comments left on purpose because this needs a bit of cleaning
 		
 		IMOperation op = new IMOperation();
 		op.addImage();                        // input
@@ -566,7 +478,11 @@ public class MediaController extends Controller {
 		//image.getHeight();
 		//image.getWidth();
 		if(crop){
-			op.resize(width,width, "^");
+			if(res){
+				op.resize(width,width, "^");
+			}else{
+				//op.resize(width,width, ">");
+			}
 			//op.gravity("center");
 
 			//op.extent(width, width);
@@ -583,7 +499,7 @@ public class MediaController extends Controller {
 		
 		ConvertCmd cmd = new ConvertCmd();
 		
-		String outfile = "tempImage2";
+		String outfile = "tempFile2";
 		
 		try {
 			cmd.run(op,image,outfile);
@@ -598,32 +514,40 @@ public class MediaController extends Controller {
 		
 
 		
-		File newFile = new File("tempImage2");
+		File newFile = new File(outfile);
 		
 		BufferedImage ithumb = ImageIO.read(newFile);
  		
 		if(crop){
+
+			/*
+			alternative, untested:
+			
+			op.gravity("center");
+			op.extent(width,width);
+			*/
+
 			 op = new IMOperation();
-				op.addImage();                        // input
-				op.gravity("center");
-				//op.crop(width);
-				op.extent(width);
-				op.addImage();  
-				ConvertCmd cmd2 = new ConvertCmd();
-				String outfile2 = "tempImage2";
-				try {
-					cmd2.run(op,ithumb,outfile2);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IM4JavaException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				newFile = new File("tempImage2");
-				
-				ithumb = ImageIO.read(newFile);
+			op.addImage();                        // input
+			op.gravity("center");
+			op.crop(width,width,0,0);
+			op.p_repage(); 		//???check!
+			op.addImage();  
+			ConvertCmd cmd2 = new ConvertCmd();
+			String outfile2 = outfile;
+			try {
+				cmd2.run(op,ithumb,outfile2);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IM4JavaException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			newFile = new File(outfile);
+			
+			ithumb = ImageIO.read(newFile);
 
 
 		}
@@ -634,6 +558,7 @@ public class MediaController extends Controller {
 		baos.flush();
 		byte[] thumbByte = baos.toByteArray();
 		baos.close();
+
 
 		
 		MediaObject mthumb = new MediaObject();
