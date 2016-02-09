@@ -69,8 +69,8 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		}
 
 		rec.setLanguages(language);
-		
-//		TODO model.setDclanguage("");
+
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 
 		
 		// List<Object> vals =

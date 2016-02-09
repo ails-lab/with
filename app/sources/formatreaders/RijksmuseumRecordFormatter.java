@@ -32,6 +32,7 @@ import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 
@@ -46,8 +47,10 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		language = getLanguagesFromText(rec.getStringValue("title"), 
 				rec.getStringValue("longTitle"));
 		rec.setLanguages(language);
-		
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
+		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("longTitle"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));

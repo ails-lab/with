@@ -35,6 +35,7 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 import utils.ListUtils;
 
 public class DPLARecordFormatter extends CulturalRecordFormatter {
@@ -62,7 +63,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 											rec.getStringValue("sourceResource.subject"));
 		}
 		rec.setLanguages(language);
-
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("originalRecord.spatial"));
 
 		model.setLabel(rec.getMultiLiteralValue("sourceResource.title"));

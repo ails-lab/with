@@ -32,6 +32,7 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class DDBRecordFormatter extends CulturalRecordFormatter {
 
@@ -47,7 +48,8 @@ public class DDBRecordFormatter extends CulturalRecordFormatter {
 		language = getLanguagesFromText(rec.getStringValue("title"), 
 				rec.getStringValue("subtitle"));
 		rec.setLanguages(language);
-		
+
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("subtitle"));
 		

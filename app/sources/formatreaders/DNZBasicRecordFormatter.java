@@ -36,6 +36,7 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
@@ -66,6 +67,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 											rec.getStringValue("fulltext"));
 		}
 		rec.setLanguages(language);
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("description","additional_description"));
 		model.setAltLabels(rec.getMultiLiteralValue("alternative_title"));

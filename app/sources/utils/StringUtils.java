@@ -41,6 +41,7 @@ import model.basicDataTypes.ILiteral;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import play.Logger;
 
@@ -190,5 +191,13 @@ public class StringUtils {
 	public static LiteralOrResource toLiteralOrResource(String value) {
 		// UrlValidaror v;
 		return null;
+	}
+	
+	public static MultiLiteralOrResource getLiteralLanguages(Language... lang){
+		MultiLiteralOrResource res = new MultiLiteralOrResource();
+		for (Language language : lang) {
+			res.addLiteral(Language.EN, language.getName());
+		}
+		return res;
 	}
 }

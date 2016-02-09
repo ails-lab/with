@@ -73,6 +73,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		rec.setLanguages(language);
 
+		model.setDclanguage(rec.getMultiLiteralOrResourceValue("dcLanguage"));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));

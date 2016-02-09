@@ -18,10 +18,13 @@ package sources.formatreaders;
 
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
@@ -31,6 +34,7 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 
@@ -43,15 +47,30 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		
+
+		Language[] language = null;
+		if (rec.getValue("language")!=null){
+			JsonNode langs = rec.getValue("language");
+			language = new Language[langs.size()];
+			for (int i = 0; i < langs.size(); i++) {
+				language[i] = Language.getLanguage(langs.get(i).asText());
+			}
+//			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("title"),
+											rec.getStringValue("dcDescription"),
+											rec.getStringValue("dcSubject"));
+		}
 		
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
-		
-		model.setLabel(rec.getMultiLiteralValue("dcTitleLangAware"));
-		model.setDescription(rec.getMultiLiteralValue("dcDescriptionLangAware"));
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
+		model.setLabel(rec.getMultiLiteralValue(false,"dcTitleLangAware","title"));
+		model.setDescription(rec.getMultiLiteralValue(false,"dcDescriptionLangAware","dcDescription"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setDates(rec.getWithDateArrayValue("year"));
-		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreatorLangAware"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue(false,"dcCreatorLangAware","dcCreator"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubjectLangAware"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), model.getIsShownAt()==null?null:model.getIsShownAt().getURI(),null));

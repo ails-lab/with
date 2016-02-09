@@ -16,21 +16,27 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
+import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 
@@ -47,6 +53,24 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		WithMediaType type = WithMediaType.getType(vals.get(0).toString());
 		
 		// TODO read the language
+		
+		Language[] language = null;
+		if (rec.getValue("ProvidedCHO.language")!=null){
+			JsonNode langs = rec.getValue("ProvidedCHO.language");
+			language = new Language[langs.size()];
+			for (int i = 0; i < langs.size(); i++) {
+				language[i] = Language.getLanguage(langs.get(i).asText());
+			}
+		}
+		if (!Utils.hasInfo(language)){
+			language = getLanguagesFromText(rec.getStringValue("ProvidedCHO.title"),
+											rec.getStringValue("Concept"),
+											rec.getStringValue("additional_description"),
+											rec.getStringValue("fulltext"));
+		}
+		rec.setLanguages(language);
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
+		
 		
 //		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 //		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));

@@ -17,6 +17,7 @@
 package sources.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -135,6 +136,21 @@ public class JsonNodeUtils {
 			return res;
 		}
 		return new ArrayList<>();
+	}
+	
+	public static List<String> asStringArray(Collection<JsonNode> node) {
+		if (node != null && !node.isMissingNode()) {
+			ArrayList<String> res = new ArrayList<>();
+			if (node.isArray()) {
+				for (int i = 0; i < node.size(); i++) {
+					res.add(node.get(i).asText());
+				}
+			} else {
+				res.add(node.asText());
+			}
+			return res;
+		}
+		return null;
 	}
 
 	public static List<String> asStringArray(JsonNode node) {

@@ -36,6 +36,7 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class NLARecordFormatter extends CulturalRecordFormatter {
 
@@ -65,6 +66,7 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		rec.setLanguages(language);
 		
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("abstract"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("contributor"));
