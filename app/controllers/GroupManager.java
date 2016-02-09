@@ -534,4 +534,12 @@ public class GroupManager extends Controller {
 		}
 		return userJSON;
 	}
+	
+	public static Result listUserGroups(String groupType) {
+		ObjectNode result = Json.newObject().objectNode();
+		ArrayNode collArray = Json.newObject().arrayNode();
+		List<UserGroup> userCollections;
+		//TODO: present only non-private spaces if not signed in, otherwise only members can see
+		return ok(result);
+	}
 }

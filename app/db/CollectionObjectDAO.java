@@ -296,29 +296,34 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			if (record.getMedia() != null) {
 				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
 				EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
-				UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
-				Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-				HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
-				     put(MediaVersion.Thumbnail, thumbnail);}};
-				colUpdate.set("media."+position, colMedia);
-				this.update(cq,  colUpdate);
+				if (thumbnail != null) {
+					UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+					Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+					
+					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
+					     put(MediaVersion.Thumbnail, thumbnail);}};
+					colUpdate.set("media."+position, colMedia);
+					this.update(cq,  colUpdate);
+				}
 			}
 		}
 	}	
 	
-	public void removeCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
+	public void removeCollectionMedia(ObjectId colId, int position) {
 		if (position < 3) {
 			//new Media should be based on records' positions before shifting.
 			List<RecordResource> newFollowingRecords = new ArrayList<RecordResource>();
-			for (int i = position+1; i<3; i++) {
-				RecordResource record = DB.getRecordResourceDAO().getByCollectionAndPosition(colId, position+1);
+			for (int i = position; i<3; i++) {
+				RecordResource record = DB.getRecordResourceDAO().getByCollectionAndPosition(colId, i);
 				if (record != null)
 					newFollowingRecords.add(record);
 			}
-			UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+			UpdateOperations<CollectionObject> colUpdate = null;
 			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
 			for (int i=position; i<3; i++) {
 				if (i-position < newFollowingRecords.size()) {
+					if (colUpdate == null)
+						colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 					RecordResource record = newFollowingRecords.get(i-position);
 					HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
 					EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
@@ -327,7 +332,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					colUpdate.set("media."+i, colMedia);
 				}
 			}
-			this.update(cq,  colUpdate);
+			if (colUpdate != null)
+				this.update(cq,  colUpdate);
 		}
 	}	
 }

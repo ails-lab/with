@@ -19,6 +19,8 @@ package sources;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import model.resources.RecordResource;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -192,7 +194,8 @@ public class YouTubeSpaceSource extends ISpaceSource {
 		}
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {

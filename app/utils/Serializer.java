@@ -59,17 +59,6 @@ public class Serializer {
 
 	}
 
-	public static class AccessSerializer extends JsonSerializer<Object> {
-
-		@Override
-		public void serialize(Object access, JsonGenerator jsonGen,
-				SerializerProvider arg2) throws IOException,
-				JsonProcessingException {
-			jsonGen.writeObject(((Access)access).ordinal());
-		}
-
-	}
-
 	public static class ObjectIdArraySerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object objectIds, JsonGenerator jsonGen,

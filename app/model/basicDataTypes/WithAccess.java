@@ -17,9 +17,7 @@
 package model.basicDataTypes;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.function.BiFunction;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Converters;
@@ -29,7 +27,6 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
-import model.basicDataTypes.WithAccess.Access;
 import db.converters.AccessEnumConverter;
 import utils.Deserializer;
 import utils.Serializer;
@@ -63,8 +60,6 @@ public class WithAccess  {
 
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId user;
-		@JsonSerialize(using = Serializer.AccessSerializer.class)
-		@JsonDeserialize(using = Deserializer.AccessDeserializer.class)
 		private Access level;
 
 

@@ -16,23 +16,21 @@
 
 package model;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.mongodb.morphia.annotations.Embedded;
-
-import utils.Deserializer;
-import utils.Serializer;
+import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import model.EmbeddedMediaObject.Quality;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
@@ -40,6 +38,11 @@ import model.basicDataTypes.WithDate;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
+
+//TODO: check how to index MultiLiteral in mongo. Actually only need to query based on the "default" value.
+@Indexes({
+	@Index(fields = @Field(value = "label", type = IndexType.ASC), options = @IndexOptions())
+})
 public class DescriptiveData {
 	
 	public static enum Quality {

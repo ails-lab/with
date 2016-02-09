@@ -27,6 +27,7 @@ import java.util.Set;
 import model.Collection;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
 
@@ -201,7 +202,7 @@ public class WithSpaceSource extends ISpaceSource {
 	}
 
 	@Override
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		log.debug("Method not implemented yet");
 		return null;
 	}

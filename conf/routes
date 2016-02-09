@@ -27,9 +27,7 @@ GET 	/custom/:customName/					controllers.CustomAssets.redirect(customName)
 GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:String, file:String)
 
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String])
-POST	/record									controllers.RecordResourceController.createRecordResource()
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
-DELETE	/record/:id								controllers.RecordResourceController.deleteRecordResource(id, format: play.libs.F.Option[String])
 
 # Collection Controller
 GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
@@ -72,6 +70,7 @@ DELETE   /group/removeUserOrGroup/:groupId         controllers.UserAndGroupManag
 PUT      /group/join/:groupId                      controllers.UserAndGroupManager.joinGroup(groupId)
 PUT      /group/leave/:groupId                     controllers.UserAndGroupManager.leaveGroup(groupId)
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
+GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project")
 
 # Rights Controller
 GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)

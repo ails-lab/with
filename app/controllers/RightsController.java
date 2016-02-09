@@ -16,42 +16,36 @@
 
 package controllers;
 
-import java.util.HashMap;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-import org.bson.types.ObjectId;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-import elastic.ElasticUpdater;
-import model.Collection;
 import model.Notification;
 import model.Notification.Activity;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
-import model.resources.RecordResource;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
-import model.usersAndGroups.UserOrGroup;
+
+import org.bson.types.ObjectId;
+
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.NotificationCenter;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DB;
+
 public class RightsController extends WithResourceController {
-	public static final ALogger log = Logger.of(CollectionController.class);
+	public static final ALogger log = Logger.of(RightsController.class);
 
 	/**
 	 * Set access rights for object for user.

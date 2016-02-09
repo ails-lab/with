@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import model.resources.RecordResource;
 import sources.FilterValuesMap;
 import sources.core.Utils.Pair;
 import utils.ListUtils;
@@ -60,7 +61,7 @@ public abstract class ISpaceSource {
 
 
 	public List<RecordJSONMetadata> getRecordFromSource(
-			String recordId) {
+			String recordId, RecordResource fullRecord) {
 		return new ArrayList<RecordJSONMetadata>();
 	}
 	

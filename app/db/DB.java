@@ -127,6 +127,7 @@ public class DB {
 				ds = getMorphia().createDatastore(getMongo(),
 						getConf().getString("mongo.dbname"));
 				ds.setDefaultWriteConcern(WriteConcern.ACKNOWLEDGED);
+				ds.ensureIndexes();
 			} catch (Exception e) {
 				log.error("Cannot create Datastore!", e);
 			}

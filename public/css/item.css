@@ -1,4 +1,4 @@
-.item .collect {
+/*.item .collect {
 	font-size: 20px;
     position: absolute;
     display: none;
@@ -6,6 +6,18 @@
     right: 25px;
     width: 36px;
     z-index: 1;
+}*/
+
+
+.item .collect {
+    font-size: 20px;
+    position: absolute;
+    /* display: none; */
+    /* top: 3px; */
+    right: 10%;
+    width: 40px;
+    z-index: 1;
+    line-height: 1.8em;
 }
 
 .item:hover .collect {

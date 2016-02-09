@@ -27,6 +27,7 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.RecordResource;
 import play.libs.Json;
 import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
@@ -176,7 +177,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		}
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {

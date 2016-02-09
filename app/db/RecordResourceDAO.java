@@ -21,34 +21,22 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
-
-import play.libs.Json;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.mongodb.BasicDBObject;
-
-import model.CollectionRecord;
-import model.resources.CollectionObject.CollectionAdmin;
 import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
-import model.resources.AgentObject;
 import model.resources.CollectionObject;
-import model.resources.CulturalObject;
-import model.resources.EUscreenObject;
-import model.resources.EventObject;
-import model.resources.PlaceObject;
+import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.RecordResource;
-import model.resources.TimespanObject;
-import model.resources.WithResource;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mongodb.BasicDBObject;
 
 
 /*
@@ -366,7 +354,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
-		updateOps.removeAll("ContextDatas", new ContextData(colId, position));
+		updateOps.removeAll("contextData", new ContextData(colId, position));
 		this.update(q, updateOps);
 		shiftRecordsToLeft(colId, position+1);
 	}
