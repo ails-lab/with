@@ -79,6 +79,8 @@ public class WithResourceController extends Controller {
 	public static Status errorIfNoAccessToWithResource(
 			WithResourceDAO resourceDAO, Action action, ObjectId id) {
 		ObjectNode result = Json.newObject();
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
 		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
 			result.put("error", "Cannot retrieve resource " + id
@@ -87,7 +89,7 @@ public class WithResourceController extends Controller {
 			// TODO superuser
 		} else if (!resourceDAO.hasAccess(
 				AccessManager.effectiveUserDbIds(session().get(
-						"effectiveUserIds")), action, id)) {
+						"effectiveUserIds")), action, id) && !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
 			result.put("error", "User does not have " + action
 					+ " access for resource " + id);
 			return forbidden(result);

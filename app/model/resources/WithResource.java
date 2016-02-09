@@ -370,6 +370,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	private HashMap<String, String> content;
 
 	// all attached media Objects (their embedded part)
+	@Embedded
 	private List<HashMap<MediaVersion, EmbeddedMediaObject>> media;
 
 	@Embedded

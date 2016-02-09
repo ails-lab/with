@@ -50,11 +50,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		            return ko.utils.unwrapObservable(data.dbId);
 		        }
 			},
-		    'administrative.access.acl': {
+			//the following is useless: mapping only works on top-level fields
+		    /*'administrative.access.acl': {
 		    	key: function(data) {
 		            return ko.utils.unwrapObservable(data.user);
 		        }
-		    }
+		    },
+		    'descriptiveData.label': {
+		    	update: function(options) {
+		    		console.log(JSON.stringify(options.data));
+		            return findByLang(options.data);
+		        }
+		    }*/
 		};
 		var usersMapping = {
 				'dbId': {
@@ -73,11 +80,38 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
         self.userGroupsToShare = ko.mapping.fromJS([], {});
         self.loading=ko.observable(false);
         //self.editedUsersToShare = ko.mapping.fromJS([], {});
-
+        
     	self.myUsername = ko.observable(app.currentUser.username());
     	self.moreCollectionData=ko.observable(true);
     	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
+    	
+    	ko.observableArray.fn.bit = function (multiLiteral) {
+    	    return ko.computed({
+    	        read: function () {
+    	            return !!(this() & bit);
+    	        },
+    	        write: function (checked) {
+    	            if (checked)
+    	                this(this() | bit);
+    	            else
+    	                this(this() & ~bit);
+    	        }
+    	    }, this);
+    	};
+    	
+    	self.multiLiteral = function (multiLiteral) {
+    		console.log("@" + JSON.stringify(multiLiteral.default()));
+    	        return ko.computed({
+    	            read: function () {
+    	            	console.log(JSON.stringify(multiLiteral));
+    	            	var s = app.findByLang(multiLiteral);
+    	            	console.log(s);
+    	                return app.findByLang(multiLiteral);
+    	            }
+    	        }, this);
+    	    }.bind(self.myCollections);
+    	
 		self.init=function(){
         	if (self.showsExhibitions) {
 				mapping.label = {
@@ -91,11 +125,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					}
 				};
 				var promise = app.getUserCollections(true);
+				self.loading(true);
 				var promiseShared = getCollectionsSharedWithMe(true);
 				$.when(promise,promiseShared).done(function(data,data2) {
-					//convert rights map to array
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
-					console.log(JSON.stringify(self.myCollections()[0].dbId()));
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
@@ -110,9 +143,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
-				
-			}
-        
+			} 
+        	
 		}
 		
 		self.checkLogged=function(){

@@ -40,8 +40,8 @@
 					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
 					 	<span class="glyphicon glyphicon-share" title="Share Collection" data-bind="click: $parent.openShareCollection" aria-hidden="true"></span>
 					 </div>
-					   <h3 data-bind="text: descriptiveData.label.default"></h3>
-					   <div class="coll-descr" data-bind="text: descriptiveData.description.default"></div>
+					   <h3 data-bind="text: $parent.multiLiteral(descriptiveData.label)"></h3>
+					   <div class="coll-descr" data-bind="text: descriptiveData.description"></div>
 					   <div class="row">
 						   <div class="col-xs-12 col-sm-12 col-md-12 coll-footer">
 						   		<!-- ko if: administrative.access.isPublic --><span class="label label-success">Public</span><!-- /ko -->
@@ -60,7 +60,7 @@
 					  	  <div data-bind="click: $parent.loadCollectionOrExhibition">
 					  	 	<!-- ko foreach: media -->
 					  	 	  <!-- ko if: $data.Thumbnail -->
-					  	 		<div class="coll_figure"><img  data-bind="attr: {src: data.Thumbnail.url}">
+					  	 		<div class="coll_figure"><img  data-bind="attr: {src: Thumbnail.url}">
 					  	 		 </div>
 					  	 	 <!-- /ko -->
 					  	 	 <!-- /ko -->

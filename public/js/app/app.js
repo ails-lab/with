@@ -828,7 +828,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		   if(self.currentUser._id()==undefined || self.currentUser._id().length==0){
 		     if(keys["user"]){self.currentUser._id(keys["user"]);self.reloadUser();}}
 		    return (keys["user"]==undefined ? false : true);
-		}else{return false;}
+		} else{return false;}
 
 	};
 
@@ -843,13 +843,12 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	      if(val){
 	       if (val[uilang]) {
 	    	   for(var i=0;i<val[uilang].length;i++){
-	                	if(selvalue.length>0){selvalue+=",";}
-	                	selvalue=val[uilang][i];
+	                if(selvalue.length>0){selvalue+=",";}
+	                selvalue=val[uilang][i];
 	    	   }
-	        }
-           else{   selvalue=val.unknown;}  
+	       }
+           else{selvalue=val.default;}  
 	      }
-	        
          return selvalue;
   }
 
