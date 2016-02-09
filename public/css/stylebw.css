@@ -986,6 +986,38 @@ div#publiccolumns figure figcaption {
 }
 
 /* Submenus */
+.dropdown-menu {
+  border-radius: 0;
+  margin: 17px 0 0;
+  min-width: 200px;
+}
+
+.dropdown-menu > li > a:hover, .dropdown-menu > li > a:focus {
+  background-color: #454545!important;
+  color: #fff!important;
+  display: block;
+  width: 100%;
+}
+
+.dropdown-menu > li > a {
+  color: #454545!important;
+  padding: 8px 20px;
+  margin-right: 0!important;
+  margin-bottom: 0!important;
+  display: block;
+}
+
+.dropdown-menu > li.divider {
+  border-bottom: 1px solid #d7d7d7;
+  height: 2px!important;
+}
+
+.dropdown-menu > li {
+  margin-right: 0!important;
+  display: inline-block;
+  width: 100%;
+}
+
 .dropdown-submenu {
   position: relative;
 }
@@ -994,6 +1026,7 @@ div#publiccolumns figure figcaption {
 }
 .dropdown-submenu > a:after {
   display: block;
+  top: 7px;
   content: " ";
   float: left;
   width: 0;
@@ -1003,18 +1036,16 @@ div#publiccolumns figure figcaption {
   border-right: 5px solid #333333;
   margin-top: 5px;
   margin-left: -10px;
+  z-index: 10000;
 }
 .dropdown-submenu:hover > a:after {
   border-left-color: #333333;
 }
 .dropdown-submenu > .dropdown-menu {
-  top: 0;
-  right: 100%;
-  margin-top: 12px;
+  top: -23px;
+  width: 350px;
+  left: -350px;
   margin-right: -6px;
-  -webkit-border-radius: 6px 0 6px 6px;
-  -moz-border-radius: 6px 0 6px 6px;
-  border-radius: 6px 0 6px 6px;
 }
 
 a {

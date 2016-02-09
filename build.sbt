@@ -35,6 +35,7 @@ libraryDependencies ++= Seq(
  "org.json" % "org.json" % "chargebee-1.0",
  "org.apache.commons" % "commons-email" % "1.3.3",
  "com.jayway.jsonpath" % "json-path" % "2.0.0",
- "junit" % "junit" % "4.11"
+ "junit" % "junit" % "4.11",
+ "org.im4java" % "im4java" % "1.4.0"
 )
 
