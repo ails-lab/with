@@ -59,7 +59,8 @@ import model.usersAndGroups.User;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("RecordResource")
 @Indexes({
-	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions())
+	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
+	@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions())
 	})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
@@ -69,7 +70,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	@Indexes({
 		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
 		@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions(unique = true)),
-		@Index(fields = @Field(value = "access.user ,access.level"))//compound/multikey index for access
+		@Index(fields = @Field(value = "access.user,access.level"))//compound/multikey index for access
 	})
 	public static class WithAdmin {
 
@@ -382,7 +383,9 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
 		this.media = new ArrayList<>();
-		this.media.add(new HashMap<MediaVersion, EmbeddedMediaObject>());
+		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
+		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
+		this.media.add(embedded);
 	}
 
 	public WithResource(Class<?> clazz) {

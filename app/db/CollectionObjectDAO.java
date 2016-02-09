@@ -296,12 +296,15 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			if (record.getMedia() != null) {
 				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
 				EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
-				UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
-				Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-				HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
-				     put(MediaVersion.Thumbnail, thumbnail);}};
-				colUpdate.set("media."+position, colMedia);
-				this.update(cq,  colUpdate);
+				if (thumbnail != null) {
+					UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+					Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+					
+					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
+					     put(MediaVersion.Thumbnail, thumbnail);}};
+					colUpdate.set("media."+position, colMedia);
+					this.update(cq,  colUpdate);
+				}
 			}
 		}
 	}	
