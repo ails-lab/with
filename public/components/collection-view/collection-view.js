@@ -119,9 +119,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			var media=options.media;
 			var provenance=options.provenance;
 			var usage=options.usage;
-	    	
-	    			
-	    	
+			
 			if(descdata){
 		    	  self.title=findByLang(descdata.label);
 		    	  self.description=findByLang(descdata.description);
@@ -230,19 +228,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				"contentType": "application/json",
 				"success": function (data) {
 					if(data.isPublic==false){
-                		
                 		if(isLogged()==false){
-                		
                 			window.location='#login';
                 			return;
                 		  }
-                		
-                		
                 	}
 					if(data.descriptiveData){
-					  self.title(findByLang(data.descriptiveData.label));
-			    	
-			    	   self.description(findByLang(data.descriptiveData.description));}
+					   self.title(findByLang(data.descriptiveData.label));
+			    	   self.description(findByLang(data.descriptiveData.description));
+			    	}
 			    	
 			    	self.entryCount(data.administrative.entryCount);
 			    	self.creator =ko.observable("");
@@ -254,7 +248,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			    	
 					self.desc(self.description());
 			    	
-					
 					if(self.count() && self.count()>0){
 						$.ajax({
 							"url": "/collection/" + self.id() + "/list?count="+self.count()+"&start=0",
@@ -262,16 +255,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							"contentType": "application/json",
 							"success": function (data) {
 								var items=self.revealItems(data.records);
-								
 								if(items.length>0){
 									 var $newitems=getItems(items);
 								     
 									 self.isotopeImagesReveal($container, $newitems );
 
 									}
-								
-
-								
 								loading(false);
 							},
 							"error": function (result) {
@@ -279,15 +268,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 								$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 							}
 						});
-						
 					}
 					else{
-					
-						
 						loading(false);
 					}
-					
-					
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					loading(false);

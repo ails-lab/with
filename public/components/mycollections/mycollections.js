@@ -41,7 +41,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		var self = this;
 		//self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
-		self.collections = [];
+		//self.collections = [];
 		self.index = ko.observable(0);
 		self.collectionSet = "none";
 		var mapping = {
@@ -50,14 +50,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		            return ko.utils.unwrapObservable(data.dbId);
 		        }
 			},
-		    'firstEntries': {
-		        key: function(data) {
-		            return ko.utils.unwrapObservable(data.dbId);
-		        }
-		    },
-		    'rights': {
+		    'administrative.access.acl': {
 		    	key: function(data) {
-		            return ko.utils.unwrapObservable(data.userId);
+		            return ko.utils.unwrapObservable(data.user);
 		        }
 		    }
 		};
@@ -83,27 +78,25 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
     	self.moreCollectionData=ko.observable(true);
     	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
-    	
-		
-		
 		self.init=function(){
-			
         	if (self.showsExhibitions) {
-				mapping.title = {
+				mapping.label = {
 					create: function(options) {
-						console.log(options);
-						if (options.data.indexOf('Dummy') === -1) {
-							return ko.observable(options.data);
+						if (options.data.default.indexOf('Dummy') === -1) {
+							return ko.observable(options.data.default);
 						}
-						return ko.observable('Add Title');
+						else {
+							return ko.observable('Add Title');
+						}
 					}
 				};
 				var promise = app.getUserCollections(true);
 				var promiseShared = getCollectionsSharedWithMe(true);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					//convert rights map to array
-					ko.mapping.fromJS(convertToRightsMap(data[0].collectionsOrExhibitions), mapping, self.myCollections);
-					ko.mapping.fromJS(convertToRightsMap(data2[0].collectionsOrExhibitions), mapping, self.sharedCollections);
+					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
+					console.log(JSON.stringify(self.myCollections()[0].dbId()));
+					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
 			}
@@ -113,8 +106,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				var promiseShared = getCollectionsSharedWithMe(false);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					//convert rights map to array
-					ko.mapping.fromJS(convertToRightsMap(data[0].collectionsOrExhibitions), mapping, self.myCollections);
-					ko.mapping.fromJS(convertToRightsMap(data2[0].collectionsOrExhibitions), mapping, self.sharedCollections);
+					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
+					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
 				
@@ -162,18 +155,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 		
 		self.createExhibition = function() {
-			
 			window.location = '#exhibition-edit';
 		};
 		
 		self.loadCollectionOrExhibition = function(collection) {
-			
 			if (self.showsExhibitions) {
-
 				window.location = '#exhibition-edit/'+ collection.dbId();		
 			}
 			else {
-
 				window.location = 'index.html#collectionview/' + collection.dbId();		
 			}
 		};

@@ -1,8 +1,5 @@
 define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slick'], function (ko, template, app, magnificPopup,slick) {
 
-
-  
-
     ko.bindingHandlers.backgroundImage = {
         update: function(element, valueAccessor) {
             ko.bindingHandlers.style.update(element,
@@ -26,34 +23,39 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
         self.externalId = "";
         self.isLoaded = ko.observable(false);
 
-        self.load = function(data) {
-            if(data.title==undefined){
-                self.title="No title";
-            }else{self.title=data.title;}
-            self.url="#item/"+data.id;
-            self.view_url=data.view_url;
-            self.thumb=data.thumb;
-            //self.fullres=data.fullres;
-            self.description=data.description;
-            self.source=data.source;
-            self.creator=data.creator;
-            self.provider=data.provider;
-            self.rights=data.rights;
-            self.recordId=data.id;
-            self.externalId=data.externalId;
-            if (data.source!="Rijksmuseum" && data.fullres && data.fullres.length > 0) {
-				self.fullres(data.fullres);
-			} 
-			else if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
-				self.fullres(data.fullres[0]);
-			}
-			else{
-				self.fullres(self.thumb);
-			}
-
+        self.load = function(options) {
+        	var admindata=options.administrative;
+			var descdata=options.descriptiveData;
+			var media=options.media;
+			var provenance=options.provenance;
+			var usage=options.usage;
+			
+			if(descdata){
+		    	  self.title=findByLang(descdata.label);
+		    	  self.description=findByLang(descdata.description);
+		    	  self.rights=findResOrLit(descdata.metadataRights);
+		    	  self.creator=options.withCreatorInfo.username;
+			 	}
+			    	
+		    	self.dbId=options.dbId;
+		    	if(provenance){
+			    	self.view_url=findProvenanceValues(provenance,"source_uri");
+			    	self.dataProvider=findProvenanceValues(provenance,"dataProvider");
+			    	self.provider=findProvenanceValues(provenance,"provider");
+			    	self.source=findProvenanceValues(provenance,"source");
+			    }   	
+		    	self.externalId=admindata.externalid;
+		    	if(usage){
+			    	self.likes=usage.likes;
+			    	self.collected=usage.collected;
+			    	self.collectedIn=usage.collectedIn;}
+		    	
+	    	self.thumb=media[0]!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:null;
+        	self.fullres=media[0]!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : null,
+        	self.isLoaded = ko.observable(false);
         };
 
-        self.cachedThumbnail = ko.pureComputed(function() {
+        /*self.cachedThumbnail = ko.pureComputed(function() {
 
             if(self.thumb){
                 if (self.thumb.indexOf('/') === 0) {
@@ -65,7 +67,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
             else{
                 return "img/content/thumb-empty.png";
             }
-        });
+        });*/
         if(data != undefined) self.load(data);
     }
 
@@ -79,16 +81,15 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
         self.route = params.route;
         var counter = 1;
         self.exhName = ko.observable('');
-        self.access = ko.observable("READ");
+        //self.access = ko.observable([]);
         self.id = ko.observable(params.id);
         self.owner = ko.observable('');
         self.ownerId = ko.observable(-1);
-        self.itemCount = ko.observable(0);
+        self.entryCount = ko.observable(0);
         self.exhItems = ko.observableArray();
         self.desc = ko.observable('');
         self.loading = ko.observable(false);
         self.showCarousel = ko.observable(false);
-
         
         self.initCarousel=function(){
         	 WITHApp.initCarousel();
@@ -134,6 +135,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
         };
 
         self.loadExhibition = function (id) {
+        	alert("1");
             self.loading(true);
             $.ajax({
                 "url": "/collection/" + self.id(),
@@ -141,23 +143,35 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
                 "contentType": "application/json",
                 "success": function (data) {
                 	/*if user not logged in and not public redirect*/
-                	if(data.isPublic==false){
-                		
-                		if(isLogged()==false){
-                		
+                	if(data.access.isPublic==false){
+                		if(isLogged()==false) {
                 			window.location='#login';
                 			return;
                 		  }
-                		
-                		
                 	}
-                    self.exhName(data.title);
-                    self.desc(data.description);
-                    self.owner(data.owner);
-                    self.ownerId(data.ownerId);
-                    self.itemCount(data.itemCount);
-                    self.access(data.access);
-                    self.revealItems(data.firstEntries);
+                	var adminData=data.administrative;
+        			var descData=data.descriptiveData;
+                    self.exhName(findByLang(descData.label));
+                    self.desc(findByLang(descData.description));
+                    self.owner(withCreatorInfo.username);
+                    self.ownerId(adminData.withCreator);
+                    self.entryCount(data.administrative.entryCount);                    
+                    //self.access(adminData.access);
+                    if(self.entryCount() && self.entryCount()>0){
+						$.ajax({
+							"url": "/collection/" + self.id() + "/list?count=10&start=0",
+							"method": "get",
+							"contentType": "application/json",
+							"success": function (data) {
+								var items=self.revealItems(data.records);
+								loading(false);
+							},
+							"error": function (result) {
+								loading(false);
+								$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
+							}
+						});
+					}
                     self.showCarousel(true);
                     self.loading(false);
                 },
@@ -181,11 +195,11 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup','slic
                 self.loading(true);
                 var offset = self.exhItems().length;
                 $.ajax({
-                    "url": "/collection/" + self.id() + "/list?count=40&start=" + offset,
+                    "url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
                     "method": "get",
                     "contentType": "application/json",
                     "success": function (data) {
-                        console.log(data.itemCount);
+                        console.log(data.administrative.entryCount);
                         self.revealItems(data.records);
                         self.loading(false);
                     },
