@@ -111,7 +111,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public Map<String, Object> transformCO() {
+	public Map<String, Object> transform() {
 		Map<String, Object> idx_map =  this.transformWR();
 		idx_map.put("collectionType", this.getAdministrative().getCollectionType());
 

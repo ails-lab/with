@@ -194,9 +194,10 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public Map<String, Object> transformCU() {
+	@Override
+	public Map<String, Object> transform() {
 
-		Map<String, Object> idx_map = this.transformRR();
+		Map<String, Object> idx_map = super.transform();
 
 		idx_map.put("dccreator", ((CulturalObjectData)getDescriptiveData()).getDccreator());
 		idx_map.put("dcidentifier", ((CulturalObjectData)getDescriptiveData()).getDcidentifier());
@@ -211,13 +212,17 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		idx_map.put("isRelatedTo", ((CulturalObjectData)getDescriptiveData()).getIsRelatedTo());
 		idx_map.put("events", ((CulturalObjectData)getDescriptiveData()).getEvents());
 
-		List<Integer> dccreated = new ArrayList<Integer>();
-		((CulturalObjectData)getDescriptiveData()).getDccreated().forEach( (d) -> dccreated.add(d.getYear()));
-		idx_map.put("dccreated", dccreated);
+		if(((CulturalObjectData)getDescriptiveData()).getDccreated() != null) {
+			List<Integer> dccreated = new ArrayList<Integer>();
+			((CulturalObjectData)getDescriptiveData()).getDccreated().forEach( (d) -> dccreated.add(d.getYear()));
+			idx_map.put("dccreated", dccreated);
+		}
 
-		List<Integer> dcdate = new ArrayList<Integer>();
-		((CulturalObjectData)getDescriptiveData()).getDcdate().forEach( (d) -> dcdate.add(d.getYear()));
-		idx_map.put("dcdate", dcdate);
+		if(((CulturalObjectData)getDescriptiveData()).getDcdate() != null) {
+			List<Integer> dcdate = new ArrayList<Integer>();
+			((CulturalObjectData)getDescriptiveData()).getDcdate().forEach( (d) -> dcdate.add(d.getYear()));
+			idx_map.put("dcdate", dcdate);
+		}
 
 
 		return idx_map;

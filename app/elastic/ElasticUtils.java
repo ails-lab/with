@@ -211,8 +211,10 @@ public class ElasticUtils {
 		 * Add the username and email of the creator
 		 * NOT the dbId
 		 */
-		idx_doc.put("creatorUsername", rr.getWithCreatorInfo().getUsername());
-		idx_doc.put("creatorEmail", rr.getWithCreatorInfo().getEmail());
+		if(rr.getWithCreatorInfo() != null ) {
+			idx_doc.put("creatorUsername", rr.getWithCreatorInfo().getUsername());
+			idx_doc.put("creatorEmail", rr.getWithCreatorInfo().getEmail());
+		}
 
 
 		/*
@@ -235,12 +237,13 @@ public class ElasticUtils {
 
 		/*
 		 * Format and add Media structure
+		 * TODO Add all Media Objects!!
 		 */
 		ArrayNode media_objects = Json.newObject().arrayNode();
 		if( (rr.getMedia() != null) && !rr.getMedia().isEmpty()
 				&& (rr.getMedia().get(0)!=null) && (!rr.getMedia().get(0).isEmpty())  ) {
 			// take care about all EmbeddedMediaObjects
-			EmbeddedMediaObject emo = rr.getMedia().get(0).get(MediaVersion.Original);
+			EmbeddedMediaObject emo = rr.getMedia().get(0).values().toArray(new EmbeddedMediaObject[1])[0];
 				ObjectNode media = Json.newObject();
 				media.put("withRights", Json.toJson(emo.getWithRights()));
 				media.put("withMediaType", Json.toJson(emo.getType()));

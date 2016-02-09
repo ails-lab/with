@@ -53,13 +53,19 @@ public class ElasticUpdater {
 	/*
 	 * Update one document with the structure provided.
 	 */
-	public static void updateOne(String type, ObjectId id, Map<String, Object> doc) {
-		Elastic.getTransportClient().prepareUpdate(
-				Elastic.index,
-				type,
-				id.toString())
-				.setDoc(doc)
-				.get();
+	public static boolean updateOne(String type, ObjectId id, Map<String, Object> doc) {
+		try{
+			Elastic.getTransportClient().prepareUpdate(
+					Elastic.index,
+					type,
+					id.toString())
+					.setDoc(doc)
+					.get();
+		} catch(Exception e) {
+			log.error("Cannot update (reindex) resource" );
+			return false;
+		}
+		return true;
 	}
 
 

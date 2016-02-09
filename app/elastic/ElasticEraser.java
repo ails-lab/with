@@ -18,8 +18,10 @@ package elastic;
 
 import java.util.List;
 
+import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.delete.DeleteRequest;
+
 import play.Logger;
 
 public class ElasticEraser {
@@ -30,7 +32,7 @@ public class ElasticEraser {
 	 * Delete the specified Resource using it's db id
 	 * from the index
 	 */
-	public static void deleteResource(String dbId) {
+	public static boolean deleteResource(String dbId) {
 		try {
 			Elastic.getTransportClient().prepareDelete(
 					Elastic.index,
@@ -41,7 +43,9 @@ public class ElasticEraser {
 				.actionGet();
 		} catch(ElasticsearchException e) {
 			log.error("Cannot delete the specified resource document", e);
+			return false;
 		}
+		return true;
 	}
 
 
@@ -49,30 +53,32 @@ public class ElasticEraser {
 	/*
 	 * Bulk deletes all resources of a deleted collection
 	 */
-	public static void deleteManyResources(List<String> ids) {
+	public static boolean deleteManyResources(List<ObjectId> ids) {
 
-		if( ids.size() == 0 ) {
-			log.debug("No records within the collection to index!");
-		} else if( ids.size() == 1 ) {
-				Elastic.getTransportClient().prepareDelete(
+		try {
+			if( ids.size() == 0 ) {
+				log.debug("No records within the collection to index!");
+			} else if( ids.size() == 1 ) {
+					Elastic.getTransportClient().prepareDelete(
+									Elastic.index,
+									Elastic.typeResource,
+									ids.get(0).toString())
+						 	.execute()
+						 	.actionGet();
+			} else {
+					for(ObjectId id: ids) {
+						Elastic.getBulkProcessor().add(new DeleteRequest(
 								Elastic.index,
 								Elastic.typeResource,
-								ids.get(0))
-					 	.execute()
-					 	.actionGet();
-		} else {
-			try {
-				for(String id: ids) {
-					Elastic.getBulkProcessor().add(new DeleteRequest(
-							Elastic.index,
-							Elastic.typeResource,
-							id));
-				}
-				Elastic.getBulkProcessor().flush();
-			} catch (Exception e) {
-				log.error("Error in Bulk deletes all records of a deleted collection", e);
+								id.toString()));
+					}
+					Elastic.getBulkProcessor().flush();
 			}
+		} catch (Exception e) {
+			log.error("Error in Bulk deletes all records of a deleted collection", e);
+			return false;
 		}
+		return true;
 	}
 
 }

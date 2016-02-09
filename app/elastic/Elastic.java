@@ -313,7 +313,7 @@ public class Elastic {
 				Callback<RecordResource> callback = new Callback<RecordResource>() {
 				@Override
 					public void invoke(RecordResource rr ) throws Throwable {
-						ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transformRR());
+						ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
 						}
 				};
 				try {

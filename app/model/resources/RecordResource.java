@@ -25,6 +25,11 @@ import model.DescriptiveData;
 public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	extends WithResource<RecordResource.RecordDescriptiveData, RecordResource.RecordAdmin> {
 
+	public RecordResource() {
+		super();
+		this.administrative = new RecordAdmin();
+	}
+
 	public static class RecordDescriptiveData extends DescriptiveData {
 
 	}
@@ -51,7 +56,7 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	 * Currently we are indexing only Resources that represent
 	 * collected records
 	 */
-	public Map<String, Object> transformRR() {
+	public Map<String, Object> transform() {
 		return this.transformWR();
 
 	}

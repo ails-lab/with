@@ -64,8 +64,8 @@ import model.usersAndGroups.User;
 	})
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
-	
-	
+
+
 	//TODO: compound indexes for common queries on multiple fields
 	@Indexes({
 		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
@@ -102,8 +102,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		private Date lastModified;
 
 		@Embedded
-		@JsonSerialize(using = Serializer.AccessMapSerializer.class)
-		@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
+		//@JsonSerialize(using = Serializer.AccessMapSerializer.class)
+		//@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
 		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
 
 		// recordId of last entry of provenance chain id the resource has been
@@ -168,7 +168,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		public User retrieveWithCreator() {
 			ObjectId userId = getWithCreator();
 			if (userId != null)
-				return DB.getUserDAO().getById(userId, null);
+				return DB.getUserDAO().getById(userId);
 			else
 				return null;
 		}
@@ -379,7 +379,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	public WithResource() {
 		this.usage = new Usage();
-		this.administrative = (U) new WithAdmin();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
 		this.media = new ArrayList<>();
@@ -539,7 +538,10 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public User getWithCreatorInfo() {
-		return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
+		if(administrative.getWithCreator() != null)
+			return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
+		else
+			return null;
 	}
 
 
