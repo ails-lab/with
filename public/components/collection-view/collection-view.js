@@ -51,6 +51,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.collected=0;
 		self.collectedIn=[];
 		self.dbId="";
+		self.data=ko.observable('');
 		 self.thumbnail = ko.pureComputed(function() {
 		        
 	        	if(self.thumb){
@@ -113,13 +114,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 	
 		
+	
+		
 		self.load=function(options){
 			var admindata=options.administrative;
 			var descdata=options.descriptiveData;
 			var media=options.media;
 			var provenance=options.provenance;
 			var usage=options.usage;
-			
+	    	
+	    			
+	    	
 			if(descdata){
 		    	  self.title=findByLang(descdata.label);
 		    	  self.description=findByLang(descdata.description);
@@ -135,14 +140,16 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			    	self.source=findProvenanceValues(provenance,"source");}
 		    	
 		    	
-		    	self.externalId=admindata.externalid;
+		    	self.externalId=admindata.externalId;
+		    	
 		    	if(usage){
 			    	self.likes=usage.likes;
 			    	self.collected=usage.collected;
 			    	self.collectedIn=usage.collectedIn;}
 		    	
 	    	self.thumb=media[0]!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:null;
-        	self.fullres=media[0]!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : null,
+        	self.fullres=media[0]!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : null;
+        	self.data(options);	
         	self.isLoaded = ko.observable(false);
 		}
 		
@@ -169,6 +176,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.citems = ko.observableArray();
 		self.selectedRecord = ko.observable(false);
 	    self.loggedUser=app.isLogged();
+	    self.rightsmap=ko.mapping.fromJS([]);
+	    
+	    
 	    if(params.count)
 	       self.count=ko.observable(params.count);
 	      
@@ -227,16 +237,20 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
-					if(data.isPublic==false){
+					if(data.administrative.isPublic==false){
+                		
                 		if(isLogged()==false){
+                		
                 			window.location='#login';
                 			return;
                 		  }
+                		
+                		
                 	}
 					if(data.descriptiveData){
-					   self.title(findByLang(data.descriptiveData.label));
-			    	   self.description(findByLang(data.descriptiveData.description));
-			    	}
+					  self.title(findByLang(data.descriptiveData.label));
+			    	
+			    	   self.description(findByLang(data.descriptiveData.description));}
 			    	
 			    	self.entryCount(data.administrative.entryCount);
 			    	self.creator =ko.observable("");
@@ -247,7 +261,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			        }, this.username);}
 			    	
 					self.desc(self.description());
-			    	
+					if(data.administrative.access){
+				    	  ko.mapping.fromJS(data.administrative.access.acl,self.rightsmap);
+						  console.log(self.rightsmap());
+							
+							var rightsrec = ko.utils.arrayFirst(self.rightsmap(), function (right) {
+								return right.user()=== currentUser._id();
+							});
+							if(rightsrec){
+								self.access(rightsrec.level());
+							}
+					}
 					if(self.count() && self.count()>0){
 						$.ajax({
 							"url": "/collection/" + self.id() + "/list?count="+self.count()+"&start=0",
@@ -255,12 +279,16 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							"contentType": "application/json",
 							"success": function (data) {
 								var items=self.revealItems(data.records);
+								
 								if(items.length>0){
 									 var $newitems=getItems(items);
 								     
 									 self.isotopeImagesReveal($container, $newitems );
 
 									}
+								
+
+								
 								loading(false);
 							},
 							"error": function (result) {
@@ -268,10 +296,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 								$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 							}
 						});
+						
 					}
 					else{
+					
+						
 						loading(false);
 					}
+					
+					
 				},
 				error: function (xhr, textStatus, errorThrown) {
 					loading(false);
@@ -331,22 +364,25 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.citems.push(e);
 		};
 
-		self.removeRecord = function (e) {
+		removeRecord = function (id,event) {
+			event.preventDefault();
+			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
+				return record.dbId=== id;
+			});
 			$.smkConfirm({text:'Are you sure you want to permanently remove this item?', accept: 'Delete', cancel: 'Cancel'}, function (ee) {
 				if (ee) {
 					$.ajax({
-						url: '/collection/' + self.id() + '/removeRecord?recId=' + e,
+						url: '/collection/' + self.id() + '/removeRecord?'+ $.param({"recId" : id}),
 						type: 'DELETE',
 						contentType: "application/json",
-						data: JSON.stringify(e),
+						data: JSON.stringify(id),
 						success: function (data, textStatus, xhr) {
 							//find item index to see if it is first item
-							var index=ko.utils.arrayIndexOf(self.citems(),e);
-							console.log("index:"+index);
-
-							self.citems.remove(e);
-							if ($("#" + e)) {
-								$container.isotope( 'remove', $("#" + e)).isotope('layout');
+						//	var index=ko.utils.arrayIndexOf(self.citems(),id);
+							
+							self.citems.remove(rec);
+							if ($("#" + id)) {
+								$container.isotope( 'remove', $("#" + id)).isotope('layout');
 								//$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
 
@@ -419,35 +455,35 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 		
 		function getItem(record) {
-		
+			
+			 		
 			 var tile= '<div class="item media"> <div class="wrap">';
+			 
+			
 			 if(isLogged()){
 				    if(record.isLiked()){
-				    	 tile+='<span class="star active">';
+				    	 tile+='<div class="star active">';
 				    }
-				    else{tile+='<span class="star">';}
-				    if(record.externalId){//could not like items from mint, this should go away when bug is fixed
-				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">'
+				    else{tile+='<div class="star">';}
+				    if(self.access()=="WRITE" || self.access()=="OWN")
+						tile+=' <span class="collect" title="remove"  onclick="removeRecord(\'' + record.dbId + '\',event)"><i class="fa fa-trash-o fa-inverse"></i></span>';
+				    if(record.externalId){
+				    	 			
+				        tile+='<span class="fa fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 						+'</span>';}
-						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.dbId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+				   
+		
+						tile+='<span class="fa fa-1x" title="collect" onclick="collect(\'' + record.dbId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></div>';
+						
+						
 					}
-			 else{
-				 tile+='<span class="star" style="display:none">'
-				 if(record.externalId){
-					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">'
-					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
-					    +'</span>';}
-					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.dbId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
-					
-			 }
+			
                     tile+='<a href="#" data-view="inline"  onclick="recordSelect(\''+record.dbId+'\',event)">'
                      +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div></a>'
                      + "<div class='sourceCredits'><a href='"+record.view_url+ "' target='_new'>"+record.sourceCredits()+"</a></div></div></div>";
- 					
- 					
-			return tile;
+ 			return tile;
 			
 		}
 		

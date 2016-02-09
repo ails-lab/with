@@ -546,9 +546,10 @@ font-size: 15px;
 	position: absolute;
 	display:none;
 	top: 0px;
-	right: 4px;
-	width: 36px;
+	right: 15%;
+	/*width: 36px;*/
 	z-index: 1;
+	line-height: 0.2em;
 }
 
 .item:hover .star {
