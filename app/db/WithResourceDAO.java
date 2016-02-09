@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -42,12 +44,19 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import play.libs.Json;
+import sources.core.ParallelAPICall;
 import utils.AccessManager.Action;
 import utils.Tuple;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
+
+import elastic.Elastic;
+import elastic.ElasticUpdater;
 
 /*
  * The class consists of methods that can be both query
@@ -284,14 +293,14 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T>{
 		updateOps.set("administrative.access", access);
 		this.update(q, updateOps);
 	}
-	
+
 	public void updateWithURI(ObjectId resourceId, String uri) {
 		Query<T> q = this.createQuery().field("_id").equal(resourceId);
 		UpdateOperations<T> updateOps = this.createUpdateOperations().disableValidation();
 		updateOps.set("administrative.withURI", uri);
 		this.update(q, updateOps);
 	}
-	
+
 	public void changeAccess(ObjectId resourceId, ObjectId userId, Access newAccess) {
 		Query<T> q = this.createQuery().field("_id").equal(resourceId);
 		ArrayList<String> retrievedFields = new ArrayList<String>();

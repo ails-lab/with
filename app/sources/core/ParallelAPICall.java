@@ -35,14 +35,14 @@ public class ParallelAPICall {
 	 */
 	public static <I, U, R> Promise<R> createPromise(final BiFunction<I, U, R> methodQuery,
 			final I input1, final U input2) {
-		Promise<R> p = Promise.promise(new Function0<R>() {
+			Promise<R> p = Promise.promise(new Function0<R>() {
 				public R apply() throws Throwable {
 					return methodQuery.apply(input1, input2);
 				}
 			 });
 		return p;
 	}
-	
+
 	public static <I, U, R> Promise<R> createPromise(final Function<I, R> methodQuery,
 			final I input) {
 		Promise<R> p = Promise.promise(new Function0<R>() {

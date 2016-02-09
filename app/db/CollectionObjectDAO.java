@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiFunction;
 
 import model.Collection;
 import model.EmbeddedMediaObject;
@@ -41,10 +42,15 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import sources.core.ParallelAPICall;
 import utils.Tuple;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import elastic.Elastic;
+import elastic.ElasticUpdater;
 
 public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
@@ -55,7 +61,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public CollectionObjectDAO() {
 		super(CollectionObject.class);
 	}
-	
+
 	public boolean isFavorites(ObjectId dbId) {
 		Query<CollectionObject> q = this.createQuery().field("_id").equal(dbId);
 		q.field("descriptiveData.label.def").equal("favorites");
@@ -64,7 +70,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	/**
 	 * Increment entryCount (number of entries collected) in a CollectionObject
-	 * 
+	 *
 	 * @param dbId
 	 */
 	public void incEntryCount(ObjectId dbId) {
@@ -78,7 +84,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	/**
 	 * Decrement entryCount (number of entries collected) in a CollectionObject
-	 * 
+	 *
 	 * @param dbId
 	 */
 	public void decEntryCount(ObjectId dbId) {
@@ -89,7 +95,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		updateOps.dec("administrative.entryCount");
 		this.update(q, updateOps);
 	}
-	
+
 	public List<RecordResource> getFirstEntries(ObjectId dbId, int upperBound) {
 		ArrayList<String> retrievedFields = new ArrayList<String>();
 		retrievedFields.add("media");
@@ -104,8 +110,28 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		updateFields("", json, updateOps);
 		updateOps.set("administrative.lastModified", new Date());
 		this.update(q, updateOps);
+
+		/* update collection index and mongo records */
+
+		BiFunction<ObjectId,  Map<String, Object>, Boolean> updateCollection = (ObjectId colId,
+				 Map<String, Object> doc) -> {
+					 return ElasticUpdater.updateOne(Elastic.typeCollection, colId, doc);
+		};
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.setSerializationInclusion(Include.NON_NULL);
+		Map<String, Object> idx_map = mapper.convertValue(json, Map.class);
+		ParallelAPICall.createPromise(updateCollection, dbId, idx_map);
+
+		/*if(json.get("administratice.access.isPublic") != null) {
+			String isPublic = json.get("administratice.access.isPublic").asText();
+			if (oldIsPublic != newVersion.getIsPublic()) {
+				DB.getCollectionRecordDAO().setSpecificRecordField(newVersion.getDbId(), "rights.isPublic",
+						String.valueOf(newVersion.getIsPublic()));
+			}
+			//updater.updateVisibility();
+		}*/
 	}
-	
+
 	public List<CollectionObject> getBySpecificAccess(
 			List<ObjectId> effectiveIds, Access access, Boolean isExhibition,
 			int offset, int count) {
@@ -148,8 +174,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		q.field("administrative.isExhibition").equal(isExhibition);
 		return this.find(q).asList();
 	}*/
-	
-	
+
+
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getCollectionsWithCount(Query<CollectionObject> q,
 			Boolean isExhibition) {
 		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
@@ -176,7 +202,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 		return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(collections, hits);
 	}
-	
+
 	/**
 	 * Return the total number of CollectionObject entities for a specific query
 	 * @param q
@@ -202,7 +228,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 		return hits;
 	}
-	
+
 
 	/**
 	 * Return CollectionObjects (bounded by a limit) that satisfy the logged in user's access
@@ -223,7 +249,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition, totalHits, offset, count);
 	}
 
-	
+
 	/**
 	 * Return public CollectionObjects (bounded by a limit) that also satisfy some user access criteria.
 	 * @param accessedByUserOrGroup
@@ -239,18 +265,18 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(this.createQuery().criteria("administrative.access.isPublic").equal(true)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition, totalHits, offset, count);
 	}
-	
+
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getSharedAndByAcl(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		List<Criteria> criteria = new ArrayList<Criteria>(Arrays.asList(this.createQuery().criteria("administrative.withCreator").notEqual(creator)));
 		return getByAcl(criteria, accessedByUserOrGroup, creator, isExhibition, totalHits, offset, count);
 	}
-	
+
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		return getByAcl(new ArrayList<Criteria>(), accessedByUserOrGroup, creator, isExhibition, totalHits, offset, count);
 	}
-	
+
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(List<Criteria> andCriteria, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
 		Query<CollectionObject> q = this.createQuery().offset(offset).limit(count+1);
@@ -272,14 +298,14 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			return new Tuple<List<CollectionObject>, Tuple<Integer, Integer>>(this.find(q).asList(), null);
 		}
 	}
-	
+
 	public List<CollectionObject> getAtLeastCollections(List<ObjectId> loggeInEffIds, Access access, int offset, int count) {
 		CriteriaContainer criteria =  loggedInUserWithAtLeastAccessQuery(loggeInEffIds, access);
 		Query<CollectionObject> q = this.createQuery().offset(offset).limit(count+1).retrievedFields(true, "_id");
 		q.and(criteria);
 		return this.find(q).asList();
 	}
-	
+
 	public CollectionObject updateCollectionAdmin(ObjectId colId) {
 		UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
@@ -287,8 +313,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		colUpdate.inc("administrative.entryCount");
 		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion
 	}
-	
-	//it may happen that e.g. the thumbnail of the 4th instead of the 3d record of the media appears in the collections's (3) media 
+
+	//it may happen that e.g. the thumbnail of the 4th instead of the 3d record of the media appears in the collections's (3) media
 	public void addCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
 		//int entryCount = updateCollectionAdmin(colId).getAdministrative().getEntryCount();//old entry count
 		if (position < 3) {
@@ -299,7 +325,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				if (thumbnail != null) {
 					UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 					Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-					
+
 					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
 					     put(MediaVersion.Thumbnail, thumbnail);}};
 					colUpdate.set("media."+position, colMedia);
@@ -307,8 +333,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				}
 			}
 		}
-	}	
-	
+	}
+
 	public void removeCollectionMedia(ObjectId colId, int position) {
 		if (position < 3) {
 			//new Media should be based on records' positions before shifting.
@@ -321,7 +347,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			UpdateOperations<CollectionObject> colUpdate = null;
 			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
 			for (int i=position; i<3; i++) {
-				if (i-position < newFollowingRecords.size()) {
+				if ((i-position) < newFollowingRecords.size()) {
 					if (colUpdate == null)
 						colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 					RecordResource record = newFollowingRecords.get(i-position);
@@ -335,5 +361,5 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			if (colUpdate != null)
 				this.update(cq,  colUpdate);
 		}
-	}	
+	}
 }

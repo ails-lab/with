@@ -17,29 +17,24 @@
 package db;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-
-import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
-import model.resources.WithResource;
-import model.usersAndGroups.User;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
+import org.elasticsearch.action.index.IndexResponse;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.dao.BasicDAO;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateResults;
 
 import play.Logger;
 import play.libs.F.Callback;
+import sources.core.ParallelAPICall;
 import utils.Tuple;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -51,10 +46,14 @@ import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
 import com.mongodb.util.JSON;
 
+import elastic.ElasticEraser;
+import elastic.ElasticIndexer;
+
 public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	public enum QueryOperator {
 		GT("$gt"), EQ("$eq"), GTE("$gte");
+
 
 		private final String text;
 
@@ -130,7 +129,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	public void onAll(Callback<E> callback, boolean withWriteback)
 			throws Exception {
-		Query<E> q = (Query<E>) this.getDs().createQuery(entityClass);
+		Query<E> q = this.getDs().createQuery(entityClass);
 		QueryResults<E> qr = this.find(q);
 		Iterator<E> i = qr.iterator();
 		while (i.hasNext()) {
@@ -189,7 +188,20 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	public Key<E> makePermanent(E doc) {
 		try {
-			return this.save(doc, WriteConcern.ACKNOWLEDGED);
+			Key<E> dbKey =  this.save(doc, WriteConcern.ACKNOWLEDGED);
+			String type = defineInstanceOf(doc);
+			if(type != null) {
+
+				/* Erase CollectionObject from index */
+				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
+						(ObjectId colId, Map<String, Object> map) -> {
+							return ElasticIndexer.index(type, colId, map);
+						};
+				ParallelAPICall.createPromise(indexResource,
+						(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
+						(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+				return dbKey;
+			}
 		} catch (Exception e) {
 			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}
@@ -203,11 +215,57 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	public int makeTransient(E doc) {
 		try {
+			String type = defineInstanceOf(doc);
+			if(type != null) {
+
+				/* Erase CollectionObject from index */
+				Function<ObjectId, Boolean> deleteCollection =
+						(ObjectId colId) -> {
+								return ElasticEraser.deleteResource(colId.toString());
+						};
+				ParallelAPICall.createPromise(deleteCollection, (ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc));
+			}
 			return this.delete(doc).getN();
-		} catch (Exception e) {
-			log.error("Cannot delete " + doc.getClass().getSimpleName(), e);
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			return -1;
 		}
-		return -1;
+
+	}
+
+	private String defineInstanceOf(E doc) {
+
+		String[] resourcesNames = { "Collection", "RecordResource",
+									"Cultural", "Agent",
+									"EUscreen", "Event",
+									"Place", "Thesaurus",
+									"Timespan", "WithResource"};
+
+		switch (doc.getClass().getSimpleName()) {
+
+		case "CollectionObject":
+			return resourcesNames[0].toLowerCase();
+		case "RecordResource":
+			return resourcesNames[1].toLowerCase();
+		case "CulturalObject":
+			return resourcesNames[2].toLowerCase();
+		case "AgentObject":
+			return resourcesNames[3].toLowerCase();
+		case "EUscreenObject":
+			return resourcesNames[4].toLowerCase();
+		case "EventObject":
+			return resourcesNames[5].toLowerCase();
+		case "PlaceObject":
+			return resourcesNames[6].toLowerCase();
+		case "ThesaurusObject":
+			return resourcesNames[7].toLowerCase();
+		case "TimespanObject":
+			return resourcesNames[8].toLowerCase();
+		case "WithResource":
+			resourcesNames[1].toLowerCase();
+		default:
+			return null;
+		}
 	}
 
 	/**
@@ -235,7 +293,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Retrieve a resource from DB using its dbId
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -247,7 +305,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	/**
 	 * Get a resource by the dbId and retrieve only a bunch of fields from the
 	 * whole document
-	 * 
+	 *
 	 * @param id
 	 * @param retrievedFields
 	 * @return
@@ -266,7 +324,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Remove an entiry by dbId
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -309,6 +367,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		return (this.find(q).asList().size() == 0 ? false : true);
 	}
 
+
 	public boolean existsEntity(ObjectId id) {
 		return existsFieldWithValue("_id", id);
 	}
@@ -323,7 +382,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Increment the specified field in a CollectionObject
-	 * 
+	 *
 	 * @param dbId
 	 * @param fieldName
 	 */
@@ -337,7 +396,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	/**
 	 * Decrement the specified field in a CollectionObject
-	 * 
+	 *
 	 * @param dbId
 	 * @param fieldName
 	 */

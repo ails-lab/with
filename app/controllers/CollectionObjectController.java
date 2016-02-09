@@ -23,7 +23,10 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
@@ -49,6 +52,7 @@ import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.index.IndexResponse;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -57,6 +61,9 @@ import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
+import sources.core.ISpaceSource;
+import sources.core.ParallelAPICall;
+import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.Locks;
 import utils.Tuple;
@@ -71,6 +78,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
+import elastic.Elastic;
+import elastic.ElasticEraser;
+import elastic.ElasticIndexer;
+import elastic.ElasticUpdater;
 
 /**
  * @author mariaral
@@ -83,7 +94,7 @@ public class CollectionObjectController extends WithResourceController {
 
 	/**
 	 * Creates a new Collection from the JSON body
-	 * 
+	 *
 	 * @param collectionType
 	 *            the collection type that can take values of : {SimpleCollection,
 	 *            Exhibition }
@@ -94,7 +105,7 @@ public class CollectionObjectController extends WithResourceController {
 		JsonNode json = request().body().asJson();
 		CollectionType colType = CollectionType.valueOf(collectionType);
 		try {
-			if (colType == null && json == null) {
+			if ((colType == null) && (json == null)) {
 				error.put("error", "Invalid JSON");
 				return badRequest(error);
 			}
@@ -134,12 +145,22 @@ public class CollectionObjectController extends WithResourceController {
 			collection.getAdministrative().setCreated(new Date());
 			collection.getAdministrative().setLastModified(new Date());
 			if (collection.getAdministrative() instanceof CollectionAdmin) {
-				((CollectionAdmin) collection.getAdministrative())
+				collection.getAdministrative()
 						.setEntryCount(0);
 			}
 			DB.getCollectionObjectDAO().makePermanent(collection);
 			DB.getCollectionObjectDAO().updateWithURI(collection.getDbId(),
 					"/collection/" + collection.getDbId());
+
+
+			/* index collection
+			BiFunction<ObjectId,  Map<String, Object>, IndexResponse> indexCollection = (ObjectId colId,
+					 Map<String, Object> doc) -> {
+						 return ElasticIndexer.index(Elastic.typeCollection, colId, doc);
+			};
+			ParallelAPICall.createPromise(indexCollection, collection.getDbId(), collection.transformCO());*/
+
+
 			return ok(Json.toJson(collection));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
@@ -214,6 +235,7 @@ public class CollectionObjectController extends WithResourceController {
 				DB.getRecordResourceDAO().removeAllRecordsFromCollection(
 						collectionDbId);
 				DB.getCollectionObjectDAO().makeTransient(collection);
+
 				result.put("message", "Resource was deleted successfully");
 				return ok(result);
 			}
@@ -230,7 +252,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * Edits the WITH resource according to the JSON body. For every field
 	 * mentioned in the JSON body it either edits the existing one or it adds it
 	 * (in case it doesn't exist)
-	 * 
+	 *
 	 * @param id
 	 * @return the edited resource
 	 */
@@ -251,6 +273,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				DB.getCollectionObjectDAO()
 						.editCollection(collectionDbId, json);
+
 			}
 			return ok(Json.toJson(DB.getCollectionObjectDAO().get(
 					collectionDbId)));
@@ -440,7 +463,7 @@ public class CollectionObjectController extends WithResourceController {
 					.getAdministrative().getAccess(), effectiveUserIds);
 			List<String> titles = collection.getDescriptiveData().getLabel()
 					.get(Language.DEFAULT);
-			if (titles != null && !titles.get(0).equals("_favorites")) {
+			if ((titles != null) && !titles.get(0).equals("_favorites")) {
 				if (maxAccess.equals(Access.NONE)) {
 					maxAccess = Access.READ;
 				}
@@ -566,7 +589,6 @@ public class CollectionObjectController extends WithResourceController {
 		fav.getDescriptiveData().setLabel(
 				new MultiLiteral(Language.DEFAULT, "_favorites"));
 		DB.getCollectionObjectDAO().makePermanent(fav);
-		DB.getCollectionObjectDAO().makePermanent(fav);
 		return fav.getDbId();
 	}
 
@@ -608,12 +630,12 @@ public class CollectionObjectController extends WithResourceController {
 					List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
 					for (ContextData ca : contextAnns) {
 						if (ca.getTarget().getCollectionId().equals(colId)
-								&& ca.getTarget().getPosition() == position)
+								&& (ca.getTarget().getPosition() == position))
 							filteredContextAnns.add(ca);
 					}
 					e.setContextData(filteredContextAnns);
 					if (contentFormat.equals("contentOnly")
-							&& e.getContent() != null) {
+							&& (e.getContent() != null)) {
 						recordsList.add(Json.toJson(e.getContent()));
 					} else {
 						if (e.getContent() != null) {
@@ -634,13 +656,13 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				result.put(
 						"itemCount",
-						((CollectionAdmin) ((CollectionObject) DB
+						DB
 								.getCollectionObjectDAO()
 								.getById(
 										colId,
 										new ArrayList<String>(
-												Arrays.asList("administrative.entryCount"))))
-								.getAdministrative()).getEntryCount());
+												Arrays.asList("administrative.entryCount")))
+								.getAdministrative().getEntryCount());
 				result.put("records", recordsList);
 				return ok(result);
 			}
