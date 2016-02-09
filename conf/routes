@@ -70,6 +70,7 @@ DELETE   /group/removeUserOrGroup/:groupId         controllers.UserAndGroupManag
 PUT      /group/join/:groupId                      controllers.UserAndGroupManager.joinGroup(groupId)
 PUT      /group/leave/:groupId                     controllers.UserAndGroupManager.leaveGroup(groupId)
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
+GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project")
 
 # Rights Controller
 GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
