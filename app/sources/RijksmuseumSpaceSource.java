@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.ExternalBasicRecord;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.RecordResource;
 import play.libs.Json;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
@@ -147,7 +148,8 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		return res;
 	}
 	
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {

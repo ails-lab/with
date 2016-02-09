@@ -25,6 +25,7 @@ import org.w3c.dom.Document;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
@@ -194,7 +195,8 @@ public class NLASpaceSource extends ISpaceSource {
 		return res;
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {
