@@ -111,6 +111,10 @@ public class CollectionObjectController extends WithResourceController {
 						createExhibitionDummyTitle());
 				collection.getDescriptiveData().setDescription(
 						new MultiLiteral("Description"));
+			} else {
+				if (collection.getDescriptiveData().getLabel() ==  null) {
+					error.put("error", "");					
+				}
 			}
 			Set<ConstraintViolation<CollectionObject>> violations = Validation
 					.getValidator().validate(collection);

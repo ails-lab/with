@@ -389,7 +389,7 @@ public class WithResourceController extends Controller {
 						.updateRecordRightsUponRemovalFromCollection(
 								recordDbId, collectionDbId);
 				DB.getCollectionObjectDAO().removeCollectionMedia(
-						collectionDbId, recordDbId, position.get());
+						collectionDbId, position.get());
 				if (DB.getCollectionObjectDAO().isFavorites(collectionDbId))
 					DB.getRecordResourceDAO().decrementLikes(recordDbId);
 				else
