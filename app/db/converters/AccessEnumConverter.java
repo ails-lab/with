@@ -22,7 +22,7 @@ import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.mapping.MappedField;
 
-public class AccessEnumConverter extends TypeConverter {//implements SimpleValueConverter{
+public class AccessEnumConverter extends TypeConverter {
 
 	public AccessEnumConverter() {
 		super(Access.class);
@@ -42,7 +42,8 @@ public class AccessEnumConverter extends TypeConverter {//implements SimpleValue
 			MappedField optionalExtraInfo) {
 		if (fromDBObject == null) 
             return null;
-		else 
+		else {
 			return Access.values()[(int)fromDBObject];
+		}
 	}
 }
