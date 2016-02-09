@@ -369,13 +369,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
 				return record.dbId=== id;
 			});
+			var position=ko.utils.arrayIndexOf(self.citems(),rec);
 			$.smkConfirm({text:'Are you sure you want to permanently remove this item?', accept: 'Delete', cancel: 'Cancel'}, function (ee) {
 				if (ee) {
 					$.ajax({
-						url: '/collection/' + self.id() + '/removeRecord?'+ $.param({"recId" : id}),
+						url: '/collection/' + self.id() + '/removeRecord?'+ $.param({"recId" : id,"position": position}),
 						type: 'DELETE',
 						contentType: "application/json",
-						data: JSON.stringify(id),
+						data: JSON.stringify({recId : id,position: position}),
 						success: function (data, textStatus, xhr) {
 							//find item index to see if it is first item
 						//	var index=ko.utils.arrayIndexOf(self.citems(),id);
