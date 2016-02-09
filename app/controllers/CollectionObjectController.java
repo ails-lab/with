@@ -82,12 +82,13 @@ public class CollectionObjectController extends WithResourceController {
 			.of(CollectionObjectController.class);
 
 	/**
-	 * Creates a new WITH resource from the JSON body
+	 * Creates a new Collection from the JSON body
 	 * 
-	 * @param exhibition
-	 * @return the newly created resource
+	 * @param collectionType
+	 *            the collection type that can take values of : {SimpleCollection,
+	 *            Exhibition }
+	 * @return the newly created collection
 	 */
-	// TODO check restrictions (unique fields e.t.c)
 	public static Result createCollectionObject(String collectionType) {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
@@ -196,10 +197,7 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectNode result = Json.newObject();
 		Locks locks = null;
 		try {
-			locks = Locks
-					.create()
-					.write("Collection #"+id)
-					.acquire();
+			locks = Locks.create().write("Collection #" + id).acquire();
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.DELETE,
 					collectionDbId);
@@ -220,7 +218,7 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		} finally {
 			if (locks != null)
-			locks.release();
+				locks.release();
 		}
 	}
 
@@ -375,7 +373,8 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 
-	// input parameter lists' (directlyAccessedByUserOrGroup etc) intended meaning
+	// input parameter lists' (directlyAccessedByUserOrGroup etc) intended
+	// meaning
 	// is AND of its entries
 	// returned list of lists accessedByUserOrGroup represents AND of OR entries
 	// i.e. each entry in directlyAccessedByUserName for example has to be
@@ -576,68 +575,71 @@ public class CollectionObjectController extends WithResourceController {
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
 		try {
-			locks = Locks
-					.create()
-					.read("Collection #"+collectionId)
+			locks = Locks.create().read("Collection #" + collectionId)
 					.acquire();
-		// TODO: don't have to get the whiole collection, use DAO method
-		// Collection collection = DB.getCollectionDAO().getById(colId);
-		Result response = errorIfNoAccessToCollection(Action.READ, colId);
-		if (!response.toString().equals(ok().toString()))
-			return response;
-		else {
-			List<String> retrievedFields = new ArrayList<String>(Arrays.asList(
-					"descriptiveData.label", "descriptiveData.description"));
-			// bytes of thumbnail???
-			List<RecordResource> records = DB.getRecordResourceDAO()
-					.getByCollectionBetweenPositions(colId, start, start+count);
-			if (records == null) {
-				result.put("message", "Cannot retrieve records from database!");
-				return internalServerError(result);
-			}
-			ArrayNode recordsList = Json.newObject().arrayNode();
-			int position = start;
-			for (RecordResource e: records) {
-				//filter out all context annotations that do not refer to this collection
-				List<ContextData> contextAnns = e.getContextData();
-				List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-				for (ContextData ca: contextAnns) {
-					if (ca.getTarget().getCollectionId().equals(colId) &&
-							ca.getTarget().getPosition() == position)
-						filteredContextAnns.add(ca);
+			// TODO: don't have to get the whiole collection, use DAO method
+			// Collection collection = DB.getCollectionDAO().getById(colId);
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				List<String> retrievedFields = new ArrayList<String>(
+						Arrays.asList("descriptiveData.label",
+								"descriptiveData.description"));
+				// bytes of thumbnail???
+				List<RecordResource> records = DB.getRecordResourceDAO()
+						.getByCollectionBetweenPositions(colId, start,
+								start + count);
+				if (records == null) {
+					result.put("message",
+							"Cannot retrieve records from database!");
+					return internalServerError(result);
 				}
-				e.setContextData(filteredContextAnns);
-				if (contentFormat.equals("contentOnly")
-						&& e.getContent() != null) {
-					recordsList.add(Json.toJson(e.getContent()));
-				} else {
-					if (e.getContent() != null) {
-						if (contentFormat.equals("noContent")) {
-							e.getContent().clear();
-						} else if (e.getContent().containsKey(contentFormat)) {
-							HashMap<String, String> newContent = new HashMap<String, String>(
-									1);
-							newContent.put(contentFormat, (String) e
-									.getContent().get(contentFormat));
-							e.setContent(newContent);
-						}
+				ArrayNode recordsList = Json.newObject().arrayNode();
+				int position = start;
+				for (RecordResource e : records) {
+					// filter out all context annotations that do not refer to
+					// this collection
+					List<ContextData> contextAnns = e.getContextData();
+					List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+					for (ContextData ca : contextAnns) {
+						if (ca.getTarget().getCollectionId().equals(colId)
+								&& ca.getTarget().getPosition() == position)
+							filteredContextAnns.add(ca);
 					}
-					recordsList.add(Json.toJson(e));
+					e.setContextData(filteredContextAnns);
+					if (contentFormat.equals("contentOnly")
+							&& e.getContent() != null) {
+						recordsList.add(Json.toJson(e.getContent()));
+					} else {
+						if (e.getContent() != null) {
+							if (contentFormat.equals("noContent")) {
+								e.getContent().clear();
+							} else if (e.getContent()
+									.containsKey(contentFormat)) {
+								HashMap<String, String> newContent = new HashMap<String, String>(
+										1);
+								newContent.put(contentFormat, (String) e
+										.getContent().get(contentFormat));
+								e.setContent(newContent);
+							}
+						}
+						recordsList.add(Json.toJson(e));
+					}
+					position += 1;
 				}
-				position+=1;
+				result.put(
+						"itemCount",
+						((CollectionAdmin) ((CollectionObject) DB
+								.getCollectionObjectDAO()
+								.getById(
+										colId,
+										new ArrayList<String>(
+												Arrays.asList("administrative.entryCount"))))
+								.getAdministrative()).getEntryCount());
+				result.put("records", recordsList);
+				return ok(result);
 			}
-			result.put(
-					"itemCount",
-					((CollectionAdmin) ((CollectionObject) DB
-							.getCollectionObjectDAO()
-							.getById(
-									colId,
-									new ArrayList<String>(
-											Arrays.asList("administrative.entryCount"))))
-							.getAdministrative()).getEntryCount());
-			result.put("records", recordsList);
-			return ok(result);
-		}
 		} catch (Exception e1) {
 			result.put("error", e1.getMessage());
 			return internalServerError(result);

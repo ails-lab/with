@@ -366,7 +366,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		UpdateOperations<RecordResource> updateOps = this.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id").equal(recordId);
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
-		updateOps.removeAll("ContextDatas", new ContextData(colId, position));
+		updateOps.removeAll("ContextData", new ContextData(colId, position));
 		this.update(q, updateOps);
 		shiftRecordsToLeft(colId, position+1);
 	}

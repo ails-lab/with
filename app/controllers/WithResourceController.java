@@ -304,10 +304,10 @@ public class WithResourceController extends Controller {
 		}
 	}
 
-	public static void updateContextDatas(JsonNode contextAnnsJson,
+	public static void updateContextData(JsonNode contextAnnsJson,
 			WithResource record, ObjectId colId, ObjectId userId) {
-		List<ContextData> ContextDatas = getContextDataFromJson(contextAnnsJson);
-		for (ContextData contextAnn : ContextDatas) {
+		List<ContextData> ContextData = getContextDataFromJson(contextAnnsJson);
+		for (ContextData contextAnn : ContextData) {
 			ObjectId contextAnnId = contextAnn.getTarget().getCollectionId();
 			if (colId.equals(contextAnnId)) {// ignore annotations that refer to
 												// other collections! to be
@@ -324,7 +324,7 @@ public class WithResourceController extends Controller {
 
 	public static List<ContextData> getContextDataFromJson(
 			JsonNode contextAnnsJson) {
-		ArrayList<ContextData> ContextDatas = new ArrayList<ContextData>();
+		ArrayList<ContextData> ContextData = new ArrayList<ContextData>();
 		if (contextAnnsJson != null && contextAnnsJson.isArray()) {
 			for (final JsonNode contextAnnJson : contextAnnsJson) {
 				JsonNode annTypeJson = contextAnnJson.get("contextDataType");
@@ -339,7 +339,7 @@ public class WithResourceController extends Controller {
 									+ annType);
 							ContextData contextAnn = (ContextData) Json
 									.fromJson(contextAnnJson, clazz);
-							ContextDatas.add(contextAnn);
+							ContextData.add(contextAnn);
 						} catch (ClassNotFoundException e) {
 							e.printStackTrace();
 						}
@@ -347,7 +347,7 @@ public class WithResourceController extends Controller {
 				}
 			}
 		}
-		return ContextDatas;
+		return ContextData;
 	}
 
 	/**
