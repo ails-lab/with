@@ -141,11 +141,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		    	
 		    	
 		    	self.externalId=admindata.externalId;
-		    	
+		    	self.collectedIn=options.collectedIn;
 		    	if(usage){
 			    	self.likes=usage.likes;
 			    	self.collected=usage.collected;
-			    	self.collectedIn=usage.collectedIn;}
+			    	}
 		    	
 	    	self.thumb=media[0]!=null && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:null;
         	self.fullres=media[0]!=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : null;
@@ -369,7 +369,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
 				return record.dbId=== id;
 			});
-			var position=ko.utils.arrayIndexOf(self.citems(),rec);
+			var position=-1;
+			var pos= rec.collectedIn.filter(function(item) { 
+			   return item.collectionId === self.id()});
+			if(pos){position=pos[0].position;}
 			$.smkConfirm({text:'Are you sure you want to permanently remove this item?', accept: 'Delete', cancel: 'Cancel'}, function (ee) {
 				if (ee) {
 					$.ajax({
@@ -379,11 +382,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						data: JSON.stringify({recId : id,position: position}),
 						success: function (data, textStatus, xhr) {
 							self.citems.remove(rec);
-							if ($("#" + id)) {
-								$container.isotope( 'remove', $("#" + id)).isotope('layout');
+							if ($("."+id ).first()) {
+								$container.isotope( 'remove', $( "."+id ).first()).isotope('layout');
 							}
 
-							self.itemCount(self.itemCount() - 1);
+							self.reloadEntryCount();
 							$.smkAlert({text:'Item removed from the collection', type:'success'});
 
 						},
@@ -454,7 +457,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		function getItem(record) {
 			
 			 		
-			 var tile= '<div class="item media"> <div class="wrap">';
+			 var tile= '<div class="item media '+record.dbId+'"><div class="wrap">';
 			 
 			
 			 if(isLogged()){
