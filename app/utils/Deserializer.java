@@ -65,17 +65,6 @@ public class Deserializer {
 		}
 	}
 
-	public static class AccessDeserializer extends JsonDeserializer<Access> {
-
-		@Override
-		public Access deserialize(JsonParser accessOrdinal,
-				DeserializationContext arg1) throws IOException,
-				JsonProcessingException {
-			return Access.values()[accessOrdinal.readValueAs(Integer.class)];
-		}
-
-	}
-
 	public static class WithAccessDeserializer extends
 			JsonDeserializer<WithAccess> {
 
