@@ -378,13 +378,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						contentType: "application/json",
 						data: JSON.stringify({recId : id,position: position}),
 						success: function (data, textStatus, xhr) {
-							//find item index to see if it is first item
-						//	var index=ko.utils.arrayIndexOf(self.citems(),id);
-							
 							self.citems.remove(rec);
 							if ($("#" + id)) {
 								$container.isotope( 'remove', $("#" + id)).isotope('layout');
-								//$container.masonry( 'remove', $("#" + e)).masonry( 'layout');
 							}
 
 							self.itemCount(self.itemCount() - 1);
