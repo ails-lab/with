@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -75,25 +76,28 @@ public class Deserializer {
 			WithAccess rights = new WithAccess();
 			TreeNode treeNode = accessString.readValueAsTree();
 			TreeNode isPublicNode = treeNode.get("isPublic");
-			if (isPublicNode != null && isPublicNode.isValueNode()) {
+			if ((isPublicNode != null) && isPublicNode.isValueNode()) {
 				BooleanNode isPublic = (BooleanNode) treeNode.get("isPublic");
 				rights.setIsPublic(isPublic.asBoolean());
 			}
 			TreeNode jsonAcl = treeNode.get("acl");
-			if (jsonAcl != null && jsonAcl.isArray()) {
+			if ((jsonAcl != null) && jsonAcl.isArray()) {
 				for (int i = 0; i < jsonAcl.size(); i++) {
 					TreeNode entry = jsonAcl.get(i);
 					if (entry.get("user").isValueNode()
 							&& entry.get("level").isValueNode()) {
 						String username = ((TextNode) entry.get("user"))
 								.asText();
-						User user = DB
+						List<User> usersRetrieved =  DB
 								.getUserDAO()
 								.getByFieldAndValue(
 										"username",
 										username,
-										new ArrayList<String>(Arrays
-												.asList("_id"))).get(0);
+										new ArrayList<String>(Arrays.asList("_id")));
+						User user = null;
+						if(usersRetrieved.size() > 0 )
+							user = usersRetrieved.get(0);
+
 						if (user != null) {
 							ObjectId userId = user.getDbId();
 							String acc = ((TextNode) entry.get("level"))

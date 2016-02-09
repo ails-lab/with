@@ -91,7 +91,7 @@ public class AutocompleteController extends Controller {
 		}
 
 		Function<AutocompleteResponse, Boolean> responseCollectionMethod =
-				(AutocompleteResponse response) -> (response.suggestions !=null && !response.suggestions.isEmpty());
+				(AutocompleteResponse response) -> ((response.suggestions !=null) && !response.suggestions.isEmpty());
 
 		Function<List<AutocompleteResponse>, List<AutocompleteResponse>> filter = (List<AutocompleteResponse> response) -> {
 			List<AutocompleteResponse> finalResponses = new ArrayList<AutocompleteResponse>();
@@ -109,7 +109,7 @@ public class AutocompleteController extends Controller {
 
 		return ParallelAPICall.<AutocompleteResponse>combineResponses(responseCollectionMethod, promises, filter);
 	}
-	
+
 
 	private static Predicate<Suggestion> distinctByValue(Function<Suggestion, String> s) {
 		Set<String> seen = new HashSet<String>();

@@ -28,10 +28,8 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
 import db.converters.AccessEnumConverter;
-import utils.Deserializer;
 import utils.Serializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
@@ -117,7 +115,7 @@ public class WithAccess  {
 			}
 		this.acl.add(accessEntry);
 	}
-	
+
 	public void removeFromAcl(ObjectId userId) {
 		for (int i=0; i<this.acl.size(); i++) {
 			if (acl.get(i).getUser().equals(userId)) {
@@ -138,7 +136,7 @@ public class WithAccess  {
 		}
 		return Access.NONE;
 	}
-	
+
 	public boolean containsUser(ObjectId userId) {
 		for (AccessEntry entry: acl) {
 			if (entry.getUser().equals(userId))
