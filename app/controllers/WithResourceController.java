@@ -470,6 +470,7 @@ public class WithResourceController extends Controller {
 						sourceId, fullRecord);
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
+						log.info(data.getJsonContent());
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode json = mapper.readTree(data.getJsonContent())
 								.get("descriptiveData");
