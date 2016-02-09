@@ -31,6 +31,7 @@ import sources.core.RecordJSONMetadata;
 import sources.core.SourceResponse;
 import sources.core.RecordJSONMetadata.Format;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.RecordResource;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -168,7 +169,8 @@ public class EuropeanaFashionSpaceSource extends ISpaceSource {
 		}
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;
 		try {

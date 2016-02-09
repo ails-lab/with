@@ -28,6 +28,7 @@ import org.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.RecordResource;
 import model.resources.WithResource;
 import play.libs.Json;
 import sources.core.AdditionalQueryModifier;
@@ -359,7 +360,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		}
 	}
 
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	@Override
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		String key = "SECRET_KEY";
 		ArrayList<RecordJSONMetadata> jsonMetadata = new ArrayList<RecordJSONMetadata>();
 		JsonNode response;

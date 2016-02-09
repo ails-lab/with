@@ -467,9 +467,10 @@ public class WithResourceController extends Controller {
 				RecordResource fullRecord = DB.getRecordResourceDAO().get(
 						recordId);
 				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(
-						sourceId);
+						sourceId, fullRecord);
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
+						log.info(data.getJsonContent());
 						ObjectMapper mapper = new ObjectMapper();
 						JsonNode json = mapper.readTree(data.getJsonContent())
 								.get("descriptiveData");

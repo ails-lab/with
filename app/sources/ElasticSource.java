@@ -18,6 +18,8 @@ package sources;
 
 import java.util.ArrayList;
 
+import model.resources.RecordResource;
+
 import org.elasticsearch.action.search.SearchResponse;
 
 import play.Logger;
@@ -50,7 +52,7 @@ public class ElasticSource extends ISpaceSource {
 	}
 
 	@Override
-	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId) {
+	public ArrayList<RecordJSONMetadata> getRecordFromSource(String recordId, RecordResource fullRecord) {
 		log.debug("Method not implemented yet");
 		return null;
 	}

@@ -58,6 +58,7 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import utils.AccessManager;
+import utils.Locks;
 import utils.Tuple;
 import utils.AccessManager.Action;
 
@@ -193,7 +194,12 @@ public class CollectionObjectController extends WithResourceController {
 	// TODO: cascaded delete (if needed)
 	public static Result deleteCollectionObject(String id) {
 		ObjectNode result = Json.newObject();
+		Locks locks = null;
 		try {
+			locks = Locks
+					.create()
+					.write("Collection #"+id)
+					.acquire();
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.DELETE,
 					collectionDbId);
@@ -212,6 +218,9 @@ public class CollectionObjectController extends WithResourceController {
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
+		} finally {
+			if (locks != null)
+			locks.release();
 		}
 	}
 
@@ -565,6 +574,12 @@ public class CollectionObjectController extends WithResourceController {
 			String contentFormat, int start, int count) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		try {
+			locks = Locks
+					.create()
+					.read("Collection #"+collectionId)
+					.acquire();
 		// TODO: don't have to get the whiole collection, use DAO method
 		// Collection collection = DB.getCollectionDAO().getById(colId);
 		Result response = errorIfNoAccessToCollection(Action.READ, colId);
@@ -622,6 +637,13 @@ public class CollectionObjectController extends WithResourceController {
 							.getAdministrative()).getEntryCount());
 			result.put("records", recordsList);
 			return ok(result);
+		}
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
 		}
 	}
 
