@@ -299,6 +299,10 @@ public class Utils {
 		return !(string==null || string.equals("") || string.equals("null"));
 	}
 	
+	public static boolean hasInfo(JsonNode node) {
+		return !(node==null || node.isMissingNode() || (node.isArray() && node.size()==0));
+	}
+	
 	public static <T> boolean hasInfo(T[] array) {
 		return !(array==null || array.length==0 );
 	}

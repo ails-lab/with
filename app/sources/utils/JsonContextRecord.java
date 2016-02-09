@@ -314,12 +314,15 @@ public class JsonContextRecord {
 	public MultiLiteral getMultiLiteralValue(boolean merge, String... path) {
 		MultiLiteral res = null;
 		for (String spath : path) {
-			JsonNode node = getValue(buildpaths(spath));
-			if (node != null) {
-				res = merge(res, JsonNodeUtils.asMultiLiteral(node, languages));
-
-				if (!merge && Utils.hasInfo(res))
-					return res;
+			List<JsonNode> node = getValues(buildpaths(spath));
+			if (Utils.hasInfo(node)) {
+				for (JsonNode jsonNode : node) {
+					if (Utils.hasInfo(jsonNode)){
+						res = merge(res, JsonNodeUtils.asMultiLiteral(jsonNode, languages));
+						if (!merge && Utils.hasInfo(res))
+							return res;
+					}
+				}
 			}
 
 		}
@@ -357,11 +360,15 @@ public class JsonContextRecord {
 	public MultiLiteralOrResource getMultiLiteralOrResourceValue(boolean merge, String... path) {
 		MultiLiteralOrResource res = null;
 		for (String spath : path) {
-			JsonNode node = getValue(buildpaths(spath));
-			if (node != null){
-				res = merge(res, JsonNodeUtils.asMultiLiteralOrResource(node, languages));
-				if (!merge && Utils.hasInfo(res))
-					return res;
+			List<JsonNode> node = getValues(buildpaths(spath));
+			if (Utils.hasInfo(node)){
+				for (JsonNode jsonNode : node) {
+					if (Utils.hasInfo(jsonNode)) {
+						res = merge(res, JsonNodeUtils.asMultiLiteralOrResource(jsonNode, languages));
+						if (!merge && Utils.hasInfo(res))
+							return res;
+					}
+				}
 			}
 		}
 		return res;

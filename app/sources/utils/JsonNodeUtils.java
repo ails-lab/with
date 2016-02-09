@@ -30,6 +30,7 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
+import sources.core.Utils;
 
 public class JsonNodeUtils {
 
@@ -115,6 +116,7 @@ public class JsonNodeUtils {
 		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node,suggestedLanguages);
 	}
 	
+	
 	public static List<WithDate> asWithDateArray(JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			ArrayList<WithDate> res = new ArrayList<>();
@@ -139,18 +141,13 @@ public class JsonNodeUtils {
 	}
 	
 	public static List<String> asStringArray(Collection<JsonNode> node) {
-		if (node != null && !node.isMissingNode()) {
-			ArrayList<String> res = new ArrayList<>();
-			if (node.isArray()) {
-				for (int i = 0; i < node.size(); i++) {
-					res.add(node.get(i).asText());
-				}
-			} else {
-				res.add(node.asText());
-			}
-			return res;
+		List<String> res = new ArrayList<>();
+		for (JsonNode n : node) {
+			List<String> a = asStringArray(n);
+			if (Utils.hasInfo(a))
+				res.addAll(a);
 		}
-		return null;
+		return res;
 	}
 
 	public static List<String> asStringArray(JsonNode node) {
