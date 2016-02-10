@@ -41,7 +41,7 @@
 					 	<span class="glyphicon glyphicon-share" title="Share Collection" data-bind="click: $parent.openShareCollection" aria-hidden="true"></span>
 					 </div>
 					   <h3 data-bind="text: $parent.multiLiteral(descriptiveData.label)"></h3>
-					   <div class="coll-descr" data-bind="text: descriptiveData.description"></div>
+					   <div class="coll-descr" data-bind="text:  $parent.multiLiteral(descriptiveData.description)"></div>
 					   <div class="row">
 						   <div class="col-xs-12 col-sm-12 col-md-12 coll-footer">
 						   		<!-- ko if: administrative.access.isPublic --><span class="label label-success">Public</span><!-- /ko -->
@@ -115,9 +115,9 @@
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
 					 	<span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>
-						<!--  ko if: (access() ==  "OWN" || access() == "WRITE")-->
+						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
 						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
-					 	<!--  ko if: access() ==  "OWN" -->
+					 	<!--  ko if: myAccess() ==  "OWN" -->
 					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
 					 	<!-- /ko -->
 					 	<!--  /ko -->
@@ -155,7 +155,7 @@
 					  	 </div>
 					  <!-- /ko -->
 					  <!-- ko else -->
-					  <!-- ko if: access()=="WRITE" -->
+					  <!-- ko if: myAccess()=="WRITE" -->
 					  	<!-- TODO: Make the message look nicer -->
 					  	<div class="col-xs-6 col-sm-6 col-md-8 coll-message">
 					 	 <div class="row-fluid">

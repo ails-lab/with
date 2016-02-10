@@ -470,6 +470,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				c.put("myAccess", maxAccess.toString());
 			}
+			collections.add(c);
 		}
 		return collections;
 	}
