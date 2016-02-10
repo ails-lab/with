@@ -70,12 +70,14 @@ public class AccessManager {
 		for (String id : userIds) {
 			User user = DB.getUserDAO().getById(new ObjectId(id),
 					new ArrayList<String>(Arrays.asList("superUser")));
-			if (user != null && user.isSuperUser())
-				return Access.OWN;
-			else if (rights.getAcl().contains(new ObjectId(id))) {
-				Access access = rights.getAcl(new ObjectId(id));
-				if (access.ordinal() > maxAccess.ordinal())
-					maxAccess = access;
+			if (user != null) {
+			  if (user.isSuperUser())
+				  return Access.OWN;
+			  else if (rights.containsUser(new ObjectId(id))) {
+					Access access = rights.getAcl(new ObjectId(id));
+					if (access.ordinal() > maxAccess.ordinal())
+						maxAccess = access;
+			  }
 			}
 		}
 		return maxAccess;
