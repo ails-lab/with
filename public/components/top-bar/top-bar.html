@@ -2,13 +2,13 @@
 <div class="wrap">
 	<div class="container">
 		<!-- logo-->
-		<a href="#" class="logo">
+		<a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" class="logo">
 		<img src="img/ui/logo.png">
 		</a>
 		<!-- nav-->
 		<nav>
 			<ul>
-				<li><a href="#" title="Home">HOME</a></li>
+				<li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">HOME</a></li>
 				<li><a href="#search" title="Explore" onclick="toggleSearch('focus'); return false;">EXPLORE</a></li>
 				<li><a href="#about" title="About">ABOUT</a></li>
 				<li><a href="http://with.image.ntua.gr/assets/developers-lite.html" title="WITH API" target="_blank">WITH API</a></li>

@@ -5,6 +5,14 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		var self           = this;
 		self.notifications = ko.observableArray();
 
+		 goToPage=function(data,event){
+			 if(data=="#index" || data=="#"){
+			      sessionStorage.removeItem("homemasonryscroll");
+			      sessionStorage.removeItem("homemasonrycount");}
+			   window.location.href=data;
+			   event.preventDefault();
+			   return false;
+		}
 
 		$("[data-toggle=popover]").popover({
 			html: true,
