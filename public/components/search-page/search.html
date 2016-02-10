@@ -11,18 +11,18 @@
 		</form>
 
 				<div id="withsearch-content" class="withsearch-content">
-					 
-					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>	
-					
+
+					<facets id="search-facets" data-bind="visible: filterselect()==true || results().length>0" params="name:'search-filters',params: {}"></facets>
+
 					<!-- ko if: noResults -->
 					<div class="withsearch-content-masonry">
 						<p>Your search did not return results. Please try again.</p></div>
 					<!-- /ko -->
-					
-					
+
+
 					<!-- ko if: results().length > 0 -->
 					 <div class="scrollable" data-bind="visible: sourceview()==true">
-					 
+
 				    <!-- ko foreach: results -->
 					<div class="dummy-column">
 					<h2>
@@ -33,7 +33,7 @@
 					</h2>
 
 					 <!-- ko foreach: items -->
-					 
+
 					 	<a class="dummy-media-object" data-bind="event: { click: $parents[1].columnRecordSelect}">
 							<img onError="this.src='images/no_image.jpg'" data-bind="attr: { src:thumb }"/>
 								<span><!-- ko text: title --><!-- /ko --></span>
@@ -43,29 +43,29 @@
 					<!-- /ko -->
 					</div>
 					<!-- /ko -->
-					
-					
-					
+
+
+
 						 <!-- wrap spacer-->
       <div class="spacer double">
         <!-- listing-->
         <section class="listing" style="background: none;border:0">
           <div class="container">
             <!-- grid-->
-			
-            
+
+
 			<!-- grid-->
             <div class="grid" data-bind="visible: sourceview()==false && mixresults().length> 0, searchIsotope: mixresults">
               <!-- item-->
                <!-- ko if: $index() === 0 -->
               <div class="sizer"></div>
               <!-- /ko -->
-              
-              
+
+
               <div class="item media" data-bind="visible: isLoaded()">
               <div class="wrap">
               <span class="star" data-bind="css: { active: isLiked }, visible: isLogged()">
-						<span class="fa-stack fa-fw" data-bind="visible: externalId!=null,event: { click: function() { $parent.likeRecord(this); } }">
+						<span class="fa-stack fa-fw" data-bind="visible: externalId!=null,event: { click: function() { $parent.likeRecord($data); } }">
 							<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>
 						</span>
 					</span>
@@ -76,7 +76,7 @@
                   <div class="info">
                     <h1 class="title" data-bind="text: title"></h1><span class="owner" data-bind="text: dataProvider,attr: { href: dataProvider_uri }"></span>
                   </div>
-               
+
                  <div class="sourceCredits">
 					<!-- ko:if self.access() == "WRITE" || self.access() == "OWN" -->
 					    <span class="glyphicon glyphicon-trash closeButton" data-bind="visible: isLogged(), event: { click: function(){ $parent.removeRecord(recordId )}}"></span>
@@ -86,8 +86,8 @@
                   </a>
               </div>
             </div>
-              
-            
+
+
             </div>
             </div>
             <div id="more" data-bind="visible: searching"> <i class="fa fa-spinner fa-pulse"></i></div>
@@ -97,17 +97,17 @@
 				</span>
 			</div>
             </section>
-			
-			
+
+
 		</div>
-					
+
 					</div>
-	
+
 				<span class="withsearch-close"></span>
-				
-			
-			
-				
+
+
+
+
 			</div>
 
 			<div class="overlay"></div>
