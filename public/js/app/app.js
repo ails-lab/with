@@ -1,10 +1,10 @@
 define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugin','./js/app/params','smoke'], function (ko, FB, imagesLoaded, moment,plugin,params) {
 
 	var self = this;
-	
+
 	//hold the selected lang value from ui
 	self.lang=ko.observable("");
-	
+
 	self.WITHApp = "";
 
 	self.settings = $.extend({
@@ -398,11 +398,11 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			.done(function (data, textStatus, jqXHR) {
 				self.currentUser.favorites(data);
 
-				for (var i in data) {
-					if ($("#" + data[i])) {
-						$("#" + data[i]).addClass('active');
-					}
-				}
+				// for (var i in data) {
+				// 	if ($("#" + data[i])) {
+				// 		$("#" + data[i]).addClass('active');
+				// 	}
+				// }
 			})
 			.fail(function (jqXHR, textStatus, errorThrown) {
 				$.smkAlert({
@@ -511,45 +511,15 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	likeItem = function (record, update) {
 		var id, data;
-		if (ko.isObservable(record.externalId)) {
-			id = record.externalId();
-			data = {
-				source: record.source(),
-				sourceId: record.recordId(),
-				title: record.title(),
-				provider: record.provider(),
-				creator: record.creator(),
-				description: record.description(),
-				rights: record.rights(),
-				type: '',
-				thumbnailUrl: record.thumb(),
-				sourceUrl: record.view_url(),
-				collectionId: self.currentUser.favoritesId(),
-				externalId: record.externalId()
-			};
-		} else {
-			id = record.externalId;
-			data = {
-				source: record.source,
-				sourceId: record.recordId,
-				title: record.title,
-				provider: record.provider,
-				creator: record.creator,
-				description: record.description,
-				rights: record.rights,
-				type: '',
-				thumbnailUrl: record.thumb,
-				sourceUrl: record.view_url,
-				collectionId: self.currentUser.favoritesId,
-				externalId: record.externalId
-			};
-		}
+		data = JSON.stringify(record.data());
+		id = record.externalId;
 		if (!self.isLiked(id)) { // Like
 			$.ajax({
 				type: "POST",
 				url: "/collection/liked",
-				data: JSON.stringify(data), //ko.toJSON(record),
+				data: data,
 				contentType: "application/json",
+				processData: false,
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.push(id);
 					update(true);
@@ -566,7 +536,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		} else { // Unlike
 			$.ajax({
 				type: "DELETE",
-				url: "/collection/unliked/" + id,
+				url: "/collection/unliked/" + encodeURIComponent(id),
 				success: function (data, textStatus, jqXHR) {
 					self.currentUser.favorites.remove(id);
 					update(false);
@@ -833,7 +803,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	self.checkLogged();
-	
+
 	self.findByLang=function(val) {
         selvalue="";
         var uilang="";
@@ -847,7 +817,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	                selvalue=val[uilang][i];
 	    	   }
 	       }
-           else{selvalue=val.default;}  
+           else{selvalue=val.default;}
 	      }
          return selvalue;
   }
@@ -856,93 +826,93 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			selvalue="";
 			if(selection=="dataProvider"){
 			  if(array.length>1 && array[0].provider)
-				  selvalue=array[0].provider; 
-				  
-			     
+				  selvalue=array[0].provider;
+
+
 			 }
 			else if(selection=="dataProvider_uri"){
 				  if(array.length>1){
-					  selvalue=array[0].uri; 
-					  
+					  selvalue=array[0].uri;
+
 					  if(array[0].uri && array[0].uri.length>0){
-						  selvalue=array[0].uri; 
+						  selvalue=array[0].uri;
 			        	}
-			              
+
 				 }}
 			else if (selection=="provider"){
 				  if(array.length==3){
-					  
+
 					  if(array[1].uri && array[1].uri.length>0){
 			        		if(array[1].provider && array[1].provider.length>0){
 			        			selvalue="<a href='"+array[1].uri+"' target='blank'>"+array[1].provider+"</a>";
 			        		}
-			        		
+
 			        	}else if(array[1].provider){
 			              selvalue+=array[1].provider;}
-					  
-				     }	
+
+				     }
 			}
 			else if (selection=="provider_uri"){
 				  if(array.length==3)
 					  if(array[1].uri && array[1].uri.length>0){
-			        		
+
 			        			selvalue=array[1].uri;
 			        		}
-			        		
-			        	
+
+
 			}
 			else if (selection=="source"){
 				var size=array.length-1;
 				if(array[size].provider){
 	              selvalue+=array[size].provider;}
-			  
+
 		     }
 			else if (selection=="source_uri"){
 				var size=array.length-1;
 				if(array[size].uri && array[size].uri.length>0){
-	        		
+
 	        			selvalue=array[size].uri;
-	        		
-	        		
+
+
 	        	}
-			  
+
 		     }
 			else if (selection=="id"){
 				var size=array.length-1;
 				if(array[size].resourceId && array[size].resourceId.length>0){
-	        		
+
 	        			selvalue+=array[size].resourceId;
 	        		}
-	        	
-			  
+
+
 		     }
 			return selvalue;
-				
+
 		}
-	 
-	 
+
+
 	 self.findResOrLit=function(data) {
-		 
+
 			selvalue="";
 			var uilang="";
 		    if(self.lang().length==0){
 						uilang="default";
 					}
-			     
+
 			if(data){
 			if(data[uilang]){
-				
+
 			   for(var i=0;i<data[uilang].length;i++){
 			                	if(selvalue.length>0){selvalue+=",";}
 			                	selvalue=data[uilang][i];
 			     }
-			    
+
 			}
 			else if(data.uri){
 				selvalue=data.uri;
 			}}
 			return selvalue;
-			
+
 		}
 //self.reloadUser(); // Reloads the user on refresh
 
