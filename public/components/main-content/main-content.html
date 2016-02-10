@@ -177,7 +177,7 @@
 						<div class="wrap">
 
 							<!-- anchor -->
-							<a data-bind="attr: {href: url}" title="VIEW EXHIBITION">
+							<a data-bind="attr: {href: data.url()}" title="VIEW EXHIBITION">
 
 								<!-- thumbnail -->
 								<div class="featured-hero">
@@ -189,19 +189,19 @@
 
 								
 									<p class="category">Featured exhibition</p>
-									<h2 class="title"><b><!-- ko text:title --><!-- /ko --></b></h2>
+									<h2 class="title"><b><!-- ko text:data.title --><!-- /ko --></b></h2>
 									<ul class="img-exhibition">
 										<li>
-											<img data-bind="attr: { src: thumbs()[0].url}" alt="exb 1" title="exb 1">
-											<p><!-- ko text:thumbs()[0].title --><!-- /ko --></p>
+											<img data-bind="attr: { src: data.media[0].Thumbnail.url}" alt="exb 1" title="exb 1">
+											
 										</li>
 										<li>
-											<img data-bind="attr: { src: thumbs()[1].url}" alt="exb 1" title="exb 1">
-											<p><!-- ko text:thumbs()[1].title --><!-- /ko --></p>
+											<img data-bind="attr: { src: data.media[1].Thumbnail.url}" alt="exb 1" title="exb 1">
+											<p></p>
 										</li>
 										<li>
-											<img data-bind="attr: { src: thumbs()[2].url}" alt="exb 1" title="exb 1">
-											<p><!-- ko text:thumbs()[2].title --><!-- /ko --></p>
+											<img data-bind="attr: { src: data.media[2].Thumbnail.url}" alt="exb 1" title="exb 1">
+											<p></p>
 										</li>
 									</ul>
 								</div>
@@ -214,26 +214,27 @@
 						<div class="wrap">
 
 							<!-- anchor -->
-							<a data-bind="attr: {href: url}"  title="VIEW COLLECTION">
-
+							<a data-bind="attr: {href: data.url()}"  title="VIEW COLLECTION">
+								
 								<!-- thumbnail -->
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[0].url}">
+									<img data-bind="attr: { src: data.media[0].Thumbnail.url}">
 								</div>
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[1].url}">
+									<img data-bind="attr: { src: data.media[1].Thumbnail.url}">
 								</div>
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[2].url}">
+									<img data-bind="attr: { src: data.media[2].Thumbnail.url}">
 								</div>
+								
 								<div class="featured-hero">
-									<img data-bind="attr: { src: thumbs()[3].url}">
+									<img data-bind="attr: { src: data.media[1].Thumbnail.url}">
 								</div>
 								
 								<!-- meta -->
 								<div class="featured-meta">
 									<p class="category">Featured collection</p>
-									<h2 class="title"><b><!-- ko text:title --><!-- /ko --></b></h2>
+									<h2 class="title"><b><!-- ko text:data.title --><!-- /ko --></b></h2>
 								</div>
 							</a>
 						</div>
@@ -281,7 +282,7 @@
 	                  <div class="thumb"><img data-bind="attr: {src: data.thumbnail()}"></div>
 	                  <!-- info-->
 	                  <div class="info"><span class="type" data-bind="text:data.type()"></span>
-	                    <h1 class="title" data-bind="text: data.title"></h1><span class="owner" data-bind="text: data.dbId"></span>
+	                    <h1 class="title" data-bind="text: data.title"></h1><span class="owner" data-bind="text: data.owner()"></span>
 	                  </div>
 	                  </a>
 	              </div>
@@ -292,7 +293,7 @@
 
 
 					<!-- load more -->
-					<a href="#" class="loadmore" data-bind="event: {click: loadNext}">
+					<a href="#" class="loadmore" data-bind="visible: homecollections().length>0 ,event: {click: loadNext}">
 						Load more
 						<div class="left"></div>
 						<div class="right"></div>
