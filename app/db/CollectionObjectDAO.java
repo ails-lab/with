@@ -325,7 +325,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				if (thumbnail != null) {
 					UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 					Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-
 					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
 					     put(MediaVersion.Thumbnail, thumbnail);}};
 					colUpdate.set("media."+position, colMedia);
@@ -338,28 +337,21 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public void removeCollectionMedia(ObjectId colId, int position) {
 		if (position < 5) {
 			//new Media should be based on records' positions before shifting.
-			List<RecordResource> newFollowingRecords = new ArrayList<RecordResource>();
-			for (int i = position; i<3; i++) {
+			List<HashMap<MediaVersion, EmbeddedMediaObject>> newMedias = new ArrayList<HashMap<MediaVersion, EmbeddedMediaObject>>();
+			for (int i=0; i<5; i++) {
 				RecordResource record = DB.getRecordResourceDAO().getByCollectionAndPosition(colId, i);
-				if (record != null)
-					newFollowingRecords.add(record);
-			}
-			UpdateOperations<CollectionObject> colUpdate = null;
-			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-			for (int i=position; i<5; i++) {
-				if ((i-position) < newFollowingRecords.size()) {
-					if (colUpdate == null)
-						colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
-					RecordResource record = newFollowingRecords.get(i-position);
+				if (record != null) {
 					HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
 					EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
 					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
 					     put(MediaVersion.Thumbnail, thumbnail);}};
-					colUpdate.set("media."+i, colMedia);
+					newMedias.add(colMedia);
 				}
 			}
-			if (colUpdate != null)
-				this.update(cq, colUpdate);
+			UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
+			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
+			colUpdate.set("media", newMedias);
+			this.update(cq,  colUpdate);
 		}
 	}
 }
