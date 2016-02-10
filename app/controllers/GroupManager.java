@@ -534,12 +534,43 @@ public class GroupManager extends Controller {
 		}
 		return userJSON;
 	}
-	
-	public static Result listUserGroups(String groupType) {
-		ObjectNode result = Json.newObject().objectNode();
-		ArrayNode collArray = Json.newObject().arrayNode();
-		List<UserGroup> userCollections;
-		//TODO: present only non-private spaces if not signed in, otherwise only members can see
-		return ok(result);
+
+	public static Result listUserGroups(String groupType, int offset, int count) {
+		List<UserGroup> groups = new ArrayList<UserGroup>();
+		try {
+			GroupType type = GroupType.valueOf(groupType);
+			Class<?> clazz = Class.forName("model.usersAndGroups." + groupType);
+			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
+					"effectiveUserIds"));
+			if (userId == null) {
+				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
+				return ok(Json.toJson(groups));
+			}
+			User user = DB.getUserDAO().get(userId);
+			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
+			int i = 0;
+			for (ObjectId groupId : userGroupsIds) {
+				if (i == offset + count)
+					break;
+				UserGroup group = DB.getUserGroupDAO().get(groupId);
+				if (group != null && group.getClass().equals(clazz)) {
+					if (i >= offset) {
+						groups.add(group);
+					}
+					i++;
+				}
+			}
+			if (i == offset + count) {
+				return ok(Json.toJson(groups));
+			}
+			if (i == 0) {
+				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
+				return ok(Json.toJson(groups));
+			}
+			groups.addAll(DB.getUserGroupDAO().findPublic(type, 0, count - i));
+			return ok(Json.toJson(groups));
+		} catch (Exception e) {
+			return ok(Json.toJson(groups));
+		}
 	}
 }
