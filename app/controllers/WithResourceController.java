@@ -28,6 +28,7 @@ import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
+import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CollectionObject;
@@ -89,7 +90,8 @@ public class WithResourceController extends Controller {
 			// TODO superuser
 		} else if (!resourceDAO.hasAccess(
 				AccessManager.effectiveUserDbIds(session().get(
-						"effectiveUserIds")), action, id) && !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
+						"effectiveUserIds")), action, id)
+				&& !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
 			result.put("error", "User does not have " + action
 					+ " access for resource " + id);
 			return forbidden(result);
@@ -125,10 +127,7 @@ public class WithResourceController extends Controller {
 		ObjectId collectionDbId = new ObjectId(colId);
 		Locks locks = null;
 		try {
-			locks = Locks
-					.create()
-					.write("Collection #" + colId)
-					.acquire();
+			locks = Locks.create().write("Collection #" + colId).acquire();
 			Status response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			if (!response.toString().equals(ok().toString())) {
@@ -302,7 +301,7 @@ public class WithResourceController extends Controller {
 			return internalServerError(result);
 		} finally {
 			if (locks != null)
-			locks.release();
+				locks.release();
 		}
 	}
 
@@ -364,9 +363,7 @@ public class WithResourceController extends Controller {
 		Locks locks = null;
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			locks = Locks
-					.create()
-					.write("Collection #" + collectionDbId)
+			locks = Locks.create().write("Collection #" + collectionDbId)
 					.acquire();
 			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
@@ -421,9 +418,7 @@ public class WithResourceController extends Controller {
 		Locks locks = null;
 		try {
 			ObjectId collectionDbId = new ObjectId(id);
-			locks = Locks
-					.create()
-					.write("Collection #" + collectionDbId)
+			locks = Locks.create().write("Collection #" + collectionDbId)
 					.acquire();
 			ObjectId recordDbId = new ObjectId(recordId);
 			Result response = errorIfNoAccessToRecord(Action.EDIT,
@@ -520,12 +515,22 @@ public class WithResourceController extends Controller {
 	/**
 	 * @return
 	 */
-	public static Result removeFromFavorites(String recordId) {
+	public static Result removeFromFavorites(String externalId) {
 		ObjectId userId = new ObjectId(session().get("user"));
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		return removeRecordFromCollection(fav, recordId, Option.None());
+		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
+				externalId);
+		List<CollectionInfo> collected = record.getCollectedIn();
+		for (CollectionInfo c : collected) {
+			if (c.getCollectionId().toString().equals(fav)) {
+				return removeRecordFromCollection(fav, record.getDbId()
+						.toString(), Option.Some(c.getPosition()));
+			}
+		}
+		return removeRecordFromCollection(fav, record.getDbId().toString(),
+				Option.None());
 	}
 
 }

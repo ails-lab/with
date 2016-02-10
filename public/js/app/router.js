@@ -12,6 +12,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	return new Router({
 		routes: [
 			{ url: '',          params: { page: 'home-page',     title: 'Home' } },
+     		{ url: 'home',          params: { page: 'home-page',     title: 'Home' } },
 			//{ url: 'search',    params: { page: 'search-page',   title: 'Search' } },
 			{ url: 'login',     params: { page: 'login-page',    title: 'Login' } },
 			{ url: 'profile',     params: { page: 'profile',    title: 'Profile' } },
@@ -62,9 +63,9 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 				else if (oldHash.indexOf("collectionview/")==0){
 					var scrollPosition = $(window).scrollTop();
 					 oldHash=oldHash.substring(15);
+					 if(oldHash.indexOf('/')!=-1)
 					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
 					 
-					 console.log("collection-viewscroll"+oldHash);
 					 sessionStorage.setItem("collection-viewscroll"+oldHash, scrollPosition);
 				     
 				}

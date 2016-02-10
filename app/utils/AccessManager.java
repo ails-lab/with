@@ -38,22 +38,26 @@ public class AccessManager {
 	public static enum Action {
 		READ, EDIT, DELETE
 	};
-	
+
 	public static boolean isSuperUser(String userId) {
-		 return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
+		return (DB.getUserDAO().isSuperUser(new ObjectId(userId)));
 	}
 
-	public static boolean hasAccessToRecordResource(String userIds, Action action, ObjectId resourceId) {
-		return DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(userIds), action, resourceId);
+	public static boolean hasAccessToRecordResource(String userIds,
+			Action action, ObjectId resourceId) {
+		return DB.getRecordResourceDAO().hasAccess(effectiveUserDbIds(userIds),
+				action, resourceId);
 	}
-	
-	public static boolean hasAccessToCollectionResource(String userIds, Action action, ObjectId resourceId) {
-		return DB.getCollectionObjectDAO().hasAccess(effectiveUserDbIds(userIds), action, resourceId);
+
+	public static boolean hasAccessToCollectionResource(String userIds,
+			Action action, ObjectId resourceId) {
+		return DB.getCollectionObjectDAO().hasAccess(
+				effectiveUserDbIds(userIds), action, resourceId);
 	}
-	
+
 	public static List<ObjectId> toObjectIds(List<String> userIds) {
 		List<ObjectId> objectIds = new ArrayList<ObjectId>();
-		for (String userId: userIds) {
+		for (String userId : userIds) {
 			objectIds.add(new ObjectId(userId));
 		}
 		return objectIds;
@@ -64,33 +68,29 @@ public class AccessManager {
 		return false;
 	}
 
-	public static Access getMaxAccess(WithAccess rights,
-			List<String> userIds) {
+	public static Access getMaxAccess(WithAccess rights, List<String> userIds) {
 		Access maxAccess = Access.NONE;
 		for (String id : userIds) {
 			User user = DB.getUserDAO().getById(new ObjectId(id),
 					new ArrayList<String>(Arrays.asList("superUser")));
-			if (user != null && user.isSuperUser())
-				return Access.OWN;
-			else if (rights.getAcl().contains(new ObjectId(id))) {
-				Access access = rights.getAcl(new ObjectId(id));
-				if (access.ordinal() > maxAccess.ordinal())
-					maxAccess = access;
+			if (user != null) {
+			  if (user.isSuperUser())
+				  return Access.OWN;
+			  else if (rights.containsUser(new ObjectId(id))) {
+					Access access = rights.getAcl(new ObjectId(id));
+					if (access.ordinal() > maxAccess.ordinal())
+						maxAccess = access;
+			  }
 			}
 		}
 		return maxAccess;
 	}
 
-	/*public static boolean increasedAccess(Access before, Access after) {
-		if (before == null) {
-			if (after == null) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-		return (after.ordinal() > before.ordinal());
-	}*/
+	/*
+	 * public static boolean increasedAccess(Access before, Access after) { if
+	 * (before == null) { if (after == null) { return false; } else { return
+	 * true; } } return (after.ordinal() > before.ordinal()); }
+	 */
 
 	/**
 	 * This methods supposes we have all user ids and all userGroup ids
@@ -129,4 +129,10 @@ public class AccessManager {
 		return ids[0];
 	}
 
+	public static ObjectId effectiveUserDbId(String effectiveUserIds) {
+		if (effectiveUserIds == null || effectiveUserIds.isEmpty())
+			return null;
+		String[] ids = effectiveUserIds.split(",");
+		return new ObjectId(ids[0]);
+	}
 }

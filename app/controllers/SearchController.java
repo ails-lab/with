@@ -186,7 +186,6 @@ public class SearchController extends Controller {
 			if (res.source==null){
 				System.out.println("Error "+src.getSourceName());
 			}
-			System.out.println("got "+res);
 			return res;
 			};
 		for (final ISpaceSource src : ESpaceSources.getESources()) {

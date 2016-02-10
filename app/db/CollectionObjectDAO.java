@@ -317,7 +317,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	//it may happen that e.g. the thumbnail of the 4th instead of the 3d record of the media appears in the collections's (3) media
 	public void addCollectionMedia(ObjectId colId, ObjectId recordId, int position) {
 		//int entryCount = updateCollectionAdmin(colId).getAdministrative().getEntryCount();//old entry count
-		if (position < 3) {
+		if (position < 5) {
 			RecordResource record = DB.getRecordResourceDAO().getById(recordId, new ArrayList<String>(Arrays.asList("media")));
 			if (record.getMedia() != null) {
 				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record.getMedia().get(0);
@@ -336,7 +336,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	}
 
 	public void removeCollectionMedia(ObjectId colId, int position) {
-		if (position < 3) {
+		if (position < 5) {
 			//new Media should be based on records' positions before shifting.
 			List<RecordResource> newFollowingRecords = new ArrayList<RecordResource>();
 			for (int i = position; i<3; i++) {
@@ -346,7 +346,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 			}
 			UpdateOperations<CollectionObject> colUpdate = null;
 			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-			for (int i=position; i<3; i++) {
+			for (int i=position; i<5; i++) {
 				if ((i-position) < newFollowingRecords.size()) {
 					if (colUpdate == null)
 						colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();

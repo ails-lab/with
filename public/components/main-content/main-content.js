@@ -50,53 +50,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	}};
 	
-			
 	
-	function FeaturedExhibit(data){
-	  var fe=this;
-	  fe.title=ko.observable();
-	  fe.description=ko.observable();
-	  fe.dbId=ko.observable(-1);
-	  fe.thumbs=ko.observableArray();
-	  fe.url=ko.observable("");
-	 
-	  fe.load=function(data){
-		 fe.title(data.title);
-	     fe.dbId(data.dbId);
-	     if(data.isExhibition)
-	      fe.url("#exhibitionview/"+data.dbId);
-	     else{fe.url("#collectionview/"+data.dbId);}
-	     fe.description(data.description);
-		  var i=0;
-		  var j=0;
-		  
-		  while (i<4 && j<data.firstEntries.length){
-			  var thumburl="";
-			  if(data.firstEntries[j].thumbnailUrl){
-				  
-				  if(data.firstEntries[j].thumbnailUrl){
-						if (data.firstEntries[j].thumbnailUrl.indexOf('/') === 0) {
-							thumburl=data.firstEntries[j].thumbnailUrl;
-						} else {
-							var newurl='url=' + encodeURIComponent(data.firstEntries[j].thumbnailUrl)+'&';
-							thumburl='/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-						}}
-					   else{
-						   thumburl="img/content/thumb-empty.png";
-					   }
-				  
-				  var thumb={url:thumburl,title:data.firstEntries[j].title};
-				  fe.thumbs.push(thumb);
-				  i++;}
-			    j++
-		  }}
-	  if(data != undefined) fe.load(data);
-	  
-	}		
-			
 	
 	function Collection(data) {
 		var self=this;
+		
 		var mapping = {
 				create: function(options) {
 			    	var self=this;
@@ -105,18 +63,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			    	self=$.extend(self, options.data);
 			    	
 			    	self.title=findByLang(self.descriptiveData.label);
-			    	
-			        self.thumbnail = ko.computed(function() {
-			        	if(self.media){
-			        	var data=self.media.thumbnailUrl;
-			        	 if(data && data>0){
-			 				if (data.indexOf('/') === 0) {
-			 					return data;
-			 				} else {
-			 					var newurl='url=' + encodeURIComponent(data)+'&';
-			 					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-			 				}}
-			 			   else{
+			    	self.thumbnail = ko.computed(function() {
+			          if(self.media && self.media[0] && self.media[0].Thumbnail){
+			        	var data=self.media[0].Thumbnail.url;
+			        	 if(data){
+			 				return data;}
+			 			  else{
 			 				   return "img/content/thumb-empty.png";
 			 			   }
 			        	}
@@ -148,6 +100,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				    		}
 			        	}else return "";
 			        });
+			        self.owner=ko.computed(function(){
+			        	if(self.withCreatorInfo){
+			        		return self.withCreatorInfo.username;
+			        	}
+			        });
+			        
 			        return self;
 			     }
 			  
@@ -164,13 +122,10 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		self.records=ko.mapping.fromJS([], recmapping);
 		
 		
-		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":"","media":""}, mapping);
-		
+		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
 		
 		self.load = function(data) {
 			self.data=ko.mapping.fromJS(data, mapping);
-			console.log(self.data);
-			//self.loadRecords(0,30);
 			
 		};
 
@@ -180,7 +135,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			 $.when(promise).done(function(responseRecords) {
 				 ko.mapping.fromJS(responseRecords.records,recmapping,self.records);
 				 loading(false);
-				 console.log(self.records());
+				 
 			 });
 		}
 		
@@ -214,8 +169,6 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  var self = this;
 	  
 	  $("div[role='main']").toggleClass( "homepage", true );
-	 // self.loading = ko.observable(false);
-	  self.exhibitloaded=ko.observable(false);
 	  self.featuredExhibition=ko.observable(null);	
 	  self.featuredCollection=ko.observable(null);
 	  self.homecollections=ko.observableArray();
@@ -240,39 +193,37 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
 		   loading(true);
-		 
+		   initFilterStick();
+		    WITHApp.initIsotope();
 		  var promiseCollections = self.getSpaceCollections();
 		  $.when(promiseCollections).done(function(responseCollections) {
 			        self.totalCollections(responseCollections.totalCollections);
 			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
-				    initFilterStick();
-				    WITHApp.initIsotope();
+				    
 				    loading(false);
 					
 			});
-		  var promise2 = self.getFeatured("5624a338569e4959735d8558");
+		  var promise2 = self.getFeatured("56baf43ebb9ce84403c41ebf");
           $.when(promise2).done(function (data) {
         	  
         	 
-        	  self.featuredExhibition(new FeaturedExhibit(data));
-        	  $("div.featured-box.exhibition").find("div.featured-hero > img").attr("src",self.featuredExhibition().thumbs()[0].url);    
-        	  self.exhibitloaded(true);
+        	  self.featuredExhibition(new Collection(data));
+        	  $("div.featured-box.exhibition").find("div.featured-hero > img").attr("src",self.featuredExhibition().data.thumbnail());    
+        	 
         	  
           });
-          var promise3 = self.getFeatured("55b74e5b569e1b44eeac72c0");
+          var promise3 = self.getFeatured("56bb2dadbb9ce8447369d09b");
           $.when(promise3).done(function (data) {
         	  
         	 
-        	  self.featuredCollection(new FeaturedExhibit(data));
-        	  $("div.featured-box.exhibition").find("div.featured-hero > img").attr("src",self.featuredCollection().thumbs()[0].url);    
-        	
+        	  self.featuredCollection(new Collection(data));
+        	 
         	  WITHApp.initCharacterLimiter();
           });
-		  $.when(promiseCollections,promise2,promise3).done(function(data){
-			  console.log("all promises done");
-			  loading(false);
-		  });
+          
+
+		 
 		};
 		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
 		self.getSpaceCollections = function () {
@@ -320,6 +271,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					"contentType": "application/json",
 					"success": function (data) {
 						self.revealItems(data['collectionsOrExhibitions']);
+						loading(false);
 						
 					},
 					"error": function (result) {

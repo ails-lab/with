@@ -119,9 +119,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				}
 			}
 		}
-		for (RecordResource r: repeatedResources) {
-			System.out.println(r.getDbId());
-		}
 		if (maxPosition > -1)
 			return repeatedResources.subList(0, maxPosition+1);
 		else
