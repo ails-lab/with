@@ -554,6 +554,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	self.getPublicCollections = function () {
+		console.log("public");
 		return $.ajax({
 			type: "GET",
 			contentType: "application/json",
@@ -576,6 +577,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		});
 	};
 
+	//TODO: check if it returns exhibitions. then can add unsaved records directly to exhibitions
 	self.getEditableCollections = function () {
 		return $.ajax({
 			type: "GET",
@@ -583,17 +585,11 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			/* for now take out isExhibition=false parameter so it doesnt throw 500 */
 			data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 				user: self.currentUser.username(),
 				rights: "WRITE"
 			}]),
 		}).done(
-			//"filterByUser=" +  self.currentUser.username() + "&filterByUserId=" + self.currentUser._id() +
-			//"&filterByEmail=" + self.currentUser.email() + "&access=read&offset=0&count=20"}).done(
-
-			//"username=" + self.currentUser.username()+"&ownerId=" + self.currentUser._id() + "&email=" + self.currentUser.email() + "&offset=0" + "&count=20"}).done(
-
 			function (data) {
 				var array = JSON.parse(JSON.stringify(data.collectionsOrExhibitions));
 				self.currentUser.editables.removeAll();
@@ -609,7 +605,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			}).fail(function (request, status, error) {});
 	};
 
-	self.getUserCollections = function (isExhibition) {
+	self.getUserCollections = function (isExhibition, offset, count) {
 		//filter = [{username:'maria.ralli',access:'OWN'}];
 		return $.ajax({
 			type: "GET",
@@ -617,7 +613,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			dataType: "json",
 			url: "/collection/list",
 			processData: false,
-			data: "creator=" + self.currentUser.username() + "&offset=0&count=20&isExhibition=" + isExhibition + "&totalHits=true"
+			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&totalHits=true"
 		}).done(
 			function (data) {
 				// console.log("User collections " + JSON.stringify(data));

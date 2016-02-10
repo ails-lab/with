@@ -45,20 +45,30 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.index = ko.observable(0);
 		self.collectionSet = "none";
 		var mapping = {
+			create: function (options) {
+		        //customize at the root level. 
+		        var innerModel = ko.mapping.fromJS(options.data);
+
+		        innerModel.title = ko.observable(self.multiLiteral(options.data.descriptiveData.label));
+		        
+		        innerModel.description = ko.observable(self.multiLiteral(options.data.descriptiveData.description));
+
+		        return innerModel;
+		    },
 			'dbId': {
 				key: function(data) {
 		            return ko.utils.unwrapObservable(data.dbId);
 		        }
-			},
-			'descriptiveData': {
+			}
+			/*'descriptiveData': {
 				create: function(options) {
 		            var thisModel = new OuterModel(options.data);
 		            return thisModel;
 		        }
-		   }
+		   }*/
 		};
 		
-		function OuterModel(data) {
+		/*function OuterModel(data) {
 		    var self = this;
 		    ko.mapping.fromJS(data, innerMapping, this);    
 		}
@@ -76,7 +86,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			        	return options.data;
 			        }
 			    }
-			};
+			};*/
 		
 		var usersMapping = {
 				'dbId': {
@@ -102,14 +112,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
   
     	
-    	self.multiLiteral = function (multiLiteral) {
+    	/*self.multiLiteral = function (multiLiteral) {
     	        return ko.computed({
     	            read: function () {
     	            	var s = app.findByLang(multiLiteral);
     	                return app.findByLang(multiLiteral);
     	            }
     	        }, this);
-    	    }.bind(self.myCollections);
+    	    }.bind(self.myCollections);*/
+    	    
+    	self.multiLiteral = function (multiLiteral) {
+                return app.findByLang(multiLiteral);
+        };
     	
 		self.init=function(){
         	if (self.showsExhibitions) {
@@ -123,19 +137,20 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						}
 					}
 				};
-				var promise = app.getUserCollections(true);
+				var promise = app.getUserCollections(true, 0, 20);
 				self.loading(true);
-				var promiseShared = getCollectionsSharedWithMe(true);
+				var promiseShared = getCollectionsSharedWithMe(true, 0, 20);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
+					console.log(self.myCollections()[0].title());
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
 			}
 			else {
-				var promise = app.getUserCollections(false);
+				var promise = app.getUserCollections(false, 0, 20);
 				self.loading(true);
-				var promiseShared = getCollectionsSharedWithMe(false);
+				var promiseShared = getCollectionsSharedWithMe(false, 0, 20);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					//convert rights map to array
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
@@ -260,8 +275,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						"method": "get",
 						"contentType": "application/json",
 						"success": function (data) {
-							var newData = convertToRightsMap(data.collectionsOrExhibitions);
-							var newItems=ko.mapping.fromJS(newData, mapping);
+							var newItems=ko.mapping.fromJS(data, mapping);
 							self.sharedCollections.push.apply(self.sharedCollections, newItems());
 							self.loading(false);
 							if(data.collectionsOrExhibitions.length<19){
@@ -279,34 +293,27 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 		
 
-		self.moreCollections=function(isExhibition){
+		self.moreCollections=function(more){
 			if (self.loading === true) {
-				setTimeout(self.moreCollections(isExhibition), 300);
+				setTimeout(self.moreCollections(more), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
-				if(self.myCollections().length<19){
+				/*if(self.myCollections().length<19){
 					self.moreCollectionData(false);
-				}else{
+				}else{*/
 					self.loading(true);
 					var offset = self.myCollections().length;
-					$.ajax({
-						"url": "/collection/list?creator="+app.currentUser.username()+"&offset="+offset+"&count=20&isExhibition="+isExhibition+"&totalHits=false",
-						"method": "get",
-						"contentType": "application/json",
-						"success": function (data) {
-							var newData = convertToRightsMap(data.collectionsOrExhibitions);
-							var newItems=ko.mapping.fromJS(newData, mapping);
-							self.myCollections.push.apply(self.myCollections, newItems());
-							self.loading(false);
-							if(data.collectionsOrExhibitions.length<19){
-								self.moreCollectionData(false);
-							}
-						},
-						"error": function (result) {
-							self.loading(false);
+					var promise = getCollections(true, offset, 20);
+					$.when(promise).done(function(data) {
+						var newItems=ko.mapping.fromJS(data, mapping);
+						self.myCollections.push.apply(self.myCollections, newItems());
+						self.loading(false);
+						if(data.collectionsOrExhibitions.length<19){
+							self.moreCollectionData(false);
+						}else{
+						  self.moreCollectionData(true);
 						}
-					});
-				}
+					}).fail(function(result) {self.loading(false);});
 			}
 		}
 		
@@ -474,18 +481,17 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			console.log(collection.myAccess() +  collIndex);
 			if (collection.myAccess() == "OWN") {
 				self.collectionSet = "my";
 				self.titleToEdit(self.myCollections()[collIndex].title());
 		        self.descriptionToEdit(self.myCollections()[collIndex].description());
-		        self.isPublicToEdit(self.myCollections()[collIndex].isPublic());
+		        self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 			}
 			else {
 				self.collectionSet = "shared";
 				self.titleToEdit(self.sharedCollections()[collIndex].title());
 		        self.descriptionToEdit(self.sharedCollections()[collIndex].description());
-		        self.isPublicToEdit(self.sharedCollections()[collIndex].isPublic());
+		        self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
 			}
 			app.showPopup("edit-collection");
 		}
@@ -495,7 +501,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 
-
+		//TODO: currently changes fisrt entry of label.default and description.default
+		//have to support multilinguality (both in presentation of collection, as well as in edit - drop-down list with languages)
 		self.editCollection = function () {
 			var collIndex = self.index();
 			var collId=-1;
@@ -506,12 +513,17 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			if (collId != -1) {
 				$.ajax({
 					"url": "/collection/"+collId,
-					"method": "POST",
+					"method": "PUT",
 					"contentType": "application/json",
-					"data": JSON.stringify({title: self.titleToEdit(),
-							description: self.descriptionToEdit(),
-							isPublic: self.isPublicToEdit()
-						}),
+					"data": JSON.stringify(
+						{descriptiveData: { 
+							label: {default: [self.titleToEdit()]},
+							description: {default: [self.descriptionToEdit()]},
+						},
+						administrative: {
+							access: {isPublic: self.isPublicToEdit()}
+						}
+					}),
 					success: function(result){
 						if (self.collectionSet == "my") {
 							self.updateCollectionData(self.myCollections(), collIndex);
@@ -520,7 +532,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 							self.updateCollectionData(self.sharedCollections(), collIndex);
 						}
 						
-						var editItem= ko.utils.arrayFirst(currentUser.editables(), function(item) {
+						var editItem = ko.utils.arrayFirst(currentUser.editables(), function(item) {
 							return item.dbId===collId;
 				           
 				        });
@@ -543,9 +555,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.updateCollectionData = function(collectionSet, collIndex) {
+			collectionSet[collIndex].descriptiveData.label.default = [self.titleToEdit()];
+			collectionSet[collIndex].descriptiveData.description.default = [self.descriptionToEdit()];
 			collectionSet[collIndex].title(self.titleToEdit());
 			collectionSet[collIndex].description(self.descriptionToEdit());
-			collectionSet[collIndex].isPublic(self.isPublicToEdit());
+			collectionSet[collIndex].administrative.access.isPublic(self.isPublicToEdit());
 		}
 
 		self.privateToggle=function(e,arg){
@@ -571,9 +585,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.updateCollectionFirstEntries = function(collectionSet, collIndex, recordObservable) {
-			var newItemCount = collectionSet[collIndex].itemCount() + 1;
-			collectionSet[collIndex].itemCount(newItemCount);
-			collectionSet[collIndex].firstEntries.push(recordObservable);
+			var newItemCount = collectionSet[collIndex].administrative.entryCount() + 1;
+			collectionSet[collIndex].administrative.entryCount(newItemCount);
+			if (newItemCount <= 5)
+				collectionSet[collIndex].media.push(recordObservable.media[0]);
 		}
 
 		self.reloadCollection = function(data) {

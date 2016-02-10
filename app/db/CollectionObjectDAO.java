@@ -359,7 +359,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				}
 			}
 			if (colUpdate != null)
-				this.update(cq,  colUpdate);
+				this.update(cq, colUpdate);
 		}
 	}
 }
