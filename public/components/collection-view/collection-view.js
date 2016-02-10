@@ -190,7 +190,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
 		self.showAPICalls = ko.observable(false);
-		var $container = $(".grid#"+self.id()).isotope({
+		self.$container = $(".grid#"+self.id()).isotope({
 			itemSelector: '.media',
 			transitionDuration: transDuration,
 			masonry: {
@@ -263,8 +263,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					self.desc(self.description());
 					if(data.administrative.access){
 				    	  ko.mapping.fromJS(data.administrative.access.acl,self.rightsmap);
-						  console.log(self.rightsmap());
-							
+						 	
 							var rightsrec = ko.utils.arrayFirst(self.rightsmap(), function (right) {
 								return right.user()=== currentUser._id();
 							});
@@ -283,7 +282,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 								if(items.length>0){
 									 var $newitems=getItems(items);
 								     
-									 self.isotopeImagesReveal($container, $newitems );
+									 self.isotopeImagesReveal(self.$container, $newitems );
 
 									}
 								
@@ -346,7 +345,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						if(items.length>0){
 							 var $newitems=getItems(items);
 						     
-							 self.isotopeImagesReveal( $container,$newitems );
+							 self.isotopeImagesReveal( self.$container,$newitems );
 							
 							}
 						loading(false);
@@ -383,7 +382,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						success: function (data, textStatus, xhr) {
 							self.citems.remove(rec);
 							if ($("."+id ).first()) {
-								$container.isotope( 'remove', $( "."+id ).first()).isotope('layout');
+								self.$container.isotope( 'remove', $( "."+id ).first()).isotope('layout');
 							}
 
 							self.reloadEntryCount();
@@ -448,7 +447,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
 				return record.dbId=== id;
 			});
-			console.log(rec);
 			
 			collectionShow(rec);
 		};
@@ -523,13 +521,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        
        
 		 self.isotopeImagesReveal = function( $container,$items ) {
-			 $container=$(".grid#"+self.id());
-	 		  var iso = $container.data('isotope');
+			 self.$container=$(".grid#"+self.id());
+	 		  var iso = self.$container.data('isotope');
 	 		 var itemSelector=null;
 	 		  if(iso) 
 	 		      itemSelector = iso.options.itemSelector;
 	 		  else{
-	 			$container = $(".grid#"+self.id()).isotope({
+	 			 self.$container = $(".grid#"+self.id()).isotope({
 	 				itemSelector: '.media',
 	 				transitionDuration: transDuration,
 	 				masonry: {
@@ -538,11 +536,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	 				
 	 				}
 	 			});
-	 			iso = $container.data('isotope');
+	 			iso = self.$container.data('isotope');
 	 			 itemSelector = iso.options.itemSelector;
 	 		  }
 	 		  // append to container
-	 		 $container.append( $items );
+	 		 self.$container.append( $items );
 	 		// hide by default
 	 		  $items.hide();
 	 		  $items.imagesLoaded().progress( function( imgLoad, image ) {
