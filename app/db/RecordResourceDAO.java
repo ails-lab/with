@@ -97,13 +97,9 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
 		List<RecordResource> resources  = this.find(q).asList();
-		/*DBCursor cursor = this.getDs().getCollection(entityClass).find(query);
-		List<T> ds = new ArrayList<T>();
-		while (cursor.hasNext()) {
-		   DBObject o = cursor.next();
-		   T d = (T) DB.getMorphia().fromDBObject(entityClass, o);
-		   ds.add(d);
-		}*/
+		for (RecordResource r: resources) {
+			System.out.println("1!!!!!!!" +r.getDbId());
+		}
 		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(upperBound-lowerBound);
 		for (int i=0; i<(upperBound - lowerBound); i++) {
 			repeatedResources.add(new RecordResource());
@@ -120,10 +116,13 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 						int arrayPosition = pos - lowerBound;
 						if (arrayPosition > maxPosition)
 							maxPosition = arrayPosition;
-						repeatedResources.add(arrayPosition, d);
+						repeatedResources.set(arrayPosition, d);
 					}
 				}
 			}
+		}
+		for (RecordResource r: repeatedResources) {
+			System.out.println(r.getDbId());
 		}
 		if (maxPosition > -1)
 			return repeatedResources.subList(0, maxPosition+1);

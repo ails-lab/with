@@ -51,6 +51,7 @@ import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 
+import org.apache.commons.codec.language.bm.Lang;
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.index.IndexResponse;
 
@@ -623,7 +624,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				ArrayNode recordsList = Json.newObject().arrayNode();
 				int position = start;
-				for (RecordResource e : records) {
+				for (RecordResource e: records) {
 					// filter out all context annotations that do not refer to
 					// this collection
 					List<ContextData> contextAnns = e.getContextData();
@@ -634,12 +635,11 @@ public class CollectionObjectController extends WithResourceController {
 							filteredContextAnns.add(ca);
 					}
 					e.setContextData(filteredContextAnns);
-					if (contentFormat.equals("contentOnly")
-							&& (e.getContent() != null)) {
-						recordsList.add(Json.toJson(e.getContent()));
-					} else {
-						if (e.getContent() != null) {
-							if (contentFormat.equals("noContent")) {
+					if (e.getContent() != null) {
+						if (contentFormat.equals("contentOnly")
+								&& (e.getContent() != null)) {
+							recordsList.add(Json.toJson(e.getContent()));
+						} else if (contentFormat.equals("noContent")) {
 								e.getContent().clear();
 							} else if (e.getContent()
 									.containsKey(contentFormat)) {
@@ -649,21 +649,19 @@ public class CollectionObjectController extends WithResourceController {
 										.getContent().get(contentFormat));
 								e.setContent(newContent);
 							}
-						}
 						recordsList.add(Json.toJson(e));
 					}
-					position += 1;
+					position+= 1;
 				}
 				result.put(
 						"itemCount",
-						DB
-								.getCollectionObjectDAO()
-								.getById(
-										colId,
-										new ArrayList<String>(
-												Arrays.asList("administrative.entryCount")))
+						DB.getCollectionObjectDAO()
+							.getById(colId,
+								new ArrayList<String>(
+									Arrays.asList("administrative.entryCount")))
 								.getAdministrative().getEntryCount());
 				result.put("records", recordsList);
+				System.out.println("4");
 				return ok(result);
 			}
 		} catch (Exception e1) {
