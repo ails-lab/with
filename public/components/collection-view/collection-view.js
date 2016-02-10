@@ -394,7 +394,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						}
 					});
 				} else {
-
 				}
 			});
 		};

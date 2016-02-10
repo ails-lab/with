@@ -46,13 +46,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.collectionSet = "none";
 		var mapping = {
 			create: function (options) {
-		        //customize at the root level. 
+		        //customize at the root level: add title and description observables, based on multiliteral
+				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...] 
 		        var innerModel = ko.mapping.fromJS(options.data);
-
 		        innerModel.title = ko.observable(self.multiLiteral(options.data.descriptiveData.label));
-		        
 		        innerModel.description = ko.observable(self.multiLiteral(options.data.descriptiveData.description));
-
 		        return innerModel;
 		    },
 			'dbId': {
@@ -142,7 +140,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				var promiseShared = getCollectionsSharedWithMe(true, 0, 20);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
-					console.log(self.myCollections()[0].title());
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
@@ -228,17 +225,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			})
 		};
 
-		self.getEditableFromStorage = function () {
-			var collections = [];
-			if (currentUser!== null){
-				collections = currentUser.editables();
-			    return collections;}
-			else {
-				$.smkAlert({text:'An error has occured. You are no longer logged in', type:'danger', permanent: true});
-				return [];
-			}
-		}
-
 		deleteCollection = function(collectionId) {
 			$.ajax({
 				"url": "/collection/"+collectionId,
@@ -303,7 +289,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}else{*/
 					self.loading(true);
 					var offset = self.myCollections().length;
-					var promise = getCollections(true, offset, 20);
+					var promise = app.getUserCollections(true, offset, 20);
 					$.when(promise).done(function(data) {
 						var newItems=ko.mapping.fromJS(data, mapping);
 						self.myCollections.push.apply(self.myCollections, newItems());

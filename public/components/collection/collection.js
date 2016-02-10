@@ -271,7 +271,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					else{
 						currentUser.editables.push(data);
 						$.smkAlert({text:'Collection created', type:'success'});
-	
+
 						self.collectionlist.push({
 							"id": data.dbId,
 							"name": data.title
