@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
-
 import java.util.function.Function;
 
 import org.bson.types.ObjectId;
@@ -29,6 +28,8 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import sources.core.ParallelAPICall;
+import utils.AccessManager;
+import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mongodb.BasicDBObject;
@@ -97,9 +98,6 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
 		List<RecordResource> resources  = this.find(q).asList();
-		for (RecordResource r: resources) {
-			System.out.println("1!!!!!!!" +r.getDbId());
-		}
 		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(upperBound-lowerBound);
 		for (int i=0; i<(upperBound - lowerBound); i++) {
 			repeatedResources.add(new RecordResource());
@@ -312,14 +310,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		return mergeRights(parentColAccess, record.getAdministrative().getWithCreator(), record.getAdministrative().getAccess().getIsPublic());
 	}
 
-	public void updateMembersToMergedRights(ObjectId colId, AccessEntry newAccess) {
+	public void updateMembersToMergedRights(ObjectId colId, AccessEntry newAccess, List<ObjectId> effectiveIds) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id", "administrative.access"));
 		WithAccess colAccess = DB.getCollectionObjectDAO().getById(colId, retrievedFields).getAdministrative().getAccess();
 		colAccess.addToAcl(newAccess);
 		List<RecordResource> memberRecords = getByCollection(colId, retrievedFields);
 		for (RecordResource r: memberRecords) {
-			WithAccess mergedAccess = mergeParentCollectionRights(r.getDbId(), colId, colAccess);
-			updateField(r.getDbId(), "administrative.access", mergedAccess);
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds, Action.DELETE, r.getDbId())) {
+				WithAccess mergedAccess = mergeParentCollectionRights(r.getDbId(), colId, colAccess);
+				updateField(r.getDbId(), "administrative.access", mergedAccess);
+			}
 		}
 	}
 
@@ -336,11 +336,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateField(recordId, "administrative.access", mergedAccess);
 	}
 
-	public void updateMembersToNewAccess(ObjectId colId, ObjectId userId, Access newAccess) {
+	public void updateMembersToNewAccess(ObjectId colId, ObjectId userId, Access newAccess, List<ObjectId> effectiveIds) {
 		ArrayList<String> retrievedFields = new ArrayList<String>(Arrays.asList("_id"));
 		List<RecordResource> memberRecords = getByCollection(colId, retrievedFields);
 		for (RecordResource r: memberRecords) {
-			changeAccess(r.getDbId(), userId, newAccess);
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds, Action.DELETE, r.getDbId()))
+				changeAccess(r.getDbId(), userId, newAccess);
 		}
 	}
 

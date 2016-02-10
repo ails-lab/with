@@ -43,6 +43,7 @@ import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
@@ -341,7 +342,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
-			List<ObjectNode> collections = collectionWithUserData(info.x,
+			List<ObjectNode> collections = collectionWithMyAccessData(info.x,
 					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -392,7 +393,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 
-			List<ObjectNode> collections = collectionWithUserData(info.x,
+			List<ObjectNode> collections = collectionWithMyAccessData(info.x,
 					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -447,7 +448,7 @@ public class CollectionObjectController extends WithResourceController {
 		return accessedByUserOrGroup;
 	}
 
-	private static List<ObjectNode> collectionWithUserData(
+	private static List<ObjectNode> collectionWithMyAccessData(
 			List<CollectionObject> userCollections,
 			List<String> effectiveUserIds) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
@@ -468,16 +469,9 @@ public class CollectionObjectController extends WithResourceController {
 				if (maxAccess.equals(Access.NONE)) {
 					maxAccess = Access.READ;
 				}
-				c.put("access", maxAccess.toString());
-				// TODO: specifiy retrieved fields
-				User user = DB.getUserDAO().getById(
-						collection.getAdministrative().getWithCreator(),
-						new ArrayList<String>(Arrays.asList("username")));
-				if (user != null) {
-					c.put("creator", user.getUsername());
-					collections.add(c);
-				}
+				c.put("myAccess", maxAccess.toString());
 			}
+			collections.add(c);
 		}
 		return collections;
 	}
@@ -548,7 +542,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 			}
 			ArrayNode collArray = Json.newObject().arrayNode();
-			List<ObjectNode> collections = collectionWithUserData(
+			List<ObjectNode> collections = collectionWithMyAccessData(
 					collectionsOrExhibitions, effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -625,32 +619,39 @@ public class CollectionObjectController extends WithResourceController {
 				ArrayNode recordsList = Json.newObject().arrayNode();
 				int position = start;
 				for (RecordResource e: records) {
-					// filter out all context annotations that do not refer to
-					// this collection
-					List<ContextData> contextAnns = e.getContextData();
-					List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-					for (ContextData ca : contextAnns) {
-						if (ca.getTarget().getCollectionId().equals(colId)
-								&& (ca.getTarget().getPosition() == position))
-							filteredContextAnns.add(ca);
+					//filter out records to which the user has no read access
+					response = errorIfNoAccessToCollection(Action.READ, e.getDbId());
+					if (!response.toString().equals(ok().toString())) {
+						recordsList.add(Json.toJson(new WithResource(e.getDbId())));
 					}
-					e.setContextData(filteredContextAnns);
-					if (e.getContent() != null) {
-						if (contentFormat.equals("contentOnly")
-								&& (e.getContent() != null)) {
-							recordsList.add(Json.toJson(e.getContent()));
-						} else if (contentFormat.equals("noContent")) {
-								e.getContent().clear();
-							} else if (e.getContent()
-									.containsKey(contentFormat)) {
-								HashMap<String, String> newContent = new HashMap<String, String>(
-										1);
-								newContent.put(contentFormat, (String) e
-										.getContent().get(contentFormat));
-								e.setContent(newContent);
-							}
-						recordsList.add(Json.toJson(e));
+					else {
+						// filter out all context annotations that do not refer to
+						// this collection
+						List<ContextData> contextAnns = e.getContextData();
+						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+						for (ContextData ca : contextAnns) {
+							if (ca.getTarget().getCollectionId().equals(colId)
+									&& (ca.getTarget().getPosition() == position))
+								filteredContextAnns.add(ca);
+						}
+						e.setContextData(filteredContextAnns);
+						if (e.getContent() != null) {
+							if (contentFormat.equals("contentOnly")
+									&& (e.getContent() != null)) {
+								recordsList.add(Json.toJson(e.getContent()));
+							} else if (contentFormat.equals("noContent")) {
+									e.getContent().clear();
+								} else if (e.getContent()
+										.containsKey(contentFormat)) {
+									HashMap<String, String> newContent = new HashMap<String, String>(
+											1);
+									newContent.put(contentFormat, (String) e
+											.getContent().get(contentFormat));
+									e.setContent(newContent);
+								}					
+						}
 					}
+					recordsList.add(Json.toJson(e));
 					position+= 1;
 				}
 				result.put(
