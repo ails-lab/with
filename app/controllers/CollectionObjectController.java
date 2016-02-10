@@ -43,6 +43,7 @@ import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
@@ -618,32 +619,39 @@ public class CollectionObjectController extends WithResourceController {
 				ArrayNode recordsList = Json.newObject().arrayNode();
 				int position = start;
 				for (RecordResource e: records) {
-					// filter out all context annotations that do not refer to
-					// this collection
-					List<ContextData> contextAnns = e.getContextData();
-					List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
-					for (ContextData ca : contextAnns) {
-						if (ca.getTarget().getCollectionId().equals(colId)
-								&& (ca.getTarget().getPosition() == position))
-							filteredContextAnns.add(ca);
+					//filter out records to which the user has no read access
+					response = errorIfNoAccessToCollection(Action.READ, e.getDbId());
+					if (!response.toString().equals(ok().toString())) {
+						recordsList.add(Json.toJson(new WithResource(e.getDbId())));
 					}
-					e.setContextData(filteredContextAnns);
-					if (e.getContent() != null) {
-						if (contentFormat.equals("contentOnly")
-								&& (e.getContent() != null)) {
-							recordsList.add(Json.toJson(e.getContent()));
-						} else if (contentFormat.equals("noContent")) {
-								e.getContent().clear();
-							} else if (e.getContent()
-									.containsKey(contentFormat)) {
-								HashMap<String, String> newContent = new HashMap<String, String>(
-										1);
-								newContent.put(contentFormat, (String) e
-										.getContent().get(contentFormat));
-								e.setContent(newContent);
-							}
-						recordsList.add(Json.toJson(e));
+					else {
+						// filter out all context annotations that do not refer to
+						// this collection
+						List<ContextData> contextAnns = e.getContextData();
+						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+						for (ContextData ca : contextAnns) {
+							if (ca.getTarget().getCollectionId().equals(colId)
+									&& (ca.getTarget().getPosition() == position))
+								filteredContextAnns.add(ca);
+						}
+						e.setContextData(filteredContextAnns);
+						if (e.getContent() != null) {
+							if (contentFormat.equals("contentOnly")
+									&& (e.getContent() != null)) {
+								recordsList.add(Json.toJson(e.getContent()));
+							} else if (contentFormat.equals("noContent")) {
+									e.getContent().clear();
+								} else if (e.getContent()
+										.containsKey(contentFormat)) {
+									HashMap<String, String> newContent = new HashMap<String, String>(
+											1);
+									newContent.put(contentFormat, (String) e
+											.getContent().get(contentFormat));
+									e.setContent(newContent);
+								}					
+						}
 					}
+					recordsList.add(Json.toJson(e));
 					position+= 1;
 				}
 				result.put(

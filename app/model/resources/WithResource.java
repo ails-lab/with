@@ -393,6 +393,11 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		new WithResource();
 		this.resourceType = WithResourceType.valueOf(clazz.getSimpleName());
 	}
+	
+	public WithResource(ObjectId id) {
+		new WithResource();
+		this.setDbId(id);
+	}
 
 	/*
 	 * Getters/Setters
