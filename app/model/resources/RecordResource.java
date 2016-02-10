@@ -17,6 +17,7 @@
 package model.resources;
 
 import java.util.Map;
+
 import org.bson.types.ObjectId;
 
 import model.DescriptiveData;
@@ -28,6 +29,11 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	public RecordResource() {
 		super();
 		this.administrative = new RecordAdmin();
+	}
+	
+	public RecordResource(ObjectId id) {
+		this.administrative = new RecordAdmin();
+		this.setDbId(id);
 	}
 
 	public static class RecordDescriptiveData extends DescriptiveData {

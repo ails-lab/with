@@ -50,19 +50,34 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		            return ko.utils.unwrapObservable(data.dbId);
 		        }
 			},
-			//the following is useless: mapping only works on top-level fields
-		    /*'administrative.access.acl': {
-		    	key: function(data) {
-		            return ko.utils.unwrapObservable(data.user);
+			'descriptiveData': {
+				create: function(options) {
+		            var thisModel = new OuterModel(options.data);
+		            return thisModel;
 		        }
-		    },
-		    'descriptiveData.label': {
-		    	update: function(options) {
-		    		console.log(JSON.stringify(options.data));
-		            return findByLang(options.data);
-		        }
-		    }*/
+		   }
 		};
+		
+		function OuterModel(data) {
+		    var self = this;
+		    ko.mapping.fromJS(data, innerMapping, this);    
+		}
+		
+		
+		//labels and descriptions are not observables!
+		var innerMapping = {
+			    'label': {
+			        create: function(options) {
+			        	return options.data;
+			        }
+			    },
+			    'description': {
+			        create: function(options) {
+			        	return options.data;
+			        }
+			    }
+			};
+		
 		var usersMapping = {
 				'dbId': {
 					key: function(data) {
@@ -85,28 +100,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
     	self.moreCollectionData=ko.observable(true);
     	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
-    	
-    	ko.observableArray.fn.bit = function (multiLiteral) {
-    	    return ko.computed({
-    	        read: function () {
-    	            return !!(this() & bit);
-    	        },
-    	        write: function (checked) {
-    	            if (checked)
-    	                this(this() | bit);
-    	            else
-    	                this(this() & ~bit);
-    	        }
-    	    }, this);
-    	};
+  
     	
     	self.multiLiteral = function (multiLiteral) {
-    		console.log("@" + JSON.stringify(multiLiteral.default()));
     	        return ko.computed({
     	            read: function () {
-    	            	console.log(JSON.stringify(multiLiteral));
     	            	var s = app.findByLang(multiLiteral);
-    	            	console.log(s);
     	                return app.findByLang(multiLiteral);
     	            }
     	        }, this);
@@ -148,25 +147,15 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 		
 		self.checkLogged=function(){
-			if(isLogged()==false){
-		
-			window.location='#login';
-			return;
-		  }else{self.init();}
+			if (isLogged()==false) {
+				window.location='#login';
+				return;
+			}	else {
+				self.init();
+			}
 		}
 		
 		self.checkLogged();
-		
-		convertToRightsMap = function(data) {
-			$.each(data, function(j, c) {
-				var rightsArray = [];
-				$.each(c.rights, function(i, obj) {
-					rightsArray.push({"userId": i, "right": obj});
-			    });
-				data[j].rights = rightsArray;
-			});
-			return data;
-		}
 
 		self.deleteMyCollection = function(collection) {
 			var collectionId = collection.dbId();
@@ -485,7 +474,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			if (collection.access() == "OWN") {
+			console.log(collection.myAccess() +  collIndex);
+			if (collection.myAccess() == "OWN") {
 				self.collectionSet = "my";
 				self.titleToEdit(self.myCollections()[collIndex].title());
 		        self.descriptionToEdit(self.myCollections()[collIndex].description());
@@ -588,7 +578,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.reloadCollection = function(data) {
 			var newCollection = ko.mapping.fromJS(data);
-			if (data.access == "OWN") {
+			if (data.myAccess == "OWN") {
 				ko.mapping.fromJS(data, newCollection);
 				self.myCollections.unshift(newCollection);
 			}

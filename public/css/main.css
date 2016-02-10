@@ -634,7 +634,8 @@ body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhib
 
 /*ntua addition*/
 body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhibition li img{
-width: 90%;}
+    max-width: 90%;
+    max-height: 150px;}
 /*end of addition*/
 body div[role='main'].homepage .featured .featured-box .featured-meta .img-exhibition li::before {
   content: '';
