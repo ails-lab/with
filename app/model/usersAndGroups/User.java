@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import controllers.CollectionObjectController;
 import db.DB;
 
 @Entity
@@ -106,8 +107,8 @@ public class User extends UserOrGroup {
 	@Embedded
 	private Page page;
 
-	//@JsonIgnore
-	//private int exhibitionsCreated;
+	// @JsonIgnore
+	// private int exhibitionsCreated;
 
 	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
 	private final Set<ObjectId> userGroupsIds = new HashSet<ObjectId>();
@@ -285,17 +286,14 @@ public class User extends UserOrGroup {
 		this.superUser = isSuperUser;
 	}
 
-	/*public int getExhibitionsCreated() {
-		return exhibitionsCreated;
-	}
-
-	public void setExhibitionsCreated(int exhibitionsCreated) {
-		this.exhibitionsCreated = exhibitionsCreated;
-	}
-
-	public void addExhibitionsCreated() {
-		this.exhibitionsCreated++;
-	}*/
+	/*
+	 * public int getExhibitionsCreated() { return exhibitionsCreated; }
+	 * 
+	 * public void setExhibitionsCreated(int exhibitionsCreated) {
+	 * this.exhibitionsCreated = exhibitionsCreated; }
+	 * 
+	 * public void addExhibitionsCreated() { this.exhibitionsCreated++; }
+	 */
 
 	public ArrayNode getOrganizations() {
 		ObjectNode groupInfo = Json.newObject();
@@ -379,6 +377,13 @@ public class User extends UserOrGroup {
 	}
 
 	public ObjectId getFavorites() {
+		if (favorites == null)
+			favorites = DB.getCollectionObjectDAO()
+					.getByOwnerAndLabel(this.getDbId(), null, "_favorites")
+					.getDbId();
+		if (favorites == null)
+			favorites = CollectionObjectController.createFavorites(this
+					.getDbId());
 		return favorites;
 	}
 
