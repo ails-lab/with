@@ -133,19 +133,19 @@ public class WithDate {
 			try {
 				setIsoDate((new SimpleDateFormat("dd-mm-yyyy")).parse(free));
 			} catch (ParseException e) {
-				Logger.error("unrecognized date: " + free);
+				Logger.warn("unrecognized date: " + free);
 			}
 		} else if (free.matches("\\d\\d\\d\\d-\\d\\d-\\d\\d")) {
 			try {
 				setIsoDate((new SimpleDateFormat("yyyy-mm-dd")).parse(free));
 			} catch (ParseException e) {
-				Logger.error("unrecognized date: " + free);
+				Logger.warn("unrecognized date: " + free);
 			}
 		} else if (sources.core.Utils.isValidURL(free)) {
 			this.uri = free;
 			// this.uriType = ResourceType.uri;
 		} else {
-			Logger.error("unrecognized date: " + free);
+			Logger.warn("unrecognized date: " + free);
 		}
 	}
 

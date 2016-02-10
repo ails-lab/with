@@ -45,15 +45,16 @@ public class JsonNodeUtils {
 		}
 		return null;
 	}
+
 	public static MultiLiteral readMultiLiteral(MultiLiteral res, JsonNode node, Language... suggestedLanguages) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isTextual()) {
-				res.addSmartLiteral(node.asText(),suggestedLanguages);
+				res.addSmartLiteral(node.asText(), suggestedLanguages);
 				return res.fillDEF();
-			} 
-			if (node.isArray()){
+			}
+			if (node.isArray()) {
 				for (int i = 0; i < node.size(); i++) {
-					readMultiLiteral(res, node.get(i),suggestedLanguages);
+					readMultiLiteral(res, node.get(i), suggestedLanguages);
 				}
 				return res.fillDEF(true);
 			}
@@ -61,16 +62,19 @@ public class JsonNodeUtils {
 				Entry<String, JsonNode> next = iterator.next();
 				Language language = Language.getLanguage(next.getKey());
 				JsonNode value = next.getValue();
-				if (language!=null){
+				if (language != null) {
 					for (int i = 0; i < value.size(); i++) {
-						res.addLiteral(language, value.get(i).asText());
+						String asText = value.get(i).asText();
+						if (Utils.hasInfo(asText))
+							res.addLiteral(language, asText);
 					}
 				} else {
 					List<String> asString = asStringArray(value);
 					for (int i = 0; i < asString.size(); i++) {
-						res.addSmartLiteral(asString.get(i),suggestedLanguages);
+						res.addSmartLiteral(asString.get(i), suggestedLanguages);
 					}
-					System.out.println("Unknown Format!!! "+next.toString());
+					if (!next.getKey().equals("@resource"))
+						System.out.println("Unknown Format!!! " + next.toString());
 				}
 			}
 			return res.fillDEF();
@@ -81,14 +85,15 @@ public class JsonNodeUtils {
 	public static MultiLiteral asMultiLiteral(JsonNode node, Language... suggestedLanguages) {
 		return readMultiLiteral(new MultiLiteral(), node, suggestedLanguages);
 	}
+
 	public static Literal readLiteral(Literal res, JsonNode node, Language... suggestedLanguages) {
 		if (node != null && !node.isMissingNode()) {
 			if (node.isTextual()) {
 				res.addSmartLiteral(node.asText());
 				return res.fillDEF();
 			}
-			if (node.isArray()){
-				res.addSmartLiteral(node.get(0).asText(),suggestedLanguages);
+			if (node.isArray()) {
+				res.addSmartLiteral(node.get(0).asText(), suggestedLanguages);
 				return res.fillDEF();
 			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
@@ -98,25 +103,25 @@ public class JsonNodeUtils {
 				if (language != null)
 					res.addLiteral(language, value.get(0).asText());
 				else
-					res.addSmartLiteral(asString(value),suggestedLanguages);
+					res.addSmartLiteral(asString(value), suggestedLanguages);
 			}
 			return res.fillDEF();
 		}
 		return null;
 	}
-	
+
 	public static Literal asLiteral(JsonNode node, Language... suggestedLanguages) {
 		return readLiteral(new Literal(), node);
 	}
+
 	public static LiteralOrResource asLiteralOrResource(JsonNode node, Language... suggestedLanguages) {
-		return (LiteralOrResource) readLiteral(new LiteralOrResource(), node,suggestedLanguages);
+		return (LiteralOrResource) readLiteral(new LiteralOrResource(), node, suggestedLanguages);
 	}
 
 	public static MultiLiteralOrResource asMultiLiteralOrResource(JsonNode node, Language... suggestedLanguages) {
-		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node,suggestedLanguages);
+		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node, suggestedLanguages);
 	}
-	
-	
+
 	public static List<WithDate> asWithDateArray(JsonNode node) {
 		if (node != null && !node.isMissingNode()) {
 			ArrayList<WithDate> res = new ArrayList<>();
@@ -124,10 +129,10 @@ public class JsonNodeUtils {
 				for (int i = 0; i < node.size(); i++) {
 					res.add(new WithDate(node.get(i).asText()));
 				}
-			} else if (node.isTextual())  {
+			} else if (node.isTextual()) {
 				res.add(new WithDate(node.asText()));
 				return res;
-			} 
+			}
 			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
 				Entry<String, JsonNode> next = iterator.next();
 				JsonNode value = next.getValue();
@@ -139,7 +144,7 @@ public class JsonNodeUtils {
 		}
 		return new ArrayList<>();
 	}
-	
+
 	public static List<String> asStringArray(Collection<JsonNode> node) {
 		List<String> res = new ArrayList<>();
 		for (JsonNode n : node) {
@@ -157,8 +162,14 @@ public class JsonNodeUtils {
 				for (int i = 0; i < node.size(); i++) {
 					res.add(node.get(i).asText());
 				}
-			} else {
+			} else if (node.isTextual()) {
 				res.add(node.asText());
+			} else {
+				for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+					Entry<String, JsonNode> next = iterator.next();
+					JsonNode value = next.getValue();
+					res.addAll(asStringArray(value));
+				}
 			}
 			return res;
 		}

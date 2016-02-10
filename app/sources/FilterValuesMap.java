@@ -213,7 +213,7 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, ".*creative(?!.*nd).*");
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*");
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, ".*rr-.*",".*rv-fz.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, ".*unknown.*");
 		
 	}

@@ -16,10 +16,7 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
@@ -31,7 +28,6 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
-import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
@@ -55,11 +51,11 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		// TODO read the language
 		
 		Language[] language = null;
-		if (rec.getValue("ProvidedCHO.language")!=null){
-			JsonNode langs = rec.getValue("ProvidedCHO.language");
+		List<String> langs = rec.getStringArrayValue("ProvidedCHO.language","ProvidedCHO.language.@resource");
+		if (langs!=null){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
-				language[i] = Language.getLanguage(langs.get(i).asText());
+				language[i] = Language.getLanguage(langs.get(i));
 			}
 		}
 		if (!Utils.hasInfo(language)){
@@ -83,15 +79,16 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 //		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setLabel(rec.getMultiLiteralValue("ProvidedCHO.title"));
 //		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("Concept"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("Concept[.*].prefLabel"));
 		model.setDates(rec.getWithDateArrayValue("ProvidedCHO.issued"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("WebResource.type"));
 //		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("WebResource.rights");
-		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
-		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+		Object object2 = getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
 		 rights.getURI()).get(0);
+		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
+		 object2;
 		
 
 

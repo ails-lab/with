@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -401,7 +403,21 @@ public class JsonContextRecord {
 	}
 
 	public List<String> getStringArrayValue(String... path) {
-		return JsonNodeUtils.asStringArray(getValues(buildpaths(path)));
+		Set<String> res = new TreeSet<>();
+		for (String spath : path) {
+			List<JsonNode> node = getValues(buildpaths(spath));
+			if (Utils.hasInfo(node)){
+				for (JsonNode jsonNode : node) {
+					if (Utils.hasInfo(jsonNode)){
+						List<String> a = JsonNodeUtils.asStringArray(jsonNode);
+						for (String string : a) {
+							res.add(string);
+						}
+					}
+				}
+			}
+		}
+		return new ArrayList<String>(res);
 	}
 
 	public List<WithDate> getWithDateArrayValue(String... path) {

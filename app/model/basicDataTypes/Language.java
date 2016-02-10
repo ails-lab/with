@@ -15,6 +15,9 @@
 
 
 package model.basicDataTypes;
+
+import sources.core.Utils;
+
 /**
  * The languages are added using the alpha2 code preferably 
  * but also another code can be used to refer to it. We define
@@ -2020,6 +2023,10 @@ public enum Language {
 	 * @return true iff the code is used to refer to this language.
 	 */
 	public boolean belongsTo(String code) {
+		if (Utils.isValidURL(code)){
+			int l = code.lastIndexOf("/");
+			code = code.substring(l+1);
+		}
 		for (String langcode: this.getCodes()) {
 			if (code.equals(langcode))
 				return true;

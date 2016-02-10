@@ -23,11 +23,9 @@ import java.util.List;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
-import play.libs.Json;
-
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.basicDataTypes.MultiLiteralOrResource;
+import play.libs.Json;
 
 public class Utils {
 
@@ -296,7 +294,7 @@ public class Utils {
 	}
 
 	public static boolean hasInfo(String string) {
-		return !(string==null || string.equals("") || string.equals("null"));
+		return !(string==null || string.equals("") || string.matches("[\\s]*") || string.equals("null"));
 	}
 	
 	public static boolean hasInfo(JsonNode node) {

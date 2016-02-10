@@ -16,7 +16,6 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,7 +30,6 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
-import play.Logger;
 import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
@@ -73,17 +71,18 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		rec.setLanguages(language);
 
-		model.setDclanguage(rec.getMultiLiteralOrResourceValue("dcLanguage"));
+		model.setDclanguage(rec.getMultiLiteralOrResourceValue("dcLanguage","edmLanguage","language"));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
+		model.setCountry(rec.getMultiLiteralOrResourceValue("country","edmCountry"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreator"));
 		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
 		model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
 		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
-		model.setLabel(rec.getMultiLiteralValue("dcTitle"));
+		model.setLabel(rec.getMultiLiteralValue("dcTitle","title"));
 		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubject"));
 		model.setDates(rec.getWithDateArrayValue("dcDate"));
