@@ -87,7 +87,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		 */
 		//index
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-		private ObjectId withCreator;
+		private ObjectId withCreator = null;
 
 		// uri that this resource has in the rdf repository
 		private String withURI;
@@ -390,13 +390,14 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public WithResource(Class<?> clazz) {
-		new WithResource();
+		this.usage = new Usage();
+		this.provenance = new ArrayList<ProvenanceInfo>();
+		this.collectedIn = new ArrayList<CollectionInfo>();
+		this.media = new ArrayList<>();
+		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
+		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
+		this.media.add(embedded);
 		this.resourceType = WithResourceType.valueOf(clazz.getSimpleName());
-	}
-	
-	public WithResource(ObjectId id) {
-		new WithResource();
-		this.setDbId(id);
 	}
 
 	/*

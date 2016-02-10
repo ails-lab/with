@@ -342,7 +342,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
-			List<ObjectNode> collections = collectionWithMyAccessData(info.x,
+			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
 					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -393,7 +393,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 
-			List<ObjectNode> collections = collectionWithMyAccessData(info.x,
+			List<ObjectNode> collections = collectionsWithMyAccessData(info.x,
 					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -448,7 +448,7 @@ public class CollectionObjectController extends WithResourceController {
 		return accessedByUserOrGroup;
 	}
 
-	private static List<ObjectNode> collectionWithMyAccessData(
+	private static List<ObjectNode> collectionsWithMyAccessData(
 			List<CollectionObject> userCollections,
 			List<String> effectiveUserIds) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
@@ -470,8 +470,8 @@ public class CollectionObjectController extends WithResourceController {
 					maxAccess = Access.READ;
 				}
 				c.put("myAccess", maxAccess.toString());
+				collections.add(c);
 			}
-			collections.add(c);
 		}
 		return collections;
 	}
@@ -542,7 +542,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 			}
 			ArrayNode collArray = Json.newObject().arrayNode();
-			List<ObjectNode> collections = collectionWithMyAccessData(
+			List<ObjectNode> collections = collectionsWithMyAccessData(
 					collectionsOrExhibitions, effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -620,9 +620,8 @@ public class CollectionObjectController extends WithResourceController {
 				int position = start;
 				for (RecordResource e: records) {
 					//filter out records to which the user has no read access
-					response = errorIfNoAccessToCollection(Action.READ, e.getDbId());
 					if (!response.toString().equals(ok().toString())) {
-						recordsList.add(Json.toJson(new WithResource(e.getDbId())));
+						recordsList.add(Json.toJson(new RecordResource(e.getDbId())));
 					}
 					else {
 						// filter out all context annotations that do not refer to
@@ -650,8 +649,8 @@ public class CollectionObjectController extends WithResourceController {
 									e.setContent(newContent);
 								}					
 						}
+						recordsList.add(Json.toJson(e));
 					}
-					recordsList.add(Json.toJson(e));
 					position+= 1;
 				}
 				result.put(
@@ -662,7 +661,6 @@ public class CollectionObjectController extends WithResourceController {
 									Arrays.asList("administrative.entryCount")))
 								.getAdministrative().getEntryCount());
 				result.put("records", recordsList);
-				System.out.println("4");
 				return ok(result);
 			}
 		} catch (Exception e1) {
