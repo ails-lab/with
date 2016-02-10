@@ -95,6 +95,8 @@ public class User extends UserOrGroup {
 	private String md5Password;
 	@JsonIgnore
 	private boolean superUser;
+	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	private ObjectId favorites;
 	// we should experiment here with an array of fixed-size
 	// We keep a complete search history, but have the first
 	// k entries in here as a copy
@@ -374,5 +376,13 @@ public class User extends UserOrGroup {
 		} catch (Exception e) {
 			return new HashSet<Notification>();
 		}
+	}
+
+	public ObjectId getFavorites() {
+		return favorites;
+	}
+
+	public void setFavorites(ObjectId favorites) {
+		this.favorites = favorites;
 	}
 }

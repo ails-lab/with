@@ -219,8 +219,8 @@ public class UserManager extends Controller {
 		// If everything is ok store the user at the database
 		User user = Json.fromJson(json, User.class);
 		DB.getUserDAO().makePermanent(user);
-		CollectionObjectController.createFavorites(user.getDbId());
-
+		ObjectId fav = CollectionObjectController.createFavorites(user.getDbId());
+		user.setFavorites(fav);		
 		session().put("user", user.getDbId().toHexString());
 		session().put("sourceIp", request().remoteAddress());
 		session().put("lastAccessTime",
