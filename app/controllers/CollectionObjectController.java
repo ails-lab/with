@@ -341,7 +341,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalCollections", info.y.x);
 				result.put("totalExhibitions", info.y.y);
 			}
-			List<ObjectNode> collections = collectionWithUserData(info.x,
+			List<ObjectNode> collections = collectionWithMyAccessData(info.x,
 					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -392,7 +392,7 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 
-			List<ObjectNode> collections = collectionWithUserData(info.x,
+			List<ObjectNode> collections = collectionWithMyAccessData(info.x,
 					effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
@@ -447,7 +447,7 @@ public class CollectionObjectController extends WithResourceController {
 		return accessedByUserOrGroup;
 	}
 
-	private static List<ObjectNode> collectionWithUserData(
+	private static List<ObjectNode> collectionWithMyAccessData(
 			List<CollectionObject> userCollections,
 			List<String> effectiveUserIds) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
@@ -468,15 +468,7 @@ public class CollectionObjectController extends WithResourceController {
 				if (maxAccess.equals(Access.NONE)) {
 					maxAccess = Access.READ;
 				}
-				c.put("access", maxAccess.toString());
-				// TODO: specifiy retrieved fields
-				User user = DB.getUserDAO().getById(
-						collection.getAdministrative().getWithCreator(),
-						new ArrayList<String>(Arrays.asList("username")));
-				if (user != null) {
-					c.put("creator", user.getUsername());
-					collections.add(c);
-				}
+				c.put("myAccess", maxAccess.toString());
 			}
 		}
 		return collections;
@@ -548,7 +540,7 @@ public class CollectionObjectController extends WithResourceController {
 				}
 			}
 			ArrayNode collArray = Json.newObject().arrayNode();
-			List<ObjectNode> collections = collectionWithUserData(
+			List<ObjectNode> collections = collectionWithMyAccessData(
 					collectionsOrExhibitions, effectiveUserIds);
 			for (ObjectNode c : collections)
 				collArray.add(c);
