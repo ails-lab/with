@@ -319,6 +319,10 @@ public class CollectionObjectController extends WithResourceController {
 				result.put("totalExhibitions", info.y.y);
 			}
 			for (CollectionObject collection : userCollections) {
+				ObjectId withCreator = collection.getAdministrative().getWithCreator();
+				System.out.println(collection.getDbId() + " " + withCreator);
+				User user = collection.getWithCreatorInfo();
+				System.out.println(user.getUsername());
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
@@ -453,12 +457,12 @@ public class CollectionObjectController extends WithResourceController {
 			List<String> effectiveUserIds) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
 				userCollections.size());
-		Collections.sort(userCollections, new Comparator<CollectionObject>() {
+		/*Collections.sort(userCollections, new Comparator<CollectionObject>() {
 			public int compare(CollectionObject c1, CollectionObject c2) {
 				return -c1.getAdministrative().getCreated()
 						.compareTo(c2.getAdministrative().getCreated());
 			}
-		});
+		});*/
 		for (CollectionObject collection : userCollections) {
 			ObjectNode c = (ObjectNode) Json.toJson(collection);
 			Access maxAccess = AccessManager.getMaxAccess(collection
