@@ -16,6 +16,7 @@
 
 package controllers;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -402,6 +403,9 @@ public class WithResourceController extends Controller {
 						"Record succesfully removed from collection");
 				return ok(result);
 			}
+		} catch (FileNotFoundException e) {
+			result.put("error", "Wrong record id or position in the collection");
+			return badRequest(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
