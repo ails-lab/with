@@ -319,9 +319,6 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			for (CollectionObject collection : userCollections) {
 				ObjectId withCreator = collection.getAdministrative().getWithCreator();
-				System.out.println(collection.getDbId() + " " + withCreator);
-				User user = collection.getWithCreatorInfo();
-				System.out.println(user.getUsername());
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
@@ -656,7 +653,7 @@ public class CollectionObjectController extends WithResourceController {
 					position+= 1;
 				}
 				result.put(
-						"itemCount",
+						"entryCount",
 						DB.getCollectionObjectDAO()
 							.getById(colId,
 								new ArrayList<String>(
