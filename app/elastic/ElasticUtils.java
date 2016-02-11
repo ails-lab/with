@@ -330,16 +330,8 @@ public class ElasticUtils {
 		Map<String, List<?>> resourcesPerType = new HashMap<String, List<?>>();
 
 		for(Entry<String, List<ObjectId>> e: idsOfEachType.entrySet()) {
-			switch (e.getKey()) {
-			case "resource":
-				resourcesPerType.put("resource" , DB.getRecordResourceDAO().getByIds(e.getValue()));
-				break;
-			case "collection":
-				resourcesPerType.put("collection" , DB.getRecordResourceDAO().getByIds(e.getValue()));
-				break;
-			default:
-				break;
-			}
+			resourcesPerType.put(e.getKey() , DB.getRecordResourceDAO().getByIds(e.getValue()));
+
 		}
 
 		return resourcesPerType;

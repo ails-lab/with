@@ -27,9 +27,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.basicDataTypes.WithAccess.Access;
-import model.resources.RecordResource;
-import model.resources.RecordResource.RecordDescriptiveData;
-
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -49,7 +46,6 @@ import org.elasticsearch.index.query.FilteredQueryBuilder;
 import org.elasticsearch.index.query.MatchAllQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.MoreLikeThisQueryBuilder;
-import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.NestedFilterBuilder;
 import org.elasticsearch.index.query.NotFilterBuilder;
 import org.elasticsearch.index.query.OrFilterBuilder;
@@ -59,27 +55,13 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder;
 import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.RangeFilterBuilder;
 import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.elasticsearch.index.query.functionscore.fieldvaluefactor.FieldValueFactorFunctionBuilder;
-import org.elasticsearch.index.search.MultiMatchQuery;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsBuilder;
-import org.elasticsearch.search.facet.FacetBuilder;
-import org.elasticsearch.search.facet.FacetBuilders;
-import org.elasticsearch.search.sort.FieldSortBuilder;
-import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilder.SuggestionBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
-import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.gson.JsonObject;
-
-import elastic.ElasticSearcher.SearchOptions;
 import utils.Tuple;
 
 public class ElasticSearcher {
@@ -371,8 +353,8 @@ public class ElasticSearcher {
 			OrFilterBuilder or_filter = FilterBuilders.orFilter();
 			for(Tuple<ObjectId, Access> t: ands) {
 				BoolFilterBuilder bool = FilterBuilders.boolFilter();
-				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("access.acl.level").gte(t.y.ordinal());
-				bool.must(this.filter("access.acl.user", t.x.toString()));
+				RangeFilterBuilder range_filter = FilterBuilders.rangeFilter("access.level").gte(t.y.ordinal());
+				bool.must(this.filter("access.user", t.x.toString()));
 				bool.must(range_filter);
 				or_filter.add(bool);
 			}

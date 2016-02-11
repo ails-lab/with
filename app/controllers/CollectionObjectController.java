@@ -23,16 +23,9 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import javax.validation.ConstraintViolation;
 
-import model.Collection;
-import model.CollectionRecord;
 import model.annotations.ContextData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -52,38 +45,25 @@ import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 
-import org.apache.commons.codec.language.bm.Lang;
 import org.bson.types.ObjectId;
-import org.elasticsearch.action.index.IndexResponse;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.F.Option;
 import play.libs.Json;
-import play.mvc.Controller;
 import play.mvc.Result;
-import sources.core.ISpaceSource;
-import sources.core.ParallelAPICall;
-import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.Locks;
 import utils.Tuple;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
-import elastic.Elastic;
-import elastic.ElasticEraser;
-import elastic.ElasticIndexer;
-import elastic.ElasticUpdater;
 
 /**
  * @author mariaral
@@ -126,7 +106,7 @@ public class CollectionObjectController extends WithResourceController {
 				collection = Json.fromJson(json,
 						CollectionObject.class);
 				if (collection.getDescriptiveData().getLabel() ==  null) {
-					error.put("error", "");					
+					error.put("error", "");
 				}
 			}
 			Set<ConstraintViolation<CollectionObject>> violations = Validation
@@ -646,7 +626,7 @@ public class CollectionObjectController extends WithResourceController {
 									newContent.put(contentFormat, (String) e
 											.getContent().get(contentFormat));
 									e.setContent(newContent);
-								}					
+								}
 						}
 						recordsList.add(Json.toJson(e));
 					}
