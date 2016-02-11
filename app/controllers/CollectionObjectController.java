@@ -116,15 +116,15 @@ public class CollectionObjectController extends WithResourceController {
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			User creator = DB.getUserDAO().get(creatorDbId);
-			CollectionObject collection = Json.fromJson(json,
-					CollectionObject.class);
+			CollectionObject collection = new CollectionObject();
 			if (colType.equals(CollectionType.Exhibition)) {
 				collection.getDescriptiveData().setLabel(
 						createExhibitionDummyTitle());
 				collection.getDescriptiveData().setDescription(
 						new MultiLiteral("Description"));
 			} else {
+				collection = Json.fromJson(json,
+						CollectionObject.class);
 				if (collection.getDescriptiveData().getLabel() ==  null) {
 					error.put("error", "");					
 				}
