@@ -46,17 +46,17 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 
             }
         });
-    };
+    }
 
     function createExhibition() {
         return $.ajax({
             type: "POST",
-            url: "/exhibition/create",
+            url: "/collection?collectionType=Exhibition",
             success: function () {
 
             }
         });
-    };
+    }
 
     function getExhibition(id) {
         return $.ajax({
@@ -66,7 +66,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 
             }
         });
-    };
+    }
 
     function updateExhibition(exhibition, isTitleUpdate) {
 
@@ -139,12 +139,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
         self.route = params.route;
         self.checkLogged=function(){
 			if(isLogged()==false){
-		
+
 			window.location='#login';
 			return;
 			}
 		}
-		
+
 		self.checkLogged();
         self.loading = ko.observable(false);
         self.title = ko.observable('');
