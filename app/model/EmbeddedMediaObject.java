@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.common.net.MediaType;
 
 import model.basicDataTypes.LiteralOrResource;
+import sources.core.Utils;
 
 @Entity
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -81,6 +82,15 @@ public class EmbeddedMediaObject {
 		@Override
 		public String toString() {
 			return text;
+		}
+		public static WithMediaRights getRighs(String code){
+			if (Utils.hasInfo(code)){
+				for (WithMediaRights v : WithMediaRights.values()) {
+					if (v.toString().equals(code))
+						return v;
+				}
+			}
+			return UNKNOWN;
 		}
 	}
 
