@@ -79,6 +79,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	if(self.administrative){
 			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
 			        		  return "COLLECTION";
+			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        			return "SPACE";
 			        	    else return "EXHIBITION";
 			        	}else return "";
 			        });
@@ -87,7 +89,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	if(self.administrative){
 			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
 			        		  return "item collection";
-			        	    else return "item exhibition";
+			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        			return "item space";
+			        	    else return "item space";
 			        	}else return "item exhibition";
 			        });
 			        
@@ -95,6 +99,9 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        	if(self.administrative){
 			        		if (self.administrative.collectionType.indexOf("Collection")==-1)
 				    		  return 'index.html#exhibitionview/'+ self.dbId;
+			        		else if (self.administrative.collectionType.indexOf("Space")>-1){
+			        			return self.administrative.isShownAt;
+			        		}
 				    		else{
 				    			return 'index.html#collectionview/'+ self.dbId;
 				    		}
@@ -174,7 +181,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.homecollections=ko.observableArray();
 	  self.totalCollections=ko.observable(0);
 	  self.totalExhibitions=ko.observable(0);
-	 	
+	  self.spaces=ko.observableArray();
+	  self.collections=ko.observableArray();
 	  self.revealItems = function (data) {
 		  if(data.length==0){ loading(false);$(".loadmore").text("no more results");}
 			
@@ -185,25 +193,58 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				
 				
 				self.homecollections().push(c);
+				self.collections().push(c);
 			}
 			self.homecollections.valueHasMutated();
 		};
 		
 	  
+		self.revealSpaceItems = function (data) {
+				
+				for (var i in data) {
+					var page=data[i].page;
+					var thumb=null;
+					var url="";
+					
+					if(page){
+						thumb=page.cover;
+						url=page.url;
+					}
+					
+					var spacetocollection={administrative:{collectionType:'Space',isShownAt:url}, descriptiveData:{label:{default:[data[i].friendlyName]}},media:[{Thumbnail:{url: thumb}}]};
+					var c=new Collection(
+								spacetocollection				
+					);
+					
+					
+					self.homecollections().push(c);
+					self.spaces().push(c);
+				}
+				// dont notify only let collections + exhibitions redraw self.homecollections.valueHasMutated();
+			};	
+		
 	  self.loadAll = function () {
 		  //this should replaced with get space collections + exhibitions
 		   loading(true);
-		   initFilterStick();
-		    WITHApp.initIsotope();
+		  
 		  var promiseCollections = self.getSpaceCollections();
+		  var promiseSpaces=self.getSpaces();
+		  $.when(promiseSpaces).done(function(response) {
+		        //self.totalSpaces(response);
+			    self.revealSpaceItems(response);
+			    
+				
+		  });
 		  $.when(promiseCollections).done(function(responseCollections) {
 			        self.totalCollections(responseCollections.totalCollections);
 			        self.totalExhibitions(responseCollections.totalExhibitions);
 				    self.revealItems(responseCollections['collectionsOrExhibitions']);
-				    
+				    initFilterStick();
+				    WITHApp.initIsotope();
 				    loading(false);
 					
 			});
+		 
 		  var promise2 = self.getFeatured("56baf43ebb9ce84403c41ebf");
           $.when(promise2).done(function (data) {
         	  
@@ -225,7 +266,20 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 
 		 
 		};
-		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
+		
+		self.getSpaces = function () {
+			//call should be replaced with space collections+exhibitions
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/group/list",
+				processData: false,
+				data: "offset=0&count=10",
+			}).success (function(){
+			});
+		};
+		
 		self.getSpaceCollections = function () {
 			//call should be replaced with space collections+exhibitions
 			return $.ajax({
@@ -234,10 +288,12 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=20&collectionHits=true&isPublic=true",
+				data: "offset=0&count=10&collectionHits=true&isPublic=true",
 			}).success (function(){
 			});
 		};
+		
+		
 		
          self.getFeatured=function(id) {
 			
@@ -255,8 +311,32 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	    
 		self.loadNext = function () {
+			self.moreSpaces();
 			self.moreCollections();
 		};
+		
+		self.moreSpaces = function(){
+			if (loading() === true) {
+				setTimeout(self.moreSpaces(), 1000);
+			}
+			if (loading() === false) {
+				loading(true);
+				var offset = self.spaces().length+1;
+				$.ajax({
+					"url": "/group/list?count=20&offset=" + offset,
+					"method": "get",
+					"contentType": "application/json",
+					"success": function (data) {
+						self.revealSpaceItems(data);
+						loading(false);
+						
+					},
+					"error": function (result) {
+						loading(false);
+					}
+				});
+			}
+		}
 
 		self.moreCollections = function () {
 			if (loading() === true) {
@@ -264,7 +344,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			}
 			if (loading() === false) {
 				loading(true);
-				var offset = self.homecollections().length+1;
+				var offset = self.collections().length+1;
 				$.ajax({
 					"url": "/collection/list?isPublic=true&count=20&offset=" + offset,
 					"method": "get",
