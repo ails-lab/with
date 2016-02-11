@@ -55,7 +55,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 			for (int i = 0; i < langs.size(); i++) {
 				language[i] = Language.getLanguage(langs.get(i));
 			}
-			System.out.println(Arrays.toString(language));
+//			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("sourceResource.title"),

@@ -16,6 +16,7 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -49,13 +50,13 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		
 
 		Language[] language = null;
-		if (rec.getValue("language")!=null){
-			JsonNode langs = rec.getValue("language");
+		List<String> langs = rec.getStringArrayValue(false,"language","dcLanguage");
+		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
-				language[i] = Language.getLanguage(langs.get(i).asText());
+				language[i] = Language.getLanguage(langs.get(i));
 			}
-//			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+//			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("title"),

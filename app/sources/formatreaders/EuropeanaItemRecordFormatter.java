@@ -16,6 +16,7 @@
 
 package sources.formatreaders;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,6 +35,7 @@ import sources.FilterValuesMap;
 import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import sources.utils.StringUtils;
 
 public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
@@ -49,34 +51,37 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("type"));
 		WithMediaType type = (WithMediaType) vals.get(0);
 		
-		rec.enterContext("proxies[0]");
-		
 
 //		String id = rec.getStringValue("objectNumber");
 		
 		Language[] language = null;
-		if (rec.getValue("dcLanguage")!=null){
-			JsonNode langs = rec.getValue("dcLanguage");
+		List<String> langs = rec.getStringArrayValue(false,"proxies[0].dcLanguage","europeanaAggregation.edmLanguage","language");
+		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
-				language[i] = Language.getLanguage(langs.get(i).asText());
+				language[i] = Language.getLanguage(langs.get(i));
 			}
-//			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("dcTitle"),
 											rec.getStringValue("titles"),
 											rec.getStringValue("dcSubject"));
 		}
+		
+
+		model.setCountry(rec.getMultiLiteralOrResourceValue("proxies[0].country","europeanaAggregation.edmCountry"));
+
+		rec.enterContext("proxies[0]");
+		
 
 		rec.setLanguages(language);
 
-		model.setDclanguage(rec.getMultiLiteralOrResourceValue("dcLanguage","edmLanguage","language"));
+		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
-		model.setCountry(rec.getMultiLiteralOrResourceValue("country","edmCountry"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreator"));
 		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
