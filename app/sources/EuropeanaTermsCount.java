@@ -20,7 +20,10 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Scanner;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -30,11 +33,13 @@ import sources.core.QueryBuilder;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
+import utils.ListUtils;
 
 public class EuropeanaTermsCount {
 
 	public static String getHTML(String urlToRead) throws Exception {
 	      StringBuilder result = new StringBuilder();
+	      System.err.println("calling " + urlToRead);
 	      URL url = new URL(urlToRead);
 	      HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	      conn.setRequestMethod("GET");
@@ -44,6 +49,7 @@ public class EuropeanaTermsCount {
 	         result.append(line);
 	      }
 	      rd.close();
+	      System.err.println("result "+System.lineSeparator() + result.toString());
 	      return result.toString();
 	   }
 	
@@ -53,13 +59,20 @@ public class EuropeanaTermsCount {
 		Scanner s = new Scanner(System.in);
 		while (s.hasNextLine()){
 			String term = s.nextLine();
-			
+			Function<String, String> function = (String ss) -> {
+				return "%22" + Utils.spacesFormatQuery(ss, "%20") + "%22";
+			};
 			QueryBuilder builder = new QueryBuilder("http://europeana.eu/api/v2/search.json");
 			builder.addSearchParam("wskey", apiKey);
 			builder.addQuery("query", term);
 			JsonContextRecord response = new JsonContextRecord(getHTML(builder.getHttp()));
 			int count = response.getIntValue("totalResults");
-			System.out.println(term+", "+count);
+			
+			Collection<String> t = Arrays.asList("Europeana Food and Drink");
+			builder.addSearchParam("qf", "PROVIDER%3A" + Utils.getORList(ListUtils.transform(t , function)));
+			response = new JsonContextRecord(getHTML(builder.getHttp()));
+			int count2 = response.getIntValue("totalResults");
+			System.out.println(term+", "+(count-count2));
 		}
 		s.close();
 	}

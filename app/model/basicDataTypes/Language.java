@@ -2003,10 +2003,14 @@ public enum Language {
 
 	public static Language getLanguage(String code){
 		for (Language lang : Language.values()) {
-			if (lang.belongsTo(code) || lang.name.equals(code))
+			if (lang.belongsTo(code) || match(code, lang))
 				return lang;
 		}
 		return null;
+	}
+
+	private static boolean match(String code, Language lang) {
+		return lang.name.toLowerCase().equals(code.toLowerCase());
 	}
 
 	public static boolean isLanguage(String code) {
@@ -2028,7 +2032,7 @@ public enum Language {
 			code = code.substring(l+1);
 		}
 		for (String langcode: this.getCodes()) {
-			if (code.equals(langcode))
+			if (code.toLowerCase().equals(langcode))
 				return true;
 		}
 		return false;

@@ -321,12 +321,12 @@ public class JsonContextRecord {
 				for (JsonNode jsonNode : node) {
 					if (Utils.hasInfo(jsonNode)){
 						res = merge(res, JsonNodeUtils.asMultiLiteral(jsonNode, languages));
-						if (!merge && Utils.hasInfo(res))
-							return res;
+						
 					}
 				}
 			}
-
+			if (!merge && Utils.hasInfo(res))
+				return res;
 		}
 		return res;
 	}
@@ -367,11 +367,11 @@ public class JsonContextRecord {
 				for (JsonNode jsonNode : node) {
 					if (Utils.hasInfo(jsonNode)) {
 						res = merge(res, JsonNodeUtils.asMultiLiteralOrResource(jsonNode, languages));
-						if (!merge && Utils.hasInfo(res))
-							return res;
 					}
 				}
 			}
+			if (!merge && Utils.hasInfo(res))
+				return res;
 		}
 		return res;
 	}
@@ -403,6 +403,10 @@ public class JsonContextRecord {
 	}
 
 	public List<String> getStringArrayValue(String... path) {
+		return getStringArrayValue(true,path);
+	}
+	
+	public List<String> getStringArrayValue(boolean merge,String... path) {
 		Set<String> res = new TreeSet<>();
 		for (String spath : path) {
 			List<JsonNode> node = getValues(buildpaths(spath));
@@ -416,6 +420,8 @@ public class JsonContextRecord {
 					}
 				}
 			}
+			if (!merge && Utils.hasInfo(res))
+				break;
 		}
 		return new ArrayList<String>(res);
 	}

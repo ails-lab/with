@@ -40,8 +40,8 @@ import utils.ListUtils;
 
 public class DPLARecordFormatter extends CulturalRecordFormatter {
 
-	public DPLARecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DPLARecordFormatter() {
+		super(FilterValuesMap.getDPLAMap());
 		object = new CulturalObject();
 	}
 
@@ -49,11 +49,11 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		Language[] language = null;
-		if (rec.getValue("sourceResource.language")!=null){
-			JsonNode langs = rec.getValue("sourceResource.language");
+		List<String> langs = rec.getStringArrayValue(false,"sourceResource.language[.*].iso639_3","originalRecord.language");
+		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
-				language[i] = Language.getLanguage(langs.get(i).path("iso639_3").asText());
+				language[i] = Language.getLanguage(langs.get(i));
 			}
 			System.out.println(Arrays.toString(language));
 		}
@@ -64,16 +64,17 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		}
 		rec.setLanguages(language);
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
-		model.setDcspatial(rec.getMultiLiteralOrResourceValue("originalRecord.spatial"));
-
-		model.setLabel(rec.getMultiLiteralValue("sourceResource.title"));
-		model.setDescription(rec.getMultiLiteralValue("sourceResource.description"));
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue(false,"originalRecord.spatial","sourceResource.spatial[.*].name"));
+		model.setCountry(rec.getMultiLiteralOrResourceValue("sourceResource.spatial[.*].country"));
+		model.setCity(rec.getMultiLiteralOrResourceValue("sourceResource.spatial[.*].city"));
+		model.setLabel(rec.getMultiLiteralValue(false,"sourceResource.title","originalRecord.label"));
+		model.setDescription(rec.getMultiLiteralValue(false,"sourceResource.description","originalRecord.description"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("hasView.@id"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("isShownAt"));
 		model.setDates(rec.getWithDateArrayValue("sourceResource.date.begin"));
-		model.setDccontributor(rec.getMultiLiteralOrResourceValue("sourceResource.contributor"));
-		model.setDccreator(rec.getMultiLiteralOrResourceValue("sourceResource.creator"));
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("sourceResource.subject"));
+		model.setDccontributor(rec.getMultiLiteralOrResourceValue(false,"sourceResource.contributor","originalRecord.contributor"));
+		model.setDccreator(rec.getMultiLiteralOrResourceValue(false,"sourceResource.creator","originalRecord.creator"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue(false,"sourceResource.subject[.*].name","originalRecord.subject"));
 		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("dataProvider"), uriAt,null));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("provider.name"), rec.getStringValue("provider.@id"), null));
@@ -81,11 +82,12 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		String uri = "http://dp.la/item/"+recID;
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DPLA.toString(), uri, recID));
-		List<String> rights = rec.getStringArrayValue("rights");
-		String stringValue = rec.getStringValue("sourceResource.type");
+		List<String> rights = rec.getStringArrayValue("sourceResource.rights");
+		String stringValue = rec.getStringValue("sourceResource.type","originalRecord.type");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
 		WithMediaType type = translateToCommon==null?null:(WithMediaType) translateToCommon.get(0);
-		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?null:(WithMediaRights) getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0);
+		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?WithMediaRights.UNKNOWN
+				:WithMediaRights.getRighs(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("object");
 		String uri2 = model.getIsShownBy()==null?null:model.getIsShownBy().getURI();
 		if (Utils.hasInfo(uri3)){

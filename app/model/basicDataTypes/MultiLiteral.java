@@ -66,8 +66,11 @@ public class MultiLiteral extends HashMap<String, List<String>> implements
 	}
 
 	public void add(String key, String value) {
-		if (this.containsKey(key))
-			this.get(key).add(value);
+		if (this.containsKey(key)){
+			List<String> list = this.get(key);
+			if (!list.contains(value))
+				list.add(value);
+		}
 		else
 			this.put(key, new ArrayList<String>(Arrays.asList(value)));
 	}

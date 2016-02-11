@@ -136,7 +136,7 @@ define(['bootstrap', 'knockout', 'text!./myfavorites.html', 'knockout-else', 'ap
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-						console.log(data.itemCount);
+						console.log(data.entryCount);
 						self.revealItems(data.records);
 						self.loading(false);
 					},

@@ -116,15 +116,15 @@ public class CollectionObjectController extends WithResourceController {
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			User creator = DB.getUserDAO().get(creatorDbId);
-			CollectionObject collection = Json.fromJson(json,
-					CollectionObject.class);
+			CollectionObject collection = new CollectionObject();
 			if (colType.equals(CollectionType.Exhibition)) {
 				collection.getDescriptiveData().setLabel(
 						createExhibitionDummyTitle());
 				collection.getDescriptiveData().setDescription(
 						new MultiLiteral("Description"));
 			} else {
+				collection = Json.fromJson(json,
+						CollectionObject.class);
 				if (collection.getDescriptiveData().getLabel() ==  null) {
 					error.put("error", "");					
 				}
@@ -319,9 +319,6 @@ public class CollectionObjectController extends WithResourceController {
 			}
 			for (CollectionObject collection : userCollections) {
 				ObjectId withCreator = collection.getAdministrative().getWithCreator();
-				System.out.println(collection.getDbId() + " " + withCreator);
-				User user = collection.getWithCreatorInfo();
-				System.out.println(user.getUsername());
 				ObjectNode c = (ObjectNode) Json.toJson(collection);
 				if (effectiveUserIds.isEmpty())
 					c.put("access", Access.READ.toString());
@@ -656,7 +653,7 @@ public class CollectionObjectController extends WithResourceController {
 					position+= 1;
 				}
 				result.put(
-						"itemCount",
+						"entryCount",
 						DB.getCollectionObjectDAO()
 							.getById(colId,
 								new ArrayList<String>(

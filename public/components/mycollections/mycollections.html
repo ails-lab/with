@@ -131,14 +131,14 @@
 						   <div class="col-xs-12 col-sm-12 col-md-12 coll-footer">
 						   		<!-- ko if: isPublic --><span class="label label-success">Public</span><!-- /ko -->
 						   		<!-- ko ifnot: isPublic --><span class="label label-danger">Restricted</span><!-- /ko -->
-					   			&bull; <strong>Items: </strong> <span data-bind="text: itemCount()"></span> &bull;
+					   			&bull; <strong>Items: </strong> <span data-bind="text: administrative.entryCount()"></span> &bull;
 						   		<b>Created:</b> <i data-bind="text: created()"></i> &bull;
 						   		<b>Creator:</b> <i data-bind="text: creator"></i>
 						   </div>
 						</div>
 					 </div>
 					 </div>
-					 <!--  ko if: itemCount() > 0 -->
+					 <!--  ko if: administrative.itemCount() > 0 -->
 						 <div class="col-xs-6  col-sm-6  col-md-8">
 					 	 <div class="row-fluid">
 					  	 <div class="imcontainer">

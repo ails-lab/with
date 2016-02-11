@@ -69,7 +69,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		
 		vmap = FilterValuesMap.getDPLAMap();
 
-		formatreader = new DPLARecordFormatter(vmap);
+		formatreader = new DPLARecordFormatter();
 
 		// TODO: what to do with physical objects?
 	}
