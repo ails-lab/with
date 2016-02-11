@@ -218,6 +218,8 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			 }*/
 		}
 		app.getEditableCollections();//TODO: update the storages for the collect it select- fix properly
+		
+		
 		self._search = function(facetinit,facetrecacl) {
 		 if(facetinit){self.filterselection.removeAll();}
 		 $(".withsearch-input").devbridgeAutocomplete("hide");
@@ -240,11 +242,16 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					self.previous(self.page()-1);
 					var moreitems=false;
                     var data=reply.responses;
-
-                    var filters=reply.filters;
+                    var facets=[];
+                    for(var f in reply.filters){
+                    	facet=reply.filters[f];
+                    	facet.filterID=facet.filterID.replace(/\./g, '_');
+			            facets.push(facet);
+                    }
                     if(facetinit || facetrecacl){
-                    self.filters.removeAll();
-                    self.filters().push.apply(self.filters(),filters);}
+	                    self.filters.removeAll();
+	                    
+	                    self.filters().push.apply(self.filters(),facets);}
 					for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed

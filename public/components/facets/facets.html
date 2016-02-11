@@ -17,7 +17,7 @@
   <li class="active"><a href="#datasources" data-toggle="tab" data-bind="event:{click: sourceBind}">Sources</a></li>
   
   <!-- ko foreach: $parent.filters -->
-  <!-- ko if: suggestedValues.length>0 && filterID != 'comesFrom' -->
+  <!-- ko if: suggestedValues.length>0 -->
   <li><a data-bind="attr:{href:'#'+filterID},text:filterName,event:{click: $parent.listBind}"  data-toggle="tab"></a></li>
   <!-- /ko -->
   <!-- /ko -->
@@ -77,7 +77,7 @@
   
    <!-- ko foreach: $parent.filters -->
    <div class="tab-pane fade" data-bind="attr:{id:filterID}">
-    <!-- ko if:(filterID!="year" &&  suggestedValues.length>0) -->
+    <!-- ko if:(filterID!="dates" &&  suggestedValues.length>0) -->
     <ul class="thumbfilters list">
    
     
@@ -92,7 +92,7 @@
       </ul>
      <!-- /ko -->
      
-     <!-- ko if:(filterID=="year" &&  suggestedValues.length>0) -->
+     <!-- ko if:(filterID=="dates" &&  suggestedValues.length>0) -->
      
         <ul class="list chart">
          <!-- ko foreach:$parent.yaxis -->
