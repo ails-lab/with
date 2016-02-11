@@ -17,6 +17,7 @@
 package db;
 
 import java.util.List;
+import java.util.Set;
 
 import model.usersAndGroups.UserGroup;
 import controllers.GroupManager.GroupType;
@@ -52,8 +53,21 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	}
 
 	public List<UserGroup> findPublic(GroupType groupType, int offset, int count) {
-		Query<UserGroup> q = createQuery().disableValidation().field("privateGroup").equal(false)
-				.offset(offset).limit(count);
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("privateGroup").equal(false).offset(offset).limit(count);
+		if (groupType.equals(GroupType.All)) {
+			return find(q).asList();
+		}
+		q.and(q.criteria("className").equal(
+				"model.usersAndGroups." + groupType.toString()));
+		return find(q).asList();
+	}
+
+	public List<UserGroup> findPublicWithRestrictions(GroupType groupType,
+			int offset, int count, Set<ObjectId> excludedIds) {
+		Query<UserGroup> q = createQuery().disableValidation()
+				.field("privateGroup").equal(false).field("_id")
+				.notIn(excludedIds).offset(offset).limit(count);
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
