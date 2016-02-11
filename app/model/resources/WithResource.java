@@ -34,6 +34,7 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
 
+import utils.AccessManager;
 import utils.Deserializer;
 import utils.Serializer;
 
@@ -51,6 +52,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;

@@ -228,6 +228,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				"url": "/collection/"+collectionId,
 				"method": "DELETE",
 				success: function(result){
+					$.smkAlert({text:'Collection removed', type:'success'});
 					self.myCollections.remove(function (item) {
                         return item.dbId() == collectionId;
                     });
@@ -276,9 +277,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 		}
 		
-
 		self.moreCollections=function(isExhibition){
-			console.log("more");
 			if (self.loading === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
@@ -287,7 +286,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.moreCollectionData(false);
 				}else{*/
 					self.loading(true);
-					var offset = self.myCollections().length;
+					var offset = self.myCollections().length+1;
 					var promise = app.getUserCollections(isExhibition, offset, count);
 					$.when(promise).done(function(data) {
 						var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
@@ -577,7 +576,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.reloadCollection = function(data) {
-			var newCollection = ko.mapping.fromJS(data);
+			var newCollection = ko.mapping.fromJS(data, mapping);
 			if (data.myAccess == "OWN") {
 				ko.mapping.fromJS(data, newCollection);
 				self.myCollections.unshift(newCollection);

@@ -161,9 +161,8 @@ public class CollectionObjectController extends WithResourceController {
 						 return ElasticIndexer.index(Elastic.typeCollection, colId, doc);
 			};
 			ParallelAPICall.createPromise(indexCollection, collection.getDbId(), collection.transformCO());*/
-
-
-			return ok(Json.toJson(collection));
+			return ok(Json.toJson(collectionWithMyAccessData(collection, AccessManager
+					.effectiveUserIds(session().get("effectiveUserIds")))));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
@@ -457,27 +456,26 @@ public class CollectionObjectController extends WithResourceController {
 			List<String> effectiveUserIds) {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
 				userCollections.size());
-		/*Collections.sort(userCollections, new Comparator<CollectionObject>() {
-			public int compare(CollectionObject c1, CollectionObject c2) {
-				return -c1.getAdministrative().getCreated()
-						.compareTo(c2.getAdministrative().getCreated());
-			}
-		});*/
 		for (CollectionObject collection : userCollections) {
-			ObjectNode c = (ObjectNode) Json.toJson(collection);
-			Access maxAccess = AccessManager.getMaxAccess(collection
-					.getAdministrative().getAccess(), effectiveUserIds);
 			List<String> titles = collection.getDescriptiveData().getLabel()
 					.get(Language.DEFAULT);
 			if ((titles != null) && !titles.get(0).equals("_favorites")) {
-				if (maxAccess.equals(Access.NONE)) {
-					maxAccess = Access.READ;
-				}
-				c.put("myAccess", maxAccess.toString());
-				collections.add(c);
+				collections.add(collectionWithMyAccessData(collection, effectiveUserIds));
 			}
 		}
 		return collections;
+	}
+	
+	private static ObjectNode collectionWithMyAccessData(
+			CollectionObject userCollection,
+			List<String> effectiveUserIds) {
+		ObjectNode c = (ObjectNode) Json.toJson(userCollection);
+		Access maxAccess = AccessManager.getMaxAccess(userCollection
+				.getAdministrative().getAccess(), effectiveUserIds);
+		if (maxAccess.equals(Access.NONE)) 
+			maxAccess = Access.READ;
+		c.put("myAccess", maxAccess.toString());
+		return c;
 	}
 
 	public static void addCollectionToList(int index,

@@ -277,11 +277,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						});
 						//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 						if (self.params.request_ == "mycollections" || (self.params.route &&  self.params.route().request_=="mycollections")) {
-							//TODO: overhead to retrieve whole userCollections again, on the other hand have to scroll down until showing the new collection
-							//(is the latter really required?)
-							//investigate more clever way to show in line with scrolling offset (save scrolling offset in mycollections?)
-							ko.contextFor(mycollections).$data.moreCollectionData(true);
-							ko.contextFor(mycollections).$data.moreCollections(false);
+							ko.contextFor(mycollections).$data.reloadCollection(data);
 						}
 						if (callback) {
 							callback(data.dbId);
