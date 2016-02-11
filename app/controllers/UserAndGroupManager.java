@@ -496,7 +496,7 @@ public class UserAndGroupManager extends Controller {
 	}
 
 	public static String getImageBase64(UserOrGroup user) {
-		if (user.getAvatar().get(MediaVersion.Thumbnail) != null) {
+		if (user.getAvatar()!=null && user.getAvatar().get(MediaVersion.Thumbnail) != null) {
 			String photoUrl = user.getAvatar().get(MediaVersion.Thumbnail);
 			MediaObject photo = DB.getMediaObjectDAO().getByUrl(photoUrl);
 			if (photo != null)
