@@ -21,6 +21,11 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.deletebyquery.DeleteByQueryRequest;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 
@@ -29,14 +34,14 @@ public class ElasticEraser {
 
 
 	/*
-	 * Delete the specified Resource using it's db id
+	 * Delete the specified Resource using its db id
 	 * from the index
 	 */
-	public static boolean deleteResource(String dbId) {
+	public static boolean deleteResource(String type, String dbId) {
 		try {
 			Elastic.getTransportClient().prepareDelete(
 					Elastic.index,
-					Elastic.typeResource,
+					type,
 					dbId)
 				.setOperationThreaded(false)
 				.execute()
@@ -49,6 +54,22 @@ public class ElasticEraser {
 	}
 
 
+	/*
+	 * Delete the specified Resource using its db id using
+	 * a query.
+	 */
+	public static boolean deleteResourceByQuery(String dbId) {
+		try {
+			TermQueryBuilder delete_query = QueryBuilders.termQuery("_id", dbId);
+
+			Elastic.getTransportClient().deleteByQuery(
+					new DeleteByQueryRequest().source(delete_query.toString()));
+		} catch(Exception e) {
+			log.error("Cannot delete the specified resource document", e);
+			return false;
+		}
+		return true;
+	}
 
 	/*
 	 * Bulk deletes all resources of a deleted collection
