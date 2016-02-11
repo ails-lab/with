@@ -21,15 +21,15 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 			{ url: 'register',  params: { page: 'register-page', title: 'Register'} },
 			{ url: 'email',     params: { page: 'email-page',    title: 'Register' } },
 			{ url: 'collect/{id}',     params: { page: 'item-view',    title: 'Collect' } },
-			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View' } },
-			{ url: 'collectionview/{id}/count/{count}',     params: { page: 'collection-view',    title: 'Collection View' } },
+			{ url: 'collectionview/{id}',     params: { page: 'collection-view',    title: 'Collection View', type: 'collection' } },
+			{ url: 'collectionview/{id}/count/{count}',     params: { page: 'collection-view',    title: 'Collection View', type: 'collection' } },
 			{ url: 'exhibitionview/{id}',     params: { page: 'exhibition-view',    title: 'Exhibition View' } },
 			{ url: 'reset/{token}', params: { page: 'new-password', title: 'Reset Password' } },
 			{ url: 'exhibition-edit',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
 			{ url: 'exhibition-edit/{id}',     params: { page: 'exhibition-edit',    title: 'Exhibition Edit' } },
 			{ url: 'apidoc', params: { page: 'api-docu', title: 'API Documentation' } },
 			{ url: 'testsearch', params: { page: 'testsearch', title: 'testsearch' } },
-			{ url: 'myfavorites', params: { page: 'myfavorites', title: 'My Favorites' } },
+			{ url: 'myfavorites', params: { page: 'collection-view', title: 'My Favorites', type: 'favorites' } },
 			{ url: 'gallery/{id}/{skin}',     params: { page: '3DRoom',    title: 'Gallery View' } },
 			{ url: 'organization/{id}', params: { page: 'organization-page', title: 'Organization', 'type': 'organization' } },
 			{ url: 'project/{id}', params: { page: 'organization-page', title: 'Project', 'type': 'project' } },
@@ -52,7 +52,7 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	function activateCrossroads() {
 		//temp fix: scrollbar moves to top when route changes
 		function resetScroll(){document.body.scrollTop = document.documentElement.scrollTop = 0;}
-		function parseHash(newHash, oldHash) { 
+		function parseHash(newHash, oldHash) {
 			if(oldHash)
 				if(oldHash.indexOf("provider/")==0){
 					 var scrollPosition = $(window).scrollTop();
@@ -65,21 +65,21 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 					 oldHash=oldHash.substring(15);
 					 if(oldHash.indexOf('/')!=-1)
 					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
-					 
+
 					 sessionStorage.setItem("collection-viewscroll"+oldHash, scrollPosition);
-				     
+
 				}
 			crossroads.parse(newHash);
-		
+
 		}
-		
-		crossroads.ignoreState= true; 
+
+		crossroads.ignoreState= true;
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
 		hasher.changed.add(resetScroll);
-		
+
 		hasher.init();
-		
+
 	}
 });

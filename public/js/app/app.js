@@ -333,6 +333,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	loadUser = function (data, remember, loadCollections) {
 		self.currentUser._id(data.dbId);
+		self.currentUser.favoritesId(data.favorites);
 		self.currentUser.email(data.email);
 		self.currentUser.username(data.username);
 		self.currentUser.firstName(data.firstName);
@@ -351,7 +352,6 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			self.currentUser.avatar.Thumbnail(data.avatar.Thumbnail);
 			self.currentUser.avatar.Medium(data.avatar.Medium);
 		}
-		self.currentUser.favoritesId(data.favoritesId);
 		self.currentUser.usergroups(data.usergroups);
 		self.currentUser.organizations(data.organizations);
 		self.currentUser.projects(data.projects);
@@ -387,10 +387,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
 			success: function (data, text) {
-
 				loadUser(data, false, false);
-
-			}
+			},
+			async: false
 		});
 	};
 
