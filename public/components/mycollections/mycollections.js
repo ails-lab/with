@@ -1,4 +1,6 @@
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
+	
+	count = 1;
 
 	function Entry(entryData) {
 		var entry = ko.mapping.fromJS(entryData);
@@ -28,7 +30,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "isExhibition="+isExhibition+"&offset=0&count=20"}).done(
+			data        : "isExhibition="+isExhibition+"&offset=0&count="+count}).done(
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
@@ -135,9 +137,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						}
 					}
 				};
-				var promise = app.getUserCollections(true, 0, 20);
+				var promise = app.getUserCollections(true, 0, count);
 				self.loading(true);
-				var promiseShared = getCollectionsSharedWithMe(true, 0, 20);
+				var promiseShared = getCollectionsSharedWithMe(true, 0, count);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
@@ -145,9 +147,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 			}
 			else {
-				var promise = app.getUserCollections(false, 0, 20);
+				var promise = app.getUserCollections(false, 0, count);
 				self.loading(true);
-				var promiseShared = getCollectionsSharedWithMe(false, 0, 20);
+				var promiseShared = getCollectionsSharedWithMe(false, 0, count);
 				$.when(promise,promiseShared).done(function(data,data2) {
 					//convert rights map to array
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
@@ -181,10 +183,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		
 		self.nextSharedCollections = function() {
 			self.moreShared(false);
-		};
-		
-		self.nextCollections = function() {
-			self.moreCollections(false);
 		};
 		
 		self.createExhibition = function() {
@@ -257,7 +255,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					self.loading(true);
 					var offset = self.sharedCollections().length;
 					$.ajax({
-						"url": "/collection/listShared?offset="+offset+"&count=20&isExhibition="+isExhibition,
+						"url": "/collection/listShared?offset="+offset+"&count="+count+"&isExhibition="+isExhibition,
 						"method": "get",
 						"contentType": "application/json",
 						"success": function (data) {
@@ -279,9 +277,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 		
 
-		self.moreCollections=function(more){
+		self.moreCollections=function(isExhibition){
+			console.log("more");
 			if (self.loading === true) {
-				setTimeout(self.moreCollections(more), 300);
+				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
 				/*if(self.myCollections().length<19){
@@ -289,12 +288,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}else{*/
 					self.loading(true);
 					var offset = self.myCollections().length;
-					var promise = app.getUserCollections(true, offset, 20);
+					var promise = app.getUserCollections(isExhibition, offset, count);
 					$.when(promise).done(function(data) {
-						var newItems=ko.mapping.fromJS(data, mapping);
+						var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
 						self.myCollections.push.apply(self.myCollections, newItems());
 						self.loading(false);
-						if(data.collectionsOrExhibitions.length<19){
+						if(data.collectionsOrExhibitions.length<count-1){
 							self.moreCollectionData(false);
 						}else{
 						  self.moreCollectionData(true);
@@ -639,7 +638,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var body = $("#myModal").find("div.modal-body");
 			var url   = window.location.href.split("assets")[0];
 			var collectionCall = url + "collection/" + collDbId;
-			var recordsCall = collectionCall + "/list/start=0&offset=20&format=all";
+			var recordsCall = collectionCall + "/list/start=0&offset="+count+"&format=all";
 			var rightsCall = url + "rights/" + collDbId + "/WRITE?username=withuser";
 			body.html('<h5>Get collection data:<\h5> <font size="2"><pre>' + collectionCall + '</pre>' +
 					'<br> <h5>Get collection records:<\h5> <font size="2"><pre>' + recordsCall +'</pre></font>' +

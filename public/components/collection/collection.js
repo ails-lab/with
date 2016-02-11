@@ -271,15 +271,17 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					else{
 						currentUser.editables.push(data);
 						$.smkAlert({text:'Collection created', type:'success'});
-
 						self.collectionlist.push({
 							"id": data.dbId,
 							"name": data.title
 						});
 						//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
-						if (self.params.request_ == "mycollections" ||( self.params.route &&  self.params.route().request_=="mycollections")) {
+						if (self.params.request_ == "mycollections" || (self.params.route &&  self.params.route().request_=="mycollections")) {
+							//TODO: overhead to retrieve whole userCollections again, on the other hand have to scroll down until showing the new collection
+							//(is the latter really required?)
+							//investigate more clever way to show in line with scrolling offset (save scrolling offset in mycollections?)
 							ko.contextFor(mycollections).$data.moreCollectionData(true);
-							ko.contextFor(mycollections).$data.nextCollections();
+							ko.contextFor(mycollections).$data.moreCollections(false);
 						}
 						if (callback) {
 							callback(data.dbId);
@@ -305,12 +307,9 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 						return x.id;
 					})) != -1) {
 					/* add item to collection with this id */
-
 					self.addRecord(item);
 				} else {
-					/*otherwise save this collection and then add the item */
-
-			
+					/*otherwise save this collection and then add the item */	
 					var jsondata = JSON.stringify({
 						administrative: { access: {
 				        isPublic: $("#publiccoll .active").data("value")},

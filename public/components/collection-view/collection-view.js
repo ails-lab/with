@@ -278,28 +278,21 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							"contentType": "application/json",
 							"success": function (data) {
 								var items=self.revealItems(data.records);
-								
 								if(items.length>0){
 									 var $newitems=getItems(items);
 								     
 									 self.isotopeImagesReveal(self.$container, $newitems );
 
-									}
-								
-
-								
+									}						
 								loading(false);
 							},
 							"error": function (result) {
 								loading(false);
 								$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 							}
-						});
-						
+						});			
 					}
 					else{
-					
-						
 						loading(false);
 					}
 					

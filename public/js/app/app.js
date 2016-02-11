@@ -153,6 +153,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			var props = allBindingsAccessor().scrollOptions;
 			var offset = props.offset ? props.offset : "0";
 			var loadFunc = props.loadFunc;
+			var functPar1 = props.functPar1;
 			var load = ko.utils.unwrapObservable(valueAccessor());
 			var self = this;
 
@@ -160,8 +161,11 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(window).on("scroll.ko.scrollHandler", function () {
 					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
 						if (self.updating) {
-							loadFunc();
-							self.updating = false;
+							if (functPar1 !== undefined && functPar1 !== null) 
+								loadFunc(functPar1);
+							else
+								loadFunc();
+							//self.updating = false;
 						}
 					} else {
 						self.updating = true;
@@ -616,11 +620,6 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			data: "creator=" + self.currentUser.username() + "&offset="+offset+"&count="+count+"&isExhibition=" + isExhibition + "&totalHits=true"
 		}).done(
 			function (data) {
-				// console.log("User collections " + JSON.stringify(data));
-				/*if (sessionStorage.getItem('User') !== null)
-					  sessionStorage.setItem("UserCollections", JSON.stringify(data));
-				  else if (localStorage.getItem('User') !== null)
-					  localStorage.setItem("UserCollections", JSON.stringify(data));*/
 				return data;
 			}).fail(function (request, status, error) {
 			//var err = JSON.parse(request.responseText);

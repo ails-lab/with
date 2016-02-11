@@ -162,7 +162,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		public void setWithCreator(ObjectId creatorId) {
 			//OWN rights from old creator are not withdrawn (ownership is not identical to creation role)
 			this.withCreator = creatorId;
-			if(withCreator != null)
+			if (withCreator != null)
 				this.getAccess().addToAcl(creatorId, Access.OWN);
 		}
 
@@ -549,7 +549,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public User getWithCreatorInfo() {
-		if(administrative.getWithCreator() != null)
+		if(administrative.getWithCreator() != null) 
 			return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
 		else
 			return null;

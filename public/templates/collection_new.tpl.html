@@ -3,12 +3,8 @@
 			   <button type="button" class="close" aria-label="Close" data-bind="event: {click: close}"><span aria-hidden="true">&times;</span></button>
 				<h3>Create a collection</h3>
 					<hr class="faded"/>
-			
-			
 			      <form data-bind="submit: save">
-				   
 					  <div class="col-md-12">
-					  
 					  <div class="form-group" data-bind="validationElement: collname">
 					    <div class="spec">
 					      <div class="itemlabel">Name
@@ -17,24 +13,8 @@
 					      <input type="text" name="collname" data-bind="value: collname" class="form-control input-sm xxs" id="collname" placeholder="Like 'Paintings' or 'Art project'" >
 					        </div>
 					      </div>
-					    </div>
-					    <!-- 
-					     <div class="form-group"> 
-					      <div class="spec">
-					      <div class="itemlabel">Select Category
-					      </div>
-					       <div class="value">
-					      <select class="form-control input-sm xxs" name="category">
-						  <option disabled>Where does this collection belong?</option>
-						  <option>Category 1</option>
-						  <option>3</option>
-						  <option>4</option>
-						  <option>5</option>
-						</select></div></div>
-					       </div>
-					        -->  
+					    </div> 
 					       <div class="form-group">
-					      
 					      <div class="spec">
 					      <div class="itemlabel">Is it public?
 					      </div>
@@ -63,17 +43,12 @@
 					      <div class="col-md-4 col-md-offset-3"><p>
 					        <button type="submit" class="btn btn-primary btn-xs xxs">Create Collection</button></p>
 					      </div>
+					  </div>			  
 					  </div>
-					  
-					  </div>
-					
-				 </form>
-			
-				
-				
+				 </form>	
+				 	
 			</div>
 </div>
-		
-		
+			
 		
 <div class="md-overlay-coll" data-bind="event: {click: close}"></div><!-- the overlay element -->
