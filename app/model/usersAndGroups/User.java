@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import model.Notification;
+import model.resources.CollectionObject;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;
@@ -377,14 +378,13 @@ public class User extends UserOrGroup {
 	}
 
 	public ObjectId getFavorites() {
-		if (favorites == null)
-			favorites = DB.getCollectionObjectDAO()
-					.getByOwnerAndLabel(this.getDbId(), null, "_favorites")
-					.getDbId();
-		if (favorites == null)
-			favorites = CollectionObjectController.createFavorites(this
-					.getDbId());
-		return favorites;
+		if (favorites != null)
+			return favorites;
+		CollectionObject favoriteCol = DB.getCollectionObjectDAO()
+				.getByOwnerAndLabel(this.getDbId(), null, "_favorites");
+		if (favoriteCol != null)
+			return favoriteCol.getDbId();
+		return CollectionObjectController.createFavorites(this.getDbId());
 	}
 
 	public void setFavorites(ObjectId favorites) {
