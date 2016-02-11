@@ -515,16 +515,19 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
+		media.setMediaVersion(mediaVersion);
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
 
 	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
 		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
 		e.put(mediaVersion, media);
+		media.setMediaVersion(mediaVersion);
 		this.media.add(e);
 	}
 
 	public void addMedia(MediaVersion mediaVersion, EmbeddedMediaObject media) {
+		media.setMediaVersion(mediaVersion);
 		this.media.get(0).put(mediaVersion, media);
 	}
 
