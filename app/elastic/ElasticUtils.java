@@ -246,7 +246,8 @@ public class ElasticUtils {
 			EmbeddedMediaObject emo = rr.getMedia().get(0).values().toArray(new EmbeddedMediaObject[1])[0];
 				ObjectNode media = Json.newObject();
 				media.put("withRights", Json.toJson(emo.getWithRights()));
-				media.put("withMediaType", Json.toJson(emo.getType()));
+				//TODO: why withMediaType and not type, like in EmbeddedMedia? media.type
+				media.put("type", Json.toJson(emo.getType()));
 				media.put("originalRights", Json.toJson(emo.getOriginalRights()));
 				media.put("mimeType", Json.toJson(emo.getMimeType()));
 				media.put("url", Json.toJson(emo.getUrl()));
