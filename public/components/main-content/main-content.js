@@ -186,7 +186,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  self.morespaces=ko.observable(true);
 	  self.fetchitemnum=20;
 	  self.revealItems = function (data) {
-		  if((data.length==0 || data.length<self.fetchitemnum) && self.morespaces()==false){ loading(false);$(".loadmore").text("no more results");return;}
+		  if((data.length==0 || data.length<self.fetchitemnum) && self.morespaces()==false){ loading(false);$(".loadmore").text("no more results");}
 			
 			for (var i in data) {
 				var c=new Collection(
@@ -202,14 +202,14 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 	  
 		self.revealSpaceItems = function (data) {
-			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);return;}
+			if(data.length==0 || data.length<self.fetchitemnum){self.morespaces(false);}
 				for (var i in data) {
 					var page=data[i].page;
 					var thumb=null;
 					var url="";
 					
-					if(page){
-						thumb=page.cover;
+					if(page && page.cover){
+						thumb=page.cover.Thumbnail;
 						url=page.url;
 					}
 					
@@ -335,7 +335,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/group/list",
 				processData: false,
-				data: "count="+self.fetchitemnum+"&offset=" + (self.spaces().length+1),
+				data: "count="+self.fetchitemnum+"&offset=" + self.spaces().length,
 			}).success (function(){
 			});
 				
@@ -349,7 +349,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + (self.collections().length+1),
+				data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.collections().length,
 			}).success (function(){
 			});
 			
