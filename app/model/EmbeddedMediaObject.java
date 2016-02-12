@@ -190,7 +190,7 @@ public class EmbeddedMediaObject {
 		if (mediaVersion == null) {
 			return null;
 		}
-		return "/media/byUrl?url=" + url + "version=" + mediaVersion.toString();
+		return "/media/byUrl?url=" + url + "&version=" + mediaVersion.toString();
 	}
 
 	public LiteralOrResource getOriginalRights() {
