@@ -82,8 +82,9 @@ public class Elastic {
 	public static final String typeTimespan	      = "timespan";
 	public static final String typeEuscreen	      = "euscreen";
 	public static final List<String> allTypes 	  = new ArrayList<String>() {{
-														add(typeResource); add(typeCollection); add(typeCultural);
-														add(typeAgent); add(typeEvent); add(typePlace); add(typeTimespan); }};
+														add(typeCultural);
+														add(typeResource);add(typeCollection);
+														add(typeAgent);add(typeEvent);add(typePlace);add(typeTimespan); }};
 
 
 

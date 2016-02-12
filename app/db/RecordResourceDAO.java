@@ -461,10 +461,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateOps.removeAll("collectedIn", new CollectionInfo(colId, position));
 		updateOps.removeAll("contextData", new ContextData(colId, position));
 		UpdateResults result = this.update(q, updateOps);
-		if (result.getWriteResult().getN() == 0) {
+		if (result.getWriteResult().getN() == 0) 
 			throw new FileNotFoundException();
-		}
-		shiftRecordsToLeft(colId, position + 1);
+		else
+			shiftRecordsToLeft(colId, position + 1);
 	}
 
 	public RecordResource getByCollectionAndPosition(ObjectId colId,

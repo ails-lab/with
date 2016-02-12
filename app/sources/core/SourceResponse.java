@@ -19,6 +19,7 @@ package sources.core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
@@ -138,7 +139,7 @@ public class SourceResponse {
 	}
 
 	public void transformResourcesToItems() {
-		List<WithResource<?, ?>> resources = (List<WithResource<?, ?>>) resourcesPerType.get("resource");
+		List<WithResource<?, ?>> resources = (List<WithResource<?, ?>>) resourcesPerType.get("cultural");
 		items.setCulturalCHO(resources);
 	}
 

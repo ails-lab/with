@@ -328,7 +328,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public static enum WithResourceType {
-		WithResource, CollectionObject, RecordResource, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject;
+		WithResource, CollectionObject, RecordResource, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject, ThesaurusObject;
 	}
 
 	@Id
@@ -429,25 +429,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	}
 
-
 	public void removePositionFromCollectedIn(ObjectId colId, Integer position) {
-		/*if (collectedIn.contains(colId)) {
-			for (int i=0; i<collectedIn.size(); i++) {
-				CollectionInfo ci = collectedIn.get(i);
-				if (ci.getCollectionId().equals(colId)) {
-					ArrayList<Integer> positions = ci.getPositions();
-					if (positions.size() == 1) {
-						if (positions.get(0) == position)
-							collectedIn.remove(i);
-						else
-							throw new IllegalArgumentException("There is no record in position " + position + "in collection " + colId);
-					}
-					else
-						positions.remove(position);
-					break;
-				}
-			}
-		}*/
 		collectedIn.remove(new CollectionInfo(colId, position));
 	}
 

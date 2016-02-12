@@ -99,7 +99,6 @@ public class RightsController extends WithResourceController {
 						getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 				WithAccess oldColAccess = collection.getAdministrative().getAccess();
 				int downgrade = downgrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
-				//TODO: update rights only of members-records that the user OWNs!!!!
 				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
 				if (downgrade > -1) //if downgrade == -1, the rights are not changed, do nothing
 					if (downgrade == 1 && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
@@ -110,7 +109,9 @@ public class RightsController extends WithResourceController {
 						DB.getCollectionObjectDAO().changeAccess(colDbId, userOrGroupId, newAccess);
 						DB.getRecordResourceDAO().updateMembersToMergedRights(colDbId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
 					}
-				return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, ownerId, newAccess);
+				result.put("message", "Collection shared with user");
+				return ok(result);
+				//return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, ownerId, newAccess);
 			}
 		}
 	}

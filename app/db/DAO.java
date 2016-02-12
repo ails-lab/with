@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import model.resources.WithResource.WithResourceType;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.index.IndexResponse;
 import org.mongodb.morphia.Key;
@@ -31,6 +33,7 @@ import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
+import org.mongodb.morphia.query.UpdateResults;
 
 import play.Logger;
 import play.libs.F.Callback;
@@ -44,8 +47,11 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.WriteConcern;
+import com.mongodb.WriteResult;
+import com.mongodb.client.result.UpdateResult;
 import com.mongodb.util.JSON;
 
+import elastic.Elastic;
 import elastic.ElasticEraser;
 import elastic.ElasticIndexer;
 
@@ -192,7 +198,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			String type = defineInstanceOf(doc);
 			if(type != null) {
 
-				/* Erase CollectionObject from index */
+				/* Index Resource */
 				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
 						(ObjectId colId, Map<String, Object> map) -> {
 							return ElasticIndexer.index(type, colId, map);
@@ -221,7 +227,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				/* Erase CollectionObject from index */
 				Function<ObjectId, Boolean> deleteCollection =
 						(ObjectId colId) -> {
-								return ElasticEraser.deleteResource(colId.toString());
+								return ElasticEraser.deleteResource(type, colId.toString());
 						};
 				ParallelAPICall.createPromise(deleteCollection, (ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc));
 			}
@@ -233,14 +239,65 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	}
 
+	/*
+	 *
+	 */
+	@Override
+	public UpdateResults update(final Query<E> q, final UpdateOperations<E> ops) {
+
+		UpdateResults results = super.update(q, ops);
+
+		/*E doc = findOne(q);
+
+		String type = defineInstanceOf(doc);
+		try {
+			if(type != null)  {
+				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
+						(ObjectId colId, Map<String, Object> map) -> {
+							return ElasticIndexer.index(type, colId, map);
+						};
+				ParallelAPICall.createPromise(indexResource,
+						(ObjectId) doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
+						(Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+			}
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			System.out.println(e.getMessage());
+			return null;
+		}*/
+		return results;
+	}
+
+
+	@Override
+	public WriteResult deleteById(ObjectId id) {
+
+		WriteResult wr = super.deleteById(id);
+
+		Function<String, Boolean> deleteResource =
+				(indexId) -> (ElasticEraser.deleteResourceByQuery(indexId));
+		ParallelAPICall.createPromise(deleteResource, id.toString());
+
+		return wr;
+	}
+
 	private String defineInstanceOf(E doc) {
-
-		String[] resourcesNames = { "Collection", "RecordResource",
-									"Cultural", "Agent",
-									"EUscreen", "Event",
-									"Place", "Thesaurus",
-									"Timespan", "WithResource"};
-
+		//TODO: why have different names in Elastic and not the same as in WithResourceType?
+		// renaming always causes trouble, when we add more resource types, 
+		//we'll have to add them in different places
+		String[] resourcesNames = { Elastic.typeCollection, Elastic.typeResource,
+									Elastic.typeCultural, Elastic.typeAgent,
+									Elastic.typeEuscreen, Elastic.typeEvent,
+									Elastic.typePlace, "Thesaurus",
+									Elastic.typeTimespan};
+		
+		//TODO: do something like the following
+		/*String s = doc.getClass().getSimpleName();
+		WithResourceType t = WithResourceType.valueOf(s);
+		if (t != null)
+			return t.toString();
+		else return null;*/
+		
 		switch (doc.getClass().getSimpleName()) {
 
 		case "CollectionObject":
