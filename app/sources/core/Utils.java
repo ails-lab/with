@@ -283,14 +283,19 @@ public class Utils {
 
 	public static boolean isValidURL(String str) {
 		UrlValidator val = new UrlValidator();
-		return val.isValid(str);
+		return str!=null && val.isValid(str);
 	}
 
 	public static boolean isNumericInteger(String date) {
-		return date.matches("[-]*[0-9]+");
+		return date!=null && date.matches("[-]{0,1}[0-9]+");
+	}
+	
+	public static boolean isNumericDouble(String date) {
+		return date!=null && date.matches("[-]{0,1}[0-9]+[\\.]{0,1}[0-9]*");
 	}
 
 	public static void main(String[] args) {
+		System.out.println(isNumericDouble("34.7"));
 	}
 
 	public static boolean hasInfo(String string) {

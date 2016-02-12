@@ -27,6 +27,7 @@ import play.libs.Json;
 import sources.formatreaders.CulturalRecordFormatter;
 import sources.formatreaders.DDBItemRecordFormatter;
 import sources.formatreaders.EuropeanaItemRecordFormatter;
+import sources.formatreaders.RijksmuseumItemRecordFormatter;
 import sources.utils.JsonContextRecord;
 
 public class SourcesTest {

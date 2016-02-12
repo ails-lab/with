@@ -1468,6 +1468,10 @@ public enum Language {
 	*/
 	RO("Romanian; Moldavian; Moldovan", "ro", "rum", "ron"),
 	/**
+	* Romanian; Moldavian; Moldovan
+	*/
+	MO("Moldavian", "mo", "mol", "Moldovan"),
+	/**
 	* Rundi
 	*/
 	RN("Rundi", "rn", "run"),
@@ -1643,6 +1647,11 @@ public enum Language {
 	* Serbian
 	*/
 	SR("Serbian", "sr", "srp"),
+	/**
+	*  Serbo-Croatian
+	*/
+	@Deprecated
+	SH("Serbo-Croatian", "sh"),
 	/**
 	* Serer
 	*/

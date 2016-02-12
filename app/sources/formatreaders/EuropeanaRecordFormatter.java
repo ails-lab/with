@@ -66,9 +66,11 @@ public class EuropeanaRecordFormatter extends CulturalRecordFormatter {
 		
 		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
 		model.setCountry(rec.getMultiLiteralOrResourceValue("country"));;
+		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("edmPlaceLatitude"),rec.getStringValue("edmPlaceLongitude")));
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setLabel(rec.getMultiLiteralValue(false,"dcTitleLangAware","title"));
 		model.setDescription(rec.getMultiLiteralValue(false,"dcDescriptionLangAware","dcDescription"));
+		model.setAltLabels(rec.getMultiLiteralValue("altLabel"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setDates(rec.getWithDateArrayValue("year"));

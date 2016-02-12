@@ -47,16 +47,15 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 
 	@Override
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
-		String id = rec.getStringValue("id");
-		
+		String id = rec.getStringValue("id");	
 		Language[] language = null;
-		if (rec.getValue("language")!=null){
-			JsonNode langs = rec.getValue("language");
+		List<String> langs = rec.getStringArrayValue("language");
+		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
-				language[i] = Language.getLanguage(langs.get(i).asText());
+				language[i] = Language.getLanguage(langs.get(i));
 			}
-			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("title"),

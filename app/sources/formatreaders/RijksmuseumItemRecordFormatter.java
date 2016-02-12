@@ -53,13 +53,13 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		String id = rec.getStringValue("objectNumber");
 		
 		Language[] language = null;
-		if (rec.getValue("language")!=null){
-			JsonNode langs = rec.getValue("language");
+		List<String> langs = rec.getStringArrayValue("language");
+		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
-				language[i] = Language.getLanguage(langs.get(i).asText());
+				language[i] = Language.getLanguage(langs.get(i));
 			}
-			Logger.info("["+id+"] Item Languages " + Arrays.toString(language));
+			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("title"),

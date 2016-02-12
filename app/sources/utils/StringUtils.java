@@ -27,6 +27,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
+
 import com.optimaize.langdetect.DetectedLanguage;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.LanguageDetectorBuilder;
@@ -44,6 +47,7 @@ import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.WithDate;
 import play.Logger;
+import sources.core.Utils;
 
 public class StringUtils {
 
@@ -199,5 +203,24 @@ public class StringUtils {
 			res.addLiteral(Language.EN, language.getName());
 		}
 		return res;
+	}
+
+	public static Point getPoint(String stringValue) {
+		if (Utils.hasInfo(stringValue)){
+			List<Double> coordinates = new ArrayList<>();
+			for (String coo : stringValue.split("[,\\s]+")) {
+				if (Utils.hasInfo(coo))
+					coordinates.add(new Double(coo));
+			}
+			Point res = GeoJson.point(coordinates.get(0), coordinates.get(1));
+			return res;
+		} else return null;
+	}
+	public static Point getPoint(String lati, String longi) {
+		if (Utils.isNumericDouble(lati) && Utils.isNumericDouble(longi)) {
+			Point res = GeoJson.point(new Double(lati), new Double(longi));
+			return res;
+		} 
+		else return null;
 	}
 }

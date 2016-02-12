@@ -55,7 +55,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 //		String id = rec.getStringValue("objectNumber");
 		
 		Language[] language = null;
-		List<String> langs = rec.getStringArrayValue(false,"proxies[0].dcLanguage","europeanaAggregation.edmLanguage","language");
+		List<String> langs = rec.getStringArrayValue("proxies[0].dcLanguage","europeanaAggregation.edmLanguage","language");
 		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
@@ -68,20 +68,23 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 											rec.getStringValue("titles"),
 											rec.getStringValue("dcSubject"));
 		}
+
+		rec.setLanguages(language);
 		
 
 		model.setCountry(rec.getMultiLiteralOrResourceValue("proxies[0].country","europeanaAggregation.edmCountry"));
+		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("places[.*].latitude"), rec.getStringValue("places[.*].longitude")));
 
-		rec.enterContext("proxies[0]");
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("proxies[0].dcSubject","proxies[1].dcSubject"));
 		
 
-		rec.setLanguages(language);
-
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue("proxies[0].dctermsSpatial","places[.*].about","places[.*].about","places[.*].prefLabel"));
+		rec.enterContext("proxies[0]");
+		
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
-		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("dcCreator"));
 		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
@@ -89,7 +92,6 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setLabel(rec.getMultiLiteralValue("dcTitle","title"));
 		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("dcSubject"));
 		model.setDates(rec.getWithDateArrayValue("dcDate"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
@@ -100,9 +102,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		 rights.getURI()).get(0);
 		
 
-
 		rec.exitContext();
-
 		rec.enterContext("proxies[1]");
 
 		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
