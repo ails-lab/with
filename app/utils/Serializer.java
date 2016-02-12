@@ -35,6 +35,7 @@ import org.w3c.dom.ls.LSSerializer;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -94,6 +95,19 @@ public class Serializer {
 			ObjectNode json = mapper.createObjectNode();
 			json.put("isPublic", isPublic);
 			json.put("acl", Json.toJson(((WithAccess)rights).getAcl()));
+			jsonGen.writeObject(json);
+		}
+	}
+
+	public static class AccessEntrySerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object ae, JsonGenerator jsonGen,
+				SerializerProvider arg2) throws IOException,
+				JsonProcessingException {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode json = mapper.createObjectNode();
+			json.put("level", ((AccessEntry)ae).getLevel().ordinal());
+			json.put("user", ((AccessEntry)ae).getUser().toString());
 			jsonGen.writeObject(json);
 		}
 	}

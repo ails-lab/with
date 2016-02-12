@@ -16,6 +16,7 @@
 
 package elastic;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import model.Collection;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
 import model.resources.RecordResource;
 import model.resources.WithResource;
@@ -40,10 +42,13 @@ import org.elasticsearch.search.SearchHits;
 
 import play.Logger;
 import play.libs.Json;
+import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -199,7 +204,22 @@ public class ElasticUtils {
 		 * User Rights structure in the document
 		 */
 		idx_doc.put("isPublic", rr.getAdministrative().getAccess().getIsPublic());
-		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
+		ObjectMapper aclMapper = new ObjectMapper();
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(AccessEntry.class, new Serializer.AccessEntrySerializer());
+		aclMapper.registerModule(module);
+		String aclString;
+		try {
+			aclString = aclMapper.writeValueAsString(rr.getAdministrative().getAccess().getAcl());
+			idx_doc.put("access", aclMapper.readTree(aclString));
+		} catch (JsonProcessingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 
 
 		/*
@@ -269,12 +289,6 @@ public class ElasticUtils {
 				}
 			idx_doc.put("media", media_objects);
 		}
-
-		/*
-		 * User Rights structure in the document
-		 */
-		idx_doc.put("isPublic", rr.getAdministrative().getAccess().getIsPublic());
-		idx_doc.put("access", Json.toJson(rr.getAdministrative().getAccess().getAcl()));
 
 		/*
 		 * Eliminate null values from the root document
