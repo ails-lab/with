@@ -165,7 +165,7 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return
 	 */
 	private static MultiLiteral createExhibitionDummyTitle() {
-		return new MultiLiteral("New Exhibition (" + new Date() + ")");
+		return new MultiLiteral(Language.DEFAULT ,"New Exhibition (" + new Date() + ")");
 	}
 
 	/**
