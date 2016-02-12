@@ -11,7 +11,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			state: exhibition.isPublic()
 		});
 		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
-			var promise = updateExhibitionPropery(exhibition, 'isPublic', state);;
+			var promise = updateExhibitionProperty(exhibition, 'isPublic', state);;
 			$.when(promise).done(function (data) {
 
 			});
@@ -33,12 +33,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		this.firstEntries = collectionData.firstEntries;
 	}
 
-	function updateExhibitionPropery(exhibition, propertyName, newValue) {
+	function updateExhibitionProperty(exhibition, propertyName, newValue) {
 		var jsonObject = {};
 		jsonObject[propertyName] = newValue;
 		var jsonData = JSON.stringify(jsonObject);
 		return $.ajax({
-			type: "POST",
+			type: "PUT",
 			url: "/collection/" + exhibition.dbId(),
 			data: jsonData,
 			contentType: "application/json",
@@ -78,7 +78,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		}
 		var jsonData = JSON.stringify(jsonObject);
 		return $.ajax({
-			type: "POST",
+			type: "PUT",
 			url: "/collection/" + exhibition.dbId(),
 			data: jsonData,
 			contentType: "application/json",
