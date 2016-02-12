@@ -48,6 +48,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.likes = 0;
 		self.collected = 0;
 		self.collectedIn = [];
+		self.position=0;
 		self.dbId = "";
 		self.data = ko.observable('');
 		self.thumbnail = ko.pureComputed(function () {
@@ -58,6 +59,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				return "img/content/thumb-empty.png";
 			}
 		});
+		
 		self.fullresolution = ko.pureComputed(function () {
 
 			if (self.fullres) {
@@ -142,6 +144,18 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.data(options);
 			self.isLoaded = ko.observable(false);
+			/*to calculate position find how many of these are already in citems
+			 * 
+			 */
+			var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
+	            return item.dbId==self.dbId;
+			});
+			var positions=ko.utils.arrayFilter(self.collectedIn, function(item) {
+	            return item.collectionId==ko.dataFor(withcollection).id();
+			});
+			if(positions && positions[foundrec.length])
+			 self.position=positions[foundrec.length].position;
+			
 		};
 
 		if (data !== undefined) self.load(data);
@@ -199,9 +213,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					var record = new Record(result);
 
 					items.push(record);
+					self.citems.push(record);
 				}
 			}
-			self.citems.push.apply(self.citems, items);
+			//self.citems.push.apply(self.citems, items);
 			var offset = self.citems().length;
 			var new_url = "";
 			if (window.location.hash.indexOf("collectionview") == 1) {
@@ -348,18 +363,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.citems.push(e);
 		};
 
-		removeRecord = function (id, event) {
-			event.preventDefault();
-			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.dbId === id;
-			});
-			var position = -1;
-			var pos = rec.collectedIn.filter(function (item) {
-				return item.collectionId === self.id()
-			});
-			if (pos) {
-				position = pos[0].position;
-			}
+		removeRecord = function (id,position, event) {
+			var $elem=$(event.target).parents(".item");
 			$.smkConfirm({
 				text: 'Are you sure you want to permanently remove this item?',
 				accept: 'Delete',
@@ -378,9 +383,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							position: position
 						}),
 						success: function (data, textStatus, xhr) {
-							self.citems.remove(rec);
-							if ($("." + id).first()) {
-								self.$container.isotope('remove', $("." + id).first()).isotope('layout');
+							
+							self.citems.splice(position, 1);
+							if ($elem) {
+								self.$container.isotope('remove', $elem).isotope('layout');
 							}
 
 							self.reloadEntryCount();
@@ -465,7 +471,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					tile += '<div class="star">';
 				}
 				if (self.access() == "WRITE" || self.access() == "OWN")
-					tile += ' <span class="collect" title="remove"  onclick="removeRecord(\'' + record.dbId + '\',event)"><i class="fa fa-trash-o fa-inverse"></i></span>';
+					tile += ' <span class="collect" title="remove"  onclick="removeRecord(\'' + record.dbId + '\','+record.position+',event)"><i class="fa fa-trash-o fa-inverse"></i></span>';
 
 				if (!self.isFavorites()) { // Don't show the favorites icon when in favorites
 					if (record.externalId) {
