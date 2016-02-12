@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import model.resources.WithResource.WithResourceType;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.index.IndexResponse;
 import org.mongodb.morphia.Key;
@@ -245,24 +247,24 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 		UpdateResults results = super.update(q, ops);
 
-		E doc = findOne(q);
+		/*E doc = findOne(q);
+
 		String type = defineInstanceOf(doc);
 		try {
 			if(type != null)  {
-				/* Index Resource */
 				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
 						(ObjectId colId, Map<String, Object> map) -> {
 							return ElasticIndexer.index(type, colId, map);
 						};
 				ParallelAPICall.createPromise(indexResource,
-						(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
-						(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+						(ObjectId) doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
+						(Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
 			}
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
+			System.out.println(e.getMessage());
 			return null;
-		}
-
+		}*/
 		return results;
 	}
 
@@ -280,13 +282,22 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	private String defineInstanceOf(E doc) {
-
+		//TODO: why have different names in Elastic and not the same as in WithResourceType?
+		// renaming always causes trouble, when we add more resource types, 
+		//we'll have to add them in different places
 		String[] resourcesNames = { Elastic.typeCollection, Elastic.typeResource,
 									Elastic.typeCultural, Elastic.typeAgent,
 									Elastic.typeEuscreen, Elastic.typeEvent,
 									Elastic.typePlace, "Thesaurus",
 									Elastic.typeTimespan};
-
+		
+		//TODO: do something like the following
+		/*String s = doc.getClass().getSimpleName();
+		WithResourceType t = WithResourceType.valueOf(s);
+		if (t != null)
+			return t.toString();
+		else return null;*/
+		
 		switch (doc.getClass().getSimpleName()) {
 
 		case "CollectionObject":
