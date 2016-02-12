@@ -32,6 +32,7 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.basicDataTypes.WithAccess;
 import model.resources.CollectionObject;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
@@ -207,17 +208,28 @@ public class WithResourceController extends Controller {
 						record.getAdministrative().setWithCreator(userId);
 						String mediaUrl;
 						WithMediaRights withRights;
-						EmbeddedMediaObject media;
-						EmbeddedMediaObject embeddedMedia;
-						for (MediaVersion version : MediaVersion.values()) {
-							if ((embeddedMedia = ((HashMap<MediaVersion, EmbeddedMediaObject>) record
-									.getMedia().get(0)).get(version)) != null) {
-								mediaUrl = embeddedMedia.getUrl();
-								withRights = embeddedMedia.getWithRights();
-								media = new EmbeddedMediaObject(DB
-										.getMediaObjectDAO().getByUrl(mediaUrl));
-								media.setWithRights(withRights);
-								record.addMedia(version, media);
+							for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia: (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record.getMedia()) {
+								for (MediaVersion version: embeddedMedia.keySet()) {
+									EmbeddedMediaObject media = embeddedMedia.get(version);
+									if (media != null) {
+										mediaUrl = media.getUrl();
+										EmbeddedMediaObject existingMedia = null;
+										if (!mediaUrl.isEmpty() && 
+											(existingMedia = DB.getMediaObjectDAO().getByUrl(mediaUrl)) != null) {
+												media = new EmbeddedMediaObject(existingMedia);
+										}
+										//TODO: careful, the user is allowed to set the media fields as s/he wishes, 
+										//if the media url doesn't already exist. The first time that a request for caching 
+										//that url is issued, the MediaObject that is created in the db will be filled by 
+										//parseMediaURL, possibly with values that are different from the embeddedMediaObject.
+										//in the record. In general, each user who adds a record with the same media url,
+										//before the media is actually saved in the db, may have a different version of media info.
+										//TODO: Better call cache the media (as a promise) here! 
+										//and put the first user's withRights, since cache has no way to retrieve the media rights.
+										//However, this allows the user to specify a wrong version, e.g. create a media which claims
+										//to be thumbnail, but is full size. Can Marios find out the version (and correct it) during caching?
+										record.addMedia(version, media);
+								}
 							}
 						}
 						DB.getRecordResourceDAO().makePermanent(record);

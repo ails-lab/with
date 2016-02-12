@@ -23,14 +23,14 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	
 	
 
-	function getCollectionsSharedWithMe(isExhibition) {
+	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
 			type        : "GET",
 			contentType : "application/json",
 			dataType    : "json",
 			url         : "/collection/listShared",
 			processData : false,
-			data        : "isExhibition="+isExhibition+"&offset=0&count="+count}).done(
+			data        : "isExhibition="+isExhibition+"&offset="+offset+"&count="+count}).done(
 				function(data) {
 					return data;
 				}).fail(function(request, status, error) {
@@ -60,34 +60,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		            return ko.utils.unwrapObservable(data.dbId);
 		        }
 			}
-			/*'descriptiveData': {
-				create: function(options) {
-		            var thisModel = new OuterModel(options.data);
-		            return thisModel;
-		        }
-		   }*/
 		};
-		
-		/*function OuterModel(data) {
-		    var self = this;
-		    ko.mapping.fromJS(data, innerMapping, this);    
-		}
-		
-		
-		//labels and descriptions are not observables!
-		var innerMapping = {
-			    'label': {
-			        create: function(options) {
-			        	return options.data;
-			        }
-			    },
-			    'description': {
-			        create: function(options) {
-			        	return options.data;
-			        }
-			    }
-			};*/
-		
 		var usersMapping = {
 				'dbId': {
 					key: function(data) {
@@ -95,7 +68,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			        }
 				}
 		};
-		//TODO: Load more myCollections with scrolling
 		self.myCollections = ko.mapping.fromJS([], mapping);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
@@ -110,7 +82,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
     	self.moreCollectionData=ko.observable(true);
     	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
-  
     	
     	/*self.multiLiteral = function (multiLiteral) {
     	        return ko.computed({
@@ -250,30 +221,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				setTimeout(self.moreShared(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreSharedCollectionData()===true) {
-				/*if(self.sharedCollections().length<19){
-					self.moreSharedCollectionData(false);
-				}else{*/
-					self.loading(true);
-					var offset = self.sharedCollections().length;
-					$.ajax({
-						"url": "/collection/listShared?offset="+offset+"&count="+count+"&isExhibition="+isExhibition,
-						"method": "get",
-						"contentType": "application/json",
-						"success": function (data) {
-							var newItems=ko.mapping.fromJS(data, mapping);
-							self.sharedCollections.push.apply(self.sharedCollections, newItems());
-							self.loading(false);
-							if(data.collectionsOrExhibitions.length<19){
-								self.moreSharedCollectionData(false);
-							}else{
-							  self.moreSharedCollectionData(true);}
-							
-						},
-						"error": function (result) {
-							self.loading(false);
-						}
-					});
-				/*}*/
+				self.loading(true);
+				var offset = self.sharedCollections().length+1;
+				var promise = app.getCollectionsSharedWithMe(isExhibition, offset, count);
+				$.when(promise).done(function(data) {
+					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
+					self.myCollections.push.apply(self.myCollections, newItems());
+					self.loading(false);
+					if(data.collectionsOrExhibitions.length<count-1){
+						self.moreCollectionData(false);
+					}else{
+					  self.moreCollectionData(true);
+					}
+				}).fail(function(result) {self.loading(false);});
 			}
 		}
 		
@@ -282,22 +242,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
-				/*if(self.myCollections().length<19){
-					self.moreCollectionData(false);
-				}else{*/
-					self.loading(true);
-					var offset = self.myCollections().length+1;
-					var promise = app.getUserCollections(isExhibition, offset, count);
-					$.when(promise).done(function(data) {
-						var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
-						self.myCollections.push.apply(self.myCollections, newItems());
-						self.loading(false);
-						if(data.collectionsOrExhibitions.length<count-1){
-							self.moreCollectionData(false);
-						}else{
-						  self.moreCollectionData(true);
-						}
-					}).fail(function(result) {self.loading(false);});
+				self.loading(true);
+				var offset = self.myCollections().length+1;
+				var promise = app.getUserCollections(isExhibition, offset, count);
+				$.when(promise).done(function(data) {
+					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
+					self.myCollections.push.apply(self.myCollections, newItems());
+					self.loading(false);
+					if(data.collectionsOrExhibitions.length<count-1){
+						self.moreCollectionData(false);
+					}else{
+					  self.moreCollectionData(true);
+					}
+				}).fail(function(result) {self.loading(false);});
 			}
 		}
 		
