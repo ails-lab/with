@@ -124,10 +124,10 @@ public class GroupManager extends Controller {
 			newGroup.addAdministrator(admin);
 			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
-			User administartor = DB.getUserDAO().get(creator);
-			administartor.addGroupForAdministration(newGroup.getDbId());
-			administartor = DB.getUserDAO().get(admin);
-			administartor.addGroupForAdministration(newGroup.getDbId());
+			User administrator = DB.getUserDAO().get(creator);
+			administrator.addGroupForAdministration(newGroup.getDbId());
+			administrator = DB.getUserDAO().get(admin);
+			administrator.addGroupForAdministration(newGroup.getDbId());
 			Set<ConstraintViolation<UserGroup>> violations = Validation
 					.getValidator().validate(newGroup);
 			if (!violations.isEmpty()) {

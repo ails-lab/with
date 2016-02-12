@@ -248,6 +248,8 @@ public class User extends UserOrGroup {
 	}
 
 	public void addUserGroups(Set<ObjectId> groups) {
+		groups.addAll(userGroupsIds);
+		this.userGroupsIds.clear();
 		this.userGroupsIds.addAll(groups);
 	}
 
