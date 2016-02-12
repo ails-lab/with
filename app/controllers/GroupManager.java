@@ -549,28 +549,24 @@ public class GroupManager extends Controller {
 			User user = DB.getUserDAO().get(userId);
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
 			int i = 0;
-			int size = 0;
 			for (ObjectId groupId : userGroupsIds) {
-				if (size == count)
+				if (count == 0)
 					break;
 				UserGroup group = DB.getUserGroupDAO().get(groupId);
 				if (group != null && group.getClass().equals(clazz)) {
 					if (i >= offset) {
 						groups.add(group);
-						size++;
+						count--;
 					}
 					i++;
 				}
 			}
-			if (size == count) {
+			if ( count == 0) 
 				return ok(Json.toJson(groups));
-			}
 			if (i <= offset)
-				offset = offset -i;
-			else {
-				offset =0;
-				count = count -i;
-			}
+				offset = offset - i;
+			else 
+				offset = 0;
 			groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
 					offset, count, userGroupsIds));
 			return ok(Json.toJson(groups));

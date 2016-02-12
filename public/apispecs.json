@@ -163,160 +163,11 @@
                 }
             }
         },
-        "/collection/listShared": {
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "If set to true, only collections shared directly (ie not via usergroups) with the logged in user will be shown. Default value is false.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "loggedInUserAccess",
-                        "in": "query",
-                        "description": "Filters returned collections based on the logged in user's access level (recursively checked for inheritance from usergroups). Values are \"READ\", ```\"WRITE\", \"OWN\"```. These values have a hierarcy, ie if the value ```\"WRITE\"``` is set, ```\"READ\"``` will also be returned (but not ```\"OWN\"```).",
-                        "type": "string"
-                    },
-                    {
-                        "name": "directlyAccessedByUserName",
-                        "in": "query",
-                        "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByUserName",
-                        "in": "query",
-                        "description": "This field works like ```directlyAccessedByUserName``` with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "directlyAccessedByGroupName",
-                        "in": "query",
-                        "description": "This field also works like ```directlyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users. For testing purposes please use this as input ```[{group1:username1,rights:\"READ\"},{group2:username2,rights2:\"WRITE\"}]```",
-                        "type": "array",
-                        "items": {
-                            "type": "string",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByGroupName",
-                        "in": "query",
-                        "description": "See ```recursivelyAccessedByUserName``` but fields of the JSON objects are usergroup names instead of users.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are ```\"READ\", \"WRITE\", \"OWN\"```."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "isExhibition",
-                        "in": "query",
-                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "collectionHits",
-                        "in": "query",
-                        "type": "boolean",
-                        "description": "If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).",
-                        "default": false
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "description": "Offset",
-                        "type": "integer",
-                        "default": 0
-                    },
-                    {
-                        "name": "count",
-                        "in": "query",
-                        "default": 10,
-                        "description": "Count (default 10)",
-                        "type": "integer"
-                    }
-                ],
-                "summary": "Get a list of collections shared with the user.",
-                "description": "This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
-                "tags": [
-                    "Collection"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Collection"
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (user not specified)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/collection/list": {
             "get": {
                 "parameters": [
                     {
-                        "name": "loggedInUserAccess",
-                        "in": "query",
-                        "description": "Filters returned collections based on the logged in user's access level (recursively checked for inheritance from usergroups). Values are \"READ\", \"WRITE\", \"OWN\". These values have a hierarcy, ie if the value \"WRITE\" is set, \"READ\" will also be returned (but not \"OWN\").",
-                        "type": "string"
-                    },
-                    {
-                        "name": "directlyAccessedByUserName",
+                        "name": "directlyAccessedByUserOrGroup",
                         "in": "query",
                         "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
                         "type": "array",
@@ -334,7 +185,7 @@
                         }
                     },
                     {
-                        "name": "recursivelyAccessedByUserName",
+                        "name": "recursivelyAccessedByUserOrGroup",
                         "in": "query",
                         "description": "This field works like '''directlyAccessedByUserName''' with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
                         "type": "array",
@@ -342,42 +193,6 @@
                             "type": "object",
                             "properties": {
                                 "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are READ, WRITE, OWN."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "directlyAccessedByGroupName",
-                        "in": "query",
-                        "description": "This field also works like '''directlyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users. For testing purposes please use this as input ```[{group1:username1,rights:\"READ\"},{group2:username2,rights2:\"WRITE\"}]```",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are READ, WRITE, OWN."
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "name": "recursivelyAccessedByGroupName",
-                        "in": "query",
-                        "description": "See '''recursivelyAccessedByUserName''' but fields of the JSON objects are usergroup names instead of users.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "groupname": {
                                     "type": "string"
                                 },
                                 "rights": {
@@ -459,6 +274,107 @@
                 }
             }
         },
+        "/collection/listShared": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "direct",
+                        "in": "query",
+                        "description": "If set to true, only collections shared directly (ie not via usergroups) with the logged in user will be shown. Default value is false.",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "directlyAccessedByUserOrGroup",
+                        "in": "query",
+                        "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "username": {
+                                    "type": "string"
+                                },
+                                "rights": {
+                                    "type": "string",
+                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "recursivelyAccessedByUserOrGroup",
+                        "in": "query",
+                        "description": "This field works like ```directlyAccessedByUserName``` with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "username": {
+                                    "type": "string"
+                                },
+                                "rights": {
+                                    "type": "string",
+                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name": "isExhibition",
+                        "in": "query",
+                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
+                        "type": "boolean"
+                    },
+                    {
+                        "name": "collectionHits",
+                        "in": "query",
+                        "type": "boolean",
+                        "description": "If true returns the total numbers of exhibitions and/or collections this call may return (limited by the count).",
+                        "default": false
+                    },
+                    {
+                        "name": "offset",
+                        "in": "query",
+                        "description": "Offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "default": 10,
+                        "description": "Count (default 10)",
+                        "type": "integer"
+                    }
+                ],
+                "summary": "Get a list of collections shared with the user.",
+                "description": "This call returns a list of all the collections that have been shared with the logged in user. This means, the user did not create these collections but has been given access rights to it. The filters are similar to the ```collection/list``` call. Using the parameter filters, you can narrow down the collections associated with a specific user. All filters are optional. Since this call has many parameters we suggest you go through all descriptions before using it.",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Collection"
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (user not specified)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/collection/featured": {
             "get": {
                 "parameters": [
@@ -516,6 +432,585 @@
                     },
                     "400": {
                         "description": "Bad Request (user or group cannot be found)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/favorites": {
+            "get": {
+                "summary": "Get a collection of favorite records.",
+                "description": "This call returns a collection with the favorite records of the logged in user. The call has no parameters and is pretty straightforward.",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "totalCollections": {
+                                    "type": "integer"
+                                },
+                                "totalExhibitions": {
+                                    "type": "integer"
+                                },
+                                "collectionsOrExhibitions": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Collection"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (user or group cannot be found)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/{collectionId}/listUsers": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "description": "Retrieves a list of all the users that have access to this collection and their access rights.",
+                "summary": "Retrieve all users that have access to a collection.",
+                "tags": [
+                    "Collection",
+                    "Exhibition",
+                    "User"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (JSON contains the serialization specified)",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "itemCount": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/InternalRecord"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbiden (invalid collection id, no read access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve records from database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/{collectionId}/list": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. Record metadata can be available in different serializations. The format parameter defines this serialization in the records array field of the JSON response.",
+                "summary": "Retrieve all records in a collection.",
+                "tags": [
+                    "Collection",
+                    "Exhibition",
+                    "Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "start",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "count",
+                        "in": "query",
+                        "description": "count (default 10)",
+                        "type": "integer",
+                        "default": 10
+                    },
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+                        "type": "string",
+                        "default": "noContent"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (JSON contains the serialization specified)",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "itemCount": {
+                                    "type": "integer"
+                                },
+                                "records": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/InternalRecord"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbiden (invalid collection id, no read access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve records from database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/liked": {
+            "post": {
+                "summary": "Add a record to favourites.",
+                "description": "This call will add a collection/record to the favourites of the logged in user???",
+                "tags": [
+                    "Collection",
+                    "Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/{collectionId}/addRecord": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection or exhibition",
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT: This is the preferred way to create a new record!",
+                "summary": "Create a new record and add it to a collection.",
+                "tags": [
+                    "Collection",
+                    "Exhibition",
+                    "Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/{collectionId}/removeRecord": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection or exhibition from which to remove the record",
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "description": "Removes the record in the specified position, from a specified collection (path). Note that calls to this path can also be used for exhibitions.",
+                "summary": "Remove a record from a collection.",
+                "tags": [
+                    "Collection",
+                    "Exhibition",
+                    "Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "name": "recordId",
+                        "in": "query",
+                        "required": true,
+                        "description": "Id of the record to remove.",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (collection Id in string)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (no or wrong record Id, cannot delete from database, exception error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/unliked/{recordId}": {
+            "parameters": [
+                {
+                    "name": "recordId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the record to be removed from favourites.",
+                    "type": "string"
+                }
+            ],
+            "delete": {
+                "description": "Removes the record, specified by its Id, from the favourites, for the logged in user.",
+                "summary": "Remove a record from favourites.",
+                "tags": [
+                    "Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer",
+                        "default": 0
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK (collection Id in string)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (no or wrong record Id, cannot delete from database, exception error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/{collectionId}": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "description": "Internal id of the collection or exhibition",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "summary": "Retrieve collection metadata.",
+                "description": "Returns the metadata of the collection specified in path. Note that calls to this path can also be used for exhibitions.",
+                "tags": [
+                    "Collection",
+                    "Exhibition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Update metadata in a collection.",
+                "description": "Use this call to change the stored metadata of a collection. Note that calls to this path can also be used for exhibitions.",
+                "tags": [
+                    "Collection",
+                    "Exhibition"
+                ],
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "New collection/exhibtion metadata. Only provide the fields you wish to be changed!",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "owner": {
+                                    "type": "string"
+                                },
+                                "access": {
+                                    "type": "string"
+                                },
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (null/invalid JSON, duplicate title, wrong JSON fields)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "summary": "Delete a collection.",
+                "description": "Removes a collection from the database. Records that were created into this collection will also be deleted. Note that calls to this path can also be used for exhibitions.",
+                "tags": [
+                    "Collection",
+                    "Exhibition"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Collection"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbiden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -1068,484 +1563,6 @@
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/Group"
-                        }
-                    }
-                }
-            }
-        },
-        "/collection": {
-            "post": {
-                "parameters": [
-                    {
-                        "name": "isExhibition",
-                        "in": "query",
-                        "description": "Is this an exhibition.",
-                        "required": true,
-                        "type": "boolean",
-                        "default": false
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "A sample body for test calls.",
-                        "schema": {
-                            "$ref": "#/definitions/SampleCollection"
-                        }
-                    }
-                ],
-                "summary": "Create a new collection.",
-                "description": "This call will create a new collection and store it in the database. I have included it here only for testing purposes so make sure you either delete unwanted collections afterwards, or use a database for testing.",
-                "tags": [
-                    "Test calls"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "collection": {
-                                    "$ref": "#/definitions/Collection"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no read-access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error(database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/{collectionId}/addRecord": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of the collection or exhibition",
-                    "type": "string"
-                }
-            ],
-            "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0.",
-                "summary": "Add a record to a collection.",
-                "tags": [
-                    "Collection",
-                    "Exhibition"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Record JSON schema",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (no position in exhibition, constraint violation)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/{collectionId}/removeRecord": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of the collection or exhibition from which to remove the record",
-                    "type": "string"
-                }
-            ],
-            "delete": {
-                "description": "Removes the specified record (parameter) from a specified collection (path). Note that calls to this path can also be used for exhibitions.",
-                "summary": "Remove a record from a collection.",
-                "tags": [
-                    "Collection",
-                    "Exhibition"
-                ],
-                "parameters": [
-                    {
-                        "name": "recordId",
-                        "in": "query",
-                        "description": "Id of record to be removed",
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK (collection Id in string)",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (no or wrong record Id, cannot delete from database, exception error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/{collectionId}/list": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of the collection",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. Record metadata can be available in different serializations. The format parameter defines this serialization in the records array field of the JSON response.",
-                "summary": "Retrieve all records in a collection.",
-                "tags": [
-                    "Collection",
-                    "Exhibition"
-                ],
-                "parameters": [
-                    {
-                        "name": "start",
-                        "in": "query",
-                        "description": "offset",
-                        "type": "integer",
-                        "default": 0
-                    },
-                    {
-                        "name": "count",
-                        "in": "query",
-                        "description": "count (default 10)",
-                        "type": "integer",
-                        "default": 10
-                    },
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
-                        "type": "string",
-                        "default": "all"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK (JSON contains the serialization specified)",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "itemCount": {
-                                    "type": "integer"
-                                },
-                                "records": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/InternalRecord"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbiden (invalid collection id, no read access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot retrieve records from database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/{collectionId}": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "description": "Internal id of the collection or exhibition",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "summary": "Retrieve collection metadata.",
-                "description": "Returns the metadata of the collection specified in path. Note that calls to this path can also be used for exhibitions.",
-                "tags": [
-                    "Collection",
-                    "Exhibition"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "collection": {
-                                    "$ref": "#/definitions/Collection"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no read-access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error(database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "post": {
-                "summary": "Update metadata in a collection.",
-                "description": "Use this call to change the stored metadata of a collection. Note that calls to this path can also be used for exhibitions.",
-                "tags": [
-                    "Collection",
-                    "Exhibition"
-                ],
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "New collection/exhibtion metadata. Only provide the fields you wish to be changed!",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/Collection"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "owner": {
-                                    "type": "string"
-                                },
-                                "access": {
-                                    "type": "string"
-                                },
-                                "collection": {
-                                    "$ref": "#/definitions/Collection"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (null/invalid JSON, duplicate title, wrong JSON fields)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no read-access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Delete a collection.",
-                "description": "Removes a collection from the database. Records that were created into this collection will also be deleted. Note that calls to this path can also be used for exhibitions.",
-                "tags": [
-                    "Collection",
-                    "Exhibition"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Collection"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbiden (no read-access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/listByUser": {
-            "post": {
-                "tags": [
-                    "Collection"
-                ],
-                "summary": "Get the first records of a user's collections.",
-                "description": "Retrieve all fields from the first 20 items of all collections of the specified user.",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "ownerId is the id of the user whose collections this call will list.",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "ownerId": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/Collection"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "description": "invalid json, or did not specify the owner",
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "description": "user not specified, or user does not have access to requested records",
-                                    "type": "string"
-                                }
-                            }
                         }
                     }
                 }
@@ -2309,6 +2326,65 @@
                                             }
                                         }
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "collectionType",
+                        "in": "query",
+                        "description": "Is this an enum?.",
+                        "required": true,
+                        "type": "string",
+                        "default": "SimpleCollection"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "A sample body for test calls.",
+                        "schema": {
+                            "$ref": "#/definitions/SampleCollection"
+                        }
+                    }
+                ],
+                "summary": "Create a new collection.",
+                "description": "This call will create a new collection and store it in the database. I have included it here only for testing purposes so make sure you either delete unwanted collections afterwards, or use a database for testing.",
+                "tags": [
+                    "Test calls"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
                                 }
                             }
                         }
