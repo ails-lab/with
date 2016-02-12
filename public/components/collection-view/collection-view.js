@@ -140,7 +140,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				self.collected = usage.collected;
 			}
 
-			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.url != "null" ? media[0].Thumbnail.url : null;
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.data(options);
 			self.isLoaded = ko.observable(false);

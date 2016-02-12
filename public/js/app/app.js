@@ -798,8 +798,17 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	self.checkLogged();
 
-	self.findByLang=function(val) {
-        selvalue="";
+	self.findByLang=function(val, language) {
+		if (language == undefined || language == null)
+			language = "default";
+		if (val !== undefined && val !== null)
+			if (val[language] !== undefined && val[language] !== null) {
+				var label = val[language][0]
+				if (label !== undefined && label !== null)
+					return label;
+			}
+		return "";
+        /*selvalue="";
         var uilang="";
         if(self.lang().length==0){
 				uilang="default";
@@ -811,9 +820,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	                selvalue=val[uilang][i];
 	    	   }
 	       }
-           else{selvalue=val.default;}
+           else{selvalue=val.default[0];}
 	      }
-         return selvalue;
+         return selvalue;*/
   }
 
 	 self.findProvenanceValues=function(array, selection) {

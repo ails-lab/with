@@ -181,16 +181,11 @@ public class EmbeddedMediaObject {
 	}
 
 	public String getWithUrl() {
-		if (url == null) {
-			return null;
-		}
-		if (url.startsWith("/")) {
+		if (url == null || url.isEmpty() || url.startsWith("/media") || mediaVersion == null) {
 			return url;
 		}
-		if (mediaVersion == null) {
-			return null;
-		}
-		return "/media/byUrl?url=" + url + "&version=" + mediaVersion.toString();
+		else
+			return "/media/byUrl?url=" + url + "version=" + mediaVersion.toString();
 	}
 
 	public LiteralOrResource getOriginalRights() {

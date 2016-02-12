@@ -1,6 +1,6 @@
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 	
-	count = 1;
+	count = 2;
 
 	function Entry(entryData) {
 		var entry = ko.mapping.fromJS(entryData);
@@ -52,7 +52,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...] 
 		        var innerModel = ko.mapping.fromJS(options.data);
 		        innerModel.title = ko.observable(self.multiLiteral(options.data.descriptiveData.label));
-		        innerModel.description = ko.observable(self.multiLiteral(options.data.descriptiveData.description));
+		        var dbDescription = options.data.descriptiveData.description;
+		        if (dbDescription == undefined || dbDescription == null)
+		        	innerModel.description = ko.observable("");
+		        else 
+		        	innerModel.description = ko.observable(self.multiLiteral(dbDescription));
+		        $.each(innerModel.media(), function(index, value){
+		        	withUrl = value.Thumbnail.withUrl();
+		        	if (withUrl.indexOf("/media") == 0)
+		        		innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
+		        	else
+		        		innerModel.media()[index].thumbnailUrl = withUrl;
+		        	console.log(innerModel.media()[index].thumbnailUrl);
+				});
 		        return innerModel;
 		    },
 			'dbId': {
@@ -222,8 +234,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 			if (self.loading() === false && self.moreSharedCollectionData()===true) {
 				self.loading(true);
-				var offset = self.sharedCollections().length+1;
-				var promise = app.getCollectionsSharedWithMe(isExhibition, offset, count);
+				var offset = self.sharedCollections().length;
+				var promise = getCollectionsSharedWithMe(isExhibition, offset, count);
 				$.when(promise).done(function(data) {
 					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
 					self.myCollections.push.apply(self.myCollections, newItems());
@@ -243,7 +255,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
 				self.loading(true);
-				var offset = self.myCollections().length+1;
+				var offset = self.myCollections().length;
 				var promise = app.getUserCollections(isExhibition, offset, count);
 				$.when(promise).done(function(data) {
 					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
@@ -497,7 +509,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.updateCollectionData = function(collectionSet, collIndex) {
 			collectionSet[collIndex].descriptiveData.label.default = [self.titleToEdit()];
-			collectionSet[collIndex].descriptiveData.description.default = [self.descriptionToEdit()];
+			if (collectionSet[collIndex].descriptiveData.description == undefined) 
+				collectionSet[collIndex].descriptiveData.description = {default: [self.descriptionToEdit()]}
+			else
+				collectionSet[collIndex].descriptiveData.description.default = [self.descriptionToEdit()];
 			collectionSet[collIndex].title(self.titleToEdit());
 			collectionSet[collIndex].description(self.descriptionToEdit());
 			collectionSet[collIndex].administrative.access.isPublic(self.isPublicToEdit());
