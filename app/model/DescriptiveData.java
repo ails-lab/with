@@ -28,8 +28,11 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
+import utils.Deserializer.PointDeserializer;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteral;
@@ -94,6 +97,7 @@ public class DescriptiveData {
 	//in case of Agents, Places, Timespan
 	private MultiLiteralOrResource city;
 	
+	@JsonDeserialize(using = PointDeserializer.class)
 	private org.mongodb.morphia.geo.Point coordinates;
 	
 	private Quality metadataQuality;

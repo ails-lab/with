@@ -163,6 +163,16 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		return this.exists(q);
 	}
 
+	public boolean existsOtherForOwnerAndLabel(ObjectId creatorId, String lang,
+			List<String> title, ObjectId excludedId) {
+		if (lang == null)
+			lang = "default";
+		Query<T> q = this.createQuery().field("administrative.withCreator")
+				.equal(creatorId).field("descriptiveData.label." + lang)
+				.equal(title).field("_id").notEqual(excludedId);
+		return this.exists(q);
+	}
+
 	/**
 	 * Get all CollectionObject using the creator's/owner's id.
 	 * 

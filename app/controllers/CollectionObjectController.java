@@ -165,7 +165,8 @@ public class CollectionObjectController extends WithResourceController {
 	 * @return
 	 */
 	private static MultiLiteral createExhibitionDummyTitle() {
-		return new MultiLiteral(Language.DEFAULT ,"New Exhibition (" + new Date() + ")");
+		return new MultiLiteral(Language.DEFAULT, "New Exhibition ("
+				+ new Date() + ")");
 	}
 
 	/**
@@ -264,11 +265,11 @@ public class CollectionObjectController extends WithResourceController {
 					CollectionObject.class);
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			if (collectionChanges.getDescriptiveData().getLabel() != null
-					&& DB.getCollectionObjectDAO().existsForOwnerAndLabel(
+					&& DB.getCollectionObjectDAO().existsOtherForOwnerAndLabel(
 							creatorDbId,
 							null,
 							collectionChanges.getDescriptiveData().getLabel()
-									.get(Language.DEFAULT))) {
+									.get(Language.DEFAULT), collectionDbId)) {
 				ObjectNode error = Json.newObject();
 				error.put("error", "Not unique collection title");
 				return badRequest(error);
