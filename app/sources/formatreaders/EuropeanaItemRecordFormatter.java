@@ -78,7 +78,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("object.proxies[0].dcSubject","object.proxies[1].dcSubject"));
 		
 
-		model.setDcspatial(rec.getMultiLiteralOrResourceValue("object.proxies[0].dctermsSpatial","object.places[.*].about","object.places[.*].about","object.places[.*].prefLabel"));
+		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("object.proxies[0].dctermsSpatial","object.places[.*].about","object.places[.*].about","object.places[.*].prefLabel"));
 		rec.enterContext("object.proxies[0]");
 		
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
@@ -96,7 +96,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		
-		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
+//		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
 //		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
 //		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
 //		 rights.getURI()).get(0);
@@ -109,6 +109,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 
 		rec.exitContext();
 		rec.enterContext("object.aggregations[0]");
+		LiteralOrResource rights = rec.getLiteralOrResourceValue("edmRights");
 		WithMediaRights withMediaRights = (WithMediaRights)
 				 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
 						 rec.getLiteralOrResourceValue("edmRights").getURI()).get(0);
@@ -116,10 +117,10 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
 		String uriAt = model.getIsShownAt()==null?null:model.getIsShownAt().getURI();
-		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider"),uriAt,null);
+		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("edmDataProvider.def[0]"),uriAt,null);
 		object.addToProvenance(provInfo);
 		
-		provInfo = new ProvenanceInfo(rec.getStringValue("edmProvider"));
+		provInfo = new ProvenanceInfo(rec.getStringValue("edmProvider.def[0]"));
 		object.addToProvenance(provInfo);
 		
 		
