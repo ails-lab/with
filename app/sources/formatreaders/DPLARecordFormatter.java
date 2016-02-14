@@ -64,7 +64,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		}
 		rec.setLanguages(language);
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
-		model.setDcspatial(rec.getMultiLiteralOrResourceValue(false,"originalRecord.spatial","sourceResource.spatial[.*].name"));
+		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue(false,"originalRecord.spatial","sourceResource.spatial[.*].name"));
 		model.setCountry(rec.getMultiLiteralOrResourceValue("sourceResource.spatial[.*].country"));
 		model.setCity(rec.getMultiLiteralOrResourceValue("sourceResource.spatial[.*].city"));
 		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("sourceResource.spatial[.*].coordinates")));

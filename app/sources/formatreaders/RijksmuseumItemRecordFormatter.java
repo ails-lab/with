@@ -81,7 +81,7 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		// model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		// model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		// model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
-		model.setDcspatial(rec.getMultiLiteralOrResourceValue("location"));
+		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("location"));
 		// model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		// model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
 		// model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));

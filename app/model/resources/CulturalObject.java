@@ -114,11 +114,11 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 			this.dccoverage = dccoverage;
 		}
 
-		public MultiLiteralOrResource getDcspatial() {
+		public MultiLiteralOrResource getDctermsspatial() {
 			return dctermsspatial;
 		}
 
-		public void setDcspatial(MultiLiteralOrResource dcspatial) {
+		public void setDctermsspatial(MultiLiteralOrResource dcspatial) {
 			this.dctermsspatial = dcspatial;
 		}
 
@@ -205,7 +205,7 @@ public class CulturalObject extends RecordResource<CulturalObject.CulturalObject
 		idx_map.put("dctype", ((CulturalObjectData)getDescriptiveData()).getDctype());
 		idx_map.put("dccoverage", ((CulturalObjectData)getDescriptiveData()).getDccoverage());
 		idx_map.put("dcrights", ((CulturalObjectData)getDescriptiveData()).getDcrights());
-		idx_map.put("dctermsspatial", ((CulturalObjectData)getDescriptiveData()).getDcspatial());
+		idx_map.put("dctermsspatial", ((CulturalObjectData)getDescriptiveData()).getDctermsspatial());
 		idx_map.put("dccontributor", ((CulturalObjectData)getDescriptiveData()).getDccontributor());
 		idx_map.put("dcformat", ((CulturalObjectData)getDescriptiveData()).getDcformat());
 		idx_map.put("dctermsmedium", ((CulturalObjectData)getDescriptiveData()).getDctermsmedium());
