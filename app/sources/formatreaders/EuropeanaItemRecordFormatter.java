@@ -55,7 +55,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 //		String id = rec.getStringValue("objectNumber");
 		
 		Language[] language = null;
-		List<String> langs = rec.getStringArrayValue("proxies[0].dcLanguage","europeanaAggregation.edmLanguage","language");
+		List<String> langs = rec.getStringArrayValue("object.proxies[0].dcLanguage","object.europeanaAggregation.edmLanguage","object.language");
 		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
@@ -72,14 +72,14 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		rec.setLanguages(language);
 		
 
-		model.setCountry(rec.getMultiLiteralOrResourceValue("proxies[0].country","europeanaAggregation.edmCountry"));
+		model.setCountry(rec.getMultiLiteralOrResourceValue("object.proxies[0].country","object.europeanaAggregation.edmCountry"));
 		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("places[.*].latitude"), rec.getStringValue("places[.*].longitude")));
 
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("proxies[0].dcSubject","proxies[1].dcSubject"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("object.proxies[0].dcSubject","object.proxies[1].dcSubject"));
 		
 
-		model.setDcspatial(rec.getMultiLiteralOrResourceValue("proxies[0].dctermsSpatial","places[.*].about","places[.*].about","places[.*].prefLabel"));
-		rec.enterContext("proxies[0]");
+		model.setDcspatial(rec.getMultiLiteralOrResourceValue("object.proxies[0].dctermsSpatial","object.places[.*].about","object.places[.*].about","object.places[.*].prefLabel"));
+		rec.enterContext("object.proxies[0]");
 		
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
@@ -97,18 +97,21 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
-		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
-		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
-		 rights.getURI()).get(0);
+//		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
+//		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+//		 rights.getURI()).get(0);
 		
 
 		rec.exitContext();
-		rec.enterContext("proxies[1]");
+		rec.enterContext("object.proxies[1]");
 
 		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
 
 		rec.exitContext();
-		rec.enterContext("aggregations[0]");
+		rec.enterContext("object.aggregations[0]");
+		WithMediaRights withMediaRights = (WithMediaRights)
+				 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+						 rec.getLiteralOrResourceValue("edmRights").getURI()).get(0);
 
 		model.setIsShownAt(rec.getLiteralOrResourceValue("edmIsShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
