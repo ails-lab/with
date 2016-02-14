@@ -76,7 +76,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("places[.*].latitude"), rec.getStringValue("places[.*].longitude")));
 
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("object.proxies[0].dcSubject","object.proxies[1].dcSubject"));
-		
+		model.setDates(rec.getWithDateArrayValue("object.year"));
 
 		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("object.proxies[0].dctermsSpatial","object.places[.*].about","object.places[.*].about","object.places[.*].prefLabel"));
 		rec.enterContext("object.proxies[0]");
@@ -92,19 +92,13 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setLabel(rec.getMultiLiteralValue("dcTitle","title"));
 		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
-		model.setDates(rec.getWithDateArrayValue("dcDate"));
+		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dcType"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
-		
-//		LiteralOrResource rights = rec.getLiteralOrResourceValue("dcRights");
-//		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
-//		 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
-//		 rights.getURI()).get(0);
-		
 
 		rec.exitContext();
 		rec.enterContext("object.proxies[1]");
-
+		
 		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
 
 		rec.exitContext();
