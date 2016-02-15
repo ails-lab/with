@@ -97,13 +97,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        
 			        self.url=ko.computed(function() {
 			        	if(self.administrative){
-			        		if (self.administrative.collectionType.indexOf("Collection")==-1)
-				    		  return 'index.html#exhibitionview/'+ self.dbId;
+			        		if (self.administrative.collectionType.indexOf("Collection")>-1)
+				    		  return 'index.html#collectionview/'+ self.dbId;
 			        		else if (self.administrative.collectionType.indexOf("Space")>-1){
 			        			return self.administrative.isShownAt;
 			        		}
 				    		else{
-				    			return 'index.html#collectionview/'+ self.dbId;
+				    			return 'index.html#exhibitionview/'+ self.dbId;
 				    		}
 			        	}else return "";
 			        });
