@@ -8,7 +8,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			size: 'small',
 			onColor: 'success',
 			offColor: 'danger',
-			state: exhibition.isPublic()
+			state: exhibition.administrative.access.isPublic()
 		});
 		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
 			var promise = updateExhibitionProperty(exhibition, 'isPublic', state);;
@@ -69,12 +69,19 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 	}
 
 	function updateExhibition(exhibition, isTitleUpdate) {
-
 		var jsonObject = {};
 		if (isTitleUpdate) {
-			jsonObject.title = exhibition.title();
+			jsonObject.descriptiveData = {
+				label: {
+					default: [ exhibition.title() ]
+				}
+			};
 		} else {
-			jsonObject.description = exhibition.description();
+			jsonObject.descriptiveData = {
+				description: {
+					default: [ exhibition.description() ]
+				}
+			};
 		}
 		var jsonData = JSON.stringify(jsonObject);
 		return $.ajax({
@@ -173,6 +180,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		});
 
 		var mappingExhibition = {
+			create: function(options) {
+				var vm = ko.mapping.fromJS(options.data);
+				return vm;
+			},
 			'dbId': {
 				key: function (data) {
 					return ko.utils.unwrapObservable(data.dbId);
@@ -202,6 +213,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				console.log(data);
 				$('.outer').css("visibility", "visible");
 				ko.mapping.fromJS(data, mappingExhibition, self);
+				self.title(app.findByLang(data.descriptiveData.label));
+				self.description(app.findByLang(data.descriptiveData.description));
 				if (self.title().indexOf('Dummy') !== -1) {
 					self.title('');
 				}
@@ -209,21 +222,23 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					self.description('');
 				}
 				setUpSwitch(self);
-				self.loadingInitialItemsCount = self.firstEntries.length;
-				self.firstEntries.map(function (record) { //fix for now till service gets implemented
-					record.additionalText = ko.observable('');
-					record.videoUrl = ko.observable('');
-					record.containsVideo = ko.observable(false);
-					record.containsText = ko.observable(false);
-					var exhibitionItemInfo = record.exhibitionRecord;
-					if (exhibitionItemInfo !== undefined) {
-						record.additionalText(exhibitionItemInfo.annotation);
-						record.videoUrl(exhibitionItemInfo.videoUrl);
-						record.containsVideo(!isEmpty(record.videoUrl()));
-						record.containsText(!isEmpty(record.additionalText()));
-					}
-				});
-				self.collectionItemsArray(self.firstEntries);
+
+// TODO: Update Code
+				// self.loadingInitialItemsCount = self.firstEntries.length;
+				// self.firstEntries.map(function (record) { //fix for now till service gets implemented
+				// 	record.additionalText = ko.observable('');
+				// 	record.videoUrl = ko.observable('');
+				// 	record.containsVideo = ko.observable(false);
+				// 	record.containsText = ko.observable(false);
+				// 	var exhibitionItemInfo = record.exhibitionRecord;
+				// 	if (exhibitionItemInfo !== undefined) {
+				// 		record.additionalText(exhibitionItemInfo.annotation);
+				// 		record.videoUrl(exhibitionItemInfo.videoUrl);
+				// 		record.containsVideo(!isEmpty(record.videoUrl()));
+				// 		record.containsText(!isEmpty(record.additionalText()));
+				// 	}
+				// });
+				// self.collectionItemsArray(self.firstEntries);
 				self.loadingExhibitionItems = true;
 			});
 		}
@@ -233,18 +248,20 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.currentItem = ko.observable();
 		self.selectedCollection.subscribe(function (newCollection) {
 			self.userSavedItemsArray(newCollection.firstEntries);
-			self.currentItem(self.userSavedItemsArray()[0]);
-			if (self.userSavedItemsArray().length > 0) {
-				self.currentItemSet(true);
-			}
+// TODO: Update Code
+			// self.currentItem(self.userSavedItemsArray()[0]);
+			// if (self.userSavedItemsArray().length > 0) {
+			// 	self.currentItemSet(true);
+			// }
 		});
 
 		self.selectedCollection.subscribe(function (newCollection) {
 			self.userSavedItemsArray(newCollection.firstEntries);
-			self.currentItem(self.userSavedItemsArray()[0]);
-			if (self.userSavedItemsArray().length > 0) {
-				self.currentItemSet(true);
-			}
+// TODO: Update Code
+			// self.currentItem(self.userSavedItemsArray()[0]);
+			// if (self.userSavedItemsArray().length > 0) {
+			// 	self.currentItemSet(true);
+			// }
 		});
 
 		showViewModel = function () {
