@@ -417,16 +417,16 @@ public class CollectionObjectController extends WithResourceController {
 					.get();
 			for (StringTuple userAccess : directlyUserNameList.list) {
 				List<Tuple<ObjectId, Access>> directlyAccessedByUser = new ArrayList<Tuple<ObjectId, Access>>();
-				User user = DB.getUserDAO().getByUsername(userAccess.x);
-				if (user != null) {
-					ObjectId userId = user.getDbId();
+				UserOrGroup userOrGroup = getUserOrGroup(userAccess.x);
+				if (userOrGroup != null) {
 					directlyAccessedByUser
-							.add(new Tuple<ObjectId, Access>(userId, Access
-									.valueOf(userAccess.y.toUpperCase())));
+					.add(new Tuple<ObjectId, Access>(userOrGroup.getDbId(), Access
+							.valueOf(userAccess.y.toUpperCase())));
 					accessedByUserOrGroup.add(directlyAccessedByUser);
 				}
 			}
 		}
+		//TODO: add support for userGroups in recursively!!!!!
 		if (recursivelyAccessedByUserOrGroup.isDefined()) {
 			MyPlayList recursivelyUserNameList = recursivelyAccessedByUserOrGroup
 					.get();
@@ -446,6 +446,21 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 		return accessedByUserOrGroup;
+	}
+	
+	private static UserOrGroup getUserOrGroup(String username) {
+		User user = DB.getUserDAO().getByUsername(username);
+		UserOrGroup userOrGroup = null;
+		if (user != null) {
+			userOrGroup = user;
+		}
+		else {
+			UserGroup userGroup =  DB.getUserGroupDAO().getByName(username);
+			if (userGroup != null) {
+				userOrGroup = userGroup;
+			}
+		}
+		return userOrGroup;
 	}
 
 	private static List<ObjectNode> collectionsWithMyAccessData(

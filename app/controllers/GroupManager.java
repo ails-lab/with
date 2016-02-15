@@ -539,7 +539,6 @@ public class GroupManager extends Controller {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
-			Class<?> clazz = Class.forName("model.usersAndGroups." + groupType);
 			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
 					"effectiveUserIds"));
 			if (userId == null) {
@@ -548,25 +547,17 @@ public class GroupManager extends Controller {
 			}
 			User user = DB.getUserDAO().get(userId);
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
-			int i = 0;
-			for (ObjectId groupId : userGroupsIds) {
-				if (count == 0)
-					break;
-				UserGroup group = DB.getUserGroupDAO().get(groupId);
-				if (group != null && group.getClass().equals(clazz)) {
-					if (i >= offset) {
-						groups.add(group);
-						count--;
-					}
-					i++;
-				}
-			}
-			if ( count == 0) 
+			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
+					offset, count);
+			if (groups.size() == count)
 				return ok(Json.toJson(groups));
-			if (i <= offset)
-				offset = offset - i;
-			else 
+			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
+					userGroupsIds, type);
+			if (offset < userGroupCount)
 				offset = 0;
+			else
+				offset = offset - userGroupCount;
+			count = count - groups.size();
 			groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
 					offset, count, userGroupsIds));
 			return ok(Json.toJson(groups));

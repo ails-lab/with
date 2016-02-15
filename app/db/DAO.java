@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import play.libs.F.Promise;
+
 
 import model.resources.WithResource.WithResourceType;
 
@@ -247,24 +249,27 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 		UpdateResults results = super.update(q, ops);
 
-		/*E doc = findOne(q);
+		String id = q.getQueryObject().get("_id").toString();
+		Query<E> q1 = createQuery().field("_id").equal(new ObjectId(id));
+		E doc = findOne(q1);
 
 		String type = defineInstanceOf(doc);
 		try {
 			if(type != null)  {
+				/* Index Resource */
 				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
 						(ObjectId colId, Map<String, Object> map) -> {
 							return ElasticIndexer.index(type, colId, map);
 						};
 				ParallelAPICall.createPromise(indexResource,
-						(ObjectId) doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
-						(Map<String, Object>) doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+						(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
+						(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
 			}
 		} catch(Exception e) {
 			log.error(e.getMessage(), e);
-			System.out.println(e.getMessage());
 			return null;
-		}*/
+		}
+
 		return results;
 	}
 
@@ -274,30 +279,32 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 		WriteResult wr = super.deleteById(id);
 
-		Function<String, Boolean> deleteResource =
-				(indexId) -> (ElasticEraser.deleteResourceByQuery(indexId));
-		ParallelAPICall.createPromise(deleteResource, id.toString());
+		if(wr.getN() == 1) {
+			Function<String, Boolean> deleteResource =
+					(indexId) -> (ElasticEraser.deleteResourceByQuery(indexId));
+			Promise<Boolean> deleteResp = ParallelAPICall.createPromise(deleteResource, id.toString());
+		}
 
 		return wr;
 	}
 
 	private String defineInstanceOf(E doc) {
 		//TODO: why have different names in Elastic and not the same as in WithResourceType?
-		// renaming always causes trouble, when we add more resource types, 
+		// renaming always causes trouble, when we add more resource types,
 		//we'll have to add them in different places
 		String[] resourcesNames = { Elastic.typeCollection, Elastic.typeResource,
 									Elastic.typeCultural, Elastic.typeAgent,
 									Elastic.typeEuscreen, Elastic.typeEvent,
 									Elastic.typePlace, "Thesaurus",
 									Elastic.typeTimespan};
-		
+
 		//TODO: do something like the following
 		/*String s = doc.getClass().getSimpleName();
 		WithResourceType t = WithResourceType.valueOf(s);
 		if (t != null)
 			return t.toString();
 		else return null;*/
-		
+
 		switch (doc.getClass().getSimpleName()) {
 
 		case "CollectionObject":
