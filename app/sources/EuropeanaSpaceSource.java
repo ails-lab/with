@@ -201,37 +201,37 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public List<CommonFilterLogic> createFilters(JsonNode response) {
 		
-		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
-		for (JsonNode facet : response.path("facets")) {
-			String filterType = facet.path("name").asText();
-			CommonFilters withFilter = CommonFilters.valueOf(filterType);//sourceToFiltersMappings.get(filterType);
-			if (withFilter != null) {
-				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
-				for (JsonNode jsonNode : facet.path("fields")) {
-					String label = jsonNode.path("label").asText();
-					int count = jsonNode.path("count").asInt();
-					switch (filterType) {
-						case "TYPE": 
-						case "RIGHTS":
-							countValue(filter, label, count);
-							break;
-						case "DATA_PROVIDER": 
-						case "PROVIDER":
-						case "proxy_dc_creator":
-						case "COUNTRY":
-						case "YEAR":
-							countValue(filter, label, false, count);
-							break;
-						default:
-							break;
-					}
-					filters.add(filter);
-				}
-			}
-		}
-		return filters;
+//		List<CommonFilterLogic> filters = new ArrayList<CommonFilterLogic>();
+//		for (JsonNode facet : response.path("facets")) {
+//			String filterType = facet.path("name").asText();
+//			CommonFilters withFilter = CommonFilters.valueOf(filterType);//sourceToFiltersMappings.get(filterType);
+//			if (withFilter != null) {
+//				CommonFilterLogic filter = new CommonFilterLogic(withFilter);
+//				for (JsonNode jsonNode : facet.path("fields")) {
+//					String label = jsonNode.path("label").asText();
+//					int count = jsonNode.path("count").asInt();
+//					switch (filterType) {
+//						case "TYPE": 
+//						case "RIGHTS":
+//							countValue(filter, label, count);
+//							break;
+//						case "DATA_PROVIDER": 
+//						case "PROVIDER":
+//						case "proxy_dc_creator":
+//						case "COUNTRY":
+//						case "YEAR":
+//							countValue(filter, label, false, count);
+//							break;
+//						default:
+//							break;
+//					}
+//					filters.add(filter);
+//				}
+//			}
+//		}
+//		return filters;
 
-		/*CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
+		CommonFilterLogic type = new CommonFilterLogic(CommonFilters.TYPE);
 		CommonFilterLogic provider = new CommonFilterLogic(CommonFilters.PROVIDER);
 		CommonFilterLogic dataprovider = new CommonFilterLogic(CommonFilters.DATA_PROVIDER);
 		CommonFilterLogic creator = new CommonFilterLogic(CommonFilters.CREATOR);
@@ -285,7 +285,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 		filters.add(creator);
 		filters.add(rights);
 		filters.add(country);
-		filters.add(year);*/
+		filters.add(year);
+		return filters;
 	}
 
 	public ArrayList<WithResource<?, ?>> getItems(JsonNode response) {
@@ -316,7 +317,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 				res.totalCount = Utils.readIntAttr(response, "totalResults", true);
 				res.count = Utils.readIntAttr(response, "itemsCount", true);
 				res.items.setCulturalCHO(getItems(response));
-				;
 				// res.facets = response.path("facets");
 				res.filtersLogic = createFilters(response);
 

@@ -167,7 +167,7 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 			CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 			String[] s = stringValue.split("<b>");
 			for (String string : s) {
-				Pattern p = Pattern.compile("([^<]*)</strong>:\\s*(.+)");
+				Pattern p = Pattern.compile("([^<]*)</b>:\\s*(.+)");
 				Matcher m = p.matcher(string);
 				while (m.find()) {
 					String field = m.group(1);
