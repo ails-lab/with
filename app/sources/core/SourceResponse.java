@@ -17,6 +17,7 @@
 package sources.core;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -139,7 +140,10 @@ public class SourceResponse {
 	}
 
 	public void transformResourcesToItems() {
-		List<WithResource<?, ?>> resources = (List<WithResource<?, ?>>) resourcesPerType.get("cultural");
+		List<WithResource<?, ?>> resources = new ArrayList<WithResource<?, ?>>();
+		for(Entry<String, List<?>> e: resourcesPerType.entrySet())
+			if(!e.getKey().equals("collection"))
+				resources.addAll((List<WithResource<?, ?>>) e.getValue());
 		items.setCulturalCHO(resources);
 	}
 

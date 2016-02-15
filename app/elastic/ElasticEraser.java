@@ -22,8 +22,12 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryRequest;
+import org.elasticsearch.action.get.GetRequest;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.index.VersionType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.fetch.source.FetchSourceContext;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -60,10 +64,16 @@ public class ElasticEraser {
 	 */
 	public static boolean deleteResourceByQuery(String dbId) {
 		try {
-			TermQueryBuilder delete_query = QueryBuilders.termQuery("_id", dbId);
 
-			Elastic.getTransportClient().deleteByQuery(
-					new DeleteByQueryRequest().source(delete_query.toString()));
+			GetResponse resp = Elastic.getTransportClient().get(new GetRequest(Elastic.index, "_all", dbId)
+						.fetchSourceContext(FetchSourceContext.DO_NOT_FETCH_SOURCE))
+						.actionGet();
+
+			Elastic.getTransportClient().prepareDelete(Elastic.index, resp.getType(), dbId)
+				.setVersion(resp.getVersion())
+				.execute()
+				.actionGet();
+
 		} catch(Exception e) {
 			log.error("Cannot delete the specified resource document", e);
 			return false;
