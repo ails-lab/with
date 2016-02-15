@@ -202,6 +202,7 @@ public class StringUtils {
 		for (Language language : lang) {
 			res.addLiteral(Language.EN, language.getName());
 		}
+		res.fillDEF();
 		return res;
 	}
 

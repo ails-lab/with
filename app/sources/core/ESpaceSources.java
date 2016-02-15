@@ -27,6 +27,7 @@ import sources.DigitalNZSpaceSource;
 import sources.ElasticSource;
 import sources.EuropeanaFashionSpaceSource;
 import sources.EuropeanaSpaceSource;
+import sources.FlickrSpaceSource;
 import sources.NLASpaceSource;
 import sources.RijksmuseumSpaceSource;
 import sources.WithSpaceSource;
@@ -57,6 +58,7 @@ public class ESpaceSources {
 		esources.add(new RijksmuseumSpaceSource());
 		esources.add(new DDBSpaceSource());
 		esources.add(new BritishLibrarySpaceSource());
+		esources.add(new FlickrSpaceSource.InternetArchiveSpaceSource());
 		esources.add(new WithSpaceSource());
 		Logger.info("Initialization of sources list");
 	}
