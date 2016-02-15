@@ -58,7 +58,6 @@ public interface ILiteral {
 			List<DetectedLanguage> probabilities = StringUtils.getLanguageDetector().getProbabilities(textObject);
 			
 	        if (!probabilities.isEmpty()) {
-	        	System.out.println(probabilities);
 	        	boolean gotSome = false;
 	            for (DetectedLanguage detectedLanguage : probabilities) {
 					if (	// is suggested
