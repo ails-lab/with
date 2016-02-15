@@ -19,10 +19,16 @@ package sources.formatreaders;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
@@ -165,19 +171,37 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 		
 		protected void matchInfo(String stringValue, JsonContextRecord rec) {
 			CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
-			String[] s = stringValue.split("<b>");
-			for (String string : s) {
-				Pattern p = Pattern.compile("([^<]*)</b>:\\s*(.+)");
-				Matcher m = p.matcher(string);
-				while (m.find()) {
-					String field = m.group(1);
-					String value = m.group(2);
-					MultiLiteralOrResource l = new MultiLiteralOrResource();
-					l.addSmartLiteral(value, rec.getLanguages());
+
+			Document doc = Jsoup.parse(stringValue);
+			for (Element efield : doc.select("b")) {
+				String text = efield.nextSibling()==null?null:efield.nextSibling().toString();
+				String url = null;
+				Element e = efield.nextElementSibling();
+				MultiLiteralOrResource l = new MultiLiteralOrResource();
+				if (e != null && !e.select("a").isEmpty()) {
+					while (e != null && !e.select("a").isEmpty()) {
+						Element first = e.select("a").first();
+						text = first.text();
+						url = first.attr("href");
+						e = e.nextElementSibling();
+						l.addSmartLiteral(text, rec.getLanguages());
+						l.addSmartLiteral(url);
+					}
+				} else
+					if (Utils.hasInfo(text))
+					l.addSmartLiteral(text, rec.getLanguages());
+
+				String field = efield.text();
+				
+				if (Utils.hasInfo(field) && Utils.hasInfo(l)){
 					switch (field) {
 					case "Author":
 					case "Authors":
 						model.setDccreator(l);
+						break;
+					case "Subjects":
+					case "Subject":
+						model.setKeywords(l);
 						break;
 					case "Publisher":
 						break;
@@ -188,15 +212,16 @@ public abstract class FlickrRecordFormatter extends CulturalRecordFormatter {
 					case "Contributor":
 						model.setDccontributor(l);
 						break;
-		
+
 					default:
 						break;
 					}
+
 				}
 			}
+
 		}
 
 	}
-
 
 }
