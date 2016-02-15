@@ -1,9 +1,9 @@
 {
     "swagger": "2.0",
     "info": {
-        "version": "v1.3",
+        "version": "v0.4",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n"
+        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us!\n"
     },
     "paths": {
         "/api/search": {
@@ -32,7 +32,7 @@
                                 },
                                 "pageSize": {
                                     "type": "integer",
-                                    "default": 10
+                                    "default": 20
                                 },
                                 "source": {
                                     "description": "Different values can be Europeana, DPLA, DigitalNZ, Rijksmuseum, WITHin, The British Library. Results from WITHin correspond to internal records.",
@@ -60,8 +60,8 @@
                             "$ref": "#/definitions/Responses"
                         }
                     },
-                    "403": {
-                        "description": "Bad request",
+                    "400": {
+                        "description": "Bad request (invalid json)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -150,11 +150,127 @@
                             }
                         }
                     },
-                    "403": {
-                        "description": "Bad request",
+                    "400": {
+                        "description": "Bad request (invalid json)",
                         "schema": {
                             "properties": {
                                 "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/record/{recordId}": {
+            "parameters": [
+                {
+                    "name": "recordId",
+                    "in": "path",
+                    "required": true,
+                    "description": "The id of the record",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "summary": "Retrieve a record.",
+                "description": "Retrieve a JSON with the metadata of the record specified in the path. The format parameter defines the serialization in the record field of the JSON response.",
+                "tags": [
+                    "Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found (format not found)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Update a record.",
+                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body. If format fields are provided, then the corresponding serializations will be updated. Many formats can be updated in one call.",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "A JSON with the updated metadata",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    }
+                ],
+                "tags": [
+                    "Record"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid json)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbiden (no edit permissions)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "message": {
                                     "type": "string"
                                 }
                             }
@@ -1208,6 +1324,152 @@
                 }
             }
         },
+        "/group/findByGroupName": {
+            "get": {
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "required": true,
+                        "description": "group name or email",
+                        "type": "string",
+                        "default": "ntua"
+                    },
+                    {
+                        "name": "collectionId",
+                        "in": "query",
+                        "required": false,
+                        "description": "A collection id to check for access rights",
+                        "type": "string"
+                    }
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Find a user or group by name or email.",
+                "description": "Returns a JSON object with metadata for the group that has the specified or email address. This call can be applied to all group types, i.e. organizations and projects. An optional functionality of this call is to check what access rights a group or user has to a collection. Just use the ```collectionId``` parameter. The access rights will be returned as an extra field named ```accessRights``` in the group or user json response.",
+                "responses": {
+                    "200": {
+                        "description": "OK (found group)",
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no group found)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/group/descendantGroups/{groupId}": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group.",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "direct",
+                        "in": "query",
+                        "description": "Only direct descendants (default is true)",
+                        "type": "boolean"
+                    }
+                ],
+                "tags": [
+                    "Group"
+                ],
+                "summary": "Find subgroups of a group.",
+                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/descendantOrganizations/{groupId}": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group.",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "direct",
+                        "in": "query",
+                        "description": "Only direct descendants (default is true)",
+                        "type": "boolean"
+                    }
+                ],
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Find subgroups of an organization.",
+                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    }
+                }
+            }
+        },
+        "/group/descendantProjects/{groupId}": {
+            "parameters": [
+                {
+                    "name": "groupId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of a group.",
+                    "type": "string"
+                }
+            ],
+            "get": {
+                "parameters": [
+                    {
+                        "name": "direct",
+                        "in": "query",
+                        "description": "Only direct descendants (default is true)",
+                        "type": "boolean"
+                    }
+                ],
+                "tags": [
+                    "Project"
+                ],
+                "summary": "Find subgroups of a project.",
+                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Group"
+                        }
+                    }
+                }
+            }
+        },
         "/group/{groupId}": {
             "parameters": [
                 {
@@ -1359,6 +1621,7 @@
                     }
                 ],
                 "tags": [
+                    "User",
                     "Group"
                 ],
                 "summary": "Add a user or another group to a group.",
@@ -1407,7 +1670,7 @@
                 }
             }
         },
-        "/group/removeUser/{groupId}": {
+        "/group/removeUserOrGroup/{groupId}": {
             "parameters": [
                 {
                     "name": "groupId",
@@ -1428,6 +1691,7 @@
                     }
                 ],
                 "tags": [
+                    "User",
                     "Group"
                 ],
                 "summary": "Removes a user from a group.",
@@ -1466,136 +1730,36 @@
                 }
             }
         },
-        "/group/descendantGroups/{groupId}": {
+        "/group/join/{groupId}": {
             "parameters": [
                 {
                     "name": "groupId",
                     "in": "path",
                     "required": true,
-                    "description": "Id of a group.",
+                    "description": "Id of a group",
                     "type": "string"
                 }
             ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "Only direct descendants (default is true)",
-                        "type": "boolean"
-                    }
-                ],
+            "put": {
                 "tags": [
+                    "User",
                     "Group"
                 ],
-                "summary": "Find subgroups of a group.",
-                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
+                "summary": "Request to join a group.",
+                "description": "Request to join the group specified by the ID in the path. The group admin will have to accept your request before you join. This call can be applied to all group types, ie organizations and projects.",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "OK (successfully submitted request)",
                         "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    }
-                }
-            }
-        },
-        "/group/descendantOrganizations/{groupId}": {
-            "parameters": [
-                {
-                    "name": "groupId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of a group.",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "Only direct descendants (default is true)",
-                        "type": "boolean"
-                    }
-                ],
-                "tags": [
-                    "Organization"
-                ],
-                "summary": "Find subgroups of an organization.",
-                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    }
-                }
-            }
-        },
-        "/group/descendantProjects/{groupId}": {
-            "parameters": [
-                {
-                    "name": "groupId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of a group.",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "Only direct descendants (default is true)",
-                        "type": "boolean"
-                    }
-                ],
-                "tags": [
-                    "Project"
-                ],
-                "summary": "Find subgroups of a project.",
-                "description": "Retrieves the specified group's descendant groups in the group hierarchy. See '''/group/addUserOrGroup/{groupId}'''.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    }
-                }
-            }
-        },
-        "/record/similar/{externalId}": {
-            "parameters": [
-                {
-                    "name": "externalId",
-                    "in": "path",
-                    "required": true,
-                    "description": "The external id of a record",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "summary": "Find similar records.",
-                "description": "Retrieve a list of records that are similar to the one specified. Similarity is based on keywords in the title and provider fields. You can use this call to check if an external record already exists in a collection and link to that instead of re-importing it.",
-                "tags": [
-                    "Record"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/InternalRecord"
+                            "properties": {
+                                "OK": {
+                                    "type": "string"
+                                }
                             }
                         }
                     },
                     "500": {
-                        "description": "Internal Server Error (database error)",
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -1607,144 +1771,39 @@
                 }
             }
         },
-        "/record/{recordId}": {
+        "/group/leave/{groupId}": {
             "parameters": [
                 {
-                    "name": "recordId",
+                    "name": "groupId",
                     "in": "path",
                     "required": true,
-                    "description": "The id of the record",
+                    "description": "Id of a group",
                     "type": "string"
                 }
             ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
-                        "type": "string"
-                    }
-                ],
-                "summary": "Retrieve a record.",
-                "description": "Retrieve a JSON with the metadata of the record specified in the path. The format parameter defines the serialization in the record field of the JSON response.",
-                "tags": [
-                    "Record"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "put": {
-                "summary": "Update a record.",
-                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body. If the format parameter is provided, then only that specified serialization will be updated.",
-                "parameters": [
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
-                        "type": "string"
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "A JSON with the updated metadata",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    }
-                ],
                 "tags": [
-                    "Record"
+                    "User",
+                    "Group"
                 ],
+                "summary": "Leave a group.",
+                "description": "Leave the group specified by the ID in the path. This call can be applied to all group types, ie organizations and projects.",
                 "responses": {
                     "200": {
-                        "description": "OK",
+                        "description": "OK (successfully removed user)",
                         "schema": {
                             "properties": {
-                                "message": {
+                                "OK": {
                                     "type": "string"
                                 }
                             }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request (invalid json)",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbiden (no edit permissions)",
+                    "500": {
+                        "description": "Internal Server Error (cannot retrieve or write to database)",
                         "schema": {
                             "properties": {
                                 "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (database error)",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "summary": "Remove a record.",
-                "description": "Remove the whole record specified in the path from the database, or just a single format.",
-                "parameters": [
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
-                        "type": "string"
-                    }
-                ],
-                "tags": [
-                    "Record"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "properties": {
-                                "message": {
                                     "type": "string"
                                 }
                             }
@@ -1785,16 +1844,11 @@
                         "type": "string"
                     },
                     {
-                        "name": "email",
+                        "name": "membersDowngrade",
                         "in": "query",
-                        "description": "another way of specifying the user",
-                        "type": "string"
-                    },
-                    {
-                        "name": "userId",
-                        "in": "query",
-                        "description": "another way of specifying the user",
-                        "type": "string"
+                        "description": "downgrade members",
+                        "type": "boolean",
+                        "default": false
                     }
                 ],
                 "responses": {
@@ -1833,6 +1887,86 @@
                         "schema": {
                             "properties": {
                                 "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/media/create": {
+            "post": {
+                "summary": "Upload new media.",
+                "description": "Upload a new media object (currently only support for images is implemented). You can either upload a file or provide an external url to a file (as a multipart/form-data). You can optionally provide rights for the media, if none are provided the default value will be \"UNKNOWN\". All metadata for the new media will be automatically extracted. The return object for this call is a list of URLs that return the cached media object and its various thumbnails. You can use the \"original\" url to create a record with the new media. The media ID is encoded in that url. See the call \"media/byUrl\", on how to use the url to get the media metadata.",
+                "tags": [
+                    "Media"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid request)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/media/byUrl": {
+            "get": {
+                "summary": "Get metadata for a media object.",
+                "description": "Returns the metadata for the media object specified by the url (see \"media/create\").",
+                "tags": [
+                    "Media"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/InternalRecord"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (invalid request)",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
                                     "type": "string"
                                 }
                             }
