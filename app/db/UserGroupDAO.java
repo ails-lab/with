@@ -54,7 +54,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public List<UserGroup> findPublic(GroupType groupType, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation()
-				.field("privateGroup").equal(false).offset(offset).limit(count);
+				.field("privateGroup").equal(false).offset(offset).limit(count).order("");
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
