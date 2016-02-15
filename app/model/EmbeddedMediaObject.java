@@ -185,7 +185,7 @@ public class EmbeddedMediaObject {
 			return url;
 		}
 		else
-			return "/media/byUrl?url=" + url + "version=" + mediaVersion.toString();
+			return "/media/byUrl?url=" + url + "&version=" + mediaVersion.toString();
 	}
 
 	public LiteralOrResource getOriginalRights() {

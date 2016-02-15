@@ -63,6 +63,28 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		return find(q).asList();
 	}
 
+	public List<UserGroup> findByIds(Set<ObjectId> groupIds,
+			GroupType groupType, int offset, int count) {
+		Query<UserGroup> q = createQuery().disableValidation().field("_id")
+				.in(groupIds).offset(offset).limit(count);
+		if (!groupType.equals(GroupType.All)) {
+			q.field("className").equal(
+					"model.usersAndGroups." + groupType.toString());
+		}
+		return find(q).asList();
+	}
+	
+	public int getGroupCount(Set<ObjectId> groupIds,
+			GroupType groupType) {
+		Query<UserGroup> q = createQuery().disableValidation().field("_id")
+				.in(groupIds);
+		if (!groupType.equals(GroupType.All)) {
+			q.field("className").equal(
+					"model.usersAndGroups." + groupType.toString());
+		}
+		return (int) count(q);		
+	}
+
 	public List<UserGroup> findPublicWithRestrictions(GroupType groupType,
 			int offset, int count, Set<ObjectId> excludedIds) {
 		Query<UserGroup> q = createQuery().disableValidation()
