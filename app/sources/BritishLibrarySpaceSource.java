@@ -24,6 +24,8 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.WithMediaRights;
+import model.EmbeddedMediaObject.WithMediaType;
 import model.ExternalBasicRecord;
 import model.ExternalBasicRecord.ItemRights;
 import model.ExternalBasicRecord.RecordType;
@@ -42,9 +44,9 @@ import sources.formatreaders.BritishLibraryRecordFormatter;
 import utils.ListUtils;
 
 public class BritishLibrarySpaceSource extends ISpaceSource {
-	private HashMap<String, String> licences;
-	private HashMap<String, String> licencesId;
-
+	private static HashMap<String, String> licences;
+	private static HashMap<String, String> licencesId;
+	
 	public BritishLibrarySpaceSource() {
 		super();
 		LABEL = Sources.BritishLibrary.toString();
@@ -57,48 +59,50 @@ public class BritishLibrarySpaceSource extends ISpaceSource {
 
 		setLicences();
 
-		addMapping(CommonFilters.TYPE.getId(), RecordType.IMAGE.toString(), "photo");
-		addMapping(CommonFilters.TYPE.getId(), RecordType.VIDEO.toString(), "video");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "photo");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "video");
 
-		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.RR.toString(), getLicence("0"));
-		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Creative_Not_Commercial.toString(), getLicence("3"),
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, getLicence("3"),
 				getLicence("2"), getLicence("1"));
-		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Modify.toString(), getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Creative.toString(), getLicence("1"), getLicence("2"),
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, getLicence("1"), getLicence("2"),
 				getLicence("3"), getLicence("4"), getLicence("5"), getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.UNKNOWN.toString(), getLicence("7"));
-		addMapping(CommonFilters.RIGHTS.getId(), ItemRights.Public.toString(), getLicence("9"), getLicence("10"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Public, getLicence("9"), getLicence("10"));
 		formatreader = new BritishLibraryRecordFormatter(vmap);
 
 	}
 
 	private void setLicences() {
-		String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key=" + apiKey
-				+ "&format=json&nojsoncallback=1";
-		licences = new HashMap<String, String>();
-		licencesId = new HashMap<String, String>();
-		JsonNode response;
+		if (licences==null){
+			String url = "https://api.flickr.com/services/rest/?method=flickr.photos.licenses.getInfo&api_key=" + apiKey
+					+ "&format=json&nojsoncallback=1";
+			licences = new HashMap<String, String>();
+			licencesId = new HashMap<String, String>();
+			JsonNode response;
 
-		try {
-			response = HttpConnector.getURLContent(url);
-			for (JsonNode item : response.path("licenses").path("license")) {
-				String id = Utils.readAttr(item, "id", true);
-				String name = Utils.readAttr(item, "name", true);
-				licences.put(id, name);
-				System.out.println(id + "-->" + name);
-				licencesId.put(name, id);
+			try {
+				response = HttpConnector.getURLContent(url);
+				for (JsonNode item : response.path("licenses").path("license")) {
+					String id = Utils.readAttr(item, "id", true);
+					String name = Utils.readAttr(item, "name", true);
+					licences.put(id, name);
+					System.out.println(id + "-->" + name);
+					licencesId.put(name, id);
+				}
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
-	public String getLicence(String id) {
+	public static String getLicence(String id) {
 		return licences.get(id);
 	}
 
-	public String getLicenceId(String name) {
+	public static String getLicenceId(String name) {
 		return licencesId.get(name);
 	}
 
