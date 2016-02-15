@@ -16,14 +16,17 @@
 
 package db;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import model.resources.CollectionObject;
 import model.usersAndGroups.UserGroup;
 import controllers.GroupManager.GroupType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import play.Logger;
 
@@ -114,6 +117,18 @@ public class UserGroupDAO extends DAO<UserGroup> {
 				.startsWith(prefix);
 		return find(q).asList();
 
+	}
+	
+	public void setCreated() {
+		Query<UserGroup> q = this.createQuery().field("created").doesNotExist();
+		UpdateOperations<UserGroup> updateOps = this
+				.createUpdateOperations();
+		updateOps.set("created", new Date());
+		List<UserGroup> a = find(q).asList();
+		for (UserGroup g :a) {
+			q = this.createQuery().field("_id").equal(g.getDbId());
+			this.update(q, updateOps);
+		}
 	}
 
 }
