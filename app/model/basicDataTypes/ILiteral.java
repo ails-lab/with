@@ -58,13 +58,13 @@ public interface ILiteral {
 			List<DetectedLanguage> probabilities = StringUtils.getLanguageDetector().getProbabilities(textObject);
 			
 	        if (!probabilities.isEmpty()) {
-	        	System.out.println(probabilities);
 	        	boolean gotSome = false;
 	            for (DetectedLanguage detectedLanguage : probabilities) {
-					if (
+					if (	// is suggested
 							(Utils.hasInfo(suggestedLanguages) && ListUtils.anyof(suggestedLanguages, 
-							(Language l)-> l.belongsTo(detectedLanguage.getLanguage())))
+							(Language l)-> l.matches(detectedLanguage.getLanguage())))
 							||
+							// or has a very high probability
 							detectedLanguage.getProbability()>=THRESHOLD
 							){
 						addLiteral(Language.getLanguage(detectedLanguage.getLanguage()), value);

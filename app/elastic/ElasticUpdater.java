@@ -73,33 +73,38 @@ public class ElasticUpdater {
 	 * Bulk updates. Updates all documents provided with the structure
 	 * provided.
 	 */
-	public static void updateMany(String type, List<ObjectId> ids, List<Map<String, Object>> docs) throws Exception {
+	public static boolean updateMany(List<String> types, List<ObjectId> ids, List<Map<String, Object>> docs) throws Exception {
 
-		if(ids.size() != docs.size()) {
+		if((ids.size() != docs.size()) ||
+				(ids.size() != types.size()) ||
+				(docs.size() != types.size())) {
 			throw new Exception("Error: ids list does not have the same size with upDocs list");
 		}
 
 		if( ids.size() == 0 ) {
 			log.debug("No resources to update!");
+			return true;
 		} else if( ids.size() == 1 ) {
 					Elastic.getTransportClient().prepareUpdate(
 							Elastic.index,
-							type,
+							types.get(0),
 							ids.get(0).toString())
 							.setDoc(docs.get(0))
 							.get();
+					return true;
 		} else {
 
 				int i = 0;
 				for(Map<String, Object> doc: docs) {
 					Elastic.getBulkProcessor().add(new UpdateRequest(
 							Elastic.index,
-							type,
+							types.get(i),
 							ids.get(i).toString())
 					.doc(doc));
 					i++;
 				}
 				Elastic.getBulkProcessor().close();
+				return true;
 		}
 
 	}

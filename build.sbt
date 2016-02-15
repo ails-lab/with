@@ -25,6 +25,7 @@ libraryDependencies ++= Seq(
  "com.google.code.gson" % "gson" % "2.2.4",
  "com.google.code.gson" % "gson" % "2.2.4",
  "commons-validator" % "commons-validator" % "1.4.0",
+ "org.jsoup" % "jsoup" % "1.8.3",
  "com.optimaize.languagedetector" % "language-detector" % "0.4",
  "org.apache.httpcomponents" % "httpclient" % "4.3.1",
   "org.apache.httpcomponents" % "httpmime" % "4.3.1",

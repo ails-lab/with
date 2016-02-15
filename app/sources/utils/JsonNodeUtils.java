@@ -68,6 +68,13 @@ public class JsonNodeUtils {
 						if (Utils.hasInfo(asText))
 							res.addLiteral(language, asText);
 					}
+					if (Language.DEFAULT.equals(language)){
+						for (int i = 0; i < value.size(); i++) {
+							String asText = value.get(i).asText();
+							if (Utils.hasInfo(asText))
+								res.addSmartLiteral(asText);
+						}
+					}
 				} else {
 					List<String> asString = asStringArray(value);
 					for (int i = 0; i < asString.size(); i++) {

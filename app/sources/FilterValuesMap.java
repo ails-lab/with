@@ -36,6 +36,7 @@ public class FilterValuesMap {
 	private static FilterValuesMap ddbMap;
 	private static FilterValuesMap dnzMap;
 	private static FilterValuesMap rijksMap;
+	private static FilterValuesMap flickrMap;
 	
 	private HashMap<String, List<Object>> specificvalues;
 	// private HashMap<String, List<Pair<String>>> queryTexts;
@@ -195,7 +196,30 @@ public class FilterValuesMap {
 		}
 		return ddbMap;
 	}
+	
+	public static FilterValuesMap getFlickrMap(){
+		if (flickrMap==null){
+			flickrMap = new FilterValuesMap();
+			flickrMap.fillFlickr();
+		}
+		return flickrMap;
+	}
 
+
+	private void fillFlickr() {
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "photo");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "video");
+
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, BritishLibrarySpaceSource.getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, BritishLibrarySpaceSource.getLicence("3"),
+				BritishLibrarySpaceSource.getLicence("2"), BritishLibrarySpaceSource.getLicence("1"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, BritishLibrarySpaceSource.getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, BritishLibrarySpaceSource.getLicence("1"), BritishLibrarySpaceSource.getLicence("2"),
+				BritishLibrarySpaceSource.getLicence("3"), BritishLibrarySpaceSource.getLicence("4"), BritishLibrarySpaceSource.getLicence("5"), BritishLibrarySpaceSource.getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, BritishLibrarySpaceSource.getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Public, BritishLibrarySpaceSource.getLicence("9"), BritishLibrarySpaceSource.getLicence("10"));
+
+	}
 	private void fillNLA() {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Image", "Photograph",
 				"Poster, chart, other");
