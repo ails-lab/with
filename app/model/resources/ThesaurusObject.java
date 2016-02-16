@@ -305,6 +305,7 @@ public class ThesaurusObject {
 
 	public SKOSSemantic getSemantic() {
 		return semantic;
+		
 	}
 
 	public void setSemantic(SKOSSemantic semantic) {
