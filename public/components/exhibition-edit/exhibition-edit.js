@@ -1,7 +1,6 @@
 define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'bootstrap-select', 'bootstrap-switch', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, bootstrapSelect, bootstrapSwitch, jqueryLazyLoad) {
 
 	function setUpSwitch(exhibition) {
-		console.log(exhibition);
 		$("input.switch").bootstrapSwitch({
 			onText: 'Public',
 			offText: 'Restricted',
@@ -19,18 +18,15 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 	}
 
 	function MyCollection(collectionData) {
-		this.title = ko.observable(collectionData.title);
 		this.dbId = collectionData.dbId;
-		this.description = ko.observable(collectionData.description);
-		if (collectionData.thumbnail != null)
-			this.thumbnail = ko.observable(collectionData.thumbnail);
-		this.itemCount = collectionData.itemCount;
-		this.isPublic = collectionData.isPublic;
-		this.created = collectionData.created;
-		this.lastModified = ko.observable(collectionData.lastModified);
-		if (collectionData.category != null)
-			this.category = ko.observable(collectionData.category);
-		this.firstEntries = collectionData.firstEntries;
+		this.title = ko.observable(app.findByLang(collectionData.descriptiveData.label));
+		this.description = ko.observable(app.findByLang(collectionData.descriptiveData.description));
+		// this.thumbnail = ko.observable();
+		this.itemCount = collectionData.administrative.entryCount;
+		this.isPublic = collectionData.administrative.access.isPublic;
+		this.created = collectionData.administrative.created;
+		this.lastModified = collectionData.administrative.lastModified;
+		this.firstEntries = collectionData.media;
 	}
 
 	function updateExhibitionProperty(exhibition, propertyName, newValue) {
@@ -165,25 +161,21 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 
 		var collections = [];
 		var promise = app.getAllUserCollections();
-		self.myCollections = ko.observableArray([]); //holds all the collections
+		self.myCollections = ko.mapping.fromJS([]); //ko.observableArray([]); //holds all the collections
 		$.when(promise).done(function (data) {
 			var collections = [];
 			if (data.hasOwnProperty('collectionsOrExhibitions')) {
-
 				collections = data['collectionsOrExhibitions'];
 			}
 			self.myCollections(ko.utils.arrayMap(collections, function (collectionData) {
 				return new MyCollection(collectionData);
 			}));
+
 			//then initialise select
 			$('.selectpicker').selectpicker();
 		});
 
 		var mappingExhibition = {
-			create: function(options) {
-				var vm = ko.mapping.fromJS(options.data);
-				return vm;
-			},
 			'dbId': {
 				key: function (data) {
 					return ko.utils.unwrapObservable(data.dbId);
@@ -239,7 +231,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				// 	}
 				// });
 				// self.collectionItemsArray(self.firstEntries);
-				self.loadingExhibitionItems = true;
+				// self.loadingExhibitionItems = true;
 			});
 		}
 
@@ -248,20 +240,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.currentItem = ko.observable();
 		self.selectedCollection.subscribe(function (newCollection) {
 			self.userSavedItemsArray(newCollection.firstEntries);
-// TODO: Update Code
-			// self.currentItem(self.userSavedItemsArray()[0]);
-			// if (self.userSavedItemsArray().length > 0) {
-			// 	self.currentItemSet(true);
-			// }
-		});
-
-		self.selectedCollection.subscribe(function (newCollection) {
-			self.userSavedItemsArray(newCollection.firstEntries);
-// TODO: Update Code
-			// self.currentItem(self.userSavedItemsArray()[0]);
-			// if (self.userSavedItemsArray().length > 0) {
-			// 	self.currentItemSet(true);
-			// }
+			self.currentItem(self.userSavedItemsArray()[0]);
+			if (self.userSavedItemsArray().length > 0) {
+				self.currentItemSet(true);
+			}
 		});
 
 		showViewModel = function () {
