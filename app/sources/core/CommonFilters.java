@@ -17,15 +17,15 @@
 package sources.core;
 
 public enum CommonFilters {
-		TYPE("media.type","Type"), 
-		PROVIDER("provider","Provider"), 
-		CREATOR("dccreator","Creator"), 
-		RIGHTS("media.withRights","Rights"),
-		COUNTRY("dctermsspatial","Spatial"), 
+		TYPE("media.type","Media Type"),
+		PROVIDER("provider","Provider"),
+		CREATOR("dccreator","Creator"),
+		RIGHTS("media.withRights","Media Rights"),
+		COUNTRY("dctermsspatial","Spatial"),
 		YEAR("dates","Dates"),
-		CONTRIBUTOR("dccontributor","Contributor"), 
+		CONTRIBUTOR("dccontributor","Contributor"),
 		DATA_PROVIDER("dataProvider","Data Provider");
-		
+
 		private final String text;
 		private final String id;
 
@@ -33,7 +33,7 @@ public enum CommonFilters {
 	        this.text = id;
 	        this.id = id;
 	    }
-		
+
 	    private CommonFilters(final String id, String text) {
 	    	this.id = id;
 	    	this.text = text;
@@ -51,9 +51,9 @@ public enum CommonFilters {
 		public String getId() {
 			return id;
 		}
-		
-		
-	
+
+
+
 	/*
 	//TODO: remove duplication
 	public static final String TYPE_NAME = "Type";

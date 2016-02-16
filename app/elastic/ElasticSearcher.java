@@ -174,7 +174,7 @@ public class ElasticSearcher {
 	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options) {
 		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
 		for(String aggName: aggregatedFields) {
-			TermsBuilder agg = AggregationBuilders.terms(aggName+"_aggregation").field(aggName);
+			TermsBuilder agg = AggregationBuilders.terms(aggName.replace(".all", "")).field(aggName);
 			search.addAggregation(agg);
 		}
 
@@ -376,7 +376,8 @@ public class ElasticSearcher {
 
 		SearchRequestBuilder search = Elastic.getTransportClient()
 									.prepareSearch(name)
-									.setTypes(types.toArray(new String[types.size()]));
+									.setTypes(types.toArray(new String[types.size()]))
+									.setFetchSource(false);
 
 		if(!options.isScroll()) {
 			search.setFrom(options.offset)
