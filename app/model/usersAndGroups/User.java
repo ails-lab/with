@@ -20,8 +20,8 @@ import java.security.MessageDigest;
 import java.util.HashSet;
 import java.util.Set;
 
-import model.Notification;
 import model.resources.CollectionObject;
+import notifications.Notification;
 
 import org.apache.commons.codec.binary.Hex;
 import org.bson.types.ObjectId;

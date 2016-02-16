@@ -41,9 +41,10 @@ import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.Media;
 import model.MediaObject;
-import model.Notification;
-import model.Notification.Activity;
 import model.basicDataTypes.WithAccess.Access;
+import notifications.GroupNotification;
+import notifications.Notification;
+import notifications.Notification.Activity;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
@@ -254,7 +255,7 @@ public class UserAndGroupManager extends Controller {
 									group.getDbId(), Activity.GROUP_INVITE);
 					if (invitations.isEmpty()) {
 						// Store notification at the database
-						Notification notification = new Notification();
+						GroupNotification notification = new GroupNotification();
 						notification.setActivity(Activity.GROUP_INVITE);
 						notification.setGroup(group.getDbId());
 						notification.setReceiver(user.getDbId());
@@ -348,7 +349,7 @@ public class UserAndGroupManager extends Controller {
 					user.removeUserGroups(ancestorGroups);
 					if (!(DB.getUserDAO().makePermanent(user) == null)
 							&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-						Notification notification = new Notification();
+						GroupNotification notification = new GroupNotification();
 						notification.setActivity(Activity.GROUP_REMOVAL);
 						notification.setGroup(group.getDbId());
 						notification.setReceiver(user.getDbId());
@@ -412,7 +413,7 @@ public class UserAndGroupManager extends Controller {
 						.getPendingGroupNotifications(user.getDbId(),
 								group.getDbId(), Activity.GROUP_REQUEST);
 				if (requests.isEmpty()) {
-					Notification notification = new Notification();
+					GroupNotification notification = new GroupNotification();
 					notification.setActivity(Activity.GROUP_REQUEST);
 					notification.setGroup(group.getDbId());
 					notification.setReceiver(group.getDbId());
@@ -464,7 +465,7 @@ public class UserAndGroupManager extends Controller {
 				user.removeUserGroups(ancestorGroups);
 				if (!(DB.getUserDAO().makePermanent(user) == null)
 						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-					Notification notification = new Notification();
+					GroupNotification notification = new GroupNotification();
 					notification.setActivity(Activity.GROUP_REMOVAL);
 					notification.setGroup(group.getDbId());
 					notification.setReceiver(group.getDbId());

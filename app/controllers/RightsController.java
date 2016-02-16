@@ -22,14 +22,16 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import model.Notification;
-import model.Notification.Activity;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import notifications.Notification;
+import notifications.Notification.Activity;
+import notifications.ResourceNotification.ShareInfo;
+import notifications.ResourceNotification;
 
 import org.bson.types.ObjectId;
 
@@ -98,25 +100,34 @@ public class RightsController extends WithResourceController {
 				CollectionObject collection = DB.getCollectionObjectDAO().
 						getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 				WithAccess oldColAccess = collection.getAdministrative().getAccess();
-				int downgrade = downgrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
+				int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
 				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
-				if (downgrade > -1) //if downgrade == -1, the rights are not changed, do nothing
-					if (downgrade == 1 && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
-						DB.getCollectionObjectDAO().changeAccess(colDbId, userOrGroupId, newAccess);
-						DB.getRecordResourceDAO().updateMembersToNewAccess(colDbId, userOrGroupId, newAccess, effectiveIds);
-					}
-					else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
-						DB.getCollectionObjectDAO().changeAccess(colDbId, userOrGroupId, newAccess);
-						DB.getRecordResourceDAO().updateMembersToMergedRights(colDbId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
-					}
-				result.put("message", "Collection shared with user");
-				return ok(result);
-				//return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, ownerId, newAccess);
+				if (downgrade > -1) {//if downgrade == -1, the rights are not changed, do nothing
+					changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
+					return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, ownerId, newAccess, effectiveIds, 
+							downgrade == 1, membersDowngrade);
+				}
+				else {
+					result.put("mesage", "The user already has the required access to the collection.");
+					return ok(result);
+				}
 			}
 		}
 	}
 	
-	public static int downgrade(List<AccessEntry> oldColAcl, ObjectId userOrGroupId, Access newAccess) {
+	public static void changeAccess(ObjectId colId, ObjectId userOrGroupId, Access newAccess, List<ObjectId> effectiveIds, 
+			boolean downgrade, boolean membersDowngrade) {
+		if (downgrade && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
+			DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
+			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, newAccess, effectiveIds);
+		}
+		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
+			DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
+			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
+		}		
+	}
+	
+	public static int isDowngrade(List<AccessEntry> oldColAcl, ObjectId userOrGroupId, Access newAccess) {
 		for (AccessEntry ae: oldColAcl) {
 			if (ae.getUser().equals(userOrGroupId))
 				if (ae.getLevel().ordinal() > newAccess.ordinal())
@@ -126,48 +137,47 @@ public class RightsController extends WithResourceController {
 		}
 		return 0;
 	}
-	
-	public void changeAllRecordMembersAccess(String colId, String access, String username) {
-	}
-	
 
 				
 	public static Result sendShareCollectionNotification(boolean userGroup, ObjectId userOrGroupId, ObjectId colDbId, 
-			ObjectId ownerId, Access newAccess) {
+			ObjectId ownerId, Access newAccess, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();	
-		Notification notification = new Notification();
-		if (userGroup) {
-			notification.setGroup(userOrGroupId);
-		}
+		ResourceNotification notification = new ResourceNotification();
+		//what if the receiver is a group?
 		notification.setReceiver(userOrGroupId);
-		notification.setCollection(colDbId);
+		notification.setResource(colDbId);
 		notification.setSender(ownerId);
 		notification.setPendingResponse(false);
+		ShareInfo shareInfo = new ShareInfo();
+		shareInfo.setNewAccess(newAccess);
+		shareInfo.setUserOrGroup(userOrGroupId);
 		Date now = new Date();
 		notification.setOpenedAt(new Timestamp(now.getTime()));
 		DB.getNotificationDAO().makePermanent(notification);
 		NotificationCenter.sendNotification(notification);
-		if (newAccess.equals(Access.NONE)) {
+		if (downgrade) {
 			notification.setActivity(Activity.COLLECTION_UNSHARED);
+			notification.setShareInfo(shareInfo);
 			NotificationCenter.sendNotification(notification);
-			result.put("mesage", "Collection unshared with user or group");
+			result.put("mesage", "Access of user or group to collection has been downgraded.");
 			return ok(result);
 		}
-		else if (DB.getUserDAO().isSuperUser(ownerId)) {
+		else if (DB.getUserDAO().isSuperUser(ownerId)) {//upgrade
 			notification.setActivity(Activity.COLLECTION_SHARED);
+			notification.setShareInfo(shareInfo);
 			NotificationCenter.sendNotification(notification);
-			result.put("message", "Collection shared");
+			result.put("message", "Collection shared.");
 			return ok(result);
 		}
-		else {
+		else {//upgrade
 			List<Notification> requests = DB.getNotificationDAO()
-					.getPendingCollectionNotifications(userOrGroupId,
+					.getPendingResourceNotifications(userOrGroupId,
 							colDbId, Activity.COLLECTION_SHARE, newAccess);
 			if (requests.isEmpty()) {
 				// Find if there is a request for other type of access and
 				// override it
 				requests = DB.getNotificationDAO()
-						.getPendingCollectionNotifications(userOrGroupId,
+						.getPendingResourceNotifications(userOrGroupId,
 								colDbId, Activity.COLLECTION_SHARE);
 				for (Notification request : requests) {
 					request.setPendingResponse(false);
@@ -178,14 +188,16 @@ public class RightsController extends WithResourceController {
 				// Make a new request for collection sharing request
 				notification.setActivity(Activity.COLLECTION_SHARE);
 				now = new Date();
+				shareInfo.setOwnerEffectiveIds(effectiveIds);
+				notification.setShareInfo(shareInfo);
 				notification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(notification);
 				NotificationCenter.sendNotification(notification);
 				result.put("message",
-						"Request for collection sharing sent to the user");
+						"Request for collection sharing sent to the user.");
 				return ok(result);
 			} else {
-				result.put("error", "Request has already been sent to the user");
+				result.put("error", "Request has already been sent to the user.");
 				return badRequest(result);
 			}
 		}

@@ -61,7 +61,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        		innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
 		        	else
 		        		innerModel.media()[index].thumbnailUrl = withUrl;
-		        	console.log(innerModel.media()[index].thumbnailUrl);
 				});
 		        return innerModel;
 		    },

@@ -14,36 +14,45 @@
  */
 
 
-package model;
+package notifications;
 
 import java.sql.Timestamp;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Index;
+import org.mongodb.morphia.annotations.IndexOptions;
+import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.utils.IndexType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
+import model.resources.WithResource;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import utils.Serializer;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Entity("Notification")
+@JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class Notification {
 
 	public enum Activity {
 		// group related
 		GROUP_INVITE, GROUP_INVITE_ACCEPT, GROUP_INVITE_DECLINED, GROUP_REMOVAL,
-
 		GROUP_REQUEST, GROUP_REQUEST_ACCEPT, GROUP_REQUEST_DENIED,
-
-		// collection related
-		COLLECTION_ITEM_ADDED, COLLECTION_ITEM_REMOVED,
-
-		COLLECTION_SHARE, COLLECTION_SHARED, COLLECTION_UNSHARED, COLLECTION_REJECTED,
-
+		//resource related
+		RECORD_ADDED_TO_COLLECTION, RECORD_REMOVED_FROM_COLLECTION,
+		COLLECTION_SHARE, COLLECTION_SHARED, COLLECTION_UNSHARED, COLLECTION_REJECTED, 
 		// messages
 		MESSAGE
 	}
@@ -59,14 +68,6 @@ public class Notification {
 	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 	private ObjectId sender;
 
-	// The collection related with the action (if collection related)
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId collection;
-	private Access access;
-
-	// The group that is involved with the action (if group related)
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId group;
 	private String message;
 	// While the notification is pending for an answer, it remains open
 	private boolean pendingResponse;
@@ -113,44 +114,6 @@ public class Notification {
 		this.sender = sender;
 	}
 
-	public ObjectId getCollection() {
-		return collection;
-	}
-
-	public void setCollection(ObjectId collection) {
-		this.collection = collection;
-	}
-
-	public String getCollectionName() {
-		if (this.collection == null) {
-			return null;
-		}
-		Collection col = DB.getCollectionDAO().get(this.collection);
-		if (col != null) {
-			return col.getTitle();
-		}
-		return "DELETED";
-	}
-
-	public ObjectId getGroup() {
-		return group;
-	}
-
-	public void setGroup(ObjectId group) {
-		this.group = group;
-	}
-
-	public String getGroupName() {
-		if (this.group == null) {
-			return null;
-		}
-		UserGroup gr = DB.getUserGroupDAO().get(this.group);
-		if (gr != null) {
-			return gr.getFriendlyName();
-		}
-		return "DELETED";
-	}
-
 	public String getMessage() {
 		return message;
 	}
@@ -191,13 +154,14 @@ public class Notification {
 		this.activity = activity;
 	}
 
-	public Access getAccess() {
+	/*public Access getAccess() {
 		return access;
 	}
 
 	public void setAccess(Access access) {
 		this.access = access;
-	}
+	}*/
+
 
 	@Override
 	public boolean equals(Object other) {

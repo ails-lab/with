@@ -40,36 +40,26 @@
 							Your request to join <em data-bind="text: groupName"></em> was declined
 							<!-- /ko -->
 							<!-- ko case: 'COLLECTION_SHARE' -->
-							<!-- ko if: groupName -->
-							<em data-bind="text: senderName"></em> wants to share collection: <a data-bind="attr: { href: '#collectionview/' + collection }"><em data-bind="text: collectionName"></em></a> with <em data-bind="text: groupName"></em>
+							<!-- ko if: shareInfo.sharedWithGroup -->
+							<em data-bind="text: senderName"></em> wants to share collection: <a data-bind="attr: { href: '#collectionview/' + resource }"><em data-bind="text: resourceName"></em></a> with <em data-bind="text: shareInfo.userOrGroupName"></em>
 							<!-- /ko -->
-							<!-- ko ifnot: groupName -->
-							<em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: collectionName"><a data-bind="attr: { href: '#collectionview/' + collection }"></a></em> with you
+							<!-- ko ifnot: shareInfo.sharedWithGroup -->
+							<em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: resourceName"><a data-bind="attr: { href: '#collectionview/' + resource }"></a></em> with you
 							<!-- /ko -->
 							<!-- /ko -->
 							<!-- ko case: 'COLLECTION_SHARED' -->
-							<!-- ko if: groupName -->
-							<a data-bind="attr: { href: '#collectionview/' + collection }"><em data-bind="text: collectionName"></em></a> is now shared with <em data-bind="text: groupName"></em>
-							<!-- /ko -->
-							<!-- ko ifnot: groupName -->
-							<a data-bind="attr: { href: '#collectionview/' + collection }"><em data-bind="text: collectionName"></em></a> is now shared with <em data-bind="text: senderName"></em>
-							<!-- /ko -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><em data-bind="text: resourceName"></em></a> is now shared with <em data-bind="text: shareInfo.userOrGroupName"></em>
 							<!-- /ko -->
 							<!-- ko case: 'COLLECTION_UNSHARED' -->
-							<!-- ko if: groupName -->
-							<a data-bind="attr: { href: '#collectionview/' + collection }"><em data-bind="text: collectionName"></em></a> is no longer shared with <em data-bind="text: groupName"></em>
+							<!-- ko if: shareInfo.sharedWithGroup -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><em data-bind="text: resourceName"></em></a> is no longer shared with <em data-bind="text: shareInfo.userOrGroupName"></em>
 							<!-- /ko -->
-							<!-- ko ifnot: groupName -->
-							<a data-bind="attr: { href: '#collectionview/' + collection }"><em data-bind="text: collectionName"></em></a> is no longer shared with you
+							<!-- ko ifnot: shareInfo.sharedWithGroup -->
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><em data-bind="text: resourceName"></em></a> is no longer shared with you
 							<!-- /ko -->
 							<!-- /ko -->
 							<!-- ko case: 'COLLECTION_REJECTED' -->
-							<!-- ko if: groupName -->
-							<em data-bind="text: groupName"></em> is not interested in collection: <em data-bind="text: collectionName"></em>
-							<!-- /ko -->
-							<!-- ko ifnot: groupName -->
-							<em data-bind="text: senderName"></em> is not interested in collection: <em data-bind="text: collectionName"></em>
-							<!-- /ko -->
+							<em data-bind="text: shareInfo.userOrGroupName"></em> is not interested in collection: <em data-bind="text: resourceName"></em>
 							<!-- /ko -->
 							<!-- /ko -->
 							<br /><small><span data-bind="text: date"></span></small>

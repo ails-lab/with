@@ -16,6 +16,8 @@
 
 package actors;
 
+import notifications.Notification;
+
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -24,7 +26,6 @@ import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.actor.UntypedActor;
 import db.DB;
-import model.Notification;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import play.Logger;

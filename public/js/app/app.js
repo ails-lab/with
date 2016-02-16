@@ -235,40 +235,38 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			});
 			break;
 		case "COLLECTION_SHARE":
-			if (notification.groupname) {
+			if (notification.shareInfo.sharedWithGroup) {
 				$.smkAlert({
-					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.collectionName + '</strong> with <strong>' + notification.groupName + '</strong>',
+					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.shareInfo.resourceName + '</strong> with <strong>' + notification.groupName + '</strong>',
 					type: 'info',
 					time: 5
 				});
 			} else {
 				$.smkAlert({
-					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.collectionName + '</strong> with you',
+					text: '<strong>' + notification.senderName + '</strong> wants to share collection <strong>' + notification.shareInfo.resourceName + '</strong> with you',
 					type: 'info',
 					time: 5
 				});
 			}
 			break;
 		case "COLLECTION_SHARED":
-			var senderName = notification.groupName ? notification.groupName : notification.senderName;
 			$.smkAlert({
-				text: '<strong>' + notification.collectionName + '</strong> is now shared with <strong>' + senderName + '</strong>',
+				text: '<strong>' + notification.shareInfo.resourceName + '</strong> is now shared with <strong>' + notification.shareInfo.userOrGroupName + '</strong>',
 				type: 'info',
 				time: 5
 			});
 			break;
 		case "COLLECTION_UNSHARED":
-			senderName = notification.groupName ? notification.groupName : 'you';
+			senderName = notification.shareInfo.sharedWithGroup ? notification.shareInfo.userOrGroupName : 'you';
 			$.smkAlert({
-				text: '<strong>' + notification.collectionName + '</strong> is no longer shared with <strong>' + senderName + '</strong>',
+				text: '<strong>' + notification.shareInfo.resourceName + '</strong> is no longer shared with <strong>' + senderName + '</strong>',
 				type: 'info',
 				time: 5
 			});
 			break;
 		case "COLLECTION_REJECTED":
-			senderName = notification.groupName ? notification.groupName : notification.senderName;
 			$.smkAlert({
-				text: '<strong>' + notification.senderName + '</strong> is not interested in collection <strong>' + collectionName + '</strong>',
+				text: '<strong>' + notification.shareInfo.userOrGroupName + '</strong> is not interested in collection <strong>' + notification.shareInfo.resourceName + '</strong>',
 				type: 'info',
 				time: 5
 			});
@@ -474,34 +472,34 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "COLLECTION_SHARE":
-			if (data.groupName) {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with <strong>' + data.groupName + '</strong>';
+			if (data.shareInfo.sharedWithGroup) {
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.resoure + '">' + data.resourceName + '</a></strong> with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 				self.currentUser.notifications.groupNotifications.unshift(data);
 			} else {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> with you';
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> with you';
 				self.currentUser.notifications.userNotifications.unshift(data);
 			}
 			break;
 		case "COLLECTION_SHARED":
-			if (data.groupName) {
-				data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.groupName + '</strong>';
+			if (data.shareInfo.sharedWithGroup) {
+				data.message = '<strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> is now shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 			} else {
-				data.message = '<strong><a href="#collectionview/' + data.collection + '">' + data.collectionName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
+				data.message = '<strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
 			}
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "COLLECTION_UNSHARED":
-			if (data.groupName) {
-				data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with <strong>' + data.groupName + '</strong>';
+			if (data.shareInfo.sharedWithGroup) {
+				data.message = '<strong>' + data.resourceName + '</strong> is no longer shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 				self.currentUser.notifications.groupNotifications.unshift(data);
 			} else {
-				data.message = '<strong>' + data.collectionName + '</strong> is no longer shared with you';
+				data.message = '<strong>' + data.resourceName + '</strong> is no longer shared with you';
 				self.currentUser.notifications.userNotifications.unshift(data);
 			}
 			break;
 		case "COLLECTION_REJECTED":
-			var senderName = data.groupName ? data.groupName : data.senderName;
-			data.message = '<strong>' + senderName + '</strong> is not interested in collection <strong>' + data.collectionName + '</strong>';
+			var senderName = data.shareInfo.userOrGroupName;
+			data.message = '<strong>' + senderName + '</strong> is not interested in collection <strong>' + data.resourceName + '</strong>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		default:
