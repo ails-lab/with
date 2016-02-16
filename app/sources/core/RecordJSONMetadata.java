@@ -39,6 +39,10 @@ public class RecordJSONMetadata {
 	public String getJsonContent() {
 		return jsonContent;
 	}
+	
+	public boolean hasFormat(Format format){
+		return this.format.equals(format);
+	}
 
 	public String getFormat() {
 		return (String.valueOf(format).replaceAll("_", "-"));
