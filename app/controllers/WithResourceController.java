@@ -144,8 +144,8 @@ public class WithResourceController extends Controller {
 						session().get("effectiveUserIds")).get(0);
 				if (json.has("resourceType"))
 					resourceType = json.get("resourceType").asText();
-				if (resourceType == null
-						|| WithResourceType.valueOf(resourceType) == null)
+				if ((resourceType == null)
+						|| (WithResourceType.valueOf(resourceType) == null))
 					resourceType = WithResourceType.CulturalObject.toString();
 				Class<?> clazz = Class.forName("model.resources."
 						+ resourceType);
@@ -153,7 +153,7 @@ public class WithResourceController extends Controller {
 						clazz);
 				int last = 0;
 				Sources source = Sources.UploadedByUser;
-				if (record.getProvenance() != null
+				if ((record.getProvenance() != null)
 						&& !record.getProvenance().isEmpty()) {
 					last = record.getProvenance().size() - 1;
 					source = Sources.valueOf(((ProvenanceInfo) record
@@ -166,7 +166,7 @@ public class WithResourceController extends Controller {
 				if (externalId == null)
 					externalId = record.getAdministrative().getExternalId();
 				ObjectId recordId = null;
-				if (externalId != null
+				if ((externalId != null)
 						&& DB.getRecordResourceDAO().existsWithExternalId(
 								externalId)) {// get dbId of existing resource
 					RecordResource resource = DB
@@ -214,17 +214,17 @@ public class WithResourceController extends Controller {
 									if (media != null) {
 										mediaUrl = media.getUrl();
 										EmbeddedMediaObject existingMedia = null;
-										if (!mediaUrl.isEmpty() && 
-											(existingMedia = DB.getMediaObjectDAO().getByUrl(mediaUrl)) != null) {
+										if (!mediaUrl.isEmpty() &&
+											((existingMedia = DB.getMediaObjectDAO().getByUrl(mediaUrl)) != null)) {
 												media = new EmbeddedMediaObject(existingMedia);
 										}
-										//TODO: careful, the user is allowed to set the media fields as s/he wishes, 
-										//if the media url doesn't already exist. The first time that a request for caching 
-										//that url is issued, the MediaObject that is created in the db will be filled by 
+										//TODO: careful, the user is allowed to set the media fields as s/he wishes,
+										//if the media url doesn't already exist. The first time that a request for caching
+										//that url is issued, the MediaObject that is created in the db will be filled by
 										//parseMediaURL, possibly with values that are different from the embeddedMediaObject.
 										//in the record. In general, each user who adds a record with the same media url,
 										//before the media is actually saved in the db, may have a different version of media info.
-										//TODO: Better call cache the media (as a promise) here! 
+										//TODO: Better call cache the media (as a promise) here!
 										//and put the first user's withRights, since cache has no way to retrieve the media rights.
 										//However, this allows the user to specify a wrong version, e.g. create a media which claims
 										//to be thumbnail, but is full size. Can Marios find out the version (and correct it) during caching?
@@ -262,9 +262,9 @@ public class WithResourceController extends Controller {
 							return badRequest(errors);
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
-						DB.getRecordResourceDAO().updateWithURI(recordId,
-								"/record/" + recordId);
 						recordId = record.getDbId();
+						DB.getRecordResourceDAO().updateWithURI(record.getDbId(),
+								"/record/" + recordId);
 						break;
 					default:// imported first time from other sources
 						// there is no withCreator and the record is public
@@ -298,7 +298,7 @@ public class WithResourceController extends Controller {
 				// make sure that update is called after record has been saved
 				// in the db
 				// while (!record.isPostPersist()) {};
-				if (position.isDefined() && recordId != null) {
+				if (position.isDefined() && (recordId != null)) {
 					Integer pos = position.get();
 					DB.getRecordResourceDAO().addToCollection(recordId,
 							collectionDbId, pos, owns);
@@ -339,10 +339,10 @@ public class WithResourceController extends Controller {
 	public static List<ContextData> getContextDataFromJson(
 			JsonNode contextAnnsJson) {
 		ArrayList<ContextData> ContextData = new ArrayList<ContextData>();
-		if (contextAnnsJson != null && contextAnnsJson.isArray()) {
+		if ((contextAnnsJson != null) && contextAnnsJson.isArray()) {
 			for (final JsonNode contextAnnJson : contextAnnsJson) {
 				JsonNode annTypeJson = contextAnnJson.get("contextDataType");
-				if (annTypeJson != null && annTypeJson.isValueNode()) {
+				if ((annTypeJson != null) && annTypeJson.isValueNode()) {
 					String annTypeString = annTypeJson.asText();
 					ContextDataType annType = ContextDataType
 							.valueOf(annTypeString);
