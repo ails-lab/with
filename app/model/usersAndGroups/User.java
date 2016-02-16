@@ -299,15 +299,18 @@ public class User extends UserOrGroup {
 	 */
 
 	public ArrayNode getOrganizations() {
-		ObjectNode groupInfo = Json.newObject();
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
 			for (ObjectId groupId : userGroupsIds) {
 				UserGroup group = DB.getUserGroupDAO().get(groupId);
 				if (group instanceof Organization) {
+					ObjectNode groupInfo = Json.newObject();
 					groupInfo.put("id", groupId.toString());
 					groupInfo.put("username", group.getUsername());
-					groupInfo.put("friendlyName", group.getFriendlyName());
+					if (group.getFriendlyName() == null)
+						groupInfo.put("friendlyName", group.getUsername());
+					else
+						groupInfo.put("friendlyName", group.getFriendlyName());
 					groups.add(groupInfo);
 				}
 			}
@@ -319,15 +322,18 @@ public class User extends UserOrGroup {
 	}
 
 	public ArrayNode getProjects() {
-		ObjectNode groupInfo = Json.newObject();
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
 			for (ObjectId groupId : userGroupsIds) {
 				UserGroup group = DB.getUserGroupDAO().get(groupId);
 				if (group instanceof Project) {
+					ObjectNode groupInfo = Json.newObject();
 					groupInfo.put("id", groupId.toString());
 					groupInfo.put("username", group.getUsername());
-					groupInfo.put("friendlyName", group.getFriendlyName());
+					if (group.getFriendlyName() == null)
+						groupInfo.put("friendlyName", group.getUsername());
+					else
+						groupInfo.put("friendlyName", group.getFriendlyName());
 					groups.add(groupInfo);
 				}
 			}
@@ -338,15 +344,18 @@ public class User extends UserOrGroup {
 	}
 
 	public ArrayNode getUsergroups() {
-		ObjectNode groupInfo = Json.newObject();
 		ArrayNode groups = Json.newObject().arrayNode();
 		try {
 			for (ObjectId groupId : userGroupsIds) {
 				UserGroup group = DB.getUserGroupDAO().get(groupId);
 				if (group.getClass().equals(UserGroup.class)) {
+					ObjectNode groupInfo = Json.newObject();
 					groupInfo.put("id", groupId.toString());
 					groupInfo.put("username", group.getUsername());
-					groupInfo.put("friendlyName", group.getFriendlyName());
+					if (group.getFriendlyName() == null)
+						groupInfo.put("friendlyName", group.getUsername());
+					else
+						groupInfo.put("friendlyName", group.getFriendlyName());
 					groups.add(groupInfo);
 				}
 			}
