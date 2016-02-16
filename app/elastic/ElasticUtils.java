@@ -18,6 +18,7 @@ package elastic;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,18 +27,15 @@ import java.util.Map.Entry;
 
 import model.Collection;
 import model.EmbeddedMediaObject;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
-import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithAdmin;
+import model.resources.WithResource.WithResourceType;
 import model.DescriptiveData;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
 import play.Logger;
@@ -79,15 +77,6 @@ public class ElasticUtils {
 			ArrayNode all_labels = Json.newObject().arrayNode();
 			while(labels_it.hasNext()) {
 				Entry<String, JsonNode> e = labels_it.next();
-				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT))
-					continue;
-				else if(e.getKey().equals(Language.UNKNOWN)) {
-					List<String> un = rr.getDescriptiveData().getLabel().get(Language.UNKNOWN);
-					if(un != null)
-						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
-				}
-
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_labels.add(v);
 				}
@@ -111,14 +100,6 @@ public class ElasticUtils {
 			while(descs_it.hasNext()) {
 				Entry<String, JsonNode> e = descs_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT))
-					continue;
-				else if(e.getKey().equals(Language.UNKNOWN)) {
-					List<String> un = rr.getDescriptiveData().getDescription().get(Language.UNKNOWN);
-					if(un != null)
-						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
-				}
-
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_descs.add(v);
 				}
@@ -140,14 +121,6 @@ public class ElasticUtils {
 			while(keywords_it.hasNext()) {
 				Entry<String, JsonNode> e = keywords_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT))
-					continue;
-				else if(e.getKey().equals(Language.UNKNOWN)) {
-					List<String> un = rr.getDescriptiveData().getKeywords().get(Language.UNKNOWN);
-					if(un != null)
-						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
-				}
-
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_keywords.add(v);
 				}
@@ -169,14 +142,6 @@ public class ElasticUtils {
 			while(altLabels_it.hasNext()) {
 				Entry<String, JsonNode> e = altLabels_it.next();
 				// ignore "def" and "unknown" language
-				if(e.getKey().equals(Language.DEFAULT))
-					continue;
-				else if(e.getKey().equals(Language.UNKNOWN)) {
-					List<String> un = rr.getDescriptiveData().getAltLabels().get(Language.UNKNOWN);
-					if(un != null)
-						for(String u: un) addToLangAll(lang_accumulators, e.getKey(), u);
-				}
-
 				for(String v: (List<String>)Json.fromJson(e.getValue(), List.class)) {
 					all_altLabels.add(v);
 				}
@@ -187,7 +152,18 @@ public class ElasticUtils {
 			idx_doc.put("altLabels_all", all_altLabels);
 		}
 
+		List<String> unknownValues = null;
 		for(Entry<String, List<String>> e: lang_accumulators.entrySet()) {
+			if(e.getKey().toLowerCase().matches("un(.*)")) {
+				unknownValues = e.getValue();
+			}
+		}
+		for(Entry<String, List<String>> e: lang_accumulators.entrySet()) {
+			if(e.getKey().toLowerCase().matches("un(.*)"))
+				continue;
+
+			if(unknownValues != null)
+				e.getValue().addAll(unknownValues);
 			JsonNode langs = Json.toJson(e.getValue());
 			idx_doc.put("_all_" + e.getKey(), langs);
 		}
@@ -322,6 +298,24 @@ public class ElasticUtils {
 			lang_values.add(value);
 			lang_acc.put(lang, lang_values);
 		}
+	}
+
+	/*
+	 * Define the type of that instance
+	 */
+	public static <E> String defineInstanceOf(E doc) {
+
+		String instanceName = doc.getClass().getSimpleName();
+		List<String> enumNames = new ArrayList<String>();
+		Arrays.asList(WithResourceType.values()).forEach( (t) -> {enumNames.add(t.toString()); return;} );
+		if(enumNames.contains(instanceName)) {
+			if(!instanceName.equalsIgnoreCase(WithResourceType.WithResource.toString()))
+				return instanceName.toLowerCase();
+			else
+				return WithResourceType.RecordResource.toString().toLowerCase();
+		} else
+			return null;
+
 	}
 
 	/*
