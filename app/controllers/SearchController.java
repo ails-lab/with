@@ -149,7 +149,7 @@ public class SearchController extends Controller {
 						for (SourceResponse r : finalResponses2) {
 							boolean merged = false;
 							for (SourceResponse r2 : res) {
-								if (r2!=null && r!=null){
+								if ((r2!=null) && (r!=null)){
 									if (r2.source.equals(r.source)) {
 										// merge these 2 and replace r.
 										res.remove(r2);
@@ -326,43 +326,5 @@ public class SearchController extends Controller {
 		return ok(result);
 	}
 
-	public static Result reindexInconsistencies() {
-		Promise.promise(new Function0<String>() {
-			public String apply() throws Exception {
-				log.info("Reindex started");
-				ElasticReindexer.indexInconsistentDocs();
-				log.info("Reindex finished");
-				return "ok";
-			}
-		});
-		return (ok());
 
-	}
-
-	public static Result reindexAllDb() {
-		String indice = request().body().asJson().get("indice").asText();
-		Promise.promise(new Function0<String>() {
-			public String apply() throws Exception {
-				log.info("Reindex started");
-				ElasticReindexer.reindexAllDbDocuments(indice);
-				log.info("Reindex finished");
-				return "ok";
-			}
-		});
-		return (ok());
-
-	}
-
-	public static Result indexFreshIndice() {
-		String newIndice = request().body().asJson().get("indice").asText();
-		Promise.promise(new Function0<String>() {
-			public String apply() throws Exception {
-				log.info("Reindex started");
-				ElasticReindexer.reindexOnANewIndice(Elastic.index, newIndice);
-				log.info("Reindex finished");
-				return "ok";
-			}
-		});
-		return (ok());
-	}
 }

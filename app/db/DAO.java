@@ -17,15 +17,16 @@
 package db;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
 import play.libs.F.Promise;
-
-
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -289,47 +290,18 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	private String defineInstanceOf(E doc) {
-		//TODO: why have different names in Elastic and not the same as in WithResourceType?
-		// renaming always causes trouble, when we add more resource types,
-		//we'll have to add them in different places
-		String[] resourcesNames = { Elastic.typeCollection, Elastic.typeResource,
-									Elastic.typeCultural, Elastic.typeAgent,
-									Elastic.typeEuscreen, Elastic.typeEvent,
-									Elastic.typePlace, "Thesaurus",
-									Elastic.typeTimespan};
 
-		//TODO: do something like the following
-		/*String s = doc.getClass().getSimpleName();
-		WithResourceType t = WithResourceType.valueOf(s);
-		if (t != null)
-			return t.toString();
-		else return null;*/
-
-		switch (doc.getClass().getSimpleName()) {
-
-		case "CollectionObject":
-			return resourcesNames[0].toLowerCase();
-		case "RecordResource":
-			return resourcesNames[1].toLowerCase();
-		case "CulturalObject":
-			return resourcesNames[2].toLowerCase();
-		case "AgentObject":
-			return resourcesNames[3].toLowerCase();
-		case "EUscreenObject":
-			return resourcesNames[4].toLowerCase();
-		case "EventObject":
-			return resourcesNames[5].toLowerCase();
-		case "PlaceObject":
-			return resourcesNames[6].toLowerCase();
-		case "ThesaurusObject":
-			return resourcesNames[7].toLowerCase();
-		case "TimespanObject":
-			return resourcesNames[8].toLowerCase();
-		case "WithResource":
-			resourcesNames[1].toLowerCase();
-		default:
+		String instanceName = doc.getClass().getSimpleName();
+		List<String> enumNames = new ArrayList<String>();
+		Arrays.asList(WithResourceType.values()).forEach( (t) -> {enumNames.add(t.toString()); return;} );
+		if(enumNames.contains(instanceName)) {
+			if(!instanceName.equalsIgnoreCase(WithResourceType.WithResource.toString()))
+				return instanceName.toLowerCase();
+			else
+				return WithResourceType.RecordResource.toString().toLowerCase();
+		} else
 			return null;
-		}
+
 	}
 
 	/**

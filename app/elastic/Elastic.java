@@ -26,6 +26,7 @@ import java.util.List;
 
 import model.Collection;
 import model.resources.RecordResource;
+import model.resources.WithResource.WithResourceType;
 
 import org.elasticsearch.action.admin.indices.create.CreateIndexRequestBuilder;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -73,17 +74,18 @@ public class Elastic {
 	public static String alias   		    = getConf().getString("elasticsearch.alias.name");
 	public static String mappingResource    = getConf().getString("elasticsearch.index.mapping.resource");
 
-	public static final String typeResource       = "resource";
-	public static final String typeCollection     = "collection";
-	public static final String typeCultural       = "cultural";
-	public static final String typeAgent          = "agent";
-	public static final String typeEvent		  = "event";
-	public static final String typePlace	      = "place";
-	public static final String typeTimespan	      = "timespan";
-	public static final String typeEuscreen	      = "euscreen";
+	public static final String typeResource       = WithResourceType.RecordResource.toString().toLowerCase();
+	public static final String typeCollection     = WithResourceType.CollectionObject.toString().toLowerCase();
+	public static final String typeCultural       = WithResourceType.CulturalObject.toString().toLowerCase();
+	public static final String typeAgent          = WithResourceType.AgentObject.toString().toLowerCase();
+	public static final String typeEvent		  = WithResourceType.EventObject.toString().toLowerCase();
+	public static final String typePlace	      = WithResourceType.PlaceObject.toString().toLowerCase();
+	public static final String typeTimespan	      = WithResourceType.TimespanObject.toString().toLowerCase();
+	public static final String typeEuscreen	      = WithResourceType.EuScreenObject.toString().toLowerCase();
+	public static final String typeThesaurus 	  = WithResourceType.ThesaurusObject.toString().toLowerCase();
 	public static final List<String> allTypes 	  = new ArrayList<String>() {{
 														add(typeCultural);
-														add(typeResource);add(typeCollection);
+														add(typeResource);add(typeCollection); add(typeThesaurus);
 														add(typeAgent);add(typeEvent);add(typePlace);add(typeTimespan); }};
 
 
@@ -215,7 +217,7 @@ public class Elastic {
 					.prepareState().execute().actionGet()
 					.getState().getMetaData().indices();
 		if(indices.containsKey(index)) {
-			System.out.println("ALL OK!");
+			System.out.println("ELASTIC OK!");
 			return;
 		}
 
@@ -261,7 +263,8 @@ public class Elastic {
 
 
 	/*
-	 * Generally we have 3 different re-indexing processes
+	 * Generally we have 3 different re-indexing processes.
+	 * For Implementation see ElasticReindexer
 	 *
 	 * 1. SLOW RE-INDEX
 	 * We want to obtain all documents from DB and slowly reindex all of them.

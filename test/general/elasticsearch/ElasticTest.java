@@ -89,15 +89,15 @@ public class ElasticTest {
 
 		RecordResource rr = getRecordResource();
 		//CollectionObject co = DB.getCollectionObjectDAO().getById(new ObjectId("569e1f284f55a2655367ec1e"));
-		//if (DB.getRecordResourceDAO().makePermanent(rr) == null) { System.out.println("No storage!"); return; }
+		if (DB.getRecordResourceDAO().makePermanent(rr) == null) { System.out.println("No storage!"); return; }
 		System.out.println("Stored!");
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		Json.setObjectMapper(mapper);
-		//System.out.println(Json.toJson(rr));
+		System.out.println(Json.toJson(rr));
 		System.out.println(rr.transform());
 
-		ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
+		//ElasticIndexer.index(Elastic.typeResource, rr.getDbId(), rr.transform());
 
 	}
 
@@ -490,6 +490,8 @@ public class ElasticTest {
 		//co.setResourceType(WithResourceType.CollectionObject);
 		// type: metadata specific for a collection
 		MultiLiteral label = new MultiLiteral(Language.EN, "Grass field");
+		label.addLiteral(Language.UNKNOWN, "I don't know");
+		label.addLiteral(Language.DEFAULT, "DEFAULT");
 		RecordDescriptiveData cdd = new RecordDescriptiveData();
 		cdd.setLabel(label);
 		MultiLiteral desc = new MultiLiteral(Language.EN, "This is a description");

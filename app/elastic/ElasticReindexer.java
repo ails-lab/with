@@ -20,7 +20,9 @@ package elastic;
 import java.util.List;
 import java.util.Map;
 
+import model.resources.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.bulk.BulkProcessor;
@@ -33,6 +35,7 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.query.Query;
+
 import db.DB;
 import play.Logger;
 
@@ -53,28 +56,50 @@ public class ElasticReindexer {
 	 *
 	 * Therefore we are NOT going to have duplicates.
 	 */
-	public static void reindexAllDbDocuments(String indice) {
+	public static boolean reindexAllDbDocuments() {
 
 		BulkProcessor bulk = Elastic.getBulkProcessor();
-		long countAll = DB.getRecordResourceDAO().find().countAll();
+		long countAllRR = DB.getRecordResourceDAO().find().countAll();
+		long countAllCO = DB.getCollectionObjectDAO().find().countAll();
 
-		for(int i = 0; i < (countAll/1000); i++) {
+		/* Index all RecordResources */
+		for(int i = 0; i < (countAllRR/1000); i++) {
 			Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset(i*1000).limit(1000);
 			List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
 			for(RecordResource rr: resourceCursor) {
-				bulk.add(new IndexRequest(Elastic.index, Elastic.typeResource, rr.getDbId().toString())
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
 						.source(rr.transform()));
 			}
 			bulk.flush();
 		}
 
-		Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset((int)(countAll/1000)*1000).limit(1000);
+		Query<RecordResource> q = DB.getDs().createQuery(RecordResource.class).offset((int)(countAllRR/1000)*1000).limit(1000);
 		List<RecordResource> resourceCursor = DB.getRecordResourceDAO().find(q).asList();
 		for(RecordResource rr: resourceCursor) {
-			bulk.add(new IndexRequest(Elastic.index, Elastic.typeResource, rr.getDbId().toString())
+			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
 					.source(rr.transform()));
 		}
+
+		/* Index all CollectionObjects */
+		for(int i = 0; i < (countAllCO/1000); i++) {
+			Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset(i*1000).limit(1000);
+			List<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).asList();
+			for(CollectionObject co: collectionCursor) {
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+						.source(co.transform()));
+			}
+			bulk.flush();
+		}
+
+		Query<CollectionObject> q1 = DB.getDs().createQuery(CollectionObject.class).offset((int)(countAllRR/1000)*1000).limit(1000);
+		List<CollectionObject> collectionCursor = DB.getCollectionObjectDAO().find(q1).asList();
+		for(CollectionObject co: collectionCursor) {
+			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+					.source(co.transform()));
+		}
+
 		bulk.close();
+		return true;
 
 	}
 
@@ -85,26 +110,44 @@ public class ElasticReindexer {
 	 * are not in the index and index only them.
 	 * Probably using a single bulk operation.
 	 */
-	public static void indexInconsistentDocs() {
+	public static boolean indexInconsistentDocs() {
 
 		BulkProcessor bulk = Elastic.getBulkProcessor();
-		List<Key<RecordResource>> allKeys = DB.getRecordResourceDAO().find().asKeyList();
+		List<Key<RecordResource>> recordKeys = DB.getRecordResourceDAO().find().asKeyList();
+		List<Key<CollectionObject>> collectionKeys = DB.getCollectionObjectDAO().find().asKeyList();
 
-		for(Key<RecordResource> k: allKeys) {
+		for(Key<RecordResource> k: recordKeys) {
 			TermQueryBuilder termQ = QueryBuilders.termQuery("_id", k.getId());
 			SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
 					.setSize(0)
 					.setTerminateAfter(1)
 					.setQuery(termQ)
+					.setFetchSource(false)
 					.execute().actionGet();
 
 			if(resp.getHits().getTotalHits() == 0) {
 				RecordResource rr = DB.getRecordResourceDAO().getById(new ObjectId(k.getId().toString()));
-				bulk.add(new IndexRequest(Elastic.index, Elastic.typeResource, rr.getDbId().toString())
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(rr), rr.getDbId().toString())
 					.source(rr.transform()));
 			}
 		}
+		for(Key<CollectionObject> k: collectionKeys) {
+			TermQueryBuilder termQ = QueryBuilders.termQuery("_id", k.getId());
+			SearchResponse resp = Elastic.getTransportClient().prepareSearch(Elastic.index)
+					.setSize(0)
+					.setTerminateAfter(1)
+					.setQuery(termQ)
+					.setFetchSource(false)
+					.execute().actionGet();
+
+			if(resp.getHits().getTotalHits() == 0) {
+				CollectionObject co = DB.getCollectionObjectDAO().getById(new ObjectId(k.getId().toString()));
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(co), co.getDbId().toString())
+					.source(co.transform()));
+			}
+		}
 		bulk.close();
+		return true;
 	}
 
 	/*
@@ -114,7 +157,7 @@ public class ElasticReindexer {
 	 * Method iterates through a scroll search cursor and reindex every
 	 * 5ms a maximum size of 1000 documents.
 	 */
-	public static void reindexOnANewIndice(String oldIndice, String newIndice) {
+	public static boolean reindexOnANewIndice(String oldIndice, String newIndice) {
 		SearchResponse scrollResp = Elastic.getTransportClient()
 				.prepareSearch(oldIndice)
 				.setSearchType(SearchType.SCAN)
@@ -147,5 +190,6 @@ public class ElasticReindexer {
 
 		}
 
+		return true;
 	}
 }
