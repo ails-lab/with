@@ -26,7 +26,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		this.isPublic = collectionData.administrative.access.isPublic;
 		this.created = collectionData.administrative.created;
 		this.lastModified = collectionData.administrative.lastModified;
-		this.firstEntries = collectionData.media;
 	}
 
 	function updateExhibitionProperty(exhibition, propertyName, newValue) {
@@ -39,7 +38,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			data: jsonData,
 			contentType: "application/json",
 			success: function () {
-                // Empty
+				// Empty
 			}
 		});
 	}
@@ -49,7 +48,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			type: "POST",
 			url: "/collection?collectionType=Exhibition",
 			success: function () {
-                // Empty
+				// Empty
 			}
 		});
 	}
@@ -59,7 +58,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			type: "GET",
 			url: "/collection/" + id,
 			success: function () {
-                // Empty
+				// Empty
 			}
 		});
 	}
@@ -86,7 +85,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			data: jsonData,
 			contentType: "application/json",
 			success: function () {
-                // Empty
+				// Empty
 			}
 		});
 	}
@@ -108,10 +107,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			"contentType": "application/json",
 			"data": jsonData,
 			"success": function (data) {
-                // Empty
+				// Empty
 			},
 			"error": function (result) {
-                // Empty
+				// Empty
 			}
 		});
 	}
@@ -122,10 +121,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			"url": "/collection/" + exhibitionId + "/removeRecord" + "?recId=" + recordId,
 			"method": "delete",
 			"success": function (data) {
-                // Empty
+				// Empty
 			},
 			"error": function (result) {
-                // Empty
+				// Empty
 			}
 		});
 	}
@@ -239,7 +238,18 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.currentItemSet = ko.observable(false);
 		self.currentItem = ko.observable();
 		self.selectedCollection.subscribe(function (newCollection) {
-			self.userSavedItemsArray(newCollection.firstEntries);
+			// Load the first 20 records when loading a different collection
+			$.ajax({
+				url: "/collection/" + newCollection.dbId + "/list?count=20&start=0",
+				method: "get",
+				success: function (data) {
+					self.userSavedItemsArray(data.records);
+				},
+				error: function (result) {
+					// Empty
+				}
+			});
+
 			self.currentItem(self.userSavedItemsArray()[0]);
 			if (self.userSavedItemsArray().length > 0) {
 				self.currentItemSet(true);
