@@ -77,7 +77,7 @@
 		<div id="outer-bottom">
 			<!-- ko foreach: userSavedItemsArray -->
 			<div class="bottom-box">
-				<img class="draggable" data-bind="attr: { src: thumbnailUrl}, drag: {item: $data, move: false}, event: { mouseover: $parent.enableDetails, mouseout: $parent.disableDetails }" > </img>
+				<img class="draggable" data-bind="attr: { src: Thumbnail.url }, drag: { item: $data, move: false }, event: { mouseover: $parent.enableDetails, mouseout: $parent.disableDetails }" > </img>
 				<!--<img src="http://www.escrs.org/milan2012/images/button_close.png" class="XButtonImage" data-bind="click: $parent.xButtonClicked"> </img>-->
 			</div>
 			<!-- /ko -->

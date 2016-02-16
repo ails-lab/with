@@ -181,12 +181,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					return ko.utils.unwrapObservable(data.dbId);
 				}
 			},
-			'firstEntries': {
+			'media': {
 				key: function (options) {
 					return ko.utils.unwrapObservable(data.dbId);
 				}
 			},
-			'copy': ["firstEntries"]
+			'copy': ["media"]
 		};
 
 		if (self.creationMode) {
