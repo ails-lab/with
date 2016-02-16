@@ -57,7 +57,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public List<UserGroup> findPublic(GroupType groupType, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation()
-				.field("privateGroup").equal(false).offset(offset).limit(count).order("");
+				.field("privateGroup").equal(false).offset(offset).limit(count).order("-created");
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
@@ -69,7 +69,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 	public List<UserGroup> findByIds(Set<ObjectId> groupIds,
 			GroupType groupType, int offset, int count) {
 		Query<UserGroup> q = createQuery().disableValidation().field("_id")
-				.in(groupIds).offset(offset).limit(count);
+				.in(groupIds).offset(offset).limit(count).order("-created");
 		if (!groupType.equals(GroupType.All)) {
 			q.field("className").equal(
 					"model.usersAndGroups." + groupType.toString());
@@ -92,7 +92,7 @@ public class UserGroupDAO extends DAO<UserGroup> {
 			int offset, int count, Set<ObjectId> excludedIds) {
 		Query<UserGroup> q = createQuery().disableValidation()
 				.field("privateGroup").equal(false).field("_id")
-				.notIn(excludedIds).offset(offset).limit(count);
+				.notIn(excludedIds).offset(offset).limit(count).order("-created");
 		if (groupType.equals(GroupType.All)) {
 			return find(q).asList();
 		}
