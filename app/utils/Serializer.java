@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.ArrayList;
 
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.Point;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
@@ -81,6 +82,20 @@ public class Serializer {
 				JsonProcessingException {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 			jsonGen.writeString(sdf.format((Date) date));
+		}
+
+	}
+	
+	public static class PointSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object point, JsonGenerator jsonGen,
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
+			ObjectMapper mapper = new ObjectMapper();
+			ObjectNode json = mapper.createObjectNode();
+			json.put("latitude", ((Point) point).getLatitude());
+			json.put("longitude", ((Point) point).getLongitude());
+			jsonGen.writeObject(json);
 		}
 
 	}

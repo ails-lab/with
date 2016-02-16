@@ -29,7 +29,9 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.utils.IndexType;
 
-import utils.Serializer;
+import utils.Serializer.PointSerializer;
+import utils.Serializer.ObjectIdSerializer;
+import utils.Serializer.ObjectIdArraySerializer;
 import utils.Deserializer.PointDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -41,6 +43,7 @@ public class Page {
 	private String address;
 
 	@JsonDeserialize(using = PointDeserializer.class)
+	@JsonSerialize(using = PointSerializer.class)
 	private Point coordinates;
 
 	private String city;
@@ -49,9 +52,9 @@ public class Page {
 
 	private HashMap<MediaVersion, String> cover;
 
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = ObjectIdArraySerializer.class)
 	private List<ObjectId> featuredCollections;
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+	@JsonSerialize(using = ObjectIdArraySerializer.class)
 	private List<ObjectId> featuredExhibitions;
 
 	public String getAddress() {
