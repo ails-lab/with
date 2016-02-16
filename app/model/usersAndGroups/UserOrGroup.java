@@ -24,8 +24,10 @@ import model.EmbeddedMediaObject.MediaVersion;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 
+import utils.Deserializer;
 import utils.Serializer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public abstract class UserOrGroup {
@@ -36,6 +38,8 @@ public abstract class UserOrGroup {
 	private String username;
 	private HashMap<MediaVersion, String> avatar;
 	private String about;
+	@JsonSerialize(using = Serializer.DateSerializer.class)
+	@JsonDeserialize(using = Deserializer.DateDeserializer.class)
 	private Date created;
 
 	public ObjectId getDbId() {

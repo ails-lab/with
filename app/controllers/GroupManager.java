@@ -126,28 +126,18 @@ public class GroupManager extends Controller {
 			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
 			newGroup.setCreated(new Date());
-			User administrator = DB.getUserDAO().get(creator);
-			administrator.addGroupForAdministration(newGroup.getDbId());
-			administrator = DB.getUserDAO().get(admin);
-			administrator.addGroupForAdministration(newGroup.getDbId());
-			Set<ConstraintViolation<UserGroup>> violations = Validation
-					.getValidator().validate(newGroup);
-			if (!violations.isEmpty()) {
-				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<UserGroup> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath()
-							+ "\":\"" + cv.getMessage() + "\"}"));
-				}
-				error.put("error", properties);
-				return badRequest(error);
-			}
 			try {
 				DB.getUserGroupDAO().makePermanent(newGroup);
 				Set<ObjectId> parentGroups = newGroup.getParentGroups();
 				parentGroups.add(newGroup.getDbId());
-				User user = DB.getUserDAO().get(admin);
-				user.addUserGroups(parentGroups);
-				DB.getUserDAO().makePermanent(user);
+				User administrator = DB.getUserDAO().get(creator);
+				administrator.addGroupForAdministration(newGroup.getDbId());
+				administrator.addUserGroups(parentGroups);
+				DB.getUserDAO().makePermanent(administrator);
+				administrator = DB.getUserDAO().get(admin);
+				administrator.addGroupForAdministration(newGroup.getDbId());
+				administrator.addUserGroups(parentGroups);
+				DB.getUserDAO().makePermanent(administrator);
 			} catch (Exception e) {
 				log.error("Cannot save group to database!", e.getMessage());
 				error.put("error", "Cannot save group to database!");
