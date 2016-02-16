@@ -1190,7 +1190,12 @@ public enum Language {
 	/**
 	* Multiple languages
 	*/
-	MUL("Multiple languages", "mul"),
+	MUL("Multiple languages", "mul"){
+		@Override
+		public boolean matches(String code) {
+			return true;
+		}
+	},
 	/**
 	* Munda languages
 	*/
@@ -1634,7 +1639,7 @@ public enum Language {
 	/**
 	* Spanish; Castilian
 	*/
-	ES("Spanish; Castilian", "es", "spa"),
+	ES("Spanish", "es", "spa","Castilian"),
 	/**
 	* Sardinian
 	*/
@@ -2045,6 +2050,10 @@ public enum Language {
 				return true;
 		}
 		return false;
+	}
+	
+	public boolean matches(String code) {
+		return belongsTo(code);
 	}
 
 }

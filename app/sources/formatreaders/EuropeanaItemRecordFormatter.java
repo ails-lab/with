@@ -48,14 +48,15 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 	public CulturalObject fillObjectFrom(JsonContextRecord rec) {
 		CulturalObjectData model = (CulturalObjectData) object.getDescriptiveData();
 		
-		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), rec.getStringValue("object.type"));
+		String stringValue = rec.getStringValue("type");
+		List<Object> vals = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
 		WithMediaType type = (WithMediaType) vals.get(0);
 		
 
 //		String id = rec.getStringValue("objectNumber");
 		
 		Language[] language = null;
-		List<String> langs = rec.getStringArrayValue("object.proxies[0].dcLanguage","object.europeanaAggregation.edmLanguage","object.language");
+		List<String> langs = rec.getStringArrayValue("proxies[0].dcLanguage","europeanaAggregation.edmLanguage","language");
 		if (Utils.hasInfo(langs)){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
@@ -72,14 +73,14 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		rec.setLanguages(language);
 		
 
-		model.setCountry(rec.getMultiLiteralOrResourceValue("object.proxies[0].country","object.europeanaAggregation.edmCountry"));
+		model.setCountry(rec.getMultiLiteralOrResourceValue("proxies[0].country","europeanaAggregation.edmCountry"));
 		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("places[.*].latitude"), rec.getStringValue("places[.*].longitude")));
 
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("object.proxies[0].dcSubject","object.proxies[1].dcSubject"));
-		model.setDates(rec.getWithDateArrayValue("object.year"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("proxies[0].dcSubject","proxies[1].dcSubject"));
+		model.setDates(rec.getWithDateArrayValue("year"));
 
-		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("object.proxies[0].dctermsSpatial","object.places[.*].about","object.places[.*].about","object.places[.*].prefLabel"));
-		rec.enterContext("object.proxies[0]");
+		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("proxies[0].dctermsSpatial","places[.*].about","places[.*].about","places[.*].prefLabel"));
+		rec.enterContext("proxies[0]");
 		
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
@@ -97,12 +98,12 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 
 		rec.exitContext();
-		rec.enterContext("object.proxies[1]");
+		rec.enterContext("proxies[1]");
 		
 		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
 
 		rec.exitContext();
-		rec.enterContext("object.aggregations[0]");
+		rec.enterContext("aggregations[0]");
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("edmRights");
 		WithMediaRights withMediaRights = (WithMediaRights)
 				 getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),

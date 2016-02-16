@@ -18,6 +18,7 @@ package controllers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -124,6 +125,7 @@ public class GroupManager extends Controller {
 			newGroup.addAdministrator(admin);
 			newGroup.getUsers().add(creator);
 			newGroup.getUsers().add(admin);
+			newGroup.setCreated(new Date());
 			User administrator = DB.getUserDAO().get(creator);
 			administrator.addGroupForAdministration(newGroup.getDbId());
 			administrator = DB.getUserDAO().get(admin);

@@ -3,7 +3,7 @@
     "info": {
         "version": "v0.4",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \nWe are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us!\n"
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''http://''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us!\n"
     },
     "paths": {
         "/api/search": {
@@ -621,17 +621,9 @@
                     "200": {
                         "description": "OK (JSON contains the serialization specified)",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "itemCount": {
-                                    "type": "integer"
-                                },
-                                "records": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/InternalRecord"
-                                    }
-                                }
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ListUser"
                             }
                         }
                     },
@@ -2473,7 +2465,11 @@
                     {
                         "name": "collectionType",
                         "in": "query",
-                        "description": "Is this an enum?.",
+                        "description": "Simple collection or exhibition.",
+                        "enum": [
+                            "SimpleCollection",
+                            "Exhibition"
+                        ],
                         "required": true,
                         "type": "string",
                         "default": "SimpleCollection"
@@ -2838,9 +2834,7 @@
                 "lastName",
                 "username",
                 "email",
-                "password",
-                "about",
-                "location"
+                "password"
             ],
             "properties": {
                 "email": {
@@ -2864,26 +2858,110 @@
                 "md5Password": {
                     "type": "string"
                 },
-                "recordLimit": {
-                    "type": "integer"
-                },
-                "collectedRecords": {
-                    "type": "integer"
-                },
-                "exhibitionsCreated": {
-                    "type": "integer"
-                },
-                "storageLimit": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
                 "username": {
                     "type": "string"
                 },
-                "favoritesId": {
+                "favorites": {
                     "type": "string"
+                },
+                "organizations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "friendlyName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "friendlyName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "usergroups": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "friendlyName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "usergroupsIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "adminGroups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "ListUser": {
+            "description": "Describes a registered user in the database.",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "enum": [
+                            "user",
+                            "group"
+                        ]
+                    },
+                    "userId": {
+                        "type": "string"
+                    },
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "accessRights": {
+                        "type": "string",
+                        "enum": [
+                            "READ",
+                            "WRITE",
+                            "OWN"
+                        ]
+                    }
                 }
             }
         },
@@ -3424,6 +3502,12 @@
                         "items": {
                             "$ref": "#/definitions/Filters"
                         }
+                    },
+                    "filtersLogic": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/definitions/Filters"
+                        }
                     }
                 }
             }
@@ -3573,20 +3657,48 @@
             "type": "object",
             "properties": {
                 "label": {
-                    "type": "string",
-                    "default": {
-                        "en": [
-                            "label1",
-                            "label2"
-                        ]
+                    "type": "object",
+                    "properties": {
+                        "default": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "default": "label1"
+                            }
+                        },
+                        "en": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "default": "label1En"
+                            }
+                        }
                     }
                 },
                 "description": {
+                    "type": "object",
+                    "properties": {
+                        "default": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "default": "label1"
+                            }
+                        },
+                        "en": {
+                            "type": "array",
+                            "items": {
+                                "type": "string",
+                                "default": "label1En"
+                            }
+                        }
+                    }
+                },
+                "dccreator": {
                     "type": "string",
                     "default": {
-                        "en": [
-                            "desc1",
-                            "desc2"
+                        "default": [
+                            "DcCreator"
                         ]
                     }
                 },

@@ -108,6 +108,10 @@ public class CollectionObjectController extends WithResourceController {
 					error.put("error", "Missing collection title");
 					return badRequest(error);
 				}
+				if (collection.getDescriptiveData().getLabel().isEmpty()) {
+					error.put("error", "Missing collection title");
+					return badRequest(error);
+				}
 				if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(
 						creatorDbId,
 						null,

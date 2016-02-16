@@ -134,8 +134,10 @@ public class SearchController extends Controller {
 						SearchResponse r1 = new SearchResponse();
 						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
 						for (SourceResponse sourceResponse : finalResponses) {
-							FiltersHelper.merge(merge, sourceResponse.filtersLogic);
-							sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
+							if (sourceResponse!=null){
+								FiltersHelper.merge(merge, sourceResponse.filtersLogic);
+								sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
+							}
 						}
 						r1.filters = ListUtils.transform(merge, f);
 						r1.responses = mergeResponses(finalResponses);
@@ -147,12 +149,14 @@ public class SearchController extends Controller {
 						for (SourceResponse r : finalResponses2) {
 							boolean merged = false;
 							for (SourceResponse r2 : res) {
-								if (r2.source.equals(r.source)) {
-									// merge these 2 and replace r.
-									res.remove(r2);
-									res.add(r.merge(r2));
-									merged = true;
-									break;
+								if (r2!=null && r!=null){
+									if (r2.source.equals(r.source)) {
+										// merge these 2 and replace r.
+										res.remove(r2);
+										res.add(r.merge(r2));
+										merged = true;
+										break;
+									}
 								}
 							}
 							if (!merged) {
@@ -181,12 +185,17 @@ public class SearchController extends Controller {
 	private static Iterable<Promise<SourceResponse>> callSources(final CommonQuery q) {
 		List<Promise<SourceResponse>> promises = new ArrayList<Promise<SourceResponse>>();
 		BiFunction<ISpaceSource, CommonQuery, SourceResponse> methodQuery = (ISpaceSource src, CommonQuery cq) -> {
-			SourceResponse res = src
-				.getResults(cq);
-			if (res.source==null){
-				System.out.println("Error "+src.getSourceName());
+			try{
+				SourceResponse res = src
+						.getResults(cq);
+					if (res.source==null){
+						System.out.println("Error "+src.getSourceName());
+					}
+					return res;
+			} catch(Exception e){
+				e.printStackTrace();
+				return null;
 			}
-			return res;
 			};
 		for (final ISpaceSource src : ESpaceSources.getESources()) {
 			if ((q.source == null) || (q.source.size() == 0) || q.source.contains(src.getSourceName())) {

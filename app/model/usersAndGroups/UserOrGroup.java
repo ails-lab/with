@@ -16,6 +16,7 @@
 
 package model.usersAndGroups;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import model.EmbeddedMediaObject.MediaVersion;
@@ -35,6 +36,7 @@ public abstract class UserOrGroup {
 	private String username;
 	private HashMap<MediaVersion, String> avatar;
 	private String about;
+	private Date created;
 
 	public ObjectId getDbId() {
 		return dbId;
@@ -66,6 +68,14 @@ public abstract class UserOrGroup {
 
 	public void setAvatar(HashMap<MediaVersion, String> avatar) {
 		this.avatar = avatar;
+	}
+
+	public Date getCreated() {
+		return created;
+	}
+
+	public void setCreated(Date created) {
+		this.created = created;
 	}
 
 }

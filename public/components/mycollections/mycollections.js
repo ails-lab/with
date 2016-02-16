@@ -1,11 +1,10 @@
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 	
 	count = 2;
-
-	function Entry(entryData) {
-		var entry = ko.mapping.fromJS(entryData);
-		ko.mapping.fromJS(entryData, entry);
-		return entry;
+	accessLevels = {
+		    READ : 0,
+		    WRITE : 1,
+		    OWN : 2
 	}
 
 	
@@ -20,7 +19,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			window.location = '#login';		
 		}
 	};
-	
 	
 
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
@@ -228,35 +226,22 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		};
 		
-		self.moreShared=function(isExhibition){
-			if (self.loading === true) {
-				setTimeout(self.moreShared(isExhibition), 300);
-			}
-			if (self.loading() === false && self.moreSharedCollectionData()===true) {
-				self.loading(true);
-				var offset = self.sharedCollections().length;
-				var promise = getCollectionsSharedWithMe(isExhibition, offset, count);
-				$.when(promise).done(function(data) {
-					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
-					self.myCollections.push.apply(self.myCollections, newItems());
-					self.loading(false);
-					if(data.collectionsOrExhibitions.length<count-1){
-						self.moreCollectionData(false);
-					}else{
-					  self.moreCollectionData(true);
-					}
-				}).fail(function(result) {self.loading(false);});
-			}
+		self.moreShared = function(isExhibition){
+			self.more(isExhibition, getCollectionsSharedWithMe);
 		}
 		
-		self.moreCollections=function(isExhibition){
+		self.moreCollections = function(isExhibition){
+			self.more(isExhibition, app.getUserCollections);
+		}
+		
+		self.more = function(isExhibition, funcToExecute) {
 			if (self.loading === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
 				self.loading(true);
 				var offset = self.myCollections().length;
-				var promise = app.getUserCollections(isExhibition, offset, count);
+				var promise = funcToExecute(isExhibition, offset, count);
 				$.when(promise).done(function(data) {
 					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
 					self.myCollections.push.apply(self.myCollections, newItems());
@@ -319,7 +304,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 		
 		self.showInfoPopup = function(title, bodyText, callback) {
-			$("#myModal").find("h4").html("Are you sure?");
+			$("#myModal").find("h4").html(title);
 			var body = $("#myModal").find("div.modal-body");
 			body.html(bodyText);
 
@@ -333,6 +318,31 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        confirmBtn.click(function() {
 		        	$("#myModal").modal('hide');
 		        	callback();
+		        });
+		    }
+			$("#myModal").modal('show');
+			$('#myModal').on('hidden.bs.modal', function () {
+				$("#myModal").find("div.modal-footer").empty();
+			});
+			$('#myModal').addClass("topOfModal");
+		}
+		
+		self.showInfoPopupTwoOptions = function(title, bodyText, callback) {
+			$("#myModal").find("h4").html(title);
+			var body = $("#myModal").find("div.modal-body");
+			body.html(bodyText);
+
+			var footer = $("#myModal").find("div.modal-footer");
+			if (footer.is(':empty')) {
+		        var cancelBtn = $('<button type="button" class="btn btn-default">No</button>').appendTo(footer);
+		        cancelBtn.click(function() {
+		        	$("#myModal").modal('hide');
+		        	callback(false);
+		        });
+		        var confirmBtn = $('<button type="button" class="btn btn-primary">Yes</button>').appendTo(footer);
+		        confirmBtn.click(function() {
+		        	$("#myModal").modal('hide');
+		        	callback(true);
 		        });
 		    }
 			$("#myModal").modal('show');
@@ -367,25 +377,49 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.shareCollection = function(userData, clickedRights) {
 			if (userData.category == "group" && clickedRights === "OWN") 
 					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
-							" group will acquire these rights. Sharing with others means that they will have the right to delete" +
-							" your collection, as well as share it with others.", function() {
+							" group will acquire these rights. Giving OWN rights to others means that they will have the right to delete" +
+							" your collection, as well as to share it with others.", function() {
 						self.callShareAPI(userData, clickedRights);
 					});
 			else if (userData.category == "group")
 					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
 							" group will acquire these rights.", function() {
-						self.callShareAPI(userData, clickedRights);
+						self.checkIfDowngrade(userData, clickedRights);
 					});
 			else if (clickedRights === "OWN") 
-				self.showInfoPopup("Are you sure?", "Sharing with others means that they will have the right to delete your collection, " +
-						"as well as share it with others.", function() {
+				self.showInfoPopup("Are you sure?", "Giving OWN rights to others means that they will have the right to delete your collection, " +
+						"as well as to share it with others.", function() {
 					self.callShareAPI(userData, clickedRights);
 				});
 			else 
-				self.callShareAPI(userData, clickedRights);
+				self.checkIfDowngrade(userData, clickedRights);
 		}
 		
-		self.callShareAPI = function(userData, clickedRights) {
+		
+		//TODO: find all members of the collections that I OWN. Find all collections these records belong to.
+		// Find if the user userData.username has access to these collections that are greater than clicked rights -
+		//if yes, present the following message:
+		//userData.username will still have currentAccess to the records [...] via collections [...] (to which userData.username has access).
+		//Do you want to downgrade access rights userData.username for all collections?
+		self.checkIfDowngrade = function(userData, clickedRights) {
+			var currentAccessRights = userData.accessRights;
+			var currentAccessOrdinal = accessLevels[currentAccessRights];
+			var newAccessOrdinal = accessLevels[clickedRights];
+			if (currentAccessOrdinal > newAccessOrdinal)
+				//downgrade
+				self.showInfoPopupTwoOptions("Downgrade of records in all collections?",
+						"User " + userData.username + " may still have " + currentAccessRights + " access to records that you own and are members of that collection " +
+						", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
+						"in all collections they belong to?", function() {
+					self.callShareAPI(userData, clickedRights);
+				});
+			else 
+				self.callShareAPI(userData, clickedRights, false);
+		}
+		
+		self.callShareAPI = function(userData, clickedRights, membersDowngrade) {
+			if (membersDowngrade == undefined ||  membersDowngrade == null)
+				membersDowngrade = false;
 			var username = userData.username;
 			var collId = self.myCollections()[self.index()].dbId();
 			var index = -1;
@@ -401,7 +435,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 			}
 			$.ajax({
-				"url": "/rights/"+collId+"/"+clickedRights+"?username="+username,
+				"url": "/rights/"+collId+"/"+clickedRights+"?username="+username+"&membersDowngrade="+membersDowngrade,
 				"method": "GET",
 				"contentType": "application/json",
 				success: function(result) {
