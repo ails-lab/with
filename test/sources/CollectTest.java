@@ -14,7 +14,7 @@
  */
 
 
-package sources.utils;
+package sources;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
