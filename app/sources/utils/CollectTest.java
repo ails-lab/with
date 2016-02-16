@@ -16,6 +16,9 @@
 
 package sources.utils;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.util.List;
 
 import play.GlobalSettings;
@@ -43,7 +46,11 @@ public class CollectTest {
 						for (RecordJSONMetadata recordJSONMetadata : l) {
 							if (recordJSONMetadata.hasFormat(Format.JSON_WITH)) {
 								System.out.println("----JSON-WITH BEGIN--------");
-								System.out.println(recordJSONMetadata.getJsonContent());
+								String jsonContent = recordJSONMetadata.getJsonContent();
+								System.out.println(jsonContent);
+								StringSelection selection = new StringSelection(jsonContent);
+							    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+							    clipboard.setContents(selection, selection);
 								System.out.println("----JSON-WITH END----------");
 								
 							}
