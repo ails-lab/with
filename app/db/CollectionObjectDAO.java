@@ -311,7 +311,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
 		colUpdate.set("administrative.lastModified", new Date());
 		colUpdate.inc("administrative.entryCount");
-		return DB.getDs().findAndModify(cq, colUpdate, false);//false (default) returns the oldVersion
+		return DB.getDs().findAndModify(cq, colUpdate, true);//true returns the oldVersion (contrary to documentation!!!)
 	}
 
 	//it may happen that e.g. the thumbnail of the 4th instead of the 3d record of the media appears in the collections's (3) media

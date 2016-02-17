@@ -311,13 +311,10 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			int position, boolean changeRecRights) {
 		CollectionObject co = DB.getCollectionObjectDAO()
 				.updateCollectionAdmin(colId);
-		int entryCount = co.getAdministrative().getEntryCount();// old entry
-																// count (before
-																// addition)
+		//old entry count (before addition)
+		int entryCount = co.getAdministrative().getEntryCount();
 		if (position > entryCount)
 			position = entryCount;
-		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
-				position);
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId, co
@@ -325,6 +322,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		updateRecordUsageCollectedAndRights(
 				new CollectionInfo(colId, position), newAccess, recordId, colId);
 		shiftRecordsToRight(colId, position);
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
+				position);
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId colId,
@@ -332,17 +331,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		// increase entry count
 		CollectionObject co = DB.getCollectionObjectDAO()
 				.updateCollectionAdmin(colId);
-		int entryCount = co.getAdministrative().getEntryCount();// old entry
-																// count (before
-																// addition)
-		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
-				entryCount);
+		//old entry count (before addition)
+		int entryCount = co.getAdministrative().getEntryCount();
 		WithAccess newAccess = null;
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId, co
 					.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId,
 				entryCount), newAccess, recordId, colId);
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
+				entryCount);
 	}
 
 	public WithAccess mergeParentCollectionRights(ObjectId recordId,

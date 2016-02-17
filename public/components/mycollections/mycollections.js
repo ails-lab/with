@@ -561,8 +561,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.reloadRecord = function(dbId, recordDataString) {
 			var recordData = JSON.parse(recordDataString);
-			var recordObservable = ko.mapping.fromJS(recordData);
-			ko.mapping.fromJS(recordData, recordObservable);
+			var recordObservable = ko.mapping.fromJS(recordData, mapping);
 			var collData = self.checkCollectionSet(dbId);
 			var collIndex = collData.index;
 			if (collData.set == "my") {
@@ -576,8 +575,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.updateCollectionFirstEntries = function(collectionSet, collIndex, recordObservable) {
 			var newItemCount = collectionSet[collIndex].administrative.entryCount() + 1;
 			collectionSet[collIndex].administrative.entryCount(newItemCount);
-			if (newItemCount <= 5)
-				collectionSet[collIndex].media.push(recordObservable.media[0]);
+			if (newItemCount <= 5) {
+				collectionSet[collIndex].media.push(recordObservable.media()[0]);
+			}
 		}
 
 		self.reloadCollection = function(data) {

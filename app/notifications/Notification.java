@@ -21,12 +21,7 @@ import java.sql.Timestamp;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.Index;
-import org.mongodb.morphia.annotations.IndexOptions;
-import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.utils.IndexType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -34,11 +29,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import db.DB;
-import model.resources.WithResource;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
-import model.basicDataTypes.Language;
-import model.basicDataTypes.WithAccess.Access;
 import utils.Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -387,7 +387,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			success: function (data, text) {
 				loadUser(data, false, false);
 			},
-			async: false
+			//async: false
 		});
 	};
 
@@ -440,7 +440,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		});
 
 		data.pending = ko.observable(data.pendingResponse);
-		data.unread = ko.observable(data.readAt === null);
+		data.unread = ko.observable(data.readAt === null || data.readAt == undefined);
 
 		if (data.unread()) {
 			self.currentUser.notifications.unread(self.currentUser.notifications.unread() + 1);

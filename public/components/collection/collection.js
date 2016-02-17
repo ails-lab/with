@@ -249,7 +249,6 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		};
 
 		self.saveCollection = function (jsondata, callback) {
-			console.log("called save collection");
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
@@ -325,8 +324,6 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			 var jsondata = JSON.stringify({ 
 				    provenance : [{ provider : self.record().source(), 
 					resourceId: self.record().externalId()}]
-			        
-			        
 					});
 			if(self.record().data()){
 				jsondata=JSON.stringify(self.record().data());
@@ -346,7 +343,6 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"success": function (data) {
 					self.ajaxConnections--;
 					if ((self.params.request_  && self.params.request_ .indexOf( "collectionview/" + collid)==0) ||( self.params.route &&  self.params.route().request_.indexOf("collectionview/" + collid))==0) {
-						//self.params.recordId(data.dbId);
 						ko.contextFor(withcollection).$data.loadNext();
 						ko.contextFor(withcollection).$data.reloadEntryCount();
 					} else if (self.params.request_ == "mycollections" ||( self.params.route &&  self.params.route().request_ == "mycollections" )) {
