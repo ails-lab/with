@@ -34,6 +34,8 @@ import sources.core.RecordJSONMetadata;
 import sources.core.RecordJSONMetadata.Format;
 import sources.core.SourceResponse;
 import sources.core.Utils;
+import sources.formatreaders.CulturalRecordFormatter;
+import sources.formatreaders.RijksmuseumItemRecordFormatter;
 import sources.formatreaders.RijksmuseumRecordFormatter;
 import utils.Serializer;
 
@@ -158,8 +160,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 			JsonNode record = response;
 			if (record != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RIJ, record.toString()));
+				CulturalRecordFormatter f = new RijksmuseumItemRecordFormatter();
 				// TODO make another reader
-				String json = Json.toJson(formatreader.readObjectFrom(record)).toString();
+				String json = Json.toJson(f .readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = HttpConnector.getURLContentAsXML(
