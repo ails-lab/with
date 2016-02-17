@@ -210,14 +210,14 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "photo");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "video");
 
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, BritishLibrarySpaceSource.getLicence("0"));
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, BritishLibrarySpaceSource.getLicence("3"),
-				BritishLibrarySpaceSource.getLicence("2"), BritishLibrarySpaceSource.getLicence("1"));
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, BritishLibrarySpaceSource.getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, BritishLibrarySpaceSource.getLicence("1"), BritishLibrarySpaceSource.getLicence("2"),
-				BritishLibrarySpaceSource.getLicence("3"), BritishLibrarySpaceSource.getLicence("4"), BritishLibrarySpaceSource.getLicence("5"), BritishLibrarySpaceSource.getLicence("6"));
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, BritishLibrarySpaceSource.getLicence("7"));
-		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Public, BritishLibrarySpaceSource.getLicence("9"), BritishLibrarySpaceSource.getLicence("10"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.RR, FlickrSpaceSource.getLicence("0"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative_Not_Commercial, FlickrSpaceSource.getLicence("3"),
+				BritishLibrarySpaceSource.getLicence("2"), FlickrSpaceSource.getLicence("1"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Modify, FlickrSpaceSource.getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, FlickrSpaceSource.getLicence("1"), FlickrSpaceSource.getLicence("2"),
+				BritishLibrarySpaceSource.getLicence("3"), FlickrSpaceSource.getLicence("4"), FlickrSpaceSource.getLicence("5"), FlickrSpaceSource.getLicence("6"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.UNKNOWN, FlickrSpaceSource.getLicence("7"));
+		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Public, FlickrSpaceSource.getLicence("9"), FlickrSpaceSource.getLicence("10"));
 
 	}
 	private void fillNLA() {
