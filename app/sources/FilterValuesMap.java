@@ -143,6 +143,7 @@ public class FilterValuesMap {
 	}
 
 	public Boolean containsFilter(String filterID) {
+		System.out.println(writters.keySet());
 		return writters.containsKey(filterID);
 	}
 	
