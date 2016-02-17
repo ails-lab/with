@@ -91,21 +91,11 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 	}
 
 	function saveItemToExhibition(record, position, exhibitionId) {
-		/*console.log('save item to index :' + position + 'record : '+ record);*/
-		var jsonData = JSON.stringify({
-			source: record.source,
-			sourceId: record.sourceId,
-			title: record.title,
-			description: record.description,
-			thumbnailUrl: record.thumbnailUrl,
-			sourceUrl: record.sourceUrl,
-			position: position
-		});
 		return $.ajax({
-			"url": "/collection/" + exhibitionId + "/addRecord",
+			"url": "/collection/" + exhibitionId + "/addRecord?position=" + position,
 			"method": "post",
 			"contentType": "application/json",
-			"data": jsonData,
+			"data": ko.toJSON(record),
 			"success": function (data) {
 				// Empty
 			},
@@ -115,10 +105,9 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		});
 	}
 
-	function deleteItemFromExhibition(exhibitionId, recordId) {
+	function deleteItemFromExhibition(exhibitionId, recordId, position) {
 		$.ajax({
-
-			"url": "/collection/" + exhibitionId + "/removeRecord" + "?recId=" + recordId,
+			"url": "/collection/" + exhibitionId + "/removeRecord" + "?recId=" + recordId + '&position=' + position,
 			"method": "delete",
 			"success": function (data) {
 				// Empty
@@ -214,6 +203,36 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				}
 				setUpSwitch(self);
 
+				$.ajax({
+					url: "/collection/" + self.dbId() + "/list?count=40&start=0",
+					method: "get",
+					success: function (data) {
+						self.firstEntries = data.records;
+						self.loadingInitialItemsCount = data.entryCount;
+						self.firstEntries.map(function (record) {
+							record.additionalText = ko.pureComputed(function() {
+								return app.findByLang(record.contextData.body.text);
+							});
+							record.videoUrl = ko.pureComputed(function() {
+								return app.findByLang(record.contextData.body.videoUrl);
+							});
+							record.containsVideo = ko.pureComputed(function() {
+								return false;	// TODO: Check if it contains video
+							});
+							record.containsText = ko.pureComputed(function() {
+								return false;	// TODO: Check if it contains text
+							});
+						});
+
+						self.collectionItemsArray(self.firstEntries);
+						self.loadingExhibitionItems = true;
+					},
+					error: function (result) {
+						// Empty
+					}
+				});
+
+
 // TODO: Update Code
 				// self.loadingInitialItemsCount = self.firstEntries.length;
 				// self.firstEntries.map(function (record) { //fix for now till service gets implemented
@@ -266,9 +285,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.xButtonClicked = function (item) {
-			if (self.collectionItemsArray.indexOf(item) > -1) {
+			var index = self.collectionItemsArray.indexOf(item);
+			if (index > -1) {
 				self.collectionItemsArray.remove(item);
-				deleteItemFromExhibition(self.dbId(), item.dbId);
+				deleteItemFromExhibition(self.dbId(), item.dbId, index);
 			} else {
 				self.userSavedItemsArray.remove(item);
 			}
