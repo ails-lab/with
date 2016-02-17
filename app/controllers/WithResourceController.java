@@ -208,27 +208,47 @@ public class WithResourceController extends Controller {
 						record.getAdministrative().setWithCreator(userId);
 						String mediaUrl;
 						WithMediaRights withRights;
-							for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia: (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record.getMedia()) {
-								for (MediaVersion version: embeddedMedia.keySet()) {
-									EmbeddedMediaObject media = embeddedMedia.get(version);
-									if (media != null) {
-										mediaUrl = media.getUrl();
-										EmbeddedMediaObject existingMedia = null;
-										if (!mediaUrl.isEmpty() &&
-											((existingMedia = DB.getMediaObjectDAO().getByUrl(mediaUrl)) != null)) {
-												media = new EmbeddedMediaObject(existingMedia);
-										}
-										//TODO: careful, the user is allowed to set the media fields as s/he wishes,
-										//if the media url doesn't already exist. The first time that a request for caching
-										//that url is issued, the MediaObject that is created in the db will be filled by
-										//parseMediaURL, possibly with values that are different from the embeddedMediaObject.
-										//in the record. In general, each user who adds a record with the same media url,
-										//before the media is actually saved in the db, may have a different version of media info.
-										//TODO: Better call cache the media (as a promise) here!
-										//and put the first user's withRights, since cache has no way to retrieve the media rights.
-										//However, this allows the user to specify a wrong version, e.g. create a media which claims
-										//to be thumbnail, but is full size. Can Marios find out the version (and correct it) during caching?
-										record.addMedia(version, media);
+						for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
+								.getMedia()) {
+							for (MediaVersion version : embeddedMedia.keySet()) {
+								EmbeddedMediaObject media = embeddedMedia
+										.get(version);
+								if (media != null) {
+									mediaUrl = media.getUrl();
+									EmbeddedMediaObject existingMedia = null;
+									if (!mediaUrl.isEmpty()
+											&& ((existingMedia = DB
+													.getMediaObjectDAO()
+													.getByUrl(mediaUrl)) != null)) {
+										media = new EmbeddedMediaObject(
+												existingMedia);
+									}
+									// TODO: careful, the user is allowed to set
+									// the media fields as s/he wishes,
+									// if the media url doesn't already exist.
+									// The first time that a request for caching
+									// that url is issued, the MediaObject that
+									// is created in the db will be filled by
+									// parseMediaURL, possibly with values that
+									// are different from the
+									// embeddedMediaObject.
+									// in the record. In general, each user who
+									// adds a record with the same media url,
+									// before the media is actually saved in the
+									// db, may have a different version of media
+									// info.
+									// TODO: Better call cache the media (as a
+									// promise) here!
+									// and put the first user's withRights,
+									// since cache has no way to retrieve the
+									// media rights.
+									// However, this allows the user to specify
+									// a wrong version, e.g. create a media
+									// which claims
+									// to be thumbnail, but is full size. Can
+									// Marios find out the version (and correct
+									// it) during caching?
+									record.addMedia(version, media);
 								}
 							}
 						}
@@ -263,8 +283,8 @@ public class WithResourceController extends Controller {
 						}
 						DB.getRecordResourceDAO().makePermanent(record);
 						recordId = record.getDbId();
-						DB.getRecordResourceDAO().updateWithURI(record.getDbId(),
-								"/record/" + recordId);
+						DB.getRecordResourceDAO().updateWithURI(
+								record.getDbId(), "/record/" + recordId);
 						break;
 					default:// imported first time from other sources
 						// there is no withCreator and the record is public
@@ -371,7 +391,7 @@ public class WithResourceController extends Controller {
 	 * @return
 	 */
 	public static Result removeRecordFromCollection(String id, String recordId,
-			Option<Integer> position) {
+			Option<Integer> position, boolean all) {
 		ObjectNode result = Json.newObject();
 		Locks locks = null;
 		try {
@@ -381,36 +401,46 @@ public class WithResourceController extends Controller {
 			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			ObjectId recordDbId = new ObjectId(recordId);
+			List<Integer> positions = new ArrayList<Integer>();
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				if (!position.isDefined()) {
-					result.put(
-							"error",
-							"The position in the collection from which the record is to be removed, must be specified");
-					return badRequest(result);
+					List<Integer> pos = DB.getRecordResourceDAO()
+							.getPositionsInCollection(recordDbId,
+									collectionDbId);
+					if (all) {
+						positions.addAll(pos);
+					} else {
+						if (!pos.isEmpty())
+							positions = pos.subList(0, 1);
+					}
 				} else {
-					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
-							collectionDbId, position.get());
+					positions.add(position.get());
 				}
-				// TODO: if position undefined, remove from all Positions. shift
-				// other records will be harder in that case though.
-				// modify record's access: the record gets the most liberal
-				// rights of the collections it belongs to after the removal
-				DB.getRecordResourceDAO()
-						.updateRecordRightsUponRemovalFromCollection(
-								recordDbId, collectionDbId);
-				DB.getCollectionObjectDAO().removeCollectionMedia(
-						collectionDbId, position.get());
-				if (DB.getCollectionObjectDAO().isFavorites(collectionDbId))
-					DB.getRecordResourceDAO().decrementLikes(recordDbId);
-				else
-					DB.getRecordResourceDAO().decField("usage.collected",
-							recordDbId);
-				// Change the collection metadata as well
-				DB.getCollectionObjectDAO().decEntryCount(collectionDbId);
-				DB.getCollectionObjectDAO().updateField(collectionDbId,
-						"administrative.lastModified", new Date());
+				for (int p : positions) {
+					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
+							collectionDbId, p);
+					// TODO: if position undefined, remove from all Positions.
+					// shift
+					// other records will be harder in that case though.
+					// modify record's access: the record gets the most liberal
+					// rights of the collections it belongs to after the removal
+					DB.getRecordResourceDAO()
+							.updateRecordRightsUponRemovalFromCollection(
+									recordDbId, collectionDbId);
+					DB.getCollectionObjectDAO().removeCollectionMedia(
+							collectionDbId, p);
+					if (DB.getCollectionObjectDAO().isFavorites(collectionDbId)) {
+						DB.getRecordResourceDAO().decrementLikes(recordDbId);
+					} else
+						DB.getRecordResourceDAO().decField("usage.collected",
+								recordDbId);
+					// Change the collection metadata as well
+					DB.getCollectionObjectDAO().decEntryCount(collectionDbId);
+					DB.getCollectionObjectDAO().updateField(collectionDbId,
+							"administrative.lastModified", new Date());
+				}
 				result.put("message",
 						"Record succesfully removed from collection");
 				return ok(result);
@@ -542,11 +572,11 @@ public class WithResourceController extends Controller {
 		for (CollectionInfo c : collected) {
 			if (c.getCollectionId().toString().equals(fav)) {
 				return removeRecordFromCollection(fav, record.getDbId()
-						.toString(), Option.Some(c.getPosition()));
+						.toString(), Option.Some(c.getPosition()), false);
 			}
 		}
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
-				Option.None());
+				Option.None(), false);
 	}
 
 }

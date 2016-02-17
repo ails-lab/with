@@ -28,87 +28,106 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 	 
 	
 	 
-	function Record(data) {
-		var self = this;
-	    self.recordId = "";
-		self.title = "";
-		self.description="";
-		self.thumb = "";
-		self.fullres="";
-		self.view_url="";
-		self.source="";
-		self.creator="";
-		self.provider="";
-		self.dataProvider="";
-		self.rights="";
-		self.url="";
-		self.externalId = "";
-		self.cachedThumbnail="";
-		self.isLike=ko.observable(false);
-		self.isLoaded = ko.observable(false);
-		 
-		
-		self.load = function(data) {
-			if(data.title==undefined){
-				self.title="No title";
-			}else{self.title=data.title;}
-			self.url="#item/"+data.recordId;
-			self.view_url=data.view_url;
-			self.thumb=data.thumb;
-			//self.imageThumb(data.thumb);
-			self.fullres=data.fullres;
-			self.description=data.description;
-			self.source=data.source;
-			self.creator=data.creator;
-			self.provider=data.provider;
-			self.dataProvider=data.dataProvider;
-			self.rights=data.rights;
-			self.recordId=data.recordId;
-			self.externalId=data.externalId;
-			var likeval=app.isLiked(self.externalId);
-			self.isLike(likeval);
-		   if(!self.thumb){
+		function Record(data) {
+			var self = this;
+		    self.recordId = "";
+			self.title = "";
+			self.description="";
+			self.thumb = "";
+			self.fullres="";
+			self.view_url="";
+			self.source="";
+			self.creator="";
+			self.provider="";
+			self.dataProvider="";
+			self.dataProvider_uri="";
+			self.rights="";
+			self.url="";
+			self.externalId = "";
+			self.likes=0;
+			self.collected=0;
+			self.collectedIn=[];
+			self.data=ko.observable("");
+			self.isLike=ko.observable(false);
+			self.isLiked = ko.pureComputed(function () {
+				return app.isLiked(self.externalId);
+			});
+			self.isLoaded = ko.observable(false);
+			
+			self.load = function(data) {
+				if(data.title==undefined){
+					self.title="No title";
+				}else{self.title=data.title;}
+				//self.url="#item/"+data.recordId;
+				self.view_url=data.view_url;
+				self.thumb=data.thumb;
+				self.fullres=data.fullres;
+				self.description=data.description;
+				self.source=data.source;
+				self.creator=data.creator;
+				self.provider=data.provider;
+				self.dataProvider=data.dataProvider;
+				self.dataProvider_uri=data.dataProvider_uri;
+				self.rights=data.rights;
+				self.recordId=data.recordId;
+				self.externalId=data.externalId;
+				self.likes=data.likes;
+				self.collected=data.collected;
+				self.collectedIn=data.collectedIn;
+				self.data(data.data);
+				var likeval=app.isLiked(self.externalId);
+			    self.isLike(likeval);
+			     if(!self.thumb){
 		   
 					   self.thumb="img/content/thumb-empty.png";
 			 }
-		};
+			};
 
-		
-		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source) {
-			    case "DPLA":
-			    	return "dp.la";
-			    case "Europeana":
-			    	return "europeana.eu";
-			    case "NLA":
-			    	return "nla.gov.au";
-			    case "DigitalNZ":
-			    	return "digitalnz.org";
-			    case "EFashion":
-			    	return "europeanafashion.eu";
-			    case "YouTube": 
-			    	return "youtube.com";
-			    case "Mint":
-			    	return "mint";
-			    case "Rijksmuseum":
-					return "www.rijksmuseum.nl";
-			    default: return "";
-			 }
+			self.doLike=function(){
+				self.isLike(true);
+			}
+			
+			self.sourceCredits = ko.pureComputed(function() {
+				 switch(self.source) {
+				    case "DPLA":
+				    	return "dp.la";
+				    case "Europeana":
+				    	return "europeana.eu";
+				    case "NLA":
+				    	return "nla.gov.au";
+				    case "DigitalNZ":
+				    	return "digitalnz.org";
+				    case "EFashion":
+				    	return "europeanafashion.eu";
+				    case "YouTube": 
+				    	return "youtube.com";
+				    case "The British Library":
+				    	return "www.bl.uk";
+				    case "Mint":
+				    	return "mint";
+				    case "Rijksmuseum":
+						return "www.rijksmuseum.nl";
+				    case "DDB":
+				        return "deutsche-digitale-bibliothek.de";
+				    default: return "";
+				 }
+				});
+
+			self.displayTitle = ko.pureComputed(function() {
+				var distitle="";
+				distitle=self.title;
+				if(self.creator && self.creator.length>0)
+					distitle+=", by "+self.creator;
+				if(self.dataProvider && self.dataProvider.length>0 && self.dataProvider!=self.creator)
+					distitle+=", "+self.dataProvider;
+				return distitle;
 			});
 
-		self.displayTitle = ko.pureComputed(function() {
-			var distitle="";
-			distitle=self.title;
-			if(self.creator!==undefined && self.creator.length>0)
-				distitle+=", by "+self.creator;
 			
-			return distitle;
-		});
+			
+			if(data != undefined) self.load(data);
+		}
 
-		
-		
-		if(data != undefined) self.load(data);
-	}
 
 	function SourceCategory(data) {
 		var self = this;
@@ -154,7 +173,10 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.route = params.route;
 		self.term = ko.observable("");
 		self.sourceview=ko.observable(true);
-		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
+		/*self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","WITHin", "Rijksmuseum"]);
+		 * no WITHin until it's fully functional
+		 */
+		self.sources= ko.observableArray([ "Europeana", "DPLA","DigitalNZ","Rijksmuseum"]);
 		self.mixresults=ko.observableArray();
 		self.selectedSource=ko.observable(self.sources()[0]);
 		self.results = ko.observableArray([]);
@@ -237,7 +259,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 		self._search = function(facetinit,facetrecacl) {
 		 if(facetinit){self.filterselection.removeAll();}
-		 $('#facet_tags').tagsinput({
+	   $('#facet_tags').tagsinput({
 		        allowDuplicates: false,
 		          itemValue: 'id',  // this will be used to set id of tag
 		          itemText: 'label' // this will be used to set text of tag
@@ -260,20 +282,30 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 				"success": function(reply) {
 					self.previous(self.page()-1);
 					var moreitems=false;
+                  
                     var data=reply.responses;
-
-                    var filters=reply.filters;
+                    var facets=[];
+                    for(var f in reply.filters){
+                    	facet=reply.filters[f];
+                    	facet.filterID=facet.filterID.replace(/\./g, '_');
+			            facets.push(facet);
+                    }
                     if(facetinit || facetrecacl){
-                    self.filters.removeAll();
-                    self.filters().push.apply(self.filters(),filters);}
+	                    self.filters.removeAll();
+	                    
+	                    self.filters().push.apply(self.filters(),facets);}
+                    
+                    
                  	for(var i in data) {
 						source=data[i].source;
 						//count should be working in api but it's not, use item length until fixed
-						if(data[i].items!=null && data[i].items.length==self.pageSize() && moreitems==false){
+						if(data[i].items!=null && data[i].items.culturalCHO!=null && data[i].items.culturalCHO.length==self.pageSize() && moreitems==false){
 							moreitems=true;
 						}
 						var items = [];
-						items=self.revealItems(data[i].items);
+						
+						items=self.revealItems(data[i].items.culturalCHO);
+						
 						
 						if(items.length>0){
 							 var $newitems=getItems(items);
@@ -386,28 +418,39 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						
 	                    for(var i in data) {
 						  source=data[i].source;
+						  
 							//count should be working in api but it's not, use item length until fixed
-						  if(data[i].items!=null && source==sdata.source){
+						  if(data[i].items!=null && data[i].items.culturalCHO!=null && source==sdata.source){
 							var items = [];
-							for(var j in data[i].items){
-							 var result = data[i].items[j];
+							for(var j in data[i].items.culturalCHO){
+							 var result = data[i].items.culturalCHO[j];
 
 							 if(result !=null ){
 								 //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
-							 var record = new Record({
-								recordId: result.recordId || result.id,
-								thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-								fullres: result.fullresolution!=null ? result.fullresolution : "",
-								title: result.title!=null? result.title:"",
-								description: result.description!=null ?result.description: result.title,		
-								view_url: result.url.fromSourceAPI,
-								creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-								dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-								provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-								rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-								externalId: result.externalId,
-								source: source
-							  });
+								 var admindata=result.administrative;
+									var descdata=result.descriptiveData;
+									var media=result.media;
+									var provenance=result.provenance;
+									var usage=result.usage;
+							        var record = new Record({
+										//recordId: result.recordId || result.id,
+										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+										fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+										title: findByLang(descdata.label),
+										description: findByLang(descdata.description),
+										view_url: findProvenanceValues(provenance,"source_uri"),
+										creator: findByLang(descdata.dccreator),
+										dataProvider: findProvenanceValues(provenance,"dataProvider"),
+										dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+										provider: findProvenanceValues(provenance,"provider"),
+										rights: findResOrLit(descdata.metadataRights),
+										externalId: admindata.externalId,
+										source: findProvenanceValues(provenance,"source"),
+										likes: usage.likes,
+										collected: usage.collected,
+										collectedIn:result.collectedIn,
+										data: result
+									  });
 							   items.push(record);
 							   self.mixresults().push(record);
 							
@@ -577,21 +620,30 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			var items=[];
 			for (var i in data) {
 				var result = data[i];
-				 if(result !=null ){
-						
+				if(result !=null ){
+					var admindata=result.administrative;
+					var descdata=result.descriptiveData;
+					var media=result.media;
+					var provenance=result.provenance;
+					var usage=result.usage;
 			        var record = new Record({
-						recordId: result.recordId || result.id,
-						thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-						fullres: result.fullresolution!=null ? result.fullresolution : "",
-						title: result.title!=null? result.title:"",
-						description: result.description!=null ? result.description : result.title,
-						view_url: result.url.fromSourceAPI,
-						creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-						provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-						dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-						rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-						externalId: result.externalId,
-						source: source
+						//recordId: result.recordId || result.id,
+						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+						fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+						title: findByLang(descdata.label),
+						description: findByLang(descdata.description),
+						view_url: findProvenanceValues(provenance,"source_uri"),
+						creator: findByLang(descdata.dccreator),
+						dataProvider: findProvenanceValues(provenance,"dataProvider"),
+						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+						provider: findProvenanceValues(provenance,"provider"),
+						rights: findResOrLit(descdata.metadataRights),
+						externalId: admindata.externalId,
+						source: findProvenanceValues(provenance,"source"),
+						likes: usage.likes,
+						collected: usage.collected,
+						collectedIn:result.collectedIn,
+						data: result
 					  });
 				  items.push(record);
 				 }
@@ -614,7 +666,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         	
         	event.preventDefault();
 			var selrecord = ko.utils.arrayFirst(self.mixresults(), function(record) {
-				   return record.recordId === data;
+				   return record.externalId === data;
 				});
 			itemShow(selrecord);
 			return false;
@@ -624,7 +676,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         likeRecord = function (id,event) {
         	event.preventDefault();
 			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.recordId=== id;
+				return record.externalId=== id;
 			});
 
 			app.likeItem(rec, function (status) {
@@ -639,7 +691,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		collect = function (id,event) {
 			event.preventDefault();
 			var rec = ko.utils.arrayFirst(self.mixresults(), function (record) {
-				return record.recordId=== id;
+				return record.externalId=== id;
 			});
 			
 			collectionShow(rec);
@@ -647,28 +699,28 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
  
         function getItem(record) {
-			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
+			 var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
 			 if(isLogged()){
 				    if(record.isLike()){
 				    	 tile+='<span class="star active">';
 				    }
 				    else{tile+='<span class="star">';}
 				    if(record.externalId){
-				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 						+'</span>';}
-						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					}
 			 else{
 				 tile+='<span class="star" style="display:none">'
 				 if(record.externalId){
-					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
 					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 					    +'</span>';}
-					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					
 			 }
-                     tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
+                     tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)">'
                       +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                       +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
                       +'<span class="rights">'+record.sourceCredits()+'</span>'
