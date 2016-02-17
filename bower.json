@@ -14,7 +14,7 @@
     "masonry": "~3.3.0",
     "holderjs": "~2.4.1",
     "imagesloaded": "latest",
-    "jquery-bridget": "1.1.0",
+    "jquery-bridget": "~1.1.0",
     "knockout-validation": "~2.0.2",
     "knockout-amd-helpers": "~0.7.3",
     "selectize": "latest",
