@@ -11,7 +11,7 @@
     "requirejs-text": "~2.0.10",
     "knockout": "~3.2.0",
     "knockout-projections": "~1.1.0",
-    "masonry": "~3.2.2",
+    "masonry": "~3.3.0",
     "holderjs": "~2.4.1",
     "imagesloaded": "latest",
     "jquery-bridget": "1.1.0",
@@ -25,21 +25,22 @@
     "jquery-ui": "~1.11.4",
     "knockout-mapping": "latest",
     "bootstrap-tagsinput": "latest",
-    "bootstrap-switch":"https://github.com/nostalgiaz/bootstrap-switch/archive/master.zip",
+    "bootstrap-switch": "https://github.com/nostalgiaz/bootstrap-switch/archive/master.zip",
     "smoke": "latest",
-    "liveFilter":"https://github.com/cheeaun/jquery.livefilter/archive/master.zip",
+    "liveFilter": "https://github.com/cheeaun/jquery.livefilter/archive/master.zip",
     "bootstrap-select": "1.6.5",
     "jquery.lazyload": "~1.9.5",
-    "horizontal-chart":"https://github.com/eriku/horizontal-chart/archive/master.zip",
+    "horizontal-chart": "https://github.com/eriku/horizontal-chart/archive/master.zip",
     "isotope": "latest",
-    "modernizr":"latest",
-    "magnific-popup":"https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
+    "modernizr": "latest",
+    "magnific-popup": "https://github.com/dimsemenov/Magnific-Popup/archive/master.zip",
     "knockout-x-editable": "latest",
     "jquery-sticky": "latest",
     "knockout-switch-case": "latest",
     "moment": "~2.10"
   },
   "resolutions": {
-    "knockout": "~3.2.0"
+    "knockout": "~3.2.0",
+    "jquery": "~2.1.1"
   }
 }
