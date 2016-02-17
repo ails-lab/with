@@ -431,6 +431,16 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				.retrievedFields(true, "usage.likes");
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
+	
+	public List<Integer> getPositionsInCollection(ObjectId id, ObjectId collectionId) {
+		T record = this.getById(id, new ArrayList<String>(Arrays.asList("collectedIn")));
+		List<Integer> positions = new ArrayList<Integer>();
+		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
+			if (ci.getCollectionId().equals(collectionId))
+				positions.add(ci.getPosition());
+		}
+		return positions;
+	}
 
 	/**
 	 * @param extId

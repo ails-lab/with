@@ -41,7 +41,7 @@ GET		 /collection/favoriteCollection			controllers.CollectionObjectController.ge
 POST     /collection/liked			            controllers.WithResourceController.addToFavorites()
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
 
-DELETE   /collection/:id/removeRecord           controllers.WithResourceController.removeRecordFromCollection(id, recId, position: play.libs.F.Option[Integer])
+DELETE   /collection/:id/removeRecord           controllers.WithResourceController.removeRecordFromCollection(id, recId, position: play.libs.F.Option[Integer], all: Boolean ?= false)
 DELETE   /collection/unliked/:recId			    controllers.WithResourceController.removeFromFavorites(recId)
 
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "SimpleCollection")
