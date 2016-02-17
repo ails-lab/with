@@ -58,6 +58,8 @@ public class DPLASpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DPLA.toString();
 		apiKey = "SECRET_KEY";
+		vmap = FilterValuesMap.getDPLAMap();
+
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("sourceResource.type"));
 		addDefaultWriter(CommonFilters.COUNTRY.getId(), fwriter("sourceResource.spatial.country"));
 		addDefaultWriter(CommonFilters.CREATOR.getId(), fwriter("sourceResource.creator"));
@@ -67,8 +69,7 @@ public class DPLASpaceSource extends ISpaceSource {
 		addDefaultComplexWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
 		addDefaultWriter(CommonFilters.RIGHTS.getId(), fwriter("sourceResource.rights"));
 		
-		vmap = FilterValuesMap.getDPLAMap();
-
+		
 		formatreader = new DPLARecordFormatter();
 
 		// TODO: what to do with physical objects?

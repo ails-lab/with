@@ -50,10 +50,10 @@ public class NLASpaceSource extends ISpaceSource {
 	public NLASpaceSource() {
 		LABEL = Sources.NLA.toString();
 		apiKey = "SECRET_KEY";
+		vmap = FilterValuesMap.getNLAMap();
 		addDefaultQueryModifier(CommonFilters.TYPE.getId(), qfwriter("format"));
 		addDefaultQueryModifier(CommonFilters.YEAR.getId(), qfwriterYEAR());
 
-		vmap = FilterValuesMap.getNLAMap();
 		formatreader = new NLARecordFormatter();
 
 	}

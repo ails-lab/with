@@ -54,6 +54,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		super();
 		LABEL = Sources.DigitalNZ.toString();
 		apiKey = "SECRET_KEY";
+		vmap = FilterValuesMap.getDNZMap();
 		addDefaultWriter(CommonFilters.TYPE.getId(), fwriter("and[category][]"));
 		addDefaultWriter(CommonFilters.CREATOR.getId(), fwriter("and[creator][]"));
 		addDefaultWriter(CommonFilters.YEAR.getId(), qfwriterYEAR());
@@ -61,8 +62,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 		// TODO: rights_url shows the license in the search
 
-		vmap = FilterValuesMap.getDNZMap();
-
+		
 		formatreader = new DNZBasicRecordFormatter(vmap);
 
 	}

@@ -24,10 +24,7 @@ import java.util.function.Function;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.EmbeddedMediaObject.WithMediaRights;
-import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import sources.core.CommonFilterLogic;
 import sources.core.CommonFilters;
 import sources.core.CommonQuery;
 import sources.core.HttpConnector;
@@ -79,6 +76,8 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 
 	public FlickrSpaceSource(String source, String userID) {
 		super();
+		setLicences();
+		this.vmap = FilterValuesMap.getFlickrMap();
 		apiKey = "SECRET_KEY";
 		LABEL = source;
 		this.userID = userID;
@@ -88,9 +87,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		// addDefaultWriter(CommonFilters.COUNTRY.name(),
 		// fwriter("sourceResource.spatial.country"));
 
-		setLicences();
 
-		this.vmap = FilterValuesMap.getFlickrMap();
 	}
 
 	protected Function<List<String>, Pair<String>> fwriter(String parameter) {

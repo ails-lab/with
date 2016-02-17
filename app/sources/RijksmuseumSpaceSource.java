@@ -42,6 +42,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 	public RijksmuseumSpaceSource() {
 		LABEL = Sources.Rijksmuseum.toString();
 		apiKey = "SECRET_KEY";
+		formatreader = new RijksmuseumRecordFormatter(FilterValuesMap.getRijksMap());
 	}
 
 	public String getHttpQuery(CommonQuery q) {
@@ -58,7 +59,6 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
-		formatreader = new RijksmuseumRecordFormatter(FilterValuesMap.getRijksMap());
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);

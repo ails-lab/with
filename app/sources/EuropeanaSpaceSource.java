@@ -56,6 +56,8 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 	public EuropeanaSpaceSource() {
 		super();
+		vmap = FilterValuesMap.getEuropeanaMap();
+		
 		LABEL = Sources.Europeana.toString();
 		apiKey = "SECRET_KEY";
 		
@@ -85,7 +87,6 @@ public class EuropeanaSpaceSource extends ISpaceSource {
 
 		addDefaultWriter(CommonFilters.TYPE.getId(), qfwriter("TYPE"));
 
-		vmap = FilterValuesMap.getEuropeanaMap();
 		
 		formatreader = new EuropeanaRecordFormatter();
 
