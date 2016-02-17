@@ -141,30 +141,28 @@ public class NotificationController extends Controller {
 				if (notification instanceof ResourceNotification) {
 					resourceNotification = (ResourceNotification) notification;
 					ShareInfo shareInfo = resourceNotification.getShareInfo();
-					if (accept) {
+					activity = accept ? Activity.COLLECTION_SHARED : Activity.COLLECTION_REJECTED;
+					resourceNotification.setPendingResponse(false);
+					resourceNotification.setReadAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					if (!accept) {
+						//TODO: downgrade to previous access
 						ObjectId resourceId = resourceNotification.getResource();
-						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getNewAccess(), shareInfo.getOwnerEffectiveIds(), 
-								false, false);
-						resourceNotification.setPendingResponse(false);
-						resourceNotification.setReadAt(new Timestamp(now.getTime()));
-						DB.getNotificationDAO().makePermanent(notification);
+						RightsController.changeAccess(resourceId, shareInfo.getUserOrGroup(), shareInfo.getPreviousAccess(), shareInfo.getOwnerEffectiveIds(), 
+								true, false);
 						ResourceNotification newNotification = new ResourceNotification();
+						newNotification.setActivity(Activity.COLLECTION_REJECTED);
 						newNotification.setResource(resourceNotification.getResource());
-						if (accept) {
-							newNotification.setActivity(Activity.COLLECTION_SHARED);
-						} else {
-							newNotification.setActivity(Activity.COLLECTION_REJECTED);
-						}
 						newNotification.setShareInfo(shareInfo);
 						newNotification.setSender(notification.getReceiver());
 						newNotification.setReceiver(notification.getSender());
 						newNotification.setOpenedAt(new Timestamp(now.getTime()));
 						DB.getNotificationDAO().makePermanent(newNotification);
 						NotificationCenter.sendNotification(newNotification);
-						result.put("message",
-								"User succesfully responded to collection share request");
-						return ok(result);
 					}
+					result.put("message",
+							"User succesfully responded to collection share request");
+					return ok(result);
 				}
 				else  {
 					result.put("error", "User is not authorized for this action");

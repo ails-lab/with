@@ -43,6 +43,7 @@ public class ResourceNotification extends Notification {
 	public static class ShareInfo {
 		//the userOrGroup the resource is shared with
 		private ObjectId userOrGroup;
+		private Access previousAccess;
 		private Access newAccess;
 		//effectiveIds of the owner of the resource - the one who does the sharing
 		private List<ObjectId> ownerEffectiveIds;
@@ -52,6 +53,12 @@ public class ResourceNotification extends Notification {
 		}
 		public void setNewAccess(Access newAccess) {
 			this.newAccess = newAccess;
+		}
+		public Access getPreviousAccess() {
+			return previousAccess;
+		}
+		public void setPreviousAccess(Access previousAccess) {
+			this.previousAccess = previousAccess;
 		}
 		public List<ObjectId> getOwnerEffectiveIds() {
 			return ownerEffectiveIds;
@@ -87,7 +94,6 @@ public class ResourceNotification extends Notification {
 			}
 			return username;
 		}
-	
 	}
 	
 	private ShareInfo shareInfo;

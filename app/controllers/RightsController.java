@@ -62,52 +62,72 @@ public class RightsController extends WithResourceController {
 	 * @return OK or Error with JSON detailing the problem
 	 *
 	 */
-	public static Result shareCollection(String colId, String right, String username, boolean membersDowngrade) {
+	public static Result editCollectionRights(String colId, String right, String username, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();
 		ObjectId colDbId = new ObjectId(colId);
-		Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
-		if (!response.toString().equals(ok().toString()))
-			return response;
-		else {//user is owner
-			Access newAccess = Access.valueOf(right);
-			if (newAccess == null) {
-				result.put("error", right + " is not an admissible value for access rights " +
-						"(should be one of NONE, READ, WRITE, OWN).");
+		Access newAccess = Access.valueOf(right);
+		if (newAccess == null) {
+			result.put("error", right + " is not an admissible value for access rights " +
+					"(should be one of NONE, READ, WRITE, OWN).");
+			return badRequest(result);
+		}
+		else {
+			ObjectId loggedIn = new ObjectId(session().get("user"));
+			UserGroup userGroup = null;
+			User user = null;
+			// the receiver can be either a User or a UserGroup
+			ObjectId userOrGroupId = null;
+			if (username != null) {
+				user = DB.getUserDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id")));
+				if (user != null) {
+					userOrGroupId = user.getDbId();
+				} else {
+					userGroup = DB.getUserGroupDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id", "adminIds")));
+					if (userGroup != null) {
+						userOrGroupId = userGroup.getDbId();
+					}
+				}
+			}
+			if (userOrGroupId == null) {
+				result.put("error",
+						"No user or userGroup with given username");
 				return badRequest(result);
 			}
 			else {
-				ObjectId ownerId = new ObjectId(session().get("user"));
-				UserGroup userGroup = null;
-				// the receiver can be either a User or a UserGroup
-				ObjectId userOrGroupId = null;
-				if (username != null) {
-					User user = DB.getUserDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id")));
-					if (user != null) {
-						userOrGroupId = user.getDbId();
-					} else {
-						userGroup = DB.getUserGroupDAO().getUniqueByFieldAndValue("username", username, new ArrayList<String>(Arrays.asList("_id")));
-						if (userGroup != null) {
-							userOrGroupId = userGroup.getDbId();
-						}
-					}
-				}
-				if (userOrGroupId == null) {
-					result.put("error",
-							"No user or userGroup with given username");
-					return badRequest(result);
-				}
 				//check whether the newAccess entails a downgrade or upgrade of the current access of the collection
 				CollectionObject collection = DB.getCollectionObjectDAO().
 						getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
 				WithAccess oldColAccess = collection.getAdministrative().getAccess();
 				int downgrade = isDowngrade(oldColAccess.getAcl(), userOrGroupId, newAccess);
+				//the logged in user has the right to downgrade his own access level (unshare)
+				boolean hasDowngradeRight = loggedIn.equals(userOrGroupId);
 				List<ObjectId> effectiveIds = AccessManager.effectiveUserDbIds(session().get("effectiveUserIds"));
-				if (downgrade > -1) {//if downgrade == -1, the rights are not changed, do nothing
-					changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
-					return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, ownerId, newAccess, effectiveIds, 
-							downgrade == 1, membersDowngrade);
+				if (userGroup != null) {
+					hasDowngradeRight = userGroup.getAdminIds().contains(loggedIn);
 				}
-				else {
+				if (downgrade == 1 && hasDowngradeRight) {
+						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, true, membersDowngrade);
+						return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, loggedIn, Access.NONE, newAccess, effectiveIds, 
+								true, membersDowngrade);
+				}
+				else if (downgrade > -1){//downgrade and no downgradeRights or upgrade
+					Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
+					if (!response.toString().equals(ok().toString()))
+						return response;
+					else {
+						Access oldAccess = Access.NONE;
+						for (AccessEntry ae: oldColAccess.getAcl()) {
+							if (ae.getUser().equals(userOrGroupId)) {
+								oldAccess = ae.getLevel();
+							    break;
+							}
+						}
+						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
+						return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, loggedIn, oldAccess, newAccess, effectiveIds, 
+								downgrade == 1, membersDowngrade);
+					}
+				}
+				else {//if downgrade == -1, the rights are not changed, do nothing
 					result.put("mesage", "The user already has the required access to the collection.");
 					return ok(result);
 				}
@@ -140,14 +160,13 @@ public class RightsController extends WithResourceController {
 
 				
 	public static Result sendShareCollectionNotification(boolean userGroup, ObjectId userOrGroupId, ObjectId colDbId, 
-			ObjectId ownerId, Access newAccess, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
+			ObjectId ownerId, Access oldAccess, Access newAccess, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();	
 		ResourceNotification notification = new ResourceNotification();
 		//what if the receiver is a group?
 		notification.setReceiver(userOrGroupId);
 		notification.setResource(colDbId);
 		notification.setSender(ownerId);
-		notification.setPendingResponse(false);
 		ShareInfo shareInfo = new ShareInfo();
 		shareInfo.setNewAccess(newAccess);
 		shareInfo.setUserOrGroup(userOrGroupId);
@@ -156,6 +175,7 @@ public class RightsController extends WithResourceController {
 		DB.getNotificationDAO().makePermanent(notification);
 		NotificationCenter.sendNotification(notification);
 		if (downgrade) {
+			notification.setPendingResponse(false);
 			notification.setActivity(Activity.COLLECTION_UNSHARED);
 			notification.setShareInfo(shareInfo);
 			NotificationCenter.sendNotification(notification);
@@ -163,6 +183,7 @@ public class RightsController extends WithResourceController {
 			return ok(result);
 		}
 		else if (DB.getUserDAO().isSuperUser(ownerId)) {//upgrade
+			notification.setPendingResponse(false);
 			notification.setActivity(Activity.COLLECTION_SHARED);
 			notification.setShareInfo(shareInfo);
 			NotificationCenter.sendNotification(notification);
@@ -186,6 +207,8 @@ public class RightsController extends WithResourceController {
 					DB.getNotificationDAO().makePermanent(request);
 				}
 				// Make a new request for collection sharing request
+				shareInfo.setPreviousAccess(oldAccess);
+				notification.setPendingResponse(true);
 				notification.setActivity(Activity.COLLECTION_SHARE);
 				now = new Date();
 				shareInfo.setOwnerEffectiveIds(effectiveIds);

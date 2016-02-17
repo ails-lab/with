@@ -228,7 +228,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+				//data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true",
 			}).success (function(){
 			});
 		};
@@ -273,7 +274,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					dataType: "json",
 					url: "/collection/list",
 					processData: false,
-					data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+					data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.homecollections().length,
+					//data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 					
 				}).success (function(){
 				});

@@ -63,17 +63,17 @@ GET		/group/descendantGroups/:groupId		controllers.GroupManager.getDescendantGro
 GET		/group/descendantOrganizations/:groupId	controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Organization", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/descendantProjects/:groupId		controllers.GroupManager.getDescendantGroups(groupId, groupType: String  ?="Project", direct: Boolean ?=true, collectionHits:Boolean ?= false)
 GET		/group/list								controllers.GroupManager.listUserGroups(groupType: String ?="Project", offset: Integer ?=0, count: Integer ?=10)
-PUT      /group/:id                                controllers.GroupManager.editGroup(id)
-DELETE   /group/:id                                controllers.GroupManager.deleteGroup(id)
-GET      /group/:id                                controllers.GroupManager.getGroup(id)
-PUT      /group/addUserOrGroup/:groupId            controllers.UserAndGroupManager.addUserOrGroupToGroup(id: String ?=null, groupId)
-DELETE   /group/removeUserOrGroup/:groupId         controllers.UserAndGroupManager.removeUserOrGroupFromGroup(id: String ?=null, groupId)
-PUT      /group/join/:groupId                      controllers.UserAndGroupManager.joinGroup(groupId)
-PUT      /group/leave/:groupId                     controllers.UserAndGroupManager.leaveGroup(groupId)
+PUT      /group/:id                             controllers.GroupManager.editGroup(id)
+DELETE   /group/:id                             controllers.GroupManager.deleteGroup(id)
+GET      /group/:id                             controllers.GroupManager.getGroup(id)
+PUT      /group/addUserOrGroup/:groupId         controllers.UserAndGroupManager.addUserOrGroupToGroup(id: String ?=null, groupId)
+DELETE   /group/removeUserOrGroup/:groupId      controllers.UserAndGroupManager.removeUserOrGroupFromGroup(id: String ?=null, groupId)
+PUT      /group/join/:groupId                   controllers.UserAndGroupManager.joinGroup(groupId)
+PUT      /group/leave/:groupId                  controllers.UserAndGroupManager.leaveGroup(groupId)
 GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(groupId, category: String ?="both")
 
 # Rights Controller
-GET      /rights/:colId/:right                     controllers.RightsController.shareCollection(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
+GET      /rights/:colId/:right                  controllers.RightsController.editCollectionRights(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)

@@ -16,19 +16,16 @@
 
 package sources.formatreaders;
 
-import java.util.Arrays;
 import java.util.List;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import sources.FilterValuesMap;
@@ -36,7 +33,6 @@ import sources.core.CommonFilters;
 import sources.core.Utils;
 import sources.utils.JsonContextRecord;
 import sources.utils.StringUtils;
-import utils.ListUtils;
 
 public class DPLARecordFormatter extends CulturalRecordFormatter {
 
@@ -86,7 +82,7 @@ public class DPLARecordFormatter extends CulturalRecordFormatter {
 		List<String> rights = rec.getStringArrayValue("sourceResource.rights");
 		String stringValue = rec.getStringValue("sourceResource.type","originalRecord.type");
 		List<Object> translateToCommon = getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), stringValue);
-		WithMediaType type = translateToCommon==null?null:(WithMediaType) translateToCommon.get(0);
+		WithMediaType type = translateToCommon==null?null:(WithMediaType.getType(translateToCommon.get(0).toString())) ;
 		WithMediaRights withRights = ((rights==null) || (rights.size()==0))?WithMediaRights.UNKNOWN
 				:WithMediaRights.getRighs(getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(), rights.get(0)).get(0).toString());
 		String uri3 = rec.getStringValue("object");

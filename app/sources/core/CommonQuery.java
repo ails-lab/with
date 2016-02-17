@@ -21,19 +21,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import model.basicDataTypes.WithAccess.Access;
-import model.usersAndGroups.User;
-import model.usersAndGroups.UserGroup;
-
 import org.bson.types.ObjectId;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
+import model.basicDataTypes.WithAccess.Access;
+import model.usersAndGroups.User;
+import model.usersAndGroups.UserGroup;
 import utils.Tuple;
 
-public class CommonQuery {
+public class CommonQuery implements Cloneable {
 
 	@JsonIgnoreProperties(ignoreUnknown=true)
 	public String page = "1";
@@ -119,17 +118,11 @@ public class CommonQuery {
 			ISpaceSource src) {
 		if (i == filters.size()) {
 			CommonQuery clone;
-			try {
-
-				clone = (CommonQuery) clone();
+			clone = clone();
+			if (clone != null) {
 				clone.filters = (List<CommonFilter>) arrayList.clone();
 				result.add(clone);
-
-			} catch (CloneNotSupportedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
-
 		}
 		if (i < filters.size()) {
 			for (CommonFilter f : filters.get(i).splitValues(src)) {
@@ -180,5 +173,16 @@ public class CommonQuery {
 			types.add(type);
 		}
 
+	}
+	
+	@Override
+	public CommonQuery clone() {
+		try {
+			Object clone = super.clone();
+			return (CommonQuery) clone;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

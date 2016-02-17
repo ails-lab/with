@@ -172,9 +172,10 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	}
     	else{
     		var id=event.item.id.substring(0,event.item.id.indexOf("#"));
-    		
+    		id=id.replace(/\_/g, '.');
     		var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
         	  if(item!=undefined)	{
+        		
     		    if(item.filterID===id && id!="dates"){
     		    	var index=$.inArray(event.item.label, item.values);
     		    	if(index>-1){
@@ -236,7 +237,6 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     self.listSelect=function(id,newvalue){
     	var exists=false;
     	var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
-    		
     		    if(item.filterID===id && id!="dates"){
     		    	if($.inArray(newvalue, item.values)>-1){
     		    		//value is already there 
