@@ -118,6 +118,19 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		});
 	}
 
+	function moveItemInExhibition(exhibitionId, recordId, oldPosition, newPosition) {
+		$.ajax({
+			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
+			method: 'put',
+			success: function(data) {
+				// Empty
+			},
+			error: function(result) {
+				// Empty
+			}
+		});
+	}
+
 	function isEmpty(str) {
 		return (!str || 0 === str.length);
 	}
@@ -141,6 +154,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.creationMode = !params.hasOwnProperty('id');
 		self.loadingExhibitionItems = false;
 		self.loadingInitialItemsCount = 0;
+		var _removeItem = false;
+		var _startIndex = -1;
 		if (!self.creationMode) {
 			self.dbId(params.id);
 		}
@@ -198,7 +213,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				setUpSwitch(self);
 
 				$.ajax({
-					url: "/collection/" + self.dbId() + "/list?count=40&start=0",
+					url: "/collection/" + self.dbId() + "/list?count=5&start=0",
 					method: "get",
 					success: function (data) {
 						self.firstEntries = data.records;
@@ -312,22 +327,30 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					return;
 				}
 
-				var promiseSaveItem = saveItemToExhibition(record, index, self.dbId());
-				$.when(promiseSaveItem).done(function (data) {
-					//now delete not to affect server order
-					if (_bIsMoveOperation) {
-						deleteItemFromExhibition(self.dbId(), record.dbId);
+				if (_bIsMoveOperation) {
+					if (_startIndex > 0) {
+						moveItemInExhibition(self.dbId(), record.dbId, _startIndex, index);
+						_startIndex = -1;		// Move was successful, reset the startIndex
+					} else {
+						saveItemToExhibition(record, index, self.dbId());
+						_removeItem = true;		// Item was added but not removed, so mark it for removal
 					}
-					//update the dbid
-					record.dbId = data.dbId;
 					$(elem).find('#loadingIcon').fadeOut();
-				}).fail(function (data) {
+				} else {
+					saveItemToExhibition(record, index, self.dbId());
 					$(elem).find('#loadingIcon').fadeOut();
-				});
+				}
 			}
 		};
 
-		self.removeItem = function (elem) {
+		self.removeItem = function (elem, index, record) {
+			if (_bIsMoveOperation) {
+				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
+				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
+					deleteItemFromExhibition(self.dbId(), record.dbId, index);
+					_removeItem = false;
+				}
+			}
 			$(elem).fadeOut(500);
 		};
 
