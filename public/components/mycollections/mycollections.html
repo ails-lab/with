@@ -57,8 +57,8 @@
 					  	 <div class="imcontainer">
 					  	  <div data-bind="click: $parent.loadCollectionOrExhibition">
 					  	 	<!-- ko foreach: media -->
-					  	 	  <!-- ko if: Thumbnail -->
-					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}">
+					  	 	  <!-- ko if: $data.thumbnailUrl-->
+					  	 		<div class="coll_figure"><img  data-bind="attr: {src: $data.thumbnailUrl}">
 					  	 		 </div>
 					  	 	 <!-- /ko -->
 					  	 	 <!-- /ko -->
@@ -139,8 +139,8 @@
 					  	 <div class="imcontainer">
 					  	  <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">
 					  	 	<!-- ko foreach: media -->
-					  	 	  <!-- ko if: $data.Thumbnail -->
-					  	 		<div class="coll_figure"><img  data-bind="attr: {src: Thumbnail.url}">
+					  	 	  <!-- ko if: thumbnailUrl -->
+					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}">
 					  	 		 </div>
 					  	 	 <!-- /ko -->
 					  	 	 <!-- /ko -->

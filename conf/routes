@@ -75,6 +75,7 @@ GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(g
 
 # Rights Controller
 GET      /rights/:colId/:right                  controllers.RightsController.editCollectionRights(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
+#GET      /rights/:colId							controllers.RightsController.editCollectionPublicity(public: Boolean)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)

@@ -573,11 +573,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		};
 
 		self.updateCollectionFirstEntries = function(collectionSet, collIndex, recordObservable) {
+			console.log(recordObservable.media()[0].thumbnailUrl);
 			var newItemCount = collectionSet[collIndex].administrative.entryCount() + 1;
 			collectionSet[collIndex].administrative.entryCount(newItemCount);
 			if (newItemCount == 1) {//first entry, overwrite empty
-				collectionSet[collIndex].media.shift();
-				collectionSet[collIndex].media.push(recordObservable.media()[0]);
+				collectionSet[collIndex].media.splice(0, 1, recordObservable.media()[0]);
 			}
 			else if (newItemCount <= 5) {
 				collectionSet[collIndex].media.push(recordObservable.media()[0]);
