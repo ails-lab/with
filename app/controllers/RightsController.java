@@ -49,6 +49,34 @@ import db.DB;
 
 public class RightsController extends WithResourceController {
 	public static final ALogger log = Logger.of(RightsController.class);
+	
+	public static Result editCollectionPublicity(String colId, Boolean isPublic, boolean membersDowngrade) {
+		ObjectNode result = Json.newObject();
+		/*if (isPublic == null) {
+			result.put("error", "isPublic should be true or false");
+			return badRequest(result);
+		}*/
+		ObjectId colDbId = new ObjectId(colId);
+		Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
+		if (!response.toString().equals(ok().toString()))
+			return response;
+		else {
+			CollectionObject collection = DB.getCollectionObjectDAO().
+				getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
+			boolean oldIsPublic = collection.getAdministrative().getAccess().getIsPublic();
+			if (oldIsPublic != isPublic) {
+				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
+				if (!isPublic) //downgrade
+					if (membersDowngrade) {
+						
+					}
+					else {
+						
+					}
+			}
+			return ok(result);
+		}
+	}
 
 	/**
 	 * Set access rights for object for user.
@@ -157,7 +185,7 @@ public class RightsController extends WithResourceController {
 		}
 		return 0;
 	}
-
+	
 				
 	public static Result sendShareCollectionNotification(boolean userGroup, ObjectId userOrGroupId, ObjectId colDbId, 
 			ObjectId ownerId, Access oldAccess, Access newAccess, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
