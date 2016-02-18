@@ -53,7 +53,6 @@ import org.im4java.core.IMOperation;
 
 import play.Logger;
 import play.Logger.ALogger;
-import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -179,6 +178,7 @@ public class MediaController extends Controller {
 					File x = fp.getFile();
 
 					parsed = parseMediaFile(x, x.getName());
+					Logger.info(parsed.toString());
 					editMediaAfterChecker(med, parsed);
 					
 					result = storeMedia(med, x);
@@ -572,56 +572,47 @@ public class MediaController extends Controller {
 		return mthumb;
 	}
 
-		
-	
-	private static Promise<JsonNode> parseMediaFile(File fToParse, String fName) {
-		
-		BiFunction<File, String, JsonNode> methodQuery = (File fileToParse, String fileName) -> {
-	
-			Logger.info("filename: " + fileName);
-	
-			// HttpClient hc = new DefaultHttpClient();
-	
-			CloseableHttpClient hc = HttpClients.createDefault();
-	
-			JsonNode resp = Json.newObject();
-			try {
-	
-				HttpPost aFile = new HttpPost(
-						"http://mediachecker.image.ntua.gr/api/extractmetadata");
-				// File testFile = fileToParse;
-				FileBody fileBody = new FileBody(fileToParse);
-				MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-				builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-				// builder.addBinaryBody("mediafile", testFile,
-				// ContentType.create("image/jpeg"), fileName);
-				builder.addPart("mediafile", fileBody);
-				aFile.setEntity(builder.build());
-				CloseableHttpResponse response = hc.execute(aFile);
-				String jsonResponse = EntityUtils.toString(response.getEntity(),
-						"UTF8");
-				// String id =
-				// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
-				resp = Json.parse(jsonResponse);
-	
-				Logger.info(jsonResponse);
-	
-				Logger.info("Called!");
-				aFile.releaseConnection();
-	
-				response.close();
-				hc.close();
-	
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return resp;
-		};
+	private static JsonNode parseMediaFile(File fileToParse, String fileName) {
+		Logger.info("filename: " + fileName);
 
-		Promise<JsonNode> ret = ParallelAPICall.createPromise(methodQuery, fToParse, fName);
+		// HttpClient hc = new DefaultHttpClient();
 
-		return ret;
+		CloseableHttpClient hc = HttpClients.createDefault();
+
+		JsonNode resp = Json.newObject();
+		try {
+
+			HttpPost aFile = new HttpPost(
+					"http://mediachecker.image.ntua.gr/api/extractmetadata");
+			// File testFile = fileToParse;
+			FileBody fileBody = new FileBody(fileToParse);
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+			// builder.addBinaryBody("mediafile", testFile,
+			// ContentType.create("image/jpeg"), fileName);
+			builder.addPart("mediafile", fileBody);
+			aFile.setEntity(builder.build());
+			CloseableHttpResponse response = hc.execute(aFile);
+			String jsonResponse = EntityUtils.toString(response.getEntity(),
+					"UTF8");
+			// String id =
+			// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
+			resp = Json.parse(jsonResponse);
+
+			Logger.info(jsonResponse);
+
+			Logger.info("Called!");
+			aFile.releaseConnection();
+
+			response.close();
+			hc.close();
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return resp;
 
 	}
 
