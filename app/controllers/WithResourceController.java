@@ -29,6 +29,7 @@ import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
+import model.MediaObject;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
@@ -86,13 +87,12 @@ public class WithResourceController extends Controller {
 				.effectiveUserIds(session().get("effectiveUserIds"));
 		if (!resourceDAO.existsEntity(id)) {
 			log.error("Cannot retrieve resource from database");
-			result.put("error", "Cannot retrieve resource " + id
-					+ " from database");
+			result.put("error",
+					"Cannot retrieve resource " + id + " from database");
 			return internalServerError(result);
 			// TODO superuser
-		} else if (!resourceDAO.hasAccess(
-				AccessManager.effectiveUserDbIds(session().get(
-						"effectiveUserIds")), action, id)
+		} else if (!resourceDAO.hasAccess(AccessManager.effectiveUserDbIds(
+				session().get("effectiveUserIds")), action, id)
 				&& !AccessManager.isSuperUser(effectiveUserIds.get(0))) {
 			result.put("error", "User does not have " + action
 					+ " access for resource " + id);
@@ -140,15 +140,16 @@ public class WithResourceController extends Controller {
 					return badRequest(result);
 				}
 				String resourceType = null;
-				ObjectId userId = AccessManager.effectiveUserDbIds(
-						session().get("effectiveUserIds")).get(0);
+				ObjectId userId = AccessManager
+						.effectiveUserDbIds(session().get("effectiveUserIds"))
+						.get(0);
 				if (json.has("resourceType"))
 					resourceType = json.get("resourceType").asText();
 				if ((resourceType == null)
 						|| (WithResourceType.valueOf(resourceType) == null))
 					resourceType = WithResourceType.CulturalObject.toString();
-				Class<?> clazz = Class.forName("model.resources."
-						+ resourceType);
+				Class<?> clazz = Class
+						.forName("model.resources." + resourceType);
 				RecordResource record = (RecordResource) Json.fromJson(json,
 						clazz);
 				int last = 0;
@@ -156,8 +157,9 @@ public class WithResourceController extends Controller {
 				if ((record.getProvenance() != null)
 						&& !record.getProvenance().isEmpty()) {
 					last = record.getProvenance().size() - 1;
-					source = Sources.valueOf(((ProvenanceInfo) record
-							.getProvenance().get(last)).getProvider());
+					source = Sources.valueOf(
+							((ProvenanceInfo) record.getProvenance().get(last))
+									.getProvider());
 				} else
 					record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
 							.asList(new ProvenanceInfo(source.toString()))));
@@ -166,14 +168,17 @@ public class WithResourceController extends Controller {
 				if (externalId == null)
 					externalId = record.getAdministrative().getExternalId();
 				ObjectId recordId = null;
-				if ((externalId != null)
-						&& DB.getRecordResourceDAO().existsWithExternalId(
-								externalId)) {// get dbId of existing resource
-					RecordResource resource = DB
-							.getRecordResourceDAO()
+				if ((externalId != null) && DB.getRecordResourceDAO()
+						.existsWithExternalId(externalId)) {// get
+															// dbId
+															// of
+															// existing
+															// resource
+					RecordResource resource = DB.getRecordResourceDAO()
 							.getUniqueByFieldAndValue(
 									"administrative.externalId", externalId,
-									new ArrayList<String>(Arrays.asList("_id")));
+									new ArrayList<String>(
+											Arrays.asList("_id")));
 					recordId = resource.getDbId();
 					response = errorIfNoAccessToRecord(Action.READ, recordId);
 					if (!response.toString().equals(ok().toString())) {
@@ -184,10 +189,10 @@ public class WithResourceController extends Controller {
 						// included
 						// in the json, if the user has WRITE.
 						// access.
-						if (DB.getRecordResourceDAO().hasAccess(
-								AccessManager.effectiveUserDbIds(session().get(
-										"effectiveUserIds")), Action.EDIT,
-								recordId)
+						if (DB.getRecordResourceDAO()
+								.hasAccess(AccessManager.effectiveUserDbIds(
+										session().get("effectiveUserIds")),
+								Action.EDIT, recordId)
 								&& (json.get("descriptiveData") != null))
 							DB.getRecordResourceDAO().editRecord(
 									"descriptiveData", resource.getDbId(),
@@ -210,7 +215,8 @@ public class WithResourceController extends Controller {
 						WithMediaRights withRights;
 						for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
 								.getMedia()) {
-							for (MediaVersion version : embeddedMedia.keySet()) {
+							for (MediaVersion version : embeddedMedia
+									.keySet()) {
 								EmbeddedMediaObject media = embeddedMedia
 										.get(version);
 								if (media != null) {
@@ -219,7 +225,8 @@ public class WithResourceController extends Controller {
 									if (!mediaUrl.isEmpty()
 											&& ((existingMedia = DB
 													.getMediaObjectDAO()
-													.getByUrl(mediaUrl)) != null)) {
+													.getByUrl(
+															mediaUrl)) != null)) {
 										media = new EmbeddedMediaObject(
 												existingMedia);
 									}
@@ -259,11 +266,11 @@ public class WithResourceController extends Controller {
 						// WithResource
 						DB.getRecordResourceDAO().updateWithURI(recordId,
 								"/record/" + recordId);
-						DB.getRecordResourceDAO().updateProvenance(
-								recordId,
+						DB.getRecordResourceDAO().updateProvenance(recordId,
 								last,
-								new ProvenanceInfo("UploadedByUser", "record/"
-										+ recordId, recordId.toString()));
+								new ProvenanceInfo("UploadedByUser",
+										"record/" + recordId,
+										recordId.toString()));
 						DB.getRecordResourceDAO().updateField(recordId,
 								"administrative.externalId",
 								recordId.toString());
@@ -313,8 +320,9 @@ public class WithResourceController extends Controller {
 				// merged and are copied to the record
 				// only if the user OWNs the resource
 				boolean owns = DB.getRecordResourceDAO().hasAccess(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Action.DELETE, recordId);
+						AccessManager.effectiveUserDbIds(
+								session().get("effectiveUserIds")),
+						Action.DELETE, recordId);
 				// make sure that update is called after record has been saved
 				// in the db
 				// while (!record.isPostPersist()) {};
@@ -326,6 +334,7 @@ public class WithResourceController extends Controller {
 					DB.getRecordResourceDAO().appendToCollection(recordId,
 							collectionDbId, owns);
 				}
+				//fillMissingThumbnails(recordId);
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
@@ -335,6 +344,24 @@ public class WithResourceController extends Controller {
 		} finally {
 			if (locks != null)
 				locks.release();
+		}
+	}
+
+	private static void fillMissingThumbnails(ObjectId recordId) {
+		RecordResource record = DB.getRecordResourceDAO().getById(recordId,
+				new ArrayList<String>(Arrays.asList("media")));
+		for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
+				.getMedia()) {
+			if (embeddedMedia.containsKey(MediaVersion.Original)
+					&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)) {
+				String originalUrl = embeddedMedia.get(MediaVersion.Original)
+						.getUrl();
+				MediaObject original = MediaController
+						.downloadMedia(originalUrl, MediaVersion.Original);
+				MediaObject thumbnail = MediaController.makeThumbnail(original);
+				//Add thumbnail
+			}
+
 		}
 	}
 
@@ -369,8 +396,8 @@ public class WithResourceController extends Controller {
 					if (annType != null) {
 						Class<?> clazz;
 						try {
-							clazz = Class.forName("model.annotations."
-									+ annType);
+							clazz = Class
+									.forName("model.annotations." + annType);
 							ContextData contextAnn = (ContextData) Json
 									.fromJson(contextAnnJson, clazz);
 							ContextData.add(contextAnn);
@@ -429,9 +456,10 @@ public class WithResourceController extends Controller {
 					DB.getRecordResourceDAO()
 							.updateRecordRightsUponRemovalFromCollection(
 									recordDbId, collectionDbId);
-					DB.getCollectionObjectDAO().removeCollectionMedia(
-							collectionDbId, p);
-					if (DB.getCollectionObjectDAO().isFavorites(collectionDbId)) {
+					DB.getCollectionObjectDAO()
+							.removeCollectionMedia(collectionDbId, p);
+					if (DB.getCollectionObjectDAO()
+							.isFavorites(collectionDbId)) {
 						DB.getRecordResourceDAO().decrementLikes(recordDbId);
 					} else
 						DB.getRecordResourceDAO().decField("usage.collected",
@@ -446,7 +474,8 @@ public class WithResourceController extends Controller {
 				return ok(result);
 			}
 		} catch (FileNotFoundException e) {
-			result.put("error", "Wrong record id or position in the collection");
+			result.put("error",
+					"Wrong record id or position in the collection");
 			return badRequest(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -507,10 +536,10 @@ public class WithResourceController extends Controller {
 			try {
 				Class<?> sourceClass = Class.forName(sourceClassName);
 				ISpaceSource s = (ISpaceSource) sourceClass.newInstance();
-				RecordResource fullRecord = DB.getRecordResourceDAO().get(
-						recordId);
-				List<RecordJSONMetadata> recordsData = s.getRecordFromSource(
-						sourceId, fullRecord);
+				RecordResource fullRecord = DB.getRecordResourceDAO()
+						.get(recordId);
+				List<RecordJSONMetadata> recordsData = s
+						.getRecordFromSource(sourceId, fullRecord);
 				for (RecordJSONMetadata data : recordsData) {
 					if (data.getFormat().equals("JSON-WITH")) {
 						log.info(data.getJsonContent());
@@ -525,10 +554,9 @@ public class WithResourceController extends Controller {
 								.readTree(data.getJsonContent()).get("media")
 								.toString();
 						List<HashMap<MediaVersion, EmbeddedMediaObject>> media = new ObjectMapper()
-								.readValue(
-										mediaString,
+								.readValue(mediaString,
 										new TypeReference<List<HashMap<MediaVersion, EmbeddedMediaObject>>>() {
-										});
+						});
 						DB.getWithResourceDAO().updateEmbeddedMedia(recordId,
 								media);
 					} else {
@@ -566,13 +594,14 @@ public class WithResourceController extends Controller {
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
-				externalId);
+		RecordResource record = DB.getRecordResourceDAO()
+				.getByExternalId(externalId);
 		List<CollectionInfo> collected = record.getCollectedIn();
 		for (CollectionInfo c : collected) {
 			if (c.getCollectionId().toString().equals(fav)) {
-				return removeRecordFromCollection(fav, record.getDbId()
-						.toString(), Option.Some(c.getPosition()), false);
+				return removeRecordFromCollection(fav,
+						record.getDbId().toString(),
+						Option.Some(c.getPosition()), false);
 			}
 		}
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
