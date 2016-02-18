@@ -105,4 +105,5 @@ GET      /user/apikey/create                       controllers.UserManager.apike
 #Reindex Controller
 GET	/api/chind										controllers.ReindexController.changeIndice(newIndice: String)
 GET	/api/mkconst									controllers.ReindexController.makeConsistent()
-GET	/api/idxall										controllers.ReindexController.reindexAllDocs()
+GET	/api/idxres										controllers.ReindexController.reindexAllResources()
+GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
