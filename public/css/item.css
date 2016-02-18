@@ -9,22 +9,43 @@
 }*/
 
 
-.item .collect {
-    font-size: 20px;
+.item .delete {
+   font-size: 20px;
     position: absolute;
-    /* display: none; */
-    /* top: 3px; */
-    right: 10%;
-    width: 40px;
+    display: none; 
+    top: 2px;
+    left: 100%;
+    width: 20px;
     z-index: 1;
     line-height: 1.8em;
 }
 
-.item:hover .collect {
+
+.item .collect {
+   font-size: 20px;
+    position: absolute;
+    display: none;
+    /* top: 3px; */
+    left: -60%;
+    width: 20px;
+    z-index: 1;
+    line-height: 1.8em;
+}
+
+
+
+.item:hover .collect{
 	color: #dddddd;
 	display: block;
 	cursor: pointer;
 }
+
+.item:hover .delete{
+	color: #dddddd;
+	display: block;
+	cursor: pointer;
+}
+
 
 .md-modal {
 	position: fixed;

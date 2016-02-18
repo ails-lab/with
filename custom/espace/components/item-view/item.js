@@ -68,7 +68,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.dataProvider=data.dataProvider;
 			self.dataProvider_uri=data.dataProvider_uri;
 			self.rights=data.rights;
-			self.recordId=data.recordId;
+			self.recordId=data.dbId;
 			self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId);
 			
 			self.externalId=data.externalId;
@@ -335,13 +335,16 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			app.likeItem(rec, function (status) {
 				if (status) {
 					$star.addClass('active');
-					if($( '[id="'+rec.recordId+'"]' ))
-						$( '[id="'+rec.recordId+'"]' ).find("span.star").addClass('active');
+					if($( '[id="'+rec.externalId+'"]' ) || $( '[id="'+rec.recordId+'"]' )){
+						$( '[id="'+rec.externalId+'"]' ).find("span.star").addClass('active');
+						$( '[id="'+rec.recordId+'"]' ).find("span.star").addClass('active');}
 						
 				} else {
 					$star.removeClass('active');
-					if($( '[id="'+rec.recordId+'"]' ))
+					if($( '[id="'+rec.externalId+'"]' ) || $( '[id="'+rec.recordId+'"]' )){
+						$( '[id="'+rec.externalId+'"]' ).find("span.star").removeClass('active');
 						$( '[id="'+rec.recordId+'"]' ).find("span.star").removeClass('active');
+					}
 				}
 			});
 		};
