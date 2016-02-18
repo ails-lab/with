@@ -195,12 +195,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				ko.mapping.fromJS(data, mappingExhibition, self);
 				self.title(app.findByLang(data.descriptiveData.label));
 				self.description(app.findByLang(data.descriptiveData.description));
-				if (self.title().indexOf('Dummy') !== -1) {
-					self.title('');
-				}
-				if (self.description().indexOf('Description') !== -1) {
-					self.description('');
-				}
 				setUpSwitch(self);
 
 				$.ajax({
