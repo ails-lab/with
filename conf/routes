@@ -42,6 +42,7 @@ POST     /collection/liked			            controllers.WithResourceController.addT
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
 
 DELETE   /collection/:id/removeRecord           controllers.WithResourceController.removeRecordFromCollection(id, recId, position: play.libs.F.Option[Integer], all: Boolean ?= false)
+PUT		 /collection/:id/moveRecord				controllers.WithResourceController.moveRecordInCollection(id, recordId, oldPosition: Int, newPosition: Int)
 DELETE   /collection/unliked/:recId			    controllers.WithResourceController.removeFromFavorites(recId)
 
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "SimpleCollection")
@@ -74,6 +75,7 @@ GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(g
 
 # Rights Controller
 GET      /rights/:colId/:right                  controllers.RightsController.editCollectionRights(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
+#GET      /rights/:colId							controllers.RightsController.editCollectionPublicity(public: Boolean)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)
