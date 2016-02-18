@@ -319,9 +319,9 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		if (changeRecRights)
 			newAccess = mergeParentCollectionRights(recordId, colId, co
 					.getAdministrative().getAccess());
+		shiftRecordsToRight(colId, position);
 		updateRecordUsageCollectedAndRights(
 				new CollectionInfo(colId, position), newAccess, recordId, colId);
-		shiftRecordsToRight(colId, position);
 		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
 				position);
 	}

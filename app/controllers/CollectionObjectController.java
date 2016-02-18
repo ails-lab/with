@@ -616,15 +616,13 @@ public class CollectionObjectController extends WithResourceController {
 		try {
 			locks = Locks.create().read("Collection #" + collectionId)
 					.acquire();
-			// TODO: don't have to get the whiole collection, use DAO method
-			// Collection collection = DB.getCollectionDAO().getById(colId);
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				List<String> retrievedFields = new ArrayList<String>(
 						Arrays.asList("descriptiveData.label",
-								"descriptiveData.description"));
+								"descriptiveData.description", "media", "collectedIn"));
 				// bytes of thumbnail???
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
@@ -643,8 +641,7 @@ public class CollectionObjectController extends WithResourceController {
 								.getDbId())));
 					} else {
 						// filter out all context annotations that do not refer
-						// to
-						// this collection
+						// to this collection
 						List<ContextData> contextAnns = e.getContextData();
 						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
 						for (ContextData ca : contextAnns) {
@@ -668,6 +665,7 @@ public class CollectionObjectController extends WithResourceController {
 								e.setContent(newContent);
 							}
 						}
+						System.out.println("record " + e.getDescriptiveData().getLabel().get(Language.DEFAULT));
 						recordsList.add(Json.toJson(e));
 					}
 					position += 1;
