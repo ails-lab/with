@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 
 import javax.imageio.ImageIO;
@@ -625,7 +626,7 @@ public class MediaController extends Controller {
 		
 		Promise<JsonNode> b = ParallelAPICall.createPromise(methodQuery, fToParse, fName);
 		
-		JsonNode parsed = b.get(REQUEST_TIMEOUT);
+		JsonNode parsed = b.get(10, TimeUnit.SECONDS);
 		
 		editMediaAfterChecker(med, parsed);
 		
