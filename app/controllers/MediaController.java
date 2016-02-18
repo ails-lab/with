@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -275,6 +276,8 @@ public class MediaController extends Controller {
 		//if (med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)) {
 
 			med.setType(WithMediaType.IMAGE);
+			//TODO: THIS IS A TEMPORARY FIX TO A MAYBE BIG BUG!
+			med.setMimeType(MediaType.parse(Files.probeContentType(x.toPath())));
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ImageIO.write(image, "jpg", baos);
 			baos.flush();
