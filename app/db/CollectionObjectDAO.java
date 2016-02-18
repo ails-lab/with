@@ -279,7 +279,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(List<Criteria> andCriteria, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-		Query<CollectionObject> q = this.createQuery().order("-administrative.lastModified").offset(offset).limit(count);
+		Query<CollectionObject> q = this.createQuery().disableValidation().field("descriptiveData.label.default.0").notEqual("_favorites");
+		q.order("-administrative.lastModified").offset(offset).limit(count);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {

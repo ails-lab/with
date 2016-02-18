@@ -473,12 +473,12 @@ public class CollectionObjectController extends WithResourceController {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
 				userCollections.size());
 		for (CollectionObject collection : userCollections) {
-			List<String> titles = collection.getDescriptiveData().getLabel()
-					.get(Language.DEFAULT);
-			if ((titles != null) && !titles.get(0).equals("_favorites")) {
+			//List<String> titles = collection.getDescriptiveData().getLabel()
+					//.get(Language.DEFAULT);
+			//if ((titles != null) && !titles.get(0).equals("_favorites")) {
 				collections.add(collectionWithMyAccessData(collection,
 						effectiveUserIds));
-			}
+			//}
 		}
 		return collections;
 	}
