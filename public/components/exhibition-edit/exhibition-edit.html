@@ -21,7 +21,9 @@
 			<img data-bind="attr: { src: media[0].Thumbnail.url }" class="itemImage"></img>
 			<div class="description d1" data-bind="text: descriptiveData.label.default[0]"></div>
 			<div class="description d2" data-bind="text: provenance[provenance.length - 1].provider"></div>
+<!-- ko if: descriptiveData.description -->
 			<div class="description d2" data-bind="text: descriptiveData.description.default[0]"> </div>
+<!-- /ko -->
 			<div class="btn-group EditOptions" role="group">
 				<button type="button" class="btn btn-link" data-bind="click: $parent.showPopUpText">
 					<i class="fa fa-pencil-square-o fa-2x EditIcons"></i>
@@ -90,7 +92,9 @@
 			<div id="hoverTextArea">
 				<div  id="title" data-bind="text: currentItem().descriptiveData.label.default[0]"></div>
 				<div  id="creator" data-bind="text: currentItem().provenance[provenance.length - 1].provider"></div>
+<!-- ko if: currentItem().descriptiveData.description -->
 				<div  id="description" data-bind="text: currentItem().descriptiveData.description.default[0]"> </div>
+<!-- /ko -->
 			</div>
 		</div>
 		<!-- /ko -->
