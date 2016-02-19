@@ -255,7 +255,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		Query<T> q = this.createQuery().field("_id").equal(id);
 		UpdateOperations<T> updateOps = this.createUpdateOperations()
 				.disableValidation();
-		updateOps.set("provenance." + index + "." + version, media);
+		updateOps.set("media." + index + "." + version, media);
 		this.updateFirst(q, updateOps);
 	}
 

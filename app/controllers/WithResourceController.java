@@ -358,7 +358,7 @@ public class WithResourceController extends Controller {
 						originalUrl, MediaVersion.Original);
 				MediaObject thumbnail = MediaController.makeThumbnail(original);
 				DB.getRecordResourceDAO().updateMedia(recordId, i,
-						MediaVersion.Thumbnail, thumbnail);
+						MediaVersion.Thumbnail, new EmbeddedMediaObject(thumbnail));
 			}
 			i++;
 		}
