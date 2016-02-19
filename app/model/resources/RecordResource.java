@@ -21,6 +21,7 @@ import java.util.Map;
 import org.bson.types.ObjectId;
 
 import model.DescriptiveData;
+import model.annotations.ContextData;
 
 
 public class RecordResource<T extends RecordResource.RecordDescriptiveData>

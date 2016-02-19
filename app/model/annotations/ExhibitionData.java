@@ -28,11 +28,11 @@ public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotat
 		this.body = new ExhibitionAnnotationBody();
 		this.contextDataType = ContextDataType.valueOf(this.getClass().getSimpleName());
 	}
-
+	
 	public static class ExhibitionAnnotationBody extends ContextDataBody {
-		Literal text;
-		String audioUrl;
-		String videoUrl;
+		Literal text = new Literal();
+		String audioUrl="";
+		String videoUrl="";
 
 		public Literal getText() {
 			return text;

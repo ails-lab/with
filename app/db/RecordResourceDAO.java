@@ -238,6 +238,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		}
 	}
 
+	
+	//TODO: context data have to be updated!!!!
 	/**
 	 * Shift one position left all resources in colId with position equal or
 	 * greater than position.
@@ -286,6 +288,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.equal(recordId);
 		UpdateOperations<RecordResource> recordUpdate = this
 				.createUpdateOperations();
+		//TODO: what if already entry with the same colId-position? have to remove first to avoid duplicates.
 		recordUpdate.add("collectedIn", colInfo);
 		if (access != null)
 			recordUpdate.set("administrative.access", access);

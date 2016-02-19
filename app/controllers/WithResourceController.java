@@ -41,9 +41,10 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
-import model.annotations.ContextData.ContextDataType;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataType;
 import model.annotations.ExhibitionData;
 
 import org.bson.types.ObjectId;
@@ -149,10 +150,15 @@ public class WithResourceController extends Controller {
 				if ((resourceType == null)
 						|| (WithResourceType.valueOf(resourceType) == null))
 					resourceType = WithResourceType.CulturalObject.toString();
-				Class<?> clazz = Class.forName("model.resources."
+				Class<?> clazz1 = Class.forName("model.resources."
 						+ resourceType);
+				JsonNode jsonWithContext = json;
+				((ObjectNode) json).remove("contextData");
+				/*ContextData contextData = null;
+				if (position.isDefined())
+					contextData = createContextData(jsonWithContext, collectionDbId, position.get());*/
 				RecordResource record = (RecordResource) Json.fromJson(json,
-						clazz);
+						clazz1);
 				int last = 0;
 				Sources source = Sources.UploadedByUser;
 				if ((record.getProvenance() != null)
@@ -344,6 +350,62 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
+	
+	private static void addContextData(ContextData contextData, ObjectId recordId) {
+		//TODO: remove contextData corresponding to the same colId-position
+		//add new contextData
+	}
+	
+	private static ContextData createContextData(JsonNode json, ObjectId colId, int position) {
+		ContextData contextData = new ContextData();
+		if (json.has("contextData")) {
+			JsonNode contextDataJson = json.get("contextData");
+			if (contextDataJson.isArray()) {
+				for (final JsonNode c: contextDataJson) {
+					if (c.has("contextDataType")) {
+						String contextDataTypeString = c.get("contextDataType").asText();
+						ContextDataType contextDataType = null;
+						if ((contextDataType = ContextDataType.valueOf(contextDataTypeString)) != null) {
+							ContextDataTarget target = null;							
+							if (c.has("target")) {
+								JsonNode targetNode = c.get("target");
+								if (targetNode.has("collectionId")) {
+									String collectionId = targetNode.get("collectionId").asText();
+									if (!colId.equals(new ObjectId(collectionId)))
+										continue;
+									if (targetNode.has("position")) {
+										int positionInJson = targetNode.get("position").asInt();
+										if (positionInJson != position)
+											continue;
+									}
+								}
+							}
+							else {
+								target = new ContextDataTarget();
+								target.setCollectionId(colId);
+								target.setPosition(position);
+							}
+							if (c.has("body")) {
+								JsonNode bodyNode = c.get("body");
+								Class<?> clazz;
+								try {
+									clazz = Class.forName("model.annotations."
+											+ contextDataTypeString);
+									ContextDataBody body = (ContextDataBody) Json.fromJson(bodyNode, clazz);
+									contextData.setBody(body);
+									contextData.setTarget(target);
+									contextData.setContextDataType(contextDataType);
+								} catch (ClassNotFoundException e) {
+									e.printStackTrace();
+								}	
+							}
+						}
+					}
+				}
+			}
+		}
+		return contextData;
+	}
 
 	private static void fillMissingThumbnailsAsync(ObjectId recordId) {
 		Function<ObjectId, Boolean> methodQuery = (ObjectId recId) -> {
@@ -371,7 +433,7 @@ public class WithResourceController extends Controller {
 		ParallelAPICall.createPromise(methodQuery, recordId);
 	}
 
-	public static void updateContextData(JsonNode contextAnnsJson,
+	/*public static void updateContextData(JsonNode contextAnnsJson,
 			WithResource record, ObjectId colId, ObjectId userId) {
 		List<ContextData> ContextData = getContextDataFromJson(contextAnnsJson);
 		for (ContextData contextAnn : ContextData) {
@@ -387,9 +449,9 @@ public class WithResourceController extends Controller {
 				}
 			}
 		}
-	}
+	}*/
 
-	public static List<ContextData> getContextDataFromJson(
+	/*public static List<ContextData> getContextDataFromJson(
 			JsonNode contextAnnsJson) {
 		ArrayList<ContextData> ContextData = new ArrayList<ContextData>();
 		if ((contextAnnsJson != null) && contextAnnsJson.isArray()) {
@@ -415,7 +477,7 @@ public class WithResourceController extends Controller {
 			}
 		}
 		return ContextData;
-	}
+	}*/
 
 	/**
 	 * @param id

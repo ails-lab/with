@@ -17,7 +17,13 @@
 package model.annotations;
 
 
+import javax.validation.constraints.NotNull;
+
+import model.resources.WithResource.WithResourceType;
+
 import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.NotBlank;
+import org.mongodb.morphia.annotations.Embedded;
 
 import utils.Serializer;
 
@@ -27,7 +33,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 public class ContextData<T1 extends ContextData.ContextDataBody> {
 	
 	public static enum ContextDataType {
-		ExhibitionAnnotation
+		ExhibitionData
 	}
 		
 	public static class ContextDataBody {
@@ -36,6 +42,16 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 	public ContextData() {
 		super();
 		this.target = new ContextDataTarget();
+		/*if (ContextDataType.valueOf(this.contextDataType.toString()) != null) {
+			System.out.println(contextDataType);
+			try {
+				Class<?> clazz = Class.forName("model.annotations."
+						+ contextDataType.toString());
+				this.body = (T1) clazz.newInstance();
+			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+		}*/
 	}
 	
 	public ContextData(ObjectId colId, int position) {
@@ -65,10 +81,14 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 		}
 	}
 	
+	@Embedded
 	T1 body;
+	@Embedded
 	ContextDataTarget target;
 	
-	ContextDataType contextDataType;
+	@NotNull
+	@NotBlank
+	ContextDataType contextDataType = ContextDataType.ExhibitionData;
 
 	public T1 getBody() {
 		return body;

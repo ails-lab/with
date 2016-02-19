@@ -67,7 +67,6 @@ public class DescriptiveData {
 	private MultiLiteral label;
 
 	// arbitrary length content description
-	@Embedded
 	private MultiLiteral description;
 
 	// an indexers dream !! They can be literal concepts and enriched easily
