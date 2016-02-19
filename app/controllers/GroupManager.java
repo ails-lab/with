@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import db.DAO.QueryOperator;
 import db.DB;
 import model.Collection;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.Organization;
@@ -60,6 +61,7 @@ import play.mvc.Result;
 import sources.core.HttpConnector;
 import utils.AccessManager;
 import utils.Tuple;
+import utils.AccessManager.Action;
 
 public class GroupManager extends Controller {
 
@@ -174,124 +176,112 @@ public class GroupManager extends Controller {
 	 * @return the updated group metadata
 	 */
 	public static Result editGroup(String groupId) {
-
 		ObjectNode json = (ObjectNode) request().body().asJson();
 		ObjectNode result = Json.newObject();
-
-		String adminId = AccessManager.effectiveUserId(session().get(
-				"effectiveUserIds"));
-		if ((adminId == null) || (adminId.equals(""))) {
-			result.put("error",
-					"Only creator of the group has the right to edit the group");
-			return forbidden(result);
-		}
-		try {
-			User admin = DB.getUserDAO().get(new ObjectId(adminId));
-			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			if (group == null) {
-				result.put("error", "Cannot retrieve group from database!");
-				return internalServerError(result);
-			}
-			if (!group.getCreator().equals(new ObjectId(adminId))
-					&& (!admin.isSuperUser())) {
-				result.put("error",
-						"Only creator of group has the right to edit the group");
-				return forbidden(result);
-			}
-			if (json.has("username")) {
-				if (json.get("username") != null) {
-					if (!group.getUsername().equals(
-							json.get("username").asText())) {
-						if (!uniqueGroupName(json.get("username").asText())) {
-							return badRequest("Group name already exists! Please specify another name.");
+		UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
+		if (group != null) {
+			ObjectId userId = new ObjectId(AccessManager
+					.effectiveUserIds(session().get("effectiveUserIds")).get(0));
+			User user = DB.getUserDAO().get(userId);
+			Set<ObjectId> groupAdmins = group.getAdminIds();
+			if (groupAdmins.contains(userId) || user.isSuperUser()) {
+				try {
+					if (json.has("username")) {
+						if (json.get("username") != null) {
+							if (!group.getUsername().equals(
+									json.get("username").asText())) {
+								if (!uniqueGroupName(json.get("username").asText())) {
+									return badRequest("Group name already exists! Please specify another name.");
+								}
+							}
 						}
 					}
-				}
-			}
-			// Update user page
-			if (json.has("page")
-					&& ((group instanceof Organization) || (group instanceof Project))) {
-				String address = null, city = null, country = null;
-				Page oldPage = null;
-				JsonNode newPage = json.get("page");
-				// Keep previous page fields
-				if (group instanceof Organization) {
-					oldPage = ((Organization) group).getPage();
-				} else if (group instanceof Project) {
-					oldPage = ((Project) group).getPage();
-				}
-				// Update Page
-				ObjectMapper pageObjectMapper = new ObjectMapper();
-				ObjectReader pageUpdator = pageObjectMapper
-						.readerForUpdating(oldPage);
-				Page page;
-				page = pageUpdator.readValue(newPage);
-				// In case that the location has changed we need to calculate
-				// the new coordinates
-				if (((json.get("page").get("address") != null)
-						|| (json.get("page").get("city") != null) || (json.get(
-						"page").get("country") != null))) {
-					address = page.getAddress();
-					city = page.getCity();
-					country = page.getCountry();
-					String fullAddress = ((address == null) ? "" : address)
-							+ "," + ((city == null) ? "" : city) + ","
-							+ ((country == null) ? "" : country);
-					fullAddress = fullAddress.replace(" ", "+");
-					try {
-						JsonNode response = HttpConnector
-								.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
-										+ fullAddress);
-						Point coordinates = GeoJson.point(
-								response.get("results").get(0).get("geometry")
-										.get("location").get("lat").asDouble(),
-								response.get("results").get(0).get("geometry")
-										.get("location").get("lng").asDouble());
-						page.setCoordinates(coordinates);
-					} catch (Exception e) {
-						log.error("Cannot update coordinates of group Page", e);
-						page.setCoordinates(null);
+					// Update user page
+					if (json.has("page")
+							&& ((group instanceof Organization) || (group instanceof Project))) {
+						String address = null, city = null, country = null;
+						Page oldPage = null;
+						JsonNode newPage = json.get("page");
+						// Keep previous page fields
+						if (group instanceof Organization) {
+							oldPage = ((Organization) group).getPage();
+						} else if (group instanceof Project) {
+							oldPage = ((Project) group).getPage();
+						}
+						// Update Page
+						ObjectMapper pageObjectMapper = new ObjectMapper();
+						ObjectReader pageUpdator = pageObjectMapper
+								.readerForUpdating(oldPage);
+						Page page;
+						page = pageUpdator.readValue(newPage);
+						// In case that the location has changed we need to calculate
+						// the new coordinates
+						if (((json.get("page").get("address") != null)
+								|| (json.get("page").get("city") != null) || (json.get(
+								"page").get("country") != null))) {
+							address = page.getAddress();
+							city = page.getCity();
+							country = page.getCountry();
+							String fullAddress = ((address == null) ? "" : address)
+									+ "," + ((city == null) ? "" : city) + ","
+									+ ((country == null) ? "" : country);
+							fullAddress = fullAddress.replace(" ", "+");
+							try {
+								JsonNode response = HttpConnector
+										.getURLContent("https://maps.googleapis.com/maps/api/geocode/json?address="
+												+ fullAddress);
+								Point coordinates = GeoJson.point(
+										response.get("results").get(0).get("geometry")
+												.get("location").get("lat").asDouble(),
+										response.get("results").get(0).get("geometry")
+												.get("location").get("lng").asDouble());
+								page.setCoordinates(coordinates);
+							} catch (Exception e) {
+								log.error("Cannot update coordinates of group Page", e);
+								page.setCoordinates(null);
+							}
+						}
+						json.remove("page");
+						if (group instanceof Organization) {
+							((Organization) group).setPage(page);
+						} else if (group instanceof Project) {
+							((Project) group).setPage(page);
+						}
 					}
-				}
-				json.remove("page");
-				if (group instanceof Organization) {
-					((Organization) group).setPage(page);
-				} else if (group instanceof Project) {
-					((Project) group).setPage(page);
-				}
-			}
-			UserGroup oldVersion = group;
-			ObjectMapper objectMapper = new ObjectMapper();
-			ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
-			UserGroup newVersion;
-			newVersion = updator.readValue(json);
-			Set<ConstraintViolation<UserGroup>> violations = Validation
-					.getValidator().validate(newVersion);
-			if (!violations.isEmpty()) {
-				ArrayNode properties = Json.newObject().arrayNode();
-				for (ConstraintViolation<UserGroup> cv : violations) {
-					properties.add(Json.parse("{\"" + cv.getPropertyPath()
-							+ "\":\"" + cv.getMessage() + "\"}"));
-				}
-				result.put("error", properties);
-				return badRequest(result);
-			}
+					UserGroup oldVersion = group;
+					ObjectMapper objectMapper = new ObjectMapper();
+					ObjectReader updator = objectMapper.readerForUpdating(oldVersion);
+					UserGroup newVersion;
+					newVersion = updator.readValue(json);
+					Set<ConstraintViolation<UserGroup>> violations = Validation
+							.getValidator().validate(newVersion);
+					if (!violations.isEmpty()) {
+						ArrayNode properties = Json.newObject().arrayNode();
+						for (ConstraintViolation<UserGroup> cv : violations) {
+							properties.add(Json.parse("{\"" + cv.getPropertyPath()
+									+ "\":\"" + cv.getMessage() + "\"}"));
+						}
+						result.put("error", properties);
+						return badRequest(result);
+					}
 
-			// update group on mongo
-			if (DB.getUserGroupDAO().makePermanent(newVersion) == null) {
-				log.error("Cannot save group to database!");
-				return internalServerError("Cannot save group to database!");
+					// update group on mongo
+					DB.getUserGroupDAO().makePermanent(newVersion);
+					return ok(Json.toJson(newVersion));
+				} catch (IOException e) {
+					e.printStackTrace();
+					return internalServerError(e.getMessage());
+				}
+			} else {
+				result.put("error",
+						"Only an admin of the group has the right to edit the group.");
+				return forbidden(result);
 			}
-			return ok(Json.toJson(newVersion));
-		} catch (
-
-		IOException e)
-
-		{
-			e.printStackTrace();
-			return internalServerError(e.getMessage());
 		}
-
+		else {
+			result.put("error", "Cannot retrieve group from database.");
+			return internalServerError(result);
+		}
 	}
 
 	/**
