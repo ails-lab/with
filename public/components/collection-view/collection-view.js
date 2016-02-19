@@ -147,14 +147,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			/*to calculate position find how many of these are already in citems
 			 * 
 			 */
-			var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
+			/*var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
 	            return item.dbId==self.dbId;
 			});
 			var positions=ko.utils.arrayFilter(self.collectedIn, function(item) {
 	            return item.collectionId==ko.dataFor(withcollection).id();
 			});
 			if(positions && positions[foundrec.length])
-			 self.position=positions[foundrec.length].position;
+			 self.position=positions[foundrec.length].position;*/
 			
 		};
 
@@ -363,7 +363,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.citems.push(e);
 		};
 
-		removeRecord = function (id,position, event) {
+		removeRecord = function (id, event) {
 			var $elem=$(event.target).parents(".item");
 			$.smkConfirm({
 				text: 'Are you sure you want to permanently remove this item?',
@@ -374,17 +374,19 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					$.ajax({
 						url: '/collection/' + self.id() + '/removeRecord?' + $.param({
 							"recId": id,
-							"position": position
+							"all": false
 						}),
 						type: 'DELETE',
 						contentType: "application/json",
 						data: JSON.stringify({
 							recId: id,
-							position: position
+							all: false
 						}),
 						success: function (data, textStatus, xhr) {
-							
-							self.citems.splice(position, 1);
+							var foundrec=ko.utils.arrayFirst(self.citems(), function(item) {
+					            return item.dbId==id;
+							});
+							self.citems.remove(foundrec);
 							if ($elem) {
 								self.$container.isotope('remove', $elem).isotope('layout');
 							}
@@ -471,7 +473,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					tile += '<div class="star">';
 				}
 				if (self.access() == "WRITE" || self.access() == "OWN")
-					tile += ' <span class="collect" title="remove"><i class="fa fa-trash-o fa-inverse" onclick="removeRecord(\'' + record.dbId + '\','+record.position+',event)"></i></span>';
+					tile += ' <span class="collect" title="remove"><i class="fa fa-trash-o fa-inverse" onclick="removeRecord(\'' + record.dbId + '\',event)"></i></span>';
 
 				if (!self.isFavorites()) { // Don't show the favorites icon when in favorites
 					if (record.externalId) {
