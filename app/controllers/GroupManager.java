@@ -23,12 +23,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.Optional;
 
 import javax.validation.ConstraintViolation;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
+import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 
@@ -38,9 +40,11 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import db.DAO.QueryOperator;
 import db.DB;
 import model.Collection;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.CollectionObject;
 import model.usersAndGroups.Organization;
 import model.usersAndGroups.Page;
 import model.usersAndGroups.Project;
@@ -377,26 +381,20 @@ public class GroupManager extends Controller {
 		UserGroup group = DB.getUserGroupDAO().getByName(name);
 		return getGroupJson.apply(group);
 	}
-
+	
 	public static ArrayNode groupsAsJSON(List<UserGroup> groups,
 			ObjectId restrictedById, boolean collectionHits) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
 			ObjectNode g = (ObjectNode) Json.toJson(group);
 			if (collectionHits) {
-				Query<Collection> q = DB.getCollectionDAO().createQuery();
-				CriteriaContainer[] criteria = new CriteriaContainer[3];
-				criteria[0] = DB.getCollectionDAO().createQuery()
-						.criteria("rights." + restrictedById.toHexString())
-						.greaterThanOrEq(1);
-				criteria[1] = DB.getCollectionDAO().createQuery()
-						.criteria("rights." + group.getDbId().toHexString())
-						.equal(3);
-				criteria[2] = DB.getCollectionDAO().createQuery()
-						.criteria("rights.isPublic").equal(true);
-				q.and(criteria);
-				Tuple<Integer, Integer> hits = DB.getCollectionDAO().getHits(q,
-						null);
+				Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
+				Criteria criteria1 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+				Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(group.getDbId(), Access.OWN), QueryOperator.EQ);
+				//Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+					//	.criteria("administrative.access.isPublic").equal(true);
+				q.and(criteria1, criteria2);
+				Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(q, Optional.ofNullable(null));
 				g.put("totalCollections", hits.x);
 				g.put("totalExhibitions", hits.y);
 			}
@@ -437,7 +435,6 @@ public class GroupManager extends Controller {
 		ObjectId parentId = new ObjectId(groupId);
 		GroupType type = GroupType.valueOf(capitalizeFirst(groupType));
 		childrenGroups = DB.getUserGroupDAO().findByParent(parentId, type);
-
 		if (childrenGroups != null) {
 			if (direct) {
 				return ok(groupsAsJSON(childrenGroups, new ObjectId(groupId),

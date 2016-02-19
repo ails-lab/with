@@ -271,7 +271,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	 * @param userAccess
 	 * @return
 	 */
-	protected Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess,
+	public Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess,
 			QueryOperator operator) {
 		int ordinal = userAccess.y.ordinal();
 		BasicDBObject accessQuery = new BasicDBObject();
