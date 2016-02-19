@@ -150,9 +150,9 @@ public class ElasticSearcher {
 		aggregatedFields.add("provider.all");
 		aggregatedFields.add("dataProvider.all");
 		aggregatedFields.add("media.type.all");
-		aggregatedFields.add("dccreator.all");
-		aggregatedFields.add("dccontributor.all");
-		aggregatedFields.add("dctermsspatial.all");
+		aggregatedFields.add("dccreator.default.all");
+		aggregatedFields.add("dccontributor.default.all");
+		aggregatedFields.add("dctermsspatial.default.all");
 		aggregatedFields.add("contentusage.all");
 		aggregatedFields.add("dates");
 		aggregatedFields.add("media.withRights.all");
@@ -178,7 +178,7 @@ public class ElasticSearcher {
 			search.addAggregation(agg);
 		}
 
-		System.out.println(search.toString());
+		//System.out.println(search.toString());
 		return search.execute().actionGet();
 	}
 
