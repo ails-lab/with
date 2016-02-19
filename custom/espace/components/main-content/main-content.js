@@ -7,33 +7,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	self.loading=ko.observable(false);
 	
 					
-	function FeaturedExhibit(data){
-	  var fe=this;
-	  fe.title=ko.observable();
-	  fe.description=ko.observable();
-	  fe.dbId=ko.observable(-1);
-	  fe.thumbs=ko.observableArray();
-	  fe.url=ko.observable();
-	  
-	  fe.load=function(data){
-	     fe.title(data.title);
-	     fe.dbId(data.dbId);
-	     fe.description(data.description);
-	     fe.url="#exhibitionview/"+fe.dbId();
-		  var i=0;
-		  var j=0;
-		  
-		  while (i<2 && j<data.firstEntries.length){
-			  if(data.firstEntries[j].thumbnailUrl){
-				  var thumb={url:data.firstEntries[j].thumbnailUrl,title:data.firstEntries[j].title};
-				  fe.thumbs.push(thumb);
-				  i++;}
-			    j++
-		  }}
-	  if(data != undefined) fe.load(data);
-	  
-	}		
-			
+		
 	function Collection(data) {
 		var self=this;
 		

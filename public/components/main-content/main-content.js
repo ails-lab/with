@@ -247,7 +247,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					
 			});
 		 
-		  var promise2 = self.getFeatured("56baf43ebb9ce84403c41ebf");
+		  var promise2 = self.getFeatured("56c5b99a5dbf0cc1914a2cd2");
           $.when(promise2).done(function (data) {
         	  
         	 
@@ -256,7 +256,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	 
         	  
           });
-          var promise3 = self.getFeatured("56bb2dadbb9ce8447369d09b");
+          var promise3 = self.getFeatured("56c5ca675dbf0cc1f74cfa63");
           $.when(promise3).done(function (data) {
         	  
         	 
