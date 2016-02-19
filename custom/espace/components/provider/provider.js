@@ -209,7 +209,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 			          self.address(self.address()+" "+data.page.city+ " "+ data.page.country);
 				      self.url(data.page.url);  
 			          self.logo(data.avatar && data.avatar.Square ?data.avatar.Square : '');
-			          self.hero(data.page && data.page.cover.Medium ? data.page.cover.Medium : null); 
+			          self.hero(data.page.cover && data.page.cover.Medium ? data.page.cover.Medium : null); 
 			          if(self.hero()){
 			        	  $(".profilebar > .wrap").css('background-image', 'url('+self.hero()+')');
 			          }

@@ -98,7 +98,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			// replace with group/descendantOrganizations/:projectId
 			self.loading(true);
 			$.ajax({
-				"url": "/group/descendantOrganizations/" + WITHApp.projectId,//TO BE ADDED WHEN fixed+"?collectionHits=true",
+				"url": "/group/descendantOrganizations/" + WITHApp.projectId+"?collectionHits=true",//TO BE ADDED WHEN fixed+"?collectionHits=true",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
