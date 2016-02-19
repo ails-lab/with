@@ -5,8 +5,25 @@
 			<h4>Give Access to Collection</h4>
 		</div>
 		<div class="modal-body row">
-			<form> <!-- data-bind="submit: ko.contextFor(mycollections).$data.shareCollection">-->
-				<div class="col-md-12">				  
+			<form>
+				<div class="col-md-12">		
+				 <div class="form-group form-inline">
+				    <div class="spec">
+				      <label>Is it public?</label>
+				      <!--  ko if: ko.contextFor(mycollections).$data.isPublicToEdit -->
+				     <div class="btn-group btn-toggle" id="publiccoll"> 
+					    <button class="btn btn-xs btn-primary active xxs" id="yes" data-bind="event: {click: ko.contextFor(mycollections).$data.isPublicToggle}" data-value="true">Yes</button>
+					    <button class="btn btn-xs btn-default xxs" id ="no" data-bind="event: {click: ko.contextFor(mycollections).$data.isPublicToggle}" data-value="false">No</button>
+					  </div>
+				    <!-- /ko -->
+				    <!-- ko else -->
+				    	<div class="btn-group btn-toggle" id="publiccoll"> 
+					    <button class="btn btn-xs btn-default xxs" id="yes" data-bind="event: {click: ko.contextFor(mycollections).$data.isPublicToggle}" data-value="true">Yes</button>
+					    <button class="btn btn-xs btn-primary active xxs" id ="no" data-bind="event: {click: ko.contextFor(mycollections).$data.isPublicToggle}" data-value="false">No</button>
+					  </div>
+				     <!-- /ko -->
+				    </div>
+				  </div>		  
 				  <div class="form-group form-inline">
 				    <div class="spec">
 				    <label for="firstName">Select user</label>

@@ -7,7 +7,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		    OWN : 2
 	}
 
-	
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 	    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context);
@@ -80,7 +79,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.myCollections = ko.mapping.fromJS([], mapping);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
-        self.isPublicToEdit = ko.observableArray([]);
+        self.isPublicToEdit = ko.observableArray(false);
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
         self.userGroupsToShare = ko.mapping.fromJS([], {});
@@ -258,6 +257,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
+			self.isPublicToEdit(collection.administrative.access.isPublic());
 			//$(".user-selection").devbridgeAutocomplete("hide");
 			$.ajax({
 				method     : "GET",
@@ -336,12 +336,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        var cancelBtn = $('<button type="button" class="btn btn-default">No</button>').appendTo(footer);
 		        cancelBtn.click(function() {
 		        	$("#myModal").modal('hide');
-		        	callback(false);
+		        	callback.call(this, false);
 		        });
 		        var confirmBtn = $('<button type="button" class="btn btn-primary">Yes</button>').appendTo(footer);
 		        confirmBtn.click(function() {
 		        	$("#myModal").modal('hide');
-		        	callback(true);
+		        	callback.call(this, true);
 		        });
 		    }
 			$("#myModal").modal('show');
@@ -372,7 +372,8 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-
+		
+		
 		self.shareCollection = function(userData, clickedRights) {
 			if (userData.category == "group" && clickedRights === "OWN") 
 					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
@@ -406,19 +407,21 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var newAccessOrdinal = accessLevels[clickedRights];
 			if (currentAccessOrdinal > newAccessOrdinal)
 				//downgrade
-				self.showInfoPopupTwoOptions("Downgrade of records in all collections?",
+				self.showInfoPopupTwoOptions("Downgrade records in all collections?",
 						"User " + userData.username + " may still have " + currentAccessRights + " access to records that you own and are members of that collection " +
 						", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
-						"in all collections they belong to?", function() {
-					self.callShareAPI(userData, clickedRights);
+						"in all collections they belong to?", function(response) {
+					self.callShareAPI(userData, clickedRights, response);
 				});
 			else 
 				self.callShareAPI(userData, clickedRights, false);
 		}
 		
+		self.callback = function(callback, par1, par2) {
+			callback.call(this, par1, par2);
+		}
+		
 		self.callShareAPI = function(userData, clickedRights, membersDowngrade) {
-			if (membersDowngrade == undefined ||  membersDowngrade == null)
-				membersDowngrade = false;
 			var username = userData.username;
 			var collId = self.myCollections()[self.index()].dbId();
 			var index = -1;
@@ -463,6 +466,42 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		}
 		
+		self.isPublicToggle = function() {
+		    var newIsPublic = !self.isPublicToEdit();
+		    if (!newIsPublic) {
+		    	self.showInfoPopupTwoOptions("Make records private in all collections?",
+						"Users may still be able to read records that you own and are members of that collection " +
+						", via other collections s/he has access to. Do you want to make these records private "  +
+						"in all collections they belong to?", function(response) {
+		    		self.editPublicity(self.index(), false, response);
+				});
+		    }
+		    else 
+		    	self.editPublicity(self.index(), true, false);
+		}
+		
+		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {
+			var collection = self.myCollections()[collIndex];
+			$.ajax({
+				"url": "/rights/"+collection.dbId()+"?isPublic="+isPublic+"&membersDowngrade="+membersDowngrade,
+				"method": "GET",
+				success: function(result) {
+					if (self.isPublicToEdit()) {
+				    	self.isPublicToEdit(false);
+				    }
+				    else {
+				    	self.isPublicToEdit(true);
+				    }
+					if (collection.myAccess() == "OWN") {
+						self.myCollections()[collIndex].administrative.access.isPublic(self.isPublicToEdit());
+					}
+					else {
+						self.sharedCollections()[collIndex].administrative.access.isPublic(self.isPublicToEdit());
+					}
+				}
+			});
+		}
+		
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
@@ -471,13 +510,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				self.collectionSet = "my";
 				self.titleToEdit(self.myCollections()[collIndex].title());
 		        self.descriptionToEdit(self.myCollections()[collIndex].description());
-		        self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
+		        //self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 			}
 			else {
 				self.collectionSet = "shared";
 				self.titleToEdit(self.sharedCollections()[collIndex].title());
 		        self.descriptionToEdit(self.sharedCollections()[collIndex].description());
-		        self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
+		        //self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
 			}
 			app.showPopup("edit-collection");
 		}
@@ -505,9 +544,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						{descriptiveData: { 
 							label: {default: [self.titleToEdit()]},
 							description: {default: [self.descriptionToEdit()]},
-						},
-						administrative: {
-							access: {isPublic: self.isPublicToEdit()}
 						}
 					}),
 					success: function(result){
@@ -539,7 +575,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			}
 			self.closePopup();
 		};
-
+		
 		self.updateCollectionData = function(collectionSet, collIndex) {
 			collectionSet[collIndex].descriptiveData.label.default = [self.titleToEdit()];
 			if (collectionSet[collIndex].descriptiveData.description == undefined) 
@@ -548,16 +584,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				collectionSet[collIndex].descriptiveData.description.default = [self.descriptionToEdit()];
 			collectionSet[collIndex].title(self.titleToEdit());
 			collectionSet[collIndex].description(self.descriptionToEdit());
-			collectionSet[collIndex].administrative.access.isPublic(self.isPublicToEdit());
 		}
-
-		self.privateToggle=function(e,arg){
-		    if (self.isPublicToEdit())
-		    	self.isPublicToEdit(false);
-		    else
-		    	self.isPublicToEdit(true);
-		}
-
 
 		self.reloadRecord = function(dbId, recordDataString) {
 			var recordData = JSON.parse(recordDataString);

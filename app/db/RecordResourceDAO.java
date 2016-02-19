@@ -372,6 +372,28 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.getWithCreator(), record.getAdministrative().getAccess()
 				.getIsPublic());
 	}
+	
+	public boolean mergeParentCollectionPublicity(ObjectId recordId,
+			boolean isPublic, ObjectId newColId) {
+		RecordResource record = this.getById(
+				recordId,
+				new ArrayList<String>(Arrays.asList("collectedIn",
+						"administrative.access.isPublic",
+						"administrative.withCreator")));
+		boolean mergedIsPublic = isPublic;
+		List<ObjectId> parentCollections = getParentCollections(recordId);
+		for (ObjectId colId : parentCollections) {
+			CollectionObject parentCollection = DB.getCollectionObjectDAO()
+					.getById(
+							colId,
+							new ArrayList<String>(Arrays
+									.asList("administrative.access")));
+			if (parentCollection.getAdministrative()
+					.getAccess().getIsPublic())
+				return true;
+		}
+		return mergedIsPublic;
+	}
 
 	public void updateMembersToMergedRights(ObjectId colId,
 			AccessEntry newAccess, List<ObjectId> effectiveIds) {
@@ -389,6 +411,22 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				WithAccess mergedAccess = mergeParentCollectionRights(
 						r.getDbId(), colId, colAccess);
 				updateField(r.getDbId(), "administrative.access", mergedAccess);
+			}
+		}
+	}
+	
+	public void updateMembersToMergedPublicity(ObjectId colId,
+			boolean isPublic, List<ObjectId> effectiveIds) {
+		ArrayList<String> retrievedFields = new ArrayList<String>(
+				Arrays.asList("_id", "administrative.access"));
+		List<RecordResource> memberRecords = getByCollection(colId,
+				retrievedFields);
+		for (RecordResource r : memberRecords) {
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
+					Action.DELETE, r.getDbId())) {
+				boolean mergedPublicity = mergeParentCollectionPublicity(
+						r.getDbId(), isPublic, colId);
+				updateField(r.getDbId(), "administrative.access", mergedPublicity);
 			}
 		}
 	}
@@ -430,8 +468,20 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				changeAccess(r.getDbId(), userId, newAccess);
 		}
 	}
+	
+	public void updateMembersToNewPublicity(ObjectId colId, 
+			boolean isPublic, List<ObjectId> effectiveIds) {
+		ArrayList<String> retrievedFields = new ArrayList<String>(
+				Arrays.asList("_id"));
+		List<RecordResource> memberRecords = getByCollection(colId,
+				retrievedFields);
+		for (RecordResource r : memberRecords) {
+			if (DB.getRecordResourceDAO().hasAccess(effectiveIds,
+					Action.DELETE, r.getDbId()))
+				DB.getRecordResourceDAO().updateField(r.getDbId(), "administrative.access.isPublic", isPublic);
+		}
+	}
 
-	// TODO: have to test
 	public void updatePosition(ObjectId resourceId, ObjectId colId,
 			int oldPosition, int newPosition) {
 		UpdateOperations<RecordResource> updateOps = this
