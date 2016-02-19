@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -331,7 +332,7 @@ public class WithResourceController extends Controller {
 					DB.getRecordResourceDAO().appendToCollection(recordId,
 							collectionDbId, owns);
 				}
-				fillMissingThumbnails(recordId);
+				fillMissingThumbnailsAsync(recordId);
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
@@ -344,24 +345,30 @@ public class WithResourceController extends Controller {
 		}
 	}
 
-	private static void fillMissingThumbnails(ObjectId recordId) {
-		RecordResource record = DB.getRecordResourceDAO().getById(recordId,
-				new ArrayList<String>(Arrays.asList("media")));
-		int i = 0;
-		for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
-				.getMedia()) {
-			if (embeddedMedia.containsKey(MediaVersion.Original)
-					&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)) {
-				String originalUrl = embeddedMedia.get(MediaVersion.Original)
-						.getUrl();
-				MediaObject original = MediaController.downloadMedia(
-						originalUrl, MediaVersion.Original);
-				MediaObject thumbnail = MediaController.makeThumbnail(original);
-				DB.getRecordResourceDAO().updateMedia(recordId, i,
-						MediaVersion.Thumbnail, new EmbeddedMediaObject(thumbnail));
+	private static void fillMissingThumbnailsAsync(ObjectId recordId) {
+		Function<ObjectId, Boolean> methodQuery = (ObjectId recId) -> {
+			RecordResource record = DB.getRecordResourceDAO().getById(recId,
+					new ArrayList<String>(Arrays.asList("media")));
+			int i = 0;
+			for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
+					.getMedia()) {
+				if (embeddedMedia.containsKey(MediaVersion.Original)
+						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)) {
+					String originalUrl = embeddedMedia.get(
+							MediaVersion.Original).getUrl();
+					MediaObject original = MediaController.downloadMedia(
+							originalUrl, MediaVersion.Original);
+					MediaObject thumbnail = MediaController
+							.makeThumbnail(original);
+					DB.getRecordResourceDAO().updateMedia(recId, i,
+							MediaVersion.Thumbnail,
+							new EmbeddedMediaObject(thumbnail));
+				}
+				i++;
 			}
-			i++;
-		}
+			return true;
+		};
+		ParallelAPICall.createPromise(methodQuery, recordId);
 	}
 
 	public static void updateContextData(JsonNode contextAnnsJson,
