@@ -87,19 +87,18 @@ public class MediaController extends Controller {
 			} else {
 				mediaVersion = MediaVersion.Original;
 			}
-			media = DB.getMediaObjectDAO().getByUrlAndVersion(url,
-					mediaVersion);
+			media = DB.getMediaObjectDAO()
+					.getByUrlAndVersion(url, mediaVersion);
 			if (media != null) {
-				return ok(media.getMediaBytes())
-						.as(media.getMimeType().toString());
+				return ok(media.getMediaBytes()).as(
+						media.getMimeType().toString());
 			}
 			// Cache media
 			downloadMediaAsync(url, mediaVersion);
 			return redirect(url);
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
-			return internalServerError(
-					"Cannot retrieve media document from database");
+			return internalServerError("Cannot retrieve media document from database");
 		}
 	}
 
@@ -121,6 +120,10 @@ public class MediaController extends Controller {
 	public static MediaObject downloadMedia(String url, MediaVersion version) {
 		try {
 			MediaObject media = new MediaObject();
+			if ((media = DB.getMediaObjectDAO()
+					.getByUrlAndVersion(url, version)) != null)
+				return media;
+			media = new MediaObject();
 			parseMediaURL(url, media);
 			String g = "::" + HttpConnector.getURLContentAsFile(url);
 			Logger.info(g);
@@ -151,8 +154,8 @@ public class MediaController extends Controller {
 			thumbnail.setMediaVersion(MediaVersion.Thumbnail);
 			thumbnail.setParentId(media.getDbId());
 			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			thumbnail.setUrl(
-					"/media/" + thumbnail.getDbId().toString() + "?file=true");
+			thumbnail.setUrl("/media/" + thumbnail.getDbId().toString()
+					+ "?file=true");
 			DB.getMediaObjectDAO().makePermanent(thumbnail);
 			return thumbnail;
 		} catch (Exception e) {
@@ -171,8 +174,8 @@ public class MediaController extends Controller {
 	 */
 	public static Result createMedia(boolean filedata) {
 
-		List<String> userIds = AccessManager
-				.effectiveUserIds(session().get("effectiveUserIds"));
+		List<String> userIds = AccessManager.effectiveUserIds(session().get(
+				"effectiveUserIds"));
 		// TODO: uncomment this after done testing
 		// if (userIds.isEmpty())
 		// return forbidden();
@@ -245,8 +248,8 @@ public class MediaController extends Controller {
 			try {
 
 				// image = HttpConnector.getContent(formData.get("url")[0]);
-				File x = HttpConnector
-						.getURLContentAsFile(jsonn.get("url").asText());
+				File x = HttpConnector.getURLContentAsFile(jsonn.get("url")
+						.asText());
 				result = storeMedia(med, x);
 
 				return ok(result);
@@ -352,8 +355,8 @@ public class MediaController extends Controller {
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
-		MediaType mime = MediaType
-				.parse(json.get("mimetype").asText().toLowerCase());
+		MediaType mime = MediaType.parse(json.get("mimetype").asText()
+				.toLowerCase());
 
 		med.setMimeType(mime);
 
@@ -425,8 +428,8 @@ public class MediaController extends Controller {
 
 		tiny.setUrl("/media/" + tiny.getDbId().toString() + "?file=true");
 		square.setUrl("/media/" + square.getDbId().toString() + "?file=true");
-		thumbnail.setUrl(
-				"/media/" + thumbnail.getDbId().toString() + "?file=true");
+		thumbnail.setUrl("/media/" + thumbnail.getDbId().toString()
+				+ "?file=true");
 		medium.setUrl("/media/" + medium.getDbId().toString() + "?file=true");
 
 		DB.getMediaObjectDAO().makePermanent(tiny);
@@ -594,8 +597,8 @@ public class MediaController extends Controller {
 				builder.addPart("mediafile", fileBody);
 				aFile.setEntity(builder.build());
 				CloseableHttpResponse response = hc.execute(aFile);
-				String jsonResponse = EntityUtils.toString(response.getEntity(),
-						"UTF8");
+				String jsonResponse = EntityUtils.toString(
+						response.getEntity(), "UTF8");
 				// String id =
 				// JsonPath.parse(jsonResponse).read("$['results'][0]['mediaId']");
 				resp = Json.parse(jsonResponse);
@@ -717,8 +720,7 @@ public class MediaController extends Controller {
 			media = DB.getMediaObjectDAO().findById(new ObjectId(mediaId));
 		} catch (Exception e) {
 			log.error("Cannot retrieve media document from database", e);
-			return internalServerError(
-					"Cannot retrieve media document from database");
+			return internalServerError("Cannot retrieve media document from database");
 		}
 
 		if (file) {

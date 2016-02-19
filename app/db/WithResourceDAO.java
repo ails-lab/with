@@ -250,6 +250,15 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		this.updateFirst(q, updateOps);
 	}
 
+	public void updateMedia(ObjectId id, int index, MediaVersion version,
+			EmbeddedMediaObject media) {
+		Query<T> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<T> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		updateOps.set("provenance." + index + "." + version, media);
+		this.updateFirst(q, updateOps);
+	}
+
 	public boolean isPublic(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
 		q.field("administrative.isPublic").equal(true);
@@ -431,9 +440,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				.retrievedFields(true, "usage.likes");
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
-	
-	public List<Integer> getPositionsInCollection(ObjectId id, ObjectId collectionId) {
-		T record = this.getById(id, new ArrayList<String>(Arrays.asList("collectedIn")));
+
+	public List<Integer> getPositionsInCollection(ObjectId id,
+			ObjectId collectionId) {
+		T record = this.getById(id,
+				new ArrayList<String>(Arrays.asList("collectedIn")));
 		List<Integer> positions = new ArrayList<Integer>();
 		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
 			if (ci.getCollectionId().equals(collectionId))
