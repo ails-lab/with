@@ -390,7 +390,7 @@ public class GroupManager extends Controller {
 			if (collectionHits) {
 				Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery();
 				Criteria criteria1 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(restrictedById, Access.READ), QueryOperator.GTE);
-				Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(group.getDbId(), Access.OWN), QueryOperator.EQ);
+				Criteria criteria2 = DB.getCollectionObjectDAO().formAccessLevelQuery(new Tuple(group.getDbId(), Access.WRITE), QueryOperator.GTE);
 				//Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
 					//	.criteria("administrative.access.isPublic").equal(true);
 				q.and(criteria1, criteria2);
