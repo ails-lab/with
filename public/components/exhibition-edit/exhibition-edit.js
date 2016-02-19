@@ -21,7 +21,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		this.dbId = collectionData.dbId;
 		this.title = ko.observable(app.findByLang(collectionData.descriptiveData.label));
 		this.description = ko.observable(app.findByLang(collectionData.descriptiveData.description));
-		// this.thumbnail = ko.observable();
 		this.itemCount = collectionData.administrative.entryCount;
 		this.isPublic = collectionData.administrative.access.isPublic;
 		this.created = collectionData.administrative.created;
@@ -219,17 +218,14 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						self.firstEntries = data.records;
 						self.loadingInitialItemsCount = data.entryCount;
 						self.firstEntries.map(function (record) {
-							record.additionalText = ko.pureComputed(function() {
-								return app.findByLang(record.contextData.body.text);
-							});
-							record.videoUrl = ko.pureComputed(function() {
-								return app.findByLang(record.contextData.body.videoUrl);
+							record.containsAudio = ko.pureComputed(function() {
+								return record.contextData.body.audioUrl() !== "";
 							});
 							record.containsVideo = ko.pureComputed(function() {
-								return false;	// TODO: Check if it contains video
+								return record.contextData.body.videoUrl() !== "";
 							});
 							record.containsText = ko.pureComputed(function() {
-								return false;	// TODO: Check if it contains text
+								return record.contextData.body.text.default[0]() !== "";
 							});
 						});
 
@@ -462,10 +458,28 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						//clone it
 						var newItem = JSON.parse(JSON.stringify(_draggedItem));
-						newItem.additionalText = ko.observable('');
-						newItem.containsText = ko.observable(false); //add the observables here
-						newItem.containsVideo = ko.observable(false);
-						newItem.videoUrl = ko.observable('');
+						newItem.contextData = {
+							body: {
+								text: {
+									default: [ko.observable('')]
+								},
+								videoUrl: ko.observable(''),
+								audioUrl: ko.observable('')
+							}
+						};
+						newItem.containsAudio = ko.pureComputed(function() {
+							return newItem.contextData.body.audioUrl() !== "";
+						});
+						newItem.containsVideo = ko.pureComputed(function() {
+							return newItem.contextData.body.videoUrl() !== "";
+						});
+						newItem.containsText = ko.pureComputed(function() {
+							return newItem.contextData.body.text.default[0]() !== "";
+						});
+						// newItem.additionalText = ko.observable('');
+						// newItem.containsText = ko.observable(false); //add the observables here
+						// newItem.containsVideo = ko.observable(false);
+						// newItem.videoUrl = ko.observable('');
 						var arrayCollection = self.collectionItemsArray;
 						//dont do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {

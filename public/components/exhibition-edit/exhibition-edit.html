@@ -41,11 +41,11 @@
 
 			<!--  ko if: $data.containsVideo-->
 			<div class="embed-responsive embed-responsive-4by3">
-				<iframe width="560" height="315" frameborder="0" allowfullscreen data-bind="attr: { src: videoUrl }"></iframe>
+				<iframe width="560" height="315" frameborder="0" allowfullscreen data-bind="attr: { src: contextData.body.videoUrl }"></iframe>
 			</div>
 			<!-- /ko -->
 			<!--  ko if: $data.containsText-->
-			<div class="Text" data-bind="text: additionalText"></div>
+			<div class="Text" data-bind="text: contextData.body.text.default[0]"></div>
 			<!-- /ko -->
 		</div>
 		<!-- /ko -->

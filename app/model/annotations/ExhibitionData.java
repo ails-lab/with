@@ -22,23 +22,23 @@ import model.basicDataTypes.Literal;
 import model.annotations.ContextData.ContextDataBody;
 
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
-	
+
 	public ExhibitionData() {
 		super();
 		this.body = new ExhibitionAnnotationBody();
 		this.contextDataType = ContextDataType.valueOf(this.getClass().getSimpleName());
 	}
-	
+
 	public static class ExhibitionAnnotationBody extends ContextDataBody {
-		Literal exhibitionDescription;
+		Literal text;
 		String audioUrl;
 		String videoUrl;
-		
-		public Literal getExhibitionDescription() {
-			return exhibitionDescription;
+
+		public Literal getText() {
+			return text;
 		}
-		public void setExhibitionDescription(Literal exhibitionDescription) {
-			this.exhibitionDescription = exhibitionDescription;
+		public void setText(Literal text) {
+			this.text = text;
 		}
 		public String getAudioUrl() {
 			return audioUrl;
