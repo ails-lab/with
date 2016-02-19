@@ -125,11 +125,9 @@ public class MediaController extends Controller {
 				return media;
 			media = new MediaObject();
 			parseMediaURL(url, media);
-			String g = "::" + HttpConnector.getURLContentAsFile(url);
-			Logger.info(g);
+			Logger.info("Downloading " + url);
 			File img = HttpConnector.getURLContentAsFile(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
-			// editMediaAfterChecker(media, parsed);
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
