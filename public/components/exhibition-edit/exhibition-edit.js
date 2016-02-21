@@ -219,13 +219,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						self.loadingInitialItemsCount = data.entryCount;
 						self.firstEntries.map(function (record) {
 							record.containsAudio = ko.pureComputed(function() {
-								return record.contextData.body.audioUrl() !== "";
+								return record.contextData[0].body.audioUrl() !== "";
 							});
 							record.containsVideo = ko.pureComputed(function() {
-								return record.contextData.body.videoUrl() !== "";
+								return record.contextData[0].body.videoUrl() !== "";
 							});
 							record.containsText = ko.pureComputed(function() {
-								return record.contextData.body.text.default[0]() !== "";
+								return record.contextData[0].body.text.default() !== "";
 							});
 						});
 
@@ -458,23 +458,24 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						//clone it
 						var newItem = JSON.parse(JSON.stringify(_draggedItem));
-						newItem.contextData = {
+						newItem.contextData = [{
+							contextDataType: "ExhibitionData",
 							body: {
 								text: {
-									default: [ko.observable('')]
+									default: ko.observable('')
 								},
 								videoUrl: ko.observable(''),
 								audioUrl: ko.observable('')
 							}
-						};
+						}];
 						newItem.containsAudio = ko.pureComputed(function() {
-							return newItem.contextData.body.audioUrl() !== "";
+							return newItem.contextData[0].body.audioUrl() !== "";
 						});
 						newItem.containsVideo = ko.pureComputed(function() {
-							return newItem.contextData.body.videoUrl() !== "";
+							return newItem.contextData[0].body.videoUrl() !== "";
 						});
 						newItem.containsText = ko.pureComputed(function() {
-							return newItem.contextData.body.text.default[0]() !== "";
+							return newItem.contextData[0].body.text.default() !== "";
 						});
 						// newItem.additionalText = ko.observable('');
 						// newItem.containsText = ko.observable(false); //add the observables here

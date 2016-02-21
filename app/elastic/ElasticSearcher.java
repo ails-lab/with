@@ -422,7 +422,6 @@ public class ElasticSearcher {
 									.prepareSuggest(name)
 									.addSuggestion(suggestion);
 
-		System.out.println(suggestion.toString());
 		return sugg;
 	}
 

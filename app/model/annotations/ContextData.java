@@ -23,43 +23,36 @@ import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
 import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.mongodb.morphia.annotations.Embedded;
 
+import utils.Deserializer;
 import utils.Serializer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 
 public class ContextData<T1 extends ContextData.ContextDataBody> {
 	
 	public static enum ContextDataType {
 		ExhibitionData
 	}
-		
+	
 	public static class ContextDataBody {
 	}
 	
 	public ContextData() {
-		super();
 		this.target = new ContextDataTarget();
-		/*if (ContextDataType.valueOf(this.contextDataType.toString()) != null) {
-			System.out.println(contextDataType);
-			try {
-				Class<?> clazz = Class.forName("model.annotations."
-						+ contextDataType.toString());
-				this.body = (T1) clazz.newInstance();
-			} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}*/
+		//default
+		this.contextDataType = ContextDataType.ExhibitionData;
 	}
 	
 	public ContextData(ObjectId colId, int position) {
-		super();
 		this.target = new ContextDataTarget();
 		this.target.collectionId = colId;
 		this.target.position = position;
-		this.body = (T1) new ContextDataBody();
+		this.contextDataType = ContextDataType.ExhibitionData;
+		//this.body = (T1) new ContextDataBody();
 	}
 	
 	public static class ContextDataTarget {		
@@ -81,14 +74,10 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 		}
 	}
 	
-	@Embedded
 	T1 body;
-	@Embedded
 	ContextDataTarget target;
 	
-	@NotNull
-	@NotBlank
-	ContextDataType contextDataType = ContextDataType.ExhibitionData;
+	ContextDataType contextDataType;
 
 	public T1 getBody() {
 		return body;

@@ -60,7 +60,6 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 					String id = Utils.readAttr(item, "id", true);
 					String name = Utils.readAttr(item, "name", true);
 					licences.put(id, name);
-					System.out.println(id + "-->" + name);
 					licencesId.put(name, id);
 				}
 			} catch (Exception e) {

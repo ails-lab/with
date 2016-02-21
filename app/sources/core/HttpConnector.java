@@ -259,7 +259,6 @@ public static <T> T postContent(String url, String parameter, String paramName) 
 					.setQueryParameter(paramName, parameter)
 					.post("content").map(new Function<WSResponse, T>() {
 				public T apply(WSResponse response) {
-//					System.out.println(response.getBody());
 					T json = (T) response.asJson();
 					long ftime = (System.currentTimeMillis() - time)/1000;
 					Logger.debug("waited "+ftime+" sec for: " + url);

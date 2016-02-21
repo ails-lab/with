@@ -29,16 +29,20 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateResults;
 
+import play.libs.Json;
 import scala.util.control.Exception;
 import sources.core.ParallelAPICall;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
 
 import elastic.ElasticEraser;
 import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ExhibitionData;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
@@ -194,6 +198,17 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				}
 				index += 1;
 			}
+			List<ContextData> contextData = resource.getContextData();
+			for (ContextData c : contextData) {
+				ContextDataTarget target = c.getTarget();
+				if (target.getCollectionId().equals(colId)) {
+					int pos = target.getPosition();
+					if (pos >= position)
+						update.accept("contextData." + index + ".target.position",
+								updateOps);
+				}
+				index += 1;
+			}
 			this.update(
 					this.createQuery().field("_id").equal(resource.getDbId()),
 					updateOps);
@@ -232,6 +247,18 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				}
 				index += 1;
 			}
+			List<ContextData> contextData = resource.getContextData();
+			for (ContextData c : contextData) {
+				ContextDataTarget target = c.getTarget();
+				if (target.getCollectionId().equals(colId)) {
+					int pos = target.getPosition();
+					if ((pos >= startPosition) && (pos <= stopPosition))
+						update.accept("contextData." + index + ".target.position",
+								updateOps);
+				}
+				index += 1;
+			}
+
 			this.update(
 					this.createQuery().field("_id").equal(resource.getDbId()),
 					updateOps);
@@ -280,6 +307,21 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BiConsumer<String, UpdateOperations> update = (String field,
 				UpdateOperations updateOpsPar) -> updateOpsPar.inc(field);
 		shift(colId, startPosition, stopPosition, update);
+	}
+	
+	public void updateContextData(ContextData contextData) {
+		ObjectId colId = contextData.getTarget().getCollectionId();
+		int position = contextData.getTarget().getPosition();
+		Query<RecordResource> q = this.createQuery().field("collectedIn")
+				.hasThisElement(new CollectionInfo(colId, position));
+		UpdateOperations<RecordResource> recordUpdate1 = this
+				.createUpdateOperations();
+		recordUpdate1.removeAll("contextData", new ContextData(colId, position));
+		this.update(q, recordUpdate1);
+		UpdateOperations<RecordResource> recordUpdate2 = this
+				.createUpdateOperations();
+		recordUpdate2.add("contextData", contextData);
+		this.update(q, recordUpdate2);
 	}
 
 	public void updateRecordUsageCollectedAndRights(CollectionInfo colInfo,
@@ -524,7 +566,23 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				.hasThisElement(new CollectionInfo(colId, position));
 		return this.findOne(q);
 	}
-
+	
+	public RecordResource getByCollectionAndPosition(ObjectId colId,
+			int position, List<String> retrievedFields) {
+		Query<RecordResource> q = this.createQuery().retrievedFields(true,
+				retrievedFields.toArray(new String[retrievedFields.size()]));
+		q.field("collectedIn")
+				.hasThisElement(new CollectionInfo(colId, position));
+		return this.findOne(q);
+	}
+	
+	public boolean existsInCollectionAndPosition(ObjectId colId,
+			int position) {
+		Query<RecordResource> q = this.createQuery().field("collectedIn")
+				.hasThisElement(new CollectionInfo(colId, position));
+		return this.find(q.limit(1)).asList().size() == 0? false : true;
+	}
+	
 	public void editRecord(String root, ObjectId dbId, JsonNode json) {
 		Query<RecordResource> q = this.createQuery().field("_id").equal(dbId);
 		UpdateOperations<RecordResource> updateOps = this

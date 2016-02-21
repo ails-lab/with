@@ -27,6 +27,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
+import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -249,11 +250,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	public UpdateResults update(final Query<E> q, final UpdateOperations<E> ops) {
 
 		UpdateResults results = super.update(q, ops);
-
-		String id = q.getQueryObject().get("_id").toString();
-		Query<E> q1 = createQuery().field("_id").equal(new ObjectId(id));
-		E doc = findOne(q1);
-
+		//ObjectId id = (ObjectId) results.getWriteResult().getUpsertedId();
+		E doc = findOne(q);
 		String type = defineInstanceOf(doc);
 		try {
 			if(type != null)  {
@@ -270,7 +268,6 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 			log.error(e.getMessage(), e);
 			return null;
 		}
-
 		return results;
 	}
 

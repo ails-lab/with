@@ -665,7 +665,6 @@ public class CollectionObjectController extends WithResourceController {
 								e.setContent(newContent);
 							}
 						}
-						System.out.println("record " + e.getDescriptiveData().getLabel().get(Language.DEFAULT));
 						recordsList.add(Json.toJson(e));
 					}
 					position += 1;

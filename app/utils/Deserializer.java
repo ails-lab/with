@@ -27,6 +27,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import model.ExhibitionRecord;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.Literal;
 import model.basicDataTypes.LiteralOrResource;
@@ -40,14 +44,18 @@ import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Point;
 
+import play.libs.Json;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.TextNode;
+import com.hp.hpl.jena.tdb.store.IntegerNode;
 
 import db.DB;
 
@@ -121,6 +129,42 @@ public class Deserializer {
 			}
 			return rights;
 		}
+	}
+	
+	public static class ContextDataDeserializer extends
+	JsonDeserializer<List<ContextData>> {
+
+	@Override
+	public List<ContextData> deserialize(JsonParser contextString,
+			DeserializationContext arg1) throws IOException,
+			JsonProcessingException {
+		TreeNode contextDataJson = contextString.readValueAsTree();
+		List<ContextData> contextDataList = new ArrayList<ContextData>();
+		if (contextDataJson != null && contextDataJson.isArray()) {
+			for (int i = 0; i < contextDataJson.size(); i++) {
+				TreeNode c = contextDataJson.get(i);
+				TreeNode contextDataTypeNode = c.get("contextDataType");
+				ContextData contextData = new ContextData();
+				if (contextDataTypeNode != null && contextDataTypeNode.isValueNode()) {
+					String contextDataTypeString = ((TextNode) contextDataTypeNode).asText();
+					ContextDataType contextDataType = null;
+					if ((contextDataType = ContextDataType.valueOf(contextDataTypeString)) != null) {
+						Class<?> clazz;
+						try {
+							clazz = Class.forName("model.annotations."
+									+ contextDataTypeString);
+							contextData = (ContextData) Json.fromJson((JsonNode) c, clazz);
+							contextDataList.add(contextData);
+						} catch (ClassNotFoundException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+		return contextDataList;
+	}
+			
 	}
 
 	public static class MultiLiteralDesiarilizer extends

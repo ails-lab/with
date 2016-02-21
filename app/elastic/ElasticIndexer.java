@@ -59,7 +59,6 @@ public class ElasticIndexer {
 	 * If the document is not indexed the method return "null"
 	 */
 	public static IndexResponse index(String type, ObjectId dbId, Map<String, Object> doc) {
-
 		IndexResponse response = null;
 		try {
 			response = Elastic.getTransportClient().prepareIndex(
