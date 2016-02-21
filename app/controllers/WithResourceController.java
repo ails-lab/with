@@ -505,10 +505,6 @@ public class WithResourceController extends Controller {
 				for (int p : positions) {
 					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
 							collectionDbId, p);
-					// TODO: if position undefined, remove from all Positions.
-					// shifting other records will be harder in that case though.
-					// modify record's access: the record gets the most liberal
-					// rights of the collections it belongs to after the removal
 					DB.getRecordResourceDAO()
 							.updateRecordRightsUponRemovalFromCollection(
 									recordDbId, collectionDbId);
