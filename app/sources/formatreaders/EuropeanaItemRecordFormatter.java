@@ -81,6 +81,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("proxies[0].dctermsSpatial","places[.*].about","places[.*].about","places[.*].prefLabel"));
 		rec.enterContext("proxies[0]");
 		
+		model.setAltLabels(rec.getMultiLiteralValue("dctermsAlternative"));
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
