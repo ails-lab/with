@@ -475,11 +475,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				if (self.access() == "WRITE" || self.access() == "OWN")
 					tile += ' <span class="collect" title="remove"><i class="fa fa-trash-o fa-inverse" onclick="removeRecord(\'' + record.dbId + '\',event)"></i></span>';
 
-				if (!self.isFavorites()) { // Don't show the favorites icon when in favorites
-					if (record.externalId) {
+				if (!self.isFavorites() && record.externalId ) { // Don't show the favorites icon when in favorites
+					
 						tile += '<span class="fa fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">' + '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>' + '</span>';
-					}
+					
 				}
+				else{tile += '<span class="fa fa-fw" title="add to favorites" style="visibility:hidden">' + '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>' + '</span>';}
 
 				tile += '<span class="delete" title="collect" onclick="collect(\'' + record.dbId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></div>';
 
