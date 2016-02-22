@@ -3,7 +3,7 @@
     "info": {
         "version": "v0.4",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''http://''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us!\n"
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE: 19 Feb, 2016\n"
     },
     "paths": {
         "/api/search": {
@@ -491,78 +491,10 @@
                 }
             }
         },
-        "/collection/featured": {
-            "get": {
-                "parameters": [
-                    {
-                        "name": "groupOrUserName",
-                        "in": "query",
-                        "description": "The name of the group or user.",
-                        "type": "string"
-                    },
-                    {
-                        "name": "isExhibition",
-                        "in": "query",
-                        "description": "If true returns only exhibitions, if false only collections and if unspecified returns both.",
-                        "type": "boolean"
-                    },
-                    {
-                        "name": "offset",
-                        "in": "query",
-                        "default": 0,
-                        "description": "Offset",
-                        "type": "integer"
-                    },
-                    {
-                        "name": "countPerType",
-                        "in": "query",
-                        "default": 10,
-                        "description": "Count (default 10)",
-                        "type": "integer"
-                    }
-                ],
-                "summary": "Get featured collections.",
-                "description": "This call returns a list of featured collections of a user or group. If ```isExhibition``` is left blank, this call will return both collections and exhibitions up to number specified by the count parameter, i.e. the results array will have twice the size of the count. ",
-                "tags": [
-                    "Collection"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "totalCollections": {
-                                    "type": "integer"
-                                },
-                                "totalExhibitions": {
-                                    "type": "integer"
-                                },
-                                "collectionsOrExhibitions": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/Collection"
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (user or group cannot be found)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/collection/favorites": {
             "get": {
-                "summary": "Get a collection of favorite records.",
-                "description": "This call returns a collection with the favorite records of the logged in user. The call has no parameters and is pretty straightforward.",
+                "summary": "Get a list of your favorite records.",
+                "description": "This call returns an array that containts the external record ids of all the favorited records for the logged in user.",
                 "tags": [
                     "Collection"
                 ],
@@ -570,19 +502,9 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "properties": {
-                                "totalCollections": {
-                                    "type": "integer"
-                                },
-                                "totalExhibitions": {
-                                    "type": "integer"
-                                },
-                                "collectionsOrExhibitions": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/Collection"
-                                    }
-                                }
+                            "type": "array",
+                            "items": {
+                                "type": "string"
                             }
                         }
                     },
@@ -610,7 +532,7 @@
                 }
             ],
             "get": {
-                "description": "Retrieves a list of all the users that have access to this collection and their access rights.",
+                "description": "Retrieves an array with all the users that have access to this collection and their access rights.",
                 "summary": "Retrieve all users that have access to a collection.",
                 "tags": [
                     "Collection",
@@ -735,7 +657,7 @@
         "/collection/liked": {
             "post": {
                 "summary": "Add a record to favourites.",
-                "description": "This call will add a collection/record to the favourites of the logged in user???",
+                "description": "This call will add a record to the favourites of the logged in user. For an already existing record, you just need a simple body with a \"dbid\" field and the id of the record. See ```collection/{id}/addRecord``` for more details, the same apply here as well.",
                 "tags": [
                     "Collection",
                     "Record"
@@ -2724,8 +2646,8 @@
         },
         "/collection/56a10eaa590b1916a881a342/addRecord": {
             "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database.",
-                "summary": "Add a record to a collection.",
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This tests adding public records to a collection.",
+                "summary": "Add a *PUBLIC* record to a collection.",
                 "tags": [
                     "Test calls"
                 ],
@@ -2743,7 +2665,7 @@
                         "name": "body",
                         "description": "Record JSON schema",
                         "schema": {
-                            "$ref": "#/definitions/SampleInternalRecord"
+                            "$ref": "#/definitions/SamplePUBLICRecord"
                         }
                     }
                 ],
@@ -2751,7 +2673,11 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/InternalRecord"
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "400": {
@@ -3561,6 +3487,146 @@
             }
         },
         "SampleInternalRecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "type": "object",
+            "required": [
+                "title",
+                "position"
+            ],
+            "properties": {
+                "resourceType": {
+                    "type": "string",
+                    "default": "CulturalObject"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleExternalCollection"
+                    }
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
+                    }
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/SampleDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleProvenance"
+                    }
+                }
+            }
+        },
+        "SampleEUROPEANARecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "type": "object",
+            "required": [
+                "title",
+                "position"
+            ],
+            "properties": {
+                "resourceType": {
+                    "type": "string",
+                    "default": "CulturalObject"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleExternalCollection"
+                    }
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
+                    }
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/SampleDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleProvenance"
+                    }
+                }
+            }
+        },
+        "SampleMINTRecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "type": "object",
+            "required": [
+                "title",
+                "position"
+            ],
+            "properties": {
+                "resourceType": {
+                    "type": "string",
+                    "default": "CulturalObject"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleExternalCollection"
+                    }
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
+                    }
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/SampleDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleProvenance"
+                    }
+                }
+            }
+        },
+        "SampleMEDIARecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "type": "object",
+            "required": [
+                "title",
+                "position"
+            ],
+            "properties": {
+                "resourceType": {
+                    "type": "string",
+                    "default": "CulturalObject"
+                },
+                "collectedIn": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleExternalCollection"
+                    }
+                },
+                "media": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
+                    }
+                },
+                "descriptiveData": {
+                    "$ref": "#/definitions/SampleDescriptiveData"
+                },
+                "provenance": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SampleProvenance"
+                    }
+                }
+            }
+        },
+        "SamplePUBLICRecord": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "type": "object",
             "required": [
