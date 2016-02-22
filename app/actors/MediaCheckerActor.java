@@ -23,6 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.Quality;
+import model.MediaObject;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
@@ -33,23 +37,22 @@ import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
 import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.util.EntityUtils;
 import org.bson.types.ObjectId;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.net.MediaType;
-
-import akka.actor.UntypedActor;
-import db.DB;
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.Quality;
-import model.MediaObject;
 import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
+import akka.actor.UntypedActor;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.net.MediaType;
+
+import db.DB;
 
 /**
  *
@@ -83,13 +86,17 @@ public class MediaCheckerActor extends UntypedActor {
 		CloseableHttpResponse response = null;
 		try {
 			ObjectId mediaObjectId = message.mediaObjectId;
-			MediaObject mediaObject = DB.getMediaObjectDAO()
-					.findById(mediaObjectId);
+			MediaObject mediaObject = DB.getMediaObjectDAO().findById(
+					mediaObjectId);
 			httpPost = new HttpPost(
 					"http://mediachecker.image.ntua.gr/api/extractmetadata");
 			if (mediaObject.getMediaBytes() != null) {
-				HttpEntity mpEntity = MultipartEntityBuilder.create()
-						.addBinaryBody("mediafile", mediaObject.getMediaBytes())
+				HttpEntity mpEntity = MultipartEntityBuilder
+						.create()
+						.addPart(
+								"mediafile",
+								new ByteArrayBody(mediaObject.getMediaBytes(),
+										"mediafile"))
 						.setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build();
 				ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
 				mpEntity.writeTo(baoStream);
@@ -105,8 +112,8 @@ public class MediaCheckerActor extends UntypedActor {
 			hc.execute(httpPost, new FutureCallback<HttpResponse>() {
 				public void completed(final HttpResponse response) {
 					try {
-						String jsonResponse = EntityUtils
-								.toString(response.getEntity(), "UTF8");
+						String jsonResponse = EntityUtils.toString(
+								response.getEntity(), "UTF8");
 						log.info(jsonResponse);
 						JsonNode resp = Json.parse(jsonResponse);
 						editMediaAfterChecker(mediaObject, resp);
@@ -155,8 +162,8 @@ public class MediaCheckerActor extends UntypedActor {
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
-		MediaType mime = MediaType
-				.parse(json.get("mimetype").asText().toLowerCase());
+		MediaType mime = MediaType.parse(json.get("mimetype").asText()
+				.toLowerCase());
 		med.setMimeType(mime);
 		med.setHeight(json.get("height").asInt());
 		med.setWidth(json.get("width").asInt());
@@ -195,6 +202,7 @@ public class MediaCheckerActor extends UntypedActor {
 	public void onReceive(Object message) throws Exception {
 		if (message instanceof MediaCheckMessage) {
 			if (parallelRequests.get() > 0) {
+				parallelRequests.getAndDecrement();
 				executeRequest((MediaCheckMessage) message);
 			} else
 				synchronized (pendingRequests) {
