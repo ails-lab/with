@@ -124,7 +124,6 @@ public class MediaController extends Controller {
 					.getByUrlAndVersion(url, version)) != null)
 				return media;
 			media = new MediaObject();
-			parseMediaURL(url, media);
 			Logger.info("Downloading " + url);
 			File img = HttpConnector.getURLContentAsFile(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
@@ -133,6 +132,10 @@ public class MediaController extends Controller {
 			if (version != null) {
 				media.setMediaVersion(version);
 				DB.getMediaObjectDAO().makePermanent(media);
+				MediaCheckMessage mcm = new MediaCheckMessage(media);
+				ActorSelection api = Akka.system().actorSelection(
+						"user/mediaChecker");
+				api.tell(mcm, ActorRef.noSender());
 			} else {
 				throw new Exception("Media version is null");
 			}
@@ -169,7 +172,7 @@ public class MediaController extends Controller {
 	 *
 	 * @param fileData
 	 * @return
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	public static Result createMedia(boolean filedata) throws Exception {
 
@@ -301,7 +304,7 @@ public class MediaController extends Controller {
 		med.setMimeType(mime);
 		med.setHeight(json.get("height").asInt());
 		med.setWidth(json.get("width").asInt());
-	// TODO: palette is component color?
+		// TODO: palette is component color?
 		if (json.hasNonNull("palette")) {
 			ArrayList<String> rights = new ArrayList<String>();
 			JsonNode paletteArray = json.get("palette");
@@ -311,7 +314,7 @@ public class MediaController extends Controller {
 				}
 			}
 		}
-	med.setColorSpace(json.get("colorspace").asText());
+		med.setColorSpace(json.get("colorspace").asText());
 		med.setOrientation();
 		// TODO : fix this naive quality enumeration, for now just for testing!
 		long size = med.getSize();
@@ -465,7 +468,7 @@ public class MediaController extends Controller {
 		MediaObject mthumb = new MediaObject();
 		mthumb.setDbId(null);
 		mthumb.setMediaBytes(thumbByte);
-		mthumb.setMimeType(med.getMimeType());
+		mthumb.setMimeType(MediaType.JPEG);
 		mthumb.setWidth(ithumb.getWidth(null));
 		mthumb.setHeight(ithumb.getHeight(null));
 
