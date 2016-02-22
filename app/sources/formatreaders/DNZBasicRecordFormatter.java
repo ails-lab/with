@@ -76,7 +76,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
-		model.setDccreator(rec.getMultiLiteralOrResourceValue("contributor"));
+		model.setDccontributor(rec.getMultiLiteralOrResourceValue("contributor"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dctype"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("category"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("collection[0]"), rec.getStringValue("landing_url"),null));
