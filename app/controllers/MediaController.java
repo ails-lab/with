@@ -260,7 +260,7 @@ public class MediaController extends Controller {
 		// TODO: VERY IMPORTANT TO FIND A WAY AROUND THIS AND THE PROMISE!
 		med.setType(WithMediaType.IMAGE);
 		// TODO: THIS IS A TEMPORARY FIX TO A MAYBE BIG BUG!
-		med.setMimeType(MediaType.parse(Files.probeContentType(x.toPath())));
+		// med.setMimeType(MediaType.parse(Files.probeContentType(x.toPath())));
 		byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(x));
 		med.setMediaBytes(mediaBytes);
 		DB.getMediaObjectDAO().makePermanent(med);
