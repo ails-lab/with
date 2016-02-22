@@ -17,13 +17,18 @@
 package sources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject;
 import model.ExternalBasicRecord;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import play.libs.Json;
 import sources.core.CommonQuery;
@@ -162,7 +167,14 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RIJ, record.toString()));
 				CulturalRecordFormatter f = new RijksmuseumItemRecordFormatter();
 				// TODO make another reader
-				String json = Json.toJson(f .readObjectFrom(record)).toString();
+				CulturalObject res = f .readObjectFrom(record);
+				if (fullRecord!=null && Utils.hasInfo(fullRecord.getMedia())){
+					EmbeddedMediaObject object = ((HashMap<MediaVersion, EmbeddedMediaObject>)fullRecord.getMedia().get(0)).get(MediaVersion.Thumbnail);
+					res.addMedia(MediaVersion.Thumbnail, object);
+				}
+					
+				String json = Json.toJson(res).toString();
+				System.out.println(json);
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = HttpConnector.getURLContentAsXML(
