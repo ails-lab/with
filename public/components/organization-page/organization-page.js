@@ -642,8 +642,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					self.closeWindow();
 				},
 				error: function (request, status, error) {
-					// TODO: Display error message
-					console.log(error);
+					var err = JSON.parse(request.responseText);
+					self.username.setError(err.error);
+					self.username.isModified(true);
+					self.validationModel.errors.showAllMessages();
 				}
 			});
 		};
@@ -663,7 +665,11 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 					});
 				},
 				error: function (request, status, error) {
-					// TODO: Display error message
+					var err = JSON.parse(request.responseText);
+					$.smkAlert({
+						text: err.error,
+						type: 'danger'
+					});
 					console.log(error);
 				}
 			});
