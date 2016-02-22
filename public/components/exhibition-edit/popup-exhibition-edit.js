@@ -1,16 +1,23 @@
 define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, template, app) {
 
-	function updateRecord(dbId, text, videoUrl) {
+	function updateRecord(dbId, text, videoUrl, colId, position) {
 
 		var jsonData = {};
 		jsonData.exhibitionRecord = {
-			"annotation": text,
-			"videoUrl": videoUrl
+			"contextDataType": "ExhibitionData",
+			"target": {
+				"collectionId": colId,
+				"position": position
+			},
+			"body" : {
+				"text": text,
+				"videoUrl": videoUrl
+			}
 		};
 		jsonData = JSON.stringify(jsonData);
 		//alert(jsonData);
 		return $.ajax({
-			"url": "/record/" + dbId,
+			"url": "/record/contextData	",
 			"method": "put",
 			"contentType": "application/json",
 			"data": jsonData,
@@ -38,23 +45,27 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 		self.exhibitionItem = {};
 		self.exhibitionItemIsSet = ko.observable(false);
 		self.isUpdating = ko.observable(false);
+		self.colId = '';
+		self.position = -1;
 
-		editItem = function (exhibitionItem, editMode) {
+		editItem = function (exhibitionItem, colId, position, editMode) {
 			//alert(JSON.stringify(exhibitionItem));
+			self.colId = colId;
+			self.position = position;
 			self.exhibitionItem = exhibitionItem;
 			self.exhibitionItemIsSet(true);
 			self.videoIsSet(false);
-			self.setUpPopUp(exhibitionItem, editMode);
+			self.setUpPopUp(exhibitionItem, colId, position, editMode);
 			$('#myModal').modal('show');
 		};
 
-		self.setUpPopUp = function (exhibitionItem, popUpMode) {
+		self.setUpPopUp = function (exhibitionItem, colId, position, popUpMode) {
 			console.log(popUpMode);
 			self.popUpMode = popUpMode;
 			console.log('mode is video : ' + self.popUpMode === 'PopUpVideoMode');
 			if (self.popUpMode === 'PopUpVideoMode') {
 				self.modeIsVideo(true);
-				self.videoUrl(exhibitionItem.videoUrl());
+				self.videoUrl(exhibitionItem.contextData[0].body.videoUrl());
 				self.title('Add a youtube video');
 				self.placeholder('Enter youtube video url');
 				if (self.exhibitionItem.containsVideo()) {
@@ -69,7 +80,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 				self.modeIsVideo(false);
 				self.title('Add text');
 				self.placeholder('');
-				self.textInput(exhibitionItem.additionalText());
+				self.textInput(exhibitionItem.contextData[0].body.text());
 				self.primaryButtonTitle('save');
 				if (self.exhibitionItem.containsText()) {
 					self.cancelButtonTitle('delete');
@@ -109,7 +120,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 
 		self.savePopUpVideoMode = function () {
 			self.isUpdating(true);
-			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl());
+			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl(), self.colId, self.position);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.containsVideo(true);
 				self.exhibitionItem.videoUrl(self.videoUrl());
@@ -129,7 +140,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 
 		self.deletePopUpVideoMode = function () {
 			self.isUpdating(true);
-			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), '');
+			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), '', self.colId, self.position);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.containsVideo(false);
 				self.exhibitionItem.videoUrl('');
@@ -143,7 +154,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 
 		//right button actions Text
 		self.savePopUpTextMode = function () {
-			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl());
+			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl(), self.colId, self.position);
 			self.isUpdating(true);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.additionalText(self.textInput());
@@ -163,7 +174,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 
 		self.deletePopUpTextMode = function () {
 			self.isUpdating(true);
-			var promise = updateRecord(self.exhibitionItem.dbId, '', self.videoUrl());
+			var promise = updateRecord(self.exhibitionItem.dbId, '', self.videoUrl(), self.colId, self.position);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.additionalText('');
 				self.exhibitionItem.containsText(false);

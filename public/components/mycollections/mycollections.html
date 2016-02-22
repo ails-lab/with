@@ -52,10 +52,10 @@
 					 </div>
 					 </div>
 					 <!--  ko if: administrative.entryCount() > 0 -->
+					     <div data-bind="click: $parent.loadCollectionOrExhibition">
 						 <div class="col-xs-6  col-sm-6  col-md-8">
 					 	 <div class="row-fluid">
 					  	 <div class="imcontainer">
-					  	  <div data-bind="click: $parent.loadCollectionOrExhibition">
 					  	 	<!-- ko foreach: media -->
 					  	 	  <!-- ko if: $data.thumbnailUrl-->
 					  	 		<div class="coll_figure"><img  data-bind="attr: {src: $data.thumbnailUrl}">
@@ -134,20 +134,20 @@
 					 </div>
 					 </div>
 					 <!--  ko if: administrative.entryCount() > 0 -->
+					     <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">
 						 <div class="col-xs-6  col-sm-6  col-md-8">
 					 	 <div class="row-fluid">
 					  	 <div class="imcontainer">
-					  	  <a data-bind="attr: {href: 'index.html#collectionview/'+dbId()}">
 					  	 	<!-- ko foreach: media -->
 					  	 	  <!-- ko if: thumbnailUrl -->
 					  	 		<div class="coll_figure"><img  data-bind="attr: {src: thumbnailUrl}">
 					  	 		 </div>
 					  	 	 <!-- /ko -->
 					  	 	 <!-- /ko -->
-					  	 	 </a>
+					  	  </div>
 					  	 </div>
 					  	 </div>
-					  	 </div>
+					  	  </a>
 					  <!-- /ko -->
 					  <!-- ko else -->
 					  <!-- ko if: myAccess()=="WRITE" -->

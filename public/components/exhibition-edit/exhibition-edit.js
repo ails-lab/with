@@ -351,11 +351,11 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.showPopUpVideo = function (data) {
-			editItem(data, 'PopUpVideoMode');
+			editItem(data, self.dbId(), 'PopUpVideoMode');
 		};
 
 		self.showPopUpText = function (data) {
-			editItem(data, 'PopUpTextMode');
+			editItem(data, self.dbId(), 'PopUpTextMode');
 		};
 
 		//custom binding

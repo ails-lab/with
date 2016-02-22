@@ -623,7 +623,6 @@ public class CollectionObjectController extends WithResourceController {
 				List<String> retrievedFields = new ArrayList<String>(
 						Arrays.asList("descriptiveData.label",
 								"descriptiveData.description", "media", "collectedIn"));
-				// bytes of thumbnail???
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);
@@ -641,7 +640,7 @@ public class CollectionObjectController extends WithResourceController {
 								.getDbId())));
 					} else {
 						// filter out all context annotations that do not refer
-						// to this collection
+						// to this collection-position
 						List<ContextData> contextAnns = e.getContextData();
 						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
 						for (ContextData ca : contextAnns) {

@@ -537,7 +537,6 @@ public class WithResourceController extends Controller {
 	}
 
 	// TODO: update collection's media
-	//TODO: update contextData
 	public static Result moveRecordInCollection(String id, String recordId,
 			int oldPosition, int newPosition) {
 		ObjectNode result = Json.newObject();
@@ -563,6 +562,8 @@ public class WithResourceController extends Controller {
 						collectionDbId, oldPosition, newPosition);
 				DB.getCollectionObjectDAO().updateField(collectionDbId,
 						"administrative.lastModified", new Date());
+				DB.getCollectionObjectDAO().removeCollectionMedia(collectionDbId, oldPosition);
+				DB.getCollectionObjectDAO().addCollectionMedia(collectionDbId, recordDbId, newPosition);
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}

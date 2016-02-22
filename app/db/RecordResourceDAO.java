@@ -529,14 +529,32 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public void updatePosition(ObjectId resourceId, ObjectId colId,
 			int oldPosition, int newPosition) {
-		UpdateOperations<RecordResource> updateOps = this
-				.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id")
 				.equal(resourceId);
-		updateOps.add("collectedIn", new CollectionInfo(colId, newPosition));
-		updateOps.removeAll("collectedIn", new CollectionInfo(colId,
+		UpdateOperations<RecordResource> updateOps1 = this
+				.createUpdateOperations();
+		updateOps1.removeAll("collectedIn", new CollectionInfo(colId,
 				oldPosition));
-		this.update(q, updateOps);
+		UpdateOperations<RecordResource> updateOps2 = this
+				.createUpdateOperations();
+		updateOps2.add("collectedIn", new CollectionInfo(colId, newPosition));
+		RecordResource record = DB.getRecordResourceDAO().getById(resourceId, 
+				Arrays.asList("contextData"));
+		if (record != null) {
+			List<ContextData> contextData = record.getContextData();
+			for (ContextData c: contextData) {
+				ContextDataTarget target = c.getTarget();
+				if (target.getCollectionId().equals(colId) &&
+						target.getPosition() == oldPosition) {
+					updateOps1.removeAll("contextData", c);
+					c.getTarget().setPosition(newPosition);
+					updateOps2.add("contextData", c);
+					break;
+				}
+			}
+		}
+		this.update(q, updateOps1);
+		this.update(q, updateOps2);
 	}
 
 	public void removeFromCollection(ObjectId recordId, ObjectId colId,
