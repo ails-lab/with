@@ -22,25 +22,28 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 		self.tinyUrl = ko.observable();
 
 		self.rights = ko.observableArray([
-			'Public("Attribution Alone")',
-			'Restricted("Restricted")',
-			'Permission("Permission")',
-			'Modify("Allow re-use and modifications")',
-			'Commercial("Allow re-use for commercial")',
-			'Creative_Commercial_Modify("use for commercial purposes modify, adapt, or build upon")',
-			'Creative_Not_Commercial("NOT Comercial")',
-			'Creative_Not_Modify("NOT Modify")',
-			'Creative_Not_Commercial_Modify("not modify, adapt, or build upon, not for commercial purposes")',
-			'Creative_SA("share alike")',
-			'Creative_BY("use by attribution")',
-			'Creative("Allow re-use")',
-			'RR("Rights Reserved")',
-			'RRPA("Rights Reserved - Paid Access")',
-			'RRRA("Rights Reserved - Restricted Access")',
-			'RRFA("Rights Reserved - Free Access")',
-			'UNKNOWN("Unknown")'
+			'Public ("Attribution Alone")',
+			'Restricted ("Restricted")',
+			'Permission ("Permission")',
+			'Modify ("Allow re-use and modifications")',
+			'Commercial ("Allow re-use for commercial")',
+			'Creative_Commercial_Modify ("use for commercial purposes modify, adapt, or build upon")',
+			'Creative_Not_Commercial ("NOT Comercial")',
+			'Creative_Not_Modify ("NOT Modify")',
+			'Creative_Not_Commercial_Modify ("not modify, adapt, or build upon, not for commercial purposes")',
+			'Creative_SA ("share alike")',
+			'Creative_BY ("use by attribution")',
+			'Creative ("Allow re-use")',
+			'RR ("Rights Reserved")',
+			'RRPA ("Rights Reserved - Paid Access")',
+			'RRRA ("Rights Reserved - Restricted Access")',
+			'RRFA ("Rights Reserved - Free Access")',
+			'UNKNOWN ("Unknown")'
 		]);
-		self.withRights = ko.observable('UNKNOWN("Unknown")');
+		self.withRights = ko.observable('UNKNOWN ("Unknown")');
+		self.enumRights = ko.pureComputed(function() {
+			return self.withRights().substring(0, self.withRights().indexOf(' '));
+		});
 
 		$('#imageupload').fileupload({
 			type: "POST",
@@ -58,11 +61,11 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 					};
 					reader.readAsDataURL(data.files[0]);
 				}
-				self.originalUrl(data.result.results[0].original);
-				self.mediumUrl(data.result.results[0].medium);
-				self.thumbnailUrl(data.result.results[0].thumbnail);
-				self.squareUrl(data.result.results[0].square);
-				self.tinyUrl(data.result.results[0].tiny);
+				self.originalUrl(data.result.original);
+				self.mediumUrl(data.result.medium);
+				self.thumbnailUrl(data.result.thumbnail);
+				self.squareUrl(data.result.square);
+				self.tinyUrl(data.result.tiny);
 			},
 			error: function (e, data) {
 				console.log(e);
@@ -77,33 +80,33 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 
 		self.uploadImage = function () {
 			var data = {
-				provenance: {
+				provenance: [{
 					provider: 'UploadedByUser'
-				},
+				}],
 				descriptiveData: {
 					label: self.title(),
 					description: self.description()
 				},
 				media: [{
-					original: {
+					Original: {
 						url: this.originalUrl(),
-						withRights: this.withRights()
+						withRights: this.enumRights()
 					},
-					medium: {
+					Medium: {
 						url: this.mediumUrl(),
-						withRights: this.withRights()
+						withRights: this.enumRights()
 					},
-					thumbnail: {
+					Thumbnail: {
 						url: this.thumbnailUrl(),
-						withRights: this.withRights()
+						withRights: this.enumRights()
 					},
-					square: {
+					Square: {
 						url: this.squareUrl(),
-						withRights: this.withRights()
+						withRights: this.enumRights()
 					},
-					tiny: {
+					Tiny: {
 						url: this.tinyUrl(),
-						withRights: this.withRights()
+						withRights: this.enumRights()
 					}
 				}]
 			};
