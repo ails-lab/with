@@ -2,17 +2,17 @@
 
  <!-- menu bar-->
       <nav class="titlebar double">
-        <div class="container">
+        <div class="container" id="withcollection" >
           <!-- type-->
           <div class="info">
-            <div class="type">Collection<span class="counter" data-bind="text: itemCount() + ' ITEMS'">ITEMS</span></div>
+            <div class="type">Collection<span class="counter" data-bind="text: entryCount() + ' ITEMS'"></span></div>
           </div>
           <!-- meta-->
           <div class="meta">
             <!-- title-->
-            <div class="title"><a href="javascript:void(null);" data-placement="bottom" data-toggle="popover" data-trigger="focus" data-bind=" attr: { 'data-content': desc() }">i</a><!-- ko text:collname --><!-- /ko --></div>
+            <div class="title"><a href="javascript:void(null);" data-placement="bottom" data-toggle="popover" data-trigger="focus" data-bind=" attr: { 'data-content': description() }">i</a><!-- ko text:title() --><!-- /ko --></div>
             <!-- owner-->
-            <div class="owner"><a title="#"><span class="name" data-bind="text: owner"></span><img src="img/user.png" alt="" class="profilepicture"></a></div>
+            <div class="owner"><a title="#"><span class="name" data-bind="text: creator()"></span><img src="img/user.png" alt="" class="profilepicture"></a></div>
           
    	  </div>
         </div>

@@ -84,7 +84,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	self.numvalues([]);
     	var filterfound=ko.utils.arrayFirst(ko.contextFor(withsearchid).$data.filters(), function(item) {
     		
-		    if(item.filterID==="year"){
+		    if(item.filterID==="dates"){
 		    	var years=item.suggestedvalues;
 		    	
 		       /*get rid of crap data , values larger than 3000l, or non numeric values*/	
@@ -187,10 +187,10 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	}
     	else{
     		var id=event.item.id.substring(0,event.item.id.indexOf("#"));
-    		
+    		id=id.replace(/\_/g, '.');
     		var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
         	  if(item!=undefined)	{
-    		    if(item.filterID===id && id!="year"){
+    		    if(item.filterID===id && id!="dates"){
     		    	var index=$.inArray(event.item.label, item.values);
     		    	if(index>-1){
     		    		item.values.splice(index,1);
@@ -203,7 +203,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		    		
     		    	}
     		    	
-    		    }else if(item.filterID===id && id=="year"){
+    		    }else if(item.filterID===id && id=="dates"){
     		    	self.filters()[0].filters.splice(self.filters()[0].filters.indexOf(item),1);
     		    }
         	   }
@@ -252,7 +252,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	var exists=false;
     	var filterfound=ko.utils.arrayFirst(self.filters()[0].filters, function(item) {
     		
-    		    if(item.filterID===id && id!="year"){
+    		    if(item.filterID===id && id!="dates"){
     		    	if($.inArray(newvalue, item.values)>-1){
     		    		//value is already there 
     		    		exists=true;
@@ -266,7 +266,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		        
     		    }
     		    
-    		    else if(item.filterID===id && id=="year"){
+    		    else if(item.filterID===id && id=="dates"){
     		    	//break new value to two values if it is range
     		    	var val1=newvalue;
     		    	var val2="";
@@ -324,9 +324,9 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		$("#facet_tags").tagsinput('add',{ id: id+'#0', label: newvalue });
         	var obj={};
     		obj['filterID']=id;
-    		if(id!="year")
+    		if(id!="dates")
     		  obj['values']=new Array(newvalue);
-    		else if(id=="year"){
+    		else if(id=="dates"){
     			var val2="";
 		    	if(newvalue.indexOf("-">0)){
 		    		val1=newvalue.substring(0,newvalue.indexOf("-")-1).trim().replace(' AD','');
@@ -355,7 +355,13 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     self.setFilters=function(){
     	self.visiblePanel(false);
     	ko.contextFor(withsearchid).$data.filterselection([]);
-    	ko.contextFor(withsearchid).$data.filterselection().push.apply(ko.contextFor(withsearchid).$data.filterselection(),self.filters()[0].filters);
+    	var searchfacets=[];
+    	for(var i=0;i<self.filters()[0].filters.length; i++){
+    		 var filter=self.filters()[0].filters[i];
+    		 filter.filterID=filter.filterID.replace(/\_/g, '.');
+	         searchfacets.push(filter);
+    	}
+    	ko.contextFor(withsearchid).$data.filterselection().push.apply(ko.contextFor(withsearchid).$data.filterselection(),searchfacets);
     	ko.contextFor(withsearchid).$data.filtersearch();
     }
     
