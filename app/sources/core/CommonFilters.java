@@ -19,11 +19,11 @@ package sources.core;
 public enum CommonFilters {
 		TYPE("media.type","Media Type"),
 		PROVIDER("provider","Provider"),
-		CREATOR("dccreator","Creator"),
+		CREATOR("dccreator.default","Creator"),
 		RIGHTS("media.withRights","Media Rights"),
-		COUNTRY("dctermsspatial","Spatial"),
+		COUNTRY("dctermsspatial.default","Spatial"),
 		YEAR("dates","Dates"),
-		CONTRIBUTOR("dccontributor","Contributor"),
+		CONTRIBUTOR("dccontributor.default","Contributor"),
 		DATA_PROVIDER("dataProvider","Data Provider");
 
 		private final String text;
