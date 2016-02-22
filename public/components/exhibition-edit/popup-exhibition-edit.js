@@ -3,19 +3,18 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 	function updateRecord(dbId, text, videoUrl, colId, position) {
 
 		var jsonData = {};
-		jsonData.exhibitionRecord = {
+		jsonData = {
 			"contextDataType": "ExhibitionData",
 			"target": {
 				"collectionId": colId,
 				"position": position
 			},
 			"body" : {
-				"text": text,
+				"text": {"default": text},
 				"videoUrl": videoUrl
 			}
 		};
 		jsonData = JSON.stringify(jsonData);
-		//alert(jsonData);
 		return $.ajax({
 			"url": "/record/contextData	",
 			"method": "put",
@@ -60,12 +59,10 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 		};
 
 		self.setUpPopUp = function (exhibitionItem, colId, position, popUpMode) {
-			console.log(popUpMode);
 			self.popUpMode = popUpMode;
-			console.log('mode is video : ' + self.popUpMode === 'PopUpVideoMode');
 			if (self.popUpMode === 'PopUpVideoMode') {
 				self.modeIsVideo(true);
-				self.videoUrl(exhibitionItem.contextData[0].body.videoUrl());
+				self.videoUrl(exhibitionItem.contextData()[0].body.videoUrl());
 				self.title('Add a youtube video');
 				self.placeholder('Enter youtube video url');
 				if (self.exhibitionItem.containsVideo()) {
@@ -80,7 +77,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 				self.modeIsVideo(false);
 				self.title('Add text');
 				self.placeholder('');
-				self.textInput(exhibitionItem.contextData[0].body.text());
+				self.textInput(exhibitionItem.contextData()[0].body.text.default());
 				self.primaryButtonTitle('save');
 				if (self.exhibitionItem.containsText()) {
 					self.cancelButtonTitle('delete');
@@ -122,10 +119,8 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 			self.isUpdating(true);
 			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl(), self.colId, self.position);
 			$.when(promise).done(function (data) {
-				self.exhibitionItem.containsVideo(true);
-				self.exhibitionItem.videoUrl(self.videoUrl());
+				self.exhibitionItem.contextData()[0].body.videoUrl(self.videoUrl());
 			}).fail(function (data) {
-
 				alert('video insertion failed');
 			}).always(function (data) {
 				self.isUpdating(false);
@@ -142,8 +137,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 			self.isUpdating(true);
 			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), '', self.colId, self.position);
 			$.when(promise).done(function (data) {
-				self.exhibitionItem.containsVideo(false);
-				self.exhibitionItem.videoUrl('');
+				self.exhibitionItem.contextData()[0].body.videoUrl('');
 			}).fail(function (data) {
 				alert('deletion failed');
 			}).always(function (data) {
@@ -157,8 +151,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl(), self.colId, self.position);
 			self.isUpdating(true);
 			$.when(promise).done(function (data) {
-				self.exhibitionItem.additionalText(self.textInput());
-				self.exhibitionItem.containsText(true);
+				self.exhibitionItem.contextData()[0].body.text.default(self.textInput());
 			}).fail(function (data) {
 				alert('text insertion failed');
 			}).always(function (data) {
@@ -176,8 +169,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 			self.isUpdating(true);
 			var promise = updateRecord(self.exhibitionItem.dbId, '', self.videoUrl(), self.colId, self.position);
 			$.when(promise).done(function (data) {
-				self.exhibitionItem.additionalText('');
-				self.exhibitionItem.containsText(false);
+				self.exhibitionItem.contextData()[0].body.text.default('');
 			}).fail(function (data) {
 				alert('deletion failed');
 			}).always(function (data) {
