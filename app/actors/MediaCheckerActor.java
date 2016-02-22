@@ -167,9 +167,11 @@ public class MediaCheckerActor extends UntypedActor {
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
-		MediaType mime = MediaType.parse(json.get("mimetype").asText()
-				.toLowerCase());
-		med.setMimeType(mime);
+		if (json.get("mimetype") != null) {
+			MediaType mime = MediaType.parse(json.get("mimetype").asText()
+					.toLowerCase());
+			med.setMimeType(mime);
+		}
 		med.setHeight(json.get("height").asInt());
 		med.setWidth(json.get("width").asInt());
 

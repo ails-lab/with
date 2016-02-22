@@ -17,12 +17,14 @@
 package model;
 
 import utils.MediaTypeConverter;
+import utils.Serializer;
 
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.net.MediaType;
 
 import model.basicDataTypes.LiteralOrResource;
@@ -126,6 +128,7 @@ public class EmbeddedMediaObject {
 	 * http://docs.guava-libraries.googlecode
 	 * .com/git/javadoc/com/google/common/net/MediaType.html
 	 */
+	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
 	private MediaType mimeType;
 
 	public static enum Quality {

@@ -131,6 +131,8 @@ public class MediaController extends Controller {
 			media.setMediaBytes(mediaBytes);
 			if (version != null) {
 				media.setMediaVersion(version);
+				media.setMimeType(MediaType.parse(Files.probeContentType(img
+						.toPath())));
 				DB.getMediaObjectDAO().makePermanent(media);
 				MediaCheckMessage mcm = new MediaCheckMessage(media);
 				ActorSelection api = Akka.system().actorSelection(
