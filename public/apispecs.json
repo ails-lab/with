@@ -3,7 +3,7 @@
     "info": {
         "version": "v0.4",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE: 19 Feb, 2016\n"
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE: 19 Feb, 2016\n \n Note for using test calls: Testing calls with parameters in the path will not work. We have created some duplicate entries for dedicated test calls under the '''test calls''' tab. You can use these for testing, however they don't always show the full body schema. To test with that, consult the non-testing descriptive calls, and experiment with an external application such as Postman."
     },
     "paths": {
         "/api/search": {
@@ -186,7 +186,7 @@
                     }
                 ],
                 "summary": "Retrieve a record.",
-                "description": "Retrieve a JSON with the metadata of the record specified in the path. The format parameter defines the serialization in the record field of the JSON response.",
+                "description": "Retrieve a JSON with the metadata of the record specified in the path, by its Id. To retrieve the Ids of records in collections, you can use the ```collection/{colId}/list``` call see the ```dbid``` field in the response. Many different serilizations are available for the record's metadata. To select one, or more of them, use the \"format\" parameter. The different serializations will appear in the \"content\" field in the record response.",
                 "tags": [
                     "Record"
                 ],
@@ -194,7 +194,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/InternalRecord"
+                            "$ref": "#/definitions/InternalRecordWithContent"
                         }
                     },
                     "404": {
@@ -221,7 +221,7 @@
             },
             "put": {
                 "summary": "Update a record.",
-                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body. If format fields are provided, then the corresponding serializations will be updated. Many formats can be updated in one call.",
+                "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body.",
                 "parameters": [
                     {
                         "in": "body",
@@ -583,7 +583,7 @@
                 }
             ],
             "get": {
-                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. Record metadata can be available in different serializations. The format parameter defines this serialization in the records array field of the JSON response.",
+                "description": "Retrieves all records from the collection specified in the path and returns an array of record objects. Record metadata can be available in different serializations. The format parameter defines this serialization in the records array field of the JSON response. See ```GET /record/{recordId}```. If the format parameter is empty, only the internal record will be provided in the WITH model.",
                 "summary": "Retrieve all records in a collection.",
                 "tags": [
                     "Collection",
@@ -625,7 +625,7 @@
                                 "records": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/definitions/InternalRecord"
+                                        "$ref": "#/definitions/InternalRecordWithContent"
                                     }
                                 }
                             }
@@ -657,7 +657,7 @@
         "/collection/liked": {
             "post": {
                 "summary": "Add a record to favourites.",
-                "description": "This call will add a record to the favourites of the logged in user. For an already existing record, you just need a simple body with a \"dbid\" field and the id of the record. See ```collection/{id}/addRecord``` for more details, the same apply here as well.",
+                "description": "This call will add a record to the favourites of the logged in user. You only need to provide a simple body with a \"dbid\" field and the id of the record.",
                 "tags": [
                     "Collection",
                     "Record"
@@ -707,7 +707,7 @@
                 }
             ],
             "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT: This is the preferred way to create a new record!",
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. See the different ```Test Calls``` for alternative ways to use this call and easily create records from many sources such as Europeana, without the need to specify schema mappings. Also, you can see how to import a record from MINT. You do not need to provide values for all the available fields, however some of them are mandatory and might return an error. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
                 "summary": "Create a new record and add it to a collection.",
                 "tags": [
                     "Collection",
@@ -735,7 +735,11 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/InternalRecord"
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "400": {
@@ -854,15 +858,6 @@
                 "summary": "Remove a record from favourites.",
                 "tags": [
                     "Record"
-                ],
-                "parameters": [
-                    {
-                        "name": "position",
-                        "in": "query",
-                        "description": "offset",
-                        "type": "integer",
-                        "default": 0
-                    }
                 ],
                 "responses": {
                     "200": {
@@ -2644,7 +2639,283 @@
                 }
             }
         },
-        "/collection/56a10eaa590b1916a881a342/addRecord": {
+        "/collection/56a10eaa590b1916a881a323/addRecord": {
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. Use for adding a NEW record to the collection.",
+                "summary": "Add a *new* record to a collection.",
+                "tags": [
+                    "Test calls"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "required": true,
+                        "description": "The position in the collection.",
+                        "type": "string",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/SampleInternalRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/56a10eaa590b1916a881a313/addRecord": {
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. Tests MINT imports to a collection.",
+                "summary": "Import a record from *MINT* to a collection.",
+                "tags": [
+                    "Test calls"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "required": true,
+                        "description": "The position in the collection.",
+                        "type": "string",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/SampleMINTRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/56a10eaa590b1916a881a113/addRecord": {
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This tests imports from Europeana.",
+                "summary": "Import a record from *EUROPEANA* to a collection.",
+                "tags": [
+                    "Test calls"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "required": true,
+                        "description": "The position in the collection.",
+                        "type": "string",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/SampleEUROPEANARecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/56a10eaa590b1916a881a123/addRecord": {
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This creates a new record with media included in the body.",
+                "summary": "Add a record with *MEDIA* to a collection.",
+                "tags": [
+                    "Test calls"
+                ],
+                "parameters": [
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "required": true,
+                        "description": "The position in the collection.",
+                        "type": "string",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/SampleMEDIARecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection/56a10eaa590b1916a881a421/addRecord": {
             "post": {
                 "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This tests adding public records to a collection.",
                 "summary": "Add a *PUBLIC* record to a collection.",
@@ -2855,6 +3126,91 @@
                 }
             }
         },
+        "UserEmbedded": {
+            "description": "Short description of registered users that appears under withCreatorInfo in WithResources.",
+            "type": "object",
+            "required": [
+                "firstName",
+                "lastName",
+                "username",
+                "email",
+                "password"
+            ],
+            "properties": {
+                "username": {
+                    "type": "string"
+                },
+                "favorites": {
+                    "type": "string"
+                },
+                "dbId": {
+                    "type": "string"
+                },
+                "organizations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "friendlyName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "projects": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "friendlyName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "usergroups": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "type": "string"
+                            },
+                            "username": {
+                                "type": "string"
+                            },
+                            "friendlyName": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "usergroupsIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "adminGroups": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "ListUser": {
             "description": "Describes a registered user in the database.",
             "type": "array",
@@ -2975,19 +3331,13 @@
                 "descriptiveData": {
                     "$ref": "#/definitions/DescriptiveData"
                 },
+                "withCreatorInfo": {
+                    "$ref": "#/definitions/UserEmbedded"
+                },
                 "provenance": {
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/Provenance"
-                    }
-                },
-                "content": {
-                    "type": "object",
-                    "properties": {
-                        "key": {
-                            "type": "string",
-                            "default": "value"
-                        }
                     }
                 }
             }
@@ -2997,6 +3347,31 @@
             "allOf": [
                 {
                     "$ref": "#/definitions/WithResource"
+                }
+            ]
+        },
+        "InternalRecordWithContent": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/WithResource"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "content": {
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "type": "string",
+                                    "default": "value"
+                                }
+                            }
+                        }
+                    },
+                    "required": [
+                        "content"
+                    ]
                 }
             ]
         },
@@ -3020,7 +3395,7 @@
             "description": "WITH related metadata.",
             "type": "object",
             "properties": {
-                "withUri": {
+                "withURI": {
                     "type": "string"
                 },
                 "access": {
@@ -3043,10 +3418,10 @@
                         }
                     }
                 },
-                "isExhibition": {
-                    "type": "boolean"
-                },
                 "externalId": {
+                    "type": "string"
+                },
+                "parentResourceID": {
                     "type": "string"
                 }
             }
@@ -3059,20 +3434,29 @@
                     "type": "boolean"
                 },
                 "acl": {
-                    "type": "object",
-                    "properties": {
-                        "user": {
-                            "type": "string"
-                        },
-                        "level": {
-                            "type": "integer"
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "user": {
+                                "type": "string"
+                            },
+                            "level": {
+                                "type": "string",
+                                "enum": [
+                                    "READ",
+                                    "WRITE",
+                                    "OWN",
+                                    "NONE"
+                                ]
+                            }
                         }
                     }
                 }
             }
         },
         "CollectionInfo": {
-            "description": "Information about internal collections this object may belong to.",
+            "description": "Internal collection IDs this object belongs to and the position in these collections.",
             "type": "object",
             "properties": {
                 "collectionId": {
@@ -3171,6 +3555,9 @@
                 "rdfType": {
                     "type": "string"
                 },
+                "dctype": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
                 "sameAs": {
                     "$ref": "#/definitions/MultiLiteralOrResource"
                 },
@@ -3209,23 +3596,45 @@
         },
         "MultiLiteralOrResource": {
             "description": "Can either be a multiliteral or a resource.",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/ResourceOrLiteral"
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "en": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
             }
         },
         "MultiLiteral": {
             "description": "More than one RDF literal types.",
-            "type": "array",
-            "items": {
-                "$ref": "#/definitions/Literal"
+            "type": "object",
+            "properties": {
+                "default": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "en": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
             }
         },
         "Literal": {
             "description": "An RDF literal type.",
             "type": "object",
             "properties": {
-                "key": {
+                "uri": {
                     "type": "string",
                     "default": "value"
                 }
@@ -3235,7 +3644,7 @@
             "description": "An RDF resource type.",
             "type": "object",
             "properties": {
-                "key": {
+                "uri": {
                     "type": "string",
                     "default": "value"
                 }
@@ -3245,7 +3654,7 @@
             "description": "Either an RDF literal or a resource.",
             "type": "object",
             "properties": {
-                "key": {
+                "uri": {
                     "type": "string",
                     "default": "value"
                 }
@@ -3255,10 +3664,34 @@
             "description": "Holds metadata for media objects, i.e. images, video, text or audio files that are the basis of records.",
             "type": "object",
             "properties": {
-                "withMediaType": {
+                "type": {
                     "type": "string"
                 },
-                "withMediaRights": {
+                "withRights": {
+                    "type": "string",
+                    "enum": [
+                        "Public",
+                        "Restricted",
+                        "Permission",
+                        "Modify",
+                        "Commercial",
+                        "Creative_Commercial_Modify",
+                        "Creative_Not_Commercial",
+                        "Creative_Not_Modify",
+                        "Creative_Not_Commercial_Modify",
+                        "Creative_SA",
+                        "Creative_BY",
+                        "Creative",
+                        "RR",
+                        "RRRA",
+                        "RRFA",
+                        "UNKNOWN"
+                    ]
+                },
+                "withUrl": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 },
                 "height": {
@@ -3266,12 +3699,6 @@
                 },
                 "width": {
                     "type": "integer"
-                },
-                "url": {
-                    "type": "string"
-                },
-                "parentId": {
-                    "type": "string"
                 },
                 "mediaVersion": {
                     "type": "string"
@@ -3286,7 +3713,15 @@
                     "type": "number"
                 },
                 "quality": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "UNKNOWN",
+                        "IMAGE_SMALL",
+                        "IMAGE_500k",
+                        "IMAGE_1",
+                        "IMAGE_4",
+                        "TEXT_IMAGE"
+                    ]
                 }
             }
         },
@@ -3529,29 +3964,20 @@
                 "position"
             ],
             "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "CulturalObject"
-                },
-                "collectedIn": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
-                    }
-                },
-                "media": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
-                    }
-                },
-                "descriptiveData": {
-                    "$ref": "#/definitions/SampleDescriptiveData"
-                },
                 "provenance": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SampleProvenance"
+                        "type": "object",
+                        "properties": {
+                            "provider": {
+                                "type": "string",
+                                "default": "Europeana"
+                            },
+                            "resourceId": {
+                                "type": "string",
+                                "default": "http://ipa.image.ntua.gr:9030/assets/apispecs.json"
+                            }
+                        }
                     }
                 }
             }
@@ -3634,24 +4060,51 @@
                 "position"
             ],
             "properties": {
-                "resourceType": {
-                    "type": "string",
-                    "default": "CulturalObject"
-                },
-                "collectedIn": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
-                    }
-                },
-                "media": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/SampleMediaObjectEmbedded"
+                "administrative": {
+                    "type": "object",
+                    "properties": {
+                        "access": {
+                            "type": "object",
+                            "properties": {
+                                "isPublic": {
+                                    "type": "boolean",
+                                    "default": true
+                                },
+                                "acl": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "user": {
+                                                "type": "string",
+                                                "default": "eirini1"
+                                            },
+                                            "level": {
+                                                "type": "string",
+                                                "default": "READ"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 "descriptiveData": {
-                    "$ref": "#/definitions/SampleDescriptiveData"
+                    "type": "object",
+                    "properties": {
+                        "label": {
+                            "type": "object",
+                            "properties": {
+                                "default": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
                 },
                 "provenance": {
                     "type": "array",
