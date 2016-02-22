@@ -250,6 +250,15 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		this.updateFirst(q, updateOps);
 	}
 
+	public void updateMedia(ObjectId id, int index, MediaVersion version,
+			EmbeddedMediaObject media) {
+		Query<T> q = this.createQuery().field("_id").equal(id);
+		UpdateOperations<T> updateOps = this.createUpdateOperations()
+				.disableValidation();
+		updateOps.set("media." + index + "." + version, media);
+		this.updateFirst(q, updateOps);
+	}
+
 	public boolean isPublic(ObjectId id) {
 		Query<T> q = this.createQuery().field("_id").equal(id).limit(1);
 		q.field("administrative.isPublic").equal(true);
@@ -262,7 +271,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 	 * @param userAccess
 	 * @return
 	 */
-	protected Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess,
+	public Criteria formAccessLevelQuery(Tuple<ObjectId, Access> userAccess,
 			QueryOperator operator) {
 		int ordinal = userAccess.y.ordinal();
 		BasicDBObject accessQuery = new BasicDBObject();
@@ -431,9 +440,11 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 				.retrievedFields(true, "usage.likes");
 		return ((WithResource) this.findOne(q)).getUsage().getLikes();
 	}
-	
-	public List<Integer> getPositionsInCollection(ObjectId id, ObjectId collectionId) {
-		T record = this.getById(id, new ArrayList<String>(Arrays.asList("collectedIn")));
+
+	public List<Integer> getPositionsInCollection(ObjectId id,
+			ObjectId collectionId) {
+		T record = this.getById(id,
+				new ArrayList<String>(Arrays.asList("collectedIn")));
 		List<Integer> positions = new ArrayList<Integer>();
 		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
 			if (ci.getCollectionId().equals(collectionId))

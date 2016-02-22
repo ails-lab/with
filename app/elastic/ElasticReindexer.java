@@ -22,6 +22,7 @@ import java.util.Map;
 
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
+import model.resources.ThesaurusObject;
 import model.resources.WithResource;
 
 import org.bson.types.ObjectId;
@@ -191,5 +192,36 @@ public class ElasticReindexer {
 		}
 
 		return true;
+	}
+
+	/*
+	 *
+	 */
+	public static boolean reindexAllDbThesaurus() {
+
+		BulkProcessor bulk = Elastic.getBulkProcessor();
+		long countAllTH = DB.getThesaurusDAO().find().countAll();
+
+		/* Index all RecordResources */
+		for(int i = 0; i < (countAllTH/1000); i++) {
+			Query<ThesaurusObject> q = DB.getDs().createQuery(ThesaurusObject.class).offset(i*1000).limit(1000);
+			List<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).asList();
+			for(ThesaurusObject th: thesaurusCursor) {
+				bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
+						.source(th.transform()));
+			}
+			bulk.flush();
+		}
+
+		Query<ThesaurusObject> q = DB.getDs().createQuery(ThesaurusObject.class).offset((int)(countAllTH/1000)*1000).limit(1000);
+		List<ThesaurusObject> thesaurusCursor = DB.getThesaurusDAO().find(q).asList();
+		for(ThesaurusObject th: thesaurusCursor) {
+			bulk.add(new IndexRequest(Elastic.index, ElasticUtils.defineInstanceOf(th), th.getDbid().toString())
+					.source(th.transform()));
+		}
+
+		bulk.close();
+		return true;
+
 	}
 }

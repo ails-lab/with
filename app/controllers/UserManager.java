@@ -630,7 +630,7 @@ public class UserManager extends Controller {
 		String newLine = System.getProperty("line.separator");
 
 		// String url = APPLICATION_URL;
-		String url = "http://with.image.ntua.gr/assets/developers.html";
+		String url = "http://ipa.image.ntua.gr:9030/assets/developers-lite.html";
 
 		String fn = "";
 		String ln = "";
@@ -724,7 +724,7 @@ public class UserManager extends Controller {
 		String enc = encryptToken(u.getDbId().toString());
 
 		// String resetURL = APPLICATION_URL;
-		String resetURL = "http://with.image.ntua.gr/assets/index.html#reset";
+		String resetURL = "http://ipa.image.ntua.gr:9030/assets/index.html#reset";
 
 		// This will retrieve line separator dependent on OS.
 		String newLine = System.getProperty("line.separator");

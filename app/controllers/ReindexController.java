@@ -72,7 +72,7 @@ public class ReindexController extends Controller {
 	 * It's a very slow reindex process. Mongo and Elastic
 	 * have to be consistent in the end.
 	 */
-	public static Result reindexAllDocs() {
+	public static Result reindexAllResources() {
 
 		try {
 			Promise<Boolean> p = Promise.promise(() -> ElasticReindexer.reindexAllDbDocuments());
@@ -83,4 +83,22 @@ public class ReindexController extends Controller {
 
 		return ok();
 	}
+
+	/*
+	 * Api call to reindex all thesaurus resources.
+	 * Mongo and Elastic should be consistent talking
+	 * about thesaurus terms.
+	 */
+	public static Result reindexAllThesaurus() {
+
+		try {
+			Promise<Boolean> p = Promise.promise(() -> ElasticReindexer.reindexAllDbThesaurus());
+		} catch(Exception e) {
+			log.error(e.getMessage(), e);
+			return internalServerError(e.getMessage());
+		}
+
+		return ok();
+	}
+
 }

@@ -122,17 +122,6 @@ public class FashionSparqlEndpoint {
 			String dataProvider = initFromResource(solution,"?dataProvider"); 
 			String thumb = initFromResource(solution,"?thumb");
 			String rigths = initFromResource(solution,"?rights");   
-
-			System.out.println(s);
-			System.out.println("	"+getIdentifier(s));
-			System.out.println("	"+title);
-			System.out.println("	"+creator);
-			System.out.println("	"+description );
-			System.out.println("	"+getDataProvider(dataProvider));
-			System.out.println("	"+thumb);
-			System.out.println("	"+getURL(s));
-			System.out.println("	"+rigths);
-
 		}
 		qexec.close() ;
 

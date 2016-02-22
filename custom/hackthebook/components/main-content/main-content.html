@@ -5,19 +5,19 @@
           <!-- title-->
           <div class="sectionhead">FEATURED EXHIBITION</div>
           <!-- featured exhibition-->
-          <div id="featuredExhibit" class="exhibition" data-bind="with: featured">
+          <div id="featuredExhibit" class="exhibition" data-bind="with: featuredExhibition">
             <div class="hue">
               <!-- info-->
               <div class="info">
                 <div class="type">EXHIBITION</div>
-                <h1 class="title"><!-- ko text:title --><!-- /ko --> </h1>
+                <h1 class="title"><!-- ko text:data.title --><!-- /ko --> </h1>
                 <div class="description">
                   <!-- description-->
-                  <div class="text" data-bind="text: description">
+                  <div class="text" data-bind="text: data.description">
                
                   </div>
                   <!-- view button-->
-                  <div class="view"><a data-bind="attr {href: url}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
+                  <div class="view"><a data-bind="attr: {href: data.url()}" title="VIEW EXHIBITION" class="btn btn-view blue"><img src="img/ic-right-arrow.png" alt="view"></a></div>
                 </div>
               </div>
               <!-- thumbnails-->
@@ -25,13 +25,13 @@
                 <!-- left-->
                 
                 <div class="left">
-                <div class="imagewrapper"><img data-bind="attr: { src: thumbs()[0].url}"></div>
-                  <div class="title" data-bind="text: thumbs()[0].title"></div>
+                <div class="imagewrapper"><img  data-bind="attr: { src: data.media[0].Thumbnail.url}"></div>
+                  <div class="title"></div>
                 </div>
                 <!-- right-->
                 <div class="right">
-                <div class="imagewrapper"><img data-bind="attr: { src: thumbs()[1].url}"></div>
-                  <div class="title" data-bind="text: thumbs()[1].title"></div>
+                <div class="imagewrapper"><img  data-bind="attr: { src: data.media[1].Thumbnail.url}""></div>
+                  <div class="title"></div>
                 </div>
               </div>
             </div>

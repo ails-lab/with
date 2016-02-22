@@ -294,10 +294,6 @@ public class Utils {
 		return date!=null && date.matches("[-]{0,1}[0-9]+[\\.]{0,1}[0-9]*");
 	}
 
-	public static void main(String[] args) {
-		System.out.println(isNumericDouble("34.7"));
-	}
-
 	public static boolean hasInfo(String string) {
 		return !(string==null || string.equals("") || string.matches("[\\s]*") || string.equals("null"));
 	}

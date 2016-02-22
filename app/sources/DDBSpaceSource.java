@@ -79,9 +79,6 @@ public class DDBSpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(res.query);
-				System.out.println("-------------------------------------------------------------");
-				System.out.println(response.toString());
-				System.out.println("-------------------------------------------------------------");
 				JsonNode docs = response.path("results").get(0).path("docs");
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();

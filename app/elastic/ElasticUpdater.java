@@ -62,7 +62,7 @@ public class ElasticUpdater {
 					.setDoc(doc)
 					.get();
 		} catch(Exception e) {
-			log.error("Cannot update (reindex) resource" );
+			log.error("Cannot update (reindex) resource", e );
 			return false;
 		}
 		return true;

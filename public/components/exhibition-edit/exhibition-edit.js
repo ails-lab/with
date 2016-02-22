@@ -21,7 +21,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		this.dbId = collectionData.dbId;
 		this.title = ko.observable(app.findByLang(collectionData.descriptiveData.label));
 		this.description = ko.observable(app.findByLang(collectionData.descriptiveData.description));
-		// this.thumbnail = ko.observable();
 		this.itemCount = collectionData.administrative.entryCount;
 		this.isPublic = collectionData.administrative.access.isPublic;
 		this.created = collectionData.administrative.created;
@@ -118,6 +117,19 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		});
 	}
 
+	function moveItemInExhibition(exhibitionId, recordId, oldPosition, newPosition) {
+		$.ajax({
+			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
+			method: 'put',
+			success: function(data) {
+				// Empty
+			},
+			error: function(result) {
+				// Empty
+			}
+		});
+	}
+
 	function isEmpty(str) {
 		return (!str || 0 === str.length);
 	}
@@ -141,6 +153,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.creationMode = !params.hasOwnProperty('id');
 		self.loadingExhibitionItems = false;
 		self.loadingInitialItemsCount = 0;
+		var _removeItem = false;
+		var _startIndex = -1;
 		if (!self.creationMode) {
 			self.dbId(params.id);
 		}
@@ -195,32 +209,23 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				ko.mapping.fromJS(data, mappingExhibition, self);
 				self.title(app.findByLang(data.descriptiveData.label));
 				self.description(app.findByLang(data.descriptiveData.description));
-				if (self.title().indexOf('Dummy') !== -1) {
-					self.title('');
-				}
-				if (self.description().indexOf('Description') !== -1) {
-					self.description('');
-				}
 				setUpSwitch(self);
 
 				$.ajax({
-					url: "/collection/" + self.dbId() + "/list?count=40&start=0",
+					url: "/collection/" + self.dbId() + "/list?count=5&start=0",
 					method: "get",
 					success: function (data) {
 						self.firstEntries = data.records;
 						self.loadingInitialItemsCount = data.entryCount;
 						self.firstEntries.map(function (record) {
-							record.additionalText = ko.pureComputed(function() {
-								return app.findByLang(record.contextData.body.text);
-							});
-							record.videoUrl = ko.pureComputed(function() {
-								return app.findByLang(record.contextData.body.videoUrl);
+							record.containsAudio = ko.pureComputed(function() {
+								return record.contextData[0].body.audioUrl() !== "";
 							});
 							record.containsVideo = ko.pureComputed(function() {
-								return false;	// TODO: Check if it contains video
+								return record.contextData[0].body.videoUrl() !== "";
 							});
 							record.containsText = ko.pureComputed(function() {
-								return false;	// TODO: Check if it contains text
+								return record.contextData[0].body.text.default() !== "";
 							});
 						});
 
@@ -318,31 +323,39 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					return;
 				}
 
-				var promiseSaveItem = saveItemToExhibition(record, index, self.dbId());
-				$.when(promiseSaveItem).done(function (data) {
-					//now delete not to affect server order
-					if (_bIsMoveOperation) {
-						deleteItemFromExhibition(self.dbId(), record.dbId);
+				if (_bIsMoveOperation) {
+					if (_startIndex > 0) {
+						moveItemInExhibition(self.dbId(), record.dbId, _startIndex, index);
+						_startIndex = -1;		// Move was successful, reset the startIndex
+					} else {
+						saveItemToExhibition(record, index, self.dbId());
+						_removeItem = true;		// Item was added but not removed, so mark it for removal
 					}
-					//update the dbid
-					record.dbId = data.dbId;
 					$(elem).find('#loadingIcon').fadeOut();
-				}).fail(function (data) {
+				} else {
+					saveItemToExhibition(record, index, self.dbId());
 					$(elem).find('#loadingIcon').fadeOut();
-				});
+				}
 			}
 		};
 
-		self.removeItem = function (elem) {
+		self.removeItem = function (elem, index, record) {
+			if (_bIsMoveOperation) {
+				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
+				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
+					deleteItemFromExhibition(self.dbId(), record.dbId, index);
+					_removeItem = false;
+				}
+			}
 			$(elem).fadeOut(500);
 		};
 
 		self.showPopUpVideo = function (data) {
-			editItem(data, 'PopUpVideoMode');
+			editItem(data, self.dbId(), 'PopUpVideoMode');
 		};
 
 		self.showPopUpText = function (data) {
-			editItem(data, 'PopUpTextMode');
+			editItem(data, self.dbId(), 'PopUpTextMode');
 		};
 
 		//custom binding
@@ -445,10 +458,29 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						//clone it
 						var newItem = JSON.parse(JSON.stringify(_draggedItem));
-						newItem.additionalText = ko.observable('');
-						newItem.containsText = ko.observable(false); //add the observables here
-						newItem.containsVideo = ko.observable(false);
-						newItem.videoUrl = ko.observable('');
+						newItem.contextData = [{
+							contextDataType: "ExhibitionData",
+							body: {
+								text: {
+									default: ko.observable('')
+								},
+								videoUrl: ko.observable(''),
+								audioUrl: ko.observable('')
+							}
+						}];
+						newItem.containsAudio = ko.pureComputed(function() {
+							return newItem.contextData[0].body.audioUrl() !== "";
+						});
+						newItem.containsVideo = ko.pureComputed(function() {
+							return newItem.contextData[0].body.videoUrl() !== "";
+						});
+						newItem.containsText = ko.pureComputed(function() {
+							return newItem.contextData[0].body.text.default() !== "";
+						});
+						// newItem.additionalText = ko.observable('');
+						// newItem.containsText = ko.observable(false); //add the observables here
+						// newItem.containsVideo = ko.observable(false);
+						// newItem.videoUrl = ko.observable('');
 						var arrayCollection = self.collectionItemsArray;
 						//dont do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {

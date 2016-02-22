@@ -17,6 +17,7 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
@@ -74,7 +76,6 @@ public class RecordResourceController extends WithResourceController {
 		try {
 			RecordResource record = DB.getRecordResourceDAO().get(
 					new ObjectId(id));
-
 			Result response = errorIfNoAccessToRecord(Action.READ,
 					new ObjectId(id));
 			if (!response.toString().equals(ok().toString()))
@@ -138,6 +139,7 @@ public class RecordResourceController extends WithResourceController {
 	 * @return the edited resource
 	 */
 	// TODO check restrictions (unique fields e.t.c)
+	//TODO: edit contextData separately ONLY for collections for which the user has access
 	public static Result editRecordResource(String id) {
 		ObjectNode error = Json.newObject();
 		ObjectId recordDbId = new ObjectId(id);
@@ -153,13 +155,55 @@ public class RecordResourceController extends WithResourceController {
 					return response;
 				else {
 					DB.getRecordResourceDAO().editRecord("", recordDbId, json);
-					return ok(Json.toJson(DB.getRecordResourceDAO().get(
-							recordDbId)));
+					//return ok(Json.toJson(DB.getRecordResourceDAO().getById(
+							//recordDbId, Arrays.asList("administrative", "descriptiveData", "collectedIn"))));
+					return ok("Record edited.");
 				}
 			}
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
+		}
+	}
+	
+	public static Result editContextData() {
+		ObjectNode error = Json.newObject();
+		JsonNode json = request().body().asJson();
+		if (json == null) {
+			error.put("error", "Invalid JSON");
+			return badRequest(error);
+		} else {
+			String contextDataType = null;
+			if (json.has("contextDataType"))
+				contextDataType = json.get("contextDataType").asText();
+			if (contextDataType != null & ContextDataType.valueOf(contextDataType) != null) {
+				Class clazz;
+				try {
+					clazz = Class.forName("model.annotations."
+							+ contextDataType);
+					ContextData newContextData = (ContextData) Json.fromJson(json, clazz);
+					ObjectId colId = newContextData.getTarget().getCollectionId();
+					int position = newContextData.getTarget().getPosition();
+					if (colId != null && DB.getCollectionObjectDAO().existsEntity(colId)) {
+					//filterContextData(record);
+						Result response = errorIfNoAccessToCollection(Action.EDIT,
+							colId);
+						if (!response.toString().equals(ok().toString()))
+							return response;
+						else {
+							DB.getRecordResourceDAO().updateContextData(newContextData);
+							return ok("Edited context data.");
+						}
+					}
+					else
+						return badRequest("Collection with id " + colId + " does not exist.");
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+					return internalServerError(error);
+				}			
+			}
+			else 
+				return badRequest("Context data type should be one of supported types: ExhibitionDataType");
 		}
 	}
 

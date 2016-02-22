@@ -21,15 +21,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
+import model.MediaObject;
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
@@ -39,15 +43,17 @@ import model.resources.CulturalObject.CulturalObjectData;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.resources.WithResource.WithResourceType;
-import model.annotations.ContextData.ContextDataType;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataTarget;
+import model.annotations.ContextData.ContextDataBody;
+import model.annotations.ContextData.ContextDataType;
 import model.annotations.ExhibitionData;
 
 import org.bson.types.ObjectId;
 
 import play.Logger;
 import play.Logger.ALogger;
+import play.api.i18n.Lang;
 import play.libs.F.Option;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -58,12 +64,14 @@ import sources.core.RecordJSONMetadata;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
+import utils.Tuple;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.parameterTypes.StringTuple;
@@ -121,7 +129,9 @@ public class WithResourceController extends Controller {
 	 *            the position of the record in the collection
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
+	//If a record already exists in that collection-position, prohibit addition- 
+	//have to remove first. This way, do not have to check if colId-position already exists
+	//in collectedIn and remove it (2 update operations).
 	public static Result addRecordToCollection(String colId,
 			Option<Integer> position) {
 		JsonNode json = request().body().asJson();
@@ -139,6 +149,12 @@ public class WithResourceController extends Controller {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
+				if (position.isDefined())
+					if (DB.getRecordResourceDAO().
+							existsInCollectionAndPosition(collectionDbId, position.get())) {
+						result.put("error", "Record already exists in that position, have to remove it first.");
+						return forbidden(result);
+					}
 				String resourceType = null;
 				ObjectId userId = AccessManager.effectiveUserDbIds(
 						session().get("effectiveUserIds")).get(0);
@@ -149,6 +165,8 @@ public class WithResourceController extends Controller {
 					resourceType = WithResourceType.CulturalObject.toString();
 				Class<?> clazz = Class.forName("model.resources."
 						+ resourceType);
+				if (position.isDefined())
+					fillInContextTarget(json, colId, position.get());
 				RecordResource record = (RecordResource) Json.fromJson(json,
 						clazz);
 				int last = 0;
@@ -166,9 +184,12 @@ public class WithResourceController extends Controller {
 				if (externalId == null)
 					externalId = record.getAdministrative().getExternalId();
 				ObjectId recordId = null;
-				if ((externalId != null)
+				boolean owns = DB.getRecordResourceDAO().hasAccess(
+						AccessManager.effectiveUserDbIds(session().get(
+								"effectiveUserIds")), Action.DELETE, recordId);
+				if ((externalId != null)//get dbId of existring resource
 						&& DB.getRecordResourceDAO().existsWithExternalId(
-								externalId)) {// get dbId of existing resource
+								externalId)) {
 					RecordResource resource = DB
 							.getRecordResourceDAO()
 							.getUniqueByFieldAndValue(
@@ -178,12 +199,9 @@ public class WithResourceController extends Controller {
 					response = errorIfNoAccessToRecord(Action.READ, recordId);
 					if (!response.toString().equals(ok().toString())) {
 						return response;
-					} else {
-						// In case the record already exists we overwrite the
+					} else {// In case the record already exists we overwrite the
 						// existing record's descriptive data for the fields
-						// included
-						// in the json, if the user has WRITE.
-						// access.
+						// included in the json, if the user has WRITE access.
 						if (DB.getRecordResourceDAO().hasAccess(
 								AccessManager.effectiveUserDbIds(session().get(
 										"effectiveUserIds")), Action.EDIT,
@@ -192,15 +210,17 @@ public class WithResourceController extends Controller {
 							DB.getRecordResourceDAO().editRecord(
 									"descriptiveData", resource.getDbId(),
 									json.get("descriptiveData"));
+						addToCollection(position, recordId, collectionDbId, owns);
 						// TODO: if record has annotations, update/add
-						// annotations
-
+						// annotations (already filtered so that they refer to colId)
+						if (record.getContextData() != null && !record.getContextData().isEmpty()) {
+							ContextData contextData = (ContextData) record.getContextData().get(0);
+							DB.getRecordResourceDAO().updateContextData(contextData);
+						}
 					}
 				} else { // create new record in db
 					ObjectNode errors;
-					// Create a new record
 					record.getAdministrative().setCreated(new Date());
-					// TODO: if record has annotations, update/add annotations
 					switch (source) {
 					case UploadedByUser:
 						// Fill the EmbeddedMediaObject from the MediaObject
@@ -266,10 +286,7 @@ public class WithResourceController extends Controller {
 										+ recordId, recordId.toString()));
 						DB.getRecordResourceDAO().updateField(recordId,
 								"administrative.externalId",
-								recordId.toString());
-						// DB.getRecordResourceDAO().updateField(recordId,
-						// "administrative.externalId", recordId.toString());
-						break;
+								recordId.toString());						break;
 					case Mint:
 						errors = RecordResourceController
 								.validateRecord(record);
@@ -306,26 +323,9 @@ public class WithResourceController extends Controller {
 								externalId);
 						break;
 					}
+					addToCollection(position, recordId, collectionDbId, owns);
 				}
-				// Updates collection administrative metadata and record's usage
-				// and collectedIn
-				// the rights of all collections the resource belongs to are
-				// merged and are copied to the record
-				// only if the user OWNs the resource
-				boolean owns = DB.getRecordResourceDAO().hasAccess(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Action.DELETE, recordId);
-				// make sure that update is called after record has been saved
-				// in the db
-				// while (!record.isPostPersist()) {};
-				if (position.isDefined() && (recordId != null)) {
-					Integer pos = position.get();
-					DB.getRecordResourceDAO().addToCollection(recordId,
-							collectionDbId, pos, owns);
-				} else {
-					DB.getRecordResourceDAO().appendToCollection(recordId,
-							collectionDbId, owns);
-				}
+				fillMissingThumbnailsAsync(recordId);
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
@@ -337,52 +337,136 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
-
-	public static void updateContextData(JsonNode contextAnnsJson,
-			WithResource record, ObjectId colId, ObjectId userId) {
-		List<ContextData> ContextData = getContextDataFromJson(contextAnnsJson);
-		for (ContextData contextAnn : ContextData) {
-			ObjectId contextAnnId = contextAnn.getTarget().getCollectionId();
-			if (colId.equals(contextAnnId)) {// ignore annotations that refer to
-												// other collections! to be
-												// faster
-				for (ContextData ca : (List<ContextData>) record
-						.getContextData()) {
-					if (ca.getTarget().getCollectionId().equals(contextAnnId)) {
-						ca = contextAnn;
-					}
+	
+	// Updates collection administrative metadata, record's usage
+	// and collectedIn. The rights of all collections the resource 
+	//belongs to are merged and are copied to the record
+	// only if the user OWNs the resource.
+	public static void addToCollection(Option<Integer> position, ObjectId recordId, ObjectId colId,
+			boolean owns) {
+		if (position.isDefined() && (recordId != null)) {
+			Integer pos = position.get();
+			DB.getRecordResourceDAO().addToCollection(recordId,
+					colId, pos, owns);
+		} else {
+			DB.getRecordResourceDAO().appendToCollection(recordId,
+					colId, owns);
+		}
+	}
+	
+	//ignores context data that do not refer to the colId-position where the record is added
+	//if target not defined, assumes it refers to colId-position.
+	private static void fillInContextTarget(JsonNode json, String colId, int position) {
+		if (json.has("contextData")) {
+			JsonNode contextDataJson = json.get("contextData");
+			if (contextDataJson.isArray()) {
+				Iterator<JsonNode> itr = contextDataJson.iterator();
+				while(itr.hasNext()){
+					JsonNode c = itr.next();
+			        if (c  instanceof ObjectNode){
+						if (c.has("target")) {
+							JsonNode targetNode = c.get("target");
+							if (targetNode.has("collectionId")) {
+								String collectionId = targetNode.get("collectionId").asText();
+								if (!colId.equals(collectionId)) 
+									itr.remove();
+								if (targetNode.has("position")) {
+									int positionInJson = targetNode.get("position").asInt();
+									if (positionInJson != position)
+										itr.remove();
+								}
+							}
+						}
+						else {
+							ObjectNode targetNode = JsonNodeFactory.instance.objectNode();
+							targetNode.put("collectionId", colId);
+							targetNode.put("position", position);	
+							((ObjectNode) c).put("target", targetNode);
+						}
+			        }
 				}
 			}
 		}
 	}
-
-	public static List<ContextData> getContextDataFromJson(
-			JsonNode contextAnnsJson) {
-		ArrayList<ContextData> ContextData = new ArrayList<ContextData>();
-		if ((contextAnnsJson != null) && contextAnnsJson.isArray()) {
-			for (final JsonNode contextAnnJson : contextAnnsJson) {
-				JsonNode annTypeJson = contextAnnJson.get("contextDataType");
-				if ((annTypeJson != null) && annTypeJson.isValueNode()) {
-					String annTypeString = annTypeJson.asText();
-					ContextDataType annType = ContextDataType
-							.valueOf(annTypeString);
-					if (annType != null) {
-						Class<?> clazz;
-						try {
-							clazz = Class.forName("model.annotations."
-									+ annType);
-							ContextData contextAnn = (ContextData) Json
-									.fromJson(contextAnnJson, clazz);
-							ContextData.add(contextAnn);
-						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
+	
+	//ignores context data that do not refer to the colId-position where the record is added
+	private static ContextData createContextData(JsonNode json, ObjectId colId, int position) {
+		ContextData contextData = new ContextData();
+		if (json.has("contextData")) {
+			JsonNode contextDataJson = json.get("contextData");
+			if (contextDataJson.isArray()) {
+				for (final JsonNode c: contextDataJson) {
+					if (c.has("contextDataType")) {
+						String contextDataTypeString = c.get("contextDataType").asText();
+						ContextDataType contextDataType = null;
+						if ((contextDataType = ContextDataType.valueOf(contextDataTypeString)) != null) {
+							ContextDataTarget target = null;							
+							if (c.has("target")) {
+								JsonNode targetNode = c.get("target");
+								if (targetNode.has("collectionId")) {
+									String collectionId = targetNode.get("collectionId").asText();
+									if (!colId.equals(new ObjectId(collectionId)))
+										continue;
+									if (targetNode.has("position")) {
+										int positionInJson = targetNode.get("position").asInt();
+										if (positionInJson != position)
+											continue;
+									}
+								}
+							}
+							else {
+								target = new ContextDataTarget();
+								target.setCollectionId(colId);
+								target.setPosition(position);
+							}
+							if (c.has("body")) {
+								JsonNode bodyNode = c.get("body");
+								Class<?> clazz;
+								try {
+									clazz = Class.forName("model.annotations."
+											+ contextDataTypeString);
+									ContextDataBody body = (ContextDataBody) Json.fromJson(bodyNode, clazz);
+									contextData.setBody(body);
+									contextData.setTarget(target);
+									contextData.setContextDataType(contextDataType);
+								} catch (ClassNotFoundException e) {
+									e.printStackTrace();
+								}	
+							}
 						}
 					}
 				}
 			}
 		}
-		return ContextData;
+		return contextData;
 	}
+
+	private static void fillMissingThumbnailsAsync(ObjectId recordId) {
+		Function<ObjectId, Boolean> methodQuery = (ObjectId recId) -> {
+			RecordResource record = DB.getRecordResourceDAO().getById(recId,
+					new ArrayList<String>(Arrays.asList("media")));
+			int i = 0;
+			for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
+					.getMedia()) {
+				if (embeddedMedia.containsKey(MediaVersion.Original)
+						&& !embeddedMedia.containsKey(MediaVersion.Thumbnail)) {
+					String originalUrl = embeddedMedia.get(
+							MediaVersion.Original).getUrl();
+					MediaObject original = MediaController.downloadMedia(
+							originalUrl, MediaVersion.Original);
+					MediaObject thumbnail = MediaController
+							.makeThumbnail(original);
+					DB.getRecordResourceDAO().updateMedia(recId, i,
+							MediaVersion.Thumbnail,
+							new EmbeddedMediaObject(thumbnail));
+				}
+				i++;
+			}
+			return true;
+		};
+		ParallelAPICall.createPromise(methodQuery, recordId);
+	}
+
 
 	/**
 	 * @param id
@@ -421,11 +505,6 @@ public class WithResourceController extends Controller {
 				for (int p : positions) {
 					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
 							collectionDbId, p);
-					// TODO: if position undefined, remove from all Positions.
-					// shift
-					// other records will be harder in that case though.
-					// modify record's access: the record gets the most liberal
-					// rights of the collections it belongs to after the removal
 					DB.getRecordResourceDAO()
 							.updateRecordRightsUponRemovalFromCollection(
 									recordDbId, collectionDbId);
@@ -483,6 +562,8 @@ public class WithResourceController extends Controller {
 						collectionDbId, oldPosition, newPosition);
 				DB.getCollectionObjectDAO().updateField(collectionDbId,
 						"administrative.lastModified", new Date());
+				DB.getCollectionObjectDAO().removeCollectionMedia(collectionDbId, oldPosition);
+				DB.getCollectionObjectDAO().addCollectionMedia(collectionDbId, recordDbId, newPosition);
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
@@ -578,5 +659,4 @@ public class WithResourceController extends Controller {
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
 				Option.None(), false);
 	}
-
 }

@@ -49,6 +49,34 @@ import db.DB;
 
 public class RightsController extends WithResourceController {
 	public static final ALogger log = Logger.of(RightsController.class);
+	
+	public static Result editCollectionPublicity(String colId, Boolean isPublic, boolean membersDowngrade) {
+		ObjectNode result = Json.newObject();
+		/*if (isPublic == null) {
+			result.put("error", "isPublic should be true or false");
+			return badRequest(result);
+		}*/
+		ObjectId colDbId = new ObjectId(colId);
+		Result response = errorIfNoAccessToCollection(Action.DELETE, colDbId);
+		if (!response.toString().equals(ok().toString()))
+			return response;
+		else {
+			CollectionObject collection = DB.getCollectionObjectDAO().
+				getUniqueByFieldAndValue("_id", colDbId, new ArrayList<String>(Arrays.asList("administrative.access")));
+			boolean oldIsPublic = collection.getAdministrative().getAccess().getIsPublic();
+			if (oldIsPublic != isPublic) {
+				DB.getCollectionObjectDAO().updateField(colDbId, "administrative.access.isPublic", isPublic);
+				if (!isPublic) //downgrade
+					if (membersDowngrade) {
+						
+					}
+					else {
+						
+					}
+			}
+			return ok(result);
+		}
+	}
 
 	/**
 	 * Set access rights for object for user.
@@ -135,14 +163,23 @@ public class RightsController extends WithResourceController {
 		}
 	}
 	
+	public static void changePublicity(ObjectId colId, boolean isPublic, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
+		DB.getCollectionObjectDAO().updateField(colId, "administrative.access.isPublic", isPublic);
+		if (downgrade && membersDowngrade) {//the publicity of all records that belong to the collection is downgraded
+			DB.getRecordResourceDAO().updateMembersToNewPublicity(colId, isPublic, effectiveIds);
+		}
+		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
+			DB.getRecordResourceDAO().updateMembersToMergedPublicity(colId, isPublic, effectiveIds);
+		}	
+	}
+	
 	public static void changeAccess(ObjectId colId, ObjectId userOrGroupId, Access newAccess, List<ObjectId> effectiveIds, 
 			boolean downgrade, boolean membersDowngrade) {
+		DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 		if (downgrade && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
-			DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, newAccess, effectiveIds);
 		}
 		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
-			DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
 		}		
 	}
@@ -157,7 +194,7 @@ public class RightsController extends WithResourceController {
 		}
 		return 0;
 	}
-
+	
 				
 	public static Result sendShareCollectionNotification(boolean userGroup, ObjectId userOrGroupId, ObjectId colDbId, 
 			ObjectId ownerId, Access oldAccess, Access newAccess, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {

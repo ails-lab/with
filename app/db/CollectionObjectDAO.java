@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 import model.Collection;
@@ -149,32 +150,26 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
-	/*
-	public List<CollectionObject> getByMaxAccess(List<ObjectId> effectiveIds,
-			Access access, Boolean isExhibition, int offset, int count) {
-		Query<CollectionObject> q = this.createQuery()
-				.order("-administrative.lastModified").offset(offset)
-				.limit(count);
-		Criteria[] criteria = new Criteria[effectiveIds
-				.size()];
-		for (int i = 0; i < effectiveIds.size(); i++) {
-			criteria[i] = formAccessLevelQuery(new Tuple(effectiveIds.get(i), access), QueryOperator.GTE);
+	public Tuple<Integer, Integer> getHits(Query<CollectionObject> q, Optional<CollectionType> collectionType) {
+		Tuple<Integer, Integer> hits = new Tuple<Integer, Integer>(0, 0);
+		if (!collectionType.isPresent()) {
+			Query<CollectionObject> q2 = q.cloneQuery();
+			q2.field("administrative.collectionType").equal("Exhibition");
+			q.field("administrative.collectionType").equal("SimpleCollection");
+			hits.x = (int) this.find(q).countAll();
+			hits.y = (int) this.find(q2).countAll();
 		}
-		q.field("administrative.isExhibition").equal(isExhibition);
-		q.or(criteria);
-		return this.find(q).asList();
-	}*/
-
-	/*public List<CollectionObject> getPublic(Boolean isExhibition, int offset,
-			int count) {
-		Query<CollectionObject> q = this.createQuery()
-				.field("administrative.access.isPublic").equal(true)
-				.order("-administrative.lastModified").offset(offset)
-				.limit(count);
-		q.field("administrative.isExhibition").equal(isExhibition);
-		return this.find(q).asList();
-	}*/
-
+		else {
+			CollectionType collectionTypeValue = collectionType.get();
+			q.field("administrative.collectionType").equal(collectionTypeValue.toString());
+			if (collectionTypeValue.equals(CollectionType.Exhibition))
+				hits.y = (int) this.find(q).countAll();
+			else
+				hits.x = (int)  this.find(q).countAll();
+		}
+		return hits;
+	}
+	
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getCollectionsWithCount(Query<CollectionObject> q,
 			Boolean isExhibition) {
@@ -279,7 +274,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	public Tuple<List<CollectionObject>, Tuple<Integer, Integer>> getByAcl(List<Criteria> andCriteria, List<List<Tuple<ObjectId, Access>>> accessedByUserOrGroup, ObjectId creator,
 			Boolean isExhibition,  boolean totalHits, int offset, int count) {
-		Query<CollectionObject> q = this.createQuery().order("-administrative.lastModified").offset(offset).limit(count);
+		Query<CollectionObject> q = this.createQuery().disableValidation().field("descriptiveData.label.default.0").notEqual("_favorites");
+		q.order("-administrative.lastModified").offset(offset).limit(count);
 		if (creator != null)
 			q.field("administrative.withCreator").equal(creator);
 		for (List<Tuple<ObjectId, Access>> orAccessed: accessedByUserOrGroup) {
@@ -337,7 +333,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	public void removeCollectionMedia(ObjectId colId, int position) {
 		if (position < 5) {
 			//new Media should be based on records' positions before shifting.
-			List<HashMap<MediaVersion, EmbeddedMediaObject>> newMedias = new ArrayList<HashMap<MediaVersion, EmbeddedMediaObject>>();
+			List<HashMap<MediaVersion, EmbeddedMediaObject>> newMedia = new ArrayList<HashMap<MediaVersion, EmbeddedMediaObject>>();
 			for (int i=0; i<5; i++) {
 				RecordResource record = DB.getRecordResourceDAO().getByCollectionAndPosition(colId, i);
 				if (record != null) {
@@ -345,12 +341,17 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
 					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
 					     put(MediaVersion.Thumbnail, thumbnail);}};
-					newMedias.add(colMedia);
+					newMedia.add(colMedia);
 				}
+			}
+			if (newMedia.isEmpty()) {
+				HashMap<MediaVersion, EmbeddedMediaObject> emptyMedia = new HashMap<MediaVersion, EmbeddedMediaObject>(){{
+				     put(MediaVersion.Thumbnail, new EmbeddedMediaObject());}};
+				newMedia.add(emptyMedia);
 			}
 			UpdateOperations<CollectionObject> colUpdate = DB.getCollectionObjectDAO().createUpdateOperations().disableValidation();
 			Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery().field("_id").equal(colId);
-			colUpdate.set("media", newMedias);
+			colUpdate.set("media", newMedia);
 			this.update(cq,  colUpdate);
 		}
 	}

@@ -27,6 +27,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
+import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -247,31 +248,29 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	@Override
 	public UpdateResults update(final Query<E> q, final UpdateOperations<E> ops) {
-
-		UpdateResults results = super.update(q, ops);
-
-		String id = q.getQueryObject().get("_id").toString();
-		Query<E> q1 = createQuery().field("_id").equal(new ObjectId(id));
-		E doc = findOne(q1);
-
-		String type = defineInstanceOf(doc);
-		try {
-			if(type != null)  {
-				/* Index Resource */
-				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
-						(ObjectId colId, Map<String, Object> map) -> {
-							return ElasticIndexer.index(type, colId, map);
-						};
-				ParallelAPICall.createPromise(indexResource,
-						(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
-						(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+		E doc = DB.getDs().findAndModify(q, ops, false);
+		//ObjectId id = (ObjectId) results.getWriteResult().getUpsertedId();
+		//E doc = findOne(q);
+		if (doc != null) {
+			String type = defineInstanceOf(doc);
+			try {
+				if(type != null)  {
+					/* Index Resource */
+					BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
+							(ObjectId colId, Map<String, Object> map) -> {
+								return ElasticIndexer.index(type, colId, map);
+							};
+					ParallelAPICall.createPromise(indexResource,
+							(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
+							(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+				}
+			} catch(Exception e) {
+				log.error(e.getMessage(), e);
+				return null;
 			}
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-			return null;
 		}
-
-		return results;
+		int n = doc == null ? 0 : 1;
+		return new UpdateResults(new WriteResult(n, true, null));
 	}
 
 

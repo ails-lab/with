@@ -16,29 +16,31 @@
 
 package model.annotations;
 
+import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 
 import model.basicDataTypes.Literal;
 import model.annotations.ContextData.ContextDataBody;
 
 public class ExhibitionData extends ContextData<ExhibitionData.ExhibitionAnnotationBody> {
-	
+
 	public ExhibitionData() {
 		super();
+		this.target = new ContextDataTarget();
 		this.body = new ExhibitionAnnotationBody();
 		this.contextDataType = ContextDataType.valueOf(this.getClass().getSimpleName());
 	}
 	
 	public static class ExhibitionAnnotationBody extends ContextDataBody {
-		Literal exhibitionDescription;
-		String audioUrl;
-		String videoUrl;
-		
-		public Literal getExhibitionDescription() {
-			return exhibitionDescription;
+		Literal text = new Literal();
+		String audioUrl="";
+		String videoUrl="";
+
+		public Literal getText() {
+			return text;
 		}
-		public void setExhibitionDescription(Literal exhibitionDescription) {
-			this.exhibitionDescription = exhibitionDescription;
+		public void setText(Literal text) {
+			this.text = text;
 		}
 		public String getAudioUrl() {
 			return audioUrl;

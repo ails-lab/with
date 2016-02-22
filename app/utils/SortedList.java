@@ -73,7 +73,6 @@ public class SortedList<T> extends ArrayList<T> {
 		}
 		if (comparator.compare(e, get(mid)) >= 0)
 			mid++;
-		// System.out.println("put " + e + " at " + mid + " of " + this);
 		return mid;
 	}
 

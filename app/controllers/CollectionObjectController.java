@@ -473,12 +473,12 @@ public class CollectionObjectController extends WithResourceController {
 		List<ObjectNode> collections = new ArrayList<ObjectNode>(
 				userCollections.size());
 		for (CollectionObject collection : userCollections) {
-			List<String> titles = collection.getDescriptiveData().getLabel()
-					.get(Language.DEFAULT);
-			if ((titles != null) && !titles.get(0).equals("_favorites")) {
+			//List<String> titles = collection.getDescriptiveData().getLabel()
+					//.get(Language.DEFAULT);
+			//if ((titles != null) && !titles.get(0).equals("_favorites")) {
 				collections.add(collectionWithMyAccessData(collection,
 						effectiveUserIds));
-			}
+			//}
 		}
 		return collections;
 	}
@@ -616,16 +616,13 @@ public class CollectionObjectController extends WithResourceController {
 		try {
 			locks = Locks.create().read("Collection #" + collectionId)
 					.acquire();
-			// TODO: don't have to get the whiole collection, use DAO method
-			// Collection collection = DB.getCollectionDAO().getById(colId);
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
 				List<String> retrievedFields = new ArrayList<String>(
 						Arrays.asList("descriptiveData.label",
-								"descriptiveData.description"));
-				// bytes of thumbnail???
+								"descriptiveData.description", "media", "collectedIn"));
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);
@@ -643,8 +640,7 @@ public class CollectionObjectController extends WithResourceController {
 								.getDbId())));
 					} else {
 						// filter out all context annotations that do not refer
-						// to
-						// this collection
+						// to this collection-position
 						List<ContextData> contextAnns = e.getContextData();
 						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
 						for (ContextData ca : contextAnns) {

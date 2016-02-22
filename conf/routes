@@ -28,6 +28,7 @@ GET 	/custom/:customName/*file				controllers.CustomAssets.getFile(customName:St
 
 GET		/record/:id							    controllers.RecordResourceController.getRecordResource(id, format: play.libs.F.Option[String])
 PUT		/record/:id								controllers.RecordResourceController.editRecordResource(id)
+PUT		/record/contextData			            controllers.RecordResourceController.editContextData()
 
 # Collection Controller
 GET 	 /collection/list 						controllers.CollectionObjectController.list(directlyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], recursivelyAccessedByUserOrGroup: play.libs.F.Option[controllers.parameterTypes.MyPlayList], creator: play.libs.F.Option[String], isPublic: play.libs.F.Option[java.lang.Boolean], isExhibition: play.libs.F.Option[java.lang.Boolean], collectionHits:Boolean ?= false, offset: Integer ?=0, count: Integer ?=10)
@@ -42,6 +43,7 @@ POST     /collection/liked			            controllers.WithResourceController.addT
 POST     /collection/:id/addRecord              controllers.WithResourceController.addRecordToCollection(id, position: play.libs.F.Option[Integer])
 
 DELETE   /collection/:id/removeRecord           controllers.WithResourceController.removeRecordFromCollection(id, recId, position: play.libs.F.Option[Integer], all: Boolean ?= false)
+PUT		 /collection/:id/moveRecord				controllers.WithResourceController.moveRecordInCollection(id, recordId, oldPosition: Int, newPosition: Int)
 DELETE   /collection/unliked/:recId			    controllers.WithResourceController.removeFromFavorites(recId)
 
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "SimpleCollection")
@@ -52,7 +54,7 @@ DELETE   /collection/:id	                    controllers.CollectionObjectControl
 # Exhibition Controller
 #POST     /exhibition/create                     controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "Exhibition")
 
-#GET		/record/similar/:externalId			controllers.RecordController.getSimilar(externalId)
+#GET	  /record/similar/:externalId			controllers.RecordController.getSimilar(externalId)
 
 #Group Manager
 POST	/group/create							controllers.GroupManager.createGroup(adminId: String ?=null, adminUsername: String ?=null, groupType: String ?="UserGroup")
@@ -74,6 +76,7 @@ GET		/group/membersInfo/:groupId 			controllers.GroupManager.getGroupUsersInfo(g
 
 # Rights Controller
 GET      /rights/:colId/:right                  controllers.RightsController.editCollectionRights(colId, right, username: String ?=null, membersDowngrade: Boolean ?= false)
+GET      /rights/:colId							controllers.RightsController.editCollectionPublicity(colId, isPublic: Boolean, membersDowngrade: Boolean ?= false)
 
 # Media Controller
 POST	/media/create							controllers.MediaController.createMedia(file: Boolean ?= true)
@@ -105,4 +108,5 @@ GET      /user/apikey/create                       controllers.UserManager.apike
 #Reindex Controller
 GET	/api/chind										controllers.ReindexController.changeIndice(newIndice: String)
 GET	/api/mkconst									controllers.ReindexController.makeConsistent()
-GET	/api/idxall										controllers.ReindexController.reindexAllDocs()
+GET	/api/idxres										controllers.ReindexController.reindexAllResources()
+GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()

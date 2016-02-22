@@ -34,6 +34,7 @@ import utils.Serializer.ObjectIdSerializer;
 import utils.Serializer.ObjectIdArraySerializer;
 import utils.Deserializer.PointDeserializer;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -101,6 +102,7 @@ public class Page {
 		return featuredCollections;
 	}
 
+	@JsonIgnore
 	public void setFeaturedCollections(List<ObjectId> featuredCollections) {
 		this.featuredCollections = featuredCollections;
 	}
@@ -112,7 +114,8 @@ public class Page {
 	public List<ObjectId> getFeaturedExhibitions() {
 		return featuredExhibitions;
 	}
-
+	
+	@JsonIgnore
 	public void setFeaturedExhibitions(List<ObjectId> featuredExhibitions) {
 		this.featuredExhibitions = featuredExhibitions;
 	}
