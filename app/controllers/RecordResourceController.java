@@ -169,41 +169,45 @@ public class RecordResourceController extends WithResourceController {
 	public static Result editContextData() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
+		System.out.println(json.toString());
 		if (json == null) {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
 		} else {
 			String contextDataType = null;
-			if (json.has("contextDataType"))
+			if (json.has("contextDataType")) {
 				contextDataType = json.get("contextDataType").asText();
-			if (contextDataType != null & ContextDataType.valueOf(contextDataType) != null) {
-				Class clazz;
-				try {
-					clazz = Class.forName("model.annotations."
-							+ contextDataType);
-					ContextData newContextData = (ContextData) Json.fromJson(json, clazz);
-					ObjectId colId = newContextData.getTarget().getCollectionId();
-					int position = newContextData.getTarget().getPosition();
-					if (colId != null && DB.getCollectionObjectDAO().existsEntity(colId)) {
-					//filterContextData(record);
-						Result response = errorIfNoAccessToCollection(Action.EDIT,
-							colId);
-						if (!response.toString().equals(ok().toString()))
-							return response;
-						else {
-							DB.getRecordResourceDAO().updateContextData(newContextData);
-							return ok("Edited context data.");
+				if (contextDataType != null & ContextDataType.valueOf(contextDataType) != null) {
+					Class clazz;
+					try {
+						clazz = Class.forName("model.annotations."
+								+ contextDataType);
+						ContextData newContextData = (ContextData) Json.fromJson(json, clazz);
+						ObjectId colId = newContextData.getTarget().getCollectionId();
+						int position = newContextData.getTarget().getPosition();
+						if (colId != null && DB.getCollectionObjectDAO().existsEntity(colId)) {
+						//filterContextData(record);
+							Result response = errorIfNoAccessToCollection(Action.EDIT,
+								colId);
+							if (!response.toString().equals(ok().toString()))
+								return response;
+							else {
+								DB.getRecordResourceDAO().updateContextData(newContextData);
+								return ok("Edited context data.");
+							}
 						}
-					}
-					else
-						return badRequest("Collection with id " + colId + " does not exist.");
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-					return internalServerError(error);
-				}			
+						else
+							return badRequest("Collection with id " + colId + " does not exist.");
+					} catch (ClassNotFoundException e) {
+						e.printStackTrace();
+						return internalServerError(error);
+					}			
+				}
+				else 
+					return badRequest("Context data type should be one of supported types: ExhibitionData.");
 			}
 			else 
-				return badRequest("Context data type should be one of supported types: ExhibitionDataType");
+				return badRequest("The contextDataType should be defined.");
 		}
 	}
 

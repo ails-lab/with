@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import model.EmbeddedMediaObject.MediaVersion;
@@ -90,6 +91,7 @@ public class MediaCheckerActor extends UntypedActor {
 					mediaObjectId);
 			httpPost = new HttpPost(
 					"http://mediachecker.image.ntua.gr/api/extractmetadata");
+			String boundary = UUID.randomUUID().toString();
 			if (mediaObject.getMediaBytes() != null) {
 				HttpEntity mpEntity = MultipartEntityBuilder
 						.create()
@@ -97,12 +99,15 @@ public class MediaCheckerActor extends UntypedActor {
 								"mediafile",
 								new ByteArrayBody(mediaObject.getMediaBytes(),
 										"mediafile"))
-						.setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build();
+						.setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+						.setBoundary("-------------" + boundary).build();
 				ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
 				mpEntity.writeTo(baoStream);
 				HttpEntity nByteEntity = new NByteArrayEntity(
 						baoStream.toByteArray(),
 						ContentType.MULTIPART_FORM_DATA);
+				httpPost.setHeader("Content-Type",
+						"multipart/form-data;boundary=-------------" + boundary);
 				httpPost.setEntity(nByteEntity);
 			} else {
 				URI uri = RequestBuilder.get()
@@ -162,9 +167,11 @@ public class MediaCheckerActor extends UntypedActor {
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
-		MediaType mime = MediaType.parse(json.get("mimetype").asText()
-				.toLowerCase());
-		med.setMimeType(mime);
+		if (json.get("mimetype") != null) {
+			MediaType mime = MediaType.parse(json.get("mimetype").asText()
+					.toLowerCase());
+			med.setMimeType(mime);
+		}
 		med.setHeight(json.get("height").asInt());
 		med.setWidth(json.get("width").asInt());
 
