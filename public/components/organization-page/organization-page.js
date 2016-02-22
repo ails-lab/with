@@ -1,4 +1,4 @@
-define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope', 'imagesloaded', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'jquery.fileupload', 'knockout.x-editable'], function (ko, template, app, bridget, Isotope, imagesLoaded) {
+define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope', 'imagesloaded', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'jquery.fileupload', 'knockout.x-editable', 'smoke'], function (ko, template, app, bridget, Isotope, imagesLoaded) {
 
 	$.bridget('isotope', Isotope);
 
@@ -294,8 +294,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			self.url = "#collectionview/" + self.id;
 
 			self.description = data.description;
-			if (data.firstEntries.length > 0) {
-				self.thumbnail = data.firstEntries[0].thumbnailUrl;
+			if (data.media.length > 0) {
+				self.thumbnail = data.media[0].Thumbnail.url === '' ? 'images/thumb-empty.png' : data.media[0].Thumbnail.url;
 			}
 			self.isExhibition = data.isExhibition;
 			if (self.isExhibition) {
