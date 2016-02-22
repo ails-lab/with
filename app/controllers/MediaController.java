@@ -216,11 +216,6 @@ public class MediaController extends Controller {
 			}
 			if (jsonn.hasNonNull("url")) {
 				med.setUrl(jsonn.get("url").asText());
-				DB.getMediaObjectDAO().makePermanent(med);
-				MediaCheckMessage mcm = new MediaCheckMessage(med);
-				ActorSelection api = Akka.system().actorSelection(
-						"user/mediaChecker");
-				api.tell(mcm, ActorRef.noSender());
 			} else {
 				result.put("error", "must provide a url in json request");
 				return badRequest(result);
@@ -230,6 +225,10 @@ public class MediaController extends Controller {
 				File x = HttpConnector.getURLContentAsFile(jsonn.get("url")
 						.asText());
 				result = storeMedia(med, x);
+				MediaCheckMessage mcm = new MediaCheckMessage(med);
+				ActorSelection api = Akka.system().actorSelection(
+						"user/mediaChecker");
+				api.tell(mcm, ActorRef.noSender());
 				return ok(result);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -254,40 +253,16 @@ public class MediaController extends Controller {
 		med.setSize(x.length() / 1024);
 		BufferedImage image = ImageIO.read(x);
 		// TODO: VERY IMPORTANT TO FIND A WAY AROUND THIS AND THE PROMISE!
-		// if (med.getMimeType().is(MediaType.ANY_IMAGE_TYPE)) {
 		med.setType(WithMediaType.IMAGE);
 		// TODO: THIS IS A TEMPORARY FIX TO A MAYBE BIG BUG!
 		med.setMimeType(MediaType.parse(Files.probeContentType(x.toPath())));
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageIO.write(image, "jpg", baos);
-		baos.flush();
-		byte[] thumbByte = baos.toByteArray();
-		baos.close();
-		med.setMediaBytes(thumbByte);
-		med.setDbId(null);
+		byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(x));
+		med.setMediaBytes(mediaBytes);
 		DB.getMediaObjectDAO().makePermanent(med);
 		med.setUrl("/media/" + med.getDbId().toString() + "?file=true");
 		DB.getMediaObjectDAO().makePermanent(med);
 		result = makeThumbs(med, image);
 		return result;
-		// } else
-		// if(med.getMimeType().is(MediaType.ANY_VIDEO_TYPE)){
-		// med.setType(WithMediaType.VIDEO);//durationSeconds
-		// //width, height //thumbnailBytes //Quality
-		//
-		// } else
-		// if(med.g/etMimeType().is(MediaType.ANY_TEXT_TYPE)){
-		// med.setType(WithMediaType.TEXT);
-		//
-		// } else
-		// if(med.getMimeType().is(MediaType.ANY_AUDIO_TYPE)){
-		// med.setType(WithMediaType.AUDIO); //durationSeconds
-		// //Quality
-
-		// } else {
-		// result.put("error", "Unsupported media type");
-		// return result;
-		// }
 	}
 
 	private static boolean checkJsonArray(ArrayNode allRes, String string) {

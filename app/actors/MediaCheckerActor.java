@@ -16,39 +16,40 @@
 
 package actors;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import model.EmbeddedMediaObject.MediaVersion;
-import model.EmbeddedMediaObject.Quality;
-import model.MediaObject;
-
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.concurrent.FutureCallback;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.nio.entity.NByteArrayEntity;
 import org.apache.http.util.EntityUtils;
 import org.bson.types.ObjectId;
-
-import play.Logger;
-import play.Logger.ALogger;
-import play.libs.Json;
-import akka.actor.UntypedActor;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.net.MediaType;
 
+import akka.actor.UntypedActor;
 import db.DB;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.Quality;
+import model.MediaObject;
+import play.Logger;
+import play.Logger.ALogger;
+import play.libs.Json;
 
 /**
  *
@@ -78,31 +79,34 @@ public class MediaCheckerActor extends UntypedActor {
 	}
 
 	public synchronized void executeRequest(MediaCheckMessage message) {
-		HttpPost aFile = null;
+		HttpPost httpPost = null;
 		CloseableHttpResponse response = null;
 		try {
-			ObjectId mediaObjectId = ((MediaCheckMessage) message).mediaObjectId;
-			MediaObject mediaObject = DB.getMediaObjectDAO().findById(
-					mediaObjectId);
-			aFile = new HttpPost(
+			ObjectId mediaObjectId = message.mediaObjectId;
+			MediaObject mediaObject = DB.getMediaObjectDAO()
+					.findById(mediaObjectId);
+			httpPost = new HttpPost(
 					"http://mediachecker.image.ntua.gr/api/extractmetadata");
 			if (mediaObject.getMediaBytes() != null) {
-				MultipartEntityBuilder builder = MultipartEntityBuilder
-						.create();
-				builder.addPart("mediafile",
-						new ByteArrayBody(mediaObject.getMediaBytes(), "dummy"));
-				builder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-				aFile.setEntity(builder.build());
+				HttpEntity mpEntity = MultipartEntityBuilder.create()
+						.addBinaryBody("mediafile", mediaObject.getMediaBytes())
+						.setMode(HttpMultipartMode.BROWSER_COMPATIBLE).build();
+				ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
+				mpEntity.writeTo(baoStream);
+				HttpEntity nByteEntity = new NByteArrayEntity(
+						baoStream.toByteArray(),
+						ContentType.MULTIPART_FORM_DATA);
+				httpPost.setEntity(nByteEntity);
 			} else {
 				URI uri = RequestBuilder.get()
 						.addParameter("url", mediaObject.getUrl()).getUri();
-				aFile.setURI(uri);
+				httpPost.setURI(uri);
 			}
-			hc.execute(aFile, new FutureCallback<HttpResponse>() {
+			hc.execute(httpPost, new FutureCallback<HttpResponse>() {
 				public void completed(final HttpResponse response) {
 					try {
-						String jsonResponse = EntityUtils.toString(
-								response.getEntity(), "UTF8");
+						String jsonResponse = EntityUtils
+								.toString(response.getEntity(), "UTF8");
 						log.info(jsonResponse);
 						JsonNode resp = Json.parse(jsonResponse);
 						editMediaAfterChecker(mediaObject, resp);
@@ -151,8 +155,8 @@ public class MediaCheckerActor extends UntypedActor {
 
 	private static void editMediaAfterChecker(MediaObject med, JsonNode json) {
 
-		MediaType mime = MediaType.parse(json.get("mimetype").asText()
-				.toLowerCase());
+		MediaType mime = MediaType
+				.parse(json.get("mimetype").asText().toLowerCase());
 		med.setMimeType(mime);
 		med.setHeight(json.get("height").asInt());
 		med.setWidth(json.get("width").asInt());
