@@ -1,11 +1,15 @@
 
 <div class="exhibition">
-	<input type="checkbox" class="switch"/>
 	<div class="left"></div>  <!-- for scrolling the page when dragging item at left of page-->
 	<div class="outer"><!--
 --><div class="boxBasic boxItem" id="placeholder">
 		<input  class="placeholderD1" data-bind="textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }" placeholder="Add title" >
 		<input  class="placeholderD2" data-bind="textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }" placeholder="Add description">
+
+		<div class="center-buttons">
+			<input type="checkbox" class="switch"/>
+			<button class="btn btn-success btn-sm" style="font-size: 12px;" data-bind="click: playExhibition"><span class="glyphicon glyphicon-play" style="vertical-align: middle"></span> Play</button>
+		</div>
 	</div><!--
 --><!-- ko template: { foreach: collectionItemsArray,
 			    beforeRemove: removeItem,
@@ -62,7 +66,6 @@
 	</div>
 
 	<div class="right"></div><!-- for scrolling the page when dragging item at right of page-->
-
 
 	<div class="exh-bottom">
 		<div class="bottom-left">
