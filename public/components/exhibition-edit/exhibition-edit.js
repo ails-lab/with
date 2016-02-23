@@ -145,11 +145,11 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				return;
 			}
 		};
-		
+
 		self.mapping = {
 			create: function (options) {
 		        //customize at the root level: add title and description observables, based on multiliteral
-				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...] 
+				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS({}, {});
 		        newRecord.dbId = ko.observable(record.dbId);
@@ -180,13 +180,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				var dbDescription = record.descriptiveData.description;
 		        if (dbDescription == undefined || dbDescription == null)
 		        	newRecord.description = ko.observable("");
-		        else 
+		        else
 		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
 				newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
 		        return newRecord;
 		    }
 		}
-		
+
 		self.checkLogged();
 		self.loading = ko.observable(false);
 		self.title = ko.observable('');
@@ -394,6 +394,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		    var index = context.$index();
 			editItem(data, self.dbId(), index, 'PopUpTextMode');
 		};
+
+	    self.playExhibition = function() {
+	    	window.location.hash = '#exhibitionview/' + self.dbId();
+	    };
 
 		//custom binding
 		var _draggedItem;
