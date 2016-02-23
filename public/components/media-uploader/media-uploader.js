@@ -118,6 +118,8 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 				success: function (data) {
 					self.close();
 					$.smkAlert({text: 'Item added to the collection', type: 'success'});
+					ko.contextFor(withcollection).$data.loadNext();
+					ko.contextFor(withcollection).$data.reloadEntryCount();
 				},
 				error: function (result) {
 					$.smkAlert({text: 'Error adding the item to the collection!', type:'danger', time: 10});
