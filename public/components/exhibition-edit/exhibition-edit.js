@@ -10,9 +10,16 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			state: exhibition.administrative.access.isPublic()
 		});
 		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
-			var promise = updateExhibitionProperty(exhibition, 'isPublic', state);;
-			$.when(promise).done(function (data) {
-
+			$.ajax({
+				url: '/rights/' + exhibition.dbId() + '?isPublic=' + state,
+				method: 'GET',
+				contentType: "application/json",
+				success: function () {
+					// Empty
+				},
+				error: function () {
+					// Empty
+				}
 			});
 		});
 	}
@@ -538,7 +545,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				dropElement.droppable(dropOptions);
 			}
 		};
-		
+
 
 		ko.bindingHandlers.scroll = {
 			updating: true,
