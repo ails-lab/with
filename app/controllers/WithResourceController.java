@@ -536,7 +536,6 @@ public class WithResourceController extends Controller {
 					} else
 						DB.getRecordResourceDAO().decField("usage.collected",
 								recordDbId);
-					// Change the collection metadata as well
 					DB.getCollectionObjectDAO().decEntryCount(collectionDbId);
 					DB.getCollectionObjectDAO().updateField(collectionDbId,
 							"administrative.lastModified", new Date());
@@ -567,7 +566,7 @@ public class WithResourceController extends Controller {
 			locks = Locks.create().write("Collection #" + collectionDbId)
 					.acquire();
 			ObjectId recordDbId = new ObjectId(recordId);
-			Result response = errorIfNoAccessToRecord(Action.EDIT,
+			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;

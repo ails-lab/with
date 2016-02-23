@@ -118,6 +118,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 	}
 
 	function moveItemInExhibition(exhibitionId, recordId, oldPosition, newPosition) {
+		alert("move call");
 		$.ajax({
 			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
 			method: 'put',
@@ -153,27 +154,27 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		        var newRecord =  ko.mapping.fromJS({}, {});
 		        newRecord.dbId = ko.observable(record.dbId);
 		        var contextData= record.contextData;
+				if (contextData !== undefined)
+					newRecord.contextData = ko.mapping.fromJS(contextData, {});
 		        newRecord.containsAudio = ko.pureComputed(function() {
-		        	if (contextData == undefined)
+		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
 		        		return false;
 		        	else
-		        		return (record.contextData[0].body.audioUrl !== "");
+		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
 				});
 		        newRecord.containsVideo = ko.pureComputed(function() {
-		        	if (contextData == undefined)
+		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined)
 		        		return false;
 		        	else
-		        		return (record.contextData[0].body.videoUrl !== '');
+		        		return (newRecord.contextData()[0].body.videoUrl() !== '');
 		        	return result;
 				});
 				newRecord.containsText = ko.pureComputed(function() {
-					if (contextData == undefined)
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined)
 						return false;
 		        	else
-		        		return record.contextData[0].body.text.default !== '';
+		        		return newRecord.contextData()[0].body.text.default() !== '';
 				});
-				if (contextData !== undefined)
-					newRecord.contextData = ko.mapping.fromJS(contextData, {});
 				newRecord.media = ko.mapping.fromJS(record.media, {});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
@@ -320,6 +321,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.xButtonClicked = function (item) {
+			alert("delete clicked");
 			var index = self.collectionItemsArray.indexOf(item);
 			if (index > -1) {
 				self.collectionItemsArray.remove(item);
@@ -352,9 +354,9 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					$(elem).find('#loadingIcon').fadeOut();
 					return;
 				}
-
 				if (_bIsMoveOperation) {
-					if (_startIndex > 0) {
+					alert("move in show: from " + _startIndex + " to " + index);
+					if (_startIndex >= 0) {
 						moveItemInExhibition(self.dbId(), record.dbId(), _startIndex, index);
 						_startIndex = -1;		// Move was successful, reset the startIndex
 					} else {
@@ -370,6 +372,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.removeItem = function (elem, index, record) {
+			alert("removes " + record.dbId() + " from position " + index);
 			if (_bIsMoveOperation) {
 				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
 				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
@@ -383,7 +386,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.showPopUpVideo = function (data, event) {
 			 var context = ko.contextFor(event.target);
 		    var index = context.$index();
-		    alert(JSON.stringify(data));
 			editItem(data, self.dbId(), index, 'PopUpVideoMode');
 		};
 
@@ -491,29 +493,33 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					},
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
-						//clone it
 						var newItem = ko.mapping.fromJS({}, {});
-						contextData = {
-							"contextDataType": "ExhibitionData",
-							"target": {
-								"collectionId": self.dbId(),
-								"position": indexNewItem
-							},
-							"body" : {
-								"text": {"default": ""},
-								"videoUrl": ""
-							}
-						};
-						_draggedItem.contextData = [contextData];
-						ko.mapping.fromJS(_draggedItem, {}, newItem);
-						//var arrayCollection = self.collectionItemsArray;
+						newItem = _draggedItem;
+						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
+						alert("move in array from " + indexDraggedItem + "to " + indexNewItem);
+						_startIndex = indexDraggedItem;
 						//dont do anything if it is moved to its direct left or right dashed box
-						if (_bIsMoveOperation) {
-							var indexDraggedItem = self.collectionItemsArray.indexOf(newItem);
+						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
 								_draggedItem = undefined;
 								return;
 							}
+							newItem.contextData()[0].target.position(indexNewItem);
+						}
+						else {//comes from a bottom collection - add empty contextData
+							contextData = ko.mapping.fromJS([{
+								"contextDataType": "ExhibitionData",
+								"target": {
+									"collectionId": self.dbId(),
+									"position": indexNewItem
+								},
+								"body" : {
+									"audioUrl": "",
+									"text": {"default": ""},
+									"videoUrl": ""
+								}
+							}], {});
+							newItem.contextData = contextData;
 						}
 						dropElement.animate({
 							width: "60px"
@@ -521,9 +527,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						dropElement.find('#droppable-Children').css({
 							display: "none"
 						});
+						alert("add to position in array " + indexNewItem);
 						self.collectionItemsArray.splice(indexNewItem, 0, newItem);
 						if (_bIsMoveOperation) {
-							self.collectionItemsArray.remove(newItem);
+							alert("remove old in position from array ");
+							_removeItem = false;
+							self.collectionItemsArray.splice(indexDraggedItem, 1);
 						}
 						_draggedItem = undefined;
 					}
