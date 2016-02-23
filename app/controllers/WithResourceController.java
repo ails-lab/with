@@ -573,7 +573,7 @@ public class WithResourceController extends Controller {
 			else {
 				if (oldPosition > newPosition) {
 					DB.getRecordResourceDAO().shiftRecordsToRight(
-							collectionDbId, newPosition, oldPosition - 1);
+							collectionDbId, oldPosition - 1, newPosition);
 				} else if (newPosition > oldPosition) {
 					DB.getRecordResourceDAO().shiftRecordsToLeft(
 							collectionDbId, oldPosition + 1, newPosition - 1);

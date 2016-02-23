@@ -44,6 +44,7 @@ import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataTarget;
 import model.annotations.ExhibitionData;
 import model.basicDataTypes.CollectionInfo;
+import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -199,13 +200,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				index += 1;
 			}
 			List<ContextData> contextData = resource.getContextData();
+			index = 0;
 			for (ContextData c : contextData) {
 				ContextDataTarget target = c.getTarget();
 				if (target.getCollectionId().equals(colId)) {
 					int pos = target.getPosition();
-					if (pos >= position)
+					if (pos >= position) {
 						update.accept("contextData." + index + ".target.position",
 								updateOps);
+					}
 				}
 				index += 1;
 			}
@@ -228,11 +231,9 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
 		q.filter("collectedIn", elemMatch1);
-		ArrayList<String> retrievedFields = new ArrayList<String>();
-		retrievedFields.add("collectedIn");
+		String[] retrievedFields = {"collectedIn", "contextData"};
 		List<RecordResource> resources = this.find(
-				q.retrievedFields(true, retrievedFields
-						.toArray(new String[retrievedFields.size()]))).asList();
+				q.retrievedFields(true, retrievedFields)).asList();
 		for (RecordResource resource : resources) {
 			UpdateOperations<RecordResource> updateOps = this
 					.createUpdateOperations().disableValidation();
@@ -247,14 +248,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				}
 				index += 1;
 			}
+			index = 0;
 			List<ContextData> contextData = resource.getContextData();
 			for (ContextData c : contextData) {
 				ContextDataTarget target = c.getTarget();
 				if (target.getCollectionId().equals(colId)) {
 					int pos = target.getPosition();
-					if ((pos >= startPosition) && (pos <= stopPosition))
+					if ((pos >= startPosition) && (pos <= stopPosition)) {
 						update.accept("contextData." + index + ".target.position",
 								updateOps);
+					}
 				}
 				index += 1;
 			}
