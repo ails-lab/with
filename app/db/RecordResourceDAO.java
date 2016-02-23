@@ -367,8 +367,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shiftRecordsToRight(colId, position);
 		updateRecordUsageCollectedAndRights(
 				new CollectionInfo(colId, position), newAccess, recordId, colId);
-		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
-				position);
+		DB.getCollectionObjectDAO().addCollectionMediaAsync(colId, recordId);
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId colId,
@@ -384,8 +383,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId,
 				entryCount), newAccess, recordId, colId);
-		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId,
-				entryCount);
+		DB.getCollectionObjectDAO().addCollectionMediaAsync(colId, recordId);
 	}
 
 	public WithAccess mergeParentCollectionRights(ObjectId recordId,
