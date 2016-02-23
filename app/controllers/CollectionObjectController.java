@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
+import model.annotations.ExhibitionData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -620,9 +621,9 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				List<String> retrievedFields = new ArrayList<String>(
+				/*List<String> retrievedFields = new ArrayList<String>(
 						Arrays.asList("descriptiveData.label",
-								"descriptiveData.description", "media", "collectedIn"));
+								"descriptiveData.description", "media", "collectedIn"));*/
 				List<RecordResource> records = DB.getRecordResourceDAO()
 						.getByCollectionBetweenPositions(colId, start,
 								start + count);
@@ -645,8 +646,10 @@ public class CollectionObjectController extends WithResourceController {
 						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
 						for (ContextData ca : contextAnns) {
 							if (ca.getTarget().getCollectionId().equals(colId)
-									&& (ca.getTarget().getPosition() == position))
+									&& (ca.getTarget().getPosition() == position)) {
 								filteredContextAnns.add(ca);
+								break;
+							}
 						}
 						e.setContextData(filteredContextAnns);
 						if (e.getContent() != null) {

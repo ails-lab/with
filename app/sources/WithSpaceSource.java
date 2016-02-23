@@ -135,10 +135,7 @@ public class WithSpaceSource extends ISpaceSource {
 		List<CommonFilter> filters = q.filters;
 		for (CommonFilter f: filters) {
 			for (String filterValue: f.values) {
-                if(f.filterID.equals("dctermsspatial") || f.filterID.equals("dccontributor") || f.filterID.equals("dccreator"))
-	    			elasticoptions.addFilter(f.filterID+".default.all", filterValue);
-                else
-	    			elasticoptions.addFilter(f.filterID+".all", filterValue);
+	    		elasticoptions.addFilter(f.filterID+".all", filterValue);
 			}
 		}
 

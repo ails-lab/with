@@ -3,7 +3,7 @@
     "info": {
         "version": "v0.4",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE: 19 Feb, 2016\n \n Note for using test calls: Testing calls with parameters in the path will not work. We have created some duplicate entries for dedicated test calls under the '''test calls''' tab. You can use these for testing, however they don't always show the full body schema. To test with that, consult the non-testing descriptive calls, and experiment with an external application such as Postman."
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE: 19 Feb, 2016\n \n Note for using test calls: Testing calls with a body will not work (for all calls, except ```search``` calls!). We have created some duplicate entries for dedicated test calls under the '''test calls''' tab. You can use these for testing, however they don't always show the full body schema. To test with that, consult the non-testing descriptive calls, and experiment with an external application such as Postman."
     },
     "paths": {
         "/api/search": {
@@ -79,7 +79,7 @@
                     "Search"
                 ],
                 "summary": "Advanced search with filters (faceted sarch).",
-                "description": "An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values. Bear in mind we are aware of a small typographical error, the field \"responses\" will be changed to \"responses\".",
+                "description": "An extension of the simple search to include filters for search with facets. The values of the filters are NOT preset. To see what filters you can use, you need to check the response from a search without filters. Then you can send another query with some values of all the possible filters. To get a better understanding we suggest you use the inspector console of your favourite browser and observe the network activity while performing a search from the frontend, using different filter values.",
                 "parameters": [
                     {
                         "in": "body",
@@ -124,7 +124,7 @@
                                         "properties": {
                                             "filterID": {
                                                 "type": "string",
-                                                "default": "type"
+                                                "default": "media.type"
                                             },
                                             "values": {
                                                 "type": "array",
@@ -716,7 +716,7 @@
                 ],
                 "parameters": [
                     {
-                        "name": "position",
+                        "name": "positiond",
                         "in": "query",
                         "description": "offset",
                         "type": "integer",

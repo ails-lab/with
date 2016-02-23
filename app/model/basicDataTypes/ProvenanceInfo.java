@@ -33,7 +33,7 @@ public class ProvenanceInfo {
 
 	public enum Sources {
 		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UploadedByUser"),
-		BritishLibrary("The British Library"),
+		BritishLibrary("BritishLibrary"),
 		InternetArchive("Internet Archive"), DDB("DDB"),
 		DigitalNZ("DigitalNZ"), DPLA("DPLA"), EFashion("EFashion"), NLA("NLA"),
 		Rijksmuseum("Rijksmuseum");

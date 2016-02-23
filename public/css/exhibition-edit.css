@@ -10,11 +10,25 @@ body {
   margin-bottom: 120px;
   position: relative;
 }*/
-.bootstrap-switch-small{
-    position: absolute;
+// .bootstrap-switch-small{
+//     position: absolute;
+//     background-color: yellow;
+//     bottom: 20px;
+//     left: 214px;
+//     z-index: 20;
+// }
+
+.bootstrap-switch-small {
+    position: relative;
     background-color: yellow;
-    top: 60px;
-    left: 5px;
+}
+
+.center-buttons {
+    text-align: center;
+    margin: 0 auto;
+    position: absolute;
+    left: 180px;
+    bottom: 20px;
     z-index: 20;
 }
 

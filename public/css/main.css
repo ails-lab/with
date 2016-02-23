@@ -353,7 +353,7 @@ body div[role='main'] {
   height: 100%;
 }
 body div[role='main'].homepage {
-  margin-top: 72px;
+  padding-top: 72px;
 }
 body div[role='main'].homepage:before,
 body div[role='main'].homepage:after {

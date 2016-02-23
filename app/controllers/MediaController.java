@@ -17,12 +17,14 @@
 package controllers;
 
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Map;
@@ -260,7 +262,11 @@ public class MediaController extends Controller {
 		// TODO: VERY IMPORTANT TO FIND A WAY AROUND THIS AND THE PROMISE!
 		med.setType(WithMediaType.IMAGE);
 		// TODO: THIS IS A TEMPORARY FIX TO A MAYBE BIG BUG!
-		// med.setMimeType(MediaType.parse(Files.probeContentType(x.toPath())));
+		//med.setMimeType(MediaType.parse(Files.probeContentType(x.toPath())));
+		InputStream is = new BufferedInputStream(new FileInputStream(x));
+		String mimeType = URLConnection.guessContentTypeFromStream(is);
+		med.setMimeType(MediaType.parse(mimeType));
+		
 		byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(x));
 		med.setMediaBytes(mediaBytes);
 		DB.getMediaObjectDAO().makePermanent(med);

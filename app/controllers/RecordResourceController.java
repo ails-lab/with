@@ -168,7 +168,6 @@ public class RecordResourceController extends WithResourceController {
 	public static Result editContextData() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
-		System.out.println(json.toString());
 		if (json == null) {
 			error.put("error", "Invalid JSON");
 			return badRequest(error);
