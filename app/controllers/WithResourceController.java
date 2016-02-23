@@ -563,7 +563,7 @@ public class WithResourceController extends Controller {
 				DB.getCollectionObjectDAO().updateField(collectionDbId,
 						"administrative.lastModified", new Date());
 				DB.getCollectionObjectDAO().removeCollectionMedia(collectionDbId, oldPosition);
-				DB.getCollectionObjectDAO().addCollectionMedia(collectionDbId, recordDbId, newPosition);
+				DB.getCollectionObjectDAO().addCollectionMedia(collectionDbId, recordDbId);
 				result.put("message", "Record succesfully added to collection");
 				return ok(result);
 			}
