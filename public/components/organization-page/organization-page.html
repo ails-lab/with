@@ -88,21 +88,25 @@
 		<div class="container">
 			<!-- grid-->
 			<div class="grid" id="homemasonry" data-bind="profileisotope: page.featuredCollections">
-				<div class="sizer"></div>
-				<div data-bind="visible: isLoaded(), css: itemcss">
-					<div class="wrap">
-						<!-- anchor--><a data-bind="click: $parent.loadCollectionOrExhibition" title="view">
-						<!-- thumbnail-->
-						<div class="thumb"><img data-bind="attr: {src: thumbnail}"></div>
-						<!-- info-->
-						<div class="info"><span class="type" data-bind="text:type"></span>
-							<h1 class="title" data-bind="text: collname"></h1><span class="owner" data-bind="text: owner"></span>
-						</div>
-						<!-- pointer-->
-						<div class="pointer"><span class="arrow"><img src="images/ic-right-arrow.png" alt="Arrow"></span></div></a>
-					</div>
-				</div>
-
+			   <!-- ko if: $index() === 0 -->
+	              <div class="sizer"></div>
+	              <!-- /ko -->
+	               <div data-bind="visible: isLoaded(), css:data.css()">
+	              <div class="wrap">
+	                <!-- anchor--><a data-bind="attr: {href:data.url()}"  title="view">
+	                <!-- thumbnail-->
+	                  <div class="thumb"><img data-bind="attr: {src: data.thumbnail()}"></div>
+	                  <!-- info-->
+	                  <div class="info"><span class="type" data-bind="text:data.type()"></span>
+	                    <h1 class="title" data-bind="text: data.title"></h1><span class="owner" data-bind="text: data.owner()"></span>
+	                  </div>
+	                  <!-- pointer-->
+						<div class="pointer"><span class="arrow"><img src="images/ic-right-arrow.png" alt="Arrow"></span></div>
+	                  </a>
+	              </div>
+	            </div>
+			
+			
 			</div>
 
 			<div id="more" data-bind="visible: loading, scroll: page.featuredCollections(), scrollOptions: { loadFunc: loadNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
