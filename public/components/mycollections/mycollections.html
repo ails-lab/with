@@ -1,12 +1,12 @@
 <div id="userCollections" class="container-fluid" style="padding-bottom: 100px;">
-		
+
 		  <div class="row">
 			<div class="col-lg-12">
 				<!-- ko if: showsExhibitions -->
 				<span class="withmain">
 				<span class="collectiontab active">
 					<h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My exhibitions</a></h2>
-				</span> | 
+				</span> |
 				<span class="collectiontab">
 					<h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Exhibitions shared with me</a></h2>
 				</span>
@@ -17,7 +17,7 @@
 				<span class="withmain">
 				<span class="collectiontab active">
 					<h2><a data-bind="event :{ click: function(data,event){changeTab('noshared',data,event);}}">My collections</a></h2>
-				</span> | 
+				</span> |
 				<span class="collectiontab">
 					<h2><a data-bind="event :{ click: function(data,event){changeTab('shared',data,event);}}">Collections shared with me</a></h2>
 				</span>
@@ -34,6 +34,9 @@
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
 					 	<!-- <span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>-->
+					 	<!-- ko if: $parent.showsExhibitions -->
+						<span class="glyphicon glyphicon-play" title="Play Collection" data-bind="click: function() { $parent.playExhibition(dbId()) }" aria-hidden="true"></span>
+						<!-- /ko -->
 						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
 					 	<span class="glyphicon glyphicon-trash" title="Delete Collection" data-bind="click: $parent.deleteMyCollection" aria-hidden="true"></span>
 					 	<span class="glyphicon glyphicon-share" title="Share Collection" data-bind="click: $parent.openShareCollection" aria-hidden="true"></span>
@@ -62,7 +65,7 @@
 					  	 		 </div>
 					  	 	 <!-- /ko -->
 					  	 	 <!-- /ko -->
-					  	 	 
+
 					  	  </div>
 					  	 </div>
 					  	 </div>
@@ -91,12 +94,12 @@
 
 				 </div>
 				 	<div id="more" data-bind="visible: loading, scroll: myCollections(), scrollOptions: {loadFunc: moreCollections, functPar1: showsExhibitions, offset: 0}"> <i class="fa fa-spinner fa-pulse"></i></div>
-		
-				 
+
+
 			</div>
 			<div class="col-lg-12" id="sharedtab" style="display:none">
 				 <span class="withmain">
-				<!-- ko if: showsExhibitions --> 
+				<!-- ko if: showsExhibitions -->
 				 <h2>Exhibitions shared with me</h2>
 				  <!-- /ko -->
 				 <!-- ko else -->
@@ -113,6 +116,9 @@
 					 <div class="content">
 						<div class="btn-group pull-right" role="group">
 					 	<!-- <span class="glyphicon glyphicon-link" title="API calls for this Collection" data-bind="click:$parent.getAPIUrl" aria-hidden="true"></span>-->
+					 	<!-- ko if: $parent.showsExhibitions -->
+						<span class="glyphicon glyphicon-play" title="Play Collection" data-bind="click: function() { $parent.playExhibition(dbId()) }" aria-hidden="true"></span>
+						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
 						<span class="glyphicon glyphicon-pencil" title="Edit Collection" data-bind="click: $parent.openEditCollectionPopup" aria-hidden="true"></span>
 					 	<!--  ko if: myAccess() ==  "OWN" -->
@@ -167,9 +173,9 @@
 				 <!-- /ko -->
 				 </div>
 				 	<div id="more" data-bind="visible: loading ,scroll: sharedCollections(), scrollOptions: { loadFunc: nextSharedCollections, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
-		
+
 		    </div>
 		</div>
-		
-		
+
+
 </div>
