@@ -762,7 +762,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				url: "/collection/list",
 				processData: false,
 				//TODO:add parent project filter
-				data: "offset=0&count=20&collectionHits=true&directlyAccessedByGroupName=" + JSON.stringify([{
+				data: "offset=0&count=20&collectionHits=true&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 					group: self.id(),
 					rights: "OWN"
 				}]),
@@ -793,7 +793,7 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				var offset = self.page.featuredCollections().length + 1;
 				$.ajax({
 					"url": '/collection/list',
-					data: "count=20&offset=" + offset + "&directlyAccessedByGroupName=" + JSON.stringify([{
+					data: "count=20&offset=" + offset + "&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 						"group": self.username(),
 						rights: "OWN"
 					}]),
