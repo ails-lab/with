@@ -154,9 +154,8 @@ public class RecordResourceController extends WithResourceController {
 				if (!response.toString().equals(ok().toString()))
 					return response;
 				else {
+					//TODO Check the JSON
 					DB.getRecordResourceDAO().editRecord("", recordDbId, json);
-					//return ok(Json.toJson(DB.getRecordResourceDAO().getById(
-							//recordDbId, Arrays.asList("administrative", "descriptiveData", "collectedIn"))));
 					return ok("Record edited.");
 				}
 			}
