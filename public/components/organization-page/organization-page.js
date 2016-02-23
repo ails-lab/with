@@ -672,11 +672,12 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 			var data = {
 				username: self.username,
 				friendlyName: self.friendlyName,
-				thumbnail: self.thumbnail,
+				avatar: self.avatar,
 				about: self.about,
 				page: self.page
 			};
-
+			console.log("sending to db:");
+			console.log(data);
 			$.ajax({
 				type: "POST",
 				url: "/" + self.type() + "/create",
@@ -768,7 +769,9 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				self.page.address(data.page.address);
 				self.page.city(data.page.city);
 				self.page.country(data.page.country);
-				self.page.url(data.page.url);
+				
+					self.page.url=data.page.url;
+				
 				if (data.page.coordinates) {
 					self.page.coordinates.longitude(data.page.coordinates.longitude);
 					self.page.coordinates.latitude(data.page.coordinates.latitude);
