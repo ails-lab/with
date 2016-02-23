@@ -27,6 +27,7 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
@@ -80,17 +81,28 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 		// model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		// model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 		// model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
-		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("location"));
+//		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("location","classification.places"));
+		model.setCountry(new MultiLiteralOrResource(Language.EN,"Netherlands"));
+		model.setCity(new MultiLiteralOrResource(Language.EN,"Amsterdam"));
+		model.setCoordinates(StringUtils.getPoint("52.36", "4.885278"));
 		// model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 		// model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
 		// model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
 		// model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("principalMaker"));
 		model.setDccontributor(rec.getMultiLiteralOrResourceValue("makers[.*].name"));
-		model.setKeywords(rec.getMultiLiteralOrResourceValue("classification.iconClassDescription","materials","techniques"));
+		model.setKeywords(rec.getMultiLiteralOrResourceValue("classification.iconClassDescription","materials","techniques","objectTypes"));
 		model.setLabel(rec.getMultiLiteralValue("title", "titles","longTitle"));
 		model.setDescription(rec.getMultiLiteralValue("description","subTitle","scLabelLine"));
 		model.setDates(StringUtils.getDates(rec.getStringArrayValue("dating.year")));
+		List<String> types = rec.getStringArrayValue("objectTypes");
+		WithMediaType type = null;
+		for (String string : types) {
+			type = WithMediaType.getType(getValuesMap().translateToCommon(CommonFilters.TYPE.getId(), string).get(0).toString());
+			if (type.isKnown()){
+				break;
+			}
+		}
 		// model.setDctype(rec.getMultiLiteralOrResourceValue("WebResource.type"));
 		// model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 
@@ -105,7 +117,7 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 //		model.setIsShownBy(rec.getLiteralOrResourceValue("Aggregation.isShownBy"));
 
 		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), 
-				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/" + id + ",0", id));
+				"https://www.rijksmuseum.nl/en/collection/" + id, id));
 		
 		
 		// List<String> theViews = rec.getStringArrayValue("hasView");
@@ -119,9 +131,9 @@ public class RijksmuseumItemRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setUrl(uri3);
 			medThumb.setWidth(rec.getIntValue("webImage.width"));
 			medThumb.setHeight(rec.getIntValue("webImage.height"));
-//			medThumb.setType(type);
-//			medThumb.setOriginalRights(rights);
-//			medThumb.setWithRights(withMediaRights);
+			medThumb.setType(type);
+			medThumb.setOriginalRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/deed.en"));
+			medThumb.setWithRights(WithMediaRights.Public);
 			object.addMedia(MediaVersion.Original, medThumb);
 		}
 

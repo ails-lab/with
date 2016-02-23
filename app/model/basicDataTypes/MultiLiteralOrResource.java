@@ -71,5 +71,9 @@ public class MultiLiteralOrResource extends MultiLiteral {
 		}
 		return this;
 	}
+	
+	public MultiLiteralOrResource fillDEF() {
+		return (MultiLiteralOrResource) fillDEF(false);
+	}
 
 }
