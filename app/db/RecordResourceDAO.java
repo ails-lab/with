@@ -223,7 +223,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		BasicDBObject elemMatch2 = new BasicDBObject();
 		BasicDBObject geq = new BasicDBObject();
 		geq.put("$gte", startPosition);
-		geq.put("$le", stopPosition);
+		geq.put("$lte", stopPosition);
 		colIdQuery.append("position", geq);
 		BasicDBObject elemMatch1 = new BasicDBObject();
 		elemMatch1.put("$elemMatch", colIdQuery);
