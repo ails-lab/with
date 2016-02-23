@@ -147,7 +147,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		self.lang=ko.observable("");
 		self.sourceview=ko.observable(true);
 		self.sources= ko.observableArray([ "Rijksmuseum","DigitalNZ","DDB","The British Library","DPLA","Europeana","WITHin"]);
-		//self.sources= ko.observableArray([ "Europeana"]);
 		self.mixresults=ko.observableArray([]);
 		
 		self.results = ko.observableArray([]);
