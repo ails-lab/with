@@ -80,7 +80,7 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 
 	function EViewModel(params) {
 		document.body.setAttribute("data-page", "exhibition");
-		$("div[role='main']").toggleClass("homepage", false);
+		// $("div[role='main']").toggleClass("homepage", false);
 
 		var self = this;
 
