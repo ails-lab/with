@@ -62,7 +62,7 @@
 			<div class="droppable-placeholder-bottom">Drag an image</div>
 		</div>
 	</div>
-		<div data-bind="scroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }"/>
+		<div data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }"/>
 	</div>
 
 	<div class="right"></div><!-- for scrolling the page when dragging item at right of page-->
@@ -86,7 +86,7 @@
 				<!--<img src="http://www.escrs.org/milan2012/images/button_close.png" class="XButtonImage" data-bind="click: $parent.xButtonClicked"> </img>-->
 			</div>
 			<!-- /ko -->
-			<div data-bind="scroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"/>
+			<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"/>
 		</div>
 		<!--  ko if: currentItemSet-->
 		<div id="hoverDetails" data-bind="visible: detailsEnabled">
