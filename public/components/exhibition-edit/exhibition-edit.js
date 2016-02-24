@@ -547,7 +547,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 
-		ko.bindingHandlers.scroll = {
+		ko.bindingHandlers.hscroll = {
 			updating: true,
 
 			init: function (element, valueAccessor, allBindingsAccessor) {
