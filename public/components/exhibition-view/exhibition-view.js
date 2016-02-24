@@ -115,8 +115,6 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
 							record.annotation = result.contextData[j].body.text.default;
 							record.videoUrl = result.contextData[j].body.videoUrl;
-							console.log(record.annotation);
-							console.log(record.videoUrl);
 						}
 					}
 				}
