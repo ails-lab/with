@@ -38,9 +38,9 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
 				self.rights = findResOrLit(descdata.metadataRights);
-                if (options.withCreator != null) {
-				    self.creator = options.withCreatorInfo.username;
-                }
+				if (options.withCreator != null) {
+					self.creator = options.withCreatorInfo.username;
+				}
 			}
 
 			self.dbId = options.dbId;
@@ -105,13 +105,20 @@ define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'sli
 		};
 
 		self.revealItems = function (data) {
+			console.log(data);
 			for (var i in data) {
 				var result = data[i];
-                var record = new Record(result);
+				var record = new Record(result);
 				record.annotation = '';
-				if (result.hasOwnProperty('exhibitionRecord')) {
-					record.annotation = result.exhibitionRecord.annotation;
-					record.videoUrl = result.exhibitionRecord.videoUrl;
+				if (result.contextData != null) {
+					for (var j in result.contextData) {
+						if (result.contextData[j].target.collectionId == self.id() && result.contextData[j].target.position == i) {
+							record.annotation = result.contextData[j].body.text.default;
+							record.videoUrl = result.contextData[j].body.videoUrl;
+							console.log(record.annotation);
+							console.log(record.videoUrl);
+						}
+					}
 				}
 				var styleId = self.exhItems().length % 5 || 0;
 				var styleIdMapping = {
