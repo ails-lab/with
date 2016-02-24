@@ -56,6 +56,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("https://www.rijksmuseum.nl/api/en/collection");
 		builder.addSearchParam("key", apiKey);
 		builder.addSearchParam("format", "json");
+		builder.addSearchParam("imgonly", "True");
+		builder.addSearchParam("f", "1");
+		
 		builder.addQuery("q", q.searchTerm);
 		builder.addSearchParam("p", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 

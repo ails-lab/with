@@ -1,6 +1,6 @@
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 
-	count = 2;
+	count = 5;
 	accessLevels = {
 		    READ : 0,
 		    WRITE : 1,
@@ -55,7 +55,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        else
 		        	innerModel.description = ko.observable(self.multiLiteral(dbDescription));
 		        $.each(innerModel.media(), function(index, value){
-		        	withUrl = value.Thumbnail.withUrl();
+		        	
+		        	
+		        	//withUrl = value.Thumbnail.withUrl(); still not fully working
+		        	withUrl = value.Thumbnail.url();
 		        	if (withUrl.indexOf("/media") == 0)
 		        		innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
 		        	else

@@ -22,8 +22,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject.WithMediaRights;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.LiteralOrResource;
+import model.basicDataTypes.MultiLiteralOrResource;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
@@ -51,6 +53,11 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 		
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		
+//		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("location","classification.places"));
+		model.setCountry(new MultiLiteralOrResource(Language.EN,"Netherlands").fillDEF());
+		model.setCity(new MultiLiteralOrResource(Language.EN,"Amsterdam").fillDEF());
+		model.setCoordinates(StringUtils.getPoint("52.36", "4.885278"));
+		
 		model.setLabel(rec.getMultiLiteralValue("title"));
 		model.setDescription(rec.getMultiLiteralValue("longTitle"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("edmIsShownBy"));
@@ -60,7 +67,7 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 
 		String id = rec.getStringValue("objectNumber");
 		object.addToProvenance(new ProvenanceInfo(Sources.Rijksmuseum.toString(), 
-				"https://www.rijksmuseum.nl/en/search/objecten?q=dance&p=1&ps=12&ii=0#/" + id + ",0", id));
+				"https://www.rijksmuseum.nl/en/collection/" + id , id));
 		
 		
 		
@@ -73,8 +80,9 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setHeight(rec.getIntValue("headerImage.height"));
 //			medThumb.setType(type);
 //			if (Utils.hasInfo(rights))
-//			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
-//			medThumb.setWithRights(withRights);
+			medThumb.setOriginalRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/deed.en"));
+			medThumb.setWithRights(WithMediaRights.Public);
+			
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
 		
@@ -85,8 +93,10 @@ public class RijksmuseumRecordFormatter extends CulturalRecordFormatter {
 			med.setHeight(rec.getIntValue("webImage.height"));
 //			if (Utils.hasInfo(rights))
 //			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
-//			med.setWithRights(withRights);
-//			med.setType(type);
+
+			med.setOriginalRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/deed.en"));
+			med.setWithRights(WithMediaRights.Public);
+			
 			object.addMedia(MediaVersion.Original, med);
 		}
 		

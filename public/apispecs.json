@@ -45,7 +45,10 @@
                                             "DigitalNZ",
                                             "Rijksmuseum",
                                             "WITHin",
-                                            "The British Library"
+                                            "BritishLibrary",
+                                            "NLA",
+                                            "DDB",
+                                            "InternetArchive"
                                         ]
                                     }
                                 }

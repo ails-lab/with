@@ -91,8 +91,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 			        		  return "item collection";
 			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
 			        			return "item space";
-			        	    else return "item space";
-			        	}else return "item exhibition";
+			        		else return "item exhibition";
+			        	}
 			        });
 			        
 			        self.url=ko.computed(function() {
@@ -222,7 +222,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					self.homecollections().push(c);
 					self.spaces().push(c);
 				}
-				// dont notify only let collections + exhibitions redraw self.homecollections.valueHasMutated();
+				self.homecollections.valueHasMutated();
 			};	
 		
 	  self.loadAll = function () {
@@ -247,7 +247,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					
 			});
 		 
-		  var promise2 = self.getFeatured("56c5b99a5dbf0cc1914a2cd2");
+		  var promise2 = self.getFeatured("56cd993275fe2461e089a8a5");
           $.when(promise2).done(function (data) {
         	  
         	 
@@ -256,7 +256,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
         	 
         	  
           });
-          var promise3 = self.getFeatured("56c5ca675dbf0cc1f74cfa63");
+          var promise3 = self.getFeatured("56cd85e375fe2461e0868723");
           $.when(promise3).done(function (data) {
         	  
         	 
