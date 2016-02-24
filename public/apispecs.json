@@ -802,56 +802,6 @@
                 }
             }
         },
-        "/collection/unliked/{recordId}": {
-            "parameters": [
-                {
-                    "name": "recordId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of the record to be removed from favourites.",
-                    "type": "string"
-                }
-            ],
-            "delete": {
-                "description": "Removes the record, specified by its Id, from the favourites, for the logged in user.",
-                "summary": "Remove a record from favourites.",
-                "tags": [
-                    "Record"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK (collection Id in string)",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (no or wrong record Id, cannot delete from database, exception error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/collection/{collectionId}": {
             "parameters": [
                 {
@@ -3297,14 +3247,6 @@
                 }
             }
         },
-        "InternalRecord": {
-            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
-            "allOf": [
-                {
-                    "$ref": "#/definitions/WithResource"
-                }
-            ]
-        },
         "InternalRecordWithContent": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "allOf": [
@@ -3314,6 +3256,37 @@
                 {
                     "type": "object",
                     "properties": {
+                        "descriptiveData": {
+                            "$ref": "#/definitions/CulturalDescriptiveData"
+                        },
+                        "content": {
+                            "type": "object",
+                            "properties": {
+                                "key": {
+                                    "type": "string",
+                                    "default": "value"
+                                }
+                            }
+                        }
+                    },
+                    "required": [
+                        "content"
+                    ]
+                }
+            ]
+        },
+        "InternalRecord": {
+            "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/WithResource"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "descriptiveData": {
+                            "$ref": "#/definitions/CulturalDescriptiveData"
+                        },
                         "content": {
                             "type": "object",
                             "properties": {
@@ -3331,6 +3304,22 @@
             ]
         },
         "Collection": {
+            "description": "Collection metadata.",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/WithResource"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "descriptiveData": {
+                            "$ref": "#/definitions/CollectionDescriptiveData"
+                        }
+                    }
+                }
+            ]
+        },
+        "CollectionList": {
             "description": "Collection metadata.",
             "allOf": [
                 {
@@ -3548,6 +3537,82 @@
                     }
                 }
             ]
+        },
+        "CulturalDescriptiveData": {
+            "description": "Extends DescriptiveData with fields unique to Cultural Records.",
+            "allOf": [
+                {
+                    "$ref": "#/definitions/DescriptiveData"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "dctype": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dccoverage": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dcrights": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dctermsspatial": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dccreator": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dccontribution": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dcformat": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dctermsmedium": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dcIsRelatedTo": {
+                            "$ref": "#/definitions/MultiLiteralOrResource"
+                        },
+                        "dccreated": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WithDate"
+                            }
+                        },
+                        "dcdate": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WithDate"
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "WithDate": {
+            "description": "A date object.",
+            "type": "object",
+            "properties": {
+                "isoDate": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "number"
+                },
+                "epoch": {
+                    "$ref": "#/definitions/ResourceOrLiteral"
+                },
+                "approximation": {
+                    "type": "number"
+                },
+                "uri": {
+                    "type": "string"
+                },
+                "free": {
+                    "type": "string"
+                }
+            }
         },
         "MultiLiteralOrResource": {
             "description": "Can either be a multiliteral or a resource.",
