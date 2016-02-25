@@ -160,12 +160,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 		if (data !== undefined) self.load(data);
 	}
+	
 
+	
 	function CViewModel(params) {
 		document.body.setAttribute("data-page", "collection");
 		var self = this;
 		self.route = params.route;
 		var counter = 1;
+		
+		self.uris = [];
+		
 		self.title = ko.observable('');
 		self.description = ko.observable('');
 		self.access = ko.observable("READ");
@@ -178,6 +183,40 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.loggedUser = app.isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
+
+		var NodeModel = function(data) {
+			
+			var selfx = this;
+			
+			selfx.isExpanded = ko.observable(false);
+			selfx.uri = ko.observable();
+			selfx.label = ko.observable();
+			selfx.children = ko.observableArray([]);
+		 
+			selfx.toggleVisibility = function() {
+				selfx.isExpanded(!selfx.isExpanded());
+			};
+		
+			ko.mapping.fromJS(data, selfx.mapOptions, selfx);
+		 
+			selfx.followLink = function() {
+				var uri = data.uri;
+				self.uris.push(uri);
+				
+				self.clearImages();
+			};
+		};
+		
+		NodeModel.prototype.mapOptions = {
+				children: {
+					create: function(args) {
+						return new NodeModel(args.data);
+					}
+				}
+			};
+		
+		
+		self.index = ko.observable(new NodeModel({schemes: [] }));
 
 		if (params.type === 'favorites') {
 			self.isFavorites(true);
@@ -272,30 +311,30 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							self.access(rightsrec.level());
 						}
 					}
+					
+					$.ajax({
+						"url": "/collectionindex/" + self.id(),
+						"method": "get",
+						"contentType": "application/json",
+						"success": function (data) {
+							var obj = JSON.parse(data);
+							self.index(new NodeModel(obj));
+							
+							//loading(false);
+						},
+						"error": function (result) {
+							loading(false);
+							$.smkAlert({
+								text: 'An error has occured',
+								type: 'danger',
+								permanent: true
+							});
+						}
+					});
+
+					
 					if (self.count() && self.count() > 0) {
-						$.ajax({
-							"url": "/collection/" + self.id() + "/list?count=" + self.count() + "&start=0",
-							"method": "get",
-							"contentType": "application/json",
-							"success": function (data) {
-
-								var items = self.revealItems(data.records);
-								if (items.length > 0) {
-									var $newitems = getItems(items);
-
-									self.isotopeImagesReveal(self.$container, $newitems);
-								}
-								loading(false);
-							},
-							"error": function (result) {
-								loading(false);
-								$.smkAlert({
-									text: 'An error has occured',
-									type: 'danger',
-									permanent: true
-								});
-							}
-						});
+						self.loadInit();
 					} else {
 						loading(false);
 					}
@@ -316,6 +355,62 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			});
 		};
 
+		self.loadInit = function () {
+			
+			if (self.uris.length == 0) {
+				$.ajax({
+					"url": "/collection/" + self.id() + "/list?count=" + self.count() + "&start=0",
+					"method": "get",
+					"contentType": "application/json",
+					"success": function (data) {
+
+						var items = self.revealItems(data.records);
+						if (items.length > 0) {
+							var $newitems = getItems(items);
+
+							self.isotopeImagesReveal(self.$container, $newitems);
+						}
+						loading(false);
+					},
+					"error": function (result) {
+						loading(false);
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+			} else {
+				$.ajax({
+					"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
+					"method": "post",
+					"contentType": "application/json",
+					"data" : "{ \"uris\": " + JSON.stringify(self.uris) + "}",
+					"success": function (data) {
+						var items = self.revealItems(data.records);
+
+						if (items.length > 0) {
+							var $newitems = getItems(items);
+
+							self.isotopeImagesReveal(self.$container, $newitems);
+						}
+						loading(false);
+					},
+					"error": function (result) {
+						loading(false);
+						$.smkAlert({
+							text: 'An error has occured',
+							type: 'danger',
+							permanent: true
+						});
+					}
+				});
+			}
+		}
+		
+
+		
 		self.loadCollection();
 		self.isOwner = ko.pureComputed(function () {
 			if (app.currentUser._id() == self.withCreator) {
@@ -336,26 +431,48 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if (loading() === false) {
 				loading(true);
 				var offset = self.citems().length;
-				$.ajax({
-					"url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
-					"method": "get",
-					"contentType": "application/json",
-					"success": function (data) {
-						var items = self.revealItems(data.records);
-
-						if (items.length > 0) {
-							var $newitems = getItems(items);
-
-							self.isotopeImagesReveal(self.$container, $newitems);
-
+				if (self.uris.length == 0) {
+					$.ajax({
+						"url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
+						"method": "get",
+						"contentType": "application/json",
+						"success": function (data) {
+							var items = self.revealItems(data.records);
+	
+							if (items.length > 0) {
+								var $newitems = getItems(items);
+	
+								self.isotopeImagesReveal(self.$container, $newitems);
+	
+							}
+							loading(false);
+	
+						},
+						"error": function (result) {
+							loading(false);
 						}
-						loading(false);
+					});
+				} else {
+					$.ajax({
+						"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
+						"method": "post",
+						"contentType": "application/json",
+						"data" : "{ \"uris\": " + JSON.stringify(self.uris) + "}",
+						"success": function (data) {
+							var items = self.revealItems(data.records);
 
-					},
-					"error": function (result) {
-						loading(false);
-					}
-				});
+							if (items.length > 0) {
+								var $newitems = getItems(items);
+
+								self.isotopeImagesReveal(self.$container, $newitems);
+							}
+							loading(false);
+						},
+						"error": function (result) {
+							loading(false);
+						}
+					});
+				}
 			}
 		};
 
@@ -539,6 +656,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					}
 				});
 				iso = self.$container.data('isotope');
+
 				itemSelector = iso.options.itemSelector;
 			}
 			// append to container
@@ -576,6 +694,18 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 			return this;
 		};
+		
+		self.clearImages = function ($container, $items) {
+
+			self.$container = $(".grid#" + self.id());
+			self.citems.removeAll();
+			
+			self.$container.isotope('remove', self.$container.isotope('getItemElements'));
+			self.$container.isotope('destroy');
+			
+			return this;
+		};
+
 	}
 
 	return {
@@ -583,3 +713,4 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		template: template
 	};
 });
+

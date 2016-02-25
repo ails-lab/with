@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +48,13 @@ import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
 
 import org.bson.types.ObjectId;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 
 import play.Logger;
 import play.Logger.ALogger;
@@ -66,6 +74,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
+import db.RecordResourceDAO;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
 
 /**
  * @author mariaral
@@ -687,6 +698,124 @@ public class CollectionObjectController extends WithResourceController {
 				locks.release();
 		}
 	}
+	
+	/**
+	 * List all Records from a Collection using a start item and a page size
+	 */
+	public static Result xlistRecordResources(String collectionId,
+			String contentFormat, int start, int count) {
+		ObjectNode result = Json.newObject();
+		ObjectId colId = new ObjectId(collectionId);
+		Locks locks = null;
+		
+		JsonNode json = request().body().asJson();
+		
+		try {
+			locks = Locks.create().read("Collection #" + collectionId)
+					.acquire();
+
+			Result response = errorIfNoAccessToCollection(Action.READ, colId);
+
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				
+				ElasticSearcher es = new ElasticSearcher();
+				
+				BoolQueryBuilder query = QueryBuilders.boolQuery();
+				query.must(QueryBuilders.termQuery("collectedIn.collectionId", collectionId));
+
+				for (Iterator<JsonNode> iter = json.get("uris").elements();iter.hasNext();) {
+					String s = iter.next().asText();
+
+					TermQueryBuilder q1 = QueryBuilders.termQuery("keywords.uri.all", s);
+					TermQueryBuilder q2 = QueryBuilders.termQuery("dctype.uri.all", s);
+					
+					query.must(QueryBuilders.boolQuery().should(q1).should(q2));
+				}
+				
+				log.info("QUERY " + query.toString());
+				log.info("QUERC " + start + " " + count);
+				
+				SearchOptions so = new SearchOptions(start, start + count);
+				
+				SearchResponse res = es.execute(query, so);
+				SearchHits sh = res.getHits();
+				log.info("*" + sh.getTotalHits());
+
+				List<String> retrievedFields = new ArrayList<String>(
+						Arrays.asList("descriptiveData.label",
+								"descriptiveData.description", "media", "collectedIn"));
+				
+				List<String> ids = new ArrayList<>();
+				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
+					SearchHit hit = iter.next();
+					ids.add(hit.getId());
+				}
+				
+				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+
+				if (records == null) {
+					result.put("message",
+							"Cannot retrieve records from database!");
+					return internalServerError(result);
+				}
+				ArrayNode recordsList = Json.newObject().arrayNode();
+				int position = start;
+				for (RecordResource e : records) {
+					// filter out records to which the user has no read access
+					if (!response.toString().equals(ok().toString())) {
+						recordsList.add(Json.toJson(new RecordResource(e
+								.getDbId())));
+					} else {
+						// filter out all context annotations that do not refer
+						// to this collection-position
+						List<ContextData> contextAnns = e.getContextData();
+						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
+						for (ContextData ca : contextAnns) {
+							if (ca.getTarget().getCollectionId().equals(colId)
+									&& (ca.getTarget().getPosition() == position))
+								filteredContextAnns.add(ca);
+						}
+						e.setContextData(filteredContextAnns);
+						if (e.getContent() != null) {
+							if (contentFormat.equals("contentOnly")
+									&& (e.getContent() != null)) {
+								recordsList.add(Json.toJson(e.getContent()));
+							} else if (contentFormat.equals("noContent")) {
+								e.getContent().clear();
+							} else if (e.getContent()
+									.containsKey(contentFormat)) {
+								HashMap<String, String> newContent = new HashMap<String, String>(
+										1);
+								newContent.put(contentFormat, (String) e
+										.getContent().get(contentFormat));
+								e.setContent(newContent);
+							}
+						}
+						recordsList.add(Json.toJson(e));
+					}
+					position += 1;
+				}
+				result.put(
+						"entryCount",
+						DB.getCollectionObjectDAO()
+								.getById(
+										colId,
+										new ArrayList<String>(
+												Arrays.asList("administrative.entryCount")))
+								.getAdministrative().getEntryCount());
+				result.put("records", recordsList);
+				return ok(result);
+			}
+		} catch (Exception e1) {
+			result.put("error", e1.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
+	}
 
 	public static Result listUsersWithRights(String collectionId) {
 		ArrayNode result = Json.newObject().arrayNode();
@@ -730,5 +859,31 @@ public class CollectionObjectController extends WithResourceController {
 			userJSON.put("image", image);
 		}
 		return userJSON;
+	}
+	
+	
+	public static Result getCollectionIndex(String id) {
+		ObjectNode result = Json.newObject();
+		try {
+			ObjectId collectionDbId = new ObjectId(id);
+			Result response = errorIfNoAccessToCollection(Action.READ,
+					collectionDbId);
+			if (!response.toString().equals(ok().toString()))
+				return response;
+			else {
+				CollectionObject collection = DB.getCollectionObjectDAO().get(
+						new ObjectId(id));
+				/*
+				 * List<RecordResource> firstEntries =
+				 * DB.getCollectionObjectDAO() .getFirstEntries(collectionDbId,
+				 * 3); result = (ObjectNode) Json.toJson(collection);
+				 * result.put("firstEntries", Json.toJson(firstEntries));
+				 */
+				return ok(Json.toJson(collection));
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		}
 	}
 }

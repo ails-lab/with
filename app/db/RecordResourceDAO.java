@@ -88,6 +88,11 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		Query<RecordResource> q = this.createQuery();
 		return getByCollectionBetweenPositions(colId, lowerBound, upperBound, q);
 	}
+	
+	public List<RecordResource> getByCollectionIds(ObjectId colId, List<String> ids) {
+		Query<RecordResource> q = this.createQuery();
+		return getByCollectionIds(colId, ids, q);
+	}
 
 	/**
 	 * Retrieve records from specific collection whose position is between
@@ -138,6 +143,60 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			return repeatedResources.subList(0, maxPosition + 1);
 		else
 			return new ArrayList<RecordResource>();
+	}
+
+	
+	public List<RecordResource> getByCollectionIds(ObjectId colId,
+			List<String> ids, Query<RecordResource> q) {
+		
+		List<ObjectId> oids = new ArrayList<>();
+		for (String s : ids) {
+			oids.add(new ObjectId(s));
+		}
+		
+		BasicDBObject colIdQuery = new BasicDBObject();
+		colIdQuery.put("collectionId", colId);
+		
+		BasicDBObject geq = new BasicDBObject();
+		geq.put("$in", oids);
+
+		BasicDBObject elemMatch1 = new BasicDBObject();
+		elemMatch1.put("$elemMatch", colIdQuery);
+		q.filter("collectedIn", elemMatch1);
+		q.filter("_id", geq);
+		
+//		log.info("MONGO " + q);
+
+		List<RecordResource> resources = this.find(q).asList();
+		
+		return resources;
+				
+//		List<RecordResource> repeatedResources = new ArrayList<RecordResource>(ids.size());
+//		for (int i = 0; i < ids.size(); i++) {
+//			repeatedResources.add(new RecordResource());
+//		}
+//		int maxPosition = -1;
+//		for (RecordResource d : resources) {
+//			ArrayList<CollectionInfo> collectionInfos = (ArrayList<CollectionInfo>) d.getCollectedIn();
+//			// May be a long iteration, if a record belongs to many collections
+//			for (CollectionInfo ci : collectionInfos) {
+//				ObjectId collectionId = ci.getCollectionId();
+//				if (collectionId.equals(colId)) {
+//					int pos = ci.getPosition();
+//					if ((lowerBound <= pos) && (pos < upperBound)) {
+//						int arrayPosition = pos - lowerBound;
+//						if (arrayPosition > maxPosition)
+//							maxPosition = arrayPosition;
+//						repeatedResources.set(arrayPosition, d);
+//					}
+//				}
+//			}
+//		}
+//		
+//		if (maxPosition > -1)
+//			return repeatedResources.subList(0, maxPosition + 1);
+//		else
+//			return new ArrayList<RecordResource>();
 	}
 
 	public List<RecordResource> getByCollection(ObjectId colId) {

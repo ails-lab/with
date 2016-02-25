@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import model.basicDataTypes.WithAccess.Access;
+
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -62,6 +63,7 @@ import org.elasticsearch.search.suggest.SuggestBuilders;
 import org.elasticsearch.search.suggest.term.TermSuggestionBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import utils.Tuple;
 
 public class ElasticSearcher {
@@ -171,6 +173,12 @@ public class ElasticSearcher {
 		return search.execute().actionGet();
 	}
 
+	public SearchResponse execute(QueryBuilder query, SearchOptions options, String... fields) {
+		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
+		search.addFields(fields);
+		return search.execute().actionGet();
+	}
+	
 	public SearchResponse executeWithAggs(QueryBuilder query, SearchOptions options) {
 		SearchRequestBuilder search = this.getSearchRequestBuilder(query, options);
 		for(String aggName: aggregatedFields) {
@@ -363,7 +371,7 @@ public class ElasticSearcher {
 
 		OrFilterBuilder outer_or = FilterBuilders.orFilter();
 		NestedFilterBuilder nested_filter = FilterBuilders.nestedFilter("access", and_filter);
-		outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
+		//outer_or.add(nested_filter).add(this.filter("isPublic", "true"));
 		if(options.filterType == FILTER_OR) {
 			((OrFilterBuilder) f).add(outer_or);
 		}

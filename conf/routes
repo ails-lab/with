@@ -110,3 +110,6 @@ GET	/api/chind										controllers.ReindexController.changeIndice(newIndice: St
 GET	/api/mkconst									controllers.ReindexController.makeConsistent()
 GET	/api/idxres										controllers.ReindexController.reindexAllResources()
 GET	/api/idxthes									controllers.ReindexController.reindexAllThesaurus()
+
+GET	/collectionindex/:id 	        			controllers.thesaurus.CollectionIndexController.getCollectionIndex(id)
+POST      /collection/:id/indexedlist		   	controllers.CollectionObjectController.xlistRecordResources(id, format: String ?="noContent", start: Integer ?=0, count: Integer ?=10)
