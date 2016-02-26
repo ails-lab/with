@@ -33,6 +33,11 @@
 
 <div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
 
+
+<ul data-bind="foreach: terms">
+    <li style="display:inline;"><button data-bind="click:removeTerm, text: label"></button></li>
+</ul>
+
 <script type="text/html" id="scheme-template">
  
     <ul data-bind="foreach: schemes">
@@ -103,7 +108,7 @@
     text: label, 
     attr: { 'title': uri }, 
     tooltip: { delay: { show: 500, hide: 10 } },
-    click: followLink"></span>
+    click: addTerm"></span>
  
 </script>
 

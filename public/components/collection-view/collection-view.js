@@ -161,15 +161,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		if (data !== undefined) self.load(data);
 	}
 	
-
-	
 	function CViewModel(params) {
 		document.body.setAttribute("data-page", "collection");
 		var self = this;
 		self.route = params.route;
 		var counter = 1;
 		
-		self.uris = [];
+		self.terms = ko.observableArray([]);
 		
 		self.title = ko.observable('');
 		self.description = ko.observable('');
@@ -184,27 +182,65 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
 
-		var NodeModel = function(data) {
+		var Term = function(data) {
+			var selfx = this;
 			
+			selfx.uri = ko.observable();
+			selfx.label = ko.observable();
+			selfx.subterms = ko.observableArray([]);
+			
+			ko.mapping.fromJS(data, {}, selfx);
+
+			selfx.removeTerm = function() {
+				for (var i = 0; i < self.terms().length; i++) {
+					if (self.terms()[i].uri() === data.uri) {
+						self.terms.splice(i,1);
+						self.clearImages();
+						self.loadInit();
+						break;
+					}
+				}
+			};
+		}
+		
+		var NodeModel = function(data) {
 			var selfx = this;
 			
 			selfx.isExpanded = ko.observable(false);
 			selfx.uri = ko.observable();
 			selfx.label = ko.observable();
-			selfx.children = ko.observableArray([]);
+			selfx.children = ko.observableArray();
 		 
 			selfx.toggleVisibility = function() {
 				selfx.isExpanded(!selfx.isExpanded());
 			};
 		
 			ko.mapping.fromJS(data, selfx.mapOptions, selfx);
-		 
-			selfx.followLink = function() {
-				var uri = data.uri;
-				self.uris.push(uri);
+
+			selfx.addTerm = function() {
+				for (var i = 0; i < self.terms().length; i++) {
+					if (self.terms()[i].uri() === data.uri) {
+						return;
+					}
+				}
+
+				self.terms.push(new Term({ uri: data.uri, label: data.label, subterms: selfx.collect() }));
 				
 				self.clearImages();
+				self.loadInit();
 			};
+			
+			selfx.collect = function() {
+				var result = [];
+				result.push(selfx.uri());
+				for (var i in selfx.children()) {
+					var cc = selfx.children()[i].collect();
+					for (j in cc) {
+						result.push(cc[j]);
+					}
+				}
+				return result;
+			}
 		};
 		
 		NodeModel.prototype.mapOptions = {
@@ -216,7 +252,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			};
 		
 		
-		self.index = ko.observable(new NodeModel({schemes: [] }));
+		self.index = ko.observable(new NodeModel({ schemes: [] }));
 
 		if (params.type === 'favorites') {
 			self.isFavorites(true);
@@ -356,8 +392,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 
 		self.loadInit = function () {
-			
-			if (self.uris.length == 0) {
+			if (self.terms().length == 0) {
 				$.ajax({
 					"url": "/collection/" + self.id() + "/list?count=" + self.count() + "&start=0",
 					"method": "get",
@@ -386,7 +421,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
 					"method": "post",
 					"contentType": "application/json",
-					"data" : "{ \"uris\": " + JSON.stringify(self.uris) + "}",
+					"data" : convertTerms(self.terms()),
 					"success": function (data) {
 						var items = self.revealItems(data.records);
 
@@ -425,13 +460,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 
 		self.moreItems = function () {
+
 			if (loading === true) {
 				setTimeout(self.moreItems(), 300);
 			}
 			if (loading() === false) {
 				loading(true);
 				var offset = self.citems().length;
-				if (self.uris.length == 0) {
+				if (self.terms().length == 0) {
 					$.ajax({
 						"url": "/collection/" + self.id() + "/list?count=10&start=" + offset,
 						"method": "get",
@@ -453,11 +489,12 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						}
 					});
 				} else {
+					
 					$.ajax({
-						"url": "/collection/" + self.id() + "/indexedlist?count=" + self.count() + "&start=0",
+						"url": "/collection/" + self.id() + "/indexedlist?count=10&start=" + offset,
 						"method": "post",
 						"contentType": "application/json",
-						"data" : "{ \"uris\": " + JSON.stringify(self.uris) + "}",
+						"data" : convertTerms(self.terms()),
 						"success": function (data) {
 							var items = self.revealItems(data.records);
 
@@ -475,6 +512,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			}
 		};
+		
+		function convertTerms(terms) {
+			var uitems = [];
+			for (i in terms) {
+				uitems.push({ top: terms[i].uri(), sub: terms[i].subterms() });
+			}
+			return "{ \"terms\": " + JSON.stringify(uitems) + "}";
+		}
 
 		self.addCollectionRecord = function (e) {
 			self.citems.push(e);
@@ -696,13 +741,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 		
 		self.clearImages = function ($container, $items) {
-
-			self.$container = $(".grid#" + self.id());
-			self.citems.removeAll();
-			
-			self.$container.isotope('remove', self.$container.isotope('getItemElements'));
-			self.$container.isotope('destroy');
-			
+			if (self.citems().length > 0) {
+				self.$container = $(".grid#" + self.id());
+				self.citems.removeAll();
+				
+				self.$container.isotope('remove', self.$container.isotope('getItemElements'));
+				self.$container.isotope('destroy');
+				
+				self.revealItems([]);
+			}
 			return this;
 		};
 

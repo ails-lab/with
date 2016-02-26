@@ -709,7 +709,7 @@ public class CollectionObjectController extends WithResourceController {
 		Locks locks = null;
 		
 		JsonNode json = request().body().asJson();
-		
+		log.info("JSON " + json.toString());
 		try {
 			locks = Locks.create().read("Collection #" + collectionId)
 					.acquire();
@@ -725,13 +725,28 @@ public class CollectionObjectController extends WithResourceController {
 				BoolQueryBuilder query = QueryBuilders.boolQuery();
 				query.must(QueryBuilders.termQuery("collectedIn.collectionId", collectionId));
 
-				for (Iterator<JsonNode> iter = json.get("uris").elements();iter.hasNext();) {
-					String s = iter.next().asText();
+				for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
+//					String s = iter.next().asText();
+//					for (Iterator<JsonNode> iter = json.get("terms").elements();iter.hasNext();) {
+//
+//					TermQueryBuilder q1 = QueryBuilders.termQuery("keywords.uri.all", s);
+//					TermQueryBuilder q2 = QueryBuilders.termQuery("dctype.uri.all", s);
+//					
+//					query.must(QueryBuilders.boolQuery().should(q1).should(q2));
 
-					TermQueryBuilder q1 = QueryBuilders.termQuery("keywords.uri.all", s);
-					TermQueryBuilder q2 = QueryBuilders.termQuery("dctype.uri.all", s);
-					
-					query.must(QueryBuilders.boolQuery().should(q1).should(q2));
+					BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+
+					JsonNode inode = iter.next();
+					for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
+						String s = iter2.next().asText();
+
+						boolQuery = boolQuery.should(QueryBuilders.termQuery("keywords.uri.all", s));
+						boolQuery = boolQuery.should(QueryBuilders.termQuery("dctype.uri.all", s));
+
+					}
+					query.must(boolQuery);
+
+
 				}
 				
 				log.info("QUERY " + query.toString());
@@ -751,9 +766,13 @@ public class CollectionObjectController extends WithResourceController {
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 					SearchHit hit = iter.next();
 					ids.add(hit.getId());
+					log.info("ID " + hit.getId());
 				}
 				
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
+				for (RecordResource rr : records) {
+					log.info("DB " + rr.getDbId());
+				}
 
 				if (records == null) {
 					result.put("message",
