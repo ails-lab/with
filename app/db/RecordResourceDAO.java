@@ -596,9 +596,15 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	public boolean existsInCollectionAndPosition(ObjectId colId,
-			int position) {
+			Integer position) {
 		Query<RecordResource> q = this.createQuery().field("collectedIn")
 				.hasThisElement(new CollectionInfo(colId, position));
+		return this.find(q.limit(1)).asList().size() == 0? false : true;
+	}
+	
+	public boolean existsInCollection(ObjectId colId) {
+		Query<RecordResource> q = this.createQuery().field("collectedIn")
+				.hasThisElement(new CollectionInfo(colId, null));
 		return this.find(q.limit(1)).asList().size() == 0? false : true;
 	}
 	

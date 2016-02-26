@@ -135,7 +135,7 @@ public class WithResourceController extends Controller {
 	// already exists
 	// in collectedIn and remove it (2 update operations).
 	public static Result addRecordToCollection(String colId,
-			Option<Integer> position) {
+			Option<Integer> position, Boolean noDouble) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
@@ -204,9 +204,15 @@ public class WithResourceController extends Controller {
 					if (!response.toString().equals(ok().toString())) {
 						return response;
 					} else {// In case the record already exists we overwrite
-							// the
-						// existing record's descriptive data for the fields
-						// included in the json, if the user has WRITE access.
+							// the existing record's descriptive data for the fields
+						    // included in the json, if the user has WRITE access.
+						if (noDouble) {
+							if (DB.getRecordResourceDAO().existsInCollection
+									(collectionDbId)) {
+								result.put("error", "double");
+								return forbidden(result);
+							}
+						}
 						if (DB.getRecordResourceDAO().hasAccess(
 								AccessManager.effectiveUserDbIds(session().get(
 										"effectiveUserIds")), Action.EDIT,
@@ -659,7 +665,7 @@ public class WithResourceController extends Controller {
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		return addRecordToCollection(fav, Option.None());
+		return addRecordToCollection(fav, Option.None(), true);
 	}
 
 	/**

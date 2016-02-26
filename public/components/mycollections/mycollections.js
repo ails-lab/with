@@ -305,55 +305,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			self.shareCollection(ko.toJS(this), clickedRights);
 		}
 
-		self.showInfoPopup = function(title, bodyText, callback) {
-			$("#myModal").find("h4").html(title);
-			var body = $("#myModal").find("div.modal-body");
-			body.html(bodyText);
-
-			var footer = $("#myModal").find("div.modal-footer");
-			if (footer.is(':empty')) {
-		        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
-		        cancelBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        });
-		        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
-		        confirmBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        	callback();
-		        });
-		    }
-			$("#myModal").modal('show');
-			$('#myModal').on('hidden.bs.modal', function () {
-				$("#myModal").find("div.modal-footer").empty();
-			});
-			$('#myModal').addClass("topOfModal");
-		}
-
-		self.showInfoPopupTwoOptions = function(title, bodyText, callback) {
-			$("#myModal").find("h4").html(title);
-			var body = $("#myModal").find("div.modal-body");
-			body.html(bodyText);
-
-			var footer = $("#myModal").find("div.modal-footer");
-			if (footer.is(':empty')) {
-		        var cancelBtn = $('<button type="button" class="btn btn-default">No</button>').appendTo(footer);
-		        cancelBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        	callback.call(this, false);
-		        });
-		        var confirmBtn = $('<button type="button" class="btn btn-primary">Yes</button>').appendTo(footer);
-		        confirmBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        	callback.call(this, true);
-		        });
-		    }
-			$("#myModal").modal('show');
-			$('#myModal').on('hidden.bs.modal', function () {
-				$("#myModal").find("div.modal-footer").empty();
-			});
-			$('#myModal').addClass("topOfModal");
-		}
-
 		self.addToSharedWithUsers = function(clickedRights) {
 			var collId = self.myCollections()[self.index()].dbId();
 			var username = $("#usernameOrEmail").val();
@@ -379,18 +330,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.shareCollection = function(userData, clickedRights) {
 			if (userData.category == "group" && clickedRights === "OWN")
-					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
+					app.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
 							" group will acquire these rights. Giving OWN rights to others means that they will have the right to delete" +
 							" your collection, as well as to share it with others.", function() {
 						self.callShareAPI(userData, clickedRights);
 					});
 			else if (userData.category == "group")
-					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
+					app.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
 							" group will acquire these rights.", function() {
 						self.checkIfDowngrade(userData, clickedRights);
 					});
 			else if (clickedRights === "OWN")
-				self.showInfoPopup("Are you sure?", "Giving OWN rights to others means that they will have the right to delete your collection, " +
+				app.showInfoPopup("Are you sure?", "Giving OWN rights to others means that they will have the right to delete your collection, " +
 						"as well as to share it with others.", function() {
 					self.callShareAPI(userData, clickedRights);
 				});
@@ -410,7 +361,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var newAccessOrdinal = accessLevels[clickedRights];
 			if (currentAccessOrdinal > newAccessOrdinal)
 				//downgrade
-				self.showInfoPopupTwoOptions("Downgrade records in all collections?",
+				app.showInfoPopupTwoOptions("Downgrade records in all collections?",
 						"User " + userData.username + " may still have " + currentAccessRights + " access to records that you own and are members of that collection " +
 						", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
 						"in all collections they belong to?", function(response) {
@@ -472,7 +423,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.isPublicToggle = function() {
 		    var newIsPublic = !self.isPublicToEdit();
 		    if (!newIsPublic) {
-		    	self.showInfoPopupTwoOptions("Make records private in all collections?",
+		    	app.showInfoPopupTwoOptions("Make records private in all collections?",
 						"Users may still be able to read records that you own and are members of that collection " +
 						", via other collections s/he has access to. Do you want to make these records private "  +
 						"in all collections they belong to?", function(response) {
@@ -480,7 +431,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 		    }
 		    else
-		    	self.editPublicity(self.index(), true, false);
+		    	app.editPublicity(self.index(), true, false);
 		}
 
 		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {

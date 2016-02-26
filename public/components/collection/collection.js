@@ -320,7 +320,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			});
 		};
 
-		self.addRecord = function (collid) {
+		self.addRecord = function (collid, noDouble) {
 			 var jsondata = JSON.stringify({ 
 				    provenance : [{ provider : self.record().source(), 
 					resourceId: self.record().externalId()}]
@@ -328,7 +328,8 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			if(self.record().data()){
 				jsondata=JSON.stringify(self.record().data());
 			}
-		
+			if (noDouble === undefined)
+				noDouble = true;
 			$.ajax({
 				"beforeSend": function (xhr) {
 					self.ajaxConnections++;
@@ -336,7 +337,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				        xhr.setRequestHeader('X-auth1', utc );
 				        xhr.setRequestHeader('X-auth2', sign( document.location.origin, utc ));
 				},
-				"url": "/collection/" + collid + "/addRecord",
+				"url": "/collection/" + collid + "/addRecord?noDouble=" + noDouble,
 				"method": "post",
 				"contentType": "application/json",
 				"data": jsondata,
@@ -353,11 +354,18 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					$.smkAlert({text:'Item added!', type:'success'});
 					self.close();
 				},
-
 				"error": function (result) {
 					self.ajaxConnections--;
-					$.smkAlert({text:'An error occured', type:'danger', time: 10});
-					self.close();
+					if (result.responseJSON.error === 'double') {
+						app.showInfoPopup("Record already exists in collection.",
+								"Do you want to add it again?", function() {
+							self.addRecord(collid, false);
+						});
+					}	
+					else {
+						$.smkAlert({text:'An error occured', type:'danger', time: 10});
+						self.close();
+					}
 				}
 			});
 		};
