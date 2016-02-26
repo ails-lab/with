@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject;
-import model.ExternalBasicRecord;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.CulturalObject;
 import model.resources.RecordResource;
@@ -89,11 +88,11 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				// res.count = q.pageSize;
-				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 				for (JsonNode item : response.path("artObjects")) {
 					res.addItem(formatreader.readObjectFrom(item));
 				}
-				res.count = a.size();
+				//TODO: what is the count?
+				res.count = 0;
 
 				res.facets = response.path("facets");
 

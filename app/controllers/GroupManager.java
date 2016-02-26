@@ -42,7 +42,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DAO.QueryOperator;
 import db.DB;
-import model.Collection;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
@@ -355,10 +354,10 @@ public class GroupManager extends Controller {
 			groupJSON.put("username", group.getUsername());
 			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
+				CollectionObject collection = DB.getCollectionObjectDAO().getById(
 						new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getRights().getAcl(
+					Access accessRights = collection.getAdministrative().getAccess().getAcl(
 							group.getDbId());
 					if (accessRights != null)
 						groupJSON.put("accessRights", accessRights.toString());
