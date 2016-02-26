@@ -3357,14 +3357,6 @@
                 "lastModified": {
                     "type": "string"
                 },
-                "underModeration": {
-                    "type": "object",
-                    "properties": {
-                        "key": {
-                            "$ref": "#/definitions/Access"
-                        }
-                    }
-                },
                 "externalId": {
                     "type": "string"
                 },
