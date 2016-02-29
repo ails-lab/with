@@ -717,8 +717,8 @@ public class CollectionObjectController extends WithResourceController {
 	
 					boolQuery = boolQuery.should(QueryBuilders.termQuery("keywords.uri.all", s));
 					boolQuery = boolQuery.should(QueryBuilders.termQuery("dctype.uri.all", s));
-	
 				}
+				
 				query.must(boolQuery);
 			}
 		}

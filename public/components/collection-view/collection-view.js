@@ -251,29 +251,31 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			};
 		
 		self.reload = function() {
+			self.index(new NodeModel({ schemes: [] }));
+			
 			self.clearImages();
 			self.loadInit();
 			
-//			$.ajax({
-//				"url": "/collectionindex/" + self.id(),
-//				"method": "post",
-//				"contentType": "application/json",
-//				"success": function (data) {
-//					alert(data);
-//					var obj = JSON.parse(data);
-//					self.index(new NodeModel(obj));
-//					
-//					//loading(false);
-//				},
-//				"error": function (result) {
-//					loading(false);
-//					$.smkAlert({
-//						text: 'An error has occured',
-//						type: 'danger',
-//						permanent: true
-//					});
-//				}
-//			});
+			$.ajax({
+				"url": "/collectionindex/" + self.id(),
+				"method": "post",
+				"data" : convertTerms(self.terms()),
+				"contentType": "application/json",
+				"success": function (data) {
+					var obj = JSON.parse(data);
+					self.index(new NodeModel(obj));
+					
+					//loading(false);
+				},
+				"error": function (result) {
+					loading(false);
+					$.smkAlert({
+						text: 'An error has occured',
+						type: 'danger',
+						permanent: true
+					});
+				}
+			});
 		}
 		
 		self.index = ko.observable(new NodeModel({ schemes: [] }));
@@ -375,7 +377,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					$.ajax({
 						"url": "/collectionindex/" + self.id(),
 						"method": "post",
-//						"data" : {},
+						"data" : "{ \"terms\": [] }",
 						"contentType": "application/json",
 						"success": function (data) {
 							var obj = JSON.parse(data);

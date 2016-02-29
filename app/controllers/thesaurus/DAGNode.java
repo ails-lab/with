@@ -16,6 +16,7 @@
 
 package controllers.thesaurus;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
 import model.basicDataTypes.Language;
@@ -252,22 +254,43 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		return false;
 	}
 	
-	private static double THRESHOLD = 0.05;
+//	private static double THRESHOLD = 0.05;
 	
-	public void normalize() {
+	private boolean childRemoved = false;
+	
+	public void normalize(Set<T> selected) {
 
-		int totalch = 0;
+//		int totalch = 0;
 		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
 			DAGNode<T> child = iter.next();
-			child.normalize();
-			if (child.size() < size*THRESHOLD) {
+			child.normalize(selected);
+			
+			if (child.childRemoved && child.children.size() == 0) {
 				iter.remove();
+				childRemoved = true;
+				continue;
 			}
-			totalch += child.size();
+			
+			if (child.children.size() == 0 && SetUtils.intersection(child.label, selected).size() > 0) {
+				iter.remove();
+				childRemoved = true;
+			}
+			
+			
+//			if (child.size() < size*THRESHOLD) {
+//				iter.remove();
+//			}
+//			totalch += child.size();
 		}
 		
-		
-		
+//		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
+//			DAGNode<T> child = iter.next();
+//			
+//			if (child.childRemoved && child.children.size() == 0) {
+//				iter.remove();
+//				continue;
+//			}
+//		}
 		
 		if (children.size() == 1) {
 			DAGNode<T> child = children.iterator().next();
@@ -278,6 +301,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 				label.addAll(child.getLabel());
 			}
 		}
+		
 		
 	}
 

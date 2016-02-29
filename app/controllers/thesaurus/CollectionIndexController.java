@@ -55,10 +55,9 @@ public class CollectionIndexController extends WithResourceController	{
 	public static Result getCollectionIndex(String id) {
 		ObjectNode result = Json.newObject();
 		
-		JsonNode json = request().body().asJson();
-//		JsonNode json = null;
-		
 		try {
+			JsonNode json = request().body().asJson();
+
 			ElasticSearcher es = new ElasticSearcher();
 			
 //			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
@@ -101,8 +100,15 @@ public class CollectionIndexController extends WithResourceController	{
 				}
 			}
 			
+			Set<String> selected = new HashSet<>();
+			if (json != null) {
+				for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
+					selected.add(iter.next().get("top").asText());
+				}
+			}
+			
 			ThesaurusFacet tf = new ThesaurusFacet();
-			tf.create(list);
+			tf.create(list, selected);
 			
 			ObjectId collectionDbId = new ObjectId(id);
 			Result response = errorIfNoAccessToCollection(Action.READ, collectionDbId);
@@ -113,6 +119,7 @@ public class CollectionIndexController extends WithResourceController	{
 				return ok(tf.toJSON(Language.EN));
 			}
 		} catch (Exception e) {
+//			e.printStackTrace();
 			result.put("error", e.getMessage());
 			return internalServerError(result);
 		}

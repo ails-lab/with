@@ -16,6 +16,7 @@
 
 package controllers.thesaurus;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -103,8 +104,8 @@ public class ThesaurusFacet {
 		return res.toString();
 	}
 	
-	public void create(List<String[]> list) {
-		long start = System.currentTimeMillis();
+	public void create(List<String[]> list, Set<String> selected) {
+//		long start = System.currentTimeMillis();
 		
 		Map<String, DAGNode<String>> nodeMap = new HashMap<>();
 		Map<String, Counter> counterMap = new HashMap<>();
@@ -140,52 +141,49 @@ public class ThesaurusFacet {
 		
 		for (Map.Entry<String, Counter> entry : counterMap.entrySet()) {
 			String term = entry.getKey();
-//			System.out.println("ADDING " + term);
 			if (!used.add(term)) {
-//				System.out.println("RETURN");
 				continue;
 			}
 			
 			DAGNode<String> node = nodeMap.get(term);
-//			System.out.println("------ " + node);
 			if (node == null) {
 				node = new DAGNode<String>(term, entry.getValue().getValue());
 				nodeMap.put(term, node);
 				tops.add(node);
 			}
 			
-//			node.explicit = levelMap.containsKey(term);
-				
 			List<SKOSTerm> broaderList = getSemantic(term).getBroader();
-//			System.out.println("BROADERLIST " + broaderList);
 			
 			if (broaderList != null) {
 				for (SKOSTerm broader : broaderList) {
 					String broaderURI = broader.getUri();
 					
 					DAGNode<String> parent = nodeMap.get(broaderURI);
-//					System.out.println("PARENT " + parent);
 					if (parent == null) {
 						parent = new DAGNode<String>(broaderURI, counterMap.get(broaderURI).getValue());
 						nodeMap.put(broaderURI, parent);
 						tops.add(parent);
 					}
 					
-//					parent.explicit = levelMap.containsKey(broaderURI);
-					
 					parent.addChild(node);
 					tops.remove(node);
 				}
 			}
 		}
-		
+
+		Set<DAGNode<String>> newTops = new HashSet<>();
 		
 		for (DAGNode<String> top : tops) {
 //			top.print(map);
-			top.normalize();
+			top.normalize(selected);
+//			if (norm.size() > 0) {
+//				newTops.add(top);
+//			}
 //			top.print(map);
 //			res.addChild(top);
 		}
+//		
+//		tops = newTops;
 
 
 	}

@@ -40,10 +40,16 @@
 <script type="text/html" id="scheme-template">
  
     <ul data-bind="foreach: schemes">
-        <li><div data-bind="template: { name: 'scheme-name-template', data: $data }, visible: true"></div>
+	
+		<!-- ko if: children().length !== 0 -->
+        
+		<li><div data-bind="template: { name: 'scheme-name-template', data: $data }, visible: true"></div>
             <div data-bind="template: { name: 'tree-template', data: $data }, visible: true"></div>
         </li>
-    </ul>
+
+		<!-- /ko -->
+    
+	</ul>
  
 </script>
 
