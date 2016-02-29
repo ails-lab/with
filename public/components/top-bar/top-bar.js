@@ -4,8 +4,22 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		this.route         = params.route;
 		var self           = this;
 		self.notifications = ko.observableArray();
-
-		 goToPage=function(data,event){
+		self.templateName = ko.observable('top-bar'); 
+		
+		ko.computed(function () {
+			var tmp = app.currentUser.notifications.userNotifications().concat(app.currentUser.notifications.groupNotifications());
+			tmp.sort(function(a, b) {
+				return b.openedAt - a.openedAt;
+			});
+			self.notifications(tmp.splice(0, 5));
+		});
+		
+		if(localStorage.getItem('logged_in')=="true"){
+			self.templateName('dashboard-bar');
+			
+		}
+		
+		goToPage=function(data,event){
 			 if(data=="#index" || data=="#"){
 			      sessionStorage.removeItem("homemasonryscroll");
 			      sessionStorage.removeItem("homemasonrycount");}
@@ -14,47 +28,10 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 			   return false;
 		}
 
-		$("[data-toggle=popover]").popover({
-			html: true,
-			content: function() {
-				var tmp = app.currentUser.notifications.userNotifications().concat(app.currentUser.notifications.groupNotifications());
-				tmp.sort(function(a, b) {
-					return b.openedAt - a.openedAt;
-				});
-				self.notifications(tmp.splice(0, 5));
-
-				return $('#notifications-content').html();
-			}
-		});
-
-		$( document ).on( 'keypress', function( event ) {
-
-			if (event.target.nodeName != 'INPUT' && event.target.nodeName != 'TEXTAREA') {
-				if (event.which === null) {
-					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
-			    	$("#myModal").modal('hide');
-
-					var char=String.fromCharCode(event.which);
-					toggleSearch("focus",char);
-
-				}
-				else if (event.which !== 0 && event.charCode !== 0) {
-					$('[id^="modal"]').removeClass('md-show').css('display', 'none');
-			    	$("#myModal").modal('hide');
-
-					var chr = String.fromCharCode(event.which);
-					toggleSearch("focus", chr);
-				}
-				else {
-					return;
-				}
-			}
-			else {
-				return;
-			}
-		});
-
+		
+		
 		self.username      = app.currentUser.username;
+		
 		self.profileImage  = ko.computed(function() { return app.currentUser.avatar.Square() ? app.currentUser.avatar.Square() : 'images/user.png'; });
 		self.organizations = app.currentUser.organizations;
 		self.projects      = app.currentUser.projects;
@@ -63,9 +40,6 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 			return app.currentUser.notifications.unread() === 0 ? '' : app.currentUser.notifications.unread();
 		});
 
-		editProfile        = function() { app.showPopup('edit-profile'); };
-		newOrganization    = function() { app.showPopup('new-organization', { type: 'organization' }); };
-		newProject         = function() { app.showPopup('new-organization', { type: 'project' }); };
 		logout             = function() { app.logout(); };
 	}
 

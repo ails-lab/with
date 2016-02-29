@@ -256,6 +256,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							}
 							else {
 								window.location.href = "#";
+								window.location.reload(true);
 							}
 						});
 					},

@@ -1,0 +1,33 @@
+	<div class="container">
+		<!-- logo-->
+		<a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" class="logo">
+		<img src="img/ui/logo.png">
+		</a>
+		<!-- nav-->
+		<nav>
+			<ul>
+				<li><a href="javascript:void(0)" data-bind="event :{ click: function(data,event){goToPage('#home',event);}}" title="Home">HOME</a></li>
+				<li><a href="#search" title="Explore" onclick="toggleSearch('focus'); return false;">EXPLORE</a></li>
+				<li><a href="#about" title="About">ABOUT</a></li>
+				<li><a href="http://ipa.image.ntua.gr:9030/assets/developers-lite.html" title="WITH API" target="_blank">WITH API</a></li>
+				<li class="mobile">
+								<a href="#login" class="login">SIGN IN</a>
+								<a href="#register" class="register">REGISTER</a>
+							</li>
+			</ul>
+			
+		</nav>
+		<!-- sign in -->
+		<section class="login-section">
+			<a  href="#login" class="login">SIGN IN</a>
+			<a  href="#register" class="register">REGISTER</a>
+			<!-- <a href="#" class="menu-trigger">
+				<span></span>
+			</a> -->
+		</section>
+		<!-- mobile menu trigger -->
+					<div class="mobile-trigger">
+						<div class="burger">
+						</div>
+					</div>
+	</div>
