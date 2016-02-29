@@ -1,0 +1,166 @@
+
+// new colors
+@brand-white:			#ffffff;
+@brand-blue:			#009edf;
+@brand-red:				#f14dae;
+@brand-green:			#aed779;
+
+// border
+@border-color:			#cfcfcf;
+
+
+@transition-timing: .3s;
+
+// set outline
+a {
+	outline: 0 !important;
+}
+
+// tooltop
+.tooltip {
+	font-size: 12px !important;
+	min-width: 100px;
+	line-height: 16px !important;
+	z-index: 60;
+}
+
+// listing
+.listing {
+	padding: 0px 0 30px 0;
+	background: #f6f6f6;
+	border-bottom: 1px solid #d7d7d7;
+
+	// grid
+	.grid {
+		margin: 0 -15px 0 -15px;
+
+		// item
+		.sizer, .item {
+			width: 25%;
+			margin-bottom: 30px;
+			padding: 0 15px 0 15px;
+
+			// wrap
+			.wrap {
+				width: 100%;
+				background: @brand-white;
+				position: relative;
+				border-top-left-radius: 5px;
+				border-top-right-radius: 5px;
+
+				// anchor
+				a {
+					display: block;
+					.opacity( 0.8 );
+					.transition( opacity 0.3s );
+
+					// hover
+					&:hover,&:focus {
+						text-decoration: none;
+						.opacity( 1 );
+					}
+				}
+
+				// thumb
+				.thumb {
+					position: relative;
+
+					// img
+					img {
+						width: 100%;
+					}
+				}
+
+				// info
+				.info {
+					padding: 30px;
+
+					// title
+					.title {
+						margin: 0 0 20px;
+						font-size: 20px;
+						font-family: georgia,sans-serif;
+						color: black;
+					}
+
+					// type
+					.type {
+						font-size: 11px;
+						color: @gray-soft;
+						margin-bottom: 13px;
+						display: inline-block;
+						text-transform: uppercase;
+						letter-spacing: 2px;
+					}
+
+					// owner
+					.text {
+						color: darken(@gray-soft, 20%);
+						font-size: 15px;
+						margin-bottom: 0;
+						line-height: 1.4em;
+					}
+
+					// location
+					.location {
+						color: @gray-light;
+						font-size: 0.86em;
+						font-style: italic;
+						letter-spacing: 1px;
+						line-height: 1.5em;
+						display: block;
+
+						// res
+						margin-left: 0px
+					}
+				}
+			}
+		}
+	}
+
+	// load more
+	.loadmore {
+		.btn(@gray-soft,darken(@gray-soft, 20%));
+		.border-effect(@gray-soft,darken(@gray-soft, 10%));
+		display: table;
+		font-weight: 600;
+		margin: 0 auto;
+	}
+}
+
+// wrap it
+body {
+
+	// popover
+	.popover {
+		border-radius: 0px;
+		border: 0px;
+		font-size: 0.9em;
+		color: @gray-light;
+		font-style: italic;
+		border-top: 3px solid @brand-green;
+
+		// arrow
+		&.bottom {
+			.arrow {
+				border-bottom-color: @brand-green;
+			}
+		}
+	}
+}
+
+// sticky 
+.sticky-wrapper {
+
+	&.is-sticky {
+
+		.filter {
+			.wrap {
+				// reduce height
+				.nav li a,.dropdown-toggle {
+					padding: 17px 0 !important;
+				}
+			}
+		}
+	}
+}

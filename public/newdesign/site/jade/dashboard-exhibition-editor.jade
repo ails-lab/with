@@ -1,0 +1,143 @@
+//- index.jade
+- var title = "WITH - My Exhibition"
+- var page  = "exhibition"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+
+						// collection section
+						section.exhibition
+
+							// head
+							.list-head
+
+								// back
+								.title Exhibition Editor
+
+								// control
+								.list-control
+									a(class="fa fa-eye" title="" data-placement="top" data-toggle="tooltip" href="dashboard-exhibition-viewer.html" data-original-title="Preview Exhibition")
+									a(href="#" data-toggle="tooltip" data-placement="top" title="Upload background image").fa.fa-image.upload
+									.toggle
+										input(type='checkbox')#toggle2
+										label(for='toggle2')
+										span.private private
+										span.public public
+
+							// editor box
+							.editorbox
+								.wrap
+
+									// scroll
+									.scroll
+										
+										// box
+										.box
+											h1.title Never in all their history
+											p
+												| Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.
+
+										// add
+										.add
+											span
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Drag your media here" )
+													img( src="img/ui/ic-add.png" )
+
+							// assets
+							.assets
+
+								// actions
+								.actions
+									select.form-control.collectionlist
+										option Collection 1
+										option Collection 2
+									.collectionsearch
+										input( type="text" placeholder="Search" )
+										img.icon( src="img/ui/ic-mag.png" )
+									.notification
+										| Select your notifications and drag items to your editor
+
+								// listing
+								.assetlisting
+									ul
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-1.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-2.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-3.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-4.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-5.png" )
+													.color
+										li
+											a( href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet" )
+												.hue
+													img( src="img/content/content-6.png" )
+													.color
+
+
+
+
+
+
+
+						// collection new
+						section.action.upload
+							.action-header
+								.title Upload background image
+
+							.action-body
+								img(src="img/ui/upload-placeholder.png").upload-img
+								span.progress( style="width:40%;" )
+
+							.button-group
+								a(href="#").btn-green-o.cancel Cancel
+								a(href="#").btn-green Save
+									
+
+
+							
+						
+	// script
+	include ./includes/script.inc.jade

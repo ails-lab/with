@@ -1,0 +1,69 @@
+//- index.jade
+- var title = "WITH - Register Email"
+- var page  = "Register Email"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		header
+			.wrap
+				.container
+					a(href="#").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="#" title="home") HOME
+							li
+								a(href="#" title="home") EXPLORE
+							li
+								a(href="#" title="home") ABOUT
+							li
+								a(href="#" title="home") SEARCH
+					section.login-section
+						a(href="dashboard.html").back GO TO DASHBOARD
+		// main
+		div( role="main" )
+
+			// viewer mode
+			.viewer
+
+				section.entrance.register-email
+					.section-header
+						.text Register with your email address
+					.section-body
+						.input-group
+							input(type="text" placeholder="Email")
+							input(type="text" placeholder="Username")
+						.input-group
+							input(type="password" placeholder="Password")
+							input(type="password" placeholder="Repeat Password")
+						.input-group
+							input(type="text" placeholder="First name")
+							input(type="text" placeholder="Last name")
+						.input-group
+							select
+								option Gender
+								option Male
+								option Female
+						.input-group.ack
+							input(type="checkbox")#ack
+							label(for="ack") I acknowledge the i have read and accept <a href="#"> Terms of Use Agreement
+						.button-group
+							a(href="#").btn-green Register
+
+
+
+					
+			// footer
+			include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

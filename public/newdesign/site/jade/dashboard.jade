@@ -1,0 +1,103 @@
+//- index.jade
+- var title = "WITH - Dashboard"
+- var page  = "dashboard"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		// head
+		include ./includes/header.inc.jade
+
+		// main
+		div( role="main" )
+			.container-fluid
+
+				// wrapper
+				.wrapper
+
+					// sidebar
+					aside
+					
+						// nav
+						include ./includes/asidenav.inc.jade
+					
+					// main
+					main
+						
+						section.dashboard
+
+							// message
+							section.message
+								img(src='img/ui/ic-inbox.png').hero
+								.message-body
+									.header Welcome to Your Dashboard
+									.description
+										| This is <b> Your Dashboard </b>, where you can see all the most recent activities on your collections and exhibitions. Do you know that you can start exploring the media by typing letters on your keyboard? try it now!
+
+									a(href="#")
+										span.cross
+										span.text Hide welcome message
+							
+							section.notification
+
+								// header
+								.list-head
+									.sort
+										a#sorting(href="#", data-toggle='dropdown')
+											span.text My Notification
+											span.arrow
+
+										// dropdown
+										ul.dropdown-menu(aria-labelledby='sorting')
+											li 
+												a(href="#") Title
+											li 
+												a(href="#") Date
+
+								ul.notif-list
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-plus.png").icon
+										.meta
+											.text You created 
+												a(href="#") a collection: My Collection
+										.timing
+											| 2 hours ago
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-mark.png").icon
+										.meta
+											.text Diana Stanton is not interested in 
+												a(href="#") collection: Street Art
+										.timing
+											| 2 hours ago
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-cross.png").icon
+										.meta
+											.text You deleted 
+												a(href="#") an exhibition: Paris in afternoon
+										.timing
+											| 2 hours ago
+									li
+										.thumbnails
+											img(src="img/content/img-profile.jpg")
+										img(src="img/ui/ic-notice.png").icon
+										.meta
+											.text Diana Stanton just shared 
+												a(href="#") collection:Street Art 
+												| with you
+										.timing
+											| 2 hours ago
+
+	// script
+	include ./includes/script.inc.jade

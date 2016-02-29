@@ -1,0 +1,150 @@
+//- index.jade
+- var title = "WITH - Search"
+- var page  = "search"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		header
+			.wrap
+				.container
+					a(href="#").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="#" title="home") HOME
+							li
+								a(href="#" title="home") EXPLORE
+							li
+								a(href="#" title="home") ABOUT
+							li
+								a(href="#" title="home") SEARCH
+					section.login-section
+						a(href="#").login Go To Dashboard
+
+		// main
+		div( role="main" )
+
+			// viewer mode
+			.viewer
+
+					// seearch section
+					section.search
+
+						// head
+						.list-head
+							
+							.mid-control
+								.wrap
+									span.fa.fa-cogs
+									span.fa.fa-search
+									input(type="text" placeholder="Search").search-bar
+
+								.wrap
+									a#picker(href="#", data-toggle='dropdown').picker
+										span.text All Content providers item
+										span.arrow
+
+									ul.dropdown-menu(aria-labelledby='picker')
+										li 
+											a(href="#") My Collection
+										li 
+											a(href="#") Collection shared with me
+
+								.wrap
+									a(href="#" data-toggle="tooltip" data-placement="top" title="List").fa.fa-align-left.active
+									a(href="#" data-toggle="tooltip" data-placement="top" title="Grids").fa.fa-th
+
+							a(href="#").close Close
+						
+						// body
+						.list-body
+
+							.search-listing.list
+								.parent
+									.title Europeana
+									ul
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-1.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-2.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+								.parent
+									.title DPLA
+									ul
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-1.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-2.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-3.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+								.parent
+									.title Digital NZ
+									ul
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-2.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+								.parent
+									.title Youtube
+									ul
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-1.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-3.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+								.parent
+									.title Rjksmuseum
+									ul
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-3.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+										li
+											a(href="#")
+												.thumbnails
+													img(src="img/content/search-2.png")
+												.description
+													| Lorem ipsum dolor sit amel conseptuos
+					
+
+	// script
+	include ./includes/script.inc.jade

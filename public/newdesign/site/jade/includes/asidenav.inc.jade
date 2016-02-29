@@ -1,0 +1,55 @@
+//- aside nav
+
+// header
+label.header NAVIGATE
+
+// nav
+nav.app
+	ul
+		li( class=page === "dashboard" ? "active" : "" )
+			a(href='dashboard.html')
+				span.icon
+					i.fa.fa-dot-circle-o
+				| Dashboard
+		li( class=page === "collection" ? "active" : "" )
+			a(href='dashboard-collection.html')
+				span.counter 7
+				span.icon
+					i.fa.fa-clone
+				| My Collection
+		li( class=page === "exhibition" ? "active" : "" )
+			a(href='dashboard-exhibition.html')
+				span.counter 10
+				span.icon
+					i.fa.fa-television
+				| My Exhibition
+		li( class=page === "favorite" ? "active" : "" )
+			a(href='dashboard-favorite.html')
+				span.counter 5
+				span.icon
+					i.fa.fa-heart-o
+				| My Favorite
+		li( class=page === "organizations" ? "active" : "" )
+			a(href='dashboard-organizations.html')
+				span.icon
+					i.fa.fa-bookmark-o
+				| Organizations
+		li( class=page === "projects" ? "active" : "" )
+			a(href='dashboard-projects.html')
+				span.icon
+					i.fa.fa-comment-o
+				| Projects
+
+// nav
+nav.site
+	ul
+		li
+			a(href='#') Help
+		li
+			a(href='#') Frequently Asked Questions
+		li
+			a(href='#') About WITH
+		li
+			a(href='#') WITH API
+		li
+			a(href='#') Feedbacks

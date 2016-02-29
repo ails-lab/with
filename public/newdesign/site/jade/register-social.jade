@@ -1,0 +1,58 @@
+//- index.jade
+- var title = "WITH - Register Social"
+- var page  = "Register Social"
+
+doctype html
+html
+
+	// head
+	include ./includes/head.inc.jade
+
+	// body
+	body
+
+		header
+			.wrap
+				.container
+					a(href="#").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="#" title="home") HOME
+							li
+								a(href="#" title="home") EXPLORE
+							li
+								a(href="#" title="home") ABOUT
+							li
+								a(href="#" title="home") SEARCH
+					section.login-section
+						a(href="dashboard.html").back GO TO DASHBOARD
+		// main
+		div( role="main" )
+
+			// viewer mode
+			.viewer
+
+				// Register using social
+				section.entrance.register-social
+					.section-header
+						.text Register
+					.section-body 
+						a(href="#").fb
+							i.fa.fa-facebook-official
+							span.text Register with Facebook account
+						a(href="#").gplus
+							i.fa.fa-google-plus
+							span.text Register with Google account
+						.or
+							span.text or
+						.button-group
+							a(href="#").btn-green Register with your email address
+					
+			// footer
+			include ./includes/footer.view.jade
+			
+	// script
+	include ./includes/script.inc.jade

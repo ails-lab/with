@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+  <!-- head-->
+  <head>
+    <!-- meta-->
+    <title>WITH - My Exhibition</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="WITH">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#009edf">
+    <!-- icons-->
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <meta name="msapplication-TileImage" content="tile.png">
+    <meta name="msapplication-TileColor" content="#d83434">
+    <!-- stylesheets-->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="js/vendor/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="js/vendor/slick.js/slick/slick.css">
+    <link rel="stylesheet" href="js/vendor/magnific-popup/dist/magnific-popup.css">
+    <!-- script-->
+    <script src="js/vendor/modernizr/modernizr.js"></script>
+  </head>
+  <!-- body-->
+  <body>
+    <!-- head-->
+    <header>
+      <div class="wrap">
+        <div class="container-fluid">
+          <!-- logo--><a href="dashboard.html" class="logo"><img src="img/ui/logo.png"></a>
+          <!-- sign in-->
+          <section class="login-section">
+            <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
+            <!-- dropdown menu-->
+            <ul aria-labelledby="profilebutton" class="dropdown-menu">
+              <li><a href="#">My profile</a></li>
+              <li><a href="#">Sign out</a></li>
+            </ul>
+          </section>
+          <!-- notification-->
+          <section class="notification">
+            <!-- button--><a id="notificationbutton" href="#" title="notification" data-toggle="dropdown"><img src="img/ui/ic-notification.png"><span class="counter">12</span></a>
+            <!-- dropdown menu-->
+            <div aria-labelledby="notificationbutton" class="dropdown-menu">
+              <!-- header-->
+              <h3>WITH Notifications</h3>
+              <!-- activity list-->
+              <ul class="list">
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+                <li><a href="#"><img src="img/content/img-profile.jpg" class="thumb">
+                    <div class="news">Lorem ipsum dolor sit amet consectetur adipiscing.</div></a></li>
+              </ul>
+              <!-- view all--><a href="#" class="viewall">View all activities </a>
+            </div>
+          </section>
+          <!-- explore-->
+          <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
+        </div>
+      </div>
+    </header>
+    <!-- main-->
+    <div role="main">
+      <div class="container-fluid">
+        <!-- wrapper-->
+        <div class="wrapper">
+          <!-- sidebar-->
+          <aside>
+            <!-- nav-->
+            <!-- header-->
+            <label class="header">NAVIGATE</label>
+            <!-- nav-->
+            <nav class="app">
+              <ul>
+                <li><a href="dashboard.html"><span class="icon"><i class="fa fa-dot-circle-o"></i></span>Dashboard</a></li>
+                <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span>My Collection</a></li>
+                <li class="active"><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span>My Exhibition</a></li>
+                <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span>My Favorite</a></li>
+                <li><a href="dashboard-organizations.html"><span class="icon"><i class="fa fa-bookmark-o"></i></span>Organizations</a></li>
+                <li><a href="dashboard-projects.html"><span class="icon"><i class="fa fa-comment-o"></i></span>Projects</a></li>
+              </ul>
+            </nav>
+            <!-- nav-->
+            <nav class="site">
+              <ul>
+                <li><a href="#">Help</a></li>
+                <li><a href="#">Frequently Asked Questions</a></li>
+                <li><a href="#">About WITH</a></li>
+                <li><a href="#">WITH API</a></li>
+                <li><a href="#">Feedbacks</a></li>
+              </ul>
+            </nav>
+          </aside>
+          <!-- main-->
+          <main>
+            <!-- collection section-->
+            <section class="exhibition">
+              <!-- head-->
+              <div class="list-head">
+                <!-- back-->
+                <div class="title">Exhibition Editor</div>
+                <!-- control-->
+                <div class="list-control"><a title="" data-placement="top" data-toggle="tooltip" href="dashboard-exhibition-viewer.html" data-original-title="Preview Exhibition" class="fa fa-eye"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Upload background image" class="fa fa-image upload"></a>
+                  <div class="toggle">
+                    <input type="checkbox" id="toggle2">
+                    <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
+                  </div>
+                </div>
+              </div>
+              <!-- editor box-->
+              <div class="editorbox">
+                <div class="wrap">
+                  <!-- scroll-->
+                  <div class="scroll">
+                    <!-- box-->
+                    <div class="box">
+                      <h1 class="title">Never in all their history</h1>
+                      <p>Never in all their history have men been able truly to conceive of the world as one: a single sphere, a globe, having the qualities of a globe, a round earth in which all the directions eventually meet, in which there is no center.</p>
+                    </div>
+                    <!-- add-->
+                    <div class="add"><span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag your media here"><img src="img/ui/ic-add.png"></a></span></div>
+                  </div>
+                </div>
+              </div>
+              <!-- assets-->
+              <div class="assets">
+                <!-- actions-->
+                <div class="actions">
+                  <select class="form-control collectionlist">
+                    <option>Collection 1</option>
+                    <option>Collection 2</option>
+                  </select>
+                  <div class="collectionsearch">
+                    <input type="text" placeholder="Search"><img src="img/ui/ic-mag.png" class="icon">
+                  </div>
+                  <div class="notification">Select your notifications and drag items to your editor</div>
+                </div>
+                <!-- listing-->
+                <div class="assetlisting">
+                  <ul>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-1.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-2.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-3.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-4.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-5.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                    <li><a href="#" data-toggle="tooltip" data-placement="top" title="Lorem ipsum dolor siy amet">
+                        <div class="hue"><img src="img/content/content-6.png">
+                          <div class="color"></div>
+                        </div></a></li>
+                  </ul>
+                </div>
+              </div>
+            </section>
+            <!-- collection new-->
+            <section class="action upload">
+              <div class="action-header">
+                <div class="title">Upload background image</div>
+              </div>
+              <div class="action-body"><img src="img/ui/upload-placeholder.png" class="upload-img"><span style="width:40%;" class="progress"></span></div>
+              <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+  <!-- script-->
+  <script src="js/vendor/jquery/dist/jquery.min.js"></script>
+  <script src="js/vendor/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="js/vendor/masonry/dist/masonry.pkgd.min.js"></script>
+  <script src="js/vendor/slick.js/slick/slick.min.js"></script>
+  <script src="js/vendor/jquery.nicescroll/dist/jquery.nicescroll.min.js"></script>
+  <script src="js/vendor/isotope/isotope.pkgd.min.js"></script>
+  <script src="js/vendor/jquery-sticky/jquery.sticky.js"></script>
+  <script src="js/plugin.js"></script>
+  <script src="js/main.js"></script>
+</html>
