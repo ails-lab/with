@@ -26,7 +26,9 @@ import model.basicDataTypes.Language;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
@@ -38,6 +40,7 @@ import play.libs.Json;
 import play.mvc.Result;
 import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.CollectionObjectController;
@@ -51,10 +54,15 @@ public class CollectionIndexController extends WithResourceController	{
 
 	public static Result getCollectionIndex(String id) {
 		ObjectNode result = Json.newObject();
+		
+		JsonNode json = request().body().asJson();
+//		JsonNode json = null;
+		
 		try {
 			ElasticSearcher es = new ElasticSearcher();
 			
-			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
+//			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
+			QueryBuilder query = CollectionObjectController.getIndexCollectionQuery(new ObjectId(id), json);
 
 			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
 

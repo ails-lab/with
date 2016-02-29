@@ -51,6 +51,7 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -699,6 +700,29 @@ public class CollectionObjectController extends WithResourceController {
 		}
 	}
 	
+	public static QueryBuilder getIndexCollectionQuery(ObjectId colId, JsonNode json) {
+		BoolQueryBuilder query = QueryBuilders.boolQuery();
+		query.must(QueryBuilders.termQuery("collectedIn.collectionId", colId));
+
+		if (json != null) {
+			for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
+				BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+	
+				JsonNode inode = iter.next();
+				for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
+					String s = iter2.next().asText();
+	
+					boolQuery = boolQuery.should(QueryBuilders.termQuery("keywords.uri.all", s));
+					boolQuery = boolQuery.should(QueryBuilders.termQuery("dctype.uri.all", s));
+	
+				}
+				query.must(boolQuery);
+			}
+		}
+
+		return query;
+	}
+	
 	/**
 	 * List all Records from a Collection using a start item and a page size
 	 */
@@ -709,7 +733,7 @@ public class CollectionObjectController extends WithResourceController {
 		Locks locks = null;
 		
 		JsonNode json = request().body().asJson();
-		log.info("JSON " + json.toString());
+//		log.info("JSON " + json.toString());
 		try {
 			locks = Locks.create().read("Collection #" + collectionId)
 					.acquire();
@@ -719,44 +743,18 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				
 				ElasticSearcher es = new ElasticSearcher();
 				
-				BoolQueryBuilder query = QueryBuilders.boolQuery();
-				query.must(QueryBuilders.termQuery("collectedIn.collectionId", collectionId));
-
-				for (Iterator<JsonNode> iter = json.get("terms").elements(); iter.hasNext();) {
-//					String s = iter.next().asText();
-//					for (Iterator<JsonNode> iter = json.get("terms").elements();iter.hasNext();) {
-//
-//					TermQueryBuilder q1 = QueryBuilders.termQuery("keywords.uri.all", s);
-//					TermQueryBuilder q2 = QueryBuilders.termQuery("dctype.uri.all", s);
-//					
-//					query.must(QueryBuilders.boolQuery().should(q1).should(q2));
-
-					BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-
-					JsonNode inode = iter.next();
-					for (Iterator<JsonNode> iter2 = inode.get("sub").elements(); iter2.hasNext();) {
-						String s = iter2.next().asText();
-
-						boolQuery = boolQuery.should(QueryBuilders.termQuery("keywords.uri.all", s));
-						boolQuery = boolQuery.should(QueryBuilders.termQuery("dctype.uri.all", s));
-
-					}
-					query.must(boolQuery);
-
-
-				}
+				QueryBuilder query = getIndexCollectionQuery(colId, json);
 				
-				log.info("QUERY " + query.toString());
-				log.info("QUERC " + start + " " + count);
+//				log.info("QUERY " + query.toString());
+//				log.info("QUERC " + start + " " + count);
 				
 				SearchOptions so = new SearchOptions(start, start + count);
 				
 				SearchResponse res = es.execute(query, so);
 				SearchHits sh = res.getHits();
-				log.info("*" + sh.getTotalHits());
+//				log.info("*" + sh.getTotalHits());
 
 				List<String> retrievedFields = new ArrayList<String>(
 						Arrays.asList("descriptiveData.label",
@@ -766,7 +764,7 @@ public class CollectionObjectController extends WithResourceController {
 				for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 					SearchHit hit = iter.next();
 					ids.add(hit.getId());
-					log.info("ID " + hit.getId());
+//					log.info("ID " + hit.getId());
 				}
 				
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);

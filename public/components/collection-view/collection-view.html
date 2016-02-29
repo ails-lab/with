@@ -33,7 +33,6 @@
 
 <div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
 
-
 <ul data-bind="foreach: terms">
     <li style="display:inline;"><button data-bind="click:removeTerm, text: label"></button></li>
 </ul>
@@ -59,7 +58,7 @@
 
 <script type="text/html" id="tree-template">
     <ul data-bind="foreach: children">
-        <li>
+        <li data-bind="attr: { 'id': id }">
             <span data-bind="
                 template: { name: 'node-name-template', data: $data },
                 css: { 'pointer-icon': children().length > 0 }"></span>

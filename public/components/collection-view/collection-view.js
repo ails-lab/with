@@ -195,8 +195,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				for (var i = 0; i < self.terms().length; i++) {
 					if (self.terms()[i].uri() === data.uri) {
 						self.terms.splice(i,1);
-						self.clearImages();
-						self.loadInit();
+						self.reload();
 						break;
 					}
 				}
@@ -210,6 +209,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			selfx.uri = ko.observable();
 			selfx.label = ko.observable();
 			selfx.children = ko.observableArray();
+			selfx.id = ko.observable(); 
 		 
 			selfx.toggleVisibility = function() {
 				selfx.isExpanded(!selfx.isExpanded());
@@ -224,10 +224,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					}
 				}
 
+//				$('#' + selfx.id()).hide();
 				self.terms.push(new Term({ uri: data.uri, label: data.label, subterms: selfx.collect() }));
-				
-				self.clearImages();
-				self.loadInit();
+				self.reload();
 			};
 			
 			selfx.collect = function() {
@@ -251,6 +250,31 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			};
 		
+		self.reload = function() {
+			self.clearImages();
+			self.loadInit();
+			
+//			$.ajax({
+//				"url": "/collectionindex/" + self.id(),
+//				"method": "post",
+//				"contentType": "application/json",
+//				"success": function (data) {
+//					alert(data);
+//					var obj = JSON.parse(data);
+//					self.index(new NodeModel(obj));
+//					
+//					//loading(false);
+//				},
+//				"error": function (result) {
+//					loading(false);
+//					$.smkAlert({
+//						text: 'An error has occured',
+//						type: 'danger',
+//						permanent: true
+//					});
+//				}
+//			});
+		}
 		
 		self.index = ko.observable(new NodeModel({ schemes: [] }));
 
@@ -350,7 +374,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					
 					$.ajax({
 						"url": "/collectionindex/" + self.id(),
-						"method": "get",
+						"method": "post",
+//						"data" : {},
 						"contentType": "application/json",
 						"success": function (data) {
 							var obj = JSON.parse(data);

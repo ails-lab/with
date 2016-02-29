@@ -14,15 +14,13 @@
  */
 
 
-package controllers.thesaurus;
+package model;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.bson.types.ObjectId;
 
 import model.basicDataTypes.Language;
 import model.resources.ThesaurusObject;
@@ -34,14 +32,12 @@ import db.ThesaurusObjectDAO;
 public class ThesaurusFacet {
 	private static boolean precompute = false;
 	private static Map<String, SKOSSemantic> map;
-	private static Map<String, ObjectId> idMap;
 	
 	private static ThesaurusObjectDAO dao;
 	
 	static {
 		dao = DB.getThesaurusDAO();
 		map = new HashMap<>();
-		idMap = new HashMap<>();
 		
 		if (precompute) {
 			System.out.println("READING THESAURUSES");
@@ -49,7 +45,6 @@ public class ThesaurusFacet {
 			long start = System.currentTimeMillis();
 	
 			for (ThesaurusObject to : dao.getAll()) {
-				idMap.put(to.getSemantic().getUri(), to.getDbid());
 				map.put(to.getSemantic().getUri(), to.getSemantic()); 
 			}
 	
@@ -65,10 +60,8 @@ public class ThesaurusFacet {
 	public SKOSSemantic getSemantic(String term) {
 		SKOSSemantic res = map.get(term);
 		if (res == null) {
-			ThesaurusObject to = DB.getThesaurusDAO().getByUri(term);
-			res = to.getSemantic();
+			res = DB.getThesaurusDAO().getByUri(term).getSemantic();
 			map.put(res.getUri(), res);
-			idMap.put(res.getUri(), to.getDbid());
 		}
 		
 		return res;
@@ -88,17 +81,17 @@ public class ThesaurusFacet {
 	private Set<DAGNode<String>> tops;
 	
 	public String toJSON(Language lang) {
-		StringBuffer res = new StringBuffer("{ \"schemes\": [");
+		StringBuffer res = new StringBuffer("[ ");
 		
 		int i = 0;
 		for (DAGNode<String> node : tops) {
 			if (i++ > 0) {
 				res.append(", ");
 			}
-			res.append(node.toJSON(idMap, map, lang));
+			res.append(node.toJSON(map, lang));
 		}
 		
-		res.append("] }");
+		res.append(" ]");
 		
 		return res.toString();
 	}
@@ -179,14 +172,29 @@ public class ThesaurusFacet {
 			}
 		}
 		
+		System.out.println("FACET TIME " + (System.currentTimeMillis() - start));
 		
+		System.out.println(tops);
 		for (DAGNode<String> top : tops) {
+			System.out.println("NEXT TOP");
+//			System.out.println("----");
 //			top.print(map);
 			top.normalize();
-//			top.print(map);
+//			System.out.println("    ");
+			top.print(map);
 //			res.addChild(top);
 		}
-
+		
+		
+		
+//		System.out.println("---------------");
+////		System.out.println(levelMap);
+//		
+//		for (Map.Entry<String, Counter> entry : levelMap.entrySet()) {
+//			flattop.addChild(new DAGNode<String>(entry.getKey(), entry.getValue().getValue()));
+//		}
+//		
+//		flattop.print(map);
 
 	}
 
