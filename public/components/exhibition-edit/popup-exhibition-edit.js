@@ -85,7 +85,7 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 					self.cancelButtonTitle('cancel');
 				}
 			}
-		}
+		};
 
 		//setup button actions
 		self.rightButtonTapped = function () {
@@ -113,38 +113,42 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 
 			self.videoUrl(embeddedVideoPath);
 			self.primaryButtonTitle('save');
-		}
+		};
 
 		self.savePopUpVideoMode = function () {
 			self.isUpdating(true);
 			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), self.videoUrl(), self.colId, self.position);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.contextData()[0].body.videoUrl(self.videoUrl());
+				self.textInput('');
+				self.videoUrl('');
 			}).fail(function (data) {
 				alert('video insertion failed');
 			}).always(function (data) {
 				self.isUpdating(false);
 				$('#myModal').modal('hide');
 			});
-		}
+		};
 
 		//left button actions
 		self.cancelPopUpVideoMode = function () {
+			self.videoUrl('');
 			$('#myModal').modal('hide');
-		}
+		};
 
 		self.deletePopUpVideoMode = function () {
 			self.isUpdating(true);
 			var promise = updateRecord(self.exhibitionItem.dbId, self.textInput(), '', self.colId, self.position);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.contextData()[0].body.videoUrl('');
+				self.videoUrl('');
 			}).fail(function (data) {
 				alert('deletion failed');
 			}).always(function (data) {
 				self.isUpdating(false);
 				$('#myModal').modal('hide');
 			});
-		}
+		};
 
 		//right button actions Text
 		self.savePopUpTextMode = function () {
@@ -152,31 +156,35 @@ define(['knockout', 'text!./popup-exhibition-edit.html', 'app'], function (ko, t
 			self.isUpdating(true);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.contextData()[0].body.text.default(self.textInput());
+				self.textInput('');
+				self.videoUrl('');
 			}).fail(function (data) {
 				alert('text insertion failed');
 			}).always(function (data) {
 				self.isUpdating(false);
 				$('#myModal').modal('hide');
 			});
-		}
+		};
 
 		//left button actions
 		self.cancelPopUpTextMode = function () {
+			self.textInput('');
 			$('#myModal').modal('hide');
-		}
+		};
 
 		self.deletePopUpTextMode = function () {
 			self.isUpdating(true);
 			var promise = updateRecord(self.exhibitionItem.dbId, '', self.videoUrl(), self.colId, self.position);
 			$.when(promise).done(function (data) {
 				self.exhibitionItem.contextData()[0].body.text.default('');
+				self.textInput('');
 			}).fail(function (data) {
 				alert('deletion failed');
 			}).always(function (data) {
 				self.isUpdating(false);
 				$('#myModal').modal('hide');
 			});
-		}
+		};
 	}
 
 	return {

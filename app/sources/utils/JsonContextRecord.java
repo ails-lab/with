@@ -427,7 +427,7 @@ public class JsonContextRecord {
 	}
 
 	public List<WithDate> getWithDateArrayValue(String... path) {
-		return JsonNodeUtils.asWithDateArray(getValue(buildpaths(path)));
+		return JsonNodeUtils.asWithDateArray(getStringArrayValue(path));
 	}
 
 	public JsonNode getRootInformation() {

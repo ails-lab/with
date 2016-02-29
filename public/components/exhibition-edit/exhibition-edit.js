@@ -10,9 +10,16 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			state: exhibition.administrative.access.isPublic()
 		});
 		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
-			var promise = updateExhibitionProperty(exhibition, 'isPublic', state);;
-			$.when(promise).done(function (data) {
-
+			$.ajax({
+				url: '/rights/' + exhibition.dbId() + '?isPublic=' + state,
+				method: 'GET',
+				contentType: "application/json",
+				success: function () {
+					// Empty
+				},
+				error: function () {
+					// Empty
+				}
 			});
 		});
 	}
@@ -118,7 +125,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 	}
 
 	function moveItemInExhibition(exhibitionId, recordId, oldPosition, newPosition) {
-		alert("move call");
 		$.ajax({
 			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
 			method: 'put',
@@ -145,11 +151,11 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				return;
 			}
 		};
-		
+
 		self.mapping = {
 			create: function (options) {
 		        //customize at the root level: add title and description observables, based on multiliteral
-				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...] 
+				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS({}, {});
 		        newRecord.dbId = ko.observable(record.dbId);
@@ -180,13 +186,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				var dbDescription = record.descriptiveData.description;
 		        if (dbDescription == undefined || dbDescription == null)
 		        	newRecord.description = ko.observable("");
-		        else 
+		        else
 		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
 				newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
 		        return newRecord;
 		    }
 		}
-		
+
 		self.checkLogged();
 		self.loading = ko.observable(false);
 		self.title = ko.observable('');
@@ -321,13 +327,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.xButtonClicked = function (item) {
-			alert("delete clicked");
 			var index = self.collectionItemsArray.indexOf(item);
 			if (index > -1) {
 				self.collectionItemsArray.remove(item);
 				deleteItemFromExhibition(self.dbId(), item.dbId(), index);
 			} else {
-				self.userSavedItemsArray.remove(item);
+				self.userSavedItemsArray.splice(index, 1);
 			}
 		};
 
@@ -355,7 +360,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					return;
 				}
 				if (_bIsMoveOperation) {
-					alert("move in show: from " + _startIndex + " to " + index);
 					if (_startIndex >= 0) {
 						moveItemInExhibition(self.dbId(), record.dbId(), _startIndex, index);
 						_startIndex = -1;		// Move was successful, reset the startIndex
@@ -372,7 +376,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.removeItem = function (elem, index, record) {
-			alert("removes " + record.dbId() + " from position " + index);
 			if (_bIsMoveOperation) {
 				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
 				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
@@ -394,6 +397,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		    var index = context.$index();
 			editItem(data, self.dbId(), index, 'PopUpTextMode');
 		};
+
+	    self.playExhibition = function() {
+	    	window.location.hash = '#exhibitionview/' + self.dbId();
+	    };
 
 		//custom binding
 		var _draggedItem;
@@ -496,17 +503,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						var newItem = ko.mapping.fromJS({}, {});
 						newItem = _draggedItem;
 						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
-						alert("move in array from " + indexDraggedItem + "to " + indexNewItem);
 						_startIndex = indexDraggedItem;
-						//dont do anything if it is moved to its direct left or right dashed box
-						if (_bIsMoveOperation) {// moved from exhibition itself
-							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
-								_draggedItem = undefined;
-								return;
-							}
-							newItem.contextData()[0].target.position(indexNewItem);
-						}
-						else {//comes from a bottom collection - add empty contextData
+						if (_draggedItem.contextData == undefined) {
 							contextData = ko.mapping.fromJS([{
 								"contextDataType": "ExhibitionData",
 								"target": {
@@ -521,19 +519,26 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 							}], {});
 							newItem.contextData = contextData;
 						}
+						else
+							newItem.contextData()[0].target.position(indexNewItem);
+						//dont do anything if it is moved to its direct left or right dashed box
+						if (_bIsMoveOperation) {// moved from exhibition itself
+							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
+								_draggedItem = undefined;
+								return;
+							}
+						}
 						dropElement.animate({
 							width: "60px"
 						}, 200);
 						dropElement.find('#droppable-Children').css({
 							display: "none"
 						});
-						alert("add to position in array " + indexNewItem);
-						self.collectionItemsArray.splice(indexNewItem, 0, newItem);
 						if (_bIsMoveOperation) {
-							alert("remove old in position from array ");
 							_removeItem = false;
 							self.collectionItemsArray.splice(indexDraggedItem, 1);
 						}
+						self.collectionItemsArray.splice(indexNewItem, 0, newItem);
 						_draggedItem = undefined;
 					}
 				};
@@ -541,7 +546,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}
 		};
 
-		ko.bindingHandlers.scroll = {
+
+		ko.bindingHandlers.hscroll = {
 			updating: true,
 
 			init: function (element, valueAccessor, allBindingsAccessor) {

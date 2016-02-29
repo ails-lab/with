@@ -29,6 +29,7 @@ import org.bson.types.ObjectId;
 import org.elasticsearch.action.suggest.SuggestResponse;
 import org.elasticsearch.search.SearchHit;
 
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
@@ -101,6 +102,16 @@ public class SearchController extends Controller {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Result searchSources() {
+		List<Sources> res = new ArrayList<>();
+		for (final ISpaceSource src : ESpaceSources.getESources()) {
+			Sources sourceByID = Sources.getSourceByID(src.LABEL);
+			if (sourceByID!=null)
+			res.add(sourceByID);
+		}
+		return ok(Json.toJson(res));
 	}
 
 	public static Promise<Result> searchwithfilter() {

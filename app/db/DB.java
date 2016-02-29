@@ -20,8 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import model.ApiKey;
-import model.Collection;
-import model.CollectionRecord;
 import model.annotations.Annotation;
 import model.resources.CollectionObject;
 import model.resources.RecordResource;
@@ -54,7 +52,6 @@ import db.converters.MultiLiteralConverter;
 // the EntityManagerFactory is here
 public class DB {
 	private static Map<String, DAO<?>> daos = new HashMap<String, DAO<?>>();
-	private static MediaDAO mediaDAO;
 	private static MediaObjectDAO mediaObjectDAO;
 	private static MongoClient mongo;
 	private static Datastore ds;
@@ -147,22 +144,8 @@ public class DB {
 		return (ApiKeyDAO) getDAO(ApiKey.class);
 	}
 
-	public static CollectionDAO getCollectionDAO() {
-		return (CollectionDAO) getDAO(Collection.class);
-	}
-
 	public static UserGroupDAO getUserGroupDAO() {
 		return (UserGroupDAO) getDAO(UserGroup.class);
-	}
-
-	public static CollectionRecordDAO getCollectionRecordDAO() {
-		return (CollectionRecordDAO) getDAO(CollectionRecord.class);
-	}
-
-	public static MediaDAO getMediaDAO() {
-		if (mediaDAO == null)
-			mediaDAO = new MediaDAO();
-		return mediaDAO;
 	}
 
 	public static ThesaurusObjectDAO getThesaurusDAO() {

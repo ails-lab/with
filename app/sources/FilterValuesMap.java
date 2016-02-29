@@ -152,6 +152,7 @@ public class FilterValuesMap {
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "VIDEO");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "SOUND");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "TEXT");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.THREED, "3D");
 
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Creative, ".*creative.*");
 		addMapping(CommonFilters.RIGHTS.getId(), WithMediaRights.Commercial, ".*creative(?!.*nc).*");
@@ -322,8 +323,10 @@ public class FilterValuesMap {
 	}
 
 	private void fillRijks() {
-		// TODO Auto-generated method stub
-		
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, 
+				"drawing","painting","photograph","documentary photographs");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, 
+				"book","poem","text sheet","print","manuscript");
 	}
 
 }

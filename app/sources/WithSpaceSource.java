@@ -24,9 +24,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import model.Collection;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.CollectionObject;
 import model.resources.RecordResource;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
@@ -104,7 +104,6 @@ public class WithSpaceSource extends ISpaceSource {
 		int offset = (Integer.parseInt(q.page)-1)*count;
 
 		/* Access parameters */
-		List<Collection> colFields = new ArrayList<Collection>();
 		List<String> userIds = q.getEffectiveUserIds();
 		List<Tuple<ObjectId, Access>> userAccess = new ArrayList<Tuple<ObjectId, Access>>();
 		if ((userIds != null) && !userIds.isEmpty()) {

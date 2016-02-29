@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import model.Collection;
 import model.EmbeddedMediaObject;
 import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
