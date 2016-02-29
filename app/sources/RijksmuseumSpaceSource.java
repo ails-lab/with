@@ -92,7 +92,7 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 					res.addItem(formatreader.readObjectFrom(item));
 				}
 				//TODO: what is the count?
-				res.count = 0;
+				res.count = res.items.getItemsCount();
 
 				res.facets = response.path("facets");
 
