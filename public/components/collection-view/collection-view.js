@@ -180,6 +180,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.loggedUser = isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
+		self.fetchitemnum=20;
 
 		if (params.type === 'favorites') {
 			self.isFavorites(true);
@@ -338,7 +339,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				
 				var promise=self.moreItems();
 				$.when(promise).done(function(data){
-					var items=self.revealItems(data.recodrs);
+					var items=self.revealItems(data.records);
 					if (items.length > 0) {
 						var $newitems = getItems(items);
 
@@ -361,7 +362,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				dataType: "json",
 				url: "/collection/" + self.id() + "/list",
 				processData: false,
-				data: "count="+self.fetchitemnum+"&offset=" + self.citems().length,
+				data: "count="+self.fetchitemnum+"&start=" + self.citems().length,
 			}).success (function(){
 			});
 			
