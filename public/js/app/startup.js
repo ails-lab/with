@@ -10,6 +10,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	// Components can be packaged as AMD modules, such as the following:
 	ko.components.register('nav-bar', { require: 'components/nav-bar/nav-bar' });
 	ko.components.register('top-bar', { require: 'components/top-bar/top-bar'});
+	ko.components.register('side-bar', { require: 'components/side-bar/side-bar'});
 	ko.components.register('home-page', { require: 'components/home-page/home' });
 	ko.components.register('main-content', { require: 'components/main-content/main-content' });
 	ko.components.register('search-page', { require: 'components/search-page/search' });
@@ -78,8 +79,8 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	// [Scaffolded component registrations will be inserted here. To retain this feature, don't remove this comment.]
 	popupName = ko.observable('empty');
 	popupParams = ko.observable({});
-    
-   
+
+
 	// Start the application
 	ko.applyBindings({ route: router.currentRoute, popupName: popupName, popupParams: popupParams });
 });
