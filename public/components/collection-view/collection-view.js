@@ -240,6 +240,16 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 				return result;
 			}
+			
+			selfx.isSelected =  ko.computed(function() {
+				for (var i in self.terms()) {
+					if (self.terms()[i].uri() === data.uri) {
+						return true;
+					}
+				}
+				
+				return false;
+			});
 		};
 		
 		NodeModel.prototype.mapOptions = {

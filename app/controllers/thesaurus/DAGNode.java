@@ -39,14 +39,14 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	public boolean explicit;
 	
 	private Collection<DAGNode<T>> children;
-//	private List<DAGNode<T>> parents;
+	private Collection<DAGNode<T>> parents;
 
 	public DAGNode() {
 		label = new HashSet<>();
 		
 //		children = new ArrayList<>();
 		children = new TreeSet<>();
-//		parents = new ArrayList<>();
+		parents = new HashSet<>();
 	}
 	
 	public DAGNode(T l) {
@@ -55,7 +55,7 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		
 //		children = new ArrayList<>();
 		children = new TreeSet<>();
-//		parents = new ArrayList<>();
+		parents = new HashSet<>();
 	}
 
 	public DAGNode(T l, int size) {
@@ -64,38 +64,11 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 		
 //		children = new ArrayList<>();
 		children = new TreeSet<>();
-//		parents = new ArrayList<>();
+		parents = new HashSet<>();
 		
 		this.size = size; 
 	}
-	
-//	public DAGNode(T l, Set<String> instances) {
-//		label = new HashSet<>();
-//		label.add(l);
-//		
-//		children = new TreeSet<>();
-////		parents = new ArrayList<>();
-//		
-//		this.instances = instances; 
-//	}
 
-//	public DAGNode(Set<T> l) {
-//		label = new HashSet<>();
-//		label.addAll(l);
-//		
-//		children = new TreeSet<>();
-////		parents = new ArrayList<>();
-//	}
-
-//	public DAGNode(Set<T> l, Set<String> instances) {
-//		label = new HashSet<>();
-//		label.addAll(l);
-//		
-//		children = new TreeSet<>();
-////		parents = new ArrayList<>();
-//		
-//		this.instances = instances;
-//	}
 	
 	public Set<T> getLabel() {
 		return label;
@@ -104,12 +77,25 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	public Collection<DAGNode<T>> getChildren() {
 		return children;
 	}
+	
+	public Collection<DAGNode<T>> getParents() {
+		return parents;
+	}
 
 	public void addChild(DAGNode<T> child) {
 //		if (!children.contains(child)) {
 			children.add(child);
+			child.parents.add(this);
 //		}
 	}
+	
+	public void removeChild(DAGNode<T> child) {
+//		if (!children.contains(child)) {
+			children.remove(child);
+			child.parents.remove(this);
+//		}
+	}
+
 
 	public Set<String> getInstances() {
 		return instances;
@@ -256,40 +242,48 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 	
 //	private static double THRESHOLD = 0.05;
 	
-	private boolean childRemoved = false;
+	public boolean childRemoved = false;
 	
 	public void normalize(Set<T> selected) {
 
 //		int totalch = 0;
+		Collection<DAGNode<T>> toAdd = new HashSet<>();
+		
+//		System.out.println(this.getLabel());
+//		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
+//			System.out.println("\t" + iter.next().getLabel());
+//		}
+		
 		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
 			DAGNode<T> child = iter.next();
 			child.normalize(selected);
-			
-			if (child.childRemoved && child.children.size() == 0) {
-				iter.remove();
-				childRemoved = true;
-				continue;
-			}
-			
-			if (child.children.size() == 0 && SetUtils.intersection(child.label, selected).size() > 0) {
-				iter.remove();
-				childRemoved = true;
-			}
-			
-			
-//			if (child.size() < size*THRESHOLD) {
-//				iter.remove();
-//			}
-//			totalch += child.size();
 		}
 		
 //		for (Iterator<DAGNode<T>> iter =  children.iterator(); iter.hasNext();) {
 //			DAGNode<T> child = iter.next();
 //			
 //			if (child.childRemoved && child.children.size() == 0) {
-//				iter.remove();
+////				iter.remove();
+//				childRemoved = true;
 //				continue;
 //			}
+//
+//			if (SetUtils.intersection(child.label, selected).size() > 0) {
+//				iter.remove();
+//				childRemoved = true;
+//				
+//				toAdd.addAll(child.children);
+//			}			
+
+			
+//			if (child.size() < size*THRESHOLD) {
+//				iter.remove();
+//			}
+//			totalch += child.size();
+//		}
+		
+//		for (DAGNode<T> cc : toAdd) {
+//			children.add(cc);
 //		}
 		
 		if (children.size() == 1) {
@@ -299,10 +293,10 @@ public class DAGNode<T> implements Comparable<DAGNode<T>> {
 				children.addAll(child.children);
 				label.clear();
 				label.addAll(child.getLabel());
+				
+				childRemoved = child.childRemoved;
 			}
 		}
-		
-		
 	}
 
 	@Override

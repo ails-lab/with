@@ -26,10 +26,7 @@ import model.basicDataTypes.Language;
 
 import org.bson.types.ObjectId;
 import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.SearchHits;
@@ -52,6 +49,8 @@ public class CollectionIndexController extends WithResourceController	{
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 
+	private static String[] fields = new String[] { "keywords.uri", "dctype.uri" };
+	
 	public static Result getCollectionIndex(String id) {
 		ObjectNode result = Json.newObject();
 		
@@ -63,37 +62,23 @@ public class CollectionIndexController extends WithResourceController	{
 //			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
 			QueryBuilder query = CollectionObjectController.getIndexCollectionQuery(new ObjectId(id), json);
 
-			SearchOptions so = new SearchOptions(0, Integer.MAX_VALUE);
-
-			String[] fields = new String[] { "_id", "keywords.uri", "dctype.uri" };
-			
-			SearchResponse res = es.execute(query, so, fields);
-			
+			SearchResponse res = es.execute(query, new SearchOptions(0, Integer.MAX_VALUE), fields);
 			SearchHits sh = res.getHits();
 
 			List<String[]> list = new ArrayList<>();
 
-			Set<Object> all = new HashSet<>();
-			
 			for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 				SearchHit hit = iter.next();
 
-				SearchHitField keywords = hit.field("keywords.uri");
-				SearchHitField dctypes = hit.field("dctype.uri");
-
 				List<Object> olist = new ArrayList<>();
 				
-				if (keywords != null) {
-					olist.addAll(keywords.getValues());
-					
-					all.addAll(keywords.getValues());
-				}				
+				for (String field : fields) {
+					SearchHitField shf = hit.field(field);
 				
-				if (dctypes != null) {
-					olist.addAll(dctypes.getValues());
-					
-					all.addAll(dctypes.getValues());
-				}			
+					if (shf != null) {
+						olist.addAll(shf.getValues());
+					}				
+				}				
 				
 				if (olist.size() > 0 ) {
 					list.add(olist.toArray(new String[] {}));

@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.jena.atlas.lib.SetUtils;
 import org.bson.types.ObjectId;
 
 import model.basicDataTypes.Language;
@@ -110,7 +111,7 @@ public class ThesaurusFacet {
 		Map<String, DAGNode<String>> nodeMap = new HashMap<>();
 		Map<String, Counter> counterMap = new HashMap<>();
 		
-		Map<String, Counter> levelMap = new HashMap<>();
+//		Map<String, Counter> levelMap = new HashMap<>();
 		
 		tops = new HashSet<>();
 		
@@ -118,12 +119,12 @@ public class ThesaurusFacet {
 		
 		for (String[] uris : list) {
 			Set<String> used = new HashSet<>();
-			Set<String> fused = new HashSet<>();
+//			Set<String> fused = new HashSet<>();
 			for (String uri : uris) {
 				SKOSSemantic semantic = getSemantic(uri);
 				
 				count(counterMap, uri, used);
-				count(levelMap, uri, fused);
+//				count(levelMap, uri, fused);
 				
 				List<SKOSTerm> broader = semantic.getBroaderTransitive();
 				if (broader != null) {
@@ -134,9 +135,9 @@ public class ThesaurusFacet {
 			}
 		}
 		
-		
 //		System.out.println("A " + (System.currentTimeMillis() - start));
 
+		Set<DAGNode<String>> points = new HashSet<>();
 		Set<String> used = new HashSet<>();
 		
 		for (Map.Entry<String, Counter> entry : counterMap.entrySet()) {
@@ -144,12 +145,17 @@ public class ThesaurusFacet {
 			if (!used.add(term)) {
 				continue;
 			}
-			
+
+//			System.out.println(term);
 			DAGNode<String> node = nodeMap.get(term);
 			if (node == null) {
 				node = new DAGNode<String>(term, entry.getValue().getValue());
 				nodeMap.put(term, node);
 				tops.add(node);
+				
+				if (selected.contains(term)) {
+					points.add(node);
+				}
 			}
 			
 			List<SKOSTerm> broaderList = getSemantic(term).getBroader();
@@ -163,6 +169,10 @@ public class ThesaurusFacet {
 						parent = new DAGNode<String>(broaderURI, counterMap.get(broaderURI).getValue());
 						nodeMap.put(broaderURI, parent);
 						tops.add(parent);
+						
+						if (selected.contains(broaderURI)) {
+							points.add(parent);
+						}
 					}
 					
 					parent.addChild(node);
@@ -171,20 +181,46 @@ public class ThesaurusFacet {
 			}
 		}
 
-		Set<DAGNode<String>> newTops = new HashSet<>();
+		Set<DAGNode<String>> changedParents = new HashSet<>();
+		
+		for (DAGNode<String> p : points) {
+			DAGNode<String> top = p;
+			while (top.getParents().size() > 0) {
+				top = top.getParents().iterator().next();
+			}
+			
+			Set<DAGNode<String>> pcopy = new HashSet<>();
+			pcopy.addAll(p.getParents());
+
+			for (DAGNode<String> parent : pcopy) {
+				parent.removeChild(p);
+				changedParents.add(parent);
+			}
+			for (DAGNode<String> child : p.getChildren()) {
+				top.addChild(child);
+			}
+		}
+		
+		while (changedParents.size() > 0) {
+			Set<DAGNode<String>> newChangedParents = new HashSet<>();
+
+			for (DAGNode<String> p : changedParents) {
+				if (p.getChildren().size() == 0) {
+					Set<DAGNode<String>> pcopy = new HashSet<>();
+					pcopy.addAll(p.getParents());
+					for (DAGNode<String> parent : pcopy) {
+						parent.removeChild(p);
+						newChangedParents.add(parent);
+					}
+				}
+			}
+			
+			changedParents = newChangedParents;
+		}
 		
 		for (DAGNode<String> top : tops) {
-//			top.print(map);
 			top.normalize(selected);
-//			if (norm.size() > 0) {
-//				newTops.add(top);
-//			}
-//			top.print(map);
-//			res.addChild(top);
 		}
-//		
-//		tops = newTops;
-
 
 	}
 

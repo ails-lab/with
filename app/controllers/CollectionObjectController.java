@@ -729,8 +729,7 @@ public class CollectionObjectController extends WithResourceController {
 	/**
 	 * List all Records from a Collection using a start item and a page size
 	 */
-	public static Result xlistRecordResources(String collectionId,
-			String contentFormat, int start, int count) {
+	public static Result xlistRecordResources(String collectionId, String contentFormat, int start, int count) {
 		ObjectNode result = Json.newObject();
 		ObjectId colId = new ObjectId(collectionId);
 		Locks locks = null;
@@ -738,14 +737,13 @@ public class CollectionObjectController extends WithResourceController {
 		JsonNode json = request().body().asJson();
 //		log.info("JSON " + json.toString());
 		try {
-			locks = Locks.create().read("Collection #" + collectionId)
-					.acquire();
+			locks = Locks.create().read("Collection #" + collectionId).acquire();
 
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
 
-			if (!response.toString().equals(ok().toString()))
+			if (!response.toString().equals(ok().toString())) {
 				return response;
-			else {
+			} else {
 				ElasticSearcher es = new ElasticSearcher();
 				
 				QueryBuilder query = getIndexCollectionQuery(colId, json);

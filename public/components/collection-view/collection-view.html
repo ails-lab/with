@@ -30,12 +30,13 @@
 	</div>
 </div>
 
-
 <div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
 
+<div>
 <ul data-bind="foreach: terms">
-    <li style="display:inline;"><button data-bind="click:removeTerm, text: label"></button></li>
+    <li style="display:inline;"><span data-bind="text: label"></span><button data-bind="click:removeTerm"><span class="tree-item glyphicon glyphicon-remove"></span></button>&nbsp;&nbsp;</li>
 </ul>
+</div>
 
 <script type="text/html" id="scheme-template">
  
@@ -64,7 +65,7 @@
 
 <script type="text/html" id="tree-template">
     <ul data-bind="foreach: children">
-        <li data-bind="attr: { 'id': id }">
+        <li>
             <span data-bind="
                 template: { name: 'node-name-template', data: $data },
                 css: { 'pointer-icon': children().length > 0 }"></span>
@@ -99,18 +100,20 @@
 </script>
  
 <script type="text/html" id="node-name-template">
- 
+
     <span class="tree-item" data-bind="
     css: { 
         'glyphicon glyphicon-minus-sign': isExpanded() && children().length > 0, 
         'glyphicon glyphicon-plus-sign': !isExpanded() && children().length > 0,
-        'glyphicon glyphicon-stop': children().length === 0 
+        'glyphicon glyphicon-stop': children().length === 0,
+		'invisible-icon': children().length === 0
     },
     click: toggleVisibility
     "></span>
  
     <span data-bind="
     text: label, 
+	css: { 'pointer-icon': true },
     attr: { 'title': uri }, 
     tooltip: { delay: { show: 500, hide: 10 } },
     click: addTerm"></span>
