@@ -181,7 +181,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
 		self.fetchitemnum=20;
-		WITHApp.tabAction();
+		
 		if (params.type === 'favorites') {
 			self.isFavorites(true);
 			self.id(currentUser.favoritesId());
@@ -289,7 +289,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 									self.isotopeImagesReveal(self.$container, $newitems);
 								}
-								WITHApp.tabAction();
+								
 								loading(false);
 							},
 							"error": function (result) {
@@ -573,7 +573,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			// append to container
 			self.$container.append($items);
-			
+			WITHApp.tabAction();
 
 			// hide by default
 			$items.hide();
