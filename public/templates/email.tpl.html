@@ -1,69 +1,41 @@
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-10 col-lg-offset-1">
-				<h2 data-bind="text: title"></h2>
-
-				<p class="lead" data-bind="text: description"></p>
-
-				<form>
-					<div class="row text-left">
-						<div class="col-sm-6">
-							<div class="form-group" data-bind="validationElement: firstName">
-								<label for="firstName">First Name</label>
-								<input type="text" class="form-control" id="firstName" data-bind="value: firstName, valueUpdate: 'afterkeypress', hasFocus: true;">
-							</div>
-							<div class="form-group" data-bind="validationElement: lastName">
-								<label for="lastName">Last Name</label>
-								<input type="text" class="form-control" id="lastName" data-bind="value: lastName, valueUpdate: 'afterkeypress'">
-							</div>
-							<div class="form-group" data-bind="validationElement: username">
-								<label for="username">Username</label>
-								<input type="text" class="form-control" id="username" data-bind="value: username, valueUpdate: 'afterkeypress'">
-							</div>
-						</div>
-						<div class="col-sm-6">
-							<div class="form-group">
-								<label for="gender">Select Gender</label>
-								<select class="form-control" id="gender" data-bind="options: genders, optionsCaption: 'Please select', value: gender"></select>
-							</div>
-							<div class="form-group" data-bind="validationElement: email">
-								<label for="useremail">Email</label>
-								<input type="email" class="form-control" id="useremail" data-bind="value: email, valueUpdate: 'afterkeypress'">
-							</div>
-							<div class="row">
-								<div class="col-sm-6" data-bind="visible: usingEmail">
-									<div class="form-group" data-bind="validationElement: password">
-										<label for="userpassword">Password</label>
-										<input type="password" class="form-control" id="userpassword" data-bind="value: password, valueUpdate: 'afterkeypress'">
-									</div>
-								</div>
-								<div class="col-sm-6" data-bind="visible: usingEmail">
-									<div class="form-group" data-bind="validationElement: password2">
-										<label for="userpassword2">Password (confirm)</label>
-										<input type="password" class="form-control" id="userpassword2" data-bind="value: password2, valueUpdate: 'afterkeypress'">
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<br />
-
-					<div class="row text-left">
-						<div class="col-lg-12">
-							<div class="well well-sm">
-								<div class="row vcenter">
-									<div class="col-md-10 col-sm-8 col-xs-12" style="margin: 10px 0;">
-										<input type="checkbox" data-bind="checked: acceptTerms"> &nbsp;I acknowledge that I have read and accept the <a>Terms of Use Agreement</a>.
-									</div>
-									<div class="col-md-2 col-sm-4 col-xs-12">
-										<button class="btn btn-primary btn-block" type="submit" data-bind="enable: acceptTerms, click: submitRegistration">Create Account</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</form>
-			</div>
+<div class="viewer">
+	<section class="entrance register-email">
+		<div class="section-header">
+			<div class="text">Register with your email address</div>
 		</div>
-	</div>
+		<div class="section-body">
+			<div class="input-group">
+				<div data-bind="validationElement: email">
+					<input type="text" class="has-error has-feedback" placeholder="Email" id="useremail" data-bind="value: email, valueUpdate: 'afterkeypress', hasFocus: true;">
+				</div>
+				<div data-bind="validationElement: username">
+					<input type="text" placeholder="Username" id="username" data-bind="value: username, valueUpdate: 'afterkeypress'">
+				</div>
+			</div>
+			<div class="input-group" data-bind="visible: usingEmail">
+				<div data-bind="validationElement: password">
+					<input type="password" placeholder="Password" id="userpassword" data-bind="value: password, valueUpdate: 'afterkeypress'">
+				</div>
+				<div data-bind="validationElement: password2">
+					<input type="password" placeholder="Repeat Password" id="userpassword2" data-bind="value: password2, valueUpdate: 'afterkeypress'">
+				</div>
+			</div>
+			<div class="input-group">
+				<div data-bind="validationElement: firstName">
+					<input type="text" placeholder="First name" id="firstName" data-bind="value: firstName, valueUpdate: 'afterkeypress'">
+				</div>
+				<div data-bind="validationElement: lastName">
+					<input type="text" placeholder="Last name" id="lastName" data-bind="value: lastName, valueUpdate: 'afterkeypress'">
+				</div>
+			</div>
+			<div class="input-group">
+				<select id="gender" data-bind="options: genders, optionsCaption: 'Select gender', value: gender"></select>
+			</div>
+			<div class="input-group ack">
+				<input type="checkbox" id="ack" data-bind="checked: acceptTerms">
+				<label for="ack">I acknowledge the i have read and accept <a href="#"> Terms of Use Agreement</label>
+			</div>
+			<div class="button-group"><a href="javascript:void(0)" class="btn-green" type="submit" data-bind="enable: acceptTerms, click: submitRegistration">Register</a></div>
+		</div>
+	</section>
+</div>

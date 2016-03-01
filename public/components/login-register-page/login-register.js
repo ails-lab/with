@@ -1,4 +1,4 @@
-define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-validation', 'google'], function(ko, template, FB, app) {
+define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-validation', 'google'], function (ko, template, FB, app) {
 
 	if (window.location.origin === 'http://localhost:9000') {
 		FB.init({
@@ -22,40 +22,45 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 
 	function LoginRegisterViewModel(params) {
 		var self = this;
-		self.callback=null;
-		if(params.callback){
-			self.callback=params.callback;
+		self.callback = null;
+		if (params.callback) {
+			self.callback = params.callback;
 		}
 
-		function tokenRequest( event ) {
+		// If User is already logged in, then redirect him to dashboard
+		if (isLogged()) {
+			window.location.href = "#";
+		}
+
+		function tokenRequest(event) {
 			var origin = event.origin;
 			var source = event.source;
 
-			if( event.data ==  "requestToken" ) {
-				if( isLogged() ) {
+			if (event.data == "requestToken") {
+				if (isLogged()) {
 					// we trust localhost and ntua,
 					// TODO: make a requester for allow access to origin
-					if( new RegExp( "^https?://localhost:?/?").test( origin ) ||
-						new RegExp( "^https?://[^/:]*.image.ntua.gr:?/?").test( origin )	||
-								false /* or new RegExp in here */ ) {
-						$.ajax( {
+					if (new RegExp("^https?://localhost:?/?").test(origin) ||
+						new RegExp("^https?://[^/:]*.image.ntua.gr:?/?").test(origin)	||
+								false /* or new RegExp in here */) {
+						$.ajax({
 							url: "/user/token",
 							type: "GET"
-						}).done( function (data,text ) {
-							source.postMessage( "Token: " + data, "*" );
-							window.removeEventListener( "message", tokenRequest );
+						}).done(function (data,text) {
+							source.postMessage("Token: " + data, "*");
+							window.removeEventListener("message", tokenRequest);
 
-						} );
+						});
 					} else {
-						console.log( "rejected from " + origin );
+						console.log("rejected from " + origin);
 					}
 				}
 			}
 		}
-		window.addEventListener( "message", tokenRequest, false );
+		window.addEventListener("message", tokenRequest, false);
 
 		// Template variables
-		self.title        = ko.observable('Join with your email address');
+		self.title        = ko.observable('Register with your email address');
 		self.description  = ko.observable('');
 		self.hasAccount   = ko.observable(false);
 		if (typeof params.title !== 'undefined') {	// To avoid problems with template-less components
@@ -72,7 +77,11 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.email        = ko.observable('').extend({ required: true, email: true });
 		self.username     = ko.observable('').extend({ required: true, minLength: 4, maxLength: 32 });
 		self.password     = ko.observable('').extend({
-			required  : { onlyIf : function() { return (self.facebookid() === '' && self.googleid() === ''); } }
+			required  : {
+				onlyIf : function () {
+					return (self.facebookid() === '' && self.googleid() === '');
+				}
+			}
 		});
 		self.password2    = ko.observable('').extend({ equal: self.password });
 		self.gender       = ko.observable();
@@ -97,10 +106,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.usingEmail  = ko.observable(true);
 
 		// Functionality
-		self.fbRegistration       = function() {
-			FB.login(function(response) {
+		self.fbRegistration       = function () {
+			FB.login(function (response) {
 				if (response.status === 'connected') {
-					FB.api('/me', function(response) {
+					FB.api('/me', function (response) {
 						self.title('You are almost ready...');
 						self.description('We loaded your account with your Facebook details. Help us with just a few more questions.' +
 							' You can always edit this or any other info in settings after joining.');
@@ -115,36 +124,34 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						$.ajax({
 							type    : "get",
 							url     : "/user/emailAvailable?email=" + response.email,
-							success : function() {
+							success : function () {
 								self.templateName('email');
 							},
-							error   : function() {
+							error   : function () {
 								self.hasAccount(true);
 								self.templateName('login');
 								window.history.pushState(null, "Login", "#login");
 							}
 						});
 					});
-				}
-				else if (response.status === 'not_athorized') {
+				} else if (response.status === 'not_athorized') {
 					// User didn't authorize the application
-				}
-				else {
+				} else {
 					// User is not logged
 				}
 			}, {scope: 'public_profile, email'});
 		};
 
-		self.googleRegistration   = function() {
+		self.googleRegistration   = function () {
 			gapi.auth.signIn({
 				'clientid'     : '712515719334-u6ofvnotfug9ktv0e9kou7ms2cq9lb85.apps.googleusercontent.com',
 				'cookiepolicy' : 'single_host_origin',
 				'scope'        : 'profile email',
-				'callback'     : function(authResult) {
+				'callback'     : function (authResult) {
 					if (authResult.status.signed_in && authResult.status.method === 'PROMPT') {
-						gapi.client.load('plus','v1', function() {
+						gapi.client.load('plus', 'v1', function () {
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
-							request.execute(function(response) {
+							request.execute(function (response) {
 								self.title('You are almost ready...');
 								self.description('We have loaded your profile with your Google details. Help us with just a few more questions.' +
 									' You can always edit this or any other info in settings after joining.');
@@ -159,10 +166,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 								$.ajax({
 									type    : "get",
 									url     : "/user/emailAvailable?email=" + response.emails[0].value,
-									success : function() {
+									success : function () {
 										self.templateName('email');
 									},
-									error   : function(request, status, error) {
+									error   : function (request, status, error) {
 										self.hasAccount(true);
 										self.templateName('login');
 										window.history.pushState(null, "Login", "#login");
@@ -175,12 +182,12 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			});
 		};
 
-		self.emailRegistration    = function() {
+		self.emailRegistration    = function () {
 			self.usingEmail(true);
 			self.templateName('email');
 		};
 
-		self.submitRegistration   = function() {
+		self.submitRegistration   = function () {
 			if (self.validationModel.isValid()) {
 				var data = {
 					firstName  : self.firstName,
@@ -201,21 +208,21 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					processData : false,
 					url         : "/user/register",
 					data        : json,
-					success     : function(data, text) {
+					success     : function (data, text) {
 						var promises = app.loadUser(data);
 						/*make sure call is finished before proceeding*/
-						$.when.apply($, promises).done(function(){
-						// self.templateName('postregister');
-						self.completeRegistration();});
+						$.when.apply($, promises).done(function () {
+							self.completeRegistration();
+						});
 					},
-					error       : function(request, status, error) {
+					error       : function (request, status, error) {
 						var err = JSON.parse(request.responseText);
 						if (err.error.email !== undefined) {
 							self.email.setError(err.error.email);
 							self.email.isModified(true);
 						}
 						if (err.error.username !== undefined) {
-							self.username.setError(err.error.username + " (Suggestions: " + err.proposal[0] + ", " + err.proposal[1] +")");
+							self.username.setError(err.error.username + " (Suggestions: " + err.proposal[0] + ", " + err.proposal[1] + ")");
 							self.username.isModified(true);
 						}
 						if (err.error.password !== undefined) {
@@ -225,13 +232,12 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						self.validationModel.errors.showAllMessages();
 					}
 				});
-			}
-			else {
+			} else {
 				self.validationModel.errors.showAllMessages();
 			}
 		};
 
-		self.emailLogin           = function(popup) {
+		self.emailLogin           = function (popup) {
 			if (self.loginValidation.isValid()) {
 				var json = ko.toJSON(self.loginValidation);
 
@@ -244,17 +250,18 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 					data        : json,
 					success     : function (data, text) {
 						var promises = app.loadUser(data, self.stayLogged());
-						$.when.apply($, promises).done(function(){
+						$.when.apply($, promises).done(function () {
 							if (typeof popup !== 'undefined') {
 								self.emailUser(null);
 								self.emailPass(null);
-								if (popup) { self.closeLoginPopup(); }
+								if (popup) {
+									self.closeLoginPopup();
+								}
 
-								if (self.callback!=null) {
+								if (self.callback != null) {
 									self.callback(self.record());
 								}
-							}
-							else {
+							} else {
 								window.location.href = "#";
 								window.location.reload(true);
 							}
@@ -273,22 +280,21 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 						self.loginValidation.errors.showAllMessages();
 					}
 				});
-			}
-			else {
+			} else {
 				self.loginValidation.errors.showAllMessages();
 			}
 		};
 
-		self.googleLogin          = function(popup) {
+		self.googleLogin          = function (popup) {
 			gapi.auth.signIn({
 				'clientid'     : '712515719334-u6ofvnotfug9ktv0e9kou7ms2cq9lb85.apps.googleusercontent.com',
 				'cookiepolicy' : 'single_host_origin',
 				'scope'        : 'profile email',
-				'callback'     : function(authResult) {
+				'callback'     : function (authResult) {
 					if (authResult.status.signed_in && authResult.status.method === 'PROMPT') {
-						gapi.client.load('plus','v1', function() {
+						gapi.client.load('plus', 'v1', function () {
 							var request = gapi.client.plus.people.get({ 'userId': 'me' });
-							request.execute(function(response) {
+							request.execute(function (response) {
 								var data = {
 									accessToken : authResult.access_token,
 									googleId    : response.id
@@ -302,25 +308,26 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									processData : "false",
 									url         : "/user/login",
 									data        : json,
-									success     : function(data, text) {
-										var promises=app.loadUser(data, true);
+									success     : function (data, text) {
+										var promises = app.loadUser(data, true);
 
 										/*make sure call is finished before proceeding*/
-										$.when.apply($, promises).done(function(){
+										$.when.apply($, promises).done(function () {
 
 											if (typeof popup !== 'undefined') {
-												if (popup) { self.closeLoginPopup(); }
+												if (popup) {
+													self.closeLoginPopup();
+												}
 
-												if (self.callback!=null) {
+												if (self.callback != null) {
 													self.callback(self.record());
 												}
-											}
-											else {
+											} else {
 												window.location.href = "#";
-										    }
+											}
 										});
 									},
-									error       : function(request, status, error) {
+									error       : function (request, status, error) {
 										var err = JSON.parse(request.responseText);
 										if (err.error === "User not registered") {
 											self.title('Before you use WITH for the first time, we have to create your profile...');
@@ -344,10 +351,10 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			});
 		};
 
-		self.fbLogin              = function(popup) {
-			FB.login(function(response) {
+		self.fbLogin              = function (popup) {
+			FB.login(function (response) {
 				if (response.status === 'connected') {
-					FB.api('/me', function(response) {
+					FB.api('/me', function (response) {
 						var data = {
 							accessToken : FB.getAuthResponse().accessToken,
 							facebookId  : response.id
@@ -362,22 +369,23 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 							processData : "false",
 							url         : "/user/login",
 							data        : json,
-							success     : function(data, text) {
-								var promises=app.loadUser(data, true);
-								$.when.apply($, promises).done(function(){
+							success     : function (data, text) {
+								var promises = app.loadUser(data, true);
+								$.when.apply($, promises).done(function () {
 									if (typeof popup !== 'undefined') {
-										if (popup) { self.closeLoginPopup(); }
+										if (popup) {
+											self.closeLoginPopup();
+										}
 
-										if (self.callback!=null) {
+										if (self.callback != null) {
 											self.callback(self.record());
 										}
-									}
-									else {
+									} else {
 										window.location.href = "#";
 									}
-									});
+								});
 							},
-							error       : function(request, status, error) {
+							error       : function (request, status, error) {
 								var err = JSON.parse(request.responseText);
 								if (err.error === "User not registered" || err.error === "Couldn't validate user") {
 									self.title('Before you use WITH for the first time, we have to create your profile...');
@@ -399,29 +407,29 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 			}, {scope: 'email'});
 		};
 
-		self.forgotPassword       = function() {
+		self.forgotPassword       = function () {
 			app.showPopup('reset-password');
 		};
 
-		showLoginPopup            = function(record) {
+		showLoginPopup            = function (record) {
 			self.record(record);
 			$('#loginPopup').addClass('open');
 		};
 
-		self.scrollEmail          = function() {
+		self.scrollEmail          = function () {
 			$('.externalLogin').slideUp();
 		};
 
-		self.scrollDownEmail      = function() {
+		self.scrollDownEmail      = function () {
 			$('.externalLogin').slideDown();
 		};
 
-		self.closeLoginPopup      = function() {
+		self.closeLoginPopup      = function () {
 			$('#loginPopup').removeClass('open');
 			$('.externalLogin').slideDown();	// Reset dialog state
 		};
 
-		self.completeRegistration = function() {
+		self.completeRegistration = function () {
 			// TODO: Get values, send to server
 			window.location.href = "#";
 		};

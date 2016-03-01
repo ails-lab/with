@@ -3,5 +3,6 @@
   "requireVarDeclFirst": false,
   "requireMultipleVarDecl": false,
   "validateIndentation": "\t",
-  "disallowDanglingUnderscores": false
+  "disallowDanglingUnderscores": false,
+  "disallowEmptyBlocks": false
 }
