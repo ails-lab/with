@@ -161,7 +161,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				$(window).on("scroll.ko.scrollHandler", function () {
 					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
 						if (self.updating) {
-							if (functPar1 !== undefined && functPar1 !== null) 
+							if (functPar1 !== undefined && functPar1 !== null)
 								loadFunc(functPar1);
 							else
 								loadFunc();
@@ -325,7 +325,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			'unread': ko.observable(0),
 			'userNotifications': ko.observableArray(),
 			'groupNotifications': ko.observableArray()
-		}
+		},
+		"collectionCount": ko.observable(0),
+		"exhibitionCount": ko.observable(0)
 	};
 	isLogged = ko.observable(false);
 
@@ -389,6 +391,10 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			},
 			//async: false
 		});
+	};
+
+	self.loadCounters = function () {
+		// TODO: Use this call to reload the number of collections/exhibitions
 	};
 
 	self.loadFavorites = function () {
@@ -692,7 +698,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		}
 		$('#popup').modal('show');
 	};
-	
+
 	self.showInfoPopup = function(title, bodyText, callback) {
 		$("#myModal").find("h4").html(title);
 		var body = $("#myModal").find("div.modal-body");
@@ -1002,6 +1008,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		isLiked: isLiked,
 		isLogged:isLogged,
 		loadFavorites: loadFavorites,
+		loadCounters: loadCounters,
 		likeItem: likeItem,
 		initOrUpdate: initOrUpdate,
 		scroll: scroll
