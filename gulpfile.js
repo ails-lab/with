@@ -10,3 +10,9 @@ gulp.task('less', function () {
     .pipe(rename('main.min.css'))
     .pipe(gulp.dest('public/css/'));
 });
+
+gulp.task('watch', function () {
+    gulp.watch('public/css/*.less', ['less']);
+});
+
+gulp.task('default', ['less']);
