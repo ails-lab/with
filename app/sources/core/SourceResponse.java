@@ -30,8 +30,10 @@ import org.elasticsearch.action.search.SearchResponse;
 
 import utils.ListUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
+@JsonIgnoreProperties({"filtersLogic"})
 public class SourceResponse {
 
 	public String query;
