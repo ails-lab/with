@@ -324,6 +324,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 												}
 											} else {
 												window.location.href = "#";
+												window.location.reload(true);
 											}
 										});
 									},
@@ -382,6 +383,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 										}
 									} else {
 										window.location.href = "#";
+										window.location.reload(true);
 									}
 								});
 							},
@@ -432,6 +434,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 		self.completeRegistration = function () {
 			// TODO: Get values, send to server
 			window.location.href = "#";
+			window.location.reload(true);
 		};
 
 		self.route = params.route;
