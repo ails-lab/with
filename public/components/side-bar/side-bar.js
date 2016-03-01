@@ -4,10 +4,10 @@ define(['knockout', 'text!./side-bar.html', 'app'], function (ko, template, app)
 		var self = this;
 
 		self.collectionCount = ko.pureComputed(function () {
-			return app.currentUser.collectionCount;
+			return app.currentUser.collectionCount();
 		});
 		self.exhibitionCount = ko.pureComputed(function () {
-			return app.currentUser.exhibitionCount;
+			return app.currentUser.exhibitionCount();
 		});
 		self.favoritesCount = ko.pureComputed(function () {
 			return app.currentUser.favorites().length;
