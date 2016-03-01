@@ -72,7 +72,7 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 		model.getDates().addAll(rec.getWithDateArrayValue("date"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("subject"));
-		
+		model.setDcdate(rec.getWithDateArrayValue("date"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
 		
 		
