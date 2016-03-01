@@ -3,9 +3,11 @@
         <!-- wrapper-->
         <div class="wrapper">
           <!-- sidebar-->
+          <!-- ko if:isLogged()==true  -->
            <side-bar params="route: route"></side-bar>
+           <!-- /ko -->
           <!-- main-->
-          <main data-bind="css:{ fullpage :isLogged()==false }">
+          <main data-bind="css:{ 'full-page' :isLogged()==false }">
             <!-- collection section-->
             <section class="collection">
               <section class="header"><span class="title"><!-- ko text:title() --><!-- /ko --></span><span class="item-count" data-bind="visible: entryCount() > -1 "><!-- ko text:entryCount() --><!-- /ko -->  Items</span>
