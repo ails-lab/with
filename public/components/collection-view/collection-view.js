@@ -180,7 +180,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.loggedUser = isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
-
+		self.fetchitemnum=20;
+		
 		if (params.type === 'favorites') {
 			self.isFavorites(true);
 			self.id(currentUser.favoritesId());
@@ -190,7 +191,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			self.count = ko.observable(params.count);
 		}
 		else {
-			self.count = ko.observable(10);
+			self.count = ko.observable(20);
 			sessionStorage.removeItem("collection-viewscroll" + self.id());
 		}
 
@@ -288,6 +289,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 									self.isotopeImagesReveal(self.$container, $newitems);
 								}
+								
 								loading(false);
 							},
 							"error": function (result) {
@@ -338,7 +340,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				
 				var promise=self.moreItems();
 				$.when(promise).done(function(data){
-					var items=self.revealItems(data.recodrs);
+					var items=self.revealItems(data.records);
 					if (items.length > 0) {
 						var $newitems = getItems(items);
 
@@ -361,7 +363,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				dataType: "json",
 				url: "/collection/" + self.id() + "/list",
 				processData: false,
-				data: "count="+self.fetchitemnum+"&offset=" + self.citems().length,
+				data: "count="+self.fetchitemnum+"&start=" + self.citems().length,
 			}).success (function(){
 			});
 			
@@ -453,10 +455,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$("div." + id).find(".star").addClass('active');
-
+					$("." + id).find("a.fa-heart").css("color","#ec5a62");
+					
 				} else {
-					$('div.' + id).find(".star").removeClass('active');
+					$('.' + id).find("a.fa-heart").css("color","");
 				}
 			});
 		};
@@ -477,15 +479,15 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
            tile+='<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
            if (isLogged()) {
         	  if (self.access() == "WRITE" || self.access() == "OWN")
-                tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o" onclick="removeRecord(\'' + record.dbId + '\',event);"></a>'
+                tile+='<a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a>'
               if (record.isLiked()) {
-            	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart" onclick="likeRecord(\'' + record.dbId + '\',event);"></a>'
+            	  tile+='<a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a>'
               }
               else{
-              	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart" onclick="likeRecord(\'' + record.dbId + '\',event);"></a>'
+              	  tile+='<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a>'
                   
             	  }
-        	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.dbId + '\',event);"></a>'
+        	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download"></a>'
               }
             tile+="</div></div></li>";
               
@@ -571,6 +573,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			// append to container
 			self.$container.append($items);
+			WITHApp.tabAction();
+
 			// hide by default
 			$items.hide();
 			$items.imagesLoaded().progress(function (imgLoad, image) {
@@ -589,7 +593,6 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				}
 
 			}).always(function () {
-
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
 				if (scrollpos && $(".grids#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
