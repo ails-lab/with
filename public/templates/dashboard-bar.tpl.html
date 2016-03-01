@@ -44,7 +44,7 @@
 							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: resourceName"></em> with <em data-bind="text: shareInfo.userOrGroupName"></em></div></a>
 							<!-- /ko -->
 							<!-- ko ifnot: shareInfo.sharedWithGroup -->
-							<a href="#notifications"><div class="news"><em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: resourceName"><a data-bind="attr: { href: '#collectionview/' + resource }"></a></em> with you</div></a>
+							<a data-bind="attr: { href: '#collectionview/' + resource }"><div class="news"><em data-bind="text: senderName"></em> wants to share collection: <em data-bind="text: resourceName"></em> with you</div></a>
 							<!-- /ko -->
 							<!-- /ko -->
 							<!-- ko case: 'COLLECTION_SHARED' -->
@@ -62,7 +62,7 @@
 							<a href="#notifications"><div class="news"><em data-bind="text: shareInfo.userOrGroupName"></em> is not interested in collection: <em data-bind="text: resourceName"></em></div></a>
 							<!-- /ko -->
 							<!-- /ko -->
-							<br /><small><span data-bind="text: date"></span></small>
+							
 						</li>
 					</ul>
               <!-- view all--><a href="#notifications" class="viewall">View all activities </a>
