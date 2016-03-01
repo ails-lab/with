@@ -33,7 +33,7 @@ import utils.ListUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.JsonNode;
 
-@JsonIgnoreProperties({"filtersLogic"})
+@JsonIgnoreProperties({"filtersLogic","resourcesPerType", "facets"})
 public class SourceResponse {
 
 	public String query;

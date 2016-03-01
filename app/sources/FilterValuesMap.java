@@ -276,7 +276,11 @@ public class FilterValuesMap {
 
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.IMAGE, "Images");
 		addMapping(CommonFilters.TYPE.getId(), WithMediaType.AUDIO, "Audio");
-		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books","Articles");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.VIDEO, "Videos");
+		addMapping(CommonFilters.TYPE.getId(), WithMediaType.TEXT, "Books",
+				"Articles","Newspapers",
+				"Research papers",
+				"Manuscripts");
 
 		// addMapping(CommonFilters.RIGHTS.name(),
 		// RightsValues.Creative_Commercial,
