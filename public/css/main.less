@@ -7,14 +7,20 @@
 // =============================================================================================
 
 // import bootstrap variables, grid and mixins
-@import "../js/vendor/bootstrap/less/variables.less";
-@import "../js/vendor/bootstrap/less/mixins.less";
+@import "../bower_modules/bootstrap/less/variables.less";
+@import "../bower_modules/bootstrap/less/mixins.less";
+
 
 // import default style (font, etc)
 @import "default.less";
 
 // import function mixin
 @import "mixin.less";
+
+@gray-soft:				 #b5b5b5;
+@brand-dashboard:		#4f7979;
+
+@font-family-header:      "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
 // html
 html, body {
@@ -59,6 +65,7 @@ body {
 			float: left;
 			margin-right: 38px;
 		}
+		
 
 		// main navigation
 		nav {
@@ -481,6 +488,16 @@ body {
 	// main
 	div[ role = 'main' ] {
 		// height: 100%;
+		
+		//more
+		.more{
+			 bottom:100px;
+			 right:40px;
+			 padding: 5px;
+		     position: fixed;
+		     z-index:1032;
+		     font-size:25px;
+			    }
 
 		// homepage
 		&.homepage {
