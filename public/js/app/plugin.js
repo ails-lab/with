@@ -76,7 +76,8 @@ WITHApp.ui = function( custom ){
 		changeList();
 
 		// init all action in collection page
-		tabAction();
+		/*this call is moved to every component that require the flyouts*/
+		//tabAction();
 
 		// initialize nicescroll plugin
 		//initNicescroll();
@@ -109,6 +110,10 @@ WITHApp.ui = function( custom ){
 
 	this.initExpandExhibitionText=function(){
 		initExpandExhibitionText();
+	}
+	
+	this.tabAction=function(){
+		tabAction();
 	}
 	
 	this.initImageZoom=function(){
@@ -232,7 +237,7 @@ WITHApp.ui = function( custom ){
 		// close
 		if ( $( '.action .button-group' ).length !== 0 ) {
 
-			$( '.cancel' ).click( function( e ) {
+			$( '.cancel' ).on("click", function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 
@@ -243,7 +248,7 @@ WITHApp.ui = function( custom ){
 		if ( $( '.action-group' ).length !== 0 ) {
 
 			// edit
-			$( '.editaction' ).click( function( e ) {
+			$( '.editaction' ).on("click", function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.edit' ).addClass( 'active' );
@@ -251,7 +256,7 @@ WITHApp.ui = function( custom ){
 			});
 
 			// access
-			$( '.fa-paper-plane-o' ).click( function( e ) {
+			$( '.fa-paper-plane-o' ).on("click", function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.access' ).addClass( 'active' );
@@ -259,14 +264,14 @@ WITHApp.ui = function( custom ){
 			});
 
 			// access
-			$( '.members' ).click( function( e ) {
+			$( '.members' ).on("click", function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.access' ).addClass( 'active' );
 
 			});
 
-			$( '.fa-download' ).click( function( e ) {
+			$( '.fa-download' ).on("click", function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.collect' ).addClass( 'active' );
@@ -277,7 +282,7 @@ WITHApp.ui = function( custom ){
 		// open upload
 		if ( $( 'a.upload' ).length !== 0 ) {
 
-			$( 'a.upload' ).click( function( e ) {
+			$( 'a.upload' ).on("click", function( e ) {
 
 				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
@@ -289,7 +294,7 @@ WITHApp.ui = function( custom ){
 		// open new
 		if ( $( 'a.new' ).length !== 0 ) {
 
-			$( 'a.new' ).click( function( e ) {
+			$( 'a.new' ).on("click", function( e ) {
 
 				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
@@ -301,7 +306,7 @@ WITHApp.ui = function( custom ){
 		// open detail area
 		if ( $( 'a.detail-control' ).length !== 0 ) {
 
-			$( 'a.detail-control' ).click( function( e ) {
+			$( 'a.detail-control' ).on("click", function( e ) {
 
 				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
@@ -312,7 +317,7 @@ WITHApp.ui = function( custom ){
 		// open members acces
 		if ( $( '.members-access' ).length !== 0 ) {
 
-			$( '.members-access' ).click( function( e ) {
+			$( '.members-access' ).on("click", function( e ) {
 
 				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
@@ -325,7 +330,7 @@ WITHApp.ui = function( custom ){
 
 			var textarea = '<textarea rows="10" placeholder="Describe your collection"></textarea>';
 
-			$( '.action .add' ).click( function( e ) {
+			$( '.action .add' ).on("click", function( e ) {
 
 				e.preventDefault();
 				$( this ).hide();

@@ -1880,6 +1880,7 @@ body div[role='main'] .wrapper main section.favorite .list-head .list-control .f
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
+  cursor: pointer;
 }
 body div[role='main'] .wrapper main section.collection .list-head .list-control .fa.fa-th,
 body div[role='main'] .wrapper main section.exhibition .list-head .list-control .fa.fa-th,
@@ -2317,6 +2318,7 @@ body div[role='main'] .wrapper main section.project .list-body.grids li .meta .a
 body div[role='main'] .wrapper main section.favorite .list-body.grids li .meta .action-group {
   position: relative;
   text-align: right;
+  cursor: pointer;
 }
 body div[role='main'] .wrapper main section.collection .list-body.grids li .meta .action-group:before,
 body div[role='main'] .wrapper main section.exhibition .list-body.grids li .meta .action-group:before,
@@ -4924,6 +4926,7 @@ body div[role='main'] .wrapper section.action .action-body ul.access-list li .to
 }
 body div[role='main'] .wrapper section.action .button-group {
   float: right;
+  cursor: pointer;
 }
 body div[role='main'] .wrapper section.action .button-group .btn-green-o {
   display: block;
@@ -4942,6 +4945,7 @@ body div[role='main'] .wrapper section.action .button-group .btn-green-o {
   text-transform: capitalize;
   font-size: 1.4rem;
   letter-spacing: 0px;
+  
 }
 body div[role='main'] .wrapper section.action .button-group .btn-green-o:hover {
   color: #3b5a5a;
