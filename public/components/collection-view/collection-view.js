@@ -477,15 +477,15 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
            tile+='<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
            if (isLogged()) {
         	  if (self.access() == "WRITE" || self.access() == "OWN")
-                tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o" onclick="removeRecord(\'' + record.dbId + '\',event);"></a>'
+                tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"></a>'
               if (record.isLiked()) {
-            	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart" onclick="likeRecord(\'' + record.dbId + '\',event);"></a>'
+            	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart"></a>'
               }
               else{
-              	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart" onclick="likeRecord(\'' + record.dbId + '\',event);"></a>'
+              	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart"></a>'
                   
             	  }
-        	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.dbId + '\',event);"></a>'
+        	  tile+='<a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download"></a>'
               }
             tile+="</div></div></li>";
               
