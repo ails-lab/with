@@ -100,6 +100,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("per_page", q.pageSize);
 		builder.addSearchParam("facets", "year,creator,category,usage");
+		builder.addSearchParam("facets_per_page", "20");
 		return addfilters(q, builder).getHttp();
 	}
 
