@@ -29,7 +29,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 
 		// If User is already logged in, then redirect him to dashboard
 		if (isLogged()) {
-			window.location.href = "#";
+			window.location.href = "#dashboard";
 		}
 
 		function tokenRequest(event) {
@@ -262,7 +262,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 									self.callback(self.record());
 								}
 							} else {
-								window.location.href = "#";
+								window.location.href = "#dashboard";
 								window.location.reload(true);
 							}
 						});
@@ -323,7 +323,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 													self.callback(self.record());
 												}
 											} else {
-												window.location.href = "#";
+												window.location.href = "#dashboard";
 												window.location.reload(true);
 											}
 										});
@@ -382,7 +382,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 											self.callback(self.record());
 										}
 									} else {
-										window.location.href = "#";
+										window.location.href = "#dashboard";
 										window.location.reload(true);
 									}
 								});
@@ -433,7 +433,7 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 
 		self.completeRegistration = function () {
 			// TODO: Get values, send to server
-			window.location.href = "#";
+			window.location.href = "#dashboard";
 			window.location.reload(true);
 		};
 
