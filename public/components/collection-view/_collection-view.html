@@ -18,10 +18,11 @@
               <section class="collection-list">
                 <!-- collection main header-->
                 <div class="list-head">
-                  <!-- back--><a href="dashboard-collection.html" class="back">Return to collection list</a>
+                  <!-- back-->
+                  <a href="void(0);"  onclick="window.history.go(-1); return false;" title="back" class="back">Return to previous page</a>
                   <!-- control-->
                   <div class="list-control">
-                    <!-- upload--><a href="#" class="upload"><span class="plus"></span><span class="text">Upload Image</span></a><a data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a><a href="#" data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
+                    <!-- upload--><a class="upload" data-bind="visible: isLogged() && (access() == 'WRITE' || access() == 'OWN')"><span class="plus"></span><span class="text">Upload Image</span></a><a data-bind="visible: isLogged() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a><a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a><a data-bind="visible: isLogged() && (access() == 'WRITE' || access() == 'OWN')"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
                   </div>
                 </div>
                 <!-- listing-->
