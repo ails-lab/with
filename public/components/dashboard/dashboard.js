@@ -2,7 +2,7 @@ define(['knockout', 'text!./dashboard.html', 'app'], function (ko, template, app
 
 	function DashboardViewModel(params) {
 		// If User is already logged in, then redirect him to dashboard
-		if (isLogged()) {
+		if (!isLogged()) {
 			window.location.href = "#login";
 		}
 
