@@ -25,16 +25,19 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.bson.types.ObjectId;
 import org.elasticsearch.action.suggest.SuggestResponse;
-import org.elasticsearch.search.SearchHit;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import elastic.Elastic;
+import elastic.ElasticSearcher;
+import elastic.ElasticSearcher.SearchOptions;
+import elastic.ElasticUtils;
 import model.basicDataTypes.ProvenanceInfo.Sources;
-import model.resources.RecordResource;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
-import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Controller;
@@ -51,16 +54,6 @@ import sources.core.SourceResponse;
 import sources.core.Utils;
 import utils.AccessManager;
 import utils.ListUtils;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DB;
-import elastic.Elastic;
-import elastic.ElasticReindexer;
-import elastic.ElasticSearcher;
-import elastic.ElasticSearcher.SearchOptions;
-import elastic.ElasticUtils;
 
 public class SearchController extends Controller {
 
@@ -117,7 +110,7 @@ public class SearchController extends Controller {
 	public static Promise<Result> searchwithfilter() {
 		JsonNode json = request().body().asJson();
 		if (json == null) {
-			return Promise.pure((Result) badRequest("Expecting Json query"));
+			return Promise.pure((Result)badRequest("Expecting Json query"));
 		} else {
 			// Parse the query.
 			try {
@@ -127,63 +120,104 @@ public class SearchController extends Controller {
 					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
 					q.setEffectiveUserIds(userIds);
 				}
-				Iterable<Promise<SourceResponse>> promises = callSources(q);
-				// compose all futures, blocks until all futures finish
-				Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
-					return o.export();
+				Promise<SearchResponse> myResults = getMyResutls(q);
+				play.libs.F.Function<SearchResponse, Result> function = 
+				new play.libs.F.Function<SearchResponse, Result>() {
+				  public Result apply(SearchResponse r) {
+				    return ok(Json.toJson(r));
+				  } 
 				};
-
-				Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);
-				return promisesSequence.map(new play.libs.F.Function<Collection<SourceResponse>, Result>() {
-					List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
-
-					public Result apply(Collection<SourceResponse> responses) {
-						finalResponses.addAll(responses);
-						// Logger.debug("Total time for all sources to respond:
-						// "
-						// + (System.currentTimeMillis()- initTime));
-						SearchResponse r1 = new SearchResponse();
-						ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
-						for (SourceResponse sourceResponse : finalResponses) {
-							if (sourceResponse!=null){
-								FiltersHelper.merge(merge, sourceResponse.filtersLogic);
-								sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
-							}
-						}
-						r1.filters = ListUtils.transform(merge, f);
-						r1.responses = mergeResponses(finalResponses);
-						return ok(Json.toJson(r1));
-					}
-
-					private List<SourceResponse> mergeResponses(List<SourceResponse> finalResponses2) {
-						List<SourceResponse> res = new ArrayList<>();
-						for (SourceResponse r : finalResponses2) {
-							boolean merged = false;
-							for (SourceResponse r2 : res) {
-								if ((r2!=null) && (r!=null)){
-									if (r2.source.equals(r.source)) {
-										// merge these 2 and replace r.
-										res.remove(r2);
-										res.add(r.merge(r2));
-										merged = true;
-										break;
-									}
-								}
-							}
-							if (!merged) {
-								res.add(r);
-							}
-						}
-						return res;
-					}
-
-				});
+				return myResults.map(function);
 
 			} catch (Exception e) {
 				e.printStackTrace();
-				return Promise.pure((Result) badRequest(e.getMessage()));
+				return Promise.pure((Result)badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Promise<Result> getfilters() {
+		JsonNode json = request().body().asJson();
+		if (json == null) {
+			return Promise.pure((Result)badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				final CommonQuery q = Utils.parseJson(json);
+				q.searchTerm=null;
+				q.setTypes(Elastic.allTypes);
+				if (session().containsKey("effectiveUserIds")) {
+					List<String> userIds = AccessManager.effectiveUserIds(session().get("effectiveUserIds"));
+					q.setEffectiveUserIds(userIds);
+				}
+				Promise<SearchResponse> myResults = getMyResutls(q);
+				play.libs.F.Function<SearchResponse, Result> function = 
+				new play.libs.F.Function<SearchResponse, Result>() {
+				  public Result apply(SearchResponse r) {
+				    return ok(Json.toJson(r.filters));
+				  } 
+				};
+				return myResults.map(function);
+
+			} catch (Exception e) {
+				e.printStackTrace();
+				return Promise.pure((Result)badRequest(e.getMessage()));
+			}
+		}
+	}
+
+	private static Promise<SearchResponse> getMyResutls(final CommonQuery q) {
+		Iterable<Promise<SourceResponse>> promises = callSources(q);
+		// compose all futures, blocks until all futures finish
+		Function<CommonFilterLogic, CommonFilterResponse> f = (CommonFilterLogic o) -> {
+			return o.export();
+		};
+
+		Promise<List<SourceResponse>> promisesSequence = Promise.sequence(promises);
+		return promisesSequence.map(new play.libs.F.Function<Collection<SourceResponse>, SearchResponse>() {
+			List<SourceResponse> finalResponses = new ArrayList<SourceResponse>();
+
+			public SearchResponse apply(Collection<SourceResponse> responses) {
+				finalResponses.addAll(responses);
+				// Logger.debug("Total time for all sources to respond:
+				// "
+				// + (System.currentTimeMillis()- initTime));
+				SearchResponse r1 = new SearchResponse();
+				ArrayList<CommonFilterLogic> merge = new ArrayList<CommonFilterLogic>();
+				for (SourceResponse sourceResponse : finalResponses) {
+					if (sourceResponse!=null){
+						FiltersHelper.merge(merge, sourceResponse.filtersLogic);
+						sourceResponse.filters = ListUtils.transform(sourceResponse.filtersLogic, f);
+					}
+				}
+				r1.filters = ListUtils.transform(merge, f);
+				r1.responses = mergeResponses(finalResponses);
+				return r1;
+			}
+
+			private List<SourceResponse> mergeResponses(List<SourceResponse> finalResponses2) {
+				List<SourceResponse> res = new ArrayList<>();
+				for (SourceResponse r : finalResponses2) {
+					boolean merged = false;
+					for (SourceResponse r2 : res) {
+						if ((r2!=null) && (r!=null)){
+							if (r2.source.equals(r.source)) {
+								// merge these 2 and replace r.
+								res.remove(r2);
+								res.add(r.merge(r2));
+								merged = true;
+								break;
+							}
+						}
+					}
+					if (!merged) {
+						res.add(r);
+					}
+				}
+				return res;
+			}
+
+		});
 	}
 
 	public static List<String> getTheSources() {
