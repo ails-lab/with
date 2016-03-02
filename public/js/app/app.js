@@ -327,7 +327,9 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			'groupNotifications': ko.observableArray()
 		},
 		"collectionCount": ko.observable(0),
-		"exhibitionCount": ko.observable(0)
+		"exhibitionCount": ko.observable(0),
+		"sharedCollectionCount": ko.observable(0),
+		"sharedExhibitionCount": ko.observable(0)
 	};
 	isLogged = ko.observable(false);
 
@@ -391,10 +393,21 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			},
 			//async: false
 		});
+
+		self.loadCounters();
 	};
 
 	self.loadCounters = function () {
-		// TODO: Use this call to reload the number of collections/exhibitions
+		$.ajax({
+			url: '/collection/countMyAndShared',
+			type: 'GET',
+			success: function (data, text) {
+				self.currentUser.exhibitionCount(data.my.Exhibition);
+				self.currentUser.collectionCount(data.my.SimpleCollection);
+				self.currentUser.sharedExhibitionCount(data.sharedWithMe.Exhibition);
+				self.currentUser.sharedCollectionCount(data.sharedWithMe.SimpleCollection);
+			}
+		});
 	};
 
 	self.loadFavorites = function () {
