@@ -62,7 +62,6 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 			for (int i = 0; i < langs.size(); i++) {
 				language[i] = Language.getLanguage(langs.get(i));
 			}
-			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("dcTitle"),
@@ -82,6 +81,7 @@ public class EuropeanaItemRecordFormatter extends CulturalRecordFormatter {
 		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("proxies[0].dctermsSpatial","places[.*].about","places[.*].about","places[.*].prefLabel"));
 		rec.enterContext("proxies[0]");
 		
+		model.setAltLabels(rec.getMultiLiteralValue("dctermsAlternative"));
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));

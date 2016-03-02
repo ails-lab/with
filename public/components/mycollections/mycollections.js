@@ -1,25 +1,24 @@
 define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
-	
-	count = 2;
+
+	count = 5;
 	accessLevels = {
 		    READ : 0,
 		    WRITE : 1,
 		    OWN : 2
 	}
 
-	
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 	    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context);
 	      }
 	 };
-	
+
 	ko.bindingHandlers.redirectToLogin = {
 		init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-			window.location = '#login';		
+			window.location = '#login';
 		}
 	};
-	
+
 
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
@@ -47,16 +46,19 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		var mapping = {
 			create: function (options) {
 		        //customize at the root level: add title and description observables, based on multiliteral
-				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...] 
+				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var innerModel = ko.mapping.fromJS(options.data);
 		        innerModel.title = ko.observable(self.multiLiteral(options.data.descriptiveData.label));
 		        var dbDescription = options.data.descriptiveData.description;
 		        if (dbDescription == undefined || dbDescription == null)
 		        	innerModel.description = ko.observable("");
-		        else 
+		        else
 		        	innerModel.description = ko.observable(self.multiLiteral(dbDescription));
 		        $.each(innerModel.media(), function(index, value){
-		        	withUrl = value.Thumbnail.withUrl();
+		        	
+		        	
+		        	//withUrl = value.Thumbnail.withUrl(); still not fully working
+		        	withUrl = value.Thumbnail.url();
 		        	if (withUrl.indexOf("/media") == 0)
 		        		innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
 		        	else
@@ -80,18 +82,18 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.myCollections = ko.mapping.fromJS([], mapping);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
-        self.isPublicToEdit = ko.observableArray([]);
+        self.isPublicToEdit = ko.observableArray(false);
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
         self.userGroupsToShare = ko.mapping.fromJS([], {});
         self.loading=ko.observable(false);
         //self.editedUsersToShare = ko.mapping.fromJS([], {});
-        
+
     	self.myUsername = ko.observable(app.currentUser.username());
     	self.moreCollectionData=ko.observable(true);
     	self.moreSharedCollectionData=ko.observable(true);
     	self.sharedCollections = ko.mapping.fromJS([], mapping);
-    	
+
     	/*self.multiLiteral = function (multiLiteral) {
     	        return ko.computed({
     	            read: function () {
@@ -100,11 +102,11 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
     	            }
     	        }, this);
     	    }.bind(self.myCollections);*/
-    	    
+
     	self.multiLiteral = function (multiLiteral) {
                 return app.findByLang(multiLiteral);
         };
-    	
+
 		self.init=function(){
         	if (self.showsExhibitions) {
 				mapping.label = {
@@ -136,10 +138,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
 				});
-			} 
-        	
+			}
+
 		}
-		
+
 		self.checkLogged=function(){
 			if (isLogged()==false) {
 				window.location='#login';
@@ -148,7 +150,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				self.init();
 			}
 		}
-		
+
 		self.checkLogged();
 
 		self.deleteMyCollection = function(collection) {
@@ -160,24 +162,24 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.createCollection = function() {
 			createNewCollection();
 		};
-		
+
 		self.nextSharedCollections = function() {
 			self.moreShared(false);
 		};
-		
+
 		self.createExhibition = function() {
 			window.location = '#exhibition-edit';
 		};
-		
+
 		self.loadCollectionOrExhibition = function(collection) {
 			if (self.showsExhibitions) {
-				window.location = '#exhibition-edit/'+ collection.dbId();		
+				window.location = '#exhibition-edit/'+ collection.dbId();
 			}
 			else {
-				window.location = 'index.html#collectionview/' + collection.dbId();		
+				window.location = 'index.html#collectionview/' + collection.dbId();
 			}
 		};
-		
+
 		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
@@ -217,22 +219,22 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
                     });
 					var theitem= ko.utils.arrayFirst(currentUser.editables(), function(item) {
 						return item.dbId===collectionId;
-			           
+
 			        });
 					currentUser.editables.remove(theitem);
-					//currentUser.editables.splice(index,1);	
+					//currentUser.editables.splice(index,1);
 				}
 			});
 		};
-		
+
 		self.moreShared = function(isExhibition){
 			self.more(isExhibition, getCollectionsSharedWithMe);
 		}
-		
+
 		self.moreCollections = function(isExhibition){
 			self.more(isExhibition, app.getUserCollections);
 		}
-		
+
 		self.more = function(isExhibition, funcToExecute) {
 			if (self.loading === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
@@ -253,11 +255,12 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}).fail(function(result) {self.loading(false);});
 			}
 		}
-		
+
 		self.openShareCollection = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
+			self.isPublicToEdit(collection.administrative.access.isPublic());
 			//$(".user-selection").devbridgeAutocomplete("hide");
 			$.ajax({
 				method     : "GET",
@@ -283,7 +286,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-		
+
 		self.showRightsIcons = function(userData) {
 			var accessRights = userData.accessRights();
 			var userId = userData.userId();
@@ -291,66 +294,17 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			$("#rightsIcons_"+userId).show();
 			$("#image_"+userId).css("opacity", "0.5");
 		}
-		
-		
+
+
 		self.hideRightsIcons = function(userId) {
 			$("#rightsIcons_"+userId).hide();
 			$("#image_"+userId).css("opacity", "1");
 		}
-		
+
 		self.changeRights = function(clickedRights) {
 			self.shareCollection(ko.toJS(this), clickedRights);
 		}
-		
-		self.showInfoPopup = function(title, bodyText, callback) {
-			$("#myModal").find("h4").html(title);
-			var body = $("#myModal").find("div.modal-body");
-			body.html(bodyText);
 
-			var footer = $("#myModal").find("div.modal-footer");
-			if (footer.is(':empty')) {
-		        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
-		        cancelBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        });
-		        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
-		        confirmBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        	callback();
-		        });
-		    }
-			$("#myModal").modal('show');
-			$('#myModal').on('hidden.bs.modal', function () {
-				$("#myModal").find("div.modal-footer").empty();
-			});
-			$('#myModal').addClass("topOfModal");
-		}
-		
-		self.showInfoPopupTwoOptions = function(title, bodyText, callback) {
-			$("#myModal").find("h4").html(title);
-			var body = $("#myModal").find("div.modal-body");
-			body.html(bodyText);
-
-			var footer = $("#myModal").find("div.modal-footer");
-			if (footer.is(':empty')) {
-		        var cancelBtn = $('<button type="button" class="btn btn-default">No</button>').appendTo(footer);
-		        cancelBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        	callback(false);
-		        });
-		        var confirmBtn = $('<button type="button" class="btn btn-primary">Yes</button>').appendTo(footer);
-		        confirmBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        	callback(true);
-		        });
-		    }
-			$("#myModal").modal('show');
-			$('#myModal').on('hidden.bs.modal', function () {
-				$("#myModal").find("div.modal-footer").empty();
-			});
-			$('#myModal').addClass("topOfModal");
-		}
-		
 		self.addToSharedWithUsers = function(clickedRights) {
 			var collId = self.myCollections()[self.index()].dbId();
 			var username = $("#usernameOrEmail").val();
@@ -373,28 +327,29 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			});
 		}
 
+
 		self.shareCollection = function(userData, clickedRights) {
-			if (userData.category == "group" && clickedRights === "OWN") 
-					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
+			if (userData.category == "group" && clickedRights === "OWN")
+					app.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
 							" group will acquire these rights. Giving OWN rights to others means that they will have the right to delete" +
 							" your collection, as well as to share it with others.", function() {
 						self.callShareAPI(userData, clickedRights);
 					});
 			else if (userData.category == "group")
-					self.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
+					app.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
 							" group will acquire these rights.", function() {
 						self.checkIfDowngrade(userData, clickedRights);
 					});
-			else if (clickedRights === "OWN") 
-				self.showInfoPopup("Are you sure?", "Giving OWN rights to others means that they will have the right to delete your collection, " +
+			else if (clickedRights === "OWN")
+				app.showInfoPopup("Are you sure?", "Giving OWN rights to others means that they will have the right to delete your collection, " +
 						"as well as to share it with others.", function() {
 					self.callShareAPI(userData, clickedRights);
 				});
-			else 
+			else
 				self.checkIfDowngrade(userData, clickedRights);
 		}
-		
-		
+
+
 		//TODO: find all members of the collections that I OWN. Find all collections these records belong to.
 		// Find if the user userData.username has access to these collections that are greater than clicked rights -
 		//if yes, present the following message:
@@ -406,24 +361,26 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			var newAccessOrdinal = accessLevels[clickedRights];
 			if (currentAccessOrdinal > newAccessOrdinal)
 				//downgrade
-				self.showInfoPopupTwoOptions("Downgrade of records in all collections?",
+				app.showInfoPopupTwoOptions("Downgrade records in all collections?",
 						"User " + userData.username + " may still have " + currentAccessRights + " access to records that you own and are members of that collection " +
 						", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
-						"in all collections they belong to?", function() {
-					self.callShareAPI(userData, clickedRights);
+						"in all collections they belong to?", function(response) {
+					self.callShareAPI(userData, clickedRights, response);
 				});
-			else 
+			else
 				self.callShareAPI(userData, clickedRights, false);
 		}
-		
+
+		self.callback = function(callback, par1, par2) {
+			callback.call(this, par1, par2);
+		}
+
 		self.callShareAPI = function(userData, clickedRights, membersDowngrade) {
-			if (membersDowngrade == undefined ||  membersDowngrade == null)
-				membersDowngrade = false;
 			var username = userData.username;
 			var collId = self.myCollections()[self.index()].dbId();
 			var index = -1;
 			var isGroup = false;
-			if (userData.category == "user") 
+			if (userData.category == "user")
 			  index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
@@ -462,7 +419,43 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				}
 			});
 		}
-		
+
+		self.isPublicToggle = function() {
+		    var newIsPublic = !self.isPublicToEdit();
+		    if (!newIsPublic) {
+		    	app.showInfoPopupTwoOptions("Make records private in all collections?",
+						"Users may still be able to read records that you own and are members of that collection " +
+						", via other collections s/he has access to. Do you want to make these records private "  +
+						"in all collections they belong to?", function(response) {
+		    		self.editPublicity(self.index(), false, response);
+				});
+		    }
+		    else
+		    	app.editPublicity(self.index(), true, false);
+		}
+
+		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {
+			var collection = self.myCollections()[collIndex];
+			$.ajax({
+				"url": "/rights/"+collection.dbId()+"?isPublic="+isPublic+"&membersDowngrade="+membersDowngrade,
+				"method": "GET",
+				success: function(result) {
+					if (self.isPublicToEdit()) {
+				    	self.isPublicToEdit(false);
+				    }
+				    else {
+				    	self.isPublicToEdit(true);
+				    }
+					if (collection.myAccess() == "OWN") {
+						self.myCollections()[collIndex].administrative.access.isPublic(self.isPublicToEdit());
+					}
+					else {
+						self.sharedCollections()[collIndex].administrative.access.isPublic(self.isPublicToEdit());
+					}
+				}
+			});
+		}
+
 		self.openEditCollectionPopup = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
@@ -471,13 +464,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				self.collectionSet = "my";
 				self.titleToEdit(self.myCollections()[collIndex].title());
 		        self.descriptionToEdit(self.myCollections()[collIndex].description());
-		        self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
+		        //self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 			}
 			else {
 				self.collectionSet = "shared";
 				self.titleToEdit(self.sharedCollections()[collIndex].title());
 		        self.descriptionToEdit(self.sharedCollections()[collIndex].description());
-		        self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
+		        //self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
 			}
 			app.showPopup("edit-collection");
 		}
@@ -502,12 +495,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					"method": "PUT",
 					"contentType": "application/json",
 					"data": JSON.stringify(
-						{descriptiveData: { 
+						{descriptiveData: {
 							label: {default: [self.titleToEdit()]},
 							description: {default: [self.descriptionToEdit()]},
-						},
-						administrative: {
-							access: {isPublic: self.isPublicToEdit()}
 						}
 					}),
 					success: function(result){
@@ -517,10 +507,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 						else if (self.collectionSet == "shared") {
 							self.updateCollectionData(self.sharedCollections(), collIndex);
 						}
-						
+
 						var editItem = ko.utils.arrayFirst(currentUser.editables(), function(item) {
 							return item.dbId===collId;
-				           
+
 				        });
 						editItem.title=self.titleToEdit();
 					},
@@ -542,22 +532,13 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 		self.updateCollectionData = function(collectionSet, collIndex) {
 			collectionSet[collIndex].descriptiveData.label.default = [self.titleToEdit()];
-			if (collectionSet[collIndex].descriptiveData.description == undefined) 
+			if (collectionSet[collIndex].descriptiveData.description == undefined)
 				collectionSet[collIndex].descriptiveData.description = {default: [self.descriptionToEdit()]}
 			else
 				collectionSet[collIndex].descriptiveData.description.default = [self.descriptionToEdit()];
 			collectionSet[collIndex].title(self.titleToEdit());
 			collectionSet[collIndex].description(self.descriptionToEdit());
-			collectionSet[collIndex].administrative.access.isPublic(self.isPublicToEdit());
 		}
-
-		self.privateToggle=function(e,arg){
-		    if (self.isPublicToEdit())
-		    	self.isPublicToEdit(false);
-		    else
-		    	self.isPublicToEdit(true);
-		}
-
 
 		self.reloadRecord = function(dbId, recordDataString) {
 			var recordData = JSON.parse(recordDataString);
@@ -594,10 +575,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				self.sharedCollections.unshift(newCollection);
 			}
 			//currentUser.editables.unshift({title: newCollection.title, dbId:newCollection.dbId});
-		
+
 		}
 
-		
+
 		self.changeTab=function(what,data,event){
 			$(event.target).parents("span.withmain").children("span.collectiontab").toggleClass('active');
 			if(what=="shared"){
@@ -608,9 +589,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				$("#mycollections").show();
 				   $("#sharedtab").hide();
 			}
-			
+
 		}
-		
+
 		self.checkCollectionSet = function(dbId) {
 			var collIndex = arrayFirstIndexOf(self.myCollections(), function(item) {
 				   return item.dbId() === dbId;
@@ -657,6 +638,10 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 			})
 	    }
 	    $('#bottomBar').fadeIn(500);
+
+	    self.playExhibition = function(dbId) {
+	    	window.location.hash = '#exhibitionview/' + dbId;
+	    };
 
 	}
 

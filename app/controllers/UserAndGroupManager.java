@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import model.Collection;
-import model.Media;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
@@ -36,10 +35,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import model.Collection;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.Media;
 import model.MediaObject;
 import model.basicDataTypes.WithAccess.Access;
 import notifications.GroupNotification;
@@ -135,11 +132,11 @@ public class UserAndGroupManager extends Controller {
 				userJSON.put("lastName", ((User) u).getLastName());
 			}
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
+				CollectionObject collection = DB.getCollectionObjectDAO().getById(
 						new ObjectId(collectionId));
 				if (collection != null) {
 					// TODO: have to do recursion here!
-					Access accessRights = collection.getRights().getAcl(
+					Access accessRights = collection.getAdministrative().getAccess().getAcl(
 							u.getDbId());
 					if (accessRights != null)
 						userJSON.put("accessRights", accessRights.toString());
@@ -153,7 +150,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (u instanceof User)
 				userJSON.put("category", "user");
-			if (u instanceof UserGroup)
+			else if (u instanceof UserGroup)
 				userJSON.put("category", "group");
 			return ok(userJSON);
 		};

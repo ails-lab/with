@@ -78,7 +78,7 @@
 				  
 				   <!-- ko foreach: $parent.filters -->
 				   <div class="tab-pane" data-bind="attr:{id:filterID}">
-				    <!-- ko if:(filterID!="year" &&  suggestedValues.length>0) -->
+				    <!-- ko if:(filterID!="dates" &&  suggestedValues.length>0) -->
 				    <ul class="type list">
 				   
 				    
@@ -93,7 +93,7 @@
 				      </ul>
 				     <!-- /ko -->
 				     
-				     <!-- ko if:(filterID=="year" &&  suggestedValues.length>0) -->
+				     <!-- ko if:(filterID=="dates" &&  suggestedValues.length>0) -->
 				     
 				        <ul class="type list chart">
 				         <!-- ko foreach:$parent.yaxis -->

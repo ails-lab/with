@@ -21,7 +21,6 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Field;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
@@ -67,7 +66,6 @@ public class DescriptiveData {
 	private MultiLiteral label;
 
 	// arbitrary length content description
-	@Embedded
 	private MultiLiteral description;
 
 	// an indexers dream !! They can be literal concepts and enriched easily

@@ -41,12 +41,14 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.libs.Json;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.net.MediaType;
 
 public class Serializer {
 	public static final ALogger log = Logger.of(Serializer.class);
@@ -85,7 +87,7 @@ public class Serializer {
 		}
 
 	}
-	
+
 	public static class PointSerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object point, JsonGenerator jsonGen,
@@ -100,6 +102,23 @@ public class Serializer {
 
 	}
 
+	public static class MimeTypeSerializer extends JsonSerializer<Object> {
+		@Override
+		public void serialize(Object mimeType, JsonGenerator jsonGen,
+				SerializerProvider provider) throws JsonGenerationException,
+				IOException {
+			try {
+				if (mimeType == null)
+					jsonGen.writeString(MediaType.ANY_TYPE.toString());
+				else
+					jsonGen.writeString(((MediaType) mimeType).toString());
+			} catch (Exception e) {
+				jsonGen.writeString(MediaType.ANY_TYPE.toString());
+			}
+		}
+
+	}
+
 	public static class WithAccessSerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object rights, JsonGenerator jsonGen,
@@ -109,7 +128,7 @@ public class Serializer {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode json = mapper.createObjectNode();
 			json.put("isPublic", isPublic);
-			json.put("acl", Json.toJson(((WithAccess)rights).getAcl()));
+			json.put("acl", Json.toJson(((WithAccess) rights).getAcl()));
 			jsonGen.writeObject(json);
 		}
 	}
@@ -121,8 +140,8 @@ public class Serializer {
 				JsonProcessingException {
 			ObjectMapper mapper = new ObjectMapper();
 			ObjectNode json = mapper.createObjectNode();
-			json.put("level", ((AccessEntry)ae).getLevel().ordinal());
-			json.put("user", ((AccessEntry)ae).getUser().toString());
+			json.put("level", ((AccessEntry) ae).getLevel().ordinal());
+			json.put("user", ((AccessEntry) ae).getUser().toString());
 			jsonGen.writeObject(json);
 		}
 	}

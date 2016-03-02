@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.Collection;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
@@ -258,54 +257,6 @@ public class Elastic {
 				Elastic.getTransportClient().admin().indices().prepareAliases()
 					.addAlias(index, alias)
 					.execute().actionGet();
-		}
-	}
-
-
-	/*
-	 * Generally we have 3 different re-indexing processes.
-	 * For Implementation see ElasticReindexer
-	 *
-	 * 1. SLOW RE-INDEX
-	 * We want to obtain all documents from DB and slowly reindex all of them.
-	 *
-	 * 2. FAST RE-INDEX
-	 * We want to index only documents from DB that are not exist
-	 * in the index at the current time
-	 *
-	 * 3. CHANGE INDICE
-	 * We want to move all indexed document to a different newly index
-	 * because of a change in settings (e.g. mappings) or whatever.
-	 * So we have to iterate with a cursor over all documents and
-	 * index them to the new index.
-	 *
-	 * TIPS:
-	 *
-	 * ** Use Bulk Operations instead of creating a new request for
-	 * every document to be indexed
-	 *
-	 * ** Use the Change Mapping tutorial in order to excecute the 3rd
-	 * process in Zero Downtime
-	 * https://www.elastic.co/blog/changing-mapping-with-zero-downtime
-	 *
-	 */
-	public static void reindex() {
-		// hopefully delete index and reput it in place
-		//getNodeClient().admin().indices().prepareDelete(index).execute().actionGet();
-		//putMapping();
-
-
-		Callback<Collection> callback = new Callback<Collection>() {
-		@Override
-			public void invoke(Collection c ) throws Throwable {
-				//ElasticIndexer ei = new ElasticIndexer( c );
-				//ei.index();
-			}
-		};
-		try {
-			DB.getCollectionDAO().onAll( callback, false );
-		} catch( Exception e ) {
-			log.error( "ReIndexing problem", e );
 		}
 	}
 

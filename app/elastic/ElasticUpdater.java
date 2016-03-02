@@ -25,9 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import model.Collection;
-import model.CollectionRecord;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess.Access;
 
@@ -43,7 +40,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import play.Logger;
 import play.libs.Json;
-import scala.Array;
 import db.DB;
 
 public class ElasticUpdater {
@@ -62,7 +58,7 @@ public class ElasticUpdater {
 					.setDoc(doc)
 					.get();
 		} catch(Exception e) {
-			log.error("Cannot update (reindex) resource" );
+			log.error("Cannot update (reindex) resource", e );
 			return false;
 		}
 		return true;

@@ -58,6 +58,7 @@ public class DDBSpaceSource extends ISpaceSource {
 		builder.addSearchParam("facet", "provider_fct");
 		builder.addSearchParam("facet", "time_fct");
 		builder.addSearchParam("facet", "license_group");
+//		builder.addSearchParam("isThumbnailFiltered", "true");
 
 		FashionSearch fq = new FashionSearch();
 		fq.setTerm(q.searchTerm);
@@ -79,9 +80,6 @@ public class DDBSpaceSource extends ISpaceSource {
 		if (checkFilters(q)) {
 			try {
 				response = HttpConnector.getURLContent(res.query);
-				System.out.println("-------------------------------------------------------------");
-				System.out.println(response.toString());
-				System.out.println("-------------------------------------------------------------");
 				JsonNode docs = response.path("results").get(0).path("docs");
 				res.totalCount = Utils.readIntAttr(response, "numberOfResults", true);
 				res.count = docs.size();
@@ -127,12 +125,14 @@ public class DDBSpaceSource extends ISpaceSource {
 			if (response != null) {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_EDM, record.toString()));
 				DDBItemRecordFormatter f = new DDBItemRecordFormatter();
+				System.out.println(record.toString());
 				String json = Json.toJson(f.readObjectFrom(record)).toString();
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 
 			return jsonMetadata;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return jsonMetadata;
 		}
 	}

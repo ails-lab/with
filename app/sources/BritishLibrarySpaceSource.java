@@ -18,9 +18,6 @@ package sources;
 
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
-import model.ExternalBasicRecord;
-import model.ExternalBasicRecord.ItemRights;
-import model.ExternalBasicRecord.RecordType;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.resources.WithResource;
 import sources.core.CommonFilterLogic;

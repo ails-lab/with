@@ -17,9 +17,12 @@
 package model.resources;
 
 import java.util.Map;
+
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+
 import model.DescriptiveData;
+import model.annotations.ContextData;
 import model.basicDataTypes.MultiLiteralOrResource;
 
 @Entity("CollectionObject")

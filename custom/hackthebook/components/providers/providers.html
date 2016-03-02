@@ -23,9 +23,9 @@
                 <div class="wrap">
                   <!-- anchor--><a data-bind="attr :{ href: url}" title="View provider">
                     <!-- thumbnail-->
-                    <div class="thumb"><img data-bind="attr: {src:background}"></div>
+                    <div class="thumb"><img data-bind="style : { visibility :  background.length>0 ? '' : 'hidden' }, attr: {src:background}"></div>
                     <!-- info-->
-                    <div class="info"><span class="logo"><img data-bind="attr: {src:thumbnail}" alt="logo"></span>
+                    <div class="info"><span class="logo"><img data-bind="style : { visibility :  logo.length>0 ? '' : 'hidden' },attr: {src:logo}" alt="logo"></span>
                       <h1 class="name"><!-- ko text:name --><!-- /ko --></h1><span class="location" data-bind="text: country"></span>
                     </div>
                     <!-- stats-->

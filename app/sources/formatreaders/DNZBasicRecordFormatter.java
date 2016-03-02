@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import akka.dispatch.Filter;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -40,8 +41,8 @@ import sources.utils.StringUtils;
 
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
-	public DNZBasicRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DNZBasicRecordFormatter() {
+		super(FilterValuesMap.getDNZMap());
 		object = new CulturalObject();
 	}
 
@@ -72,11 +73,11 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		model.setDescription(rec.getMultiLiteralValue("description","additional_description"));
 		model.setAltLabels(rec.getMultiLiteralValue("alternative_title"));
 		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dc_identifier"));
-		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url","humbnail_url", "large_thumbnail_url"));
+		model.setIsShownBy(rec.getLiteralOrResourceValue("object_url","thumbnail_url", "large_thumbnail_url"));
 		model.setIsShownAt(rec.getLiteralOrResourceValue("landing_url"));
 		model.setDates(rec.getWithDateArrayValue("date"));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("creator"));
-		model.setDccreator(rec.getMultiLiteralOrResourceValue("contributor"));
+		model.setDccontributor(rec.getMultiLiteralOrResourceValue("contributor"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("dctype"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("category"));
 		object.addToProvenance(new ProvenanceInfo(rec.getStringValue("collection[0]"), rec.getStringValue("landing_url"),null));

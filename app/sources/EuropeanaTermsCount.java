@@ -72,7 +72,6 @@ public class EuropeanaTermsCount {
 			builder.addSearchParam("qf", "PROVIDER%3A" + Utils.getORList(ListUtils.transform(t , function)));
 			response = new JsonContextRecord(getHTML(builder.getHttp()));
 			int count2 = response.getIntValue("totalResults");
-			System.out.println(term+", "+(count-count2));
 		}
 		s.close();
 	}
