@@ -21,6 +21,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import akka.dispatch.Filter;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.WithMediaRights;
@@ -40,8 +41,8 @@ import sources.utils.StringUtils;
 
 public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 
-	public DNZBasicRecordFormatter(FilterValuesMap map) {
-		super(map);
+	public DNZBasicRecordFormatter() {
+		super(FilterValuesMap.getDNZMap());
 		object = new CulturalObject();
 	}
 

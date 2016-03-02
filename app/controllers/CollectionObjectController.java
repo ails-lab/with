@@ -287,6 +287,20 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
+	
+	public static Result countMyAndShared() {
+		ObjectNode result = Json.newObject().objectNode();
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		if (effectiveUserIds.isEmpty()) {
+			return badRequest("You should be signed in as a user.");
+		}
+		 else { 
+			 result = DB.getCollectionObjectDAO().countMyAndSharedCollections(
+					 AccessManager.toObjectIds(effectiveUserIds));
+				return ok(result);
+		 }
+	}
 
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup,
@@ -408,8 +422,7 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	// input parameter lists' (directlyAccessedByUserOrGroup etc) intended
-	// meaning
-	// is AND of its entries
+	// meaning is AND of its entries
 	// returned list of lists accessedByUserOrGroup represents AND of OR entries
 	// i.e. each entry in directlyAccessedByUserName for example has to be
 	// included in a separate list!

@@ -165,14 +165,6 @@ public class WithResourceController extends Controller {
 	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
 			Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
-		if (position.isDefined())
-			if (DB.getRecordResourceDAO()
-					.existsInCollectionAndPosition(collectionDbId,
-							position.get())) {
-				result.put("error",
-						"Record already exists in that position, have to remove it first.");
-				return forbidden(result);
-			}
 		String resourceType = null;
 		ObjectId userId = AccessManager.effectiveUserDbIds(
 				session().get("effectiveUserIds")).get(0);
@@ -222,8 +214,8 @@ public class WithResourceController extends Controller {
 						// the existing record's descriptive data for the fields
 					    // included in the json, if the user has WRITE access.
 					if (noDouble) {
-						if (DB.getRecordResourceDAO().existsInCollection
-								(collectionDbId)) {
+						if (DB.getRecordResourceDAO().existsSameExternaIdInCollection
+								(externalId, collectionDbId)) {
 							result.put("error", "double");
 							return forbidden(result);
 						}
