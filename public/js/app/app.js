@@ -191,6 +191,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	self.receiveEvent = function (event) {
 		var notification = JSON.parse(event.data);
 		self.addNotification(notification);
+
 		switch (notification.activity) {
 		case "GROUP_INVITE":
 			$.smkAlert({
@@ -457,6 +458,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		data.date = ko.pureComputed(function () {
 			return moment(data.openedAt).fromNow();
 		});
+		data.image = ko.computed(function() { return 'images/user.png'; });
 
 		data.pending = ko.observable(data.pendingResponse);
 		data.unread = ko.observable(data.readAt === null || data.readAt == undefined);
@@ -467,43 +469,43 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 		switch (data.activity) {
 		case "GROUP_INVITE":
-			data.message = '<strong>' + data.senderName + '</strong> invites you to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> invites you to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "GROUP_INVITE_ACCEPT":
-			data.message = '<strong>' + data.senderName + '</strong> joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> joined <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_INVITE_DECLINED":
-			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> declined your invitation to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST":
-			data.message = '<strong>' + data.senderName + '</strong> wants to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = '<strong>' + data.senderName + '</strong> wants to join <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.groupNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST_ACCEPT":
-			data.message = 'You joined <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong>';
+			data.message = 'You joined <a href="#organization/' + data.group + '">' + data.groupName + '</a>';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "GROUP_REQUEST_DENIED":
-			data.message = 'Your request to join <strong><a href="#organization/' + data.group + '">' + data.groupName + '</a></strong> was declined';
+			data.message = 'Your request to join <a href="#organization/' + data.group + '">' + data.groupName + '</a> was declined';
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;
 		case "COLLECTION_SHARE":
 			if (data.shareInfo.sharedWithGroup) {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.resoure + '">' + data.resourceName + '</a></strong> with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <a href="#collectionview/' + data.resoure + '">' + data.resourceName + '</a> with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 				self.currentUser.notifications.groupNotifications.unshift(data);
 			} else {
-				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> with you';
+				data.message = '<strong>' + data.senderName + '</strong> wants to share collection <a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> with you';
 				self.currentUser.notifications.userNotifications.unshift(data);
 			}
 			break;
 		case "COLLECTION_SHARED":
 			if (data.shareInfo.sharedWithGroup) {
-				data.message = '<strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> is now shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
+				data.message = '<a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> is now shared with <strong>' + data.shareInfo.userOrGroupName + '</strong>';
 			} else {
-				data.message = '<strong><a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a></strong> is now shared with <strong>' + data.senderName + '</strong>';
+				data.message = '<a href="#collectionview/' + data.resource + '">' + data.resourceName + '</a> is now shared with <strong>' + data.senderName + '</strong>';
 			}
 			self.currentUser.notifications.userNotifications.unshift(data);
 			break;

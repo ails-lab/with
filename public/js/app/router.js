@@ -1,4 +1,4 @@
-define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
+define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 
 	// This module configures crossroads.js, a routing library. If you prefer, you
 	// can use any other routing library (or none at all) as Knockout is designed to
@@ -12,7 +12,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	return new Router({
 		routes: [
 			{ url: '',          params: { page: 'home-page',     title: 'Home' } },
-     		{ url: 'home',          params: { page: 'home-page',     title: 'Home' } },
+			{ url: 'home',          params: { page: 'home-page',     title: 'Home' } },
+			{ url: 'dashboard', params: { page: 'dashboard', title: 'Dashboard' } },
 			//{ url: 'search',    params: { page: 'search-page',   title: 'Search' } },
 			{ url: 'login',     params: { page: 'login-page',    title: 'Login' } },
 			{ url: 'profile',     params: { page: 'profile',    title: 'Profile' } },
@@ -40,8 +41,8 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 	function Router(config) {
 		var currentRoute = this.currentRoute = ko.observable({});
 
-		ko.utils.arrayForEach(config.routes, function(route) {
-			crossroads.addRoute(route.url, function(requestParams) {
+		ko.utils.arrayForEach(config.routes, function (route) {
+			crossroads.addRoute(route.url, function (requestParams) {
 				currentRoute(ko.utils.extend(requestParams, route.params));
 			});
 		});
@@ -51,35 +52,36 @@ define(["knockout", "crossroads", "hasher"], function(ko, crossroads, hasher) {
 
 	function activateCrossroads() {
 		//temp fix: scrollbar moves to top when route changes
-		function resetScroll(){document.body.scrollTop = document.documentElement.scrollTop = 0;}
+		function resetScroll() {
+			document.body.scrollTop = document.documentElement.scrollTop = 0;
+		}
 		function parseHash(newHash, oldHash) {
-			if(oldHash)
-				if(oldHash.indexOf("provider/")==0){
-					 var scrollPosition = $(window).scrollTop();
-					 oldHash=oldHash.substring(9);
-					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
-					 sessionStorage.setItem("provider"+oldHash, scrollPosition);
-				}
-				else if (oldHash.indexOf("collectionview/")==0){
+			if (oldHash) {
+				if (oldHash.indexOf("provider/") === 0) {
 					var scrollPosition = $(window).scrollTop();
-					 oldHash=oldHash.substring(15);
-					 if(oldHash.indexOf('/')!=-1)
-					 oldHash=oldHash.substring(0,oldHash.indexOf('/'));
+					oldHash = oldHash.substring(9);
+					oldHash = oldHash.substring(0, oldHash.indexOf('/'));
+					sessionStorage.setItem("provider" + oldHash, scrollPosition);
+				} else if (oldHash.indexOf("collectionview/") === 0) {
+					var scrollPosition = $(window).scrollTop();
+					oldHash = oldHash.substring(15);
+					if (oldHash.indexOf('/') != -1) {
+						oldHash = oldHash.substring(0, oldHash.indexOf('/'));
+					}
 
-					 sessionStorage.setItem("collection-viewscroll"+oldHash, scrollPosition);
-
+					sessionStorage.setItem("collection-viewscroll" + oldHash, scrollPosition);
 				}
+			}
 			crossroads.parse(newHash);
 
 		}
 
-		crossroads.ignoreState= true;
+		crossroads.ignoreState = true;
 		crossroads.normalizeFn = crossroads.NORM_AS_OBJECT;
 		hasher.initialized.add(parseHash);
 		hasher.changed.add(parseHash);
 		hasher.changed.add(resetScroll);
 
 		hasher.init();
-
 	}
 });

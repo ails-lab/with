@@ -12,6 +12,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	ko.components.register('top-bar', { require: 'components/top-bar/top-bar'});
 	ko.components.register('side-bar', { require: 'components/side-bar/side-bar'});
 	ko.components.register('home-page', { require: 'components/home-page/home' });
+	ko.components.register('dashboard', { require: 'components/dashboard/dashboard' });
 	ko.components.register('main-content', { require: 'components/main-content/main-content' });
 	ko.components.register('search-page', { require: 'components/search-page/search' });
 	ko.components.register('item-view', { require: 'components/item-view/item' });
