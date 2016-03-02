@@ -458,7 +458,13 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		data.date = ko.pureComputed(function () {
 			return moment(data.openedAt).fromNow();
 		});
-		data.image = ko.computed(function() { return 'images/user.png'; });
+		data.image = ko.computed(function() {
+			if (null == data.senderLogoUrl) {
+				return 'images/user.png';
+			} else {
+				return data.senderLogoUrl;
+			}
+		});
 
 		data.pending = ko.observable(data.pendingResponse);
 		data.unread = ko.observable(data.readAt === null || data.readAt == undefined);
