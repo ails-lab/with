@@ -603,7 +603,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	public boolean existsSameExternaIdInCollection(String externalId, ObjectId colId) {
-		Query<RecordResource> q = this.createQuery().field("collectedIn")
+		Query<RecordResource> q = this.createQuery().disableValidation().field("collectedIn")
 				.hasThisElement(new CollectionInfo(colId, null));
 	    q.field("administrativeData.externalId").equal(externalId);
 		return this.find(q.limit(1)).asList().size() == 0? false : true;
