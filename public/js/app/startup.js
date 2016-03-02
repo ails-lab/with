@@ -58,7 +58,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	});
 	ko.components.register('image-upload', {
 		viewModel: { require: 'components/media-uploader/media-uploader' },
-		template: { require: 'text!components/media-uploader/image-upload.html' }
+		template: { require: 'text!components/media-uploader/_image-upload.html' }
 	});
 	ko.components.register('organization-page', {
 		viewModel: { require: 'components/organization-page/organization-page' },

@@ -1,3 +1,10 @@
+#uploaded-image > input
+{
+    display: none;
+   
+}
+
+
 a {
   outline: 0 !important;
 }

@@ -50,10 +50,10 @@
                 </div>
                 <div class="action-body">
                   <div class="input-style"><span class="get">GET</span>
-                    <input type="text" value="http://ipa.image.ntua.gr:9010/collection/53">
+                    <input type="text" data-bind="value: getAPIUrlCollection()">
                   </div>
                   <div class="input-style"><span class="post">POST</span>
-                    <input type="text" value="http://ipa.image.ntua.gr:9010/collection/53">
+                    <input type="text" data-bind="value: getAPIUrlRecords()">
                   </div>
                 </div>
                 <div class="button-group"><a class="btn-green cancel">close</a></div>
@@ -75,13 +75,11 @@
               </section>
               <!-- collection new-->
               <section class="action upload">
-                <div class="action-header">
-                  <div class="title">Upload image</div>
-                </div>
-                <div class="action-body"><img src="img/ui/upload-placeholder.png" class="upload-img"><span style="width:40%;" class="progress"></span>
-                  <input type="text" placeholder="Name your image"><a href="#" class="add"><span class="plus"></span><span class="text">Add description</span></a>
-                </div>
-                <div class="button-group"><a class="btn-green-o cancel">Cancel</a><a  class="btn-green">Save</a></div>
+                <!-- ko component: {
+				    name: "image-upload",
+				    params: { collectionId: id() }
+				} -->
+				<!-- /ko -->
               </section>
               <!-- collection give access-->
               <section class="action collect">

@@ -1,4 +1,4 @@
-define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'jquery.fileupload', 'smoke'], function (ko, template, app) {
+define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', 'jquery.fileupload', 'smoke'], function (ko, template, app) {
 
 	ko.validation.init({
 		errorElementClass: 'has-error',
