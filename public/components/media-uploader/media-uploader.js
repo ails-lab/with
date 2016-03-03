@@ -84,7 +84,11 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 		});
 
 		self.close = function () {
-			app.closePopup();
+			self.imageURL(null);
+			self.title('');
+
+			self.validationModel.errors.showAllMessages(false);
+			$( '.action' ).removeClass( 'active' );
 		};
 
 		self.uploadImage = function () {

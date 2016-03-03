@@ -136,13 +136,6 @@ public class EmbeddedMediaObject {
 
 	private MediaVersion mediaVersion;
 
-	/*
-	 * These do not have to be saved in the db just returned in the json, i.e.
-	 * the json has a field withThumbnailUrl computed based on whether there
-	 * exists a MediaObject in the db* * // with urls for embedded or cached
-	 * objects private String withUrl; private String withThumbnailUrl;
-	 */
-
 	public MediaVersion getMediaVersion() {
 		return mediaVersion;
 	}
