@@ -1,4 +1,4 @@
-define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-validation','smoke'], function (ko, template, selectize, app) {
+define(['knockout', 'text!./collection-popup.html', 'selectize', 'app', 'knockout-validation','smoke'], function (ko, template, selectize, app) {
 
 	ko.validation.init({
 		errorElementClass: 'has-error',
@@ -130,17 +130,16 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		var self = this;
 		self.params=params;
 		self.route = params.route;
-		self.templateName = ko.observable('');
+		self.templateName = ko.observable('collection_newpopup');
 		self.modal = ko.observable("3");
 		self.record = ko.observable(false);
 		self.collname = ko.observable('').extend({
 			required: true
 		});
-		
 		self.selectedCollection = ko.observable('');
 		self.description = ko.observable('');
 		self.collectionlist=ko.observableArray([]);
-		self.isPublic=ko.observable(true);
+		
 		
 		self.id = ko.observable(-1);
 		self.ajaxConnections = 0;
@@ -152,19 +151,6 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		self.findEditableCollections = function () {
 			var deferred = $.Deferred();
 			self.collectionlist([]);
-			if(isLogged()){
-					var temparray=ko.utils.arrayMap(currentUser.editables(), function(item) {
-		        	
-		        	return({
-						"id": item.dbId,
-						"name": item.title
-					});
-		            
-		        });
-				self.collectionlist.push.apply(self.collectionlist, temparray);
-				deferred.resolve();
-			}
-			else{
 			var promise=app.getEditableCollections();
 			$.when(promise).done(function(){
 				var temparray=ko.utils.arrayMap(currentUser.editables(), function(item) {
@@ -177,7 +163,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		        });
 				self.collectionlist.push.apply(self.collectionlist, temparray);
 				deferred.resolve();
-			 })}
+			 })
 			return deferred.promise();
 			
 		};
@@ -185,7 +171,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		createNewCollection = function () {
 			self.findEditableCollections();
 			self.modal("2");
-			self.templateName('collection_new');
+			self.templateName('collection_newpopup');
 			self.open();
 		};
 
@@ -198,32 +184,30 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 			$.when(promise).done(function(){
 				if (self.collectionlist().length == 0) {
 					self.modal("2");
-					self.templateName('collection_new');
+					self.templateName('collection_newpopup');
 				} else {
 					self.modal("3");
-					self.templateName('additem');
+					self.templateName('additempopup');
 				}
 				self.open();});
 		};
 
 		self.open = function () {
-			$( '.action' ).removeClass( 'active' );
-			$( '.action.collect' ).addClass( 'active' );
-
+			$('#modal-' + self.modal()).css('display', 'block');
+			$('#modal-' + self.modal()).addClass('md-show');
 		};
 
 		self.close = function () {
+			$('[id^="modal"]').removeClass('md-show').css('display', 'none');
+			$("body").removeClass("modal-open");
 			if (0 === self.ajaxConnections) {
+				// this was the last Ajax connection, do the thing
+				if ($('#myModal').find('h4.modal-title').is(':empty') == false)
+					$("#myModal").modal('show');
 				self.reset();
 			}
 		};
 
-		self.addDescription=function(event){
-			event.preventDefault();
-			$('textarea').show();
-			$(event.target).parent('a').hide();
-		}
-		
 		self.save = function (formElement) {
 			if (self.validationModel.isValid()) {
 
@@ -235,7 +219,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				});*/
 				var jsondata = JSON.stringify({
 					administrative: { access: {
-				        isPublic: self.isPublic()},
+				        isPublic: $("#publiccoll .active").data("value")},
 				        collectionType: "SimpleCollection"},
 				        descriptiveData : {
 				        	 label : {
@@ -290,11 +274,8 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 							"id": data.dbId,
 							"name": data.title
 						});
-						getEditableCollections();
 						//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
-						if(window.location.hash.indexOf("mycollection")!=-1){
-				
-						//if (self.params.request_ == "mycollections" || (self.params.route &&  self.params.route().request_=="mycollections")) {
+						if (self.params.request_ == "mycollections" || (self.params.route &&  self.params.route().request_=="mycollections")) {
 							ko.contextFor(mycollections).$data.reloadCollection(data);
 						}
 						if (callback) {
@@ -326,7 +307,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 					/*otherwise save this collection and then add the item */	
 					var jsondata = JSON.stringify({
 						administrative: { access: {
-				        isPublic: self.isPublic()},
+				        isPublic: $("#publiccoll .active").data("value")},
 				        collectionType: "SimpleCollection"},
 				        descriptiveData : {
 				        	 label : {
@@ -362,11 +343,10 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 				"data": jsondata,
 				"success": function (data) {
 					self.ajaxConnections--;
-					if(window.location.hash.indexOf("collectionview/"+collid)!=-1){
+					if ((self.params.request_  && self.params.request_ .indexOf( "collectionview/" + collid)==0) ||( self.params.route &&  self.params.route().request_.indexOf("collectionview/" + collid))==0) {
 						ko.contextFor(withcollection).$data.loadNext();
 						ko.contextFor(withcollection).$data.reloadEntryCount();
-					} 
-					else if(window.location.hash.indexOf("mycollections")!=-1){
+					} else if (self.params.request_ == "mycollections" ||( self.params.route &&  self.params.route().request_ == "mycollections" )) {
 						var obj = null;
 						ko.contextFor(mycollections).$data.reloadRecord(collid, jsondata);
 					}
@@ -393,17 +373,23 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 		self.reset = function () {
 			self.collname('');
 			self.description('');
-			self.isPublic(true);
 			self.id(-1);
 			self.record(false);
 			self.validationModel.errors.showAllMessages(false);
 			self.selected_items2([]);
-			$('textarea').hide();
-			$('.add').show();
-			$( '.action' ).removeClass( 'active' );
 		};
 
+		self.privateToggle = function (e, arg) {
+			$(arg.currentTarget).parent().find('.btn').toggleClass('active');
+
+			if ($(arg.currentTarget).parent().find('.btn-primary').size() > 0) {
+				$(arg.currentTarget).parent().find('.btn').toggleClass('btn-primary');
+			}
+
+			$(arg.currentTarget).parent().find('.btn').toggleClass('btn-default');
+		};
 		
+
 	}
 
 	return {
