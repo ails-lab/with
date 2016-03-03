@@ -180,6 +180,10 @@ public class WithResourceController extends Controller {
 				fillInContextTarget(json, collectionDbId.toString(), position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json,
 					clazz);
+			HashMap<String, List<String>> label =  record.getDescriptiveData().getLabel();
+			if (label == null || label.get(Language.DEFAULT) == null || 
+					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
+				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
 			if ((record.getProvenance() != null)
@@ -265,6 +269,9 @@ public class WithResourceController extends Controller {
 												.getByUrl(mediaUrl)) != null)) {
 									media = new EmbeddedMediaObject(
 											existingMedia);
+								}
+								else {
+									return badRequest("A media url has to be provided.");
 								}
 								// TODO: careful, the user is allowed to set
 								// the media fields as s/he wishes,
