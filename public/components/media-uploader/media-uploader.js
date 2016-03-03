@@ -8,11 +8,16 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 
 	function MediaUploaderModel(params) {
 		var self = this;
-		self.title = ko.observable().extend({
+		self.title = ko.observable('').extend({
 			required: true
 		});
-		self.description = ko.observable().extend();
-		self.imageURL = ko.observable();
+		self.description = ko.observable();
+		self.imageURL = ko.observable().extend({
+			required: {
+				message: "No image was uploaded.",
+				params: true
+			}
+		});
 		self.collectionId = ko.observable(params.collectionId);
 
 		self.originalUrl = ko.observable();
@@ -20,6 +25,10 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 		self.thumbnailUrl = ko.observable();
 		self.squareUrl = ko.observable();
 		self.tinyUrl = ko.observable();
+		self.validationModel = ko.validatedObservable({
+			title: self.title,
+			imageURL: self.imageURL
+		});
 
 		self.rights = ko.observableArray([
 			'Public ("Attribution Alone")',
@@ -41,7 +50,7 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 			'UNKNOWN ("Unknown")'
 		]);
 		self.withRights = ko.observable('UNKNOWN ("Unknown")');
-		self.enumRights = ko.pureComputed(function() {
+		self.enumRights = ko.pureComputed(function () {
 			return self.withRights().substring(0, self.withRights().indexOf(' '));
 		});
 
@@ -70,7 +79,7 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 			error: function (e, data) {
 				console.log(e);
 				console.log(data);
-				$.smkAlert({text:'Error uploading the file', type:'danger', time: 10});
+				$.smkAlert({ text: 'Error uploading the file', type: 'danger', time: 10});
 			}
 		});
 
@@ -79,52 +88,58 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 		};
 
 		self.uploadImage = function () {
-			var data = {
-				provenance: [{provider: app.currentUser.username()},
-				             {provider: 'UploadedByUser'}
-				],
-				descriptiveData: {
-					label: {"default":[self.title()]},
-					description: {"default": [self.description()]}
-				},
-				media: [{
-					Original: {
-						url: this.originalUrl(),
-						withRights: this.enumRights()
+			if (self.validationModel.isValid()) {
+				var data = {
+					provenance: [{
+						provider: app.currentUser.username()
+					}, {
+						provider: 'UploadedByUser'
+					}],
+					descriptiveData: {
+						label: { "default": [self.title()] },
+						description: { "default": [self.description()] }
 					},
-					Medium: {
-						url: this.mediumUrl(),
-						withRights: this.enumRights()
+					media: [{
+						Original: {
+							url: this.originalUrl(),
+							withRights: this.enumRights()
+						},
+						Medium: {
+							url: this.mediumUrl(),
+							withRights: this.enumRights()
+						},
+						Thumbnail: {
+							url: this.thumbnailUrl(),
+							withRights: this.enumRights()
+						},
+						Square: {
+							url: this.squareUrl(),
+							withRights: this.enumRights()
+						},
+						Tiny: {
+							url: this.tinyUrl(),
+							withRights: this.enumRights()
+						}
+					}]
+				};
+				$.ajax({
+					url: '/collection/' + self.collectionId() + '/addRecord',
+					method: 'POST',
+					data: JSON.stringify(data),
+					contentType: 'application/json',
+					success: function (data) {
+						self.close();
+						$.smkAlert({text: 'Item added to the collection', type: 'success'});
+						ko.contextFor(withcollection).$data.loadNext();
+						ko.contextFor(withcollection).$data.reloadEntryCount();
 					},
-					Thumbnail: {
-						url: this.thumbnailUrl(),
-						withRights: this.enumRights()
-					},
-					Square: {
-						url: this.squareUrl(),
-						withRights: this.enumRights()
-					},
-					Tiny: {
-						url: this.tinyUrl(),
-						withRights: this.enumRights()
+					error: function (result) {
+						$.smkAlert({text: 'Error adding the item to the collection!', type: 'danger', time: 10});
 					}
-				}]
-			};
-			$.ajax({
-				url: '/collection/' + self.collectionId() + '/addRecord',
-				method: 'POST',
-				data: JSON.stringify(data),
-				contentType: 'application/json',
-				success: function (data) {
-					self.close();
-					$.smkAlert({text: 'Item added to the collection', type: 'success'});
-					ko.contextFor(withcollection).$data.loadNext();
-					ko.contextFor(withcollection).$data.reloadEntryCount();
-				},
-				error: function (result) {
-					$.smkAlert({text: 'Error adding the item to the collection!', type:'danger', time: 10});
-				}
-			});
+				});
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}
 		};
 
 		self.resizePhoto = function (src, width, height) {
