@@ -80,12 +80,12 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 
 		self.uploadImage = function () {
 			var data = {
-				provenance: [{
-					provider: 'UploadedByUser'
-				}],
+				provenance: [{provider: app.currentUser.username()},
+				             {provider: 'UploadedByUser'}
+				],
 				descriptiveData: {
-					label: self.title(),
-					description: self.description()
+					label: {"default":[self.title()]},
+					description: {"default": [self.description()]}
 				},
 				media: [{
 					Original: {

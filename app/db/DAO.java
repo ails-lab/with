@@ -27,6 +27,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
+import play.libs.Json;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
@@ -396,7 +398,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	public boolean existsFieldWithValue(String field, Object value) {
-		Query<E> q = this.createQuery().field(field).equal(value).limit(1);
+		Query<E> q = this.createQuery().disableValidation().field(field).equal(value).limit(1);
 		return (this.find(q).asList().size() == 0 ? false : true);
 	}
 
