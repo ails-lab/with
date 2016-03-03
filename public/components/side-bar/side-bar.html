@@ -2,12 +2,12 @@
 	<label class="header">NAVIGATE</label>
 	<nav class="app">
 		<ul>
-			<li class="active"><a href="#dashboard"><span class="icon"><i class="fa fa-dot-circle-o"></i></span>Dashboard</a></li>
-			<li><a href="#mycollections"><span class="counter" data-bind="text: collectionCount"></span><span class="icon"><i class="fa fa-clone"></i></span>My Collections</a></li>
-			<li><a href="#myexhibitions"><span class="counter" data-bind="text: exhibitionCount"></span><span class="icon"><i class="fa fa-television"></i></span>My Exhibitions</a></li>
-			<li><a href="#myfavorites"><span class="counter" data-bind="text: favoritesCount"></span><span class="icon"><i class="fa fa-heart-o"></i></span>My Favorites</a></li>
-			<li><a href="#organizations"><span class="icon"><i class="fa fa-bookmark-o"></i></span>Organizations</a></li>
-			<li><a href="#projects"><span class="icon"><i class="fa fa-comment-o"></i></span>Projects</a></li>
+			<li data-bind="css: { active: currentRoute() == '#dashboard' }"><a href="#dashboard"><span class="icon"><i class="fa fa-dot-circle-o"></i></span>Dashboard</a></li>
+			<li data-bind="css: { active: currentRoute() == '#mycollections' }"><a href="#mycollections"><span class="counter" data-bind="text: collectionCount"></span><span class="icon"><i class="fa fa-clone"></i></span>My Collections</a></li>
+			<li data-bind="css: { active: currentRoute() == '#myexhibitions' }"><a href="#myexhibitions"><span class="counter" data-bind="text: exhibitionCount"></span><span class="icon"><i class="fa fa-television"></i></span>My Exhibitions</a></li>
+			<li data-bind="css: { active: currentRoute() == '#myfavorites' }"><a href="#myfavorites"><span class="counter" data-bind="text: favoritesCount"></span><span class="icon"><i class="fa fa-heart-o"></i></span>My Favorites</a></li>
+			<li data-bind="css: { active: currentRoute() == '#organizations' }"><a href="#organizations"><span class="icon"><i class="fa fa-bookmark-o"></i></span>Organizations</a></li>
+			<li data-bind="css: { active: currentRoute() == '#projects' }"><a href="#projects"><span class="icon"><i class="fa fa-comment-o"></i></span>Projects</a></li>
 		</ul>
 	</nav>
 	<nav class="site">
