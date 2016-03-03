@@ -1,7 +1,7 @@
 
       <div class="container-fluid">
         <!-- wrapper-->
-        <div class="wrapper">
+        <div class="wrapper" id="withcollection" >
           <!-- sidebar-->
           <!-- ko if:isLogged()==true  -->
            <side-bar params="route: route"></side-bar>
@@ -63,15 +63,15 @@
                 <div class="action-header">
                   <div class="title">Edit Collection</div>
                   <div class="toggle">
-                    <input type="checkbox" id="toggle1">
+                    <input type="checkbox" id="toggle1" data-bind="checked:isPublicEdit">
                     <label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
                   </div>
                 </div>
                 <div class="action-body">
-                  <input type="text" placeholder="Name your collection">
-                  <textarea placeholder="Describe your collection"></textarea>
+                  <input type="text" placeholder="Name your collection" data-bind="{value: titleToEdit}">
+                  <textarea placeholder="Describe your collection" data-bind="{value: descriptionToEdit}" ></textarea>
                 </div>
-                <div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save collection</a></div>
+                <div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green" data-bind="click: editCollection">Save collection</a></div>
               </section>
               <!-- collection new-->
               <section class="action upload">
@@ -83,22 +83,7 @@
               </section>
               <!-- collection give access-->
               <section class="action collect">
-                <div class="action-header">
-                  <div class="title">Collect an item</div>
-                </div>
-                <div class="action-body">
-                  <select class="form-control">
-                    <option>Select a collection</option>
-                    <option>Select a collection</option>
-                    <option>Select a collection</option>
-                  </select>
-                  <div class="group">
-                    <div class="title">Media info</div>
-                    <p>Lorem ipsum dolor sit amet conceptuas</p>
-                    <textarea disabled>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.</textarea>
-                  </div>
-                </div>
-                <div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add to collection</a></div>
+              <collection params="route: route"></collection>
               </section>
               <!-- item view-->
               <section class="itemview">

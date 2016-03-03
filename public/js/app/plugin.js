@@ -271,12 +271,12 @@ WITHApp.ui = function( custom ){
 
 			});
 
-			$( '.fa-download' ).on("click", function( e ) {
+			/*$( '.fa-download' ).on("click", function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.collect' ).addClass( 'active' );
 
-			});
+			});*/
 		}
 
 		// open upload
@@ -326,6 +326,7 @@ WITHApp.ui = function( custom ){
 		}
 
 		// add textarea
+		/*
 		if ( $( '.action' ).length !== 0 ) {
 
 			var textarea = '<textarea rows="10" placeholder="Describe your collection"></textarea>';
@@ -337,7 +338,7 @@ WITHApp.ui = function( custom ){
 				$( this ).first().after( textarea );
 
 			});
-		}
+		}*/
 	};
 	
 	// method to initialize isotope

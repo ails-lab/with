@@ -390,7 +390,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			url: '/user/' + self.currentUser._id(),
 			type: 'GET',
 			success: function (data, text) {
-				loadUser(data, false, false);
+				loadUser(data, false, true);
 			},
 			//async: false
 		});

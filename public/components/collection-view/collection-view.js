@@ -169,7 +169,10 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.route = params.route;
 		var counter = 1;
 		self.title = ko.observable('');
+		self.titleToEdit=ko.observable('');
 		self.description = ko.observable('');
+		self.descriptionToEdit=ko.observable('');
+		self.isPublicEdit=ko.observable(true);
 		self.access = ko.observable("READ");
 		self.id = ko.observable(params.id);
 		self.creator = ko.observable('');
@@ -181,6 +184,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
 		self.fetchitemnum=20;
+		self.isPublic=ko.observable(true);
 		
 		if (params.type === 'favorites') {
 			self.isFavorites(true);
@@ -245,6 +249,8 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				"contentType": "application/json",
 				"success": function (data) {
 					if (data.administrative.isPublic === false) {
+						self.isPublic(false);
+						self.isPublicToEdit(false);
 						if (isLogged() === false) {
 							window.location = '#login';
 							return;
@@ -252,8 +258,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 					}
 					if (data.descriptiveData) {
 						self.title(findByLang(data.descriptiveData.label));
-
+						self.titleToEdit(findByLang(data.descriptiveData.label));
 						self.description(findByLang(data.descriptiveData.description));
+						self.descriptionToEdit(findByLang(data.descriptiveData.description));
 					}
 
 					self.entryCount(data.administrative.entryCount);
@@ -422,12 +429,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			});
 		};
 
-		self.uploadItem = function () {
-			app.showPopup('image-upload', {
-				collectionId: self.id()
-			});
-		};
-
+		
 		self.getAPIUrlCollection = function () {
 			var url = window.location.href.split("assets")[0];
 			var collectionCall = url + "collection/" + self.id();
@@ -440,12 +442,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			return recordsCall;
 		};
 
-		self.presentAPICalls = function () {
-			if (self.showAPICalls())
-				self.showAPICalls(false);
-			else
-				self.showAPICalls(true);
-		};
+		
 
 		likeRecord = function (id, event) {
 			event.preventDefault();
@@ -487,7 +484,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
               	  tile+='<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a>'
                   
             	  }
-        	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download"></a>'
+        	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.dbId + '\',event);" ></a>'
               }
             tile+="</div></div></li>";
               
@@ -551,6 +548,45 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				}
 			});
 		};
+		
+		self.editCollection=function(){
+			
+		    var jsondata=JSON.stringify(
+					{descriptiveData: {
+						label: {default: [self.titleToEdit()]},
+						description: {default: [self.descriptionToEdit()]},
+						administrative: { access: {
+					        isPublic: self.isPublicEdit(),
+					        collectionType: "SimpleCollection"}},
+					}});
+		    console.log(jsondata);
+			$.ajax({
+				"url": "/collection/"+self.id(),
+				"method": "PUT",
+				"contentType": "application/json",
+				"data": jsondata,
+				success: function(result){
+					
+					self.title(self.titleToEdit());
+					self.description(self.descriptionToEdit());
+					self.desc(self.description());
+					self.isPublic(self.isPublicEdit());
+					$( '.action' ).removeClass( 'active' );
+					$.smkAlert({
+						text: 'Collection updated',
+						type: 'success'
+					});
+
+				},
+				error: function(error) {
+					$.smkAlert({
+						text: 'An error has occured while updating this collection',
+						type: 'danger',
+						time: 5
+					});
+				}
+			});
+		}
 
 		self.isotopeImagesReveal = function ($container, $items) {
 			self.$container = $(".grids#" + self.id());
