@@ -1,4 +1,4 @@
-define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','app'], function(bootstrap, ko, template, KnockoutElse, app) {
 
 	count = 5;
 	accessLevels = {
@@ -37,8 +37,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 
 	function MyCollectionsModel(params) {
 		KnockoutElse.init([spec={}]);
+		//$("div[role='main']").toggleClass( "homepage", false );
 		var self = this;
-		//self.route = params.route;
+		self.route = params.route;
 		self.showsExhibitions = params.showsExhibitions;
 		//self.collections = [];
 		self.index = ko.observable(0);
@@ -55,8 +56,6 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		        else
 		        	innerModel.description = ko.observable(self.multiLiteral(dbDescription));
 		        $.each(innerModel.media(), function(index, value){
-		        	
-		        	
 		        	//withUrl = value.Thumbnail.withUrl(); still not fully working
 		        	withUrl = value.Thumbnail.url();
 		        	if (withUrl.indexOf("/media") == 0)
@@ -126,6 +125,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
+		        	WITHApp.tabAction();
 				});
 			}
 			else {
@@ -137,9 +137,9 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
+		        	WITHApp.tabAction();
 				});
 			}
-
 		}
 
 		self.checkLogged=function(){
