@@ -290,6 +290,7 @@ define(['knockout', 'text!./collection.html', 'selectize', 'app', 'knockout-vali
 							"id": data.dbId,
 							"name": data.title
 						});
+						getEditableCollections();
 						//TODO: Bug fix - the route is mycollections only the first time new collection is called from mycollections?
 						if(window.location.hash.indexOf("mycollection")!=-1){
 				
