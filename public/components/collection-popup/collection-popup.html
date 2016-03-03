@@ -1,0 +1,8 @@
+				<div>
+					<div data-bind="template: { name: templateName, afterRender: open}"></div>
+					<!-- ko if: isLogged()==false && WITHApp.projectName==undefined-->
+					<div data-bind="component: { name: 'popup-login', params: { item: $parent , callback:collectionShow} }"></div>
+					<!-- /ko -->
+				</div>
+				
+				
