@@ -8,13 +8,13 @@
 			<section class="project organization">
 				<!-- header-->
 				<section class="header">
-					<!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New Organization</span></a>
+					<!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New <!-- ko text: name --><!-- /ko --></span></a>
 				</section>
 				<!-- message-->
 				<section class="message"><img src="img/ui/ic-project.png" class="hero">
 					<div class="message-body">
-						<div class="header">Welcome to Organizations</div>
-						<div class="description">This is <b> Organizations </b>, a collaborative place where you can work on thins lorem ipsum dolor sit amet.</div><a href="#" data-bind="click: function() { hideMessage() }"><span class="cross"></span><span class="text">Hide welcome message</span></a>
+						<div class="header">Welcome to <!-- ko text: namePlural --><!-- /ko --></div>
+						<div class="description">This is <b data-bind="text: namePlural"></b>, a collaborative place where you can work on thins lorem ipsum dolor sit amet.</div><a href="#" data-bind="click: function() { hideMessage() }"><span class="cross"></span><span class="text">Hide welcome message</span></a>
 					</div>
 				</section>
 				<!-- collection main-->
