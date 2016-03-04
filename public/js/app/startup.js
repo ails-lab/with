@@ -36,6 +36,11 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 
 	ko.components.register('testsearch', { require: 'components/testsearch/testsearch' });
 
+	ko.components.register('itemview', {
+		viewModel: { require: 'components/item-view/item' },
+		template: { require: 'text!components/item-view/item.html' }
+	});
+	
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }

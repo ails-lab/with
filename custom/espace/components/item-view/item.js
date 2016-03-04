@@ -323,7 +323,11 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 
 		self.collect = function (item) {
+				if (!isLogged()) {
+				showLoginPopup(self.record());
+			} else {
 				collectionShow(self.record());
+			}
 		};
 
 		self.recordSelect = function (e,flag) {

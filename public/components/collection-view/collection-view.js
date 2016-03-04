@@ -472,7 +472,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		function getItem(record) {
 			
            var tile = '<li class="item ' + record.dbId + '"><div class="wrap"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
-           tile+='<div class="meta"><a href="#" class="header mediaviewer">'+ record.displayTitle()+'</a><div class="description"></div>';
+           tile+='<div class="meta"><a href="#" class="header mediaviewer" onclick="recordSelect(\''+record.dbId+'\',event)">'+ record.displayTitle()+'</a><div class="description"></div>';
            tile+='<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
            if (isLogged()) {
         	  if (self.access() == "WRITE" || self.access() == "OWN")
