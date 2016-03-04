@@ -73,7 +73,7 @@ WITHApp.ui = function( custom ){
 		hideMessage();
 
 		// toggle list function
-		changeList();
+		//changeList();
 
 		// init all action in collection page
 		/*this call is moved to every component that require the flyouts*/
@@ -114,6 +114,10 @@ WITHApp.ui = function( custom ){
 	
 	this.tabAction=function(){
 		tabAction();
+	}
+	
+	this.changeList=function(){
+		changeList();
 	}
 	
 	this.initImageZoom=function(){
@@ -326,7 +330,6 @@ WITHApp.ui = function( custom ){
 		}
 
 		// add textarea
-		/*
 		if ( $( '.action' ).length !== 0 ) {
 
 			var textarea = '<textarea rows="10" placeholder="Describe your collection"></textarea>';
@@ -338,7 +341,7 @@ WITHApp.ui = function( custom ){
 				$( this ).first().after( textarea );
 
 			});
-		}*/
+		}
 	};
 	
 	// method to initialize isotope

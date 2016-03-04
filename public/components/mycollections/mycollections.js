@@ -141,8 +141,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				});
 			}
 		}
-
-		self.checkLogged=function(){
+		
+		self.changeList = function() {
+			WITHApp.changeList();
+		}
+		
+		self.checkLogged = function() {
 			if (isLogged()==false) {
 				window.location='#login';
 				return;
@@ -160,7 +164,33 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		};
 
 		self.createCollection = function() {
-			createNewCollection();
+			var jsondata = JSON.stringify({
+				administrative: { access: {
+			        isPublic: self.isPublicToEdit()},
+			        collectionType: "SimpleCollection"},
+			        descriptiveData : {
+			        	 label : {
+					            default : [self.titleToEdit()]
+					        },
+					     description : {
+				            default : [self.descriptionToEdit()]
+			            }
+			        }
+			});
+			$.ajax({
+				"url": "/collection",
+				"method": "post",
+				"contentType": "application/json",
+				"data": jsondata,
+				"success": function (data) {
+					self.reloadCollection(data);
+					self.closeSideBar();
+				},
+				"error": function (result) {
+					$.smkAlert({text:'An error occured', type:'danger', time: 10});
+					self.closeSideBar();
+				}
+			});
 		};
 
 		self.nextSharedCollections = function() {
@@ -419,7 +449,11 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				}
 			});
 		}
-
+		
+		self.isPublicToggleEmpty = function(newIsPublic) {
+		    self.isPublicToEdit(newIsPublic);
+		}
+		
 		self.isPublicToggle = function() {
 		    var newIsPublic = !self.isPublicToEdit();
 		    if (!newIsPublic) {
@@ -535,7 +569,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		self.closeSideBar = function () {
 			//$('textarea').hide();
 			//$('.add').show();
-			$( '.action' ).removeClass( 'active' );
+			self.isPublicToEdit();
+			self.titleToEdit();
+			self.descriptionToEdit();
+			$('textarea').hide();
+			$('.add').show();
+			$('.action').removeClass( 'active' );
 		};
 
 		self.updateCollectionData = function(collectionSet, collIndex) {

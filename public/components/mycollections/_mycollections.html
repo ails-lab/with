@@ -33,7 +33,10 @@
 					<li><a href="#">Date</a></li>
 				  </ul>
 				</div>
-				<div class="list-control"><a data-toggle="tooltip" data-placement="top" title="List view" class="fa fa-bars"></a><a data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a></div>
+				<div class="list-control">
+					<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: changeList" title="List view" class="fa fa-bars"></a>
+					<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: changeList" title="Grid view" class="fa fa-th active"></a>
+				</div>
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
@@ -43,21 +46,30 @@
 				  	<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
 					<!--/ko-->
-					<!-- ko ifnot: administrative.access.isPublic -->
+					<!-- ko else -->
 					<div class="category">private</div>
 					<!--/ko-->
 					<!-- ko if: media()[0]-->
-					<div class="wrap"><img  data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
+					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap"></div>
 					<!-- /ko -->
 					<!-- ko if: media()[1]-->
 					<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
 					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap small"></div>
+					<!-- /ko -->
 					<!-- ko if: media()[2]-->
 					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
 					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap small"></div>
+					<!-- /ko -->
 				  </div>
 				  <div class="meta">
-				  	<a href="dashboard-collection-detail.html" class="header" data-bind="text: title()"></a>
+				  	<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}"></a>
 					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">
 					  <div class="count" data-bind="text: administrative.entryCount()"></div>
@@ -67,7 +79,7 @@
 					<div class="action-group">
 						<a data-toggle="tooltip" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
 						<a data-toggle="tooltip" data-placement="top" title="Share collection" class="fa fa-paper-plane-o"></a>
-						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<a href="#" data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
 					</div>
 				  </div>
 				</li>
@@ -100,11 +112,15 @@
 				<div class="title">New Collection</div>
 				<div class="toggle">
 				  <input type="checkbox" id="toggle2">
-				  <label for="toggle2"></label><span class="private">private</span><span class="public">public</span>
+				  <label for="toggle2"></label><span data-bind="event: {click: isPublicToggleEmpty(false)}" class="private">private</span><span data-bind="event: {click: isPublicToggleEmpty(true)" class="public">public</span>
 				</div>
 			  </div>
 			  <div class="action-body">
-				<input type="text" placeholder="Name your collection"><a href="#" class="add"><span class="plus"></span><span class="text">Add description</span></a>
+				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
+				<a class="add" >
+					<span class="plus" style="cursor:pointer;"></span>
+					<span class="text" data-bind="{value: descriptionToEdit}">Add description</span>
+				</a>
 			  </div>
 			  <div class="button-group">
 			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
