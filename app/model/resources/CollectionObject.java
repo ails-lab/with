@@ -16,14 +16,16 @@
 
 package model.resources;
 
+import java.util.List;
 import java.util.Map;
-
-import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
 
 import model.DescriptiveData;
 import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.MultiLiteralOrResource;
+
+import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 
 @Entity("CollectionObject")
 public class CollectionObject extends WithResource<CollectionObject.CollectionDescriptiveData, CollectionObject.CollectionAdmin> {
@@ -36,7 +38,19 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 				.getSimpleName());
 	}
 
+	@Embedded
+	private List<ContextData<ContextDataBody>> collectedResources;
+	
 
+	public List<ContextData<ContextDataBody>> getCollectedResources() {
+		return collectedResources;
+	}
+
+	public void setCollectedResources(
+			List<ContextData<ContextDataBody>> collectedResources) {
+		this.collectedResources = collectedResources;
+	}
+	
 	@Embedded
 	public static class CollectionAdmin extends WithResource.WithAdmin {
 

@@ -16,20 +16,18 @@
 
 package db;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 import model.EmbeddedMediaObject;
-import model.MediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
+import model.MediaObject;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
@@ -37,7 +35,6 @@ import model.resources.CollectionObject.CollectionAdmin.CollectionType;
 import model.resources.RecordResource;
 
 import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
 import org.mongodb.morphia.query.Criteria;
 import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
@@ -50,6 +47,7 @@ import utils.Tuple;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
 import elastic.Elastic;
@@ -354,6 +352,21 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 																// oldVersion
 																// (contrary to
 																// documentation!!!)
+	}
+
+	public List<CollectionObject> getByCollectedResource(ObjectId resourceId,
+			List<String> retrievedFields) {
+		Query<CollectionObject> q = this.createQuery()
+				.field("collectedResources").equal(resourceId);
+		BasicDBObject query = new BasicDBObject();
+		query.put("resourceId", resourceId);
+		BasicDBObject elemMatch = new BasicDBObject();
+		elemMatch.put("$elemMatch", query);
+		q.filter("collectedIn", elemMatch);
+		if (retrievedFields != null)
+			q.retrievedFields(true,
+					retrievedFields.toArray(new String[retrievedFields.size()]));
+		return this.find(q).asList();
 	}
 
 	// it may happen that e.g. the thumbnail of the 4th instead of the 3d record
