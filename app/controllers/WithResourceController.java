@@ -34,6 +34,7 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.MediaObject;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
@@ -180,7 +181,7 @@ public class WithResourceController extends Controller {
 				fillInContextTarget(json, collectionDbId.toString(), position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json,
 					clazz);
-			HashMap<String, List<String>> label =  record.getDescriptiveData().getLabel();
+			MultiLiteral label =  record.getDescriptiveData().getLabel();
 			if (label == null || label.get(Language.DEFAULT) == null || 
 					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
 				return badRequest("A label for the record has to be provided");
