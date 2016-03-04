@@ -22,6 +22,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	ko.components.register('myexhibitions', { require: 'components/myexhibitions/myexhibitions' });
 	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
 	ko.components.register('myfavorites', { require: 'components/myfavorites/myfavorites' });
+	ko.components.register('organizations', { require: 'components/myorganizations/myorganizations' });
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('exhibition-view', { require: 'components/exhibition-view/exhibition-view' });
 	ko.components.register('3DRoom', { require: 'components/3DRoom/room' });

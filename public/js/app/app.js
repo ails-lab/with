@@ -190,6 +190,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 
 	self.receiveEvent = function (event) {
 		var notification = JSON.parse(event.data);
+
 		self.addNotification(notification);
 
 		switch (notification.activity) {
@@ -442,15 +443,17 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		self.currentUser.notifications.unread(0);
 
 		if(data){
-		// Sort notification array
-		data.sort(function (a, b) {
-			return a.openedAt - b.openedAt;
-		});
+			// Sort notification array
+			data.sort(function (a, b) {
+				return a.openedAt - b.openedAt;
+			});
 
-		// Load notifications
-		for (var i = 0; i < data.length; i++) {
-			self.addNotification(data[i]);
-		}
+			// Load notifications
+			for (var i = 0; i < data.length; i++) {
+				if (data[i].activity != null) {
+					self.addNotification(data[i]);
+				}
+			}
 		}
 	};
 
