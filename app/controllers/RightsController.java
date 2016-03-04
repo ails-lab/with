@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
@@ -137,7 +138,7 @@ public class RightsController extends WithResourceController {
 				}
 				if (downgrade == 1 && hasDowngradeRight) {
 						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, true, membersDowngrade);
-						return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, loggedIn, Access.NONE, newAccess, effectiveIds, 
+						return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, Access.NONE, newAccess, effectiveIds, 
 								true, membersDowngrade);
 				}
 				else if (downgrade > -1){//downgrade and no downgradeRights or upgrade
@@ -153,7 +154,7 @@ public class RightsController extends WithResourceController {
 							}
 						}
 						changeAccess(colDbId, userOrGroupId, newAccess, effectiveIds, downgrade == 1, membersDowngrade);
-						return sendShareCollectionNotification(userGroup == null? false: true, userOrGroupId, colDbId, loggedIn, oldAccess, newAccess, effectiveIds, 
+						return sendShareCollectionNotification(userOrGroupId, colDbId, loggedIn, oldAccess, newAccess, effectiveIds, 
 								downgrade == 1, membersDowngrade);
 					}
 				}
@@ -198,7 +199,7 @@ public class RightsController extends WithResourceController {
 	}
 	
 				
-	public static Result sendShareCollectionNotification(boolean userGroup, ObjectId userOrGroupId, ObjectId colDbId, 
+	public static Result sendShareCollectionNotification(ObjectId userOrGroupId, ObjectId colDbId, 
 			ObjectId ownerId, Access oldAccess, Access newAccess, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
 		ObjectNode result = Json.newObject();	
 		ResourceNotification notification = new ResourceNotification();
@@ -224,47 +225,50 @@ public class RightsController extends WithResourceController {
 			result.put("mesage", "Access of user or group to collection has been downgraded.");
 			return ok(result);
 		}
-		else if (DB.getUserDAO().isSuperUser(ownerId)) {//upgrade
-			notification.setPendingResponse(false);
-			notification.setActivity(Activity.COLLECTION_SHARED);
-			notification.setShareInfo(shareInfo);
-			DB.getNotificationDAO().makePermanent(notification);
-			NotificationCenter.sendNotification(notification);
-			result.put("message", "Collection shared.");
-			return ok(result);
-		}
 		else {//upgrade
-			List<Notification> requests = DB.getNotificationDAO()
-					.getPendingResourceNotifications(userOrGroupId,
-							colDbId, Activity.COLLECTION_SHARE, newAccess);
-			if (requests.isEmpty()) {
-				// Find if there is a request for other type of access and
-				// override it
-				requests = DB.getNotificationDAO()
-						.getPendingResourceNotifications(userOrGroupId,
-								colDbId, Activity.COLLECTION_SHARE);
-				for (Notification request : requests) {
-					request.setPendingResponse(false);
-					now = new Date();
-					request.setReadAt(new Timestamp(now.getTime()));
-					DB.getNotificationDAO().makePermanent(request);
-				}
-				// Make a new request for collection sharing request
-				shareInfo.setPreviousAccess(oldAccess);
-				notification.setPendingResponse(true);
-				notification.setActivity(Activity.COLLECTION_SHARE);
-				now = new Date();
-				shareInfo.setOwnerEffectiveIds(effectiveIds);
+			UserGroup userGroup = DB.getUserGroupDAO().getById(userOrGroupId, new ArrayList<String>(Arrays.asList("_id", "adminIds")));
+			if (DB.getUserDAO().isSuperUser(ownerId) || (userGroup != null && userGroup.getAdminIds().contains(ownerId))) {
+				notification.setPendingResponse(false);
+				notification.setActivity(Activity.COLLECTION_SHARED);
 				notification.setShareInfo(shareInfo);
-				notification.setOpenedAt(new Timestamp(now.getTime()));
 				DB.getNotificationDAO().makePermanent(notification);
 				NotificationCenter.sendNotification(notification);
-				result.put("message",
-						"Request for collection sharing sent to the user.");
+				result.put("message", "Collection shared.");
 				return ok(result);
-			} else {
-				result.put("error", "Request has already been sent to the user.");
-				return badRequest(result);
+			}
+			else {//receiver can reject the notification
+				List<Notification> requests = DB.getNotificationDAO()
+						.getPendingResourceNotifications(userOrGroupId,
+								colDbId, Activity.COLLECTION_SHARE, newAccess);
+				if (requests.isEmpty()) {
+					// Find if there is a request for other type of access and
+					// override it
+					requests = DB.getNotificationDAO()
+							.getPendingResourceNotifications(userOrGroupId,
+									colDbId, Activity.COLLECTION_SHARE);
+					for (Notification request : requests) {
+						request.setPendingResponse(false);
+						now = new Date();
+						request.setReadAt(new Timestamp(now.getTime()));
+						DB.getNotificationDAO().makePermanent(request);
+					}
+					// Make a new request for collection sharing request
+					shareInfo.setPreviousAccess(oldAccess);
+					notification.setPendingResponse(true);
+					notification.setActivity(Activity.COLLECTION_SHARE);
+					now = new Date();
+					shareInfo.setOwnerEffectiveIds(effectiveIds);
+					notification.setShareInfo(shareInfo);
+					notification.setOpenedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					NotificationCenter.sendNotification(notification);
+					result.put("message",
+							"Request for collection sharing sent to the user.");
+					return ok(result);
+				} else {
+					result.put("error", "Request has already been sent to the user.");
+					return badRequest(result);
+				}
 			}
 		}
 	}
