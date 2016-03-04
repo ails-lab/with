@@ -33,12 +33,12 @@
 					<li><a href="#">Date</a></li>
 				  </ul>
 				</div>
-				<div class="list-control"><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="fa fa-bars"></a><a href="#" data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a></div>
+				<div class="list-control"><a data-toggle="tooltip" data-placement="top" title="List view" class="fa fa-bars"></a><a data-toggle="tooltip" data-placement="top" title="Grid view" class="fa fa-th active"></a></div>
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
 			  	<!-- ko foreach: myCollections -->
-				<li css: { private: !administrative.access.isPublic()}">
+				<li data-bind="css: { private: !administrative.access.isPublic()}">
 				  <div class="thumbnails">
 				  	<!-- ko if: administrative.access.isPublic()-->
 					<div class="category">public</div>
@@ -56,16 +56,19 @@
 					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
 					<!-- /ko -->
 				  </div>
-				  <div class="meta"><a href="dashboard-collection-detail.html" class="header" data-bind="text: title()"/>
-					<div class="description" data-bind="text: description()"/>
+				  <div class="meta">
+				  	<a href="dashboard-collection-detail.html" class="header" data-bind="text: title()"></a>
+					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">
-					  <div class="count" data-bind="text: administrative.entryCount()"/>
-					  <div class="date" data-bind="text: administrative.created()"/>
-					  <div class="user"data-bind="text: withCreatorInfo.username"/>
+					  <div class="count" data-bind="text: administrative.entryCount()"></div>
+					  <div class="date" data-bind="text: administrative.created()"></div>
+					  <div class="user"data-bind="text: withCreatorInfo.username"></div>
 					</div>
-					<div class="action-group"><a data-toggle="tooltip" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
+					<div class="action-group">
+						<a data-toggle="tooltip" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
 						<a data-toggle="tooltip" data-placement="top" title="Share collection" class="fa fa-paper-plane-o"></a>
-						<a data-toggle="tooltip" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a></div>
+						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+					</div>
 				  </div>
 				</li>
 				<!--/ko-->
@@ -81,10 +84,15 @@
 				</div>-->
 			  </div>
 			  <div class="action-body">
-				<input type="text" placeholder="Name your collection">
-				<textarea placeholder="Describe your collection"></textarea>
+				<input type="text" data-bind="{value: titleToEdit, 
+				      attr: {placeholder: titleToEdit}}">
+				<textarea data-bind="{value: descriptionToEdit, 
+					  attr: {placeholder: descriptionToEdit}"></textarea>
 			  </div>
-			  <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save collection</a></div>
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			  	<a class="btn-green" data-bind="click: editCollection">Save collection</a>
+			  </div>
 			</section>
 			<!-- collection new-->
 			<section class="action new">
@@ -98,7 +106,10 @@
 			  <div class="action-body">
 				<input type="text" placeholder="Name your collection"><a href="#" class="add"><span class="plus"></span><span class="text">Add description</span></a>
 			  </div>
-			  <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Create collection</a></div>
+			  <div class="button-group">
+			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
+			  	<a data-bind="click: createCollection" class="btn-green">Create collection</a>
+			  </div>
 			</section>
 			<!-- collection give access-->
 			<section class="action access">

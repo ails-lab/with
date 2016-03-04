@@ -456,7 +456,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			});
 		}
 
-		self.openEditCollectionPopup = function(collection, event) {
+		self.prepareForEditCollection = function(collection, event) {
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
@@ -472,7 +472,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		        self.descriptionToEdit(self.sharedCollections()[collIndex].description());
 		        //self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
 			}
-			app.showPopup("edit-collection");
+			//app.showPopup("edit-collection");
 		}
 
 		self.closePopup = function() {
@@ -527,7 +527,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				$("#myModal").find("div.modal-body").html("The collection cannot be edited");
 				$("#myModal").modal('show');
 			}
-			self.closePopup();
+			self.closeSideBar();
+			//WITHApp.tabAction();
+		};
+		
+
+		self.closeSideBar = function () {
+			//$('textarea').hide();
+			//$('.add').show();
+			$( '.action' ).removeClass( 'active' );
 		};
 
 		self.updateCollectionData = function(collectionSet, collIndex) {
