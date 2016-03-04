@@ -513,7 +513,7 @@ public class GroupManager extends Controller {
 		return userJSON;
 	}
 
-	public static Result listUserGroups(String groupType, int offset, int count) {
+	public static Result listUserGroups(String groupType, int offset, int count, boolean belongsOnly) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
 			GroupType type = GroupType.valueOf(groupType);
@@ -536,7 +536,8 @@ public class GroupManager extends Controller {
 			else
 				offset = offset - userGroupCount;
 			count = count - groups.size();
-			groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
+			if (! belongsOnly)
+				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
 					offset, count, userGroupsIds));
 			return ok(Json.toJson(groups));
 		} catch (Exception e) {
