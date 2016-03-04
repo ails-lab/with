@@ -29,6 +29,9 @@ import org.mongodb.morphia.annotations.Id;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.net.MediaType;
+
+import model.basicDataTypes.LiteralOrResource;
 
 /**
  * A class to represent media, merge of all the interesting attributes and
@@ -43,7 +46,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
 @Converters(MediaTypeConverter.class)
 public class MediaObject extends EmbeddedMediaObject {
-	
+
 	public static enum Orientation {
 		PORTRAIT, LANDSCAPE
 	}
@@ -51,48 +54,49 @@ public class MediaObject extends EmbeddedMediaObject {
 	@Id
 	@JsonIgnore
 	private ObjectId dbId;
-	
-	// which resource is this Media part of, this is the access rights restriction
+
+	// which resource is this Media part of, this is the access rights
+	// restriction
 	// if there is none, the media object is publicly available
 	private ArrayList<ObjectId> resources;
 
 	@JsonIgnore
 	private byte[] mediaBytes;
-	
-	//extended model fields
-	
-//	is an Enum but i leave it here till we decide upon the libraries to use
+
+	// extended model fields
+
+	// is an Enum but i leave it here till we decide upon the libraries to use
 	private String codec;
-	
+
 	private double durationSeconds;
-	
-//	for pdfs only TODO: add this in the controller
+
+	// for pdfs only TODO: add this in the controller
 	private int spatialResolution;
-	
+
 	private int bitRate;
-	
+
 	private int frameRate;
-	
-//	also an Enum!
+
+	// also an Enum!
 	private String colorSpace;
-	
-//	use different Hex?
+
+	// use different Hex?
 	private Hex componentColor;
-	
+
 	private Orientation orientation;
-	
+
 	private int audioChannelNumber;
 
-//	audio only	
+	// audio only
 	private int sampleSize;
-	
+
 	private int sampleRate;
-	
+
 	// If this is a thumbnail, the parentID field refers to
 	// the parent media object, else it should be the id of the media object
 	// itself
 	private ObjectId parentId;
-	
+
 	// Setters/Getters
 	public ObjectId getDbId() {
 		return dbId;
@@ -105,18 +109,23 @@ public class MediaObject extends EmbeddedMediaObject {
 	public ArrayList<ObjectId> getResources() {
 		return resources;
 	}
+
 	public void setResources(ArrayList<ObjectId> resources) {
 		this.resources = resources;
 	}
+
 	public double getDurationSeconds() {
 		return durationSeconds;
 	}
+
 	public void setDurationSeconds(double durationSeconds) {
 		this.durationSeconds = durationSeconds;
 	}
+
 	public byte[] getMediaBytes() {
 		return mediaBytes;
 	}
+
 	public void setMediaBytes(byte[] mediaBytes) {
 		this.mediaBytes = mediaBytes;
 	}
@@ -192,9 +201,9 @@ public class MediaObject extends EmbeddedMediaObject {
 	public void setOrientation(Orientation orientation) {
 		this.orientation = orientation;
 	}
-	
-	public void setOrientation(){
-		if(this.getWidth()>=this.getHeight()){
+
+	public void setOrientation() {
+		if (this.getWidth() >= this.getHeight()) {
 			this.orientation = Orientation.LANDSCAPE;
 		} else {
 			this.orientation = Orientation.PORTRAIT;
@@ -217,6 +226,49 @@ public class MediaObject extends EmbeddedMediaObject {
 		this.parentId = parentId;
 	}
 
+	public MediaObject(int width, int height, WithMediaType type,
+			WithMediaRights withRights, String url, MediaVersion mediaVersion,
+			LiteralOrResource originalRights, MediaType mimeType, long size,
+			Quality quality, ArrayList<ObjectId> resources, byte[] mediaBytes,
+			String codec, double durationSeconds, int spatialResolution,
+			int bitRate, int frameRate, String colorSpace, Hex componentColor,
+			Orientation orientation, int audioChannelNumber, int sampleSize,
+			int sampleRate, ObjectId parentId) {
+		super(width, height, type, withRights, url, mediaVersion,
+				originalRights, mimeType, size, quality);
+		this.resources = resources;
+		this.mediaBytes = mediaBytes;
+		this.codec = codec;
+		this.durationSeconds = durationSeconds;
+		this.spatialResolution = spatialResolution;
+		this.bitRate = bitRate;
+		this.frameRate = frameRate;
+		this.colorSpace = colorSpace;
+		this.componentColor = componentColor;
+		this.orientation = orientation;
+		this.audioChannelNumber = audioChannelNumber;
+		this.sampleSize = sampleSize;
+		this.sampleRate = sampleRate;
+		this.parentId = parentId;
+	}
 
+	public MediaObject(MediaObject mediaObject) {
+		this(mediaObject.getWidth(), mediaObject.getHeight(),
+				mediaObject.getType(), mediaObject.getWithRights(),
+				mediaObject.getUrl(), mediaObject.getMediaVersion(),
+				mediaObject.getOriginalRights(), mediaObject.getMimeType(),
+				mediaObject.getSize(), mediaObject.getQuality(),
+				mediaObject.getResources(), mediaObject.getMediaBytes(),
+				mediaObject.getCodec(), mediaObject.getDurationSeconds(),
+				mediaObject.getSpatialResolution(), mediaObject.getBitRate(),
+				mediaObject.getFrameRate(), mediaObject.getColorSpace(),
+				mediaObject.getComponentColor(), mediaObject.getOrientation(),
+				mediaObject.getAudioChannelNumber(),
+				mediaObject.getSampleSize(), mediaObject.getSampleRate(),
+				mediaObject.getParentId());
+	}
+
+	public MediaObject() {
+	}
 
 }
