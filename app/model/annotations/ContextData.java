@@ -16,10 +16,14 @@
 
 package model.annotations;
 
+import model.basicDataTypes.WithAccess;
+
 import org.bson.types.ObjectId;
 
+import utils.Deserializer;
 import utils.Serializer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 public class ContextData<T1 extends ContextData.ContextDataBody> {
@@ -33,6 +37,41 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 	private ObjectId resourceId;
 	private ContextDataType contextDataType;
 	private T1 body;
+
+	public static class ContextDataTarget {
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+		ObjectId collectionId;
+		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
+		ObjectId recordId;
+		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
+		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
+		WithAccess access;
+		
+
+		public ObjectId getCollectionId() {
+			return collectionId;
+		}
+
+		public void setCollectionId(ObjectId collectionId) {
+			this.collectionId = collectionId;
+		}
+
+		public ObjectId getRecordId() {
+			return recordId;
+		}
+
+		public void setRecordId(ObjectId recordId) {
+			this.recordId = recordId;
+		}
+
+		public WithAccess getAccess() {
+			return access;
+		}
+
+		public void setAccess(WithAccess access) {
+			this.access = access;
+		}
+	}
 
 	public static class ContextDataBody {
 	}
@@ -49,13 +88,14 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 		this.resourceId = resourceId;
 		this.contextDataType = contextDataType;
 	}
-	
-	public ContextData(ObjectId resourceId, ContextDataType contextDataType, T1 body) {
+
+	public ContextData(ObjectId resourceId, ContextDataType contextDataType,
+			T1 body) {
 		this.resourceId = resourceId;
 		this.contextDataType = contextDataType;
 		this.body = body;
 	}
-	
+
 	public ObjectId getResourceId() {
 		return resourceId;
 	}
