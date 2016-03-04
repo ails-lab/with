@@ -16,6 +16,8 @@
 
 package model.resources;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.bson.types.ObjectId;
@@ -64,7 +66,14 @@ public class RecordResource<T extends RecordResource.RecordDescriptiveData>
 	 * collected records
 	 */
 	public Map<String, Object> transform() {
-		return this.transformWR();
-
+		Map<String, Object> idx_map =  this.transformWR();
+		
+		List<ObjectId> colIn = new ArrayList<ObjectId>();
+		this.getCollectedIn().forEach( (ci) -> (colIn.add(ci.getCollectionId())) );
+		
+		idx_map.put("collectedId", colIn);
+		idx_map.put("contextData", this.getContextData());
+		
+		return idx_map;
 	}
 }
