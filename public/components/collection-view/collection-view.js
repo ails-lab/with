@@ -452,10 +452,9 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 			app.likeItem(rec, function (status) {
 				if (status) {
-					$("." + id).find("a.fa-heart").css("color","#ec5a62");
-					
+					$('[class*="'+id+'"]').find("a.fa-heart").css("color","#ec5a62");
 				} else {
-					$('.' + id).find("a.fa-heart").css("color","");
+					$('[class*="'+id+'"]').find("a.fa-heart").css("color","");
 				}
 			});
 		};

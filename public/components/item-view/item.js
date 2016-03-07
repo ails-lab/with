@@ -220,9 +220,6 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		}
 	   
 
-		self.doLike=function(){
-			self.isLike(true);
-		}
 		
 		self.calcThumbnail = ko.pureComputed(function() {
 
@@ -362,19 +359,24 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 		
 			self.likeRecord = function (rec,event) {
         	event.preventDefault();
-        	var $star=$(event.target.parentNode).parent();
-			app.likeItem(rec, function (status) {
+        	var $heart=$(event.target);
+			
+        	app.likeItem(rec, function (status) {
 				if (status) {
-					$star.addClass('active');
-					if($( '[id="'+rec.externalId+'"]' ) || $( '[id="'+rec.recordId+'"]' )){
-						$( '[id="'+rec.externalId+'"]' ).find("span.star").addClass('active');
-						$( '[id="'+rec.recordId+'"]' ).find("span.star").addClass('active');}
-						
+					$heart.addClass('redheart');
+					if($( '[class*="'+rec.externalId+'"]' ) || $( '[class*="'+rec.recordId+'"]')){
+					//if($( "." + rec.externalId ) || $( "." + rec.recordId)){
+						$( '[class*="'+rec.externalId+'"]' ).find("a.fa-heart").css("color","#ec5a62");
+						$( '[class*="'+rec.recordId+'"]').find("a.fa-heart").css("color","#ec5a62");
+					}	
 				} else {
-					$star.removeClass('active');
-					if($( '[id="'+rec.externalId+'"]' ) || $( '[id="'+rec.recordId+'"]' )){
-						$( '[id="'+rec.externalId+'"]' ).find("span.star").removeClass('active');
-						$( '[id="'+rec.recordId+'"]' ).find("span.star").removeClass('active');
+				    $heart.removeClass('redheart');
+					
+				    if($( '[class*="'+rec.externalId+'"]' ) || $( '[class=*"'+rec.recordId+'"]' )){
+							
+						$( '[class*="'+rec.externalId+'"]').find("a.fa-heart").css("color","");
+						$( '[class*="'+rec.recordId+'"]' ).find("a.fa-heart").css("color","");
+						
 					}
 				}
 			});
