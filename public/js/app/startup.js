@@ -71,6 +71,11 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 		viewModel: { require: 'components/organization-page/organization-page' },
 		template: { require: 'text!components/organization-page/organization-page.html' }
 	});
+	ko.components.register('group-page', {
+		viewModel: { require: 'components/organization-page/provider' },
+		template: { require: 'text!components/organization-page/provider.html' }
+	});
+	
 	ko.components.register('new-organization', {
 		viewModel: { require: 'components/organization-page/organization-page' },
 		template: { require: 'text!components/organization-page/new-organization.html' }
