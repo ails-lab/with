@@ -276,7 +276,15 @@ public class UserAndGroupManager extends Controller {
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
-				childGroup.getParentGroups().add(new ObjectId(groupId));
+				if( !group.getParentGroups().contains(userOrGroupId) )
+					childGroup.getParentGroups().add(new ObjectId(groupId));
+				else {
+					result.put("error", "Sorry! The group/organization you are trying to add"
+										+ "is already parent of your current group/organization");
+					return badRequest(result);
+				}
+
+
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);
 					user.addUserGroups(ancestorGroups);
@@ -393,7 +401,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			User user = DB.getUserDAO().get(new ObjectId(userId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			if (group == null || user == null) {
+			if ((group == null) || (user == null)) {
 				result.put("error", "Cannot retrieve object from database");
 				return internalServerError(result);
 			}
@@ -449,7 +457,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			User user = DB.getUserDAO().get(new ObjectId(userId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			if (group == null || user == null) {
+			if ((group == null) || (user == null)) {
 				result.put("error", "Cannot retrieve object from database");
 				return internalServerError(result);
 			}
@@ -495,7 +503,7 @@ public class UserAndGroupManager extends Controller {
 	}
 
 	public static String getImageBase64(UserOrGroup user) {
-		if (user.getAvatar()!=null && user.getAvatar().get(MediaVersion.Thumbnail) != null) {
+		if ((user.getAvatar()!=null) && (user.getAvatar().get(MediaVersion.Thumbnail) != null)) {
 			String photoUrl = user.getAvatar().get(MediaVersion.Thumbnail);
 			MediaObject photo = DB.getMediaObjectDAO().getByUrl(photoUrl);
 			if (photo != null)
