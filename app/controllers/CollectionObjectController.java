@@ -105,13 +105,14 @@ public class CollectionObjectController extends WithResourceController {
 		SourceResponse result;
 		int page = 1;
 		int pageSize = 20;
-	    Promise<Integer> promiseOfInt = Promise.promise(
-	      new Function0<Integer>() {
-	        public Integer apply() {
-	          return intensiveComputation();
-	        }
-	      }
-	    );
+	    do {
+	    	q.page = page+"";
+	    	result = src.getAllResults(q);
+	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+				
+			};
+			page++;
+	    } while (page*pageSize < result.totalCount);
 		return ok("Collection imported");
 	}
 
