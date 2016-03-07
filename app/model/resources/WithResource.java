@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Embedded;
@@ -33,10 +35,6 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.utils.IndexType;
-
-import utils.AccessManager;
-import utils.Deserializer;
-import utils.Serializer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -52,11 +50,12 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.annotations.Annotation;
 import model.annotations.ContextData;
 import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.usersAndGroups.User;
+import utils.Deserializer;
+import utils.Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("RecordResource")
@@ -343,7 +342,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	protected U administrative;
 
 	@Embedded
-	private List<CollectionInfo > collectedIn;
+	private Set<ObjectId> collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -380,7 +379,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public WithResource() {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new ArrayList<CollectionInfo>();
+		this.collectedIn = new HashSet<ObjectId>();
 		this.contextData = new ArrayList<ContextData>();
 		this.media = new ArrayList<>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
@@ -391,7 +390,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new ArrayList<CollectionInfo>();
+		this.collectedIn = new HashSet<ObjectId>();
 		this.media = new ArrayList<>();
 		this.contextData = new ArrayList<ContextData>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
@@ -411,19 +410,18 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.administrative = administrative;
 	}
 
-	public List<CollectionInfo> getCollectedIn() {
+	public Set<ObjectId> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(List<CollectionInfo> collectedIn) {
+	public void setCollectedIn(Set<ObjectId> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
-	public void addPositionToCollectedIn(ObjectId colId, Integer position) {
-		CollectionInfo entry = new CollectionInfo(colId, position);
+	public void addPositionToCollectedIn(ObjectId colId) {
 		if (collectedIn == null)
-			collectedIn = new ArrayList<CollectionInfo>();
-		collectedIn.add(entry);
+			collectedIn = new HashSet<ObjectId>();
+		collectedIn.add(colId);
 
 	}
 

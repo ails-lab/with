@@ -18,6 +18,7 @@ package model.resources;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
@@ -30,11 +31,11 @@ import db.DB;
 public class RecordResourceExtended extends
 		RecordResource<RecordResource.RecordDescriptiveData> {
 
-	public List<ObjectId> collectedIn;
+	public Set<ObjectId> collectedIn;
 	public List<ContextData> contextData;
 
 	public void addExtendedInformation() {
-		this.collectedIn = new ArrayList();
+		this.collectedIn = (Set<ObjectId>) new ArrayList();
 		this.contextData = new ArrayList();
 		List<CollectionObject> collections = DB.getCollectionObjectDAO()
 				.getByCollectedResource(getDbId(), null);
