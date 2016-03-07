@@ -34,6 +34,7 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.MediaObject;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
@@ -165,14 +166,6 @@ public class WithResourceController extends Controller {
 	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
 			Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
-		if (position.isDefined())
-			if (DB.getRecordResourceDAO()
-					.existsInCollectionAndPosition(collectionDbId,
-							position.get())) {
-				result.put("error",
-						"Record already exists in that position, have to remove it first.");
-				return forbidden(result);
-			}
 		String resourceType = null;
 		ObjectId userId = AccessManager.effectiveUserDbIds(
 				session().get("effectiveUserIds")).get(0);
@@ -188,6 +181,10 @@ public class WithResourceController extends Controller {
 				fillInContextTarget(json, collectionDbId.toString(), position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json,
 					clazz);
+			 MultiLiteral label = record.getDescriptiveData().getLabel();
+			if (label == null || label.get(Language.DEFAULT) == null || 
+					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
+				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
 			if ((record.getProvenance() != null)
@@ -222,8 +219,8 @@ public class WithResourceController extends Controller {
 						// the existing record's descriptive data for the fields
 					    // included in the json, if the user has WRITE access.
 					if (noDouble) {
-						if (DB.getRecordResourceDAO().existsInCollection
-								(collectionDbId)) {
+						if (DB.getRecordResourceDAO().existsSameExternaIdInCollection
+								(externalId, collectionDbId)) {
 							result.put("error", "double");
 							return forbidden(result);
 						}
@@ -273,6 +270,9 @@ public class WithResourceController extends Controller {
 												.getByUrl(mediaUrl)) != null)) {
 									media = new EmbeddedMediaObject(
 											existingMedia);
+								}
+								else {
+									return badRequest("A media url has to be provided.");
 								}
 								// TODO: careful, the user is allowed to set
 								// the media fields as s/he wishes,

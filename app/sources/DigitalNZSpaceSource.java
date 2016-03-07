@@ -63,7 +63,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// TODO: rights_url shows the license in the search
 
 		
-		formatreader = new DNZBasicRecordFormatter(vmap);
+		formatreader = new DNZBasicRecordFormatter();
 
 	}
 
@@ -100,6 +100,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		builder.addSearchParam("page", q.page);
 		builder.addSearchParam("per_page", q.pageSize);
 		builder.addSearchParam("facets", "year,creator,category,usage");
+		builder.addSearchParam("facets_per_page", "20");
 		return addfilters(q, builder).getHttp();
 	}
 
@@ -109,6 +110,8 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 
 	@Override
 	public SourceResponse getResults(CommonQuery q) {
+		if (q.searchTerm==null)
+			q.searchTerm = "format:(picture OR book OR music OR article)";
 		SourceResponse res = new SourceResponse();
 		res.source = getSourceName();
 		String httpQuery = getHttpQuery(q);

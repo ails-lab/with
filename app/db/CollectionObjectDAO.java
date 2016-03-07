@@ -41,6 +41,7 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryResults;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import play.libs.Json;
 import sources.core.ParallelAPICall;
 import utils.Tuple;
 
@@ -48,6 +49,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongodb.BasicDBObject;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.MediaController;
 import elastic.Elastic;
@@ -204,6 +206,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				collections, hits);
 	}
 
+
 	/**
 	 * Return the total number of CollectionObject entities for a specific query
 	 * 
@@ -329,6 +332,39 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					this.find(q).asList(), null);
 		}
 	}
+	
+	public ObjectNode countMyAndSharedCollections(List<ObjectId> loggedInEffIds) {
+		ObjectNode result = Json.newObject().objectNode();
+		Query<CollectionObject> qMy = this.createQuery().disableValidation()
+				.field("descriptiveData.label.default.0")
+				.notEqual("_favorites");
+		
+		//count my collections-exhibitions
+		qMy.field("administrative.withCreator").equal(loggedInEffIds.get(0));
+		ObjectNode result1 = countPerCollectionType(qMy);
+		result.put("my", result1);
+		//count collections-exhibitions shared with me
+		Query<CollectionObject> qShared = this.createQuery().disableValidation()
+				.field("administrative.withCreator").notEqual(loggedInEffIds.get(0));
+		List<Criteria> criteria = new ArrayList<Criteria>(
+				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggedInEffIds,
+						Access.READ)));
+		qShared.and(criteria.toArray(new Criteria[criteria.size()]));
+		ObjectNode result2 = countPerCollectionType(qShared);
+		result.put("sharedWithMe", result2);
+		return result;
+	}
+	
+	public ObjectNode countPerCollectionType(Query<CollectionObject> q) {
+		ObjectNode result = Json.newObject().objectNode();
+		for (CollectionType collectionType: CollectionType.values()) {
+			Query<CollectionObject> qi = q.cloneQuery();
+			qi.field("administrative.collectionType").equal(collectionType);
+			long count = this.find(qi).countAll();
+			result.put(collectionType.toString(), count);
+		}
+		return result;
+	}
 
 	public List<CollectionObject> getAtLeastCollections(
 			List<ObjectId> loggeInEffIds, Access access, int offset, int count) {
@@ -420,7 +456,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		}
 	}
 
-	public void addCollectionMediaAsync(ObjectId collectionId, ObjectId recordId) {
+	/*public void addCollectionMediaAsync(ObjectId collectionId, ObjectId recordId) {
 		BiFunction<ObjectId, ObjectId, Boolean> methodQuery = (ObjectId colId,
 				ObjectId recId) -> {
 			try {
@@ -432,7 +468,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 		};
 		ParallelAPICall.createPromise(methodQuery, collectionId, recordId);
-	}
+	}*/
 
 	public void removeCollectionMedia(ObjectId colId, int position) {
 		if (position < 5) {
