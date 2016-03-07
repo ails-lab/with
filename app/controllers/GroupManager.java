@@ -512,6 +512,47 @@ public class GroupManager extends Controller {
 		}
 		return userJSON;
 	}
+	
+	public static ArrayNode userGroupsToJSON(List<UserGroup> groups) {
+		ArrayNode result = Json.newObject().arrayNode();
+		for (UserGroup group : groups) {
+			ObjectNode g = (ObjectNode) Json.toJson(group);
+
+			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
+					"effectiveUserIds"));
+			User user = DB.getUserDAO().get(userId);
+			g.put("firstName", ((User) user).getFirstName());
+			g.put("lastName", ((User) user).getLastName());
+
+			//
+			Query<CollectionObject> q = DB.getCollectionObjectDAO()
+					.createQuery();
+			// Criteria criteria1 =
+			// DB.getCollectionObjectDAO().formAccessLevelQuery(new
+			// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+			Criteria criteria2 = DB.getCollectionObjectDAO()
+					.formAccessLevelQuery(
+							new Tuple(group.getDbId(), Access.READ),
+							QueryOperator.GTE);
+			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+			// .criteria("administrative.access.isPublic").equal(true);
+			// q.and(criteria1, criteria2);
+			q.and(criteria2);
+			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
+					q, Optional.ofNullable(null));
+			ObjectNode count = Json.newObject();
+
+			count.put("Collections", hits.x);
+			count.put("Exhibitions", hits.y);
+			g.put("count", count);
+			//
+
+			result.add(g);
+		}
+		return result;
+	}
+	
+	
 
 	public static Result listUserGroups(String groupType, int offset, int count, boolean belongsOnly) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
@@ -521,6 +562,7 @@ public class GroupManager extends Controller {
 					"effectiveUserIds"));
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
+				//return ok (userGroupsToJSON(groups));
 				return ok(Json.toJson(groups));
 			}
 			User user = DB.getUserDAO().get(userId);
@@ -528,7 +570,8 @@ public class GroupManager extends Controller {
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
 			if (groups.size() == count)
-				return ok(Json.toJson(groups));
+				return ok (userGroupsToJSON(groups));
+				//return ok(Json.toJson(groups));
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (offset < userGroupCount)
@@ -539,9 +582,11 @@ public class GroupManager extends Controller {
 			if (! belongsOnly)
 				groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
 					offset, count, userGroupsIds));
-			return ok(Json.toJson(groups));
+			return ok (userGroupsToJSON(groups));
+			//return ok(Json.toJson(groups));
 		} catch (Exception e) {
-			return ok(Json.toJson(groups));
+			return ok (userGroupsToJSON(groups));
+			//return ok(Json.toJson(groups));
 		}
 	}
 }
