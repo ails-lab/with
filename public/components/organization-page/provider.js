@@ -247,7 +247,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				url: "/collection/list",
 				processData: false,
 				//TODO:add parent project filter
-				data: "offset=0&count="+self.count()+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:self.username(),rights:"READ"},{group:WITHApp.projectName,rights:"READ"}]),
+				data: "offset=0&count="+self.count()+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:self.username(),rights:"WRITE"}]),
 				//data: "offset=0&count="+self.count()+"&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:self.username(),rights:"READ"},{group:WITHApp.projectName,rights:"READ"}]),
 			}).success (function(){
 			});
@@ -282,7 +282,7 @@ define(['bridget','knockout', 'text!./provider.html','isotope','imagesloaded','a
 				var offset = self.collections().length+1;
 				$.ajax({
 					"url": '/collection/list',
-					data: "count=20&offset=" + offset + "&directlyAccessedByUserOrGroup="+JSON.stringify([{group:self.username(),rights:"READ"}]),
+					data: "count=20&offset=" + offset + "&directlyAccessedByUserOrGroup="+JSON.stringify([{group:self.username(),rights:"WRITE"}]),
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
