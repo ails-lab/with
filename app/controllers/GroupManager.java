@@ -478,7 +478,7 @@ public class GroupManager extends Controller {
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
-					log.error("Not a User with dbId: " + oid);
+					log.error("No User with dbId: " + oid);
 				}
 				users.add(userOrGroupJson(u));
 			}

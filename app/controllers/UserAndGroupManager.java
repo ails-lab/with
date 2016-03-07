@@ -208,6 +208,7 @@ public class UserAndGroupManager extends Controller {
 	 *            the group id
 	 * @return success message
 	 */
+	//TODO: Implement with updates, not make permanent!
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
@@ -275,7 +276,7 @@ public class UserAndGroupManager extends Controller {
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
-				childGroup.getParentGroups().add(group.getDbId());
+				childGroup.getParentGroups().add(new ObjectId(groupId));
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);
 					user.addUserGroups(ancestorGroups);

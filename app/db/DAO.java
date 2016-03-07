@@ -212,8 +212,8 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 						.getClass().getMethod("getDbId", new Class<?>[0])
 						.invoke(doc), (Map<String, Object>) doc.getClass()
 						.getMethod("transform", new Class<?>[0]).invoke(doc));
-				return dbKey;
 			}
+			return dbKey;
 		} catch (Exception e) {
 			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}
