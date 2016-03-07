@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.ExhibitionRecord;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
 import model.annotations.ContextData.ContextDataTarget;
@@ -60,19 +59,6 @@ import com.hp.hpl.jena.tdb.store.IntegerNode;
 import db.DB;
 
 public class Deserializer {
-
-	public static class ExhibitionRecordDeserializer extends
-			JsonDeserializer<ExhibitionRecord> {
-
-		@Override
-		public ExhibitionRecord deserialize(JsonParser annot,
-				DeserializationContext arg1) throws IOException,
-				JsonProcessingException {
-			ExhibitionRecord exhRec = new ExhibitionRecord();
-			exhRec.setExtraDescription(annot.getValueAsString());
-			return exhRec;
-		}
-	}
 
 	public static class WithAccessDeserializer extends
 			JsonDeserializer<WithAccess> {

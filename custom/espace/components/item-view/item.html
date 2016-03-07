@@ -37,7 +37,7 @@
                     <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
                     <li><a href="#related" title="" data-toggle="tab" data-bind="event:{ click: function(){record().findsimilar()}}">Related</a></li>
                     <li><a href="#comment" title="" data-toggle="tab">Comments</a></li>
-                    <li data-bind="visible: record().source=='WITHin'"><a href="#share" title="" data-toggle="tab">Share</a></li>
+                    <li data-bind="visible: record().recordId!='-1'"><a href="#share" title="" data-toggle="tab">Share</a></li>
                   </ul>
                   <!-- panes-->
                   <div class="tab-content">

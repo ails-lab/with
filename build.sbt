@@ -38,6 +38,7 @@ libraryDependencies ++= Seq(
  "org.apache.commons" % "commons-email" % "1.3.3",
  "com.jayway.jsonpath" % "json-path" % "2.0.0",
  "junit" % "junit" % "4.11",
- "org.im4java" % "im4java" % "1.4.0"
+ "org.im4java" % "im4java" % "1.4.0",
+ "net.coobird" % "thumbnailator" % "0.4.8"
 )
 

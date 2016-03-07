@@ -370,7 +370,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		shiftRecordsToRight(colId, position);
 		updateRecordUsageCollectedAndRights(
 				new CollectionInfo(colId, position), newAccess, recordId, colId);
-		DB.getCollectionObjectDAO().addCollectionMediaAsync(colId, recordId);
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId);
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId colId,
@@ -386,7 +386,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 					.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(new CollectionInfo(colId,
 				entryCount), newAccess, recordId, colId);
-		DB.getCollectionObjectDAO().addCollectionMediaAsync(colId, recordId);
+		DB.getCollectionObjectDAO().addCollectionMedia(colId, recordId);
 	}
 
 	public WithAccess mergeParentCollectionRights(ObjectId recordId,
@@ -596,9 +596,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 	
 	public boolean existsInCollectionAndPosition(ObjectId colId,
-			int position) {
+			Integer position) {
 		Query<RecordResource> q = this.createQuery().field("collectedIn")
 				.hasThisElement(new CollectionInfo(colId, position));
+		return this.find(q.limit(1)).asList().size() == 0? false : true;
+	}
+	
+	public boolean existsSameExternaIdInCollection(String externalId, ObjectId colId) {
+		Query<RecordResource> q = this.createQuery().disableValidation().field("collectedIn")
+				.hasThisElement(new CollectionInfo(colId, null));
+	    q.field("administrativeData.externalId").equal(externalId);
 		return this.find(q.limit(1)).asList().size() == 0? false : true;
 	}
 	

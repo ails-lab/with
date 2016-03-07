@@ -42,7 +42,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DAO.QueryOperator;
 import db.DB;
-import model.Collection;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
@@ -355,10 +354,10 @@ public class GroupManager extends Controller {
 			groupJSON.put("username", group.getUsername());
 			groupJSON.put("about", group.getAbout());
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
+				CollectionObject collection = DB.getCollectionObjectDAO().getById(
 						new ObjectId(collectionId));
 				if (collection != null) {
-					Access accessRights = collection.getRights().getAcl(
+					Access accessRights = collection.getAdministrative().getAccess().getAcl(
 							group.getDbId());
 					if (accessRights != null)
 						groupJSON.put("accessRights", accessRights.toString());
@@ -514,6 +513,47 @@ public class GroupManager extends Controller {
 		return userJSON;
 	}
 
+	
+	public static ArrayNode userGroupsAsJSON(List<UserGroup> groups) {
+		ArrayNode result = Json.newObject().arrayNode();
+		for (UserGroup group : groups) {
+			ObjectNode g = (ObjectNode) Json.toJson(group);
+
+			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
+					"effectiveUserIds"));
+			User user = DB.getUserDAO().get(userId);
+			g.put("firstName", ((User) user).getFirstName());
+			g.put("lastName", ((User) user).getLastName());
+
+			//
+			Query<CollectionObject> q = DB.getCollectionObjectDAO()
+					.createQuery();
+			// Criteria criteria1 =
+			// DB.getCollectionObjectDAO().formAccessLevelQuery(new
+			// Tuple(restrictedById, Access.READ), QueryOperator.GTE);
+			Criteria criteria2 = DB.getCollectionObjectDAO()
+					.formAccessLevelQuery(
+							new Tuple(group.getDbId(), Access.READ),
+							QueryOperator.GTE);
+			// Criteria criteria3 = DB.getCollectionObjectDAO().createQuery()
+			// .criteria("administrative.access.isPublic").equal(true);
+			// q.and(criteria1, criteria2);
+			q.and(criteria2);
+			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
+					q, Optional.ofNullable(null));
+			ObjectNode count = Json.newObject();
+
+			count.put("Collections", hits.x);
+			count.put("Exhibitions", hits.y);
+			g.put("count", count);
+			//
+
+			result.add(g);
+		}
+		return result;
+	}
+	
+	
 	public static Result listUserGroups(String groupType, int offset, int count) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
@@ -522,14 +562,18 @@ public class GroupManager extends Controller {
 					"effectiveUserIds"));
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
-				return ok(Json.toJson(groups));
+				//return ok(Json.toJson(groups));
+				return ok(userGroupsAsJSON(groups));
 			}
 			User user = DB.getUserDAO().get(userId);
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
 			groups = DB.getUserGroupDAO().findByIds(userGroupsIds, type,
 					offset, count);
 			if (groups.size() == count)
-				return ok(Json.toJson(groups));
+				//return ok(Json.toJson(groups));
+			
+				return ok(userGroupsAsJSON(groups));
+
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (offset < userGroupCount)
@@ -539,9 +583,13 @@ public class GroupManager extends Controller {
 			count = count - groups.size();
 			groups.addAll(DB.getUserGroupDAO().findPublicWithRestrictions(type,
 					offset, count, userGroupsIds));
-			return ok(Json.toJson(groups));
+//			return ok(Json.toJson(groups));
+			return ok(userGroupsAsJSON(groups));
+
 		} catch (Exception e) {
-			return ok(Json.toJson(groups));
+			//return ok(Json.toJson(groups));
+			return ok(userGroupsAsJSON(groups));
+
 		}
 	}
 }

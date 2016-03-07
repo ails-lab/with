@@ -34,6 +34,7 @@ import model.EmbeddedMediaObject.WithMediaRights;
 import model.MediaObject;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.Language;
+import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.ProvenanceInfo;
 import model.basicDataTypes.ProvenanceInfo.Sources;
 import model.basicDataTypes.WithAccess;
@@ -135,7 +136,7 @@ public class WithResourceController extends Controller {
 	// already exists
 	// in collectedIn and remove it (2 update operations).
 	public static Result addRecordToCollection(String colId,
-			Option<Integer> position) {
+			Option<Integer> position, Boolean noDouble) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId collectionDbId = new ObjectId(colId);
@@ -151,194 +152,243 @@ public class WithResourceController extends Controller {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				if (position.isDefined())
-					if (DB.getRecordResourceDAO()
-							.existsInCollectionAndPosition(collectionDbId,
-									position.get())) {
-						result.put("error",
-								"Record already exists in that position, have to remove it first.");
-						return forbidden(result);
-					}
-				String resourceType = null;
-				ObjectId userId = AccessManager.effectiveUserDbIds(
-						session().get("effectiveUserIds")).get(0);
-				if (json.has("resourceType"))
-					resourceType = json.get("resourceType").asText();
-				if ((resourceType == null)
-						|| (WithResourceType.valueOf(resourceType) == null))
-					resourceType = WithResourceType.CulturalObject.toString();
-				Class<?> clazz = Class.forName("model.resources."
-						+ resourceType);
-				if (position.isDefined())
-					fillInContextTarget(json, colId, position.get());
-				RecordResource record = (RecordResource) Json.fromJson(json,
-						clazz);
-				int last = 0;
-				Sources source = Sources.UploadedByUser;
-				if ((record.getProvenance() != null)
-						&& !record.getProvenance().isEmpty()) {
-					last = record.getProvenance().size() - 1;
-					source = Sources.valueOf(((ProvenanceInfo) record
-							.getProvenance().get(last)).getProvider());
-				} else
-					record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
-							.asList(new ProvenanceInfo(source.toString()))));
-				String externalId = ((ProvenanceInfo) record.getProvenance()
-						.get(last)).getResourceId();
-				if (externalId == null)
-					externalId = record.getAdministrative().getExternalId();
-				ObjectId recordId = null;
-				boolean owns = DB.getRecordResourceDAO().hasAccess(
-						AccessManager.effectiveUserDbIds(session().get(
-								"effectiveUserIds")), Action.DELETE, recordId);
-				if ((externalId != null)// get dbId of existring resource
-						&& DB.getRecordResourceDAO().existsWithExternalId(
-								externalId)) {
-					RecordResource resource = DB
-							.getRecordResourceDAO()
-							.getUniqueByFieldAndValue(
-									"administrative.externalId", externalId,
-									new ArrayList<String>(Arrays.asList("_id")));
-					recordId = resource.getDbId();
-					response = errorIfNoAccessToRecord(Action.READ, recordId);
-					if (!response.toString().equals(ok().toString())) {
-						return response;
-					} else {// In case the record already exists we overwrite
-							// the
-						// existing record's descriptive data for the fields
-						// included in the json, if the user has WRITE access.
-						if (DB.getRecordResourceDAO().hasAccess(
-								AccessManager.effectiveUserDbIds(session().get(
-										"effectiveUserIds")), Action.EDIT,
-								recordId)
-								&& (json.get("descriptiveData") != null))
-							DB.getRecordResourceDAO().editRecord(
-									"descriptiveData", resource.getDbId(),
-									json.get("descriptiveData"));
-						addToCollection(position, recordId, collectionDbId,
-								owns);
-						// TODO: if record has annotations, update/add
-						// annotations (already filtered so that they refer to
-						// colId)
-						if (record.getContextData() != null
-								&& !record.getContextData().isEmpty()) {
-							ContextData contextData = (ContextData) record
-									.getContextData().get(0);
-							DB.getRecordResourceDAO().updateContextData(
-									contextData);
+				return addRecordToCollection(json, collectionDbId, position, noDouble);
+			}
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		} finally {
+			if (locks != null)
+				locks.release();
+		}
+	}
+	
+	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
+			Option<Integer> position, Boolean noDouble) {
+		ObjectNode result = Json.newObject();
+		String resourceType = null;
+		ObjectId userId = AccessManager.effectiveUserDbIds(
+				session().get("effectiveUserIds")).get(0);
+		if (json.has("resourceType"))
+			resourceType = json.get("resourceType").asText();
+		if ((resourceType == null)
+				|| (WithResourceType.valueOf(resourceType) == null))
+			resourceType = WithResourceType.CulturalObject.toString();
+		try {
+			Class<?> clazz = Class.forName("model.resources."
+					+ resourceType);
+			if (position.isDefined())
+				fillInContextTarget(json, collectionDbId.toString(), position.get());
+			RecordResource record = (RecordResource) Json.fromJson(json,
+					clazz);
+			 MultiLiteral label = record.getDescriptiveData().getLabel();
+			if (label == null || label.get(Language.DEFAULT) == null || 
+					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
+				return badRequest("A label for the record has to be provided");
+			int last = 0;
+			Sources source = Sources.UploadedByUser;
+			if ((record.getProvenance() != null)
+					&& !record.getProvenance().isEmpty()) {
+				last = record.getProvenance().size() - 1;
+				source = Sources.valueOf(((ProvenanceInfo) record
+						.getProvenance().get(last)).getProvider());
+			} else
+				record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
+						.asList(new ProvenanceInfo(source.toString()))));
+			String externalId = ((ProvenanceInfo) record.getProvenance()
+					.get(last)).getResourceId();
+			if (externalId == null)
+				externalId = record.getAdministrative().getExternalId();
+			ObjectId recordId = null;
+			boolean owns = DB.getRecordResourceDAO().hasAccess(
+					AccessManager.effectiveUserDbIds(session().get(
+							"effectiveUserIds")), Action.DELETE, recordId);
+			if ((externalId != null)// get dbId of existring resource
+					&& DB.getRecordResourceDAO().existsWithExternalId(
+							externalId)) {
+				RecordResource resource = DB
+						.getRecordResourceDAO()
+						.getUniqueByFieldAndValue(
+								"administrative.externalId", externalId,
+								new ArrayList<String>(Arrays.asList("_id")));
+				recordId = resource.getDbId();
+				Status response = errorIfNoAccessToRecord(Action.READ, recordId);
+				if (!response.toString().equals(ok().toString())) {
+					return response;
+				} else {// In case the record already exists we overwrite
+						// the existing record's descriptive data for the fields
+					    // included in the json, if the user has WRITE access.
+					if (noDouble) {
+						if (DB.getRecordResourceDAO().existsSameExternaIdInCollection
+								(externalId, collectionDbId)) {
+							result.put("error", "double");
+							return forbidden(result);
 						}
 					}
-				} else { // create new record in db
-					ObjectNode errors;
-					record.getAdministrative().setCreated(new Date());
-					switch (source) {
-					case UploadedByUser:
-						// Fill the EmbeddedMediaObject from the MediaObject
-						// that has been created
-						record.getAdministrative().setWithCreator(userId);
-						String mediaUrl;
-						WithMediaRights withRights;
-						for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
-								.getMedia()) {
-							for (MediaVersion version : embeddedMedia.keySet()) {
-								EmbeddedMediaObject media = embeddedMedia
-										.get(version);
-								if (media != null) {
-									mediaUrl = media.getUrl();
-									EmbeddedMediaObject existingMedia = null;
-									if (!mediaUrl.isEmpty()
-											&& ((existingMedia = DB
-													.getMediaObjectDAO()
-													.getByUrl(mediaUrl)) != null)) {
-										media = new EmbeddedMediaObject(
-												existingMedia);
-									}
-									// TODO: careful, the user is allowed to set
-									// the media fields as s/he wishes,
-									// if the media url doesn't already exist.
-									// The first time that a request for caching
-									// that url is issued, the MediaObject that
-									// is created in the db will be filled by
-									// parseMediaURL, possibly with values that
-									// are different from the
-									// embeddedMediaObject.
-									// in the record. In general, each user who
-									// adds a record with the same media url,
-									// before the media is actually saved in the
-									// db, may have a different version of media
-									// info.
-									// TODO: Better call cache the media (as a
-									// promise) here!
-									// and put the first user's withRights,
-									// since cache has no way to retrieve the
-									// media rights.
-									// However, this allows the user to specify
-									// a wrong version, e.g. create a media
-									// which claims
-									// to be thumbnail, but is full size. Can
-									// Marios find out the version (and correct
-									// it) during caching?
-									record.addMedia(version, media);
+					if (DB.getRecordResourceDAO().hasAccess(
+							AccessManager.effectiveUserDbIds(session().get(
+									"effectiveUserIds")), Action.EDIT,
+							recordId)
+							&& (json.get("descriptiveData") != null))
+						DB.getRecordResourceDAO().editRecord(
+								"descriptiveData", resource.getDbId(),
+								json.get("descriptiveData"));
+					addToCollection(position, recordId, collectionDbId,
+							owns);
+					// TODO: if record has annotations, update/add
+					// annotations (already filtered so that they refer to
+					// colId)
+					if (record.getContextData() != null
+							&& !record.getContextData().isEmpty()) {
+						ContextData contextData = (ContextData) record
+								.getContextData().get(0);
+						DB.getRecordResourceDAO().updateContextData(
+								contextData);
+					}
+				}
+			} else { // create new record in db
+				ObjectNode errors;
+				record.getAdministrative().setCreated(new Date());
+				switch (source) {
+				case UploadedByUser:
+					// Fill the EmbeddedMediaObject from the MediaObject
+					// that has been created
+					record.getAdministrative().setWithCreator(userId);
+					String mediaUrl;
+					WithMediaRights withRights;
+					for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
+							.getMedia()) {
+						for (MediaVersion version : embeddedMedia.keySet()) {
+							EmbeddedMediaObject media = embeddedMedia
+									.get(version);
+							if (media != null) {
+								mediaUrl = media.getUrl();
+								EmbeddedMediaObject existingMedia = null;
+								if (!mediaUrl.isEmpty()
+										&& ((existingMedia = DB
+												.getMediaObjectDAO()
+												.getByUrl(mediaUrl)) != null)) {
+									media = new EmbeddedMediaObject(
+											existingMedia);
 								}
+								else {
+									return badRequest("A media url has to be provided.");
+								}
+								// TODO: careful, the user is allowed to set
+								// the media fields as s/he wishes,
+								// if the media url doesn't already exist.
+								// The first time that a request for caching
+								// that url is issued, the MediaObject that
+								// is created in the db will be filled by
+								// parseMediaURL, possibly with values that
+								// are different from the
+								// embeddedMediaObject.
+								// in the record. In general, each user who
+								// adds a record with the same media url,
+								// before the media is actually saved in the
+								// db, may have a different version of media
+								// info.
+								// The call allows the user to specify
+								// a wrong version, e.g. create a media
+								// which claims
+								// to be thumbnail, but is full size. Can
+								// Marios find out the version (and correct
+								// it) during caching?
+								record.addMedia(version, media);
 							}
 						}
-						DB.getRecordResourceDAO().makePermanent(record);
-						recordId = record.getDbId();
-						// setting of provevance's resourceId and externalId
-						// (based on recordDbId) is taken care by postLoad in
-						// WithResource
-						DB.getRecordResourceDAO().updateWithURI(recordId,
-								"/record/" + recordId);
-						DB.getRecordResourceDAO().updateProvenance(
-								recordId,
-								last,
-								new ProvenanceInfo("UploadedByUser", "record/"
-										+ recordId, recordId.toString()));
-						DB.getRecordResourceDAO().updateField(recordId,
-								"administrative.externalId",
-								recordId.toString());
-						break;
-					case Mint:
-						errors = RecordResourceController
-								.validateRecord(record);
-						record.getAdministrative().setWithCreator(userId);
-						List<ProvenanceInfo> provenance = record
-								.getProvenance();
-						record.getAdministrative().setExternalId(
-								provenance.get(last).getResourceId());
-						if (errors != null) {
-							return badRequest(errors);
-						}
-						DB.getRecordResourceDAO().makePermanent(record);
-						recordId = record.getDbId();
-						DB.getRecordResourceDAO().updateWithURI(
-								record.getDbId(), "/record/" + recordId);
-						break;
-					default:// imported first time from other sources
-						// there is no withCreator and the record is public
-						record.getAdministrative().getAccess()
-								.setIsPublic(true);
-						errors = RecordResourceController
-								.validateRecord(record);
-						provenance = record.getProvenance();
-						record.getAdministrative().setExternalId(
-								provenance.get(last).getResourceId());
-						if (errors != null) {
-							return badRequest(errors);
-						}
-						DB.getRecordResourceDAO().makePermanent(record);
-						recordId = record.getDbId();
-						DB.getRecordResourceDAO().updateWithURI(recordId,
-								"/record/" + recordId);
-						addContentToRecord(record.getDbId(), source.toString(),
-								externalId);
-						break;
 					}
-					addToCollection(position, recordId, collectionDbId, owns);
+					DB.getRecordResourceDAO().makePermanent(record);
+					recordId = record.getDbId();
+					// setting of provevance's resourceId and externalId
+					// (based on recordDbId) is taken care by postLoad in
+					// WithResource
+					DB.getRecordResourceDAO().updateWithURI(recordId,
+							"/record/" + recordId);
+					DB.getRecordResourceDAO().updateProvenance(
+							recordId,
+							last,
+							new ProvenanceInfo("UploadedByUser", "record/"
+									+ recordId, recordId.toString()));
+					DB.getRecordResourceDAO().updateField(recordId,
+							"administrative.externalId",
+							recordId.toString());
+					break;
+				case Mint:
+					errors = RecordResourceController
+							.validateRecord(record);
+					record.getAdministrative().setWithCreator(userId);
+					List<ProvenanceInfo> provenance = record
+							.getProvenance();
+					record.getAdministrative().setExternalId(
+							provenance.get(last).getResourceId());
+					if (errors != null) {
+						return badRequest(errors);
+					}
+					DB.getRecordResourceDAO().makePermanent(record);
+					recordId = record.getDbId();
+					DB.getRecordResourceDAO().updateWithURI(
+							record.getDbId(), "/record/" + recordId);
+					break;
+				default:// imported first time from other sources
+					// there is no withCreator and the record is public
+					record.getAdministrative().getAccess()
+							.setIsPublic(true);
+					errors = RecordResourceController
+							.validateRecord(record);
+					provenance = record.getProvenance();
+					record.getAdministrative().setExternalId(
+							provenance.get(last).getResourceId());
+					if (errors != null) {
+						return badRequest(errors);
+					}
+					DB.getRecordResourceDAO().makePermanent(record);
+					recordId = record.getDbId();
+					DB.getRecordResourceDAO().updateWithURI(recordId,
+							"/record/" + recordId);
+					addContentToRecord(record.getDbId(), source.toString(),
+							externalId);
+					break;
 				}
-				fillMissingThumbnailsAsync(recordId);
-				result.put("message", "Record succesfully added to collection");
-				return ok(result);
+				addToCollection(position, recordId, collectionDbId, owns);
+			}
+			fillMissingThumbnailsAsync(recordId);
+			result.put("message", "Record succesfully added to collection");
+			return ok(result);
+		} catch (Exception e) {
+			result.put("error", e.getMessage());
+			return internalServerError(result);
+		} 
+	}
+	
+	public static Result addRecordsToCollection(String colId) {
+		JsonNode json = request().body().asJson();
+		ObjectNode result = Json.newObject();
+		ObjectId collectionDbId = new ObjectId(colId);
+		Locks locks = null;
+		try {
+			locks = Locks.create().write("Collection #" + colId).acquire();
+			Status response = errorIfNoAccessToCollection(Action.EDIT,
+					collectionDbId);
+			if (!response.toString().equals(ok().toString())) {
+				return response;
+			} else {
+				if (json == null || !json.isArray()) {
+					result.put("error", "Invalid JSON");
+					return badRequest(result);
+				}
+				else {
+					Iterator<JsonNode> iterator = json.iterator();
+					while (iterator.hasNext()) {
+						JsonNode recordJson = iterator.next();
+						Result r = addRecordToCollection(recordJson, new ObjectId(colId), Option.None(), false);
+						if (!r.toString().equals(ok().toString())) {
+							return r;
+						}
+					}
+					result.put("message", "Records have been successfully added to to collection.");
+					return ok(result);
+				}
 			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -402,6 +452,7 @@ public class WithResourceController extends Controller {
 			}
 		}
 	}
+	
 
 	// ignores context data that do not refer to the colId-position where the
 	// record is added
@@ -659,7 +710,7 @@ public class WithResourceController extends Controller {
 		String fav = DB.getCollectionObjectDAO()
 				.getByOwnerAndLabel(userId, null, "_favorites").getDbId()
 				.toString();
-		return addRecordToCollection(fav, Option.None());
+		return addRecordToCollection(fav, Option.None(), true);
 	}
 
 	/**

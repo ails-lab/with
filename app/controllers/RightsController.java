@@ -20,8 +20,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -204,17 +206,20 @@ public class RightsController extends WithResourceController {
 		notification.setReceiver(userOrGroupId);
 		notification.setResource(colDbId);
 		notification.setSender(ownerId);
+		User sender = DB.getUserDAO().getById(ownerId, new ArrayList<String>(Arrays.asList("avatar")));
+		HashMap<MediaVersion, String> avatar = sender.getAvatar();
+		if (avatar != null && avatar.containsKey(MediaVersion.Square))
+			notification.setSenderLogoUrl(avatar.get(MediaVersion.Square));
 		ShareInfo shareInfo = new ShareInfo();
 		shareInfo.setNewAccess(newAccess);
 		shareInfo.setUserOrGroup(userOrGroupId);
 		Date now = new Date();
 		notification.setOpenedAt(new Timestamp(now.getTime()));
-		DB.getNotificationDAO().makePermanent(notification);
-		NotificationCenter.sendNotification(notification);
 		if (downgrade) {
 			notification.setPendingResponse(false);
 			notification.setActivity(Activity.COLLECTION_UNSHARED);
 			notification.setShareInfo(shareInfo);
+			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
 			result.put("mesage", "Access of user or group to collection has been downgraded.");
 			return ok(result);
@@ -223,6 +228,7 @@ public class RightsController extends WithResourceController {
 			notification.setPendingResponse(false);
 			notification.setActivity(Activity.COLLECTION_SHARED);
 			notification.setShareInfo(shareInfo);
+			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
 			result.put("message", "Collection shared.");
 			return ok(result);

@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
 import model.ApiKey;
-import model.Media;
 import model.basicDataTypes.MultiLiteral;
 import model.resources.CollectionObject;
 import model.usersAndGroups.User;

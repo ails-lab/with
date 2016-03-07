@@ -692,6 +692,56 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		}
 		$('#popup').modal('show');
 	};
+	
+	self.showInfoPopup = function(title, bodyText, callback) {
+		$("#myModal").find("h4").html(title);
+		var body = $("#myModal").find("div.modal-body");
+		body.html(bodyText);
+
+		var footer = $("#myModal").find("div.modal-footer");
+		if (footer.is(':empty')) {
+	        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
+	        cancelBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        });
+	        var confirmBtn = $('<button type="button" class="btn btn-primary">Confirm</button>').appendTo(footer);
+	        confirmBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        	callback();
+	        });
+	    }
+		$("#myModal").modal('show');
+		$('#myModal').on('hidden.bs.modal', function () {
+			$("#myModal").find("div.modal-footer").empty();
+		});
+		$('#myModal').addClass("topOfModal");
+	}
+
+	self.showInfoPopupTwoOptions = function(title, bodyText, callback) {
+		$("#myModal").find("h4").html(title);
+		var body = $("#myModal").find("div.modal-body");
+		body.html(bodyText);
+
+		var footer = $("#myModal").find("div.modal-footer");
+		if (footer.is(':empty')) {
+	        var cancelBtn = $('<button type="button" class="btn btn-default">No</button>').appendTo(footer);
+	        cancelBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        	callback.call(this, false);
+	        });
+	        var confirmBtn = $('<button type="button" class="btn btn-primary">Yes</button>').appendTo(footer);
+	        confirmBtn.click(function() {
+	        	$("#myModal").modal('hide');
+	        	callback.call(this, true);
+	        });
+	    }
+		$("#myModal").modal('show');
+		$('#myModal').on('hidden.bs.modal', function () {
+			$("#myModal").find("div.modal-footer").empty();
+		});
+		$('#myModal').addClass("topOfModal");
+	}
+
 
 	// Closing modal dialog and setting back to empty to dispose the component
 	closePopup = function () {
@@ -947,6 +997,8 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		getAllUserCollections: getAllUserCollections,
 		getPublicCollections: getPublicCollections,
 		getEditableCollections: getEditableCollections,
+		showInfoPopup: showInfoPopup,
+		showInfoPopupTwoOptions: showInfoPopupTwoOptions,
 		isLiked: isLiked,
 		isLogged:isLogged,
 		loadFavorites: loadFavorites,

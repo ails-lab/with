@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import model.Collection;
 import model.EmbeddedMediaObject;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.basicDataTypes.WithDate;
@@ -346,12 +345,6 @@ public class ElasticUtils {
 		}
 
 		return resourcesPerType;
-	}
-
-	///// OLD CODE ////
-	public static List<Collection> getCollectionMetadaFromHit(SearchHits hits) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }
