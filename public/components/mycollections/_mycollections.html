@@ -77,9 +77,13 @@
 					  <div class="user"data-bind="text: withCreatorInfo.username"></div>
 					</div>
 					<div class="action-group">
+						<!--  ko if: myAccess() ==  "OWN" -->
 						<a href="#" data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
-						<a data-toggle="tooltip" data-placement="top" title="Share collection" class="fa fa-paper-plane-o"></a>
+						<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
+						<!-- /ko -->
+						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
 						<a href="#" data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<!-- /ko -->
 					</div>
 				  </div>
 				</li>
@@ -90,10 +94,6 @@
 			<section class="action edit">
 			  <div class="action-header">
 				<div class="title">Edit Collection</div>
-				<!--<div class="toggle">
-				  <input type="checkbox" id="toggle1">
-				  <label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
-				</div>-->
 			  </div>
 			  <div class="action-body">
 				<input type="text" data-bind="{value: titleToEdit, 
@@ -110,16 +110,17 @@
 			<section class="action new">
 			  <div class="action-header">
 				<div class="title">New Collection</div>
-				<div class="toggle">
-				  <input type="checkbox" id="toggle2">
-				  <label for="toggle2"></label><span data-bind="event: {click: isPublicToggleEmpty(false)}" class="private">private</span><span data-bind="event: {click: isPublicToggleEmpty(true)" class="public">public</span>
+				<div class="toggle" >
+				  <input type="checkbox" id="toggle2" data-bind="click: isPublicToggleEmpty">
+				  <label for="toggle2" ></label><span  class="private">private</span>
+				  <span class="public">public</span>
 				</div>
 			  </div>
 			  <div class="action-body">
 				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
 				<a class="add" >
 					<span class="plus" style="cursor:pointer;"></span>
-					<span class="text" data-bind="{value: descriptionToEdit}">Add description</span>
+					<span class="text">Add description</span>
 				</a>
 			  </div>
 			  <div class="button-group">
@@ -132,67 +133,55 @@
 			  <div class="action-header">
 				<div class="title">Give access to collection</div>
 			  </div>
+			  <div class="toggle">
+				<input type="checkbox" id="toggle1" data-bind="click: isPublicToggle">
+				<label for="toggle1"></label>
+				<span class="private">private</span>
+				<span class="public">public</span>
+			  </div>
 			  <div class="action-body">
 				<div class="group">
 				  <div class="title">Users access</div>
-				  <input type="text" placeholder="Start typing username">
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername: myUsername" placeholder="Start typing username or email">
 				  <ul class="access-list">
+				  	<!-- ko foreach: usersToShare() -->
 					<li>
-					  <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
+					  <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
+					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{title: username(), click: changeRights.bind($data, 'NONE')}" class="trash">
+					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" id="u1">
-						<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
+						<label for="u1"></label>
+						<span class="private" data-bind="click: changeRights.bind($data, 'READ')">view</span>
+						<span class="public" "click: changeRights.bind($data, 'WRITE')">co-edit</span>
 					  </div>
 					</li>
-					<li>
-					  <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
-					  <div class="toggle">
-						<input type="checkbox" id="u2">
-						<label for="u2"></label><span class="private">view</span><span class="public">co-edit</span>
-					  </div>
-					</li>
-					<li>
-					  <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
-					  <div class="toggle">
-						<input type="checkbox" id="u3">
-						<label for="u3"></label><span class="private">view</span><span class="public">co-edit</span>
-					  </div>
-					</li>
-					<li>
-					  <div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
-					  <div class="toggle">
-						<input type="checkbox" id="u4">
-						<label for="u4"></label><span class="private">view</span><span class="public">co-edit</span>
-					  </div>
-					</li>
+					<!-- /ko -->
 				  </ul>
 				</div>
 				<div class="group">
 				  <div class="title">Groups access</div>
-				  <input type="text" placeholder="Start typing group name">
+				  <input type="text"  data-bind="autocompleteUsername: myUsername" placeholder="Start typing group name">
 				  <ul class="access-list">
-					<li class="blue"><span class="text">DK</span><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
+				  	<!-- ko foreach: userGroupsToShare() -->
+				  	<li>
+					  <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
+					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{title: username(), click: changeRights.bind($data, 'NONE')}" class="trash">
+					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
-						<input type="checkbox" id="g1">
-						<label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
+						<input type="checkbox" id="u1">
+						<label for="u1"></label>
+						<span class="private" data-bind="click: changeRights.bind($data, 'READ')">view</span>
+						<span class="public" "click: changeRights.bind($data, 'WRITE')">co-edit</span>
 					  </div>
 					</li>
-					<li class="green"><span class="text">US</span><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
-					  <div class="toggle">
-						<input type="checkbox" id="g2">
-						<label for="g2"></label><span class="private">view</span><span class="public">co-edit</span>
-					  </div>
-					</li>
-					<li class="orange"><span class="text">MN</span><a href="#" data-toggle="tooltip" data-placement="top" title="username" class="trash"><i class="fa fa-trash"></i></a>
-					  <div class="toggle">
-						<input type="checkbox" id="g3">
-						<label for="g3"></label><span class="private">view</span><span class="public">co-edit</span>
-					  </div>
-					</li>
+					<!-- /ko -->
 				  </ul>
 				</div>
 			  </div>
-			  <div class="button-group"><a href="#" class="btn-green cancel">Close</a></div>
+			  <div class="button-group">
+			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
+			  </div>
 			</section>
 		  </section>
 		</main>

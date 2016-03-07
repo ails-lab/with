@@ -19,7 +19,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		}
 	};
 
-
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
 			type        : "GET",
@@ -213,26 +212,14 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		self.showDelCollPopup = function(collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
-			$("#myModal").find("h4").html("Do you want to delete collection "+collectionTitle+"?");
-			var body = $("#myModal").find("div.modal-body");
-			body.html("All records in that collection will be deleted.");
-
-			var footer = $("#myModal").find("div.modal-footer");
-			if (footer.is(':empty')) {
-		        var cancelBtn = $('<button type="button" class="btn btn-default">Cancel</button>').appendTo(footer);
-		        cancelBtn.click(function() {
-		        	$("#myModal").modal('hide');
-		        });
-		        var confirmBtn = $('<button type="button" class="btn btn-danger">Delete</button>').appendTo(footer);
-		        confirmBtn.click(function() {
-		        	deleteCollection(myself.id);
-		        	$("#myModal").modal('hide');
-		        });
-		    }
-			$("#myModal").modal('show');
-			$('#myModal').on('hidden.bs.modal', function () {
-				$("#myModal").find("div.modal-footer").empty();
-			})
+			$.smkConfirm({
+				text: "All records in " + collectionTitle + " will be deleted. Are you sure?",
+				accept: 'Delete',
+				cancel: 'Cancel'
+			}, function (ee) {
+				if (ee)
+					deleteCollection(myself.id);
+			});
 		};
 
 		deleteCollection = function(collectionId) {
@@ -312,7 +299,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 					});
 					ko.mapping.fromJS(users, self.usersMapping, self.usersToShare);
 					ko.mapping.fromJS(userGroups, self.usersMapping, self.userGroupsToShare);
-					app.showPopup("share-collection");
+					//app.showPopup("share-collection");
 				}
 			});
 		}
@@ -450,12 +437,13 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			});
 		}
 		
-		self.isPublicToggleEmpty = function(newIsPublic) {
-		    self.isPublicToEdit(newIsPublic);
+		self.isPublicToggleEmpty = function() {
+			//alert("1");
+		    self.isPublicToEdit(true);
 		}
 		
 		self.isPublicToggle = function() {
-		    var newIsPublic = !self.isPublicToEdit();
+		    /*var newIsPublic = !self.isPublicToEdit();
 		    if (!newIsPublic) {
 		    	app.showInfoPopupTwoOptions("Make records private in all collections?",
 						"Users may still be able to read records that you own and are members of that collection " +
@@ -465,7 +453,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				});
 		    }
 		    else
-		    	app.editPublicity(self.index(), true, false);
+		    	app.editPublicity(self.index(), true, false);*/
 		}
 
 		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {
