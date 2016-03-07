@@ -9,18 +9,7 @@
 		</div>
 		<div class="modal-body row">
 			<div class="form-group">
-				<div>
-					<ul class="nav nav-tabs" role="tablist">
-						<li role="presentation" class="active"><a href="#addUser"
-							aria-controls="addUser" role="tab" data-toggle="tab">Add a
-								User</a></li>
-						<li role="presentation"><a href="#addUserGroup"
-							aria-controls="addUserGroup" role="tab" data-toggle="tab">Add
-								a User Group</a></li>
-					</ul>
-				</div>
-				<div class="tab-content">
-					<div role="tabpanel" class="tab-pane active" id="addUser">
+				
 						<div class="col-md-12">
 							<div class="form-group form-inline">
 								<div class="spec">
@@ -43,34 +32,9 @@
 						</div>
 						<hr>
 					</div>
-					<div role="tabpanel" class="tab-pane fade" id="addUserGroup">
-						<br>
-						<div class="col-md-12">
-							<div class="form-group form-inline">
-								<div class="spec">
-									<label for="firstName">Select group</label> <br>
-									<div class="input-group input-group-bg col-lg-10">
-										<input type="search" class="form-control" id="groupName"
-											placeholder="Group name or email"
-											data-bind="autocompleteUsername: myUsername, category:2" />
-									</div>
-									<span style="padding-left: 10px;">
-										<button type="button" class="btn btn-primary btn-xs"
-											title="Add group to Organization"
-											data-bind="click: addToUserGroup.bind($data, 'Add Group')">
-											<span class="glyphicon glyphicon-saved" aria-hidden="true"
-												style="cursor: pointer"> </span>
-										</button>
-									</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
 
 			<hr>
-			<div data-bind="visible:  userMembers().length > 0">
+			<div data-bind="visible:  userMembers().length >= 0">
 				<h5 align="center">
 					<strong>Users with access to the collection</strong>
 				</h5>
@@ -113,7 +77,28 @@
 				</div>
 			</div>
 			<hr>
-			<div data-bind="visible:  groupMembers().length > 0">
+						<br>
+						<div class="col-md-12">
+							<div class="form-group form-inline">
+								<div class="spec">
+									<label for="firstName">Select group</label> <br>
+									<div class="input-group input-group-bg col-lg-10">
+										<input type="search" class="form-control" id="groupName"
+											placeholder="Group name or email"
+											data-bind="autocompleteUsername: myUsername, category:2" />
+									</div>
+									<span style="padding-left: 10px;">
+										<button type="button" class="btn btn-primary btn-xs"
+											title="Add group to Organization"
+											data-bind="click: addToUserGroup.bind($data, 'Add Group')">
+											<span class="glyphicon glyphicon-saved" aria-hidden="true"
+												style="cursor: pointer"> </span>
+										</button>
+									</span>
+								</div>
+				</div>
+			</div>
+			<div data-bind="visible:  groupMembers().length >= 0">
 				<h5 align="center">
 					<strong>User groups with access to the collection</strong>
 				</h5>
