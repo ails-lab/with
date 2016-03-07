@@ -179,6 +179,13 @@
             "get": {
                 "parameters": [
                     {
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the record",
+                        "type": "string"
+                    },
+                    {
                         "name": "format",
                         "in": "query",
                         "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
@@ -226,6 +233,13 @@
                 "summary": "Update a record.",
                 "description": "Update the metadata of an existing record, specified by its id in the path. You only need to provide the fields you want updated in the record body.",
                 "parameters": [
+                    {
+                        "name": "recordId",
+                        "in": "path",
+                        "required": true,
+                        "description": "The id of the record",
+                        "type": "string"
+                    },
                     {
                         "in": "body",
                         "name": "body",
@@ -415,7 +429,11 @@
                                 },
                                 "rights": {
                                     "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
+                                    "enum": [
+                                        "READ",
+                                        "WRITE",
+                                        "OWN"
+                                    ]
                                 }
                             }
                         }
@@ -423,7 +441,7 @@
                     {
                         "name": "recursivelyAccessedByUserOrGroup",
                         "in": "query",
-                        "description": "This field works like ```directlyAccessedByUserName``` with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
+                        "description": "This field works like directlyAccessedByUserName with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
                         "type": "array",
                         "items": {
                             "type": "object",
@@ -538,6 +556,15 @@
             "get": {
                 "description": "Retrieves an array with all the users that have access to this collection and their access rights.",
                 "summary": "Retrieve all users that have access to a collection.",
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    }
+                ],
                 "tags": [
                     "Collection",
                     "Exhibition",
@@ -595,6 +622,13 @@
                     "Record"
                 ],
                 "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
                     {
                         "name": "start",
                         "in": "query",
@@ -659,29 +693,26 @@
             }
         },
         "/collection/{collectionId}/addRecord": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of the collection or exhibition",
-                    "type": "string"
-                }
-            ],
             "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. See the different ```Test Calls``` for alternative ways to use this call and easily create records from many sources such as Europeana, without the need to specify schema mappings. Also, you can see how to import a record from MINT. You do not need to provide values for all the available fields, however some of them are mandatory and might return an error. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
-                "summary": "Create a new record and add it to a collection.",
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This tests adding public records to a collection.",
+                "summary": "Add a *PUBLIC* record to a collection.",
                 "tags": [
-                    "Collection",
-                    "Exhibition",
-                    "Record"
+                    "Test calls"
                 ],
                 "parameters": [
                     {
-                        "name": "positiond",
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
+                    {
+                        "name": "position",
                         "in": "query",
-                        "description": "offset",
-                        "type": "integer",
+                        "required": true,
+                        "description": "The position in the collection.",
+                        "type": "string",
                         "default": 0
                     },
                     {
@@ -689,7 +720,7 @@
                         "name": "body",
                         "description": "Record JSON schema",
                         "schema": {
-                            "$ref": "#/definitions/InternalRecord"
+                            "$ref": "#/definitions/SamplePUBLICRecord"
                         }
                     }
                 ],
@@ -757,6 +788,13 @@
                 ],
                 "parameters": [
                     {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
+                    {
                         "name": "position",
                         "in": "query",
                         "description": "offset",
@@ -822,6 +860,15 @@
                     "Collection",
                     "Exhibition"
                 ],
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -859,6 +906,13 @@
                     "Exhibition"
                 ],
                 "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
                     {
                         "in": "body",
                         "name": "body",
@@ -924,6 +978,15 @@
                 "tags": [
                     "Collection",
                     "Exhibition"
+                ],
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    }
                 ],
                 "responses": {
                     "200": {
@@ -1198,6 +1261,13 @@
             "get": {
                 "parameters": [
                     {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
                         "name": "direct",
                         "in": "query",
                         "description": "Only direct descendants (default is true)",
@@ -1231,6 +1301,13 @@
             ],
             "get": {
                 "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
                     {
                         "name": "direct",
                         "in": "query",
@@ -1266,6 +1343,13 @@
             "get": {
                 "parameters": [
                     {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
+                    {
                         "name": "direct",
                         "in": "query",
                         "description": "Only direct descendants (default is true)",
@@ -1299,6 +1383,13 @@
             ],
             "put": {
                 "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    },
                     {
                         "name": "body",
                         "in": "body",
@@ -1358,6 +1449,15 @@
                 ],
                 "summary": "Retrieve group info.",
                 "description": "Retrieves attributes of a group from the database. This call can be applied to all group types, ie organizations and projects.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1383,6 +1483,15 @@
                 ],
                 "summary": "Delete a group.",
                 "description": "Removes a group from the database. Only the group admin can delete the group. This call can be applied to all group types, ie organizations and projects.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK (successfully deleted)",
@@ -1434,6 +1543,13 @@
                         "in": "query",
                         "required": true,
                         "description": "User or group ID to add in group",
+                        "type": "string"
+                    },
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
                         "type": "string"
                     }
                 ],
@@ -1505,6 +1621,13 @@
                         "required": true,
                         "description": "User ID to remove from this group.",
                         "type": "string"
+                    },
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
                     }
                 ],
                 "tags": [
@@ -1564,6 +1687,15 @@
                 ],
                 "summary": "Request to join a group.",
                 "description": "Request to join the group specified by the ID in the path. The group admin will have to accept your request before you join. This call can be applied to all group types, ie organizations and projects.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK (successfully submitted request)",
@@ -1605,6 +1737,15 @@
                 ],
                 "summary": "Leave a group.",
                 "description": "Leave the group specified by the ID in the path. This call can be applied to all group types, ie organizations and projects.",
+                "parameters": [
+                    {
+                        "name": "groupId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of a group.",
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK (successfully removed user)",
@@ -1654,6 +1795,20 @@
                     "Collection"
                 ],
                 "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Internal Id of the collection whose rights you wish to change",
+                        "type": "string"
+                    },
+                    {
+                        "name": "right",
+                        "in": "path",
+                        "required": true,
+                        "description": "\"none\" (withdraws previously given rights), \"read\", \"write\", \"own\"",
+                        "type": "string"
+                    },
                     {
                         "name": "username",
                         "in": "query",
@@ -1974,6 +2129,15 @@
                 "tags": [
                     "User"
                 ],
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "Internal ID of a user",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2000,6 +2164,13 @@
                 "summary": "Update a user entry.",
                 "description": "Updates the stored info of the user specified by the id provided in the path.",
                 "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "Internal ID of a user",
+                        "required": true,
+                        "type": "string"
+                    },
                     {
                         "in": "body",
                         "name": "body",
@@ -2031,6 +2202,15 @@
                 ],
                 "summary": "Deletes the user.",
                 "description": "Removes a user from the database. (This call might not function currently at the moment.)",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "Internal ID of a user",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2071,6 +2251,15 @@
                 ],
                 "summary": "Send a reset password email.",
                 "description": "Sends an email to the user provided in the path. The email contains a link to a webpage where the user can provide a new password.",
+                "parameters": [
+                    {
+                        "name": "emailOrUserName",
+                        "in": "path",
+                        "description": "Username or email",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2163,6 +2352,15 @@
                 ],
                 "summary": "Get the profile thumbnail of a user or group.",
                 "description": "Returns the photoId of the thumbnail the user or group use in their profile.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "User or group id",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2284,477 +2482,7 @@
                 }
             }
         },
-        "/collection": {
-            "post": {
-                "parameters": [
-                    {
-                        "name": "collectionType",
-                        "in": "query",
-                        "description": "Simple collection or exhibition.",
-                        "enum": [
-                            "SimpleCollection",
-                            "Exhibition"
-                        ],
-                        "required": true,
-                        "type": "string",
-                        "default": "SimpleCollection"
-                    },
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "A sample body for test calls.",
-                        "schema": {
-                            "$ref": "#/definitions/SampleCollection"
-                        }
-                    }
-                ],
-                "summary": "Create a new collection.",
-                "description": "This call will create a new collection and store it in the database. I have included it here only for testing purposes so make sure you either delete unwanted collections afterwards, or use a database for testing.",
-                "tags": [
-                    "Test calls"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "collection": {
-                                    "$ref": "#/definitions/Collection"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no read-access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error(database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/55b74e5b569e1b44eeac72c0": {
-            "parameters": [
-                {
-                    "name": "collectionId",
-                    "in": "path",
-                    "description": "Internal id of the collection or exhibition",
-                    "required": true,
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "summary": "Retrieve collection metadata.",
-                "description": "This call makes a test request for the sample collection \"street art\" and returns all its metadata. Please see ```/collection/{collectionId}``` for more.",
-                "tags": [
-                    "Test calls"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "collection": {
-                                    "$ref": "#/definitions/Collection"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no read-access)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error(database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/group/5620e9f8e4b0857763602205": {
-            "parameters": [
-                {
-                    "name": "groupId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of a group.",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "tags": [
-                    "Test calls"
-                ],
-                "summary": "Retrieve group info.",
-                "description": "This call requests the stored metadata about the group \"ntua\". Please see ```/group/{groupId}``` for more.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot retrieve or save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/group/descendantGroups/561fa2f4e4b069ad810ab44b": {
-            "parameters": [
-                {
-                    "name": "groupId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of a group.",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "Only direct descendants (default is true)",
-                        "type": "boolean",
-                        "default": true
-                    }
-                ],
-                "tags": [
-                    "Test calls"
-                ],
-                "summary": "Find subgroups of a group.",
-                "description": "This call finds all the descendant groups of the \"ntua\" organization. Please see ```/group/descendantGroups/{groupId}``` for more.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    }
-                }
-            }
-        },
-        "/group/descendantOrganizations/5620e9f8e4b0857763602205": {
-            "parameters": [
-                {
-                    "name": "groupId",
-                    "in": "path",
-                    "required": true,
-                    "description": "Id of a group.",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "direct",
-                        "in": "query",
-                        "description": "Only direct descendants (default is true)",
-                        "type": "boolean",
-                        "default": true
-                    }
-                ],
-                "tags": [
-                    "Test calls"
-                ],
-                "summary": "Find subgroups of an organization.",
-                "description": "This call finds all the descendant groups of the \"espace\" organization. Please see ```/group/descendantOrganizations/{groupId}``` for more. In the results you can see the \"ntua\" group of the previous examples.",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/Group"
-                        }
-                    }
-                }
-            }
-        },
-        "/record/55b74e8b569e1b44eeac72c3": {
-            "parameters": [
-                {
-                    "name": "recordId",
-                    "in": "path",
-                    "required": true,
-                    "description": "The id of the record",
-                    "type": "string"
-                }
-            ],
-            "get": {
-                "parameters": [
-                    {
-                        "name": "format",
-                        "in": "query",
-                        "description": "The serialization of the response. One of the following:  JSON_UNKNOWN, JSONLD_UNKNOWN, XML_UNKNOWN, JSON_EDM, JSONLD_EDM, XML_EDM, JSONLD_DPLA, JSON_NLA, XML_NLA, JSON_DNZ, XML_DNZ, JSON_YOUTUBE, “UKNOWN”, “all”. If not specified, no content is returned, only basic collection fields.",
-                        "type": "string"
-                    }
-                ],
-                "summary": "Retrieve a record.",
-                "description": "This is a test call of a record metadata. The sample record is called \"Big walls - street art on Hereford Street\". Note that by default the content object has the \"JSON-DNZ\" and \"XML-DNZ\" serializations. For more details please see ```/record/{recordId}```.",
-                "tags": [
-                    "Test calls"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (database error)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/56a10eaa590b1916a881a323/addRecord": {
-            "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. Use for adding a NEW record to the collection.",
-                "summary": "Add a *new* record to a collection.",
-                "tags": [
-                    "Test calls"
-                ],
-                "parameters": [
-                    {
-                        "name": "position",
-                        "in": "query",
-                        "required": true,
-                        "description": "The position in the collection.",
-                        "type": "string",
-                        "default": 0
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Record JSON schema",
-                        "schema": {
-                            "$ref": "#/definitions/SampleInternalRecord"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (no position in exhibition, constraint violation)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/56a10eaa590b1916a881a313/addRecord": {
-            "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. Tests MINT imports to a collection.",
-                "summary": "Import a record from *MINT* to a collection.",
-                "tags": [
-                    "Test calls"
-                ],
-                "parameters": [
-                    {
-                        "name": "position",
-                        "in": "query",
-                        "required": true,
-                        "description": "The position in the collection.",
-                        "type": "string",
-                        "default": 0
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Record JSON schema",
-                        "schema": {
-                            "$ref": "#/definitions/SampleMINTRecord"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (no position in exhibition, constraint violation)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/56a10eaa590b1916a881a113/addRecord": {
-            "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This tests imports from Europeana.",
-                "summary": "Import a record from *EUROPEANA* to a collection.",
-                "tags": [
-                    "Test calls"
-                ],
-                "parameters": [
-                    {
-                        "name": "position",
-                        "in": "query",
-                        "required": true,
-                        "description": "The position in the collection.",
-                        "type": "string",
-                        "default": 0
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Record JSON schema",
-                        "schema": {
-                            "$ref": "#/definitions/SampleEUROPEANARecord"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (no position in exhibition, constraint violation)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/56a10eaa590b1916a881a123/addRecord": {
+        "/collection/{collectionID}/addRecord": {
             "post": {
                 "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This creates a new record with media included in the body.",
                 "summary": "Add a record with *MEDIA* to a collection.",
@@ -2762,6 +2490,13 @@
                     "Test calls"
                 ],
                 "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
                     {
                         "name": "position",
                         "in": "query",
@@ -2812,112 +2547,6 @@
                     },
                     "500": {
                         "description": "Internal Server Error (cannot save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/collection/56a10eaa590b1916a881a421/addRecord": {
-            "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. This is a test call I made and the collection in the path only exists in the test database. This tests adding public records to a collection.",
-                "summary": "Add a *PUBLIC* record to a collection.",
-                "tags": [
-                    "Test calls"
-                ],
-                "parameters": [
-                    {
-                        "name": "position",
-                        "in": "query",
-                        "required": true,
-                        "description": "The position in the collection.",
-                        "type": "string",
-                        "default": 0
-                    },
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "Record JSON schema",
-                        "schema": {
-                            "$ref": "#/definitions/SamplePUBLICRecord"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "properties": {
-                                "message": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request (no position in exhibition, constraint violation)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden (no permission to edit collection)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (cannot save to database)",
-                        "schema": {
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/record": {
-            "post": {
-                "parameters": [
-                    {
-                        "name": "body",
-                        "in": "body",
-                        "description": "A sample body for test calls.",
-                        "schema": {
-                            "$ref": "#/definitions/SampleInternalRecord"
-                        }
-                    }
-                ],
-                "summary": "Create a new record.",
-                "description": "This call will create a new collection and store it in the database. I have included it here only for testing purposes so make sure you either delete unwanted collections afterwards, or use a database for testing.",
-                "tags": [
-                    "Test calls"
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/InternalRecord"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error (database error)",
                         "schema": {
                             "properties": {
                                 "error": {
