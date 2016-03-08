@@ -361,9 +361,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							return;
 						}
 					}
+					
 					if (data.descriptiveData) {
 						self.title(findByLang(data.descriptiveData.label));
-
 						self.description(findByLang(data.descriptiveData.description));
 					}
 
@@ -395,9 +395,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						"contentType": "application/json",
 						"success": function (data) {
 							self.index(new NodeModel(JSON.parse(data)));
+							
+							//loading(false);
 						},
 						"error": function (result) {
-//							loading(false);
+							//loading(false);
 							$.smkAlert({
 								text: 'An error has occured',
 								type: 'danger',
@@ -405,7 +407,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 							});
 						}
 					});
-
 					
 					if (self.count() && self.count() > 0) {
 						self.loadInit();
