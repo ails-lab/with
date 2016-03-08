@@ -723,6 +723,7 @@ public class CollectionObjectController extends WithResourceController {
 			}
 		}
 
+//		System.out.println("QUERY " + query);
 		return query;
 	}
 	
@@ -737,6 +738,7 @@ public class CollectionObjectController extends WithResourceController {
 		JsonNode json = request().body().asJson();
 //		log.info("JSON " + json.toString());
 		try {
+			
 			locks = Locks.create().read("Collection #" + collectionId).acquire();
 
 			Result response = errorIfNoAccessToCollection(Action.READ, colId);
@@ -744,18 +746,22 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
+//				System.out.println("QUERYING FOR VIEW");
 				ElasticSearcher es = new ElasticSearcher();
 				
 				QueryBuilder query = getIndexCollectionQuery(colId, json);
 				
 //				log.info("QUERY " + query.toString());
 //				log.info("QUERC " + start + " " + count);
-				
+//				
 				SearchOptions so = new SearchOptions(start, start + count);
 				
 				SearchResponse res = es.execute(query, so);
 				SearchHits sh = res.getHits();
-//				log.info("*" + sh.getTotalHits());
+				
+				long totalHits = sh.getTotalHits();
+				
+//				System.out.println("RESULTS " + sh.getHits().length);
 
 				List<String> retrievedFields = new ArrayList<String>(
 						Arrays.asList("descriptiveData.label",
@@ -769,9 +775,11 @@ public class CollectionObjectController extends WithResourceController {
 				}
 				
 				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionIds(colId, ids);
-				for (RecordResource rr : records) {
-					log.info("DB " + rr.getDbId());
-				}
+				
+//				System.out.println("RESULTS DB " + records.size());
+//				for (RecordResource rr : records) {
+//					log.info("DB " + rr.getDbId());
+//				}
 
 				if (records == null) {
 					result.put("message",
@@ -815,14 +823,7 @@ public class CollectionObjectController extends WithResourceController {
 					}
 					position += 1;
 				}
-				result.put(
-						"entryCount",
-						DB.getCollectionObjectDAO()
-								.getById(
-										colId,
-										new ArrayList<String>(
-												Arrays.asList("administrative.entryCount")))
-								.getAdministrative().getEntryCount());
+				result.put("entryCount", totalHits);
 				result.put("records", recordsList);
 				return ok(result);
 			}

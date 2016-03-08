@@ -57,6 +57,7 @@ public class CollectionIndexController extends WithResourceController	{
 		try {
 			JsonNode json = request().body().asJson();
 
+//			System.out.println("QUERYING FOR TREE CONSTUCTION");
 			ElasticSearcher es = new ElasticSearcher();
 			
 //			MatchQueryBuilder query = QueryBuilders.matchQuery("collectedIn.collectionId", id);
@@ -67,6 +68,7 @@ public class CollectionIndexController extends WithResourceController	{
 
 			List<String[]> list = new ArrayList<>();
 
+//			System.out.println("RESULTS " + sh.getHits().length);
 			for (Iterator<SearchHit> iter = sh.iterator(); iter.hasNext();) {
 				SearchHit hit = iter.next();
 

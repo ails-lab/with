@@ -30,12 +30,15 @@
 	</div>
 </div>
 
+
 <div id="nav-bar" data-bind="template: { name: 'scheme-template', data: index }"></div>
+<div>
 
 <div>
 <ul data-bind="foreach: terms">
     <li style="display:inline;"><span data-bind="text: label"></span><button data-bind="click:removeTerm"><span class="tree-item glyphicon glyphicon-remove"></span></button>&nbsp;&nbsp;</li>
 </ul>
+<span data-bind="text: indexCount"></span>
 </div>
 
 <script type="text/html" id="scheme-template">

@@ -167,6 +167,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.route = params.route;
 		var counter = 1;
 		
+		self.indexCount = ko.observable("");
 		self.terms = ko.observableArray([]);
 		
 		self.title = ko.observable('');
@@ -181,6 +182,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		self.loggedUser = app.isLogged();
 		self.rightsmap = ko.mapping.fromJS([]);
 		self.isFavorites = ko.observable(false);
+		
 
 		var Term = function(data) {
 			var selfx = this;
@@ -261,10 +263,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			};
 		
 		self.reload = function() {
+			loading(true);
+
 			self.index(new NodeModel({ schemes: [] }));
-			
 			self.clearImages();
-			self.loadInit();
 			
 			$.ajax({
 				"url": "/collectionindex/" + self.id(),
@@ -278,7 +280,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					//loading(false);
 				},
 				"error": function (result) {
-					loading(false);
+					//loading(false);
 					$.smkAlert({
 						text: 'An error has occured',
 						type: 'danger',
@@ -286,6 +288,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					});
 				}
 			});
+			
+			self.loadInit();
 		}
 		
 		self.index = ko.observable(new NodeModel({ schemes: [] }));
@@ -390,13 +394,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						"data" : "{ \"terms\": [] }",
 						"contentType": "application/json",
 						"success": function (data) {
-							var obj = JSON.parse(data);
-							self.index(new NodeModel(obj));
-							
-							//loading(false);
+							self.index(new NodeModel(JSON.parse(data)));
 						},
 						"error": function (result) {
-							loading(false);
+//							loading(false);
 							$.smkAlert({
 								text: 'An error has occured',
 								type: 'danger',
@@ -435,7 +436,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					"method": "get",
 					"contentType": "application/json",
 					"success": function (data) {
-
+						self.indexCount("");
+						
 						var items = self.revealItems(data.records);
 						if (items.length > 0) {
 							var $newitems = getItems(items);
@@ -460,8 +462,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					"contentType": "application/json",
 					"data" : convertTerms(self.terms()),
 					"success": function (data) {
+						self.indexCount("(" + data.entryCount + " matches)");
+						
 						var items = self.revealItems(data.records);
-
 						if (items.length > 0) {
 							var $newitems = getItems(items);
 
@@ -481,9 +484,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			}
 		}
 		
-
-		
 		self.loadCollection();
+		
 		self.isOwner = ko.pureComputed(function () {
 			if (app.currentUser._id() == self.withCreator) {
 				return true;
@@ -497,7 +499,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 
 		self.moreItems = function () {
-
+			if (self.citems().length == 0) {
+				return;
+			}
+			
 			if (loading === true) {
 				setTimeout(self.moreItems(), 300);
 			}
@@ -510,6 +515,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						"method": "get",
 						"contentType": "application/json",
 						"success": function (data) {
+							self.indexCount("");
+
 							var items = self.revealItems(data.records);
 	
 							if (items.length > 0) {
@@ -533,6 +540,8 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						"contentType": "application/json",
 						"data" : convertTerms(self.terms()),
 						"success": function (data) {
+							self.indexCount("(" + data.entryCount + " matches)");
+
 							var items = self.revealItems(data.records);
 
 							if (items.length > 0) {
