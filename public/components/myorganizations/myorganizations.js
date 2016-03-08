@@ -95,7 +95,6 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 			url: '/group/list?groupType=' + params.type + '&offset=0&belongsOnly=true',
 			type: 'GET',
 			success: function (data) {
-				console.log(data);
 				ko.mapping.fromJS(data, mapping, self.groups);
 				WITHApp.tabAction();
 
