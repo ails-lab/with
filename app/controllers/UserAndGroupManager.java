@@ -242,6 +242,13 @@ public class UserAndGroupManager extends Controller {
 					result.put("error", "User is already member of a group");
 					return badRequest(result);
 				}
+				
+				//add user to the group - database side
+				group.getUsers().add(user.getDbId());
+				user.addUserGroups(ancestorGroups);
+				DB.getUserDAO().makePermanent(user);
+				DB.getUserGroupDAO().makePermanent(group);
+				
 				List<Notification> requests = DB.getNotificationDAO()
 						.getPendingGroupNotifications(user.getDbId(),
 								group.getDbId(), Activity.GROUP_REQUEST);
@@ -346,40 +353,51 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (DB.getUserDAO().get(userOrGroupId) != null) {
 				User user = DB.getUserDAO().get(userOrGroupId);
-				List<Notification> requests = DB.getNotificationDAO()
-						.getPendingGroupNotifications(user.getDbId(),
-								group.getDbId(), Activity.GROUP_REQUEST);
-				if (requests.isEmpty()) {
-					ancestorGroups.add(group.getDbId());
-					group.removeUser(user.getDbId());
-					user.removeUserGroups(ancestorGroups);
-					if (!(DB.getUserDAO().makePermanent(user) == null)
-							&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
-						GroupNotification notification = new GroupNotification();
-						notification.setActivity(Activity.GROUP_REMOVAL);
-						notification.setGroup(group.getDbId());
-						notification.setReceiver(user.getDbId());
-						notification.setSender(admin.getDbId());
-						Date now = new Date();
-						notification.setOpenedAt(new Timestamp(now.getTime()));
-						DB.getNotificationDAO().makePermanent(notification);
-						// Send notification to the user through socket
-						NotificationCenter.sendNotification(notification);
-						// Notification for the administrators of the group
-						notification.setReceiver(group.getDbId());
-						notification.setDbId(null);
-						DB.getNotificationDAO().makePermanent(notification);
-						// Send notification through socket to group
-						// administrators
-						NotificationCenter.sendNotification(notification);
-						result.put("message",
-								"User succesfully removed from group");
-						return ok(result);
-					} else {
-						result.put("error", "Could not remove user from group");
-						return internalServerError(result);
+				
+				// remove the user from the group
+				ancestorGroups.add(group.getDbId());
+				group.removeUser(user.getDbId());
+				user.removeUserGroups(ancestorGroups);
+				if (!(DB.getUserDAO().makePermanent(user) == null)
+						&& !(DB.getUserGroupDAO().makePermanent(group) == null)) {
+					
+					//remove pending invites on this group
+					List<Notification> group_invites = DB.getNotificationDAO()
+							.getPendingGroupNotifications(user.getDbId(),
+									group.getDbId(), Activity.GROUP_INVITE);
+					for(Notification not: group_invites) {
+						if(DB.getNotificationDAO().makeTransient(not) != 1) {
+							log.error("Cannot remove notification with id: " + not.getDbId());
+							result.put("error_"+not.getDbId(), 
+									"Cannot remove notification with id: " + not.getDbId());
+						}
 					}
+					
+					GroupNotification notification = new GroupNotification();
+					notification.setActivity(Activity.GROUP_REMOVAL);
+					notification.setGroup(group.getDbId());
+					notification.setReceiver(user.getDbId());
+					notification.setSender(admin.getDbId());
+					Date now = new Date();
+					notification.setOpenedAt(new Timestamp(now.getTime()));
+					DB.getNotificationDAO().makePermanent(notification);
+					// Send notification to the user through socket
+					NotificationCenter.sendNotification(notification);
+					// Notification for the administrators of the group
+					notification.setReceiver(group.getDbId());
+					notification.setDbId(null);
+					DB.getNotificationDAO().makePermanent(notification);
+					// Send notification through socket to group
+					// administrators
+					NotificationCenter.sendNotification(notification);
+					result.put("message",
+							"User succesfully removed from group");
+					return ok(result);
+				} else {
+					result.put("error", "Could not remove user from group");
+					return internalServerError(result);
 				}
+				
 			}
 			result.put("error", "Wrong user or group id");
 			return badRequest(result);
