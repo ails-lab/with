@@ -38,6 +38,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     	self.sourceBind();
     	//do date calculations for bar graph
     	self.calcdates(); 
+    	WITHApp.tabAction();
     }
     
     
@@ -48,7 +49,7 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     }
     
     
-    self.showfacets= function(){
+    showfacets= function(){
     	if(self.visiblePanel()==false){
     	    self.visiblePanel(true);
     	    $('.chart').horizBarChart({

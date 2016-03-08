@@ -100,6 +100,10 @@ WITHApp.ui = function( custom ){
 		initCharacterLimiter();
 	}
 	
+	this.initSearchColumnAdjustment=function(){
+		initSearchColumnAdjustment();
+	}
+	
 	this.initIsotope=function(){
 		initIsotope();
 	}
