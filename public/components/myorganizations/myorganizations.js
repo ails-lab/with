@@ -92,12 +92,16 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 		};
 
 		$.ajax({
-			url: '/group/list?groupType=' + params.type + '&offset=0&start=0&belongsOnly=true',
+			url: '/group/list?groupType=' + params.type + '&offset=0&belongsOnly=true',
 			type: 'GET',
 			success: function (data) {
 				console.log(data);
 				ko.mapping.fromJS(data, mapping, self.groups);
 				WITHApp.tabAction();
+
+				if (self.groups().length % 10 > 0) {
+					$('.loadmore').text('no more results');
+				}
 			}
 		});
 
@@ -203,6 +207,23 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 			self.validationModel.errors.showAllMessages(false);
 		};
 
+		self.loadMore = function () {
+			var offset = self.groups().length;
+
+			$.ajax({
+				url: '/group/list?groupType=' + params.type + '&offset=' + offset + '&belongsOnly=true',
+				type: 'GET',
+				success: function (data) {
+					var newItems = ko.mapping.fromJS(data, mapping);
+					self.groups.push.apply(self.groups, newItems());
+
+					WITHApp.tabAction();
+					if (data.length === 0 || data.length % 10 > 0) {
+						$('.loadmore').text('no more results');
+					}
+				}
+			});
+		};
 	}
 
 	return {
