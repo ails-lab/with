@@ -644,6 +644,92 @@
                 }
             }
         },
+        "/collection/{collectionId}/addRecord": {
+            "parameters": [
+                {
+                    "name": "collectionId",
+                    "in": "path",
+                    "required": true,
+                    "description": "Id of the collection or exhibition",
+                    "type": "string"
+                }
+            ],
+            "post": {
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. You do not need to provide values for all the available fields. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
+                "summary": "Create a new record and add it to a collection.",
+                "tags": [
+                    "Collection",
+                    "Exhibition",
+                    "Record"
+                ],
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "required": true,
+                        "description": "Id of the collection",
+                        "type": "string"
+                    },
+                    {
+                        "name": "position",
+                        "in": "query",
+                        "description": "offset",
+                        "type": "integer",
+                        "default": 0
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Record JSON schema",
+                        "schema": {
+                            "$ref": "#/definitions/InternalRecord"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "message": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request (no position in exhibition, constraint violation)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no permission to edit collection)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error (cannot save to database)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/collection/{collectionId}/removeRecord": {
             "parameters": [
                 {
@@ -883,6 +969,69 @@
                     },
                     "500": {
                         "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "collectionType",
+                        "in": "query",
+                        "description": "Simple collection or exhibition.",
+                        "enum": [
+                            "SimpleCollection",
+                            "Exhibition"
+                        ],
+                        "required": true,
+                        "type": "string",
+                        "default": "SimpleCollection"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "A sample body for test calls.",
+                        "schema": {
+                            "$ref": "#/definitions/SampleCollection"
+                        }
+                    }
+                ],
+                "summary": "Create a new collection.",
+                "description": "This call will create a new collection and store it in the database. Please use with caution as testing with this call will update your current collections!",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -3530,7 +3679,7 @@
                 "collectedIn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
+                        "$ref": "#/definitions/SampleExternalCollectionNoId"
                     }
                 },
                 "descriptiveData": {
@@ -3552,6 +3701,16 @@
                     "type": "string",
                     "default": "569f78d6590b1966cdeb3443"
                 },
+                "position": {
+                    "type": "integer",
+                    "default": 16
+                }
+            }
+        },
+        "SampleExternalCollectionNoId": {
+            "description": "Metadata related to external collections an object may belong to.",
+            "type": "object",
+            "properties": {
                 "position": {
                     "type": "integer",
                     "default": 16
