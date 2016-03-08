@@ -111,18 +111,38 @@ public class CollectionObjectController extends WithResourceController {
 		q.page = "1";
 		q.pageSize = "20";
 		EuropeanaCollectionSpaceSource src = new EuropeanaCollectionSpaceSource(id);
-		SourceResponse result;
-		int page = 1;
-		int pageSize = 20;
-	    do {
-	    	q.page = page+"";
-	    	result = src.getAllResults(q);
-	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
-						F.Option.None(), resultInfo);
-			};
-			page++;
-	    } while (page*pageSize < result.totalCount);
+		
+		
+		q.page = 1+"";
+		SourceResponse result = src.getAllResults(q);
+    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+			WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
+					F.Option.None(), resultInfo);
+		};
+		
+	    Promise<Integer> promiseOfInt = Promise.promise(
+	      new Function0<Integer>() {
+	        public Integer apply() {
+	        	SourceResponse result;
+        		int page = 2;
+        		int pageSize = 20;
+	        	do {
+	        		q.page = page+"";
+	    	    	result = src.getAllResults(q);
+	    	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+	    				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
+	    						F.Option.None(), resultInfo);
+	    			};
+	    			page++;
+	    	    } while (page*pageSize < result.totalCount);
+	          return 0;
+	        }
+	      }
+	    );
+		
+		
+	    
+	    
 	    if (resultInfo.has("error"))
 	    	return badRequest(resultInfo);
 		return ok(resultInfo);
