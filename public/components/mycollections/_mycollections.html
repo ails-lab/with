@@ -110,9 +110,9 @@
 			<section class="action new">
 			  <div class="action-header">
 				<div class="title">New Collection</div>
-				<div class="toggle" >
-				  <input type="checkbox" id="toggle2" data-bind="click: isPublicToggleEmpty">
-				  <label for="toggle2" ></label><span  class="private">private</span>
+				<div class="toggle">
+				  <input type="checkbox" id="toggle2" data-bind="checked: isPublicToEdit">
+				  <label for="toggle2" ></label><span class="private">private</span>
 				  <span class="public">public</span>
 				</div>
 			  </div>
@@ -120,7 +120,7 @@
 				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
 				<a class="add" >
 					<span class="plus" style="cursor:pointer;"></span>
-					<span class="text">Add description</span>
+					<span href="#" class="text">Add description</span>
 				</a>
 			  </div>
 			  <div class="button-group">

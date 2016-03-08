@@ -15,7 +15,7 @@ POST     /notifications/send                       controllers.NotificationContr
 
 POST     /api/advancedsearch        controllers.SearchController.searchwithfilter()
 POST     /api/initialfilters        controllers.SearchController.getfilters()
-GET     /api/searchsources        controllers.SearchController.searchSources()
+GET      /api/searchsources        controllers.SearchController.searchSources()
 POST     /api/search            	controllers.SearchController.search()
 
 #Autocomplete
