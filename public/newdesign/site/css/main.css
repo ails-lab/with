@@ -610,6 +610,22 @@ body header .notification .dropdown-menu a.viewall:hover {
   color: #395c5c;
   text-decoration: none;
 }
+body header .home {
+  float: right;
+  margin: 1px 20px 0 0;
+  position: relative;
+}
+body header .home a {
+  opacity: 0.5;
+  filter: alpha(opacity=50);
+  -webkit-transition: opacity 0.3s;
+  -o-transition: opacity 0.3s;
+  transition: opacity 0.3s;
+}
+body header .home a:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
 body div[role='main'].homepage {
   margin-top: 72px;
 }
@@ -710,7 +726,7 @@ body div[role='main'].homepage section.selection ul li .select-hover a {
 }
 body div[role='main'].homepage section.selection ul li .select-hover a div {
   position: absolute;
-  background: #ffffff;
+  background: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -1172,11 +1188,11 @@ body div[role='main'].homepage section.api ul li .overlay a {
   padding: 5px 0;
 }
 body div[role='main'].homepage section.api ul li .overlay a:hover {
-  color: #ffffff;
+  color: white;
 }
 body div[role='main'].homepage section.api ul li .overlay a div {
   position: absolute;
-  background: #ffffff;
+  background: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -3536,129 +3552,6 @@ body div[role='main'] .wrapper .search .searchbar .settings a:hover {
   opacity: 1;
   filter: alpha(opacity=100);
 }
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting {
-  position: absolute;
-  width: 320px;
-  background: #fff;
-  color: #555555;
-  z-index: 2;
-  top: 40px;
-  -webkit-box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
-  -moz-box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
-  box-shadow: 0px 0px 14px -1px rgba(0, 0, 0, 0.52);
-  display: none;
-  left: -15px;
-  height: 383px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting:before,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting:after {
-  content: " ";
-  display: table;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting:after {
-  clear: both;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext {
-  background: #4f7979;
-  text-align: right;
-  height: 40px;
-  padding: 0px 7px 0px 7px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext .label {
-  font-size: 0.8em;
-  color: #fff;
-  font-style: italic;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext .filterinput {
-  width: 100%;
-  height: 26px;
-  border: 0;
-  margin-top: 7px;
-  padding: 0 0 0 5px;
-  font-size: 0.9em;
-  color: #4f7979;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .filtertext .filterimg {
-  float: right;
-  margin: 13px 10px 0 0;
-  display: none;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul {
-  width: 35%;
-  float: left;
-  border-bottom: 0px;
-  height: 400px;
-  background: #4f7979;
-  height: 343px;
-  overflow: auto;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li {
-  display: block;
-  float: none;
-  border-bottom: 0px;
-  border-bottom: 1px solid #558282;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li > a {
-  font-family: "DIN", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 0.800em;
-  opacity: 1;
-  filter: alpha(opacity=100);
-  margin: 0;
-  color: #fff;
-  text-align: right;
-  font-weight: bold;
-  padding-right: 20px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li:last-child {
-  border-bottom: 0px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting > ul > li.active a {
-  background: #ffffff;
-  color: #4f7979;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content {
-  float: left;
-  width: 65%;
-  height: 365px;
-  overflow: auto;
-  height: 340px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list {
-  margin: 0;
-  padding: 20px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li {
-  list-style: none;
-  display: block;
-  width: 100%;
-  color: #555555;
-  border-bottom: 1px solid #ffffff;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li label,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li a {
-  display: block;
-  font-weight: normal;
-  text-align: left;
-  cursor: pointer;
-  padding: 10px 0 10px 0;
-  margin: 0;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li label input,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li a input {
-  float: right;
-  margin-top: 7px;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li a {
-  color: #555555;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li:hover label,
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li:hover a {
-  color: #4f7979;
-  text-decoration: none;
-}
-body div[role='main'] .wrapper .search .searchbar .settings .searchsetting .tab-content ul.list li:last-child {
-  border-bottom: 0px;
-}
 body div[role='main'] .wrapper .search .searchbar .settings.active a {
   opacity: 1;
   filter: alpha(opacity=100);
@@ -4442,12 +4335,12 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .comments .form .btn {
   display: block;
   padding: 5px 30px;
-  border: 1px solid #ffffff;
+  border: 1px solid white;
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: #ffffff;
+  color: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -4460,7 +4353,7 @@ body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .m
   margin-top: 10px;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .comments .form .btn:hover {
-  color: #ffffff;
+  color: white;
 }
 body div[role='main'] .wrapper .itemview .mediacontent .container-fluid .wrap .metadata .infowrap .tab-content .comments .form .commentbox {
   border-radius: 0;
@@ -4607,6 +4500,168 @@ body div[role='main'] .wrapper section.action.new .button-group .btn-green-o {
   padding: 5px 0;
   margin-right: 10px;
 }
+body div[role='main'] .wrapper section.action.searchfilter .filtertext {
+  position: relative;
+}
+body div[role='main'] .wrapper section.action.searchfilter .filtertext .filterimg {
+  position: absolute;
+  right: 10px;
+  top: 15px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps {
+  border-top: 1px solid #ccc;
+  margin-top: 10px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps:before,
+body div[role='main'] .wrapper section.action.searchfilter .wraps:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps:after {
+  clear: both;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs {
+  width: 33%;
+  float: left;
+  border-right: 1px solid #ccc;
+  border-bottom: 0px;
+  padding: 20px 0 20px 0;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs li {
+  display: block;
+  width: 100%;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs li a {
+  display: block;
+  color: #888;
+  padding-left: 10px;
+  font-size: 1.3rem;
+  margin: 0;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .nav-tabs li.active a {
+  background: #dedede;
+  color: #555;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content {
+  width: 67%;
+  float: left;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content .tab-pane {
+  padding: 20px 0 0 20px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li {
+  list-style-type: none;
+  margin-bottom: 5px;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li label {
+  display: block;
+  cursor: pointer;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li label span {
+  font-weight: normal;
+  color: #777;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li input {
+  float: right;
+}
+body div[role='main'] .wrapper section.action.searchfilter .wraps .tab-content ul li a {
+  color: #4f7979;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture {
+  background: #fcfcfc;
+  border: 1px solid #cfcfcf;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture:before,
+body div[role='main'] .wrapper section.action.profile .profilepicture:after {
+  content: " ";
+  display: table;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture:after {
+  clear: both;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap {
+  height: 78px;
+  width: 78px;
+  border-radius: 39px;
+  background: #fff;
+  border: 1px solid #cfcfcf;
+  position: relative;
+  float: left;
+  margin-right: 20px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap a.hue {
+  display: block;
+  height: 70px;
+  width: 70px;
+  border-radius: 35px;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  opacity: 0;
+  filter: alpha(opacity=0);
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+  background: rgba(172, 60, 60, 0.6);
+  color: #fff;
+  text-align: center;
+  font-size: 1.9rem;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap a.hue i {
+  margin-top: 27px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap a.hue:hover {
+  opacity: 1;
+  filter: alpha(opacity=100);
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .boxwrap img {
+  height: 70px;
+  width: 70px;
+  border-radius: 35px;
+  margin: 3px 0 0 3px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction {
+  padding-top: 6px;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction span {
+  color: #a0a0a0;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul {
+  margin: 0;
+  padding: 0;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul li {
+  list-style: none;
+  display: inline-block;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul li a {
+  width: 34px;
+  height: 34px;
+  display: block;
+  background: #fff;
+  border: 1px solid #cfcfcf;
+  border-radius: 2px;
+  text-align: center;
+  color: #6f6f6f;
+  padding-top: 5px;
+  -webkit-transition: all 0.3s;
+  -o-transition: all 0.3s;
+  transition: all 0.3s;
+}
+body div[role='main'] .wrapper section.action.profile .profilepicture .profileaction ul li a:hover {
+  background: #6f6f6f;
+  border: 1px solid #6f6f6f;
+  color: #fff;
+}
+body div[role='main'] .wrapper section.action.profile textarea.about {
+  margin-bottom: 0px;
+}
 body div[role='main'] .wrapper section.action .toggle {
   margin-top: 2px;
   position: relative;
@@ -4684,7 +4739,7 @@ body div[role='main'] .wrapper section.action .toggle input:checked + label {
   background: #9FD6AE;
 }
 body div[role='main'] .wrapper section.action .action-header {
-  padding: 0 0 20px;
+  padding: 0 0 10px;
   border-bottom: 1px solid #ccc;
 }
 body div[role='main'] .wrapper section.action .action-header:before,
@@ -4936,12 +4991,12 @@ body div[role='main'] .wrapper section.action .button-group .btn-green-o:hover {
 body div[role='main'] .wrapper section.action .button-group .btn-green {
   display: block;
   padding: 5px 30px;
-  border: 1px solid #ffffff;
+  border: 1px solid white;
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: #ffffff;
+  color: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -4952,7 +5007,7 @@ body div[role='main'] .wrapper section.action .button-group .btn-green {
   letter-spacing: 0px;
 }
 body div[role='main'] .wrapper section.action .button-group .btn-green:hover {
-  color: #ffffff;
+  color: white;
 }
 body div[role='main'] .wrapper section.action .button-group .btn-green:hover {
   background-color: #3b5a5a;
@@ -5712,12 +5767,12 @@ body div[role='main'] .viewer section.entrance .btn-green-o:hover {
 body div[role='main'] .viewer section.entrance .btn-green {
   display: block;
   padding: 5px 30px;
-  border: 1px solid #ffffff;
+  border: 1px solid white;
   text-decoration: none;
   font-size: 12px;
   letter-spacing: 1.3px;
   text-transform: uppercase;
-  color: #ffffff;
+  color: white;
   -webkit-transition: all 0.3s;
   -o-transition: all 0.3s;
   transition: all 0.3s;
@@ -5728,7 +5783,7 @@ body div[role='main'] .viewer section.entrance .btn-green {
   letter-spacing: 0px;
 }
 body div[role='main'] .viewer section.entrance .btn-green:hover {
-  color: #ffffff;
+  color: white;
 }
 body div[role='main'] .viewer section.entrance .btn-green:hover {
   background-color: #3b5a5a;

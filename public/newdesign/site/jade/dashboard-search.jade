@@ -36,8 +36,6 @@ html
 										a( href="#" title="#" )
 											img( src="img/ui/ic-setting.png" alt="settings" )
 										
-										//- search settings
-										include ./includes/search.setting.jade
 
 									// input
 									.searchbox
@@ -47,22 +45,14 @@ html
 									.provider
 										// collection picker
 										a#picker(href="#", data-toggle='dropdown').picker
-											span.text All content provider 
+											span.text All Content Provider 
 											span.arrow
 
 										ul.dropdown-menu(aria-labelledby='picker')
 											li 
-												a(href="#") All content provider
+												a(href="#") All Content Provider
 											li 
-												a(href="#") Europeana
-											li 
-												a(href="#") DPLA
-											li 
-												a(href="#") Digital NZ
-											li 
-												a(href="#") Youtube
-											li 
-												a(href="#") Rijksmuseum
+												a(href="#") WITH Content
 
 									// view setting
 									ul.view
@@ -802,5 +792,19 @@ html
 						.button-group
 							a(href="#").btn-green-o.cancel Cancel
 							a(href="#").btn-green Add to collection
+
+					// search filter
+					section.action.searchfilter
+						.action-header
+							.title Search Filter
+
+						.action-body
+
+							// setting
+							include ./includes/search.setting.jade
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Apply
 	// script
 	include ./includes/script.inc.jade

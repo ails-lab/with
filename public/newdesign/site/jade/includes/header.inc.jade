@@ -22,7 +22,7 @@ header
 				// dropdown menu
 				ul.dropdown-menu(aria-labelledby='profilebutton')
 					li
-						a(href='#') My profile
+						a.showprofile(href='#') My profile
 					li
 						a(href='#') Sign out
 			
@@ -57,6 +57,10 @@ header
 					a.viewall( href='#' )
 						| View all activities 
 
+			// home
+			section.home
+				a( href="dashboard.html" title="Home" )
+					img( src="img/ui/ic-home.png" alt="Home" )
 
 			// explore
 			section.explore

@@ -35,7 +35,7 @@
             <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
             <!-- dropdown menu-->
             <ul aria-labelledby="profilebutton" class="dropdown-menu">
-              <li><a href="#">My profile</a></li>
+              <li><a href="#" class="showprofile">My profile</a></li>
               <li><a href="#">Sign out</a></li>
             </ul>
           </section>
@@ -56,6 +56,8 @@
               <!-- view all--><a href="#" class="viewall">View all activities </a>
             </div>
           </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
           <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
         </div>
@@ -74,7 +76,7 @@
             <!-- nav-->
             <nav class="app">
               <ul>
-                <li class="active"><a href="dashboard.html"><span class="icon"><i class="fa fa-dot-circle-o"></i></span>Dashboard</a></li>
+                <li class="active"><a href="dashboard.html"><span class="icon"><i class="fa fa-home"></i></span>Dashboard</a></li>
                 <li><a href="dashboard-collection.html"><span class="counter">7</span><span class="icon"><i class="fa fa-clone"></i></span>My Collection</a></li>
                 <li><a href="dashboard-exhibition.html"><span class="counter">10</span><span class="icon"><i class="fa fa-television"></i></span>My Exhibition</a></li>
                 <li><a href="dashboard-favorite.html"><span class="counter">5</span><span class="icon"><i class="fa fa-heart-o"></i></span>My Favorite</a></li>
@@ -147,6 +149,38 @@
               </section>
             </section>
           </main>
+          <!-- collection give access-->
+          <section class="action profile">
+            <div class="action-header">
+              <div class="title">My Profile</div>
+            </div>
+            <div class="action-body">
+              <div class="group">
+                <div class="title">Profile Picture</div>
+                <!-- profile picture box-->
+                <div class="profilepicture">
+                  <div class="boxwrap"><img src="img/content/img-profile.jpg"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete profile picture" class="hue"><i class="fa fa-trash-o"></i></a></div>
+                  <!-- action-->
+                  <div class="profileaction"><span>Load picture from</span>
+                    <ul>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Local image"><i class="fa fa-folder-o"></i></a></li>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Facebook"><i class="fa fa-facebook"></i></a></li>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Google+"><i class="fa fa-google-plus"></i></a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="group">
+                <div class="title">Personal Info</div>
+                <div class="fields">
+                  <input type="text" placeholder="Firstname" value="Michelle" class="half">
+                  <input type="text" placeholder="Lastname" value="Smith" class="half">
+                </div>
+                <textarea type="text" placeholder="About me" class="about">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+              </div>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save Profile</a></div>
+          </section>
         </div>
       </div>
     </div>

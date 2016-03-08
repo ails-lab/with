@@ -35,7 +35,7 @@
             <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img src="img/content/img-profile.jpg"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name">Megan Mullaly</span><span class="arrow"></span></a>
             <!-- dropdown menu-->
             <ul aria-labelledby="profilebutton" class="dropdown-menu">
-              <li><a href="#">My profile</a></li>
+              <li><a href="#" class="showprofile">My profile</a></li>
               <li><a href="#">Sign out</a></li>
             </ul>
           </section>
@@ -56,6 +56,8 @@
               <!-- view all--><a href="#" class="viewall">View all activities </a>
             </div>
           </section>
+          <!-- home-->
+          <section class="home"><a href="dashboard.html" title="Home"><img src="img/ui/ic-home.png" alt="Home"></a></section>
           <!-- explore-->
           <section class="explore"><a href="dashboard-search.html" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
         </div>
@@ -74,182 +76,16 @@
                 <!-- wrap-->
                 <div class="wrap">
                   <!-- settings bar-->
-                  <div class="settings"><a href="#" title="#"><img src="img/ui/ic-setting.png" alt="settings"></a>
-                    <!-- settings-->
-                    <div class="searchsetting">
-                      <!-- filter Text-->
-                      <div class="filtertext">
-                        <input type="text" placeholder="Search" class="filterinput"><img alt="search" src="img/ic-search.png" class="filterimg">
-                      </div>
-                      <!-- tabs-->
-                      <ul role="tablist" class="nav nav-tabs">
-                        <li class="active"><a href="#sources" title="" data-toggle="tab">SOURCES</a></li>
-                        <li><a href="#type" title="" data-toggle="tab">TYPE</a></li>
-                        <li><a href="#provider" title="" data-toggle="tab">PROVIDER</a></li>
-                        <li><a href="#dataprovider" title="" data-toggle="tab">DATA PROVIDER</a></li>
-                        <li><a href="#creator" title="" data-toggle="tab">CREATOR</a></li>
-                        <li><a href="#right" title="" data-toggle="tab">RIGHTS</a></li>
-                        <li><a href="#country" title="" data-toggle="tab">COUNTRY</a></li>
-                        <li><a href="#year" title="" data-toggle="tab">YEAR</a></li>
-                      </ul>
-                      <!-- panes-->
-                      <div class="tab-content">
-                        <div id="sources" class="tab-pane active">
-                          <!-- sources-->
-                          <ul class="sources list">
-                            <li>
-                              <label>
-                                <input type="checkbox"><span>EUROPEANA</span>
-                              </label>
-                            </li>
-                            <li>
-                              <label>
-                                <input type="checkbox"><span>DPLA</span>
-                              </label>
-                            </li>
-                            <li>
-                              <label>
-                                <input type="checkbox"><span>NLA</span>
-                              </label>
-                            </li>
-                            <li>
-                              <label>
-                                <input type="checkbox"><span>YOUTUBE</span>
-                              </label>
-                            </li>
-                            <li>
-                              <label>
-                                <input type="checkbox"><span>DIGITAL NZ</span>
-                              </label>
-                            </li>
-                            <li>
-                              <label>
-                                <input type="checkbox"><span>EUSPACE</span>
-                              </label>
-                            </li>
-                          </ul>
-                        </div>
-                        <div id="type" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">The European Library</a></li>
-                            <li><a href="#" title="#">EuroPhoto</a></li>
-                            <li><a href="#" title="#">AthenaPlus</a></li>
-                            <li><a href="#" title="#">Hispana</a></li>
-                            <li><a href="#" title="#">Culture Grid</a></li>
-                            <li><a href="#" title="#">Linked Heritage</a></li>
-                            <li><a href="#" title="#">Digitale Collectie</a></li>
-                            <li><a href="#" title="#">EUscreenXL</a></li>
-                            <li><a href="#" title="#">Cultura Italia</a></li>
-                            <li><a href="#" title="#">Europeana Photography</a></li>
-                          </ul>
-                        </div>
-                        <div id="provider" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">Newspaper</a></li>
-                            <li><a href="#" title="#">Article</a></li>
-                            <li><a href="#" title="#">Text</a></li>
-                            <li><a href="#" title="#">Image</a></li>
-                            <li><a href="#" title="#">Archive</a></li>
-                            <li><a href="#" title="#">Research Paper</a></li>
-                            <li><a href="#" title="#">Sound</a></li>
-                            <li><a href="#" title="#">Video</a></li>
-                            <li><a href="#" title="#">Manuscripts</a></li>
-                            <li><a href="#" title="#">Data</a></li>
-                          </ul>
-                        </div>
-                        <div id="dataprovider" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">Newspaper</a></li>
-                            <li><a href="#" title="#">Article</a></li>
-                            <li><a href="#" title="#">Text</a></li>
-                            <li><a href="#" title="#">Image</a></li>
-                            <li><a href="#" title="#">Archive</a></li>
-                            <li><a href="#" title="#">Research Paper</a></li>
-                            <li><a href="#" title="#">Sound</a></li>
-                            <li><a href="#" title="#">Video</a></li>
-                            <li><a href="#" title="#">Manuscripts</a></li>
-                            <li><a href="#" title="#">Data</a></li>
-                          </ul>
-                        </div>
-                        <div id="creator" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">Newspaper</a></li>
-                            <li><a href="#" title="#">Article</a></li>
-                            <li><a href="#" title="#">Text</a></li>
-                            <li><a href="#" title="#">Image</a></li>
-                            <li><a href="#" title="#">Archive</a></li>
-                            <li><a href="#" title="#">Research Paper</a></li>
-                            <li><a href="#" title="#">Sound</a></li>
-                            <li><a href="#" title="#">Video</a></li>
-                            <li><a href="#" title="#">Manuscripts</a></li>
-                            <li><a href="#" title="#">Data</a></li>
-                          </ul>
-                        </div>
-                        <div id="right" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">Newspaper</a></li>
-                            <li><a href="#" title="#">Article</a></li>
-                            <li><a href="#" title="#">Text</a></li>
-                            <li><a href="#" title="#">Image</a></li>
-                            <li><a href="#" title="#">Archive</a></li>
-                            <li><a href="#" title="#">Research Paper</a></li>
-                            <li><a href="#" title="#">Sound</a></li>
-                            <li><a href="#" title="#">Video</a></li>
-                            <li><a href="#" title="#">Manuscripts</a></li>
-                            <li><a href="#" title="#">Data</a></li>
-                          </ul>
-                        </div>
-                        <div id="country" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">Newspaper</a></li>
-                            <li><a href="#" title="#">Article</a></li>
-                            <li><a href="#" title="#">Text</a></li>
-                            <li><a href="#" title="#">Image</a></li>
-                            <li><a href="#" title="#">Archive</a></li>
-                            <li><a href="#" title="#">Research Paper</a></li>
-                            <li><a href="#" title="#">Sound</a></li>
-                            <li><a href="#" title="#">Video</a></li>
-                            <li><a href="#" title="#">Manuscripts</a></li>
-                            <li><a href="#" title="#">Data</a></li>
-                          </ul>
-                        </div>
-                        <div id="year" class="tab-pane">
-                          <!-- type-->
-                          <ul class="type list">
-                            <li><a href="#" title="#">Newspaper</a></li>
-                            <li><a href="#" title="#">Article</a></li>
-                            <li><a href="#" title="#">Text</a></li>
-                            <li><a href="#" title="#">Image</a></li>
-                            <li><a href="#" title="#">Archive</a></li>
-                            <li><a href="#" title="#">Research Paper</a></li>
-                            <li><a href="#" title="#">Sound</a></li>
-                            <li><a href="#" title="#">Video</a></li>
-                            <li><a href="#" title="#">Manuscripts</a></li>
-                            <li><a href="#" title="#">Data</a></li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <div class="settings"><a href="#" title="#"><img src="img/ui/ic-setting.png" alt="settings"></a></div>
                   <!-- input-->
                   <div class="searchbox"><img src="img/ui/ic-mag.png" alt="Search" class="icon">
                     <input type="text" placeholder="Search media" class="searchinput">
                   </div>
                   <div class="provider">
-                    <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">All content provider </span><span class="arrow"></span></a>
+                    <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">All Content Provider </span><span class="arrow"></span></a>
                     <ul aria-labelledby="picker" class="dropdown-menu">
-                      <li><a href="#">All content provider</a></li>
-                      <li><a href="#">Europeana</a></li>
-                      <li><a href="#">DPLA</a></li>
-                      <li><a href="#">Digital NZ</a></li>
-                      <li><a href="#">Youtube</a></li>
-                      <li><a href="#">Rijksmuseum</a></li>
+                      <li><a href="#">All Content Provider</a></li>
+                      <li><a href="#">WITH Content</a></li>
                     </ul>
                   </div>
                   <!-- view setting-->
@@ -729,6 +565,180 @@
               </div>
             </div>
             <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Add to collection</a></div>
+          </section>
+          <!-- search filter-->
+          <section class="action searchfilter">
+            <div class="action-header">
+              <div class="title">Search Filter</div>
+            </div>
+            <div class="action-body">
+              <!-- setting-->
+              <!-- settings-->
+              <div class="searchsetting">
+                <!-- filter Text-->
+                <div class="filtertext">
+                  <input type="text" placeholder="Search" class="filterinput"><img alt="search" src="img/ui/ic-mag.png" class="filterimg">
+                </div>
+                <!-- wrap-->
+                <div class="wraps">
+                  <!-- tabs-->
+                  <ul role="tablist" class="nav nav-tabs">
+                    <li class="active"><a href="#sources" title="" data-toggle="tab">SOURCES</a></li>
+                    <li><a href="#type" title="" data-toggle="tab">TYPE</a></li>
+                    <li><a href="#provider" title="" data-toggle="tab">PROVIDER</a></li>
+                    <li><a href="#dataprovider" title="" data-toggle="tab">DATA PROVIDER</a></li>
+                    <li><a href="#creator" title="" data-toggle="tab">CREATOR</a></li>
+                    <li><a href="#right" title="" data-toggle="tab">RIGHTS</a></li>
+                    <li><a href="#country" title="" data-toggle="tab">COUNTRY</a></li>
+                    <li><a href="#year" title="" data-toggle="tab">YEAR</a></li>
+                  </ul>
+                  <!-- panes-->
+                  <div class="tab-content">
+                    <div id="sources" class="tab-pane active">
+                      <!-- sources-->
+                      <ul class="sources list">
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>EUROPEANA</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>DPLA</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>NLA</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>YOUTUBE</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>DIGITAL NZ</span>
+                          </label>
+                        </li>
+                        <li>
+                          <label>
+                            <input type="checkbox"><span>EUSPACE</span>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                    <div id="type" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">The European Library</a></li>
+                        <li><a href="#" title="#">EuroPhoto</a></li>
+                        <li><a href="#" title="#">AthenaPlus</a></li>
+                        <li><a href="#" title="#">Hispana</a></li>
+                        <li><a href="#" title="#">Culture Grid</a></li>
+                        <li><a href="#" title="#">Linked Heritage</a></li>
+                        <li><a href="#" title="#">Digitale Collectie</a></li>
+                        <li><a href="#" title="#">EUscreenXL</a></li>
+                        <li><a href="#" title="#">Cultura Italia</a></li>
+                        <li><a href="#" title="#">Europeana Photography</a></li>
+                      </ul>
+                    </div>
+                    <div id="provider" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="dataprovider" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="creator" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="right" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="country" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Data</a></li>
+                      </ul>
+                    </div>
+                    <div id="year" class="tab-pane">
+                      <!-- type-->
+                      <ul class="type list">
+                        <li><a href="#" title="#">Newspaper</a></li>
+                        <li><a href="#" title="#">Article</a></li>
+                        <li><a href="#" title="#">Text</a></li>
+                        <li><a href="#" title="#">Image</a></li>
+                        <li><a href="#" title="#">Archive</a></li>
+                        <li><a href="#" title="#">Research Paper</a></li>
+                        <li><a href="#" title="#">Sound</a></li>
+                        <li><a href="#" title="#">Video</a></li>
+                        <li><a href="#" title="#">Manuscripts</a></li>
+                        <li><a href="#" title="#">Dat</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Apply</a></div>
           </section>
         </div>
       </div>

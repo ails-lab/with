@@ -9,7 +9,7 @@
             <!-- profile picture--><a id="profilebutton" href="#" data-toggle="dropdown" class="profile"><span class="picture"><img data-bind="attr: { src: profileImage }"><img src="img/ui/ic-profile-frame.png" class="frame"></span><span class="name" data-bind="text: username"></span><span class="arrow"></span></a>
             <!-- dropdown menu-->
             <ul aria-labelledby="profilebutton" class="dropdown-menu">
-              <li><a href="#profile">My profile</a></li>
+              <li><a href="#"  class="showprofile">My profile</a></li>
               <li><a href="#" onclick="logout(); return false;">Sign out</a></li>
             </ul>
           </section>
@@ -68,9 +68,12 @@
 							
 						</li>
 					</ul>
-              <!-- view all--><a href="#notifications" class="viewall">View all activities </a>
+              <!-- view all--><a href="#dashboard" class="viewall">View all activities </a>
             </div>
           </section>
+           <!-- home-->
+          <section class="home"><a href="#dashboard" title="Dashboard Home"><img src="img/ui/ic-home.png" alt="Dashboard Home"></a></section>
+         
           <!-- explore-->
           <section class="explore"><a href="#search" title="explore"><img src="img/ui/ic-search.png"><span class="text">EXPLORE</span></a></section>
         </div>

@@ -99,5 +99,48 @@ html
 										.timing
 											| 2 hours ago
 
+					// collection give access
+					section.action.profile
+						.action-header
+							.title My Profile
+
+						.action-body
+							.group
+								.title Profile Picture
+
+								// profile picture box
+								.profilepicture
+									.boxwrap
+										img( src="img/content/img-profile.jpg")
+										a.hue( href="#" data-toggle="tooltip" data-placement="top" title="Delete profile picture")
+											i.fa.fa-trash-o
+
+									// action
+									.profileaction
+										span Load picture from
+										ul
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Local image")
+													i.fa.fa-folder-o
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Facebook")
+													i.fa.fa-facebook
+											li
+												a( href="#" data-toggle="tooltip" data-placement="top" title="Google+")
+													i.fa.fa-google-plus
+
+
+							.group
+								.title Personal Info
+								.fields
+									input.half( type="text" placeholder="Firstname" value="Michelle" )
+									input.half( type="text" placeholder="Lastname" value="Smith" )
+								textarea.about( type="text" placeholder="About me")
+									| Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
+
+						.button-group
+							a(href="#").btn-green-o.cancel Cancel
+							a(href="#").btn-green Save Profile
+
 	// script
 	include ./includes/script.inc.jade

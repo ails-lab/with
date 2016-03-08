@@ -2,7 +2,7 @@
 	<label class="header">NAVIGATE</label>
 	<nav class="app">
 		<ul>
-			<li data-bind="css: { active: checkRoute('#dashboard') }"><a href="#dashboard"><span class="icon"><i class="fa fa-dot-circle-o"></i></span>Dashboard</a></li>
+			<li data-bind="css: { active: checkRoute('#dashboard') }"><a href="#dashboard"><span class="icon"><i class="fa fa-home"></i></span>Dashboard</a></li>
 			<li data-bind="css: { active: checkRoute('#mycollections') || checkRoute('#collectionview') }"><a href="#mycollections"><span class="counter" data-bind="text: collectionCount"></span><span class="icon"><i class="fa fa-clone"></i></span>My Collections</a></li>
 			<li data-bind="css: { active: checkRoute('#myexhibitions') || checkRoute('#exhibitionview') || checkRoute('#exhibition-edit') }"><a href="#myexhibitions"><span class="counter" data-bind="text: exhibitionCount"></span><span class="icon"><i class="fa fa-television"></i></span>My Exhibitions</a></li>
 			<li data-bind="css: { active: checkRoute('#myfavorites') }"><a href="#myfavorites"><span class="counter" data-bind="text: favoritesCount"></span><span class="icon"><i class="fa fa-heart-o"></i></span>My Favorites</a></li>
@@ -20,3 +20,36 @@
 		</ul>
 	</nav>
 </aside>
+<!-- collection give access-->
+          <section class="action profile">
+            <div class="action-header">
+              <div class="title">My Profile</div>
+            </div>
+            <div class="action-body">
+              <div class="group">
+                <div class="title">Profile Picture</div>
+                <!-- profile picture box-->
+                <div class="profilepicture">
+                  <div class="boxwrap"><img src="img/content/img-profile.jpg"><a href="#" data-toggle="tooltip" data-placement="top" title="Delete profile picture" class="hue"><i class="fa fa-trash-o"></i></a></div>
+                  <!-- action-->
+                  <div class="profileaction"><span>Load picture from</span>
+                    <ul>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Local image"><i class="fa fa-folder-o"></i></a></li>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Facebook"><i class="fa fa-facebook"></i></a></li>
+                      <li><a href="#" data-toggle="tooltip" data-placement="top" title="Google+"><i class="fa fa-google-plus"></i></a></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="group">
+                <div class="title">Personal Info</div>
+                <div class="fields">
+                  <input type="text" placeholder="Firstname" value="Michelle" class="half">
+                  <input type="text" placeholder="Lastname" value="Smith" class="half">
+                </div>
+                <textarea type="text" placeholder="About me" class="about">Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.</textarea>
+              </div>
+            </div>
+            <div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save Profile</a></div>
+          </section>
+

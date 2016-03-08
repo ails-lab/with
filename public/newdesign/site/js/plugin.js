@@ -81,7 +81,7 @@ WITHApp.ui = function( custom ){
 		// init carousel
 		initCarousel();
 
-		initSearchSetting();
+		//initSearchSetting();
 
 		initSearchColumnAdjustment();
 
@@ -305,6 +305,27 @@ WITHApp.ui = function( custom ){
 
 			});
 		}
+
+		// search settings
+		$( '.searchbar .settings > a' ).click( function( e ) {
+
+			// prevent
+			e.preventDefault();
+
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.searchfilter' ).addClass( 'active' );
+		});
+
+		// profile
+		$( '.showprofile' ).click( function( e ) {
+
+			// prevent
+			e.preventDefault();
+
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.profile' ).addClass( 'active' );
+
+		});
 	};
 
 	// method to initialize isotope
