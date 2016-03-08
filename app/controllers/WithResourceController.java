@@ -126,6 +126,34 @@ public class WithResourceController extends Controller {
 			Option<Integer> position) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
+		if (json == null) {
+			result.put("error", "Invalid JSON");
+			return badRequest(result);
+		}
+		String resourceType = null;
+		if (json.has("resourceType"))
+			resourceType = json.get("resourceType").asText();
+		if ((resourceType == null)
+				|| (WithResourceType.valueOf(resourceType) == null))
+			resourceType = WithResourceType.CulturalObject.toString();
+//		
+		Class<?> clazz;
+		RecordResource record = null;
+		try {
+			clazz = Class.forName("model.resources."
+					+ resourceType);
+			 record = (RecordResource) Json.fromJson(json,
+					clazz);
+		} catch (ClassNotFoundException e1) {
+			log.error(Arrays.toString(e1.getStackTrace()));
+			result.put("error",e1.getLocalizedMessage());
+		}
+		
+		return internalAddRecordToCollection(colId, record, position, result);
+	}
+
+	public static Result internalAddRecordToCollection(String colId, RecordResource record, Option<Integer> position,
+			ObjectNode result) {
 		ObjectId collectionDbId = new ObjectId(colId);
 		Locks locks = null;
 		try {
@@ -135,22 +163,9 @@ public class WithResourceController extends Controller {
 			if (!response.toString().equals(ok().toString())) {
 				return response;
 			} else {
-				if (json == null) {
-					result.put("error", "Invalid JSON");
-					return badRequest(result);
-				}
-				String resourceType = null;
+				
 				ObjectId userId = AccessManager.effectiveUserDbIds(
 						session().get("effectiveUserIds")).get(0);
-				if (json.has("resourceType"))
-					resourceType = json.get("resourceType").asText();
-				if ((resourceType == null)
-						|| (WithResourceType.valueOf(resourceType) == null))
-					resourceType = WithResourceType.CulturalObject.toString();
-				Class<?> clazz = Class.forName("model.resources."
-						+ resourceType);
-				RecordResource record = (RecordResource) Json.fromJson(json,
-						clazz);
 				int last = 0;
 				Sources source = Sources.UploadedByUser;
 				if ((record.getProvenance() != null)
@@ -188,10 +203,10 @@ public class WithResourceController extends Controller {
 								AccessManager.effectiveUserDbIds(session().get(
 										"effectiveUserIds")), Action.EDIT,
 								recordId)
-								&& (json.get("descriptiveData") != null))
+								&& (record.getDescriptiveData() != null))
 							DB.getRecordResourceDAO().editRecord(
 									"descriptiveData", resource.getDbId(),
-									json.get("descriptiveData"));
+									Json.toJson(record.getDescriptiveData()));
 						// TODO: if record has annotations, update/add
 						// annotations
 

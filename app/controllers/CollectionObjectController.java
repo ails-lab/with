@@ -51,6 +51,7 @@ import org.bson.types.ObjectId;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
+import play.libs.F;
 import play.libs.F.Function0;
 import play.libs.F.Option;
 import play.libs.F.Promise;
@@ -65,8 +66,15 @@ import utils.Locks;
 import utils.Tuple;
 import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.core.JsonParser.NumberType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeType;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import controllers.parameterTypes.MyPlayList;
@@ -92,11 +100,11 @@ public class CollectionObjectController extends WithResourceController {
 
 		CollectionObject collection = new CollectionObject();
 		collection.getDescriptiveData().setLabel(new MultiLiteral(id));
-		ObjectNode error = Json.newObject();
-//		ObjectId creatorDbId = new ObjectId(session().get("user"));
-//		boolean succes = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, error);
-//		if (!succes)
-//			return badRequest(error);
+		ObjectNode resultInfo = Json.newObject();
+		ObjectId creatorDbId = new ObjectId(session().get("user"));
+		boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
+		if (!success)
+			return badRequest(resultInfo);
 
 		CommonQuery q = new CommonQuery();
 		q.page = "1";
@@ -109,11 +117,14 @@ public class CollectionObjectController extends WithResourceController {
 	    	q.page = page+"";
 	    	result = src.getAllResults(q);
 	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
-				
+				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
+						F.Option.None(), resultInfo);
 			};
 			page++;
-	    } while (page*pageSize < result.totalCount);
-		return ok("Collection imported");
+	    } while (page*pageSize < result.totalCount && false);
+	    if (resultInfo.has("error"))
+	    	return badRequest(resultInfo);
+		return ok(resultInfo);
 	}
 
 	/**
@@ -140,8 +151,8 @@ public class CollectionObjectController extends WithResourceController {
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
 			CollectionObject collection = (colType.equals(CollectionType.Exhibition)) ? new CollectionObject()
 					: Json.fromJson(json, CollectionObject.class);
-			boolean succes = internalAddCollection(collection, colType, creatorDbId, error);
-			if (!succes)
+			boolean success = internalAddCollection(collection, colType, creatorDbId, error);
+			if (!success)
 				return badRequest(error);
 			/*
 			 * index collection BiFunction<ObjectId, Map<String, Object>,
