@@ -32,11 +32,9 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 		ExhibitionData, None
 	}
 
-	// The target resource Id
-	@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
-	private ObjectId resourceId;
-	private ContextDataType contextDataType;
-	private T1 body;
+	protected ContextDataType contextDataType;
+	protected ContextDataTarget target;
+	protected T1 body;
 
 	public static class ContextDataTarget {
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
@@ -46,7 +44,6 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		WithAccess access;
-		
 
 		public ObjectId getCollectionId() {
 			return collectionId;
@@ -79,29 +76,20 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 	public ContextData() {
 	}
 
-	public ContextData(ObjectId resourceId) {
-		this.resourceId = resourceId;
+	public ContextData(ObjectId recordId) {
+		this.target = new ContextDataTarget();
+		this.getTarget().setRecordId(recordId);
 		this.contextDataType = ContextDataType.None;
 	}
 
 	public ContextData(ObjectId resourceId, ContextDataType contextDataType) {
-		this.resourceId = resourceId;
 		this.contextDataType = contextDataType;
 	}
 
 	public ContextData(ObjectId resourceId, ContextDataType contextDataType,
 			T1 body) {
-		this.resourceId = resourceId;
 		this.contextDataType = contextDataType;
 		this.body = body;
-	}
-
-	public ObjectId getResourceId() {
-		return resourceId;
-	}
-
-	public void setResourceId(ObjectId resourceId) {
-		this.resourceId = resourceId;
 	}
 
 	public T1 getBody() {
@@ -118,6 +106,14 @@ public class ContextData<T1 extends ContextData.ContextDataBody> {
 
 	public void setContextDataType(ContextDataType contextDataType) {
 		this.contextDataType = contextDataType;
+	}
+
+	public ContextDataTarget getTarget() {
+		return target;
+	}
+
+	public void setTarget(ContextDataTarget target) {
+		this.target = target;
 	}
 
 }

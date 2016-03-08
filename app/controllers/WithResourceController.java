@@ -152,7 +152,8 @@ public class WithResourceController extends Controller {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
 				}
-				return addRecordToCollection(json, collectionDbId, position, noDouble);
+				return addRecordToCollection(json, collectionDbId, position,
+						noDouble);
 			}
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
@@ -162,9 +163,9 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
-	
-	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
-			Option<Integer> position, Boolean noDouble) {
+
+	public static Result addRecordToCollection(JsonNode json,
+			ObjectId collectionDbId, Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
 		String resourceType = null;
 		ObjectId userId = AccessManager.effectiveUserDbIds(
@@ -175,15 +176,15 @@ public class WithResourceController extends Controller {
 				|| (WithResourceType.valueOf(resourceType) == null))
 			resourceType = WithResourceType.CulturalObject.toString();
 		try {
-			Class<?> clazz = Class.forName("model.resources."
-					+ resourceType);
+			Class<?> clazz = Class.forName("model.resources." + resourceType);
 			if (position.isDefined())
-				fillInContextTarget(json, collectionDbId.toString(), position.get());
-			RecordResource record = (RecordResource) Json.fromJson(json,
-					clazz);
-			 MultiLiteral label = record.getDescriptiveData().getLabel();
-			if (label == null || label.get(Language.DEFAULT) == null || 
-					label.get(Language.DEFAULT).isEmpty() || label.get(Language.DEFAULT).get(0) == "") 
+				fillInContextTarget(json, collectionDbId.toString(),
+						position.get());
+			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
+			MultiLiteral label = record.getDescriptiveData().getLabel();
+			if (label == null || label.get(Language.DEFAULT) == null
+					|| label.get(Language.DEFAULT).isEmpty()
+					|| label.get(Language.DEFAULT).get(0) == "")
 				return badRequest("A label for the record has to be provided");
 			int last = 0;
 			Sources source = Sources.UploadedByUser;
@@ -195,8 +196,8 @@ public class WithResourceController extends Controller {
 			} else
 				record.setProvenance(new ArrayList<ProvenanceInfo>(Arrays
 						.asList(new ProvenanceInfo(source.toString()))));
-			String externalId = ((ProvenanceInfo) record.getProvenance()
-					.get(last)).getResourceId();
+			String externalId = ((ProvenanceInfo) record.getProvenance().get(
+					last)).getResourceId();
 			if (externalId == null)
 				externalId = record.getAdministrative().getExternalId();
 			ObjectId recordId = null;
@@ -206,10 +207,9 @@ public class WithResourceController extends Controller {
 			if ((externalId != null)// get dbId of existring resource
 					&& DB.getRecordResourceDAO().existsWithExternalId(
 							externalId)) {
-				RecordResource resource = DB
-						.getRecordResourceDAO()
-						.getUniqueByFieldAndValue(
-								"administrative.externalId", externalId,
+				RecordResource resource = DB.getRecordResourceDAO()
+						.getUniqueByFieldAndValue("administrative.externalId",
+								externalId,
 								new ArrayList<String>(Arrays.asList("_id")));
 				recordId = resource.getDbId();
 				Status response = errorIfNoAccessToRecord(Action.READ, recordId);
@@ -217,24 +217,26 @@ public class WithResourceController extends Controller {
 					return response;
 				} else {// In case the record already exists we overwrite
 						// the existing record's descriptive data for the fields
-					    // included in the json, if the user has WRITE access.
+						// included in the json, if the user has WRITE access.
 					if (noDouble) {
-						if (DB.getRecordResourceDAO().existsSameExternaIdInCollection
-								(externalId, collectionDbId)) {
+						if (DB.getRecordResourceDAO()
+								.existsSameExternaIdInCollection(externalId,
+										collectionDbId)) {
 							result.put("error", "double");
 							return forbidden(result);
 						}
 					}
-					if (DB.getRecordResourceDAO().hasAccess(
-							AccessManager.effectiveUserDbIds(session().get(
-									"effectiveUserIds")), Action.EDIT,
-							recordId)
+					if (DB.getRecordResourceDAO()
+							.hasAccess(
+									AccessManager.effectiveUserDbIds(session()
+											.get("effectiveUserIds")),
+									Action.EDIT, recordId)
 							&& (json.get("descriptiveData") != null))
-						DB.getRecordResourceDAO().editRecord(
-								"descriptiveData", resource.getDbId(),
-								json.get("descriptiveData"));
-					addToCollection(position, recordId, collectionDbId,
-							owns);
+						DB.getRecordResourceDAO()
+								.editRecord("descriptiveData",
+										resource.getDbId(),
+										json.get("descriptiveData"));
+					addToCollection(position, recordId, collectionDbId, owns);
 					// TODO: if record has annotations, update/add
 					// annotations (already filtered so that they refer to
 					// colId)
@@ -242,8 +244,8 @@ public class WithResourceController extends Controller {
 							&& !record.getContextData().isEmpty()) {
 						ContextData contextData = (ContextData) record
 								.getContextData().get(0);
-						DB.getRecordResourceDAO().updateContextData(
-								contextData);
+						DB.getRecordResourceDAO()
+								.updateContextData(contextData);
 					}
 				}
 			} else { // create new record in db
@@ -266,12 +268,11 @@ public class WithResourceController extends Controller {
 								EmbeddedMediaObject existingMedia = null;
 								if (!mediaUrl.isEmpty()
 										&& ((existingMedia = DB
-												.getMediaObjectDAO()
-												.getByUrl(mediaUrl)) != null)) {
+												.getMediaObjectDAO().getByUrl(
+														mediaUrl)) != null)) {
 									media = new EmbeddedMediaObject(
 											existingMedia);
-								}
-								else {
+								} else {
 									return badRequest("A media url has to be provided.");
 								}
 								// TODO: careful, the user is allowed to set
@@ -311,15 +312,12 @@ public class WithResourceController extends Controller {
 							new ProvenanceInfo("UploadedByUser", "record/"
 									+ recordId, recordId.toString()));
 					DB.getRecordResourceDAO().updateField(recordId,
-							"administrative.externalId",
-							recordId.toString());
+							"administrative.externalId", recordId.toString());
 					break;
 				case Mint:
-					errors = RecordResourceController
-							.validateRecord(record);
+					errors = RecordResourceController.validateRecord(record);
 					record.getAdministrative().setWithCreator(userId);
-					List<ProvenanceInfo> provenance = record
-							.getProvenance();
+					List<ProvenanceInfo> provenance = record.getProvenance();
 					record.getAdministrative().setExternalId(
 							provenance.get(last).getResourceId());
 					if (errors != null) {
@@ -327,15 +325,13 @@ public class WithResourceController extends Controller {
 					}
 					DB.getRecordResourceDAO().makePermanent(record);
 					recordId = record.getDbId();
-					DB.getRecordResourceDAO().updateWithURI(
-							record.getDbId(), "/record/" + recordId);
+					DB.getRecordResourceDAO().updateWithURI(record.getDbId(),
+							"/record/" + recordId);
 					break;
 				default:// imported first time from other sources
 					// there is no withCreator and the record is public
-					record.getAdministrative().getAccess()
-							.setIsPublic(true);
-					errors = RecordResourceController
-							.validateRecord(record);
+					record.getAdministrative().getAccess().setIsPublic(true);
+					errors = RecordResourceController.validateRecord(record);
 					provenance = record.getProvenance();
 					record.getAdministrative().setExternalId(
 							provenance.get(last).getResourceId());
@@ -358,9 +354,9 @@ public class WithResourceController extends Controller {
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
-		} 
+		}
 	}
-	
+
 	public static Result addRecordsToCollection(String colId) {
 		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
@@ -376,17 +372,18 @@ public class WithResourceController extends Controller {
 				if (json == null || !json.isArray()) {
 					result.put("error", "Invalid JSON");
 					return badRequest(result);
-				}
-				else {
+				} else {
 					Iterator<JsonNode> iterator = json.iterator();
 					while (iterator.hasNext()) {
 						JsonNode recordJson = iterator.next();
-						Result r = addRecordToCollection(recordJson, new ObjectId(colId), Option.None(), false);
+						Result r = addRecordToCollection(recordJson,
+								new ObjectId(colId), Option.None(), false);
 						if (!r.toString().equals(ok().toString())) {
 							return r;
 						}
 					}
-					result.put("message", "Records have been successfully added to to collection.");
+					result.put("message",
+							"Records have been successfully added to to collection.");
 					return ok(result);
 				}
 			}
@@ -452,7 +449,6 @@ public class WithResourceController extends Controller {
 			}
 		}
 	}
-	
 
 	// ignores context data that do not refer to the colId-position where the
 	// record is added

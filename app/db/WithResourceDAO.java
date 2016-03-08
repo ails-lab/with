@@ -16,14 +16,10 @@
 
 package db;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -44,19 +40,10 @@ import org.mongodb.morphia.query.CriteriaContainer;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import play.libs.Json;
-import sources.core.ParallelAPICall;
 import utils.AccessManager.Action;
 import utils.Tuple;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.mongodb.BasicDBObject;
-
-import elastic.Elastic;
-import elastic.ElasticUpdater;
 
 /*
  * The class consists of methods that can be both query
@@ -66,6 +53,7 @@ import elastic.ElasticUpdater;
  * Special methods referring to one of these entities go to the
  * specific DAO class.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	/*
@@ -423,8 +411,8 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 		T record = this.getById(resourceId,
 				new ArrayList<String>(Arrays.asList("collectedIn")));
 		List<ObjectId> parentCollections = new ArrayList<ObjectId>();
-		for (CollectionInfo ci : (List<CollectionInfo>) record.getCollectedIn()) {
-			parentCollections.add(ci.getCollectionId());
+		for (ObjectId ci : (List<ObjectId>) record.getCollectedIn()) {
+			parentCollections.add(ci);
 		}
 		return parentCollections;
 	}

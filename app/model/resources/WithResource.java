@@ -57,25 +57,27 @@ import model.usersAndGroups.User;
 import utils.Deserializer;
 import utils.Serializer;
 
+@SuppressWarnings("rawtypes")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity("RecordResource")
 @Indexes({
-	@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
-	@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions())
-	})
+		@Index(fields = @Field(value = "resourceType", type = IndexType.ASC), options = @IndexOptions()),
+		@Index(fields = @Field(value = "collectedIn", type = IndexType.ASC), options = @IndexOptions()) })
 @JsonInclude(value = JsonInclude.Include.NON_EMPTY)
 public class WithResource<T extends DescriptiveData, U extends WithResource.WithAdmin> {
 
-
-	//TODO: compound indexes for common queries on multiple fields
+	// TODO: compound indexes for common queries on multiple fields
 	@Indexes({
-		@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
-		@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions(unique = true)),
-		@Index(fields = @Field(value = "access.user,access.level"))//compound/multikey index for access
+			@Index(fields = @Field(value = "withCreator", type = IndexType.ASC), options = @IndexOptions()),
+			@Index(fields = @Field(value = "externalId", type = IndexType.ASC), options = @IndexOptions(unique = true)),
+			@Index(fields = @Field(value = "access.user,access.level")) // compound/multikey
+																		// index
+																		// for
+																		// access
 	})
 	public static class WithAdmin {
 
-		//index
+		// index
 		@JsonSerialize(using = Serializer.WithAccessSerializer.class)
 		@JsonDeserialize(using = Deserializer.WithAccessDeserializer.class)
 		private WithAccess access = new WithAccess();
@@ -86,7 +88,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		 * who uploaded that resource. For collections, it links to the userId
 		 * who created the collection.
 		 */
-		//index
+		// index
 		@JsonSerialize(using = Serializer.ObjectIdSerializer.class)
 		private ObjectId withCreator = null;
 
@@ -103,10 +105,10 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		private Date lastModified;
 
 		@Embedded
-		//@JsonSerialize(using = Serializer.AccessMapSerializer.class)
-		//@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
-		//private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
-
+		// @JsonSerialize(using = Serializer.AccessMapSerializer.class)
+		// @JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
+		// private final Map<ObjectId, Access> underModeration = new
+		// HashMap<ObjectId, Access>();
 		// recordId of last entry of provenance chain id the resource has been
 		// imported from external resource
 		// dbId if uploaded by user
@@ -153,7 +155,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		}
 
 		public void setWithCreator(ObjectId creatorId) {
-			//OWN rights from old creator are not withdrawn (ownership is not identical to creation role)
+			// OWN rights from old creator are not withdrawn (ownership is not
+			// identical to creation role)
 			this.withCreator = creatorId;
 			if (withCreator != null)
 				this.getAccess().addToAcl(creatorId, Access.OWN);
@@ -176,7 +179,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		}
 
 	}
-
 
 	public static class Usage {
 		// in how many favorites is it
@@ -319,10 +321,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public static enum WithResourceType {
-		WithResource, CollectionObject, RecordResource,
-		CulturalObject, EuScreenObject, EventObject,
-		PlaceObject, TimespanObject, ThesaurusObject,
-		AgentObject;
+		WithResource, CollectionObject, RecordResource, CulturalObject, EuScreenObject, EventObject, PlaceObject, TimespanObject, ThesaurusObject, AgentObject;
 	}
 
 	@Id
@@ -331,7 +330,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 	public ObjectId getDbId() {
 		return dbId;
-		//TODO: fill in withURI (with postLoad?)
+		// TODO: fill in withURI (with postLoad?)
 	}
 
 	public void setDbId(ObjectId dbId) {
@@ -352,7 +351,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	private List<ExternalCollection> externalCollections;
 
 	@Embedded
-	//depending on the source, we know which entry is the dataProvider and which the provider
+	// depending on the source, we know which entry is the dataProvider and
+	// which the provider
 	private List<ProvenanceInfo> provenance;
 
 	// enum of classes that are derived from DescriptiveData
@@ -494,12 +494,14 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.media = media;
 	}
 
-	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media, int viewIndex) {
+	public void addMediaView(MediaVersion mediaVersion,
+			EmbeddedMediaObject media, int viewIndex) {
 		media.setMediaVersion(mediaVersion);
 		this.media.get(viewIndex).put(mediaVersion, media);
 	}
 
-	public void addMediaView(MediaVersion mediaVersion, EmbeddedMediaObject media) {
+	public void addMediaView(MediaVersion mediaVersion,
+			EmbeddedMediaObject media) {
 		HashMap<MediaVersion, EmbeddedMediaObject> e = new HashMap<>();
 		e.put(mediaVersion, media);
 		media.setMediaVersion(mediaVersion);
@@ -515,9 +517,14 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		return contextData;
 	}
 
-	public void setContextData(
-			List<ContextData> contextData) {
+	public void setContextData(List<ContextData> contextData) {
 		this.contextData = contextData;
+	}
+
+	public void addContextData(ContextData contextData) {
+		if (this.contextData == null)
+			this.contextData = new ArrayList<ContextData>();
+		this.contextData.add(contextData);
 	}
 
 	public List<Annotation> getAnnotations() {
@@ -529,18 +536,18 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	}
 
 	public User getWithCreatorInfo() {
-		if(administrative.getWithCreator() != null)
-			return DB.getUserDAO().getById(this.administrative.getWithCreator(), new ArrayList<String>(Arrays.asList("username")));
+		if (administrative.getWithCreator() != null)
+			return DB.getUserDAO().getById(
+					this.administrative.getWithCreator(),
+					new ArrayList<String>(Arrays.asList("username")));
 		else
 			return null;
 	}
 
-
 	/* Elastic Transformations */
 
 	/*
-	 * Currently we are indexing only Resources that represent
-	 * collected records
+	 * Currently we are indexing only Resources that represent collected records
 	 */
 	public Map<String, Object> transformWR() {
 		return ElasticUtils.basicTransformation(this);

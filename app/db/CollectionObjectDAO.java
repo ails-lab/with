@@ -28,6 +28,8 @@ import java.util.function.BiFunction;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
+import model.annotations.ContextData;
+import model.annotations.ContextData.ContextDataBody;
 import model.basicDataTypes.CollectionInfo;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
@@ -55,6 +57,7 @@ import controllers.MediaController;
 import elastic.Elastic;
 import elastic.ElasticUpdater;
 
+@SuppressWarnings({ "rawtypes", "unchecked", "serial" })
 public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	/*
@@ -206,7 +209,6 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				collections, hits);
 	}
 
-
 	/**
 	 * Return the total number of CollectionObject entities for a specific query
 	 * 
@@ -332,32 +334,33 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 					this.find(q).asList(), null);
 		}
 	}
-	
+
 	public ObjectNode countMyAndSharedCollections(List<ObjectId> loggedInEffIds) {
 		ObjectNode result = Json.newObject().objectNode();
 		Query<CollectionObject> qMy = this.createQuery().disableValidation()
 				.field("descriptiveData.label.default.0")
 				.notEqual("_favorites");
-		
-		//count my collections-exhibitions
+
+		// count my collections-exhibitions
 		qMy.field("administrative.withCreator").equal(loggedInEffIds.get(0));
 		ObjectNode result1 = countPerCollectionType(qMy);
 		result.put("my", result1);
-		//count collections-exhibitions shared with me
-		Query<CollectionObject> qShared = this.createQuery().disableValidation()
-				.field("administrative.withCreator").notEqual(loggedInEffIds.get(0));
+		// count collections-exhibitions shared with me
+		Query<CollectionObject> qShared = this.createQuery()
+				.disableValidation().field("administrative.withCreator")
+				.notEqual(loggedInEffIds.get(0));
 		List<Criteria> criteria = new ArrayList<Criteria>(
-				Arrays.asList(loggedInUserWithAtLeastAccessQuery(loggedInEffIds,
-						Access.READ)));
+				Arrays.asList(loggedInUserWithAtLeastAccessQuery(
+						loggedInEffIds, Access.READ)));
 		qShared.and(criteria.toArray(new Criteria[criteria.size()]));
 		ObjectNode result2 = countPerCollectionType(qShared);
 		result.put("sharedWithMe", result2);
 		return result;
 	}
-	
+
 	public ObjectNode countPerCollectionType(Query<CollectionObject> q) {
 		ObjectNode result = Json.newObject().objectNode();
-		for (CollectionType collectionType: CollectionType.values()) {
+		for (CollectionType collectionType : CollectionType.values()) {
 			Query<CollectionObject> qi = q.cloneQuery();
 			qi.field("administrative.collectionType").equal(collectionType);
 			long count = this.find(qi).countAll();
@@ -376,18 +379,23 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
-	public CollectionObject updateCollectionAdmin(ObjectId colId) {
+	public CollectionObject addToCollection(ObjectId collectionId,
+			ObjectId recordId, int position) {
 		UpdateOperations<CollectionObject> colUpdate = DB
 				.getCollectionObjectDAO().createUpdateOperations()
 				.disableValidation();
-		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery()
-				.field("_id").equal(colId);
+		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
+				.field("_id").equal(collectionId);
+		if (position == -1)
+			colUpdate.add("collectedResources",
+					new ContextData<ContextDataBody>(recordId));
+		else
+			colUpdate.add("collectedResources." + position,
+					new ContextData<ContextDataBody>(recordId));
 		colUpdate.set("administrative.lastModified", new Date());
 		colUpdate.inc("administrative.entryCount");
-		return DB.getDs().findAndModify(cq, colUpdate, true);// true returns the
-																// oldVersion
-																// (contrary to
-																// documentation!!!)
+		// true returns the oldVersion (contrary to documentation!!!)
+		return DB.getDs().findAndModify(q, colUpdate, true);
 	}
 
 	public List<CollectionObject> getByCollectedResource(ObjectId resourceId,
@@ -407,68 +415,77 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	// it may happen that e.g. the thumbnail of the 4th instead of the 3d record
 	// of the media appears in the collections's (3) media
-	public void addCollectionMedia(ObjectId colId, ObjectId recordId) {
-		// int entryCount =
-		// updateCollectionAdmin(colId).getAdministrative().getEntryCount();//old
-		// entry count
+	public void addCollectionMedia(ObjectId collectionId, ObjectId recordId) {
+		CollectionObject collection = DB.getCollectionObjectDAO().getById(
+				collectionId,
+				new ArrayList<String>(Arrays.asList("collectedResources")));
+		int position = 0;
+		for (ContextData<ContextDataBody> data : collection
+				.getCollectedResources()) {
+			if (data.getTarget().getRecordId().equals(recordId)
+					|| position++ == 5)
+				break;
+		}
+		if (position > 4)
+			return;
 		RecordResource record = DB.getRecordResourceDAO().getById(recordId,
-				new ArrayList<String>(Arrays.asList("collectedIn")));
-		int position = 6;
-		for (CollectionInfo col : (List<CollectionInfo>) record
-				.getCollectedIn()) {
-			if (col.getCollectionId().equals(colId)) {
-				position = col.getPosition();
+				new ArrayList<String>(Arrays.asList("media")));
+		EmbeddedMediaObject thumbnail;
+		if (record.getMedia() != null) {
+			HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record
+					.getMedia().get(0);
+			if (media.containsKey(MediaVersion.Original)
+					&& !media.containsKey(MediaVersion.Thumbnail)) {
+				String originalUrl = media.get(MediaVersion.Original).getUrl();
+				MediaObject original = MediaController.downloadMedia(
+						originalUrl, MediaVersion.Original);
+				thumbnail = new EmbeddedMediaObject(
+						MediaController.makeThumbnail(original));
+			} else {
+				thumbnail = media.get(MediaVersion.Thumbnail);
+			}
+			if (thumbnail != null) {
+				UpdateOperations<CollectionObject> colUpdate = DB
+						.getCollectionObjectDAO().createUpdateOperations()
+						.disableValidation();
+				Query<CollectionObject> cq = DB.getCollectionObjectDAO()
+						.createQuery().field("_id").equal(collectionId);
+				HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
+					{
+						put(MediaVersion.Thumbnail, thumbnail);
+					}
+				};
+				colUpdate.set("media." + position, colMedia);
+				this.update(cq, colUpdate);
 			}
 		}
-		if (position < 5) {
-			record = DB.getRecordResourceDAO().getById(recordId,
-					new ArrayList<String>(Arrays.asList("media")));
-			EmbeddedMediaObject thumbnail;
-			if (record.getMedia() != null) {
-				HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record
-						.getMedia().get(0);
-				if (media.containsKey(MediaVersion.Original)
-						&& !media.containsKey(MediaVersion.Thumbnail)) {
-					String originalUrl = media.get(MediaVersion.Original)
-							.getUrl();
-					MediaObject original = MediaController.downloadMedia(
-							originalUrl, MediaVersion.Original);
-					thumbnail = new EmbeddedMediaObject(
-							MediaController.makeThumbnail(original));
-				} else {
-					thumbnail = media.get(MediaVersion.Thumbnail);
-				}
-				if (thumbnail != null) {
-					UpdateOperations<CollectionObject> colUpdate = DB
-							.getCollectionObjectDAO().createUpdateOperations()
-							.disableValidation();
-					Query<CollectionObject> cq = DB.getCollectionObjectDAO()
-							.createQuery().field("_id").equal(colId);
-					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
-						{
-							put(MediaVersion.Thumbnail, thumbnail);
-						}
-					};
-					colUpdate.set("media." + position, colMedia);
-					this.update(cq, colUpdate);
-				}
-			}
-		}
+
 	}
 
-	/*public void addCollectionMediaAsync(ObjectId collectionId, ObjectId recordId) {
-		BiFunction<ObjectId, ObjectId, Boolean> methodQuery = (ObjectId colId,
-				ObjectId recId) -> {
-			try {
-				addCollectionMedia(colId, recId);
-				return true;
-			} catch (Exception e) {
-				return false;
-			}
+	public void updateContextData(ContextData contextData) {
+		ObjectId colId = contextData.getTarget().getCollectionId();
+		int position = contextData.getTarget().getPosition();
+		Query<RecordResource> q = this.createQuery().field("collectedIn")
+				.hasThisElement(new CollectionInfo(colId, position));
+		UpdateOperations<RecordResource> recordUpdate1 = this
+				.createUpdateOperations();
+		recordUpdate1
+				.removeAll("contextData", new ContextData(colId, position));
+		this.update(q, recordUpdate1);
+		UpdateOperations<RecordResource> recordUpdate2 = this
+				.createUpdateOperations();
+		recordUpdate2.add("contextData", contextData);
+		this.update(q, recordUpdate2);
+	}
 
-		};
-		ParallelAPICall.createPromise(methodQuery, collectionId, recordId);
-	}*/
+	/*
+	 * public void addCollectionMediaAsync(ObjectId collectionId, ObjectId
+	 * recordId) { BiFunction<ObjectId, ObjectId, Boolean> methodQuery =
+	 * (ObjectId colId, ObjectId recId) -> { try { addCollectionMedia(colId,
+	 * recId); return true; } catch (Exception e) { return false; }
+	 * 
+	 * }; ParallelAPICall.createPromise(methodQuery, collectionId, recordId); }
+	 */
 
 	public void removeCollectionMedia(ObjectId colId, int position) {
 		if (position < 5) {
