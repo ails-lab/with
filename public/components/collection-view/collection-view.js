@@ -262,20 +262,14 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				}
 			};
 		
-		self.reload = function() {
-			loading(true);
-
-			self.index(new NodeModel({ schemes: [] }));
-			self.clearImages();
-			
+		self.loadIndex = function() {
 			$.ajax({
 				"url": "/collectionindex/" + self.id(),
 				"method": "post",
 				"data" : convertTerms(self.terms()),
 				"contentType": "application/json",
 				"success": function (data) {
-					var obj = JSON.parse(data);
-					self.index(new NodeModel(obj));
+					self.index(new NodeModel(JSON.parse(data)));
 					
 					//loading(false);
 				},
@@ -288,7 +282,15 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					});
 				}
 			});
+		}
+		
+		self.reload = function() {
+			loading(true);
+
+			self.index(new NodeModel({ schemes: [] }));
+			self.clearImages();
 			
+			self.loadIndex();
 			self.loadInit();
 		}
 		
@@ -388,25 +390,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						}
 					}
 					
-					$.ajax({
-						"url": "/collectionindex/" + self.id(),
-						"method": "post",
-						"data" : "{ \"terms\": [] }",
-						"contentType": "application/json",
-						"success": function (data) {
-							self.index(new NodeModel(JSON.parse(data)));
-							
-							//loading(false);
-						},
-						"error": function (result) {
-							//loading(false);
-							$.smkAlert({
-								text: 'An error has occured',
-								type: 'danger',
-								permanent: true
-							});
-						}
-					});
+					self.loadIndex();
 					
 					if (self.count() && self.count() > 0) {
 						self.loadInit();
@@ -430,7 +414,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			});
 		};
 
-		self.loadInit = function () {
+		self.loadInit = function() {
 			if (self.terms().length == 0) {
 				$.ajax({
 					"url": "/collection/" + self.id() + "/list?count=" + self.count() + "&start=0",
@@ -500,10 +484,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		};
 
 		self.moreItems = function () {
-			if (self.citems().length == 0) {
-				return;
-			}
-			
 			if (loading === true) {
 				setTimeout(self.moreItems(), 300);
 			}
@@ -534,7 +514,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						}
 					});
 				} else {
-					
 					$.ajax({
 						"url": "/collection/" + self.id() + "/indexedlist?count=10&start=" + offset,
 						"method": "post",
