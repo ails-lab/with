@@ -99,7 +99,7 @@ public class CollectionObjectController extends WithResourceController {
 	public static Result createAndFillEuropeanaCollection(String id) {
 
 		CollectionObject collection = new CollectionObject();
-		collection.getDescriptiveData().setLabel(new MultiLiteral(id));
+		collection.getDescriptiveData().setLabel(new MultiLiteral(id).fillDEF());
 		ObjectNode resultInfo = Json.newObject();
 		ObjectId creatorDbId = new ObjectId(session().get("user"));
 		boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
@@ -121,7 +121,7 @@ public class CollectionObjectController extends WithResourceController {
 						F.Option.None(), resultInfo);
 			};
 			page++;
-	    } while (page*pageSize < result.totalCount && false);
+	    } while (page*pageSize < result.totalCount);
 	    if (resultInfo.has("error"))
 	    	return badRequest(resultInfo);
 		return ok(resultInfo);
