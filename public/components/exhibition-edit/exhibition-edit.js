@@ -10,9 +10,16 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			state: exhibition.administrative.access.isPublic()
 		});
 		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
-			var promise = updateExhibitionProperty(exhibition, 'isPublic', state);;
-			$.when(promise).done(function (data) {
-
+			$.ajax({
+				url: '/rights/' + exhibition.dbId() + '?isPublic=' + state,
+				method: 'GET',
+				contentType: "application/json",
+				success: function () {
+					// Empty
+				},
+				error: function () {
+					// Empty
+				}
 			});
 		});
 	}
@@ -21,7 +28,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		this.dbId = collectionData.dbId;
 		this.title = ko.observable(app.findByLang(collectionData.descriptiveData.label));
 		this.description = ko.observable(app.findByLang(collectionData.descriptiveData.description));
-		// this.thumbnail = ko.observable();
 		this.itemCount = collectionData.administrative.entryCount;
 		this.isPublic = collectionData.administrative.access.isPublic;
 		this.created = collectionData.administrative.created;
@@ -118,6 +124,19 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		});
 	}
 
+	function moveItemInExhibition(exhibitionId, recordId, oldPosition, newPosition) {
+		$.ajax({
+			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
+			method: 'put',
+			success: function(data) {
+				// Empty
+			},
+			error: function(result) {
+				// Empty
+			}
+		});
+	}
+
 	function isEmpty(str) {
 		return (!str || 0 === str.length);
 	}
@@ -133,6 +152,47 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}
 		};
 
+		self.mapping = {
+			create: function (options) {
+		        //customize at the root level: add title and description observables, based on multiliteral
+				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
+		        var record = options.data;
+		        var newRecord =  ko.mapping.fromJS({}, {});
+		        newRecord.dbId = ko.observable(record.dbId);
+		        var contextData= record.contextData;
+				if (contextData !== undefined)
+					newRecord.contextData = ko.mapping.fromJS(contextData, {});
+		        newRecord.containsAudio = ko.pureComputed(function() {
+		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
+		        		return false;
+		        	else
+		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
+				});
+		        newRecord.containsVideo = ko.pureComputed(function() {
+		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined)
+		        		return false;
+		        	else
+		        		return (newRecord.contextData()[0].body.videoUrl() !== '');
+		        	return result;
+				});
+				newRecord.containsText = ko.pureComputed(function() {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined)
+						return false;
+		        	else
+		        		return newRecord.contextData()[0].body.text.default() !== '';
+				});
+				newRecord.media = ko.mapping.fromJS(record.media, {});
+				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
+				var dbDescription = record.descriptiveData.description;
+		        if (dbDescription == undefined || dbDescription == null)
+		        	newRecord.description = ko.observable("");
+		        else
+		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
+				newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
+		        return newRecord;
+		    }
+		}
+
 		self.checkLogged();
 		self.loading = ko.observable(false);
 		self.title = ko.observable('');
@@ -141,11 +201,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.creationMode = !params.hasOwnProperty('id');
 		self.loadingExhibitionItems = false;
 		self.loadingInitialItemsCount = 0;
+		var _removeItem = false;
+		var _startIndex = -1;
 		if (!self.creationMode) {
 			self.dbId(params.id);
 		}
-		self.userSavedItemsArray = ko.observableArray([]); //holds the selected collections items
-		self.collectionItemsArray = ko.observableArray([]); //holds the exhibitions items
+		self.userSavedItemsArray = ko.mapping.fromJS([], {});  //holds the selected collections items
+		self.collectionItemsArray = ko.mapping.fromJS([], {}); //holds the exhibitions items
 
 		var collections = [];
 		var promise = app.getAllUserCollections();
@@ -190,7 +252,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			self.loadingExhibitionItems = true;
 			var promise = getExhibition(self.dbId());
 			$.when(promise).done(function (data) {
-				console.log(data);
 				$('.outer').css("visibility", "visible");
 				ko.mapping.fromJS(data, mappingExhibition, self);
 				self.title(app.findByLang(data.descriptiveData.label));
@@ -198,27 +259,12 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				setUpSwitch(self);
 
 				$.ajax({
-					url: "/collection/" + self.dbId() + "/list?count=40&start=0",
+					url: "/collection/" + self.dbId() + "/list?count=5&start=0",
 					method: "get",
 					success: function (data) {
 						self.firstEntries = data.records;
 						self.loadingInitialItemsCount = data.entryCount;
-						self.firstEntries.map(function (record) {
-							record.additionalText = ko.pureComputed(function() {
-								return app.findByLang(record.contextData.body.text);
-							});
-							record.videoUrl = ko.pureComputed(function() {
-								return app.findByLang(record.contextData.body.videoUrl);
-							});
-							record.containsVideo = ko.pureComputed(function() {
-								return false;	// TODO: Check if it contains video
-							});
-							record.containsText = ko.pureComputed(function() {
-								return false;	// TODO: Check if it contains text
-							});
-						});
-
-						self.collectionItemsArray(self.firstEntries);
+						ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
 						self.loadingExhibitionItems = true;
 					},
 					error: function (result) {
@@ -256,7 +302,9 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				url: "/collection/" + newCollection.dbId + "/list?count=20&start=0",
 				method: "get",
 				success: function (data) {
-					self.userSavedItemsArray(data.records);
+					self.firstEntries = data.records;
+					ko.mapping.fromJS(self.firstEntries, self.mapping, self.userSavedItemsArray);
+					//self.userSavedItemsArray(data.records);
 				},
 				error: function (result) {
 					// Empty
@@ -282,9 +330,9 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			var index = self.collectionItemsArray.indexOf(item);
 			if (index > -1) {
 				self.collectionItemsArray.remove(item);
-				deleteItemFromExhibition(self.dbId(), item.dbId, index);
+				deleteItemFromExhibition(self.dbId(), item.dbId(), index);
 			} else {
-				self.userSavedItemsArray.remove(item);
+				self.userSavedItemsArray.splice(index, 1);
 			}
 		};
 
@@ -311,33 +359,48 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					$(elem).find('#loadingIcon').fadeOut();
 					return;
 				}
-
-				var promiseSaveItem = saveItemToExhibition(record, index, self.dbId());
-				$.when(promiseSaveItem).done(function (data) {
-					//now delete not to affect server order
-					if (_bIsMoveOperation) {
-						deleteItemFromExhibition(self.dbId(), record.dbId);
+				if (_bIsMoveOperation) {
+					if (_startIndex >= 0) {
+						moveItemInExhibition(self.dbId(), record.dbId(), _startIndex, index);
+						_startIndex = -1;		// Move was successful, reset the startIndex
+					} else {
+						saveItemToExhibition(record, index, self.dbId());
+						_removeItem = true;		// Item was added but not removed, so mark it for removal
 					}
-					//update the dbid
-					record.dbId = data.dbId;
 					$(elem).find('#loadingIcon').fadeOut();
-				}).fail(function (data) {
+				} else {
+					saveItemToExhibition(record, index, self.dbId());
 					$(elem).find('#loadingIcon').fadeOut();
-				});
+				}
 			}
 		};
 
-		self.removeItem = function (elem) {
+		self.removeItem = function (elem, index, record) {
+			if (_bIsMoveOperation) {
+				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
+				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
+					deleteItemFromExhibition(self.dbId(), record.dbId(), index);
+					_removeItem = false;
+				}
+			}
 			$(elem).fadeOut(500);
 		};
 
-		self.showPopUpVideo = function (data) {
-			editItem(data, 'PopUpVideoMode');
+		self.showPopUpVideo = function (data, event) {
+			 var context = ko.contextFor(event.target);
+		    var index = context.$index();
+			editItem(data, self.dbId(), index, 'PopUpVideoMode');
 		};
 
-		self.showPopUpText = function (data) {
-			editItem(data, 'PopUpTextMode');
+		self.showPopUpText = function (data, event) {
+			var context = ko.contextFor(event.target);
+		    var index = context.$index();
+			editItem(data, self.dbId(), index, 'PopUpTextMode');
 		};
+
+	    self.playExhibition = function() {
+	    	window.location.hash = '#exhibitionview/' + self.dbId();
+	    };
 
 		//custom binding
 		var _draggedItem;
@@ -437,16 +500,29 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 					},
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
-						//clone it
-						var newItem = JSON.parse(JSON.stringify(_draggedItem));
-						newItem.additionalText = ko.observable('');
-						newItem.containsText = ko.observable(false); //add the observables here
-						newItem.containsVideo = ko.observable(false);
-						newItem.videoUrl = ko.observable('');
-						var arrayCollection = self.collectionItemsArray;
+						var newItem = ko.mapping.fromJS({}, {});
+						newItem = _draggedItem;
+						var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
+						_startIndex = indexDraggedItem;
+						if (_draggedItem.contextData == undefined) {
+							contextData = ko.mapping.fromJS([{
+								"contextDataType": "ExhibitionData",
+								"target": {
+									"collectionId": self.dbId(),
+									"position": indexNewItem
+								},
+								"body" : {
+									"audioUrl": "",
+									"text": {"default": ""},
+									"videoUrl": ""
+								}
+							}], {});
+							newItem.contextData = contextData;
+						}
+						else
+							newItem.contextData()[0].target.position(indexNewItem);
 						//dont do anything if it is moved to its direct left or right dashed box
-						if (_bIsMoveOperation) {
-							var indexDraggedItem = arrayCollection.indexOf(_draggedItem);
+						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
 								_draggedItem = undefined;
 								return;
@@ -458,10 +534,11 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 						dropElement.find('#droppable-Children').css({
 							display: "none"
 						});
-						arrayCollection.splice(indexNewItem, 0, newItem);
 						if (_bIsMoveOperation) {
-							arrayCollection.remove(_draggedItem);
+							_removeItem = false;
+							self.collectionItemsArray.splice(indexDraggedItem, 1);
 						}
+						self.collectionItemsArray.splice(indexNewItem, 0, newItem);
 						_draggedItem = undefined;
 					}
 				};
@@ -469,7 +546,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}
 		};
 
-		ko.bindingHandlers.scroll = {
+
+		ko.bindingHandlers.hscroll = {
 			updating: true,
 
 			init: function (element, valueAccessor, allBindingsAccessor) {

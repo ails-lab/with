@@ -3,8 +3,8 @@ define(function () {
     var _args = {}; // private
     
     _args.projectName = 'espace';
-    _args.projectId = '56bc78f10b5c5f50ca10febb';
-    _args.featuredExhibition='56baf43ebb9ce84403c41ebf';
+    _args.projectId = '56cd8aac75fe2461e0871aad';
+    _args.featuredExhibition='56cd993275fe2461e089a8a5';
     _args.featuredCollection='';
     
     return {

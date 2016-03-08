@@ -1,9 +1,9 @@
 define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'imagesloaded', 'app','smoke'], function (bridget, ko, template, Isotope, imagesLoaded,app) {
 
 	$.bridget('isotope', Isotope);
+	self.loading = ko.observable(false);	
 		
-		
-		ko.bindingHandlers.collectionIsotope = {
+    ko.bindingHandlers.collectionIsotope = {
 				init: app.initOrUpdate('init'),
 				update: app.initOrUpdate('update')
 			};
@@ -35,89 +35,135 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 	
 	function Record(data) {
 		var self = this;
-	    self.recordId = "";
-		self.title = "";
-		self.description="";
-		self.thumb = "";
-		self.fullres="";
-		self.view_url="";
-		self.source="";
-		self.creator="";
-		self.provider="";
-		self.dataProvider="";
-		self.rights="";
-		self.url="";
-		self.externalId = "";
-		self.isLoaded = ko.observable(false);
-		self.isLiked = ko.pureComputed(function () {
-			return app.isLiked(self.externalId);
-		}); 
-		self.load = function(data) {
-			if(data.title==undefined){
-				self.title="No title";
-			}else{self.title=data.title;}
-			self.url="#item/"+data.id;
-			self.view_url=data.view_url;
-			self.thumb=data.thumb;
-			self.fullres=data.fullres;
-			self.description=data.description;
-			self.source=data.source;
-			self.creator=data.creator;
-			self.provider=data.provider;
-			self.dataProvider=data.dataProvider;
-			self.rights=data.rights;
-			self.recordId=data.id;
-			self.externalId=data.externalId;
-			
-		};
 
-		self.cachedThumbnail = ko.pureComputed(function() {
-			
-		   if(self.thumb && self.thumb!="img/content/thumb-empty.png"){
-			if (self.thumb.indexOf('/') === 0) {
+		self.title = "";
+		self.description = "";
+		self.thumb = "";
+		self.fullres = "";
+		self.view_url = "";
+		self.source = "";
+		self.creator = "";
+		self.provider = "";
+		self.dataProvider = "";
+		self.dataProvider_uri = "";
+		self.rights = "";
+		self.url = "";
+		self.externalId = "";
+		self.thumbnail = "";
+		self.likes = 0;
+		self.collected = 0;
+		self.collectedIn = [];
+		self.position=0;
+		self.dbId = "";
+		self.data = ko.observable('');
+		self.thumbnail = ko.pureComputed(function () {
+
+			if (self.thumb) {
 				return self.thumb;
 			} else {
-				var newurl='url=' + encodeURIComponent(self.thumb)+'&';
-				return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-			}}
-		   else{
-			   return "img/content/thumb-empty.png";
-		   }
+				return "img/content/thumb-empty.png";
+			}
 		});
-		self.sourceCredits = ko.pureComputed(function() {
-			 switch(self.source) {
-			    case "DPLA":
-			    	return "dp.la";
-			    case "Europeana":
-			    	return "europeana.eu";
-			    case "NLA":
-			    	return "nla.gov.au";
-			    case "DigitalNZ":
-			    	return "digitalnz.org";
-			    case "EFashion":
-			    	return "europeanafashion.eu";
-			    case "YouTube": {
-			    	return "youtube.com";
-			    }
-			    case "Mint":
-			    	return "mint";
-			    case "WITHin":
-			    	return "WITHin";
-			    default: return "";
-			 }
-			});
+		
+		self.fullresolution = ko.pureComputed(function () {
 
-		self.displayTitle = ko.pureComputed(function() {
-			var distitle="";
-			distitle=self.title;
-			if(self.creator!==undefined && self.creator.length>0)
-				distitle+=", by "+self.creator;
-			
+			if (self.fullres) {
+				return self.fullres;
+
+			} else {
+				return self.thumbnail();
+			}
+		});
+
+		self.sourceCredits = ko.pureComputed(function () {
+			switch (self.source) {
+			case "DPLA":
+				return "dp.la";
+			case "Europeana":
+				return "europeana.eu";
+			case "NLA":
+				return "nla.gov.au";
+			case "DigitalNZ":
+				return "digitalnz.org";
+			case "EFashion":
+				return "europeanafashion.eu";
+			case "YouTube":
+				return "youtube.com";
+			case "The British Library":
+				return "www.bl.uk";
+			case "Mint":
+				return "mint";
+			case "Rijksmuseum":
+				return "www.rijksmuseum.nl";
+			case "DDB":
+				return "deutsche-digitale-bibliothek.de";
+			default:
+				return "";
+			}
+		});
+
+		self.displayTitle = ko.pureComputed(function () {
+			var distitle = "";
+			distitle = self.title;
+			if (self.creator && self.creator.length > 0)
+				distitle += ", by " + self.creator;
+			if (self.dataProvider && self.dataProvider.length > 0 && self.dataProvider != self.creator)
+				distitle += ", " + self.dataProvider;
 			return distitle;
 		});
 
-		if(data != undefined) self.load(data);
-		
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
+		});
+
+		self.load = function (options) {
+			var admindata = options.administrative;
+			var descdata = options.descriptiveData;
+			var media = options.media;
+			var provenance = options.provenance;
+			var usage = options.usage;
+
+			if (descdata) {
+				self.title = findByLang(descdata.label);
+				self.description = findByLang(descdata.description);
+				self.rights = findResOrLit(descdata.metadataRights);
+				self.creator = findByLang(descdata.dccreator);
+			}
+
+			self.dbId = options.dbId;
+			if (provenance) {
+				self.view_url = findProvenanceValues(provenance, "source_uri");
+				self.dataProvider = findProvenanceValues(provenance, "dataProvider");
+				self.provider = findProvenanceValues(provenance, "provider");
+				self.source = findProvenanceValues(provenance, "source");
+			}
+
+			self.externalId = admindata.externalId;
+			self.collectedIn = options.collectedIn;
+			if (usage) {
+				self.likes = usage.likes;
+				self.collected = usage.collected;
+			}
+
+			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
+			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
+			self.data(options);
+			self.isLoaded = ko.observable(false);
+			/*to calculate position find how many of these are already in citems
+			 * 
+			 */
+			var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
+	            return item.dbId==self.dbId;
+			});
+			var positions=ko.utils.arrayFilter(self.collectedIn, function(item) {
+	            return item.collectionId==ko.dataFor(withcollection).id();
+			});
+			if(positions && positions[foundrec.length])
+			 self.position=positions[foundrec.length].position;
+			
+		};
+
+		if (data !== undefined) self.load(data);
 	}
 
 	
@@ -127,7 +173,10 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		   
 		var self = this;
 
-		var $container = $(".grid").isotope({
+        var self = this;
+		self.route = params.route;
+		var counter = 1;
+		self.$container = $(".grid").isotope({
 			itemSelector: '.media',
 			transitionDuration: transDuration,
 			masonry: {
@@ -137,41 +186,68 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			}
 		});
 		
-		self.route = params.route;
-		var counter = 1;
+		
 		self.hash=window.location.hash;
-		self.collname = ko.observable('');
+		self.title = ko.observable('');
+		self.description = ko.observable('');
 		self.access = ko.observable("READ");
 		self.id = ko.observable(params.id);
-		self.count=ko.observable(params.count);
-		self.owner = ko.observable('');
+		self.creator = ko.observable('');
 		self.ownerId = ko.observable(-1);
-		self.itemCount = ko.observable(0);
+		self.entryCount = ko.observable(0);
 		self.citems = ko.observableArray();
-		self.description = ko.observable('');
+		self.selectedRecord = ko.observable(false);
+		self.loggedUser = app.isLogged();
+		self.rightsmap = ko.mapping.fromJS([]);
 		self.selectedRecord = ko.observable(false);
 
-		self.loading = ko.observable(false);
-        self.loggedUser=app.isLogged();
+		self.loggedUser=app.isLogged();
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
-	
+		if (params.count) {
+			self.count = ko.observable(params.count);
+		}
+		else {
+			self.count = ko.observable(20);
+			sessionStorage.removeItem("collection-viewscroll" + self.id());
+		}	
 
 		self.loadCollection = function (id) {
 			// check if a state property exists and write back the HTML cache
 		    
-			self.loading(true);
+			loading(true);
 			$.ajax({
 				"url": "/collection/" + self.id(),
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {
-					self.collname(data.title);
-					self.desc(data.description);
-					self.owner(data.creator);
-					self.ownerId(data.ownerId);
-					self.itemCount(data.itemCount);
-					self.access(data.access);
+					
+					if (data.descriptiveData) {
+						self.title(findByLang(data.descriptiveData.label));
+
+						self.description(findByLang(data.descriptiveData.description));
+					}
+
+					self.entryCount(data.administrative.entryCount);
+					self.creator = ko.observable("");
+					if (data.administrative.withCreator) {
+						ko.computed(function () {
+							var params = {};
+							$.getJSON('/user/' + data.administrative.withCreator, params, self.creator);
+						}, this.username);
+					}
+
+					self.desc(self.description());
+					if (data.administrative.access) {
+						ko.mapping.fromJS(data.administrative.access.acl, self.rightsmap);
+
+						var rightsrec = ko.utils.arrayFirst(self.rightsmap(), function (right) {
+							return right.user() === currentUser._id();
+						});
+						if (rightsrec) {
+							self.access(rightsrec.level());
+						}
+					}
 					
 					if(self.count() && self.count()>0){
 						$.ajax({
@@ -184,37 +260,32 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 								if(items.length>0){
 									 var $newitems=getItems(items);
 								     
-									 isotopeImagesReveal($container, $newitems );
+									 self.isotopeImagesReveal($newitems );
 
 									}
 								
 
 								
-								self.loading(false);
+								loading(false);
 							},
 							"error": function (result) {
-								self.loading(false);
+								loading(false);
+								$.smkAlert({
+									text: 'An error has occured',
+									type: 'danger',
+									permanent: true
+								});
 							}
 						});
 						
 					}
 					else{
 					
-						var items=self.revealItems(data.firstEntries);
-						
-						if(items.length>0){
-							 var $newitems=getItems(items);
-							if(sessionStorage.getItem("collection-viewscroll"+self.id())){
-								 sessionStorage.removeItem("collection-viewscroll"+self.id());
-							 }
-							 isotopeImagesReveal( $container,$newitems );
-								
-							}
-						self.loading(false);
+						loading(false);
 					}
 				},
 				error: function (xhr, textStatus, errorThrown) {
-					self.loading(false);
+				    loading(false);
 					$.smkAlert({text:'An error has occured', type:'danger', permanent: true});
 				}
 			});
@@ -223,29 +294,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 
 		
 		self.revealItems = function (data) {
+			if(data.length==0){ loading(false);return false;}
 			var items=[];
 			for (var i in data) {
 				var result = data[i];
-				 if(result !=null ){
-					 var record = new Record({
-							id: result.dbId,
-							description: result.description,
-							thumb: result.thumbnailUrl,
-							dataProvider: result.dataProvider,
-							title: result.title,
-							view_url: result.sourceUrl,
-							creator: result.creator,
-							provider: result.provider,
-							source: result.source,
-							rights: result.rights,
-							externalId: result.externalId
-						});	
-					 
-			      
-				  items.push(record);
-				 }
+				if (result != null) {
+					var record = new Record(result);
+
+					items.push(record);
+					self.citems.push(record);
+				}
 			}
-			self.citems.push.apply(self.citems, items);
 			var offset = self.citems().length;
 			var new_url="";
 			if(window.location.hash.indexOf("collectionview")==1){
@@ -261,7 +320,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 		self.loadCollection();
 		self.isOwner = ko.pureComputed(function () {
-			if (app.currentUser._id() == self.ownerId()) {
+			if (app.currentUser._id() == self.withCreator) {
 				return true;
 			} else {
 				return false;
@@ -269,16 +328,16 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		});
 
 		self.loadNext = function () {
-			console.log("more items ");
+			
 			self.moreItems();
 		};
 
 		self.moreItems = function () {
-			if (self.loading === true) {
+			if (loading === true) {
 				setTimeout(self.moreItems(), 1000);
 			}
-			if (self.loading() === false) {
-				self.loading(true);
+			if (loading() === false) {
+				loading(true);
 				
 				var offset = self.citems().length;
 				$.ajax({
@@ -291,13 +350,13 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 						if(items.length>0){
 							 var $newitems=getItems(items);
 						     
-							 isotopeImagesReveal( $container,$newitems );
+							 self.isotopeImagesReveal($newitems );
 							
 							}
-						self.loading(false);
+						loading(false);
 					},
 					"error": function (result) {
-						self.loading(false);
+						loading(false);
 					}
 				});
 			}
@@ -309,7 +368,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		likeRecord = function (id,event) {
         	event.preventDefault();
 			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.recordId=== id;
+				return record.dbId=== id;
 			});
 
 			app.likeItem(rec, function (status) {
@@ -325,7 +384,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		collect = function (id,event) {
 			event.preventDefault();
 			var rec = ko.utils.arrayFirst(self.citems(), function (record) {
-				return record.recordId=== id;
+				return record.dbId=== id;
 			});
 			console.log(rec);
 			
@@ -334,29 +393,29 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
 		
 		function getItem(record) {
-			 var tile= '<div class="item media" id="'+record.recordId+'"> <div class="wrap">';
+			 var tile= '<div class="item media" id="'+record.dbId+'"> <div class="wrap">';
 			 if(isLogged()){
 				    if(record.isLiked()){
 				    	 tile+='<span class="star active">';
 				    }
 				    else{tile+='<span class="star">';}
 				    if(record.externalId){
-				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">'
 						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 						+'</span>';}
-						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.dbId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					}
 			 else{
 				 tile+='<span class="star" style="display:none">'
-				 if(record.externalId){
-					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.recordId + '\',event);" title="add to favorites">'
+				 if(record.dbId){
+					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">'
 					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
 					    +'</span>';}
-					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.recordId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
+					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.dbId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
 					
 			 }
-                    tile+='<a href="#" onclick="recordSelect(\''+record.recordId+'\',event)">'
-                     +'<div class="thumb"><img src="'+record.cachedThumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
+                    tile+='<a href="#" onclick="recordSelect(\''+record.dbId+'\',event)">'
+                     +'<div class="thumb"><img src="'+record.thumbnail()+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                      +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1><span class="owner">'+ record.dataProvider+'</span></div>'
                      +'<span class="rights">'+record.sourceCredits()+'</span>'
                     +'</a></div> </div>';
@@ -377,7 +436,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
        	
        	event.preventDefault();
 			var selrecord = ko.utils.arrayFirst(self.citems(), function(record) {
-				   return record.recordId === data;
+				   return record.dbId === data;
 				});
 			itemShow(selrecord);
 			return false;
@@ -385,25 +444,41 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		}
 
        self.refresh=function(){
-    	   self.loading(true);
+    	   
+    	   loading(true);
     	   var items=self.citems();
 			
 			if(items.length>0){
 				 var $newitems=getItems(items);
 			     
-				 isotopeImagesReveal( $container,$newitems );
+				 self.isotopeImagesReveal( $newitems );
 
 				}
-			self.loading(false);
+			loading(false);
     	   
        }
        
-       isotopeImagesReveal = function( $container,$items ) {
- 		  var iso = $container.data('isotope');
- 		  var itemSelector = iso.options.itemSelector;
- 		  
- 		  // append to container
- 		 $container.append( $items );
+       self.isotopeImagesReveal = function($items ) {
+ 		  self.$container = $(".grid#" + self.id());
+			var iso = self.$container.data('isotope');
+			var itemSelector = null;
+			if (iso)
+				itemSelector = iso.options.itemSelector;
+			else {
+				self.$container = $(".grid#" + self.id()).isotope({
+					itemSelector: '.media',
+					transitionDuration: transDuration,
+					masonry: {
+						columnWidth: '.sizer',
+						percentPosition: true
+
+					}
+				});
+				iso = self.$container.data('isotope');
+				itemSelector = iso.options.itemSelector;
+			}
+			// append to container
+			self.$container.append($items);
  		// hide by default
  		  $items.hide();
  		  $items.imagesLoaded().progress( function( imgLoad, image ) {
@@ -414,19 +489,17 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
  		    iso.appended( $item );
  		  // $container.isotope("layout");
  		   var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
- 			if(scrollpos && $(".grid").height()>scrollpos){
- 		    	 $(window).scrollTop(scrollpos);
- 		    	 sessionStorage.removeItem("collection-viewscroll"+self.id());
- 		    }else if(scrollpos && $(".grid").height()<scrollpos){
- 		    	$(window).scrollTop($(".grid").height());	
- 		    	
- 		    }
-			 
- 		    
+ 		   if (scrollpos && $(".grid").height() > scrollpos) {
+					$(window).scrollTop(scrollpos);
+					sessionStorage.removeItem("collection-viewscroll" + self.id());
+		   } else if (scrollpos && $(".grid").height() < scrollpos) {
+					$(window).scrollTop($(".grid").height());
+		  }
+		    
  		  }).always(function(){
 			  
  			 var scrollpos=sessionStorage.getItem("collection-viewscroll"+self.id());
-  			if(scrollpos && $(".grid").height()>scrollpos){
+  			 if(scrollpos && $(".grid").height()>scrollpos){
   		    	 $(window).scrollTop(scrollpos);
   		    	 sessionStorage.removeItem("collection-viewscroll"+self.id());
   		    }else if(scrollpos && $(".grid").height()<scrollpos){

@@ -1046,6 +1046,8 @@ div#publiccolumns figure figcaption {
   width: 350px;
   left: -350px;
   margin-right: -6px;
+  overflow: auto;
+  max-height: 200px;
 }
 
 a {

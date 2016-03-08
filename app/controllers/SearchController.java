@@ -34,6 +34,7 @@ import elastic.Elastic;
 import elastic.ElasticSearcher;
 import elastic.ElasticSearcher.SearchOptions;
 import elastic.ElasticUtils;
+import model.basicDataTypes.ProvenanceInfo.Sources;
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.Form;
@@ -94,6 +95,16 @@ public class SearchController extends Controller {
 				return Promise.pure((Result) badRequest(e.getMessage()));
 			}
 		}
+	}
+	
+	public static Result searchSources() {
+		List<Sources> res = new ArrayList<>();
+		for (final ISpaceSource src : ESpaceSources.getESources()) {
+			Sources sourceByID = Sources.getSourceByID(src.LABEL);
+			if (sourceByID!=null)
+			res.add(sourceByID);
+		}
+		return ok(Json.toJson(res));
 	}
 
 	public static Promise<Result> searchwithfilter() {

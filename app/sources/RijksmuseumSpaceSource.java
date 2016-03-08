@@ -17,13 +17,17 @@
 package sources;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import org.w3c.dom.Document;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
-import model.ExternalBasicRecord;
+import model.EmbeddedMediaObject.MediaVersion;
+import model.EmbeddedMediaObject;
 import model.basicDataTypes.ProvenanceInfo.Sources;
+import model.resources.CulturalObject;
 import model.resources.RecordResource;
 import play.libs.Json;
 import sources.core.CommonQuery;
@@ -51,6 +55,9 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 		QueryBuilder builder = new QueryBuilder("https://www.rijksmuseum.nl/api/en/collection");
 		builder.addSearchParam("key", apiKey);
 		builder.addSearchParam("format", "json");
+		builder.addSearchParam("imgonly", "True");
+		builder.addSearchParam("f", "1");
+		
 		builder.addQuery("q", q.searchTerm);
 		builder.addSearchParam("p", "" + ((Integer.parseInt(q.page) - 1) * Integer.parseInt(q.pageSize) + 1));
 
@@ -81,11 +88,11 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				response = HttpConnector.getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response, "count", true);
 				// res.count = q.pageSize;
-				ArrayList<ExternalBasicRecord> a = new ArrayList<>();
 				for (JsonNode item : response.path("artObjects")) {
 					res.addItem(formatreader.readObjectFrom(item));
 				}
-				res.count = a.size();
+				//TODO: what is the count?
+				res.count = res.items.getItemsCount();
 
 				res.facets = response.path("facets");
 
@@ -162,7 +169,14 @@ public class RijksmuseumSpaceSource extends ISpaceSource {
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_RIJ, record.toString()));
 				CulturalRecordFormatter f = new RijksmuseumItemRecordFormatter();
 				// TODO make another reader
-				String json = Json.toJson(f .readObjectFrom(record)).toString();
+				CulturalObject res = f .readObjectFrom(record);
+				if (fullRecord!=null && Utils.hasInfo(fullRecord.getMedia())){
+					EmbeddedMediaObject object = ((HashMap<MediaVersion, EmbeddedMediaObject>)fullRecord.getMedia().get(0)).get(MediaVersion.Thumbnail);
+					res.addMedia(MediaVersion.Thumbnail, object);
+				}
+					
+				String json = Json.toJson(res).toString();
+				System.out.println(json);
 				jsonMetadata.add(new RecordJSONMetadata(Format.JSON_WITH, json));
 			}
 			Document xmlResponse = HttpConnector.getURLContentAsXML(

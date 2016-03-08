@@ -106,7 +106,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		@Embedded
 		//@JsonSerialize(using = Serializer.AccessMapSerializer.class)
 		//@JsonDeserialize(using = Deserializer.AccessMapDeserializer.class)
-		private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
+		//private final Map<ObjectId, Access> underModeration = new HashMap<ObjectId, Access>();
 
 		// recordId of last entry of provenance chain id the resource has been
 		// imported from external resource
@@ -147,14 +147,6 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 
 		public void setLastModified(Date lastModified) {
 			this.lastModified = lastModified;
-		}
-
-		public void addForModeration(ObjectId groupId, Access access) {
-			this.underModeration.put(groupId, access);
-		}
-
-		public Access removeFromModeration(ObjectId groupId) {
-			return this.underModeration.remove(groupId);
 		}
 
 		public ObjectId getWithCreator() {
@@ -380,14 +372,16 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	private List<HashMap<MediaVersion, EmbeddedMediaObject>> media;
 
 	@Embedded
-	private List<ContextData> contextData = new ArrayList<ContextData>();
+	@JsonDeserialize(using = Deserializer.ContextDataDeserializer.class)
+	private List<ContextData> contextData;
 
-	private ArrayList<Annotation> annotations;
+	private List<Annotation> annotations;
 
 	public WithResource() {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
+		this.contextData = new ArrayList<ContextData>();
 		this.media = new ArrayList<>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
 		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
@@ -399,6 +393,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.provenance = new ArrayList<ProvenanceInfo>();
 		this.collectedIn = new ArrayList<CollectionInfo>();
 		this.media = new ArrayList<>();
+		this.contextData = new ArrayList<ContextData>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
 		embedded.put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
 		this.media.add(embedded);

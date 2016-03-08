@@ -103,6 +103,7 @@ text-decoration: none;
 	-webkit-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
 	-moz-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
 	box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
+	background: white;
 }
 
 .autocomplete-suggestions > .autocomplete-selected {

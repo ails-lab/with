@@ -22,9 +22,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import model.Collection;
-import model.Media;
 import model.basicDataTypes.WithAccess.Access;
+import model.resources.CollectionObject;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
@@ -36,10 +35,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import db.DB;
-import model.Collection;
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
-import model.Media;
 import model.MediaObject;
 import model.basicDataTypes.WithAccess.Access;
 import notifications.GroupNotification;
@@ -135,11 +132,11 @@ public class UserAndGroupManager extends Controller {
 				userJSON.put("lastName", ((User) u).getLastName());
 			}
 			if (collectionId != null) {
-				Collection collection = DB.getCollectionDAO().getById(
+				CollectionObject collection = DB.getCollectionObjectDAO().getById(
 						new ObjectId(collectionId));
 				if (collection != null) {
 					// TODO: have to do recursion here!
-					Access accessRights = collection.getRights().getAcl(
+					Access accessRights = collection.getAdministrative().getAccess().getAcl(
 							u.getDbId());
 					if (accessRights != null)
 						userJSON.put("accessRights", accessRights.toString());
@@ -153,7 +150,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			if (u instanceof User)
 				userJSON.put("category", "user");
-			if (u instanceof UserGroup)
+			else if (u instanceof UserGroup)
 				userJSON.put("category", "group");
 			return ok(userJSON);
 		};
@@ -211,6 +208,7 @@ public class UserAndGroupManager extends Controller {
 	 *            the group id
 	 * @return success message
 	 */
+	//TODO: Implement with updates, not make permanent!
 	public static Result addUserOrGroupToGroup(String id, String groupId) {
 		ObjectNode result = Json.newObject();
 		try {
@@ -278,7 +276,15 @@ public class UserAndGroupManager extends Controller {
 			// Add group as a child of the group
 			if (DB.getUserGroupDAO().get(userOrGroupId) != null) {
 				UserGroup childGroup = DB.getUserGroupDAO().get(userOrGroupId);
-				childGroup.getParentGroups().add(group.getDbId());
+				if( !group.getParentGroups().contains(userOrGroupId) )
+					childGroup.getParentGroups().add(new ObjectId(groupId));
+				else {
+					result.put("error", "Sorry! The group/organization you are trying to add"
+										+ "is already parent of your current group/organization");
+					return badRequest(result);
+				}
+
+
 				for (ObjectId userId : childGroup.getUsers()) {
 					User user = DB.getUserDAO().get(userId);
 					user.addUserGroups(ancestorGroups);
@@ -395,7 +401,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			User user = DB.getUserDAO().get(new ObjectId(userId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			if (group == null || user == null) {
+			if ((group == null) || (user == null)) {
 				result.put("error", "Cannot retrieve object from database");
 				return internalServerError(result);
 			}
@@ -451,7 +457,7 @@ public class UserAndGroupManager extends Controller {
 			}
 			User user = DB.getUserDAO().get(new ObjectId(userId));
 			UserGroup group = DB.getUserGroupDAO().get(new ObjectId(groupId));
-			if (group == null || user == null) {
+			if ((group == null) || (user == null)) {
 				result.put("error", "Cannot retrieve object from database");
 				return internalServerError(result);
 			}
@@ -497,7 +503,7 @@ public class UserAndGroupManager extends Controller {
 	}
 
 	public static String getImageBase64(UserOrGroup user) {
-		if (user.getAvatar()!=null && user.getAvatar().get(MediaVersion.Thumbnail) != null) {
+		if ((user.getAvatar()!=null) && (user.getAvatar().get(MediaVersion.Thumbnail) != null)) {
 			String photoUrl = user.getAvatar().get(MediaVersion.Thumbnail);
 			MediaObject photo = DB.getMediaObjectDAO().getByUrl(photoUrl);
 			if (photo != null)

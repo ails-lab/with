@@ -2,23 +2,26 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 
 	function Record(data) {
 		var self = this;
-		self.recordId = ko.observable("");
-		self.title = ko.observable(false);
-		self.description = ko.observable(false);
-		self.thumb = ko.observable(false);
-		self.fullres = ko.observable(false);
-		self.view_url = ko.observable(false);
-		self.source = ko.observable(false);
-		self.creator = ko.observable("");
-		self.provider = ko.observable("");
-		self.dataProvider = ko.observable("");
-		self.rights = ko.observable("");
-		self.url = ko.observable("");
-		self.id = ko.observable("");
-		self.externalId = ko.observable("");
-		self.collectedCount = ko.observable("");
-		self.liked = ko.observable("");
+	    self.recordId = "-1";
+		self.title = "";
+		self.description="";
+		self.thumb = "";
+		self.fullres=ko.observable('');
+		self.view_url="";
+		self.source="";
+		self.creator="";
+		self.provider="";
+		self.dataProvider="";
+		self.dataProvider_uri="";
+		self.rights="";
+		self.url="";
+		self.externalId = "";
+		self.likes=0;
+		self.collected=0;
+		self.data=ko.observable('');
+		self.collectedIn =  [];
 		self.isLike=ko.observable(false);
+		
 		self.related =  ko.observableArray([]);
 		self.similar =  ko.observableArray([]);
 		self.facebook='';
@@ -33,7 +36,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		self.pinterest=function() {
 		    var url = encodeURIComponent(self.loc());
 		    var media = encodeURIComponent(self.fullres());
-		    var desc = encodeURIComponent(self.title()+" on "+window.location.host);
+		    var desc = encodeURIComponent(self.title+" on "+window.location.host);
 		    window.open("//www.pinterest.com/pin/create/button/"+
 		    "?url="+url+
 		    "&media="+media+
@@ -41,86 +44,53 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		    return false;
 		};
 		 
+		self.isLiked = ko.pureComputed(function () {
+			return app.isLiked(self.externalId);
+		});
+		self.isLoaded = ko.observable(false);
 		
-		self.cachedThumbnail = ko.pureComputed(function() {
-
-
-			   if(data && data.thumb){
-				return data.thumb;}
-			   else{
-				   return "img/content/thumb-empty.png";
-			   }
-			});
-		
-		
-		self.load = function (data) {
-			self.loading(true);
-			if (data.title == undefined) {
-				self.title("No title");
-			} else {
-				self.title(data.title);
-			}
-
-			if (data.id) {
-				self.recordId(data.id);
-				
-			} else {
-				self.recordId(data.recordId);
-			}
-			self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId());
-			
-			self.url("#item/" + self.recordId());
-			self.view_url(data.view_url);
-			self.thumb(data.thumb);
-
-			if (data.source!="Rijksmuseum" && data.fullres && data.fullres.length > 0) {
+		self.load = function(data) {
+			if(data.title==undefined){
+				self.title="No title";
+			}else{self.title=data.title;}
+			self.view_url=data.view_url;
+			self.thumb=data.thumb;
+			if ( data.fullres && data.fullres.length > 0 ) {
 				self.fullres(data.fullres);
-			} 
-			else if (data.source!="Rijksmuseum" && data.fullres && data.fullres[0]  && data.fullres[0].length > 0) {
-				self.fullres(data.fullres[0]);
-			}
-			else{
-				self.fullres(self.cachedThumbnail());
-			}
-			if (data.description == undefined) {
-				self.description(data.title);
 			} else {
-				self.description(data.description);
+				self.fullres(self.calcThumbnail());
 			}
-
-			
-			if (data.creator !== undefined) {
-				self.creator(data.creator);
+			//self.fullres=data.fullres;
+			self.description=data.description;
+			self.source=data.source;
+			self.creator=data.creator;
+			self.provider=data.provider;
+			self.dataProvider=data.dataProvider;
+			self.dataProvider_uri=data.dataProvider_uri;
+			self.rights=data.rights;
+			if(data.dbId){
+			 self.recordId=data.dbId;
+			 self.loc(location.href.replace(location.hash,"")+"#item/"+self.recordId);
 			}
-
-			if (data.provider !== undefined) {
-				self.provider(data.provider);
-			}
-			if (data.dataProvider !== undefined) {
-				self.dataProvider(data.dataProvider);
-			}
-
-			if (data.rights !== undefined) {
-				self.rights(data.rights);
-			}
-
-			self.externalId(data.externalId);
-			self.source(data.source);
+			self.externalId=data.externalId;
+			self.likes=data.likes;
+			self.collected=data.collected;
+			self.collectedIn=data.collectedIn;
+			self.data(data.data);
 			self.facebook='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(self.loc());
-			self.twitter='https://twitter.com/share?url='+encodeURIComponent(self.loc())+'&text='+encodeURIComponent(self.title()+" on "+window.location.host)+'"';
-			self.mail="mailto:?subject="+self.title()+"&body="+encodeURIComponent(self.loc());
-			var likeval=app.isLiked(self.externalId());
+			self.twitter='https://twitter.com/share?url='+encodeURIComponent(self.loc())+'&text='+encodeURIComponent(self.title+" on "+window.location.host)+'"';
+			self.mail="mailto:?subject="+self.title+"&body="+encodeURIComponent(self.loc());
+			var likeval=app.isLiked(self.externalId);
 			self.isLike(likeval);
 			self.loading(false);
-	
-			
+		 
 		};
 
 		self.findsimilar=function(){
 		  if(self.related().length==0 && self.relatedsearch==false){
 			self.relatedsearch=true;  
-			self.creator().length>0? self.forrelated(self.creator().toUpperCase()) : self.forrelated(self.provider().toUpperCase());
-            self.relatedlabel=self.creator().length>0? "CREATOR" : "PROVIDER";
+			self.creator.length>0? self.forrelated(self.creator.toUpperCase()) : self.forrelated(self.provider.toUpperCase());
+            self.relatedlabel=self.creator.length>0? "CREATOR" : "PROVIDER";
             if(self.forrelated().length>0){
             	self.loading(true);
            $.ajax({
@@ -131,31 +101,42 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					searchTerm: self.forrelated(),
 					page: 1,
 					pageSize:10,
-				    source:[self.source()],
+				    source:[self.source],
 				    filters:[]
 				}),
 				success : function(result) {
-					data=result.responses[0]!=undefined ? result.responses[0].items :null;
+					data=result.responses[0]!=undefined  &&  result.responses[0].items.culturalCHO !=undefined? result.responses[0].items.culturalCHO :null;
 					var items=[];
 					if(data!=null) {
 						for (var i in data) {
 							var result = data[i];
 							 if(result !=null){
+								 var admindata=result.administrative;
+								 var descdata=result.descriptiveData;
+								 var media=result.media;
+								 var provenance=result.provenance;
+								 var usage=result.usage;
+										
 									
 						        var record = new Record({
-									recordId: result.recordId || result.id,
-									thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-									fullres: result.fullresolution!=null ? result.fullresolution : "",
-									title: result.title!=null? result.title:"",
-									view_url: result.url.fromSourceAPI,
-									creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-									dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-									provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-									rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-									externalId: result.externalId,
-									source: self.source()
+									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+											title: findByLang(descdata.label),
+											description: findByLang(descdata.description),
+											view_url: findProvenanceValues(provenance,"source_uri"),
+											creator: findByLang(descdata.dccreator),
+											dataProvider: findProvenanceValues(provenance,"dataProvider"),
+											dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+											provider: findProvenanceValues(provenance,"provider"),
+											rights: findResOrLit(descdata.metadataRights),
+											externalId: admindata.externalId,
+											source: findProvenanceValues(provenance,"source"),
+											likes: usage.likes,
+											collected: usage.collected,
+											collectedIn:result.collectedIn,
+											data: result
 								  });
-						        if(record.thumb() && record.thumb().length>0 && record.recordId()!=self.recordId())
+						        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 							       items.push(record);
 							}
 							 if(items.length>3){break;}
@@ -180,34 +161,44 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					url     : "/api/advancedsearch",
 					contentType: "application/json",
 					data     : JSON.stringify({
-						searchTerm: self.title(),
+						searchTerm: self.title,
 						page: 1,
 						pageSize:10,
-					    source:[self.source()],
+					    source:[self.source],
 					    filters:[]
 					}),
 					success : function(result) {
-						data=result.responses[0]!=undefined ? result.responses[0].items :null;
+						data=result.responses[0]!=undefined &&  result.responses[0].items.culturalCHO !=undefined? result.responses[0].items.culturalCHO :null;
 						var items=[];
 						if(data!=null) {
 							for (var i in data) {
 								var result = data[i];
 								 if(result !=null){
+									var admindata=result.administrative;
+									var descdata=result.descriptiveData;
+									var media=result.media;
+									var provenance=result.provenance;
+									var usage=result.usage;
 										
 							        var record = new Record({
-										recordId: result.recordId || result.id,
-										thumb: result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" ? result.thumb[0]:"",
-										fullres: result.fullresolution!=null && result.fullersolution!="null"? result.fullresolution : "",
-										title: result.title!=null? result.title:"",
-										view_url: result.url.fromSourceAPI,
-										creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-										dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-										provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-										rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-										externalId: result.externalId,
-										source: self.source()
+							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+												title: findByLang(descdata.label),
+												description: findByLang(descdata.description),
+												view_url: findProvenanceValues(provenance,"source_uri"),
+												creator: findByLang(descdata.dccreator),
+												dataProvider: findProvenanceValues(provenance,"dataProvider"),
+												dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+												provider: findProvenanceValues(provenance,"provider"),
+												rights: findResOrLit(descdata.metadataRights),
+												externalId: admindata.externalId,
+												source: findProvenanceValues(provenance,"source"),
+												likes: usage.likes,
+												collected: usage.collected,
+												collectedIn:result.collectedIn,
+												data: result
 									  });
-							        if(record.thumb() && record.thumb().length>0 && record.recordId()!=self.recordId())
+							        if(record.thumb && record.thumb.length>0 && record.externalId!=self.externalId)
 								       items.push(record);
 								}
 								 if(items.length>3){break;}
@@ -224,66 +215,60 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 	            
 				}
 		}
+
+		self.doLike=function(){
+			self.isLike(true);
+		}
 		
-		self.sourceImage = ko.pureComputed(function () {
-			switch (self.source()) {
-			case "DPLA":
-				return "images/logos/dpla.png";
-			case "Europeana":
-				return "images/logos/europeana.jpeg";
-			case "NLA":
-				return "images/logos/nla_logo.png";
-			case "DigitalNZ":
-				return "images/logos/digitalnz.png";
-			case "EFashion":
-				return "images/logos/eufashion.png";
-			case "YouTube":
-				{
-					return "images/logos/youtube.jpg";
-				}
-			case "WITHin":
-				return "images/logos/with_logo.png";
-			case "Rijksmuseum":
-				return "images/logos/Rijksmuseum.png";
-			default:
-				return "";
-			}
-		});
+		self.calcThumbnail = ko.pureComputed(function() {
 
-		self.sourceCredits = ko.pureComputed(function () {
-			switch (self.source()) {
-			case "DPLA":
-				return "dpla.eu";
-			case "Europeana":
-				return "europeana.eu";
-			case "NLA":
-				return "nla.gov.au";
-			case "DigitalNZ":
-				return "digitalnz.org";
-			case "EFashion":
-				return "europeanafashion.eu";
-			case "YouTube":
-				{
-					return "youtube.com";
-				}
-			case "WITHin":
-				return "WITHin";
-			default:
-				return "";
-			}
-		});
 
-		self.displayTitle = ko.pureComputed(function () {
-			var distitle = "";
-			distitle = self.title();
-			if (self.creator() !== undefined && self.creator().length > 0)
-				distitle += ", by " + self.creator();
-			if (self.provider() !== undefined && self.provider().length > 0 && self.provider() != self.creator())
-				distitle += ", " + self.provider();
+			   if(self.thumb){
+					return self.thumb;
+				}
+			   else{
+				   return "images/no_image.jpg";
+			   }
+			});
+		self.sourceCredits = ko.pureComputed(function() {
+			 switch(self.source) {
+			    case "DPLA":
+			    	return "dp.la";
+			    case "Europeana":
+			    	return "europeana.eu";
+			    case "NLA":
+			    	return "nla.gov.au";
+			    case "DigitalNZ":
+			    	return "digitalnz.org";
+			    case "EFashion":
+			    	return "europeanafashion.eu";
+			    case "YouTube": 
+			    	return "youtube.com";
+			    case "The British Library":
+			    	return "www.bl.uk";
+			    case "Mint":
+			    	return "mint";
+			    case "Rijksmuseum":
+					return "www.rijksmuseum.nl";
+			    case "DDB":
+			        return "deutsche-digitale-bibliothek.de";
+			    default: return "";
+			 }
+			});
+
+		self.displayTitle = ko.pureComputed(function() {
+			var distitle="";
+			distitle=self.title;
+			if(self.creator && self.creator.length>0)
+				distitle+=", by "+self.creator;
+			if(self.dataProvider && self.dataProvider.length>0 && self.dataProvider!=self.creator)
+				distitle+=", "+self.dataProvider;
 			return distitle;
 		});
 
-		if (data !== undefined) self.load(data);
+		
+		
+		if(data != undefined) self.load(data);
 	}
 
 	function ItemViewModel(params) {
@@ -305,7 +290,8 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			$(".mediathumb > img").attr("src","");
 			
 			self.open();
-			self.record(new Record(data));
+			self.record(new Record(data
+					));
 			
 		};
 
@@ -333,15 +319,15 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 		};
 
 		self.changeSource = function (item) {
-			item.record().fullres(item.record().thumb());
+			item.record().fullres(item.record().calcThumbnail());
 		};
 
 		self.collect = function (item) {
 				collectionShow(self.record());
 		};
 
-		self.recordSelect = function (e) {
-			itemShow(e);
+		self.recordSelect = function (e,flag) {
+			itemShow(e,flag);
 		};
 		
 		self.likeRecord = function (rec,event) {
@@ -350,13 +336,16 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			app.likeItem(rec, function (status) {
 				if (status) {
 					$star.addClass('active');
-					if($( '[id="'+rec.recordId()+'"]' ))
-						$( '[id="'+rec.recordId()+'"]' ).find("span.star").addClass('active');
+					if($( '[id="'+rec.externalId+'"]' ) || $( '[id="'+rec.recordId+'"]' )){
+						$( '[id="'+rec.externalId+'"]' ).find("span.star").addClass('active');
+						$( '[id="'+rec.recordId+'"]' ).find("span.star").addClass('active');}
 						
 				} else {
 					$star.removeClass('active');
-					if($( '[id="'+rec.recordId()+'"]' ))
-						$( '[id="'+rec.recordId()+'"]' ).find("span.star").removeClass('active');
+					if($( '[id="'+rec.externalId+'"]' ) || $( '[id="'+rec.recordId+'"]' )){
+						$( '[id="'+rec.externalId+'"]' ).find("span.star").removeClass('active');
+						$( '[id="'+rec.recordId+'"]' ).find("span.star").removeClass('active');
+					}
 				}
 			});
 		};
@@ -375,18 +364,29 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (result) {
+					var admindata=result.administrative;
+					var descdata=result.descriptiveData;
+					var media=result.media;
+					var provenance=result.provenance;
+					var usage=result.usage;
 					 var record = new Record({
-							recordId: result.recordId || result.id,
-							thumb: result.thumbnailUrl,
-							fullres: result.fullresolution!=null ? result.fullresolution : "",
-							title: result.title!=null? result.title:"",
-							view_url: result.sourceUrl,
-							creator: result.creator!==undefined && result.creator!==null? result.creator : "",
-							dataProvider: result.dataProvider!=undefined && result.dataProvider!==null ? result.dataProvider: "",
-							provider: result.provider!=undefined && result.provider!==null ? result.provider: "",
-							rights: result.rights!==undefined && result.rights!==null ? result.rights : "",
-							externalId: result.externalId,
-							source: result.source
+						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
+								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
+									title: findByLang(descdata.label),
+									description: findByLang(descdata.description),
+									view_url: findProvenanceValues(provenance,"source_uri"),
+									creator: findByLang(descdata.dccreator),
+									dataProvider: findProvenanceValues(provenance,"dataProvider"),
+									dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
+									provider: findProvenanceValues(provenance,"provider"),
+									rights: findResOrLit(descdata.metadataRights),
+									externalId: admindata.externalId,
+									source: findProvenanceValues(provenance,"source"),
+									dbId:result.dbId,
+									likes: usage.likes,
+									collected: usage.collected,
+									collectedIn:result.collectedIn,
+									data: result
 						  });
 					self.record(record);
 					$('.nav-tabs a[href="#information"]').tab('show');

@@ -7,7 +7,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		self.title = "";
 		self.description="";
 		self.thumb = "";
-		self.fullres="";
+		self.fullres=ko.observable("");
 		self.view_url="";
 		self.source="";
 		self.creator="";
@@ -33,9 +33,9 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 			self.view_url=data.view_url;
 			self.thumb=data.thumb;
 			if ( data.fullres && data.fullres.length > 0 ) {
-				self.fullres=data.fullres;
+				self.fullres(data.fullres);
 			} else {
-				self.fullres=self.calcThumbnail();
+				self.fullres(self.calcThumbnail());
 			}
 			//self.fullres=data.fullres;
 			self.description=data.description;
@@ -138,7 +138,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.close = function () {
-			self.record().fullres='';
+			self.record().fullres('');
 			$("body").removeClass("modal-open");
 			$("#modal-1").find("div[id^='modal-']").removeClass('md-show').css('display', 'none');
 			$('#modal-1').removeClass('md-show');
@@ -147,7 +147,7 @@ define(['knockout', 'text!./item.html', 'app'], function (ko, template, app) {
 		};
 
 		self.changeSource = function (item) {
-			item.record().fullres=item.record().calcThumbnail();
+			item.record().fullres(item.record().calcThumbnail());
 		};
 
 		self.collect = function (item) {

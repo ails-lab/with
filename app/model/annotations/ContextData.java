@@ -17,33 +17,42 @@
 package model.annotations;
 
 
-import org.bson.types.ObjectId;
+import javax.validation.constraints.NotNull;
 
+import model.resources.WithResource.WithResourceType;
+
+import org.bson.types.ObjectId;
+import org.hibernate.validator.constraints.NotBlank;
+import org.hibernate.validator.constraints.NotEmpty;
+import org.mongodb.morphia.annotations.Embedded;
+
+import utils.Deserializer;
 import utils.Serializer;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
 
 public class ContextData<T1 extends ContextData.ContextDataBody> {
 	
 	public static enum ContextDataType {
-		ExhibitionAnnotation
+		ExhibitionData
 	}
-		
+	
 	public static class ContextDataBody {
 	}
 	
 	public ContextData() {
-		super();
 		this.target = new ContextDataTarget();
+		//default
+		this.contextDataType = ContextDataType.ExhibitionData;
 	}
 	
 	public ContextData(ObjectId colId, int position) {
-		super();
 		this.target = new ContextDataTarget();
 		this.target.collectionId = colId;
 		this.target.position = position;
-		this.body = (T1) new ContextDataBody();
+		this.contextDataType = ContextDataType.ExhibitionData;
+		//this.body = (T1) new ContextDataBody();
 	}
 	
 	public static class ContextDataTarget {		

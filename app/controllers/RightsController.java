@@ -20,8 +20,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import model.EmbeddedMediaObject.MediaVersion;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -163,14 +165,23 @@ public class RightsController extends WithResourceController {
 		}
 	}
 	
+	public static void changePublicity(ObjectId colId, boolean isPublic, List<ObjectId> effectiveIds, boolean downgrade, boolean membersDowngrade) {
+		DB.getCollectionObjectDAO().updateField(colId, "administrative.access.isPublic", isPublic);
+		if (downgrade && membersDowngrade) {//the publicity of all records that belong to the collection is downgraded
+			DB.getRecordResourceDAO().updateMembersToNewPublicity(colId, isPublic, effectiveIds);
+		}
+		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
+			DB.getRecordResourceDAO().updateMembersToMergedPublicity(colId, isPublic, effectiveIds);
+		}	
+	}
+	
 	public static void changeAccess(ObjectId colId, ObjectId userOrGroupId, Access newAccess, List<ObjectId> effectiveIds, 
 			boolean downgrade, boolean membersDowngrade) {
+		DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 		if (downgrade && membersDowngrade) {//the rights of all records that belong to the collection are downgraded
-			DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 			DB.getRecordResourceDAO().updateMembersToNewAccess(colId, userOrGroupId, newAccess, effectiveIds);
 		}
 		else {//if upgrade, or downgrade but !membersDowngrade the new rights of the collection are merged to all records that belong to the record. 
-			DB.getCollectionObjectDAO().changeAccess(colId, userOrGroupId, newAccess);
 			DB.getRecordResourceDAO().updateMembersToMergedRights(colId, new AccessEntry(userOrGroupId, newAccess), effectiveIds);
 		}		
 	}
@@ -195,17 +206,20 @@ public class RightsController extends WithResourceController {
 		notification.setReceiver(userOrGroupId);
 		notification.setResource(colDbId);
 		notification.setSender(ownerId);
+		User sender = DB.getUserDAO().getById(ownerId, new ArrayList<String>(Arrays.asList("avatar")));
+		HashMap<MediaVersion, String> avatar = sender.getAvatar();
+		if (avatar != null && avatar.containsKey(MediaVersion.Square))
+			notification.setSenderLogoUrl(avatar.get(MediaVersion.Square));
 		ShareInfo shareInfo = new ShareInfo();
 		shareInfo.setNewAccess(newAccess);
 		shareInfo.setUserOrGroup(userOrGroupId);
 		Date now = new Date();
 		notification.setOpenedAt(new Timestamp(now.getTime()));
-		DB.getNotificationDAO().makePermanent(notification);
-		NotificationCenter.sendNotification(notification);
 		if (downgrade) {
 			notification.setPendingResponse(false);
 			notification.setActivity(Activity.COLLECTION_UNSHARED);
 			notification.setShareInfo(shareInfo);
+			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
 			result.put("mesage", "Access of user or group to collection has been downgraded.");
 			return ok(result);
@@ -214,6 +228,7 @@ public class RightsController extends WithResourceController {
 			notification.setPendingResponse(false);
 			notification.setActivity(Activity.COLLECTION_SHARED);
 			notification.setShareInfo(shareInfo);
+			DB.getNotificationDAO().makePermanent(notification);
 			NotificationCenter.sendNotification(notification);
 			result.put("message", "Collection shared.");
 			return ok(result);

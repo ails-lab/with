@@ -27,6 +27,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import play.libs.F.Promise;
+import play.libs.Json;
+import model.resources.CulturalObject;
+import model.resources.RecordResource;
 import model.resources.WithResource.WithResourceType;
 
 import org.bson.types.ObjectId;
@@ -62,7 +65,6 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 	public enum QueryOperator {
 		GT("$gt"), EQ("$eq"), GTE("$gte");
-
 
 		private final String text;
 
@@ -197,20 +199,21 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	public Key<E> makePermanent(E doc) {
 		try {
-			Key<E> dbKey =  this.save(doc, WriteConcern.ACKNOWLEDGED);
+			Key<E> dbKey = this.save(doc, WriteConcern.ACKNOWLEDGED);
 			String type = defineInstanceOf(doc);
-			if(type != null) {
+			if (type != null) {
 
 				/* Index Resource */
-				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
-						(ObjectId colId, Map<String, Object> map) -> {
-							return ElasticIndexer.index(type, colId, map);
-						};
-				ParallelAPICall.createPromise(indexResource,
-						(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
-						(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
-				return dbKey;
+				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource = (
+						ObjectId colId, Map<String, Object> map) -> {
+					return ElasticIndexer.index(type, colId, map);
+				};
+				ParallelAPICall.createPromise(indexResource, (ObjectId) doc
+						.getClass().getMethod("getDbId", new Class<?>[0])
+						.invoke(doc), (Map<String, Object>) doc.getClass()
+						.getMethod("transform", new Class<?>[0]).invoke(doc));
 			}
+			return dbKey;
 		} catch (Exception e) {
 			log.error("Cannot save " + doc.getClass().getSimpleName(), e);
 		}
@@ -225,17 +228,18 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	public int makeTransient(E doc) {
 		try {
 			String type = defineInstanceOf(doc);
-			if(type != null) {
+			if (type != null) {
 
 				/* Erase CollectionObject from index */
-				Function<ObjectId, Boolean> deleteCollection =
-						(ObjectId colId) -> {
-								return ElasticEraser.deleteResource(type, colId.toString());
-						};
-				ParallelAPICall.createPromise(deleteCollection, (ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc));
+				Function<ObjectId, Boolean> deleteCollection = (ObjectId colId) -> {
+					return ElasticEraser.deleteResource(type, colId.toString());
+				};
+				ParallelAPICall.createPromise(deleteCollection, (ObjectId) doc
+						.getClass().getMethod("getDbId", new Class<?>[0])
+						.invoke(doc));
 			}
 			return this.delete(doc).getN();
-		} catch(Exception e) {
+		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 			return -1;
 		}
@@ -247,43 +251,43 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	 */
 	@Override
 	public UpdateResults update(final Query<E> q, final UpdateOperations<E> ops) {
-
-		UpdateResults results = super.update(q, ops);
-
-		String id = q.getQueryObject().get("_id").toString();
-		Query<E> q1 = createQuery().field("_id").equal(new ObjectId(id));
-		E doc = findOne(q1);
-
-		String type = defineInstanceOf(doc);
-		try {
-			if(type != null)  {
-				/* Index Resource */
-				BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource =
-						(ObjectId colId, Map<String, Object> map) -> {
-							return ElasticIndexer.index(type, colId, map);
-						};
-				ParallelAPICall.createPromise(indexResource,
-						(ObjectId)doc.getClass().getMethod("getDbId", new Class<?>[0]).invoke(doc),
-						(Map<String, Object>)doc.getClass().getMethod("transform", new Class<?>[0]).invoke(doc));
+		E doc = DB.getDs().findAndModify(q, ops, false);
+		// ObjectId id = (ObjectId) results.getWriteResult().getUpsertedId();
+		// E doc = findOne(q);
+		if (doc != null) {
+			String type = defineInstanceOf(doc);
+			try {
+				if (type != null) {
+					/* Index Resource */
+					BiFunction<ObjectId, Map<String, Object>, IndexResponse> indexResource = (
+							ObjectId colId, Map<String, Object> map) -> {
+						return ElasticIndexer.index(type, colId, map);
+					};
+					ParallelAPICall.createPromise(indexResource, (ObjectId) doc
+							.getClass().getMethod("getDbId", new Class<?>[0])
+							.invoke(doc), (Map<String, Object>) doc.getClass()
+							.getMethod("transform", new Class<?>[0])
+							.invoke(doc));
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				return null;
 			}
-		} catch(Exception e) {
-			log.error(e.getMessage(), e);
-			return null;
 		}
-
-		return results;
+		int n = doc == null ? 0 : 1;
+		return new UpdateResults(new WriteResult(n, true, null));
 	}
-
 
 	@Override
 	public WriteResult deleteById(ObjectId id) {
 
 		WriteResult wr = super.deleteById(id);
 
-		if(wr.getN() == 1) {
-			Function<String, Boolean> deleteResource =
-					(indexId) -> (ElasticEraser.deleteResourceByQuery(indexId));
-			Promise<Boolean> deleteResp = ParallelAPICall.createPromise(deleteResource, id.toString());
+		if (wr.getN() == 1) {
+			Function<String, Boolean> deleteResource = (indexId) -> (ElasticEraser
+					.deleteResourceByQuery(indexId));
+			Promise<Boolean> deleteResp = ParallelAPICall.createPromise(
+					deleteResource, id.toString());
 		}
 
 		return wr;
@@ -293,9 +297,13 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 
 		String instanceName = doc.getClass().getSimpleName();
 		List<String> enumNames = new ArrayList<String>();
-		Arrays.asList(WithResourceType.values()).forEach( (t) -> {enumNames.add(t.toString()); return;} );
-		if(enumNames.contains(instanceName)) {
-			if(!instanceName.equalsIgnoreCase(WithResourceType.WithResource.toString()))
+		Arrays.asList(WithResourceType.values()).forEach((t) -> {
+			enumNames.add(t.toString());
+			return;
+		});
+		if (enumNames.contains(instanceName)) {
+			if (!instanceName.equalsIgnoreCase(WithResourceType.WithResource
+					.toString()))
 				return instanceName.toLowerCase();
 			else
 				return WithResourceType.RecordResource.toString().toLowerCase();
@@ -390,7 +398,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 	}
 
 	public boolean existsFieldWithValue(String field, Object value) {
-		Query<E> q = this.createQuery().field(field).equal(value).limit(1);
+		Query<E> q = this.createQuery().disableValidation().field(field).equal(value).limit(1);
 		return (this.find(q).asList().size() == 0 ? false : true);
 	}
 
@@ -402,7 +410,6 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 		}
 		return (this.find(q).asList().size() == 0 ? false : true);
 	}
-
 
 	public boolean existsEntity(ObjectId id) {
 		return existsFieldWithValue("_id", id);
@@ -457,9 +464,13 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 				if (fieldValue.isArray()) {
 					String[] values = new String[fieldValue.size()];
 					for (int i = 0; i < fieldValue.size(); i++) {
-						values[i] = fieldValue.get(i).asText();
+						if (fieldValue.get(i).isObject())
+							updateFields(newFieldName, fieldValue, updateOps);
+						else
+							values[i] = fieldValue.get(i).asText();
 					}
-					updateOps.disableValidation().set(newFieldName, values);
+					if (values[0] != null)
+						updateOps.disableValidation().set(newFieldName, values);
 				} else {
 					updateOps.disableValidation().set(newFieldName,
 							fieldValue.asText());

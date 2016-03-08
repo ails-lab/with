@@ -129,27 +129,16 @@ public class JsonNodeUtils {
 		return (MultiLiteralOrResource) readMultiLiteral(new MultiLiteralOrResource(), node, suggestedLanguages);
 	}
 
-	public static List<WithDate> asWithDateArray(JsonNode node) {
-		if (node != null && !node.isMissingNode()) {
-			ArrayList<WithDate> res = new ArrayList<>();
-			if (node.isArray()) {
-				for (int i = 0; i < node.size(); i++) {
-					res.add(new WithDate(node.get(i).asText()));
-				}
-			} else if (node.isTextual()) {
-				res.add(new WithDate(node.asText()));
-				return res;
-			}
-			for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
-				Entry<String, JsonNode> next = iterator.next();
-				JsonNode value = next.getValue();
-				for (int i = 0; i < value.size(); i++) {
-					res.add(new WithDate(value.get(i).asText()));
+	public static List<WithDate> asWithDateArray(List<String> list) {
+		ArrayList<WithDate> res = new ArrayList<>();
+		if (Utils.hasInfo(list)) {
+			for (String string : list) {
+				if (Utils.hasInfo(string)){
+					res.add(new WithDate(string));
 				}
 			}
-			return res;
 		}
-		return new ArrayList<>();
+		return res;
 	}
 
 	public static List<String> asStringArray(Collection<JsonNode> node) {

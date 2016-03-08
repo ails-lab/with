@@ -44,6 +44,7 @@
   box-shadow: 0 0 5px rgba(0,0,0,0.15);
   -webkit-border-radius: 4px;
   border-radius: 4px;
+      overflow: auto;
 }
 
 .facetcontents{
@@ -93,7 +94,7 @@
   background-color: #fff;
   padding: 10px 0px 3px 3px;
   overflow-y: auto;
-  min-height:360px;
+  min-height:460px;
   max-height: 460px;
   border-radius: 4px;
 }

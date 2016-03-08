@@ -17,12 +17,14 @@
 package model;
 
 import utils.MediaTypeConverter;
+import utils.Serializer;
 
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.common.net.MediaType;
 
 import model.basicDataTypes.LiteralOrResource;
@@ -47,16 +49,45 @@ public class EmbeddedMediaObject {
 		}
 	}
 
+	/**
+	 * the text used to represent the value is defined by the getName() property 
+	 * in order to give support to values like "3D" which is not a valid id for an 
+	 * Enum value.
+	 * @author Enrique Matos Alfonso (gardero@gmail.com)
+	 *
+	 */
 	public static enum WithMediaType {
-		VIDEO, IMAGE, TEXT, AUDIO, OTHER;
+		VIDEO, IMAGE, TEXT, AUDIO, THREED{
+			@Override
+			public String getName() {
+				return "3D";
+			}
+		}, OTHER{
+			
+			@Override
+			public boolean isKnown() {
+				return false;
+			}
+			
 
+		};
+		
 		public static WithMediaType getType(String string) {
 			for (WithMediaType v : WithMediaType.values()) {
-				if (v.toString().equals(string))
+				if (v.toString().equals(string) || v.getName().equals(string))
 					return v;
 			}
 			return OTHER;
 		}
+
+		public boolean isKnown() {
+			return true;
+		}
+		
+		public String getName() {
+			return this.name();
+		}
+		
 	}
 
 	// this needs work
@@ -126,6 +157,7 @@ public class EmbeddedMediaObject {
 	 * http://docs.guava-libraries.googlecode
 	 * .com/git/javadoc/com/google/common/net/MediaType.html
 	 */
+	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
 	private MediaType mimeType;
 
 	public static enum Quality {
@@ -195,7 +227,8 @@ public class EmbeddedMediaObject {
 	public void setOriginalRights(LiteralOrResource originalRights) {
 		this.originalRights = originalRights;
 	}
-
+	
+	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
 	public MediaType getMimeType() {
 		return mimeType;
 	}

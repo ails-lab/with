@@ -4,92 +4,126 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	$.bridget('isotope', Isotope);
 		
 	
-	
+	self.loading=ko.observable(false);
 	
 					
-	function FeaturedExhibit(data){
-	  var fe=this;
-	  fe.title=ko.observable();
-	  fe.description=ko.observable();
-	  fe.dbId=ko.observable(-1);
-	  fe.thumbs=ko.observableArray();
-	  fe.url=ko.observable();
-	  
-	  fe.load=function(data){
-	     fe.title(data.title);
-	     fe.dbId(data.dbId);
-	     fe.description(data.description);
-	     fe.url="#exhibitionview/"+fe.dbId();
-		  var i=0;
-		  var j=0;
-		  
-		  while (i<2 && j<data.firstEntries.length){
-			  if(data.firstEntries[j].thumbnailUrl){
-				  var thumb={url:data.firstEntries[j].thumbnailUrl,title:data.firstEntries[j].title};
-				  fe.thumbs.push(thumb);
-				  i++;}
-			    j++
-		  }}
-	  if(data != undefined) fe.load(data);
-	  
-	}		
-			
-	 function Collection(data){
-		 var self = this;
+		
+	function Collection(data) {
+		var self=this;
+		
+		var mapping = {
+				create: function(options) {
+			    	var self=this;
+			        // use extend instead of map to avoid observables
+			    	
+			    	self=$.extend(self, options.data);
+			    	
+			    	self.title=findByLang(self.descriptiveData.label);
+			    	self.thumbnail = ko.computed(function() {
+			          if(self.media && self.media[0] && self.media[0].Thumbnail){
+			        	var data=self.media[0].Thumbnail.url;
+			        	 if(data){
+			 				return data;}
+			 			  else{
+			 				   return "img/content/thumb-empty.png";
+			 			   }
+			        	}
+			        	return "img/content/thumb-empty.png";
+			        });
 
-
-		  self.collname='';
-		  self.id=-1;
-		  self.url='';
-		  self.owner='';
-		  self.ownerId=-1;
-		  self.itemCount=0;
-		  self.thumbnail='';
-		  self.description='';
-		  self.isLoaded = ko.observable(false);
-		  self.isExhibition=false;
-		  self.itemcss="item ";
-		  self.type="COLLECTION";
-		  self.load=function(data){
-			  if(data.title==undefined){
-					self.collname="No title";
-				}else{self.collname=data.title;}
-				self.id=data.dbId;
-				
-				self.url="#collectionview/"+self.id;
-				
-				self.description=data.description;
-				if(data.firstEntries.length>0 && data.firstEntries[0].thumbnailUrl){
-					self.thumbnail=data.firstEntries[0].thumbnailUrl;
-				}
-				self.isExhibition=data.isExhibition;
-				if(self.isExhibition){
-					self.itemcss+="exhibition";
-					self.type="EXHIBITION";
-				}
-				else{self.itemcss+="collection";}
-				if(data.owner!==undefined){
-						self.owner=data.owner;
-					}
-
+			        self.type=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        		  return "COLLECTION";
+			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        			return "SPACE";
+			        	    else return "EXHIBITION";
+			        	}else return "";
+			        });
+			        
+			        self.css=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        		  return "item collection";
+			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        			return "item space";
+			        	    else return "item space";
+			        	}else return "item exhibition";
+			        });
+			        
+			        self.url=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.collectionType.indexOf("Collection")==-1)
+				    		  return 'index.html#exhibitionview/'+ self.dbId;
+			        		else if (self.administrative.collectionType.indexOf("Space")>-1){
+			        			return self.administrative.isShownAt;
+			        		}
+				    		else{
+				    			return 'index.html#collectionview/'+ self.dbId;
+				    		}
+			        	}else return "";
+			        });
+			        self.owner=ko.computed(function(){
+			        	if(self.withCreatorInfo){
+			        		return self.withCreatorInfo.username;
+			        	}
+			        });
+			        
+			        return self;
+			     }
 			  
-		  }
-		  self.cachedThumbnail = ko.pureComputed(function() {
-				
-			   if(self.thumbnail && self.thumbnail!="img/content/thumb-empty.png"){
-				if (self.thumbnail.indexOf('/') === 0) {
-					return self.thumbnail;
-				} else {
-					var newurl='url=' + encodeURIComponent(self.thumbnail)+'&';
-					return '/cache/byUrl?'+newurl+'Xauth2='+ sign(newurl);
-				}}
-			   else{
-				   return "img/content/thumb-empty.png";
-			   }
+		};
+		
+		
+		var recmapping={
+				'dbId': {
+					key: function(data) {
+			            return ko.utils.unwrapObservable(data.dbId);
+			        }
+				 }};
+		self.isLoaded = ko.observable(false);
+		self.records=ko.mapping.fromJS([], recmapping);
+		
+		
+		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
+		
+		self.load = function(data) {
+			self.data=ko.mapping.fromJS(data, mapping);
+			
+		};
+
+		self.loadRecords= function(offset,count){
+			loading(true);
+			var promise=self.getCollectionRecords(0,30);
+			 $.when(promise).done(function(responseRecords) {
+				 ko.mapping.fromJS(responseRecords.records,recmapping,self.records);
+				 loading(false);
+				 
+			 });
+		}
+		
+		self.more= function(){
+			var offset=self.records().length;
+			self.loadRecords(offset,30);
+		}
+		
+		self.getCollectionRecords = function (offset,count) {
+			//call should be replaced with space collections+exhibitions
+			return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/"+self.data.dbId+"/list",
+				processData: false,
+				data: "start="+offset+"&count="+count,
+			}).success (function(){
 			});
-		  if(data != undefined) self.load(data);
-		   
-		  
+		};
+		
+		if(data != undefined){ 
+			self.load(data);
+			
+		}
 	}
 	
   function MainContentModel(params) {
@@ -97,13 +131,18 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  var self = this;
 	  document.body.setAttribute("data-page","home");
 	  setTimeout(function(){ WITHApp.init(); }, 300);
-	  self.loading = ko.observable(false);
+	 
+	 
+	  self.hash=window.location.hash;
+	  
 	  self.exhibitloaded=ko.observable(false);
-	  self.featured=ko.observable(null);	
+	  self.featuredExhibition=ko.observable(null);	
 	  self.homecollections=ko.observableArray();
 	  self.totalCollections=ko.observable(0);
 	  self.totalExhibitions=ko.observable(0);
-	  self.hash=window.location.hash;
+	  self.collections=ko.observableArray();
+	  self.fetchitemnum=20;
+	  
 	  var $container = $(".grid").isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
@@ -116,9 +155,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  
 	  
 	  self.loadAll = function () {
-		  console.log("load all");
 		  //this should replaced with get space collections + exhibitions
-		   self.loading(true);
+		 loading(true);
 		 var count=40;
 		 if(sessionStorage.getItem("homemasonrycount")){
 			 count=sessionStorage.getItem("homemasonrycount");
@@ -135,15 +173,15 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 						 homeisotopeImagesReveal( $container,$newitems );
 						
 						}
-					self.loading(false);
+				    loading(false);
 				   // self.revealItems(responseCollections['collectionsOrExhibitions']);
 					
 			});
 		  var promise2 = self.getFeaturedExhibition(WITHApp.featuredExhibition);
           $.when(promise2).done(function (data) {
         	  
-        	  self.featured(new FeaturedExhibit(data));
-        	  $("#featuredExhibit").css('background-image','url('+self.featured().thumbs()[0].url+')');    
+        	  self.featuredExhibition(new Collection(data));
+        	  $("#featuredExhibit").css('background-image','url('+self.featuredExhibition().data.thumbnail()+')');    
         	  self.exhibitloaded(true);
         	  WITHApp.initCharacterLimiter();
           });
@@ -151,7 +189,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		  
 		};
 		//TODO:get project from backend. Update hard-coded group name parameter in list collections call.
-		self.getSpaceCollections = function (count) {
+		
+		self.getSpaceCollections = function () {
 			//call should be replaced with space collections+exhibitions
 			return $.ajax({
 				type: "GET",
@@ -159,10 +198,13 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count="+count+"&collectionHits=true&directlyAccessedByGroupName="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+				//data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true",
 			}).success (function(){
 			});
 		};
+		
+	
 		
          self.getFeaturedExhibition=function(id) {
 			
@@ -175,77 +217,71 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	            }
 	        });
 	    };
+	    
+	    self.loadNext = function () {
+			  if (loading() === false) {
+				 loading(true);
+				
+				var promise=self.moreCollections();
+				$.when(promise).done(function(data){
+					var items=self.revealItems(data['collectionsOrExhibitions']);
+					if(items.length>0){
+						 var $newitems=getItems(items);
+						 homeisotopeImagesReveal( $container,$newitems );
+						
+						}
+					loading(false);
+				})
+				
+				
+				}
+			};
 		
-		self.loadNext = function () {
-			console.log("main content more collections");
-			
-			self.moreCollections();
-		};
-
-		self.moreCollections = function () {
-			if (self.loading === true) {
-				setTimeout(self.moreCollections(), 1000);
-			}
-			if (self.loading() === false) {
-				self.loading(true);
-				var offset = self.homecollections().length+1;
-				$.ajax({
-					"url": "/collection/list?count=40&offset=" + offset + "&directlyAccessedByGroupName="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
-					"method": "get",
-					"contentType": "application/json",
-					"success": function (data) {
-						var items=self.revealItems(data['collectionsOrExhibitions']);
-						
-						if(items.length>0){
-							 var $newitems=getItems(items);
-							 homeisotopeImagesReveal( $container,$newitems );
-							
-							}
-						self.loading(false);
-						//self.revealItems(data['collectionsOrExhibitions']);
-						
-					},
-					"error": function (result) {
-						self.loading(false);
-					}
+			self.moreCollections = function () {
+				return $.ajax({
+					type: "GET",
+					contentType: "application/json",
+					dataType: "json",
+					url: "/collection/list",
+					processData: false,
+					//data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.homecollections().length,
+					data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+					
+				}).success (function(){
 				});
-			}
-		};
+				
+			};
 
-	  loadCollectionOrExhibition = function(data,event) {
+	  
+	  
+	  loadUrl = function(data,event) {
+		 
 		  event.preventDefault();
 		  var scrollPosition = $(window).scrollTop();
 	      sessionStorage.setItem("homemasonryscroll", scrollPosition);
-	     	var item = ko.utils.arrayFirst(self.homecollections(), function(coll) {
-				   return coll.id === data;
-				});
-		  if (item.isExhibition) {
-			  window.location = 'index.html#exhibitionview/'+ item.id;
-			  
-		  }
-		  else {
-			  window.location = 'index.html#collectionview/' + item.id+'/count/0';
-		  }
+	     
+		  window.location.href = data;
+		  
 		  return false;
 	  };
-		
-
 	  
 	  self.revealItems = function (data) {
 		var items=[];
 			
 		  
-		  if(data.length==0){ self.loading(false);}
+		  if(data.length==0){ loading(false);}
 			
 			for (var i in data) {
 				var c=new Collection(
 						data[i]
 						);
 				items.push(c);
+				self.homecollections().push(c);
+				
 			
 			}
-			self.homecollections.push.apply(self.homecollections, items);
-			 sessionStorage.setItem("homemasonrycount", self.homecollections().length);
+			self.homecollections.valueHasMutated();
+			sessionStorage.setItem("homemasonrycount", self.homecollections().length);
 				
 			return items;
 			
@@ -254,11 +290,11 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 		
 		function getItem(collection) {
 			
-	          var tile= '<div class="'+collection.itemcss+'"> <div class="wrap">';
+			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
 			
-                   tile+='<a href="#" onclick="loadCollectionOrExhibition(\''+collection.id+'\',event)">'
-                    +'<div class="thumb"><img src="'+collection.cachedThumbnail()+'"></div>'
-                    +' <div class="info"><span class="type">'+collection.type+'</span><h1 class="title">'+collection.collname+'</h1><span class="owner">'+ collection.owner+'</span></div>'
+                   tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
+                    +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"></div>'
+                    +' <div class="info"><span class="type">'+collection.data.type()+'</span><h1 class="title">'+collection.data.title+'</h1><span class="owner">'+ collection.data.owner()+'</span></div>'
                     +'</a></div></div>';
 			return tile;
 			

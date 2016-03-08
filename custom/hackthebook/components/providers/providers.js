@@ -24,7 +24,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 		var self = this;
 	    self.id = "";
 		self.name = "";
-		self.thumbnail="";
+		self.logo="";
 		self.country = "";
 		self.background="";
 		self.totalCollections=0;
@@ -38,12 +38,14 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			}else{self.title=data.title;}
 			//get 20 collections and exhibitions
 			self.url="#provider/"+data.dbId+"/count/20";
-			self.thumbnail='/media/' + data.thumbnail;
+			if(data.avatar && data.avatar.Square)
+			 self.logo=data.avatar.Square;
 			self.country=data.page.country;
 			self.totalCollections=data.totalCollections;
 			self.totalExhibitions=data.totalExhibitions;
 			self.name=data.friendlyName !=null? data.friendlyName : data.username;
-			self.background='/media/' + data.page.coverThumbnail;
+			if(data.page.cover && data.page.cover.Thumbnail)
+			 self.background= data.page.cover.Thumbnail;
 			
 		};
 
@@ -96,7 +98,7 @@ define(['bridget', 'knockout', 'text!./providers.html','isotope','imagesloaded',
 			// replace with group/descendantOrganizations/:projectId
 			self.loading(true);
 			$.ajax({
-				"url": "/group/descendantOrganizations/" + WITHApp.projectId+"?collectionHits=true",
+				"url": "/group/descendantOrganizations/" + WITHApp.projectId+"?collectionHits=true",//TO BE ADDED WHEN fixed+"?collectionHits=true",
 				"method": "get",
 				"contentType": "application/json",
 				"success": function (data) {

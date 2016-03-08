@@ -28,6 +28,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 
 import model.annotations.ContextData;
+import model.annotations.ExhibitionData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -323,6 +324,20 @@ public class CollectionObjectController extends WithResourceController {
 			return internalServerError(result);
 		}
 	}
+	
+	public static Result countMyAndShared() {
+		ObjectNode result = Json.newObject().objectNode();
+		List<String> effectiveUserIds = AccessManager
+				.effectiveUserIds(session().get("effectiveUserIds"));
+		if (effectiveUserIds.isEmpty()) {
+			return badRequest("You should be signed in as a user.");
+		}
+		 else { 
+			 result = DB.getCollectionObjectDAO().countMyAndSharedCollections(
+					 AccessManager.toObjectIds(effectiveUserIds));
+				return ok(result);
+		 }
+	}
 
 	public static Result list(Option<MyPlayList> directlyAccessedByUserOrGroup,
 			Option<MyPlayList> recursivelyAccessedByUserOrGroup, Option<String> creator, Option<Boolean> isPublic,
@@ -421,8 +436,7 @@ public class CollectionObjectController extends WithResourceController {
 	}
 
 	// input parameter lists' (directlyAccessedByUserOrGroup etc) intended
-	// meaning
-	// is AND of its entries
+	// meaning is AND of its entries
 	// returned list of lists accessedByUserOrGroup represents AND of OR entries
 	// i.e. each entry in directlyAccessedByUserName for example has to be
 	// included in a separate list!
@@ -610,11 +624,13 @@ public class CollectionObjectController extends WithResourceController {
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			else {
-				List<String> retrievedFields = new ArrayList<String>(
-						Arrays.asList("descriptiveData.label", "descriptiveData.description", "media", "collectedIn"));
-				// bytes of thumbnail???
-				List<RecordResource> records = DB.getRecordResourceDAO().getByCollectionBetweenPositions(colId, start,
-						start + count);
+
+				/*List<String> retrievedFields = new ArrayList<String>(
+						Arrays.asList("descriptiveData.label",
+								"descriptiveData.description", "media", "collectedIn"));*/
+				List<RecordResource> records = DB.getRecordResourceDAO()
+						.getByCollectionBetweenPositions(colId, start,
+								start + count);
 				if (records == null) {
 					result.put("message", "Cannot retrieve records from database!");
 					return internalServerError(result);
@@ -627,13 +643,15 @@ public class CollectionObjectController extends WithResourceController {
 						recordsList.add(Json.toJson(new RecordResource(e.getDbId())));
 					} else {
 						// filter out all context annotations that do not refer
-						// to this collection
+						// to this collection-position
 						List<ContextData> contextAnns = e.getContextData();
 						List<ContextData> filteredContextAnns = new ArrayList<ContextData>();
 						for (ContextData ca : contextAnns) {
 							if (ca.getTarget().getCollectionId().equals(colId)
-									&& (ca.getTarget().getPosition() == position))
+									&& (ca.getTarget().getPosition() == position)) {
 								filteredContextAnns.add(ca);
+								break;
+							}
 						}
 						e.setContextData(filteredContextAnns);
 						if (e.getContent() != null) {
@@ -647,7 +665,6 @@ public class CollectionObjectController extends WithResourceController {
 								e.setContent(newContent);
 							}
 						}
-						System.out.println("record " + e.getDescriptiveData().getLabel().get(Language.DEFAULT));
 						recordsList.add(Json.toJson(e));
 					}
 					position += 1;

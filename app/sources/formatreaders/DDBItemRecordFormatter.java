@@ -51,7 +51,8 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		// TODO read the language
 		
 		Language[] language = null;
-		List<String> langs = rec.getStringArrayValue("ProvidedCHO.language","ProvidedCHO.language.@resource");
+		List<String> langs = rec.getStringArrayValue("ProvidedCHO.language","ProvidedCHO.language.@resource"
+				,"LinguisticSystem.value");
 		if (langs!=null){
 			language = new Language[langs.size()];
 			for (int i = 0; i < langs.size(); i++) {
@@ -60,9 +61,8 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("ProvidedCHO.title"),
-											rec.getStringValue("Concept"),
-											rec.getStringValue("additional_description"),
-											rec.getStringValue("fulltext"));
+											rec.getStringValue("ProvidedCHO.description"),
+											rec.getStringValue("Concept[.*].prefLabel"));
 		}
 		rec.setLanguages(language);
 		model.setDclanguage(StringUtils.getLiteralLanguages(language));
@@ -71,35 +71,30 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 //		model.setDcidentifier(rec.getMultiLiteralOrResourceValue("dcIdentifier"));
 //		model.setDccoverage(rec.getMultiLiteralOrResourceValue("dcCoverage"));
 //		model.setDcrights(rec.getMultiLiteralOrResourceValue("dcRights"));
-//		model.setDcspatial(rec.getMultiLiteralOrResourceValue("dctermsSpatial"));
+		model.setDctermsspatial(rec.getMultiLiteralOrResourceValue("Place.prefLabel","Place.@about"));
+		model.setCoordinates(StringUtils.getPoint(rec.getStringValue("Place.lat"), (rec.getStringValue("Place.long"))));
 		model.setDccreator(rec.getMultiLiteralOrResourceValue("ProvidedCHO.creator"));
 //		model.setDccreated(rec.getWithDateArrayValue("dctermsCreated"));
 //		model.setDcformat(rec.getMultiLiteralOrResourceValue("dcFormat"));
 //		model.setDctermsmedium(rec.getMultiLiteralOrResourceValue("dctermsMedium"));
 //		model.setIsRelatedTo(rec.getMultiLiteralOrResourceValue("edmIsRelatedTo"));
 		model.setLabel(rec.getMultiLiteralValue("ProvidedCHO.title"));
-//		model.setDescription(rec.getMultiLiteralValue("dcDescription"));
+		model.setDescription(rec.getMultiLiteralValue("ProvidedCHO.description"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("Concept[.*].prefLabel"));
-		model.setDates(rec.getWithDateArrayValue("ProvidedCHO.issued"));
+		model.setDates(rec.getWithDateArrayValue("ProvidedCHO.issued","ProvidedCHO.date"));
 		model.setDctype(rec.getMultiLiteralOrResourceValue("WebResource.type"));
 //		model.setDccontributor(rec.getMultiLiteralOrResourceValue("dcContributor"));
 		
 		LiteralOrResource rights = rec.getLiteralOrResourceValue("WebResource.rights");
-		Object object2 = getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
-		 rights.getURI()).get(0);
-		WithMediaRights withMediaRights = rights==null?null:(WithMediaRights)
-		 object2;
+		List<Object> translateToCommon = !Utils.hasInfo(rights)?null: 
+			getValuesMap().translateToCommon(CommonFilters.RIGHTS.getId(),
+		 rights.getURI());
+		WithMediaRights withMediaRights = !Utils.hasInfo(rights)?null:
+			(WithMediaRights.getRighs((String) translateToCommon.get(0)));
 		
-
-
-
-
-		model.getDates().addAll(rec.getWithDateArrayValue("dcDate"));
-
-
 		model.setIsShownAt(rec.getLiteralOrResourceValue("Aggregation.isShownAt"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("Aggregation.isShownBy"));
-		String uriAt = rec.getStringValue("Aggregation.dataProvider[1]@resource");
+		String uriAt = rec.getStringValue("Aggregation.dataProvider[1].@resource");
 		ProvenanceInfo provInfo = new ProvenanceInfo(rec.getStringValue("Aggregation.dataProvider[0]"),uriAt,null);
 		object.addToProvenance(provInfo);
 		
@@ -107,7 +102,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(provInfo);
 		
 		
-		String recID = rec.getStringValue("ProvidedCHO.identifier[1]");
+		String recID = rec.getStringValue("ProvidedCHO.identifier");
 		String uri = rec.getStringValue("ProvidedCHO.@about");
 		object.addToProvenance(
 				new ProvenanceInfo(Sources.DDB.toString(),  uri,recID));
@@ -124,6 +119,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 			EmbeddedMediaObject medThumb = new EmbeddedMediaObject();
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
+			if (Utils.hasInfo(rights))
 			medThumb.setOriginalRights(rights);
 			medThumb.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
@@ -133,6 +129,7 @@ public class DDBItemRecordFormatter extends CulturalRecordFormatter {
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setType(type);
 			med.setUrl(uri2);
+			if (Utils.hasInfo(rights))
 			med.setOriginalRights(rights);
 			med.setWithRights(withMediaRights);
 			object.addMedia(MediaVersion.Original, med);

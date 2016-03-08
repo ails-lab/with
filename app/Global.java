@@ -18,6 +18,7 @@ import com.mongodb.WriteConcern;
 
 import actors.ApiKeyManager;
 import actors.LockActor;
+import actors.MediaCheckerActor;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
 import akka.actor.Props;
@@ -45,7 +46,8 @@ public class Global extends GlobalSettings {
 		// some global 
 		ActorRef apiKeyManager = Akka.system().actorOf( Props.create( ApiKeyManager.class ), "apiKeyManager");
 		ActorRef lockManager = Akka.system().actorOf( Props.create( LockActor.class), "lockManager");
-		
+		ActorRef mediaChecker = Akka.system().actorOf( Props.create( MediaCheckerActor.class), "mediaChecker");
+
 		
 		Locks.setLockManagerActorRef( lockManager );
 		

@@ -55,7 +55,6 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 			for (int i = 0; i < langs.size(); i++) {
 				language[i] = Language.getLanguage(langs.get(i));
 			}
-			System.out.println(Arrays.toString(language));
 		}
 		if (!Utils.hasInfo(language)){
 			language = getLanguagesFromText(rec.getStringValue("title"),
@@ -73,7 +72,7 @@ public class NLARecordFormatter extends CulturalRecordFormatter {
 		model.getDates().addAll(rec.getWithDateArrayValue("year"));
 		model.getDates().addAll(rec.getWithDateArrayValue("date"));
 		model.setKeywords(rec.getMultiLiteralOrResourceValue("subject"));
-		
+		model.setDcdate(rec.getWithDateArrayValue("date"));
 		model.setIsShownBy(rec.getLiteralOrResourceValue("identifier[type=url,linktype=fulltext|restricted|unknown].value"));
 		
 		

@@ -1,16 +1,20 @@
 
 <div class="exhibition">
-	<input type="checkbox" class="switch"/>
 	<div class="left"></div>  <!-- for scrolling the page when dragging item at left of page-->
 	<div class="outer"><!--
 --><div class="boxBasic boxItem" id="placeholder">
 		<input  class="placeholderD1" data-bind="textInput: title, event: { blur: textfieldsLostFocus.bind($data, true) }" placeholder="Add title" >
 		<input  class="placeholderD2" data-bind="textInput: description, event: { blur: textfieldsLostFocus.bind($data, false) }" placeholder="Add description">
+
+		<div class="center-buttons">
+			<input type="checkbox" class="switch"/>
+			<button class="btn btn-success btn-sm" style="font-size: 12px;" data-bind="click: playExhibition"><span class="glyphicon glyphicon-play" style="vertical-align: middle"></span> Play</button>
+		</div>
 	</div><!--
 --><!-- ko template: { foreach: collectionItemsArray,
 			    beforeRemove: removeItem,
 			    afterAdd: showNewItem } --><!--
---><div class ="boxBasic dashed-box droppable" data-bind="drop: { contenteditable="" index: $index, array: $parent.collectionItemsArray }">
+--><div class ="boxBasic dashed-box droppable" data-bind="drop: {index: $index, array: $parent.collectionItemsArray }">
 		<div id="droppable-Children">
 			<div class="droppable-placeholder-top">Add a new panel</div>
 			<div class="droppable-placeholder-bottom">Drag an image</div>
@@ -18,11 +22,11 @@
 --></div><!--
 --><div class="boxBasic boxItem" data-bind="drag: { item: $data, move: true }">
 		<div class="ImageDescription">
-			<img data-bind="attr: { src: media[0].Thumbnail.url }" class="itemImage"></img>
-			<div class="description d1" data-bind="text: descriptiveData.label.default[0]"></div>
-			<div class="description d2" data-bind="text: provenance[provenance.length - 1].provider"></div>
-<!-- ko if: descriptiveData.description -->
-			<div class="description d2" data-bind="text: descriptiveData.description.default[0]"> </div>
+			<img data-bind="attr: { src: media()[0].Thumbnail.url }" class="itemImage"></img>
+			<div class="description d1" data-bind="text: title"></div>
+			<div class="description d2" data-bind="text: provenance()[provenance().length - 1].provider"></div>
+<!-- ko if: description -->
+			<div class="description d2" data-bind="text: description"> </div>
 <!-- /ko -->
 			<div class="btn-group EditOptions" role="group">
 				<button type="button" class="btn btn-link" data-bind="click: $parent.showPopUpText">
@@ -41,11 +45,11 @@
 
 			<!--  ko if: $data.containsVideo-->
 			<div class="embed-responsive embed-responsive-4by3">
-				<iframe width="560" height="315" frameborder="0" allowfullscreen data-bind="attr: { src: videoUrl }"></iframe>
+				<iframe width="560" height="315" frameborder="0" allowfullscreen data-bind="attr: { src: contextData()[0].body.videoUrl }"></iframe>
 			</div>
 			<!-- /ko -->
 			<!--  ko if: $data.containsText-->
-			<div class="Text" data-bind="text: additionalText"></div>
+			<div class="Text" data-bind="text: contextData()[0].body.text.default"></div>
 			<!-- /ko -->
 		</div>
 		<!-- /ko -->
@@ -58,11 +62,10 @@
 			<div class="droppable-placeholder-bottom">Drag an image</div>
 		</div>
 	</div>
-		<div data-bind="scroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }"/>
+		<div data-bind="hscroll: collectionItemsArray(), scrollOptions: { loadFunc: loadNextExhibition, offset: 20 }"/>
 	</div>
 
 	<div class="right"></div><!-- for scrolling the page when dragging item at right of page-->
-
 
 	<div class="exh-bottom">
 		<div class="bottom-left">
@@ -79,21 +82,21 @@
 		<div id="outer-bottom">
 			<!-- ko foreach: userSavedItemsArray -->
 			<div class="bottom-box">
-				<img class="draggable" data-bind="attr: { src: media[0].Thumbnail.url }, drag: { item: $data, move: false }, event: { mouseover: $parent.enableDetails, mouseout: $parent.disableDetails }" > </img>
+				<img class="draggable" data-bind="attr: { src: media()[0].Thumbnail.url }, drag: { item: $data, move: false }, event: { mouseover: $parent.enableDetails, mouseout: $parent.disableDetails }" > </img>
 				<!--<img src="http://www.escrs.org/milan2012/images/button_close.png" class="XButtonImage" data-bind="click: $parent.xButtonClicked"> </img>-->
 			</div>
 			<!-- /ko -->
-			<div data-bind="scroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"/>
+			<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"/>
 		</div>
 		<!--  ko if: currentItemSet-->
 		<div id="hoverDetails" data-bind="visible: detailsEnabled">
 
-			<img data-bind="attr: { src: currentItem().media[0].Thumbnail.url }"></img>
+			<img data-bind="attr: { src: currentItem().media()[0].Thumbnail.url }"></img>
 			<div id="hoverTextArea">
-				<div  id="title" data-bind="text: currentItem().descriptiveData.label.default[0]"></div>
-				<div  id="creator" data-bind="text: currentItem().provenance[provenance.length - 1].provider"></div>
+				<div  id="title" data-bind="text: currentItem().title"></div>
+				<div  id="creator" data-bind="text: currentItem().provenance()[provenance().length - 1].provider"></div>
 <!-- ko if: currentItem().descriptiveData.description -->
-				<div  id="description" data-bind="text: currentItem().descriptiveData.description.default[0]"> </div>
+				<div  id="description" data-bind="text: currentItem().description"> </div>
 <!-- /ko -->
 			</div>
 		</div>

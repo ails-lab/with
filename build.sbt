@@ -28,6 +28,7 @@ libraryDependencies ++= Seq(
  "org.jsoup" % "jsoup" % "1.8.3",
  "com.optimaize.languagedetector" % "language-detector" % "0.4",
  "org.apache.httpcomponents" % "httpclient" % "4.3.1",
+ "org.apache.httpcomponents" % "httpasyncclient" % "4.1.1",
   "org.apache.httpcomponents" % "httpmime" % "4.3.1",
   "org.elasticsearch" % "elasticsearch" % "1.5.1",
 // "com.yakaz.elasticsearch.plugins" % "elasticsearch-action-updatebyquery" % "2.5.1",
@@ -37,6 +38,7 @@ libraryDependencies ++= Seq(
  "org.apache.commons" % "commons-email" % "1.3.3",
  "com.jayway.jsonpath" % "json-path" % "2.0.0",
  "junit" % "junit" % "4.11",
- "org.im4java" % "im4java" % "1.4.0"
+ "org.im4java" % "im4java" % "1.4.0",
+ "net.coobird" % "thumbnailator" % "0.4.8"
 )
 

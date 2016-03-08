@@ -33,21 +33,48 @@ public class ProvenanceInfo {
 
 	public enum Sources {
 		Mint("Mint"), Europeana("Europeana"), UploadedByUser("UploadedByUser"),
-		BritishLibrary("The British Library"),
-		InternetArchive("Internet Archive"), DDB("DDB"),
-		DigitalNZ("DigitalNZ"), DPLA("DPLA"), EFashion("EFashion"), NLA("NLA"),
-		Rijksmuseum("Rijksmuseum");
+		BritishLibrary("BritishLibrary", "The British Library"),
+		InternetArchive("InternetArchive","Internet Archive"), DDB("DDB","Deutsche Digitale Bibliothek"),
+		DigitalNZ("DigitalNZ"), DPLA("DPLA","Digital Public Library of America"), 
+		EFashion("EFashion"), 
+		NLA("NLA","National Library of Australia"),
+		Rijksmuseum("Rijksmuseum","Rijksmuseum");
 		
 		private final String text;
+		private final String ID;
 
-		private Sources(final String text) {
+		private Sources( String id, String text) {
 			this.text = text;
+			this.ID = id;
+		}
+		
+		private Sources(String textid) {
+			this.text = textid;
+			this.ID = textid;
 		}
 
 		@Override
 		public String toString() {
+			return ID;
+		}
+
+		public String getText() {
 			return text;
 		}
+
+		public String getID() {
+			return ID;
+		}
+		
+		public static Sources getSourceByID(String id){
+			for (Sources e : Sources.values()) {
+				if (e.getID().equals(id)){
+					return e;
+				}
+			}
+			return null;
+		}
+		
 
 	}
 

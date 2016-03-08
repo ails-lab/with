@@ -7,33 +7,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	self.loading=ko.observable(false);
 	
 					
-	function FeaturedExhibit(data){
-	  var fe=this;
-	  fe.title=ko.observable();
-	  fe.description=ko.observable();
-	  fe.dbId=ko.observable(-1);
-	  fe.thumbs=ko.observableArray();
-	  fe.url=ko.observable();
-	  
-	  fe.load=function(data){
-	     fe.title(data.title);
-	     fe.dbId(data.dbId);
-	     fe.description(data.description);
-	     fe.url="#exhibitionview/"+fe.dbId();
-		  var i=0;
-		  var j=0;
-		  
-		  while (i<2 && j<data.firstEntries.length){
-			  if(data.firstEntries[j].thumbnailUrl){
-				  var thumb={url:data.firstEntries[j].thumbnailUrl,title:data.firstEntries[j].title};
-				  fe.thumbs.push(thumb);
-				  i++;}
-			    j++
-		  }}
-	  if(data != undefined) fe.load(data);
-	  
-	}		
-			
+		
 	function Collection(data) {
 		var self=this;
 		
@@ -158,11 +132,7 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 	  document.body.setAttribute("data-page","home");
 	  setTimeout(function(){ WITHApp.init(); }, 300);
 	 
-	  /*self.exhibitloaded=ko.observable(false);
-	  self.featured=ko.observable(null);	
-	  self.homecollections=ko.observableArray();
-	  self.totalCollections=ko.observable(0);
-	  self.totalExhibitions=ko.observable(0);*/
+	 
 	  self.hash=window.location.hash;
 	  
 	  self.exhibitloaded=ko.observable(false);
@@ -228,8 +198,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				//data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
-				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true",
+				data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+				//data: "offset=0&count="+self.fetchitemnum+"&collectionHits=true&isPublic=true",
 			}).success (function(){
 			});
 		};
@@ -274,8 +244,8 @@ define(['bridget','knockout', 'text!./main-content.html','isotope','imagesloaded
 					dataType: "json",
 					url: "/collection/list",
 					processData: false,
-					data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.homecollections().length,
-					//data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
+					//data: "isPublic=true&count="+self.fetchitemnum+"&offset=" + self.homecollections().length,
+					data: "count="+self.fetchitemnum+"&offset=" + self.homecollections().length+"&directlyAccessedByUserOrGroup="+JSON.stringify([{group:WITHApp.projectName,rights:"READ"}]),
 					
 				}).success (function(){
 				});

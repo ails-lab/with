@@ -63,7 +63,7 @@ public class DigitalNZSpaceSource extends ISpaceSource {
 		// TODO: rights_url shows the license in the search
 
 		
-		formatreader = new DNZBasicRecordFormatter(vmap);
+		formatreader = new DNZBasicRecordFormatter();
 
 	}
 
