@@ -23,6 +23,10 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 	ko.components.register('mycollections', { require: 'components/mycollections/mycollections' });
 	ko.components.register('myfavorites', { require: 'components/myfavorites/myfavorites' });
 	ko.components.register('organizations', { require: 'components/myorganizations/myorganizations' });
+	ko.components.register('organization-edit', {
+		viewModel: { require: 'components/organization-edit/organization-edit'},
+		template: { require: 'text!components/organization-edit/organization-edit.html' }
+	});
 	ko.components.register('collection-view', { require: 'components/collection-view/collection-view' });
 	ko.components.register('exhibition-view', { require: 'components/exhibition-view/exhibition-view' });
 	ko.components.register('3DRoom', { require: 'components/3DRoom/room' });
@@ -41,7 +45,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 		viewModel: { require: 'components/item-view/item' },
 		template: { require: 'text!components/item-view/item.html' }
 	});
-	
+
 	ko.components.register('popup-login', {
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
@@ -75,7 +79,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 		viewModel: { require: 'components/organization-page/provider' },
 		template: { require: 'text!components/organization-page/provider.html' }
 	});
-	
+
 	ko.components.register('new-organization', {
 		viewModel: { require: 'components/organization-page/organization-page' },
 		template: { require: 'text!components/organization-page/new-organization.html' }

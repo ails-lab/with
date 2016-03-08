@@ -1,4 +1,4 @@
-define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation'], function (ko, template, app) {
+define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke'], function (ko, template, app) {
 
 	ko.validation.init({
 		errorElementClass: 'has-error',
@@ -222,6 +222,10 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 					}
 				}
 			});
+		};
+
+		self.editGroup = function (group) {
+			window.location.href = '#' + params.type.toLowerCase() + '/' + group.dbId()  + '/edit';
 		};
 	}
 
