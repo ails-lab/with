@@ -80,7 +80,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		self.myCollections = ko.mapping.fromJS([], mapping);
 		self.titleToEdit = ko.observable("");
         self.descriptionToEdit = ko.observable("");
-        self.isPublicToEdit = ko.observableArray(false);
+        self.isPublicToEdit = ko.observable(false);
         self.apiUrl = ko.observable("");
         self.usersToShare = ko.mapping.fromJS([], {});
         self.userGroupsToShare = ko.mapping.fromJS([], {});
@@ -163,6 +163,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		};
 
 		self.createCollection = function() {
+			alert(self.isPublicToEdit());
 			var jsondata = JSON.stringify({
 				administrative: { access: {
 			        isPublic: self.isPublicToEdit()},
@@ -437,14 +438,8 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			});
 		}
 		
-		self.isPublicToggleEmpty = function() {
-			//alert("1");
-		    self.isPublicToEdit(true);
-		}
-		
 		self.isPublicToggle = function() {
-		    /*var newIsPublic = !self.isPublicToEdit();
-		    if (!newIsPublic) {
+		    if (!self.isPublicToEdit()) {
 		    	app.showInfoPopupTwoOptions("Make records private in all collections?",
 						"Users may still be able to read records that you own and are members of that collection " +
 						", via other collections s/he has access to. Do you want to make these records private "  +
@@ -453,10 +448,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				});
 		    }
 		    else
-		    	app.editPublicity(self.index(), true, false);*/
+		    	self.editPublicity(self.index(), true, false);
+		    return true;
 		}
 
 		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {
+			alert("?");
 			var collection = self.myCollections()[collIndex];
 			$.ajax({
 				"url": "/rights/"+collection.dbId()+"?isPublic="+isPublic+"&membersDowngrade="+membersDowngrade,
@@ -474,6 +471,8 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 					else {
 						self.sharedCollections()[collIndex].administrative.access.isPublic(self.isPublicToEdit());
 					}
+				},
+				error: function(error) {
 				}
 			});
 		}
