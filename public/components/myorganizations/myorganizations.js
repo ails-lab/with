@@ -1,5 +1,10 @@
-define(['knockout', 'text!./myorganizations.html', 'app'], function (ko, template, app) {
+define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation'], function (ko, template, app) {
 
+	ko.validation.init({
+		errorElementClass: 'has-error',
+		errorMessageClass: 'help-block',
+		decorateInputElement: true
+	});
 
 	var mapping = {
 		create: function (options) {
@@ -18,6 +23,19 @@ define(['knockout', 'text!./myorganizations.html', 'app'], function (ko, templat
 					return innerModel.page.cover.Medium();
 				}
 			});
+			innerModel.creatorName = ko.pureComputed(function () {
+				return 'by ' + innerModel.firstName() + ' ' + innerModel.lastName();
+			});
+			innerModel.itemsCount = ko.pureComputed(function () {
+				var count = innerModel.count.Collections() + innerModel.count.Exhibitions();
+				return count === 1 ? count + ' Collection' : count + ' Collections';
+			});
+			innerModel.isCreator = ko.pureComputed(function () {
+				return innerModel.creator() === app.currentUser._id();
+			});
+			innerModel.isAdmin = ko.pureComputed(function () {
+				return innerModel.adminIds().indexOf(app.currentUser._id()) >= 0;
+			});
 
 			return innerModel;
 		},
@@ -29,21 +47,55 @@ define(['knockout', 'text!./myorganizations.html', 'app'], function (ko, templat
 	};
 
 	function OrganizationsViewModel(params) {
-		var self = this;
-		self.route = params.route;
-		self.groups = ko.observableArray([], mapping);
-		self.name = ko.observable(params.type);
-		self.namePlural = ko.observable(params.title);
-
 		// Check if user is logged in. If not, ask for user to login
 		if (localStorage.getItem('logged_in') != "true") {
 			window.location.href = "#login";
 		}
 
+		var self = this;
+		self.route = params.route;
+		self.groups = ko.observableArray([], mapping);
+		self.name = ko.observable(params.type);			// Project or Organization (display field)
+		self.namePlural = ko.observable(params.title);	// Projects or Organizations (display field)
+		self.baseURL = ko.pureComputed(function () {
+			return window.location.origin + '/assets/index.html#' + self.name().toLowerCase() + '/';
+		});
+
+		// Project Information
+		self.username = ko.observable().extend({
+			required: true,
+			minLength: 3,
+			pattern: {
+				message: 'Your username must be alphanumeric.',
+				params: /^\w+$/
+			}
+		});
+		self.friendlyName = ko.observable().extend({
+			required: true
+		});
+		self.about = ko.observable();
+		self.validationModel = ko.validatedObservable({
+			username: self.username,
+			friendlyName: self.friendlyName
+		});
+
+		// Page Fields
+		self.page = {
+			address: ko.observable(),
+			city: ko.observable(),
+			country: ko.observable(),
+			url: ko.observable(),
+			coordinates: {
+				latitude: ko.observable(),
+				longitude: ko.observable()
+			}
+		};
+
 		$.ajax({
 			url: '/group/list?groupType=' + params.type + '&offset=0&start=0&belongsOnly=true',
 			type: 'GET',
 			success: function (data) {
+				console.log(data);
 				ko.mapping.fromJS(data, mapping, self.groups);
 				WITHApp.tabAction();
 			}
@@ -51,6 +103,104 @@ define(['knockout', 'text!./myorganizations.html', 'app'], function (ko, templat
 
 		self.hideMessage = function () {
 			$("section.message").toggle();
+		};
+
+		self.getCoordinatesAndSubmit = function (submitFunc) {
+			if (self.page.address && self.page.city && self.page.country) {
+				var address = self.page.address() + ', ' + self.page.city() + ', ' + self.page.country();
+				var geocoder = new google.maps.Geocoder();
+				geocoder.geocode({
+					'address': address
+				}, function (results, status) {
+					if (status == google.maps.GeocoderStatus.OK) {
+						self.page.coordinates.latitude(results[0].geometry.location.lat());
+						self.page.coordinates.longitude(results[0].geometry.location.lng());
+					}
+
+					submitFunc();
+				});
+			} else {
+				submitFunc();
+			}
+		};
+
+		self.submit = function () {
+			if (self.validationModel.isValid()) {
+				self.getCoordinatesAndSubmit(self.create);
+			} else {
+				self.validationModel.errors.showAllMessages();
+			}
+		};
+
+		self.deleteGroup = function (group) {
+			$.smkConfirm({
+				text: group.friendlyName() + ' will be permanently deleted. Are you sure?',
+				accept: 'Delete',
+				cancel: 'Cancel'
+			}, function (ee) {
+				if (ee) {
+					$.ajax({
+						type: 'DELETE',
+						url: '/group/' + group.dbId(),
+						success: function (data, textStatus, jqXHR) {
+							self.groups.remove(group);
+							console.log(data);
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							console.log(errorThrown);
+						}
+					});
+				}
+			});
+		};
+
+		self.create = function () {
+			var data = {
+				username: self.username,
+				friendlyName: self.friendlyName,
+				about: self.about,
+				page: self.page
+			};
+			$.ajax({
+				type: "POST",
+				url: "/" + params.type.toLowerCase() + "/create",
+				contentType: 'application/json',
+				dataType: 'json',
+				processData: false,
+				data: ko.toJSON(data),
+				success: function (data, text) {
+					self.closeSideBar();
+					// $.smkAlert({
+					// 	text: 'A new ' + params.type + ' was created successfully!',
+					// 	type: 'success'
+					// });
+					app.reloadUser();
+					window.location.href = "#" + params.type.toLowerCase() + '/' + data.dbId;
+				},
+				error: function (request, status, error) {
+					var err = JSON.parse(request.responseText);
+					self.username.setError(err.error);
+					self.username.isModified(true);
+					self.validationModel.errors.showAllMessages();
+				}
+			});
+		};
+
+		self.closeSideBar = function () {
+			// Reset fields
+			self.friendlyName(null);
+			self.username(null);
+			self.about(null);
+			self.page.address(null);
+			self.page.city(null);
+			self.page.country(null);
+			self.page.url(null);
+
+			// Close sidebar
+			$('.action new').hide();
+
+			// Hide errors
+			self.validationModel.errors.showAllMessages(false);
 		};
 
 	}
