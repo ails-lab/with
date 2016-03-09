@@ -195,7 +195,9 @@ public class GroupManager extends Controller {
 		if (json.has("username") && json.get("username") != null
 				&& !group.getUsername().equals(json.get("username").asText())) {
 			if (!uniqueGroupName(json.get("username").asText())) {
-				return badRequest("Group name already exists! Please specify another name.");
+				result.put("error",
+						"Group name already exists! Please specify another name.");
+				return badRequest(result);
 			}
 		}
 		DB.getUserGroupDAO().editGroup(groupDbId, json);
@@ -216,7 +218,6 @@ public class GroupManager extends Controller {
 
 		// In case that the location has changed we need to calculate the
 		// new coordinates
-		// max = (a > b) ? a : b;
 		String address = (newPage.getAddress() != null) ? newPage.getAddress()
 				: oldPage.getAddress();
 		String city = (newPage.getCity() != null) ? newPage.getCity() : oldPage

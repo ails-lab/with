@@ -151,7 +151,8 @@ public class UserGroupDAO extends DAO<UserGroup> {
 
 	public void updatePageCoordinates(ObjectId groupId, Point point) {
 		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
-		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations();
+		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations()
+				.disableValidation();
 		updateOps.set("page.coordinates", point);
 		this.update(q, updateOps);
 	}
