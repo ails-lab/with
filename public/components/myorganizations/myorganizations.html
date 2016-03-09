@@ -36,7 +36,8 @@
 								<div class="action-group">
 									<a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o" data-bind="visible: isCreator, click: $parent.deleteGroup"></a>
 									<a href="#" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil" data-bind="visible: isCreator, click: $parent.editGroup"></a>
-									<a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members" data-bind="visible: isAdmin"></a>
+									<a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members" 
+									data-bind="visible: isAdmin, click: $parent.getMembersInfo.bind($data, 'both')"></a>
 								</div>
 							</div>
 						</li>
@@ -323,60 +324,64 @@
 					<div class="action-body">
 						<div class="group">
 							<div class="title">Users access</div>
-							<input type="text" placeholder="Start typing username">
-							<ul class="access-list">
+							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
+							
+			
+							<ul class="access-list" data-bind="foreach: userMembers">
 								<li>
-									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+									<!-- ko if: $data.image -->
+									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}"></div>
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user')" title="List view" class="trash">
+										<i class="fa fa-trash"></i>
+									</a>
 									<div class="toggle">
 										<input type="checkbox" id="u1">
 										<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div>
-								</li>
-								<li>
-									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+									
+									
+									<!-- /ko -->
+									<!-- ko ifnot: $data.image -->
+									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div>
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user')" title="List view" class="trash">
+										<i class="fa fa-trash"></i>
+									</a>
 									<div class="toggle">
-										<input type="checkbox" id="u2">
-										<label for="u2"></label><span class="private">view</span><span class="public">co-edit</span>
+										<input type="checkbox" id="u1">
+										<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div>
-								</li>
-								<li>
-									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-									<div class="toggle">
-										<input type="checkbox" id="u3">
-										<label for="u3"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div>
-								</li>
-								<li>
-									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-									<div class="toggle">
-										<input type="checkbox" id="u4">
-										<label for="u4"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div>
-								</li>
+									
+									
+									<!-- /ko -->
+								</li> 
 							</ul>
 						</div>
 						<div class="group">
 							<div class="title">Groups access</div>
-							<input type="text" placeholder="Start typing group name">
-							<ul class="access-list">
-								<li class="blue"><span class="text">DK</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, category:2">
+							<ul class="access-list" data-bind="foreach: groupMembers">
+								 <li class="blue">
+									<!-- ko if: $data.image -->
+										<span class="text">DK</span>
+										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group')" title="List view" class="trash">
+											<i class="fa fa-trash"></i>
+										</a>
 									<div class="toggle">
 										<input type="checkbox" id="g1">
 										<label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div>
-								</li>
-								<li class="green"><span class="text">US</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
+									<!-- /ko -->
+									<!-- ko ifnot: $data.image -->
+										<span class="text">DK</span>
+										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group')" title="List view" class="trash">
+											<i class="fa fa-trash"></i>
+										</a>
 									<div class="toggle">
-										<input type="checkbox" id="g2">
-										<label for="g2"></label><span class="private">view</span><span class="public">co-edit</span>
+										<input type="checkbox" id="g1">
+										<label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div>
-								</li>
-								<li class="orange"><span class="text">MN</span><a href="#" data-toggle="tooltip" data-placement="top" title="List view" class="trash"><i class="fa fa-trash"></i></a>
-									<div class="toggle">
-										<input type="checkbox" id="g3">
-										<label for="g3"></label><span class="private">view</span><span class="public">co-edit</span>
-									</div>
-								</li>
+									<!-- /ko -->
+								</li> 	
 							</ul>
 						</div>
 					</div>
