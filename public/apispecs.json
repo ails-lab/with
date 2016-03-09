@@ -3,7 +3,7 @@
     "info": {
         "version": "v0.5",
         "title": "WITH API",
-        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. NEW (since v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE(v. 0.5): 26 Feb, 2016\n \n Note for using test calls: Testing calls with path parameters now works! Create a new collection and some records and you can try out calls by pasting the IDs in the forms."
+        "description": "Welcome to the WITH API documentation! \n If you are completely new to the API, please visit '''link available soon''' for an introduction to the model and basic functionalities. \n We are still in a development phase, so expect changes. We will keep this documentation updated and this text will include a memo of the latest changes. \n \n NEW: \n \n (since v. 0.5) Fixed some issues with ```collection/list``` parameters not being displayed properly. \n \n (since v. 0.4): We have updated our model to a richer, more flexible one! We kept most of the calls the same, however we simplified a lot of the parameters in requests. Make sure you see the new response schemas as there have been some major changes. For any questions and help to implement our API feel free to contact us! ~ LAST UPDATE(v. 0.51): March 2, 2016\n \n Note for using test calls: Testing calls with path parameters now works! Create a new collection and some records and you can try out calls by pasting the IDs in the forms."
     },
     "paths": {
         "/api/search": {
@@ -303,37 +303,15 @@
                         "name": "directlyAccessedByUserOrGroup",
                         "in": "query",
                         "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are READ, WRITE, OWN."
-                                }
-                            }
-                        }
+                        "type": "string",
+                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
                     },
                     {
                         "name": "recursivelyAccessedByUserOrGroup",
                         "in": "query",
                         "description": "This field works like '''directlyAccessedByUserName''' with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are READ, WRITE, OWN."
-                                }
-                            }
-                        }
+                        "type": "string",
+                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
                     },
                     {
                         "name": "creator",
@@ -420,41 +398,15 @@
                         "name": "directlyAccessedByUserOrGroup",
                         "in": "query",
                         "description": "Filters returned collections based on the specified rights for each user in the input array of JSON objects. Each user needs to have direct access rights to this collection and not through a usergroup (organization or project).",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "enum": [
-                                        "READ",
-                                        "WRITE",
-                                        "OWN"
-                                    ]
-                                }
-                            }
-                        }
+                        "type": "string",
+                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
                     },
                     {
                         "name": "recursivelyAccessedByUserOrGroup",
                         "in": "query",
                         "description": "This field works like directlyAccessedByUserName with the difference that access rights can be inherited from a usergroup to which a user recursively belongs to.",
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "username": {
-                                    "type": "string"
-                                },
-                                "rights": {
-                                    "type": "string",
-                                    "description": "Values are \"READ\", \"WRITE\", \"OWN\"."
-                                }
-                            }
-                        }
+                        "type": "string",
+                        "default": "{\"username\": \"name\", \"rights\": \"OWN\"}"
                     },
                     {
                         "name": "isExhibition",
@@ -703,7 +655,7 @@
                 }
             ],
             "post": {
-                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. See the different ```Test Calls``` for alternative ways to use this call and easily create records from many sources such as Europeana, without the need to specify schema mappings. Also, you can see how to import a record from MINT. You do not need to provide values for all the available fields, however some of them are mandatory and might return an error. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
+                "description": "Adds a record to the collection specified in the path, creating a new internal record that containts the specified metadata. You will need to be logged in and have write access or be the owner of the collection in order to add records to it. Note that calls to this path can also be used for exhibitions. Position is a Mandatory field for exhibitions, the default is 0 i.e. the record will be displayed first. IMPORTANT This is the preferred way to create a new record! Different serializations for the new record will be created automatically and can be retrieved with ```GET /record/{recordId}```. You do not need to provide values for all the available fields. Finally, please note that this call will only return a message. To see the collection and the new record, you will need to use ```GET /collection/{collectionId}/list``` and parse the results for a list of the record metadata in the collection and the corresponding record dbids. For individual record metadata, use ```GET /record/{recordId}``` with the dbids retrieved.",
                 "summary": "Create a new record and add it to a collection.",
                 "tags": [
                     "Collection",
@@ -719,7 +671,7 @@
                         "type": "string"
                     },
                     {
-                        "name": "positiond",
+                        "name": "position",
                         "in": "query",
                         "description": "offset",
                         "type": "integer",
@@ -1017,6 +969,69 @@
                     },
                     "500": {
                         "description": "Internal Server Error (database error)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/collection": {
+            "post": {
+                "parameters": [
+                    {
+                        "name": "collectionType",
+                        "in": "query",
+                        "description": "Simple collection or exhibition.",
+                        "enum": [
+                            "SimpleCollection",
+                            "Exhibition"
+                        ],
+                        "required": true,
+                        "type": "string",
+                        "default": "SimpleCollection"
+                    },
+                    {
+                        "name": "body",
+                        "in": "body",
+                        "description": "A sample body for test calls.",
+                        "schema": {
+                            "$ref": "#/definitions/SampleCollection"
+                        }
+                    }
+                ],
+                "summary": "Create a new collection.",
+                "description": "This call will create a new collection and store it in the database. Please use with caution as testing with this call will update your current collections!",
+                "tags": [
+                    "Collection"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "properties": {
+                                "collection": {
+                                    "$ref": "#/definitions/Collection"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden (no read-access)",
+                        "schema": {
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error(database error)",
                         "schema": {
                             "properties": {
                                 "error": {
@@ -2502,7 +2517,7 @@
                 "lastName",
                 "username",
                 "email",
-                "password"
+                "md5Password"
             ],
             "properties": {
                 "email": {
@@ -2600,13 +2615,6 @@
         "UserEmbedded": {
             "description": "Short description of registered users that appears under withCreatorInfo in WithResources.",
             "type": "object",
-            "required": [
-                "firstName",
-                "lastName",
-                "username",
-                "email",
-                "password"
-            ],
             "properties": {
                 "username": {
                     "type": "string"
@@ -2761,10 +2769,6 @@
             "description": "This is the parent type of the WITH data model. Record and Collection models extend this model.",
             "type": "object",
             "discriminator": "descriptiveData",
-            "required": [
-                "title",
-                "position"
-            ],
             "properties": {
                 "dbId": {
                     "type": "string"
@@ -3449,12 +3453,6 @@
                         "items": {
                             "$ref": "#/definitions/Filters"
                         }
-                    },
-                    "filtersLogic": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/definitions/Filters"
-                        }
                     }
                 }
             }
@@ -3477,43 +3475,29 @@
             "properties": {
                 "Original": {
                     "type": "string",
-                    "default": {
-                        "uri": "/media/569f78d6590b1966cdeb3443?file=true"
-                    }
+                    "default": "uri: /media/569f78d6590b1966cdeb3443?file=true"
                 },
                 "Tiny": {
                     "type": "string",
-                    "default": {
-                        "uri": "/media/569f78de590b1966cdeb3450?file=true"
-                    }
+                    "default": "uri: /media/569f78de590b1966cdeb3450?file=true"
                 },
                 "Square": {
                     "type": "string",
-                    "default": {
-                        "uri": "/media/569f78de590b1966cdeb3452?file=true"
-                    }
+                    "default": "uri: /media/569f78de590b1966cdeb3452?file=true"
                 },
                 "Thumbnail": {
                     "type": "string",
-                    "default": {
-                        "uri": "/media/569f78de590b1966cdeb3454?file=true"
-                    }
+                    "default": "uri: /media/569f78de590b1966cdeb3454?file=true"
                 },
                 "Medium": {
                     "type": "string",
-                    "default": {
-                        "uri": "/media/569f78de590b1966cdeb3456?file=true"
-                    }
+                    "default": "uri: /media/569f78de590b1966cdeb3456?file=true"
                 }
             }
         },
         "SampleInternalRecord": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
             "properties": {
                 "resourceType": {
                     "type": "string",
@@ -3545,10 +3529,6 @@
         "SampleEUROPEANARecord": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
             "properties": {
                 "provenance": {
                     "type": "array",
@@ -3571,10 +3551,6 @@
         "SampleMINTRecord": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
             "properties": {
                 "resourceType": {
                     "type": "string",
@@ -3606,10 +3582,6 @@
         "SampleMEDIARecord": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
             "properties": {
                 "resourceType": {
                     "type": "string",
@@ -3641,10 +3613,6 @@
         "SamplePUBLICRecord": {
             "description": "An individual record description and metadata. The fields exhibition and position are used only for records in exhibitions. This object schema is used for internal search responses (records stored in the WITH database).",
             "type": "object",
-            "required": [
-                "title",
-                "position"
-            ],
             "properties": {
                 "administrative": {
                     "type": "object",
@@ -3711,7 +3679,7 @@
                 "collectedIn": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/SampleExternalCollection"
+                        "$ref": "#/definitions/SampleExternalCollectionNoId"
                     }
                 },
                 "descriptiveData": {
@@ -3733,6 +3701,16 @@
                     "type": "string",
                     "default": "569f78d6590b1966cdeb3443"
                 },
+                "position": {
+                    "type": "integer",
+                    "default": 16
+                }
+            }
+        },
+        "SampleExternalCollectionNoId": {
+            "description": "Metadata related to external collections an object may belong to.",
+            "type": "object",
+            "properties": {
                 "position": {
                     "type": "integer",
                     "default": 16

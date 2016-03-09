@@ -185,4 +185,10 @@ public class CommonQuery implements Cloneable {
 		}
 		return null;
 	}
+
+	public void addFilter(CommonFilter commonFilter) {
+		if (filters==null)
+			filters = new ArrayList<>();
+		filters.add(commonFilter);
+	}
 }

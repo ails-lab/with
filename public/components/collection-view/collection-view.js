@@ -121,7 +121,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			if (descdata) {
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
-				self.rights = findResOrLit(descdata.metadataRights);
+				self.rights = media[0] != null && media[0].Original != null && media[0].Original.originalRights != "null" ? media[0].Original.originalRights : null;
 				self.creator = findByLang(descdata.dccreator);
 			}
 

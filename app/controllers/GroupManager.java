@@ -478,7 +478,7 @@ public class GroupManager extends Controller {
 			User u;
 			for (ObjectId oid : group.getUsers()) {
 				if ((u = DB.getUserDAO().get(oid)) == null) {
-					log.error("Not a User with dbId: " + oid);
+					log.error("No User with dbId: " + oid);
 				}
 				users.add(userOrGroupJson(u));
 			}
@@ -523,8 +523,6 @@ public class GroupManager extends Controller {
 			User user = DB.getUserDAO().get(userId);
 			g.put("firstName", ((User) user).getFirstName());
 			g.put("lastName", ((User) user).getLastName());
-
-			//
 			Query<CollectionObject> q = DB.getCollectionObjectDAO()
 					.createQuery();
 			// Criteria criteria1 =
@@ -541,19 +539,14 @@ public class GroupManager extends Controller {
 			Tuple<Integer, Integer> hits = DB.getCollectionObjectDAO().getHits(
 					q, Optional.ofNullable(null));
 			ObjectNode count = Json.newObject();
-
 			count.put("Collections", hits.x);
 			count.put("Exhibitions", hits.y);
 			g.put("count", count);
-			//
-
 			result.add(g);
 		}
 		return result;
 	}
 	
-	
-
 	public static Result listUserGroups(String groupType, int offset, int count, boolean belongsOnly) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
@@ -571,7 +564,6 @@ public class GroupManager extends Controller {
 					offset, count);
 			if (groups.size() == count)
 				return ok (userGroupsToJSON(groups));
-				//return ok(Json.toJson(groups));
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(
 					userGroupsIds, type);
 			if (offset < userGroupCount)

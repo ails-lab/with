@@ -163,6 +163,11 @@ public class WithResourceController extends Controller {
 		}
 	}
 	
+	public static Result internalAddRecordToCollection(String colId, RecordResource record, Option<Integer> position,
+			ObjectNode result) {
+		return addRecordToCollection(Json.toJson(record), new ObjectId(colId), position, false);
+	}
+	
 	public static Result addRecordToCollection(JsonNode json, ObjectId collectionDbId,
 			Option<Integer> position, Boolean noDouble) {
 		ObjectNode result = Json.newObject();
@@ -649,6 +654,8 @@ public class WithResourceController extends Controller {
 				locks.release();
 		}
 	}
+	
+	
 
 	/**
 	 * @param recordId
