@@ -137,7 +137,7 @@ WITHApp.ui = function( custom ){
 
 		if ( $( '.searchbar .view' ).length !== 0 ) {
 
-			$( '.searchbar .view a' ).click( function( e ) {
+			$( '.searchbar .view a' ).on('click', function( e ) {
 
 				e.preventDefault();
 				e.stopPropagation();
@@ -202,8 +202,8 @@ WITHApp.ui = function( custom ){
 		// log
 		logger( 'info','plugins.js / initSearchSetting' );
 
-		// check
-		if( $( '.searchbar .settings' ).length > 0 ) {
+		// handled by component
+		/*if( $( '.searchbar .settings' ).length > 0 ) {
 
 			// attach
 			$( '.searchbar .settings > a' ).on( 'click', function( e ){
@@ -215,7 +215,7 @@ WITHApp.ui = function( custom ){
 				$( this ).parent().toggleClass( 'active' );
 
 			});
-		}		
+		}*/		
 	};
 
 	// method to initialize nicescroll plugin
@@ -243,15 +243,13 @@ WITHApp.ui = function( custom ){
 		logger( 'info','plugin.js / Collection Action' );
 
 		// close
-		if ( $( '.action .button-group' ).length !== 0 ) {
-
+		
 			$( '.cancel' ).on("click", function( e ) {
-
+				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
 
 			});
-		}
-
+		
 		// open edit & access
 		if ( $( '.action-group' ).length !== 0 ) {
 
@@ -347,18 +345,10 @@ WITHApp.ui = function( custom ){
 			});
 		}
 		
-		// search settings
-		$( '.searchbar .settings > a' ).click( function( e ) {
-
-			// prevent
-			e.preventDefault();
-
-			$( '.action' ).removeClass( 'active' );
-			$( '.action.searchfilter' ).addClass( 'active' );
-		});
+		
 
 		// profile
-		$( '.showprofile' ).click( function( e ) {
+		$( '.showprofile' ).on('click', function(e) {
 
 			// prevent
 			e.preventDefault();
@@ -504,7 +494,7 @@ WITHApp.ui = function( custom ){
 		// check
 		if ( settings.mobile && $( settings.mobileTrigger ).length !== 0 ) {
 
-			$( settings.mobileTrigger ).click( function( e ){
+			$( settings.mobileTrigger ).on('click',  function( e ){
 
 				$( this ).toggleClass( 'active' );
 				$( 'nav' ).toggleClass( 'active' );
@@ -546,7 +536,7 @@ WITHApp.ui = function( custom ){
 		// check
 		if ( $( 'section.message' ).length !== 0 ) {
 
-			$( '.message-body a' ).click( function( e ) {
+			$( '.message-body a' ).on('click', function( e ) {
 
 				e.preventDefault();
 				$( this ).closest( '.message' ).addClass( 'close' );
@@ -561,7 +551,7 @@ WITHApp.ui = function( custom ){
 		// check
 		if ( $( '.list-control' ).length !== 0 ) {
 
-			$( '.list-control .fa-th' ).click( function( e ) {
+			$( '.list-control .fa-th' ).on('click', function(e) {
 
 				e.preventDefault();
 
@@ -572,7 +562,7 @@ WITHApp.ui = function( custom ){
 
 			});
 
-			$( '.list-control .fa-bars' ).click( function( e ) {
+			$( '.list-control .fa-bars' ).on('click', function( e ) {
 
 				e.preventDefault();
 
@@ -656,7 +646,7 @@ WITHApp.ui = function( custom ){
 			});
 
 			// on btn click
-			$( '.carouselexhibition .main .btn').click( function( e ){
+			$( '.carouselexhibition .main .btn').on('click', function( e ){
 
 				// prevent
 				e.preventDefault();
