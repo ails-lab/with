@@ -780,7 +780,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 		popupParams("{}");
 	};
 
-	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+	autoCompleteUserName = function (elem, valueAccessor, allBindingsAccessor, viewModel, context, callback) {
 		var category = allBindingsAccessor.get('category') || 0;
 		$(elem).devbridgeAutocomplete({
 			minChars: 3,
@@ -823,6 +823,10 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 				s += suggestion.value.substring(currentValue.length);
 				s += ' <span class="label pull-right">' + suggestion.data.category + '</span>';
 				return s;
+			},
+			onSelect: function (suggestion) {
+				if (callback !== undefined && callback != null)
+					callback.call(this, suggestion.value);
 			}
 		});
 	};

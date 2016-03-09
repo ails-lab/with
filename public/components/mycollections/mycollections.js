@@ -9,7 +9,9 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 
 	ko.bindingHandlers.autocompleteUsername = {
 	      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-	    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context);
+	    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context, function(suggestion) {
+					viewModel.addToSharedWithUsers("READ", suggestion);
+				});
 	      }
 	 };
 
@@ -18,6 +20,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			window.location = '#login';
 		}
 	};
+	
+	/*ko.bindingHandlers.enterOnUsername = {
+		 init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+	    	  viewModel.addToSharedWithUsers('READ');
+	      }	
+	}*/
 
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
@@ -329,9 +337,9 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			self.shareCollection(ko.toJS(this), clickedRights);
 		}
 
-		self.addToSharedWithUsers = function(clickedRights) {
+		self.addToSharedWithUsers = function(clickedRights, username) {
 			var collId = self.myCollections()[self.index()].dbId();
-			var username = $("#usernameOrEmail").val();
+			//var username = $("#usernameOrEmail").val();
 			$.ajax({
 				method      : "GET",
 				contentType    : "application/json",
@@ -446,11 +454,23 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		
 		self.isPublicToggle = function() {
 		    if (!self.isPublicToEdit()) {
-		    	app.showInfoPopupTwoOptions("Make records private in all collections?",
+		    	/*app.showInfoPopupTwoOptions("Make records private in all collections?",
 						"Users may still be able to read records that you own and are members of that collection " +
 						", via other collections s/he has access to. Do you want to make these records private "  +
 						"in all collections they belong to?", function(response) {
 		    		self.editPublicity(self.index(), false, response);
+				});*/
+		    	$.smkConfirm({
+					text: "Users may still be able to read records that you own and are members of that collection " +
+					", via other collections s/he has access to. Do you want to make these records private "  +
+					"in all collections they belong to?",
+					accept: 'Yes, make private in all collections.',
+					cancel: 'No, only in this collection.'
+				}, function (ee) {
+					if (ee)
+						self.editPublicity(self.index(), false, true);
+					else
+						self.editPublicity(self.index(), false, false);
 				});
 		    }
 		    else
@@ -459,18 +479,11 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		}
 
 		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {
-			alert("?");
 			var collection = self.myCollections()[collIndex];
 			$.ajax({
 				"url": "/rights/"+collection.dbId()+"?isPublic="+isPublic+"&membersDowngrade="+membersDowngrade,
 				"method": "GET",
 				success: function(result) {
-					if (self.isPublicToEdit()) {
-				    	self.isPublicToEdit(false);
-				    }
-				    else {
-				    	self.isPublicToEdit(true);
-				    }
 					if (collection.myAccess() == "OWN") {
 						self.myCollections()[collIndex].administrative.access.isPublic(self.isPublicToEdit());
 					}
@@ -479,6 +492,13 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 					}
 				},
 				error: function(error) {
+					//reset
+					if (self.isPublicToEdit()) {
+				    	self.isPublicToEdit(false);
+				    }
+				    else {
+				    	self.isPublicToEdit(true);
+				    }
 				}
 			});
 		}
@@ -560,14 +580,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		
 
 		self.closeSideBar = function () {
-			//$('textarea').hide();
-			//$('.add').show();
 			self.isPublicToEdit();
 			self.titleToEdit();
 			self.descriptionToEdit();
 			$('textarea').hide();
-			$('.add').show();
-			$('.action').removeClass( 'active' );
+			//$('.add').show();
+			$('.action').removeClass('active');
 		};
 
 		self.updateCollectionData = function(collectionSet, collIndex) {

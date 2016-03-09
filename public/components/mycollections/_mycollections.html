@@ -118,10 +118,11 @@
 			  </div>
 			  <div class="action-body">
 				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
-				<a class="add" >
+				<!--<a class="add" >
 					<span class="plus" style="cursor:pointer;"></span>
 					<span href="#" class="text">Add description</span>
-				</a>
+				</a>-->
+				<textarea rows="10" placeholder="Description" data-bind="value: descriptionToEdit"></textarea>
 			  </div>
 			  <div class="button-group">
 			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
@@ -134,7 +135,7 @@
 				<div class="title">Give access to collection</div>
 			  </div>
 			  <div class="toggle">
-				<input type="checkbox" id="toggle1" data-bind="click: isPublicToggle">
+				<input type="checkbox" id="toggle1" data-bind="{checked: isPublicToEdit, click: isPublicToggle}">
 				<label for="toggle1"></label>
 				<span class="private">private</span>
 				<span class="public">public</span>
@@ -142,12 +143,17 @@
 			  <div class="action-body">
 				<div class="group">
 				  <div class="title">Users access</div>
-				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername: myUsername" placeholder="Start typing username or email">
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername: myUsername, category:1" placeholder="Start typing username or email">
 				  <ul class="access-list">
 				  	<!-- ko foreach: usersToShare() -->
 					<li>
-					  <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
-					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{title: username(), click: changeRights.bind($data, 'NONE')}" class="trash">
+					  <!-- ko if: image -->
+					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
+					  <!--/ko-->
+					  <!-- ko else -->
+					  	<div class="thumbnails"><img src="images/user.png"></div>
+					  <!-- /ko -->
+					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username()}, click: changeRights.bind($data, 'NONE')}" class="trash">
 					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" id="u1">
@@ -161,7 +167,7 @@
 				</div>
 				<div class="group">
 				  <div class="title">Groups access</div>
-				  <input type="text"  data-bind="autocompleteUsername: myUsername" placeholder="Start typing group name">
+				  <input type="text"  id="usernameOrEmail" data-bind="autocompleteUsername: myUsername, category:2" placeholder="Start typing group name">
 				  <ul class="access-list">
 				  	<!-- ko foreach: userGroupsToShare() -->
 				  	<li>
