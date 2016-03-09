@@ -173,12 +173,12 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 				data: ko.toJSON(data),
 				success: function (data, text) {
 					self.closeSideBar();
-					// $.smkAlert({
-					// 	text: 'A new ' + params.type + ' was created successfully!',
-					// 	type: 'success'
-					// });
+					$.smkAlert({
+						text: 'A new ' + params.type.toLowerCase() + ' was created successfully!',
+						type: 'success'
+					});
 					app.reloadUser();
-					window.location.href = "#" + params.type.toLowerCase() + '/' + data.dbId;
+					window.location.href = "#" + params.type.toLowerCase() + '/' + data.dbId + '/edit';
 				},
 				error: function (request, status, error) {
 					var err = JSON.parse(request.responseText);
