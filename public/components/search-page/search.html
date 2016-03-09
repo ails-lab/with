@@ -16,7 +16,7 @@
                   <div class="searchbox" id="withsearchid"><img src="img/ui/ic-mag.png" alt="Search" class="icon" data-bind="attr: {src: searching()==true ? 'img/ui/ic-loading.gif' : 'img/ui/ic-mag.png'}, click: function() { search(true,true); }">
                     <input type="text" data-bind="value: term" placeholder="Search media" class="searchinput">
                   </div>
-                  <div class="provider">
+                  <div class="provider" style="visibility:hidden">
                     <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">All Content Provider </span><span class="arrow"></span></a>
                     <ul aria-labelledby="picker" class="dropdown-menu">
                       <li><a href="#">Content Providers</a></li>

@@ -313,7 +313,7 @@ ul.thumbfilters li:hover {
 }
 
 .chart li .bar {
-  min-width: 0.5%;
+  min-width: 1%;
   left: 2.2em;
   position: absolute;
   cursor:pointer;

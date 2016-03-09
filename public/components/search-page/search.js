@@ -682,10 +682,11 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 			});
 
 			app.likeItem(rec, function (status) {
+				
 				if (status) {
-					$( '[id="'+id+'"]' ).find("span.star").addClass('active');
+					$('[id="'+id+'"]').find("a.fa-heart").css("color","#ec5a62");
 				} else {
-					$( '[id="'+id+'"]').find("span.star").removeClass('active');
+					$('[id="'+id+'"]').find("a.fa-heart").css("color","");
 				}
 			});
 		};
@@ -732,13 +733,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
                      tile+='<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">'+ record.sourceCredits() +'</a>';
                      if (isLogged()) {
                   	    if (record.isLiked()) {
-                      	  tile+='<a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a>'
+                      	  tile+='<a data-toggle="tooltip" data-placement="top" title="Add to favorites"  onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a>'
                         }
                         else{
-                        	  tile+='<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a>'
+                        	  tile+='<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.externalId + '\',event);" class="fa fa-heart"></a>'
                             
                       	  }
-                  	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.dbId + '\',event);" ></a>'
+                  	  tile+='<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.externalId + '\',event);" ></a>'
                         }
                      
                      tile+='</div></a></div> </div>';
