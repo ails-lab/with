@@ -1,7 +1,4 @@
-define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke'], function (ko, template, app) {
-
-
-
+define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke', 'jquery.fileupload'], function (ko, template, app) {
 
 	function OrganizationEditViewModel(params) {
 		// Check if user is logged in. If not, ask for user to login
@@ -99,12 +96,72 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 		});
 		self.isCreator = ko.observable(false);
 		self.isAdmin = ko.observable(false);
+		self.logo = ko.pureComputed(function () {
+			if (self.avatar.Square()) {
+				return self.avatar.Square();
+			} else {
+				return 'img/content/profile-placeholder.png';
+			}
+		});
+		self.coverThumbnail = ko.pureComputed(function () {
+			if (self.page.cover.Original()) {
+				return self.page.cover.Original();
+			} else {
+				return 'img/ui/upload-placeholder.png';
+			}
+		});
 
 		$.ajax({
 			type: 'GET',
 			url: '/group/' + self.id(),
 			success: function (data, textStatus, jqXHR) {
 				self.loadGroup(data);
+			}
+		});
+
+		// Logo Upload function
+		$('#logoupload').fileupload({
+			type: "POST",
+			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 50000,
+			done: function (e, data) {
+				self.avatar.Original(data.result.original);
+				self.avatar.Tiny(data.result.tiny);
+				self.avatar.Square(data.result.square);
+				self.avatar.Thumbnail(data.result.thumbnail);
+				self.avatar.Medium(data.result.medium);
+
+				self.saveChanges();
+			},
+			error: function (e, data) {
+				$.smkAlert({
+					text: 'Error uploading the file',
+					type: 'danger',
+					time: 10
+				});
+			}
+		});
+
+		// Cover Upload function
+		$('#coverupload').fileupload({
+			type: "POST",
+			url: '/media/create',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			maxFileSize: 500000,
+			done: function (e, data) {
+				self.page.cover.Original(data.result.original);
+				self.page.cover.Tiny(data.result.tiny);
+				self.page.cover.Square(data.result.square);
+				self.page.cover.Thumbnail(data.result.thumbnail);
+				self.page.cover.Medium(data.result.medium);
+			},
+			error: function (e, data) {
+				$.smkAlert({
+					text: 'Error uploading the file',
+					type: 'danger',
+					time: 10
+				});
 			}
 		});
 
@@ -147,6 +204,12 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 				self.avatar.Thumbnail(data.avatar.Thumbnail);
 				self.avatar.Medium(data.avatar.Medium);
 				self.avatar.Tiny(data.avatar.Tiny);
+			} else {
+				self.avatar.Original(null);
+				self.avatar.Square(null);
+				self.avatar.Thumbnail(null);
+				self.avatar.Medium(null);
+				self.avatar.Tiny(null);
 			}
 
 			if (data.page != null) {
@@ -164,6 +227,12 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 					self.page.cover.Thumbnail(data.page.cover.Thumbnail);
 					self.page.cover.Medium(data.page.cover.Medium);
 					self.page.cover.Tiny(data.page.cover.Tiny);
+				} else {
+					self.page.cover.Original(null);
+					self.page.cover.Square(null);
+					self.page.cover.Thumbnail(null);
+					self.page.cover.Medium(null);
+					self.page.cover.Tiny(null);
 				}
 			}
 
@@ -182,8 +251,8 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 				}
 			});
 
-			// Close sidebar
-			$('.action new').hide();
+			// Close the side-bar
+			$('.action').removeClass('active');
 
 			// Hide errors
 			self.validationModel.errors.showAllMessages(false);
@@ -210,8 +279,8 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 						type: 'success'
 					});
 
-					// Close sidebar
-					$('.action new').hide();
+					// Close the side-bar
+					$('.action').removeClass('active');
 				},
 				error: function (request, status, error) {
 					var err = JSON.parse(request.responseText);
@@ -219,7 +288,6 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 						text: err.error,
 						type: 'danger'
 					});
-					console.log(error);
 				}
 			});
 		};

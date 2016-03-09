@@ -59,12 +59,19 @@ body div[role="main"] .wrapper main section.project section.project-list .list-b
 	width: 100px;
 }
 
-body div[role="main"] .wrapper main section.collection .list-body.list li .thumbnails .wrap, 
+body div[role="main"] .wrapper main section.collection .list-body.list li .thumbnails .wrap,
 body div[role="main"] .wrapper main section.exhibition .list-body.list li .thumbnails .wrap   {
   overflow: hidden;
 }
 
 // Remove dummy map
-body div[role="main"] .viewer section.hero .map {
+body div[role="main"] .wrapper main section.collection section.hero .map,
+body div[role="main"] .wrapper main section.exhibition section.hero .map,
+body div[role="main"] .wrapper main section.favorite section.hero .map,
+body div[role="main"] .wrapper main section.project section.hero .map {
 	background: none;
+}
+
+#uploaded-logo img {
+	cursor: pointer;
 }

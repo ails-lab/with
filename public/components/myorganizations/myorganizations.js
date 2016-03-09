@@ -52,6 +52,8 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 			window.location.href = "#login";
 		}
 
+		$("div[role='main']").toggleClass("homepage", false);
+
 		var self = this;
 		self.route = params.route;
 		self.groups = ko.observableArray([], mapping);
