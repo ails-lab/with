@@ -18,31 +18,20 @@ package db;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
 
-import model.resources.CollectionObject;
-import model.usersAndGroups.Page;
 import model.usersAndGroups.UserGroup;
-import controllers.GroupManager.GroupType;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
-import elastic.Elastic;
-import elastic.ElasticUpdater;
-import play.Logger;
-import sources.core.ParallelAPICall;
+import controllers.GroupManager.GroupType;
 
 public class UserGroupDAO extends DAO<UserGroup> {
-	static private final Logger.ALogger log = Logger.of(UserGroup.class);
 
 	public UserGroupDAO() {
 		super(UserGroup.class);
@@ -153,7 +142,10 @@ public class UserGroupDAO extends DAO<UserGroup> {
 		Query<UserGroup> q = this.createQuery().field("_id").equal(groupId);
 		UpdateOperations<UserGroup> updateOps = this.createUpdateOperations()
 				.disableValidation();
-		updateOps.set("page.coordinates", point);
+		if (point != null)
+			updateOps.set("page.coordinates", point);
+		else
+			updateOps.unset("page.coordinates");
 		this.update(q, updateOps);
 	}
 }

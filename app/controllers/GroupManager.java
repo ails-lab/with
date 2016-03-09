@@ -16,33 +16,14 @@
 
 package controllers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.Optional;
 
-import javax.validation.ConstraintViolation;
-
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.geo.GeoJson;
-import org.mongodb.morphia.geo.Point;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.Query;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import db.DAO.QueryOperator;
-import db.DB;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.usersAndGroups.Organization;
@@ -51,17 +32,30 @@ import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
+
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.geo.GeoJson;
+import org.mongodb.morphia.geo.Point;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.Query;
+
 import play.Logger;
 import play.Logger.ALogger;
-import play.data.validation.Validation;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import utils.AccessManager;
 import utils.Tuple;
-import utils.AccessManager.Action;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import db.DAO.QueryOperator;
+import db.DB;
+
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GroupManager extends Controller {
 
 	public static final ALogger log = Logger.of(UserGroup.class);
@@ -148,6 +142,7 @@ public class GroupManager extends Controller {
 				error.put("error", "Cannot save group to database!");
 				return internalServerError(error);
 			}
+			updatePage(newGroup.getDbId(), json);
 			return ok(Json.toJson(newGroup));
 		} catch (Exception e) {
 			error.put("error", e.getMessage());
@@ -175,7 +170,7 @@ public class GroupManager extends Controller {
 	 * @return the updated group metadata
 	 */
 	public static Result editGroup(String groupId) {
-		ObjectNode json = (ObjectNode) request().body().asJson();
+		JsonNode json = request().body().asJson();
 		ObjectNode result = Json.newObject();
 		ObjectId groupDbId = new ObjectId(groupId);
 		UserGroup group = DB.getUserGroupDAO().get(groupDbId);
@@ -201,14 +196,21 @@ public class GroupManager extends Controller {
 			}
 		}
 		DB.getUserGroupDAO().editGroup(groupDbId, json);
-		group = DB.getUserGroupDAO().get(groupDbId);
+		updatePage(groupDbId, json);
+		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
+	}
+
+	
+	
+	private static void updatePage(ObjectId groupId, JsonNode json) {
+		UserGroup group = DB.getUserGroupDAO().get(groupId);
 		if (!json.has("page") || !(group instanceof Organization)
 				&& !(group instanceof Project))
-			return ok(Json.toJson(group));
+			return;
 		Page newPage = Json.fromJson(json.get("page"), Page.class);
 		if (newPage.getAddress() == null && newPage.getCity() == null
 				&& newPage.getCountry() == null)
-			return ok(Json.toJson(group));
+			return;
 		Page oldPage = null;
 		// Keep previous page fields
 		if (group instanceof Organization)
@@ -237,11 +239,12 @@ public class GroupManager extends Controller {
 							.get("location").get("lat").asDouble(),
 					response.get("results").get(0).get("geometry")
 							.get("location").get("lng").asDouble());
-			DB.getUserGroupDAO().updatePageCoordinates(groupDbId, coordinates);
+			DB.getUserGroupDAO().updatePageCoordinates(groupId, coordinates);
 		} catch (Exception e) {
 			log.error("Cannot update coordinates of group Page", e);
+			DB.getUserGroupDAO().updatePageCoordinates(groupId, null);
+
 		}
-		return ok(Json.toJson(DB.getUserGroupDAO().get(groupDbId)));
 	}
 
 	/**
