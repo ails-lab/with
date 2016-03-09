@@ -38,6 +38,10 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			Thumbnail: ko.observable(),
 			Medium: ko.observable()
 		};
+		self.coordinates = {
+			latitude: ko.observable(),
+			longitude: ko.observable()
+		};
 
 		// Page Fields
 		self.page = {
@@ -45,10 +49,6 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			city: ko.observable(),
 			country: ko.observable(),
 			url: ko.observable(),
-			coordinates: {
-				latitude: ko.observable(),
-				longitude: ko.observable()
-			},
 			cover: {
 				Original: ko.observable(),
 				Tiny: ko.observable(),
@@ -81,8 +81,8 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			return addr;
 		});
 		self.coords = ko.computed(function () {
-			if (self.page.coordinates.latitude() && self.page.coordinates.longitude()) {
-				return "https://www.google.com/maps/embed/v1/place?q=" + self.page.coordinates.latitude() + "," + self.page.coordinates.longitude() + "&key=AIzaSyAN0om9mFmy1QN6Wf54tXAowK4eT0ZUPrU";
+			if (self.coordinates.latitude() && self.coordinates.longitude()) {
+				return "https://www.google.com/maps/embed/v1/place?q=" + self.coordinates.latitude() + "," + self.coordinates.longitude() + "&key=AIzaSyAN0om9mFmy1QN6Wf54tXAowK4eT0ZUPrU";
 			} else {
 				return null;
 			}
@@ -278,6 +278,12 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 						text: 'Update successful!',
 						type: 'success'
 					});
+
+					// Read the updated coordinates
+					if (data.page.coordinates != null) {
+						self.coordinates.latitude(data.page.coordinates.latitude);
+						self.coordinates.longitude(data.page.coordinates.longitude);
+					}
 
 					// Close the side-bar
 					$('.action').removeClass('active');
