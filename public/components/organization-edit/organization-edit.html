@@ -48,48 +48,31 @@
 						<div class="wrap">
 							<!-- menu-->
 							<ul class="nav">
-								<li data-filter="*" class="active"><a href="#" title="ALL">All</a></li>
-								<li data-filter=".collection"><a href="#" title="ALL">Collections</a></li>
-								<li data-filter=".exhibition"><a href="#" title="EXHIBITION">Exhibitions</a></li>
+								<li data-filter="*" class="active" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+								<li data-filter=".collection" data-bind="click: filter"><a href="#" title="ALL">Collections</a></li>
+								<li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibitions</a></li>
 							</ul>
 						</div>
 					</section>
 					<section class="listing">
 						<div class="grid">
 							<div class="sizer"></div>
-							<div class="item exhibition">
-								<div class="wrap"><a href="#" title="Lorem ipsum">
-									<div class="thumb"><img src="img/content/content-1.png" alt="Lorem ipsum">
-										<div class="counter">124 items</div>
-									</div>
-									<div class="info">
-										<div class="type">Exhibitions</div>
-										<h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-									</div></a>
+							<!-- ko foreach: collections -->
+							<div data-bind="css: css">
+								<div class="wrap">
+									<a data-bind="attr: { href: url }">
+										<div class="thumb">
+											<img data-bind="attr: { src: thumbnail }" />
+											<div class="counter" data-bind="text: count"></div>
+										</div>
+										<div class="info">
+											<div class="type" data-bind="text: type"></div>
+											<h2 class="title" data-bind="text: title"></h2>
+										</div>
+									</a>
 								</div>
 							</div>
-							<div class="item collection">
-								<div class="wrap"><a href="#" title="Lorem ipsum">
-									<div class="thumb"><img src="img/content/content-2.png" alt="Lorem ipsum">
-										<div class="counter">124 items</div>
-									</div>
-									<div class="info">
-										<div class="type">Collection</div>
-										<h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-									</div></a>
-								</div>
-							</div>
-							<div class="item collection">
-								<div class="wrap"><a href="#" title="Lorem ipsum">
-									<div class="thumb"><img src="img/content/content-3.png" alt="Lorem ipsum">
-										<div class="counter">124 items</div>
-									</div>
-									<div class="info">
-										<div class="type">Collection</div>
-										<h2 class="title">Lorem ipsum dolor sit amet conceptus</h2>
-									</div></a>
-								</div>
-							</div>
+							<!-- /ko -->
 						</div>
 					</section>
 				</section>

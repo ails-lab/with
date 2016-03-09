@@ -1,5 +1,79 @@
 define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke', 'jquery.fileupload'], function (ko, template, app) {
 
+	var mapping = {
+		create: function (options) {
+			var self = this;
+			// use extend instead of map to avoid observables
+
+			self = $.extend(self, options.data);
+			self.title = findByLang(self.descriptiveData.label);
+			self.thumbnail = ko.computed(function () {
+				if (self.media && self.media[0] && self.media[0].Thumbnail) {
+					var data = self.media[0].Thumbnail.url;
+					if (data) {
+						return data;
+					} else {
+						return "img/content/thumb-empty.png";
+					}
+				}
+				return "img/content/thumb-empty.png";
+			});
+			self.type = ko.computed(function () {
+				if (self.administrative) {
+					if (self.administrative.collectionType.indexOf("Collection") != -1) {
+						return "COLLECTION";
+					} else if (self.administrative.collectionType.indexOf("Space") != -1) {
+						return "SPACE";
+					} else {
+						return "EXHIBITION";
+					}
+				} else {
+					return "";
+				}
+			});
+			self.css = ko.computed(function () {
+				if (self.administrative) {
+					if (self.administrative.collectionType.indexOf("Collection") != -1) {
+						return "item collection";
+					} else if (self.administrative.collectionType.indexOf("Space") != -1) {
+						return "item space";
+					} else {
+						return "item space";
+					}
+				} else {
+					return "item exhibition";
+				}
+			});
+			self.url = ko.computed(function () {
+				if (self.administrative) {
+					if (self.administrative.collectionType.indexOf("Collection") > -1) {
+						return 'index.html#collectionview/' + self.dbId;
+					} else if (self.administrative.collectionType.indexOf("Space") > -1) {
+						return self.administrative.isShownAt;
+					} else {
+						return 'index.html#exhibitionview/' + self.dbId;
+					}
+				} else {
+					return "";
+				}
+			});
+			self.owner = ko.computed(function () {
+				if (self.withCreatorInfo) {
+					return self.withCreatorInfo.username;
+				}
+			});
+			self.count = ko.computed(function () {
+				if (self.administrative.entryCount === 1) {
+					return self.administrative.entryCount + ' item';
+				} else {
+					return self.administrative.entryCount + ' items';
+				}
+			});
+
+			return self;
+		}
+	};
+
 	function OrganizationEditViewModel(params) {
 		// Check if user is logged in. If not, ask for user to login
 		if (localStorage.getItem('logged_in') != "true") {
@@ -38,10 +112,7 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			Thumbnail: ko.observable(),
 			Medium: ko.observable()
 		};
-		self.coordinates = {
-			latitude: ko.observable(),
-			longitude: ko.observable()
-		};
+		self.collections = ko.mapping.fromJS([], mapping);
 
 		// Page Fields
 		self.page = {
@@ -58,7 +129,12 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			}
 		};
 
-		// Computed
+		// Computed & Utility Observables
+		self.count = ko.observable(0);
+		self.coordinates = {
+			latitude: ko.observable(),
+			longitude: ko.observable()
+		};
 		self.fullAddress = ko.pureComputed(function () {
 			var addr = '';
 
@@ -116,6 +192,9 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			url: '/group/' + self.id(),
 			success: function (data, textStatus, jqXHR) {
 				self.loadGroup(data);
+			},
+			error: function () {
+				self.goBack();
 			}
 		});
 
@@ -218,8 +297,8 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 				self.page.country(data.page.country);
 				self.page.url(data.page.url);
 				if (data.page.coordinates != null) {
-					self.page.coordinates.longitude(data.page.coordinates.longitude);
-					self.page.coordinates.latitude(data.page.coordinates.latitude);
+					self.coordinates.longitude(data.page.coordinates.longitude);
+					self.coordinates.latitude(data.page.coordinates.latitude);
 				}
 				if (data.page.cover != null) {
 					self.page.cover.Original(data.page.cover.Original);
@@ -235,6 +314,9 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 					self.page.cover.Tiny(null);
 				}
 			}
+
+			// Load Collections
+			self.getProfileCollections();
 
 			self.isCreator(app.currentUser._id() === data.creator);
 			self.isAdmin(data.adminIds.indexOf(app.currentUser._id()) > 0);
@@ -283,6 +365,9 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 					if (data.page.coordinates != null) {
 						self.coordinates.latitude(data.page.coordinates.latitude);
 						self.coordinates.longitude(data.page.coordinates.longitude);
+					} else {
+						self.coordinates.latitude(null);
+						self.coordinates.longitude(null);
 					}
 
 					// Close the side-bar
@@ -295,6 +380,30 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 						type: 'danger'
 					});
 				}
+			});
+		};
+
+		self.filter = function (data, event) {
+			var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
+			$(event.currentTarget).siblings().removeClass("active");
+			$(event.currentTarget).addClass("active");
+			$(settings.mSelector).isotope({ filter: selector });
+
+			return false;
+		};
+
+		self.getProfileCollections = function () {
+			$.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/list",
+				processData: false,
+				data: "offset=0&count=" + self.count() + "&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
+			}).success(function (data, textStatus, jqXHR) {
+				console.log(data);
+				ko.mapping.fromJS(data.collectionsOrExhibitions, mapping, self.collections);
+				console.log(self.collections());
 			});
 		};
 	}
