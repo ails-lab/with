@@ -189,6 +189,40 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			self.validationModel.errors.showAllMessages(false);
 		};
 
+		self.saveChanges = function () {
+			var data = {
+				username: self.username,
+				friendlyName: self.friendlyName,
+				avatar: self.avatar,
+				about: self.about,
+				page: self.page
+			};
+			$.ajax({
+				type: 'PUT',
+				url: '/group/' + self.id(),
+				contentType: 'application/json',
+				dataType: 'json',
+				processData: false,
+				data: ko.toJSON(data),
+				success: function (data, text) {
+					$.smkAlert({
+						text: 'Update successful!',
+						type: 'success'
+					});
+
+					// Close sidebar
+					$('.action new').hide();
+				},
+				error: function (request, status, error) {
+					var err = JSON.parse(request.responseText);
+					$.smkAlert({
+						text: err.error,
+						type: 'danger'
+					});
+					console.log(error);
+				}
+			});
+		};
 	}
 
 	return {
