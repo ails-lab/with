@@ -41,6 +41,13 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		});
 
 		logout             = function() { app.logout(); };
+		
+		
+		self.removeFlyouts=function() {
+		
+			$( '.action' ).removeClass( 'active' );
+
+		};
 	}
 
 	return { viewModel: TopBarViewModel, template: template };

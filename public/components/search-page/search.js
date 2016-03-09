@@ -161,7 +161,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		//document.body.setAttribute("data-page","search");
 		 $("div[role='main']").toggleClass( "searchpage", true );
 		 
-		setTimeout(function(){ WITHApp.init(); }, 300);
+		setTimeout(function(){ WITHApp.init(); WITHApp.tabAction();}, 300);
 		var $container = $(".grid").isotope({
 			itemSelector: '.media',
 			masonry: {

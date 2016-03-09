@@ -177,7 +177,6 @@ ul.thumbfilters li:hover {
 
 .bootstrap-tagsinput {
   display: block;
-  padding: 4px 6px 0px 6.5em;
   color: #555;
   vertical-align: middle;
   border-radius: 4px;
@@ -212,7 +211,6 @@ ul.thumbfilters li:hover {
 }
 .bootstrap-tagsinput .tag {
   display: inline-block;
-  margin-top: 10px;
   margin-right: 2px;
   color: white;
   font-size:1.0em;
