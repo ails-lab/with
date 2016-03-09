@@ -49,7 +49,8 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     }
     
     
-    showfacets= function(){
+    showfacets= function(e){
+    	e.preventDefault();
     	if(self.visiblePanel()==false){
     	    self.visiblePanel(true);
     	    $('.chart').horizBarChart({
@@ -62,6 +63,9 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     		self.visiblePanel(false);
     }
     
+    self.close=function(){
+    	$( '.action' ).removeClass( 'active' );
+    }
     
     self.calcdates=function(){
     	self.yaxis([]);
