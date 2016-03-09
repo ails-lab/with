@@ -146,7 +146,7 @@ public class ElasticSearcher {
 		fedSearchFieldsWithBoosts.put("keywords", 1.3f);
 
 		this.aggregatedFields = new ArrayList<String>();
-		aggregatedFields.add("resourceType.all");
+		//aggregatedFields.add("resourceType.all");
 		aggregatedFields.add("provider.all");
 		aggregatedFields.add("dataProvider.all");
 		aggregatedFields.add("media.type.all");

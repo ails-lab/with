@@ -51,6 +51,7 @@ PUT		 /collection/:id/moveRecord				controllers.WithResourceController.moveRecor
 DELETE   /collection/unliked/:recId			    controllers.WithResourceController.removeFromFavorites(recId)
 
 POST     /collection		                    controllers.CollectionObjectController.createCollectionObject(collectionType: String ?= "SimpleCollection")
+GET     /collection/importEuropeanaCollection	controllers.CollectionObjectController.createAndFillEuropeanaCollection(id)
 GET	     /collection/:id 	        			controllers.CollectionObjectController.getCollectionObject(id)
 PUT		 /collection/:id 						controllers.CollectionObjectController.editCollectionObject(id)
 DELETE   /collection/:id	                    controllers.CollectionObjectController.deleteCollectionObject(id)

@@ -843,8 +843,8 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				//TODO:add parent project filter
 				data: "offset=0&count=20&collectionHits=true&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 					group: self.username(),
-					rights: "OWN"
-				}])
+					rights: "WRITE"
+				}]),
 			}).success(function () {});
 		};
 
@@ -886,12 +886,10 @@ define(['knockout', 'text!./organization-page.html', 'app', 'bridget', 'isotope'
 				processData: false,
 				data: "count=20&offset=" + self.page.featuredCollections().length + "&directlyAccessedByUserOrGroup=" + JSON.stringify([{
 					"group": self.username(),
-					rights: "OWN"
+					rights: "WRITE"
 				}])
-
 			}).success (function () {
 			});
-
 		};
 
 		// Load the page, if we have an ID

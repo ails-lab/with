@@ -94,7 +94,7 @@ define(['knockout', 'text!./members.html', 'app'], function(ko, template, app) {
 					}
 				},
 				error      : function(result) {
-					$.smkAlert({text:'There is no such username or email', type:'danger', time: 10});
+					$.smkAlert({text: result.responseJSON.error, type:'danger', time: 10});
 				}
 			});
 		}

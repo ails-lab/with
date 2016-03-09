@@ -132,7 +132,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				self.loading(true);
 				var promiseShared = getCollectionsSharedWithMe(false, 0, count);
 				$.when(promise,promiseShared).done(function(data,data2) {
-					//convert rights map to array
 					ko.mapping.fromJS(data[0].collectionsOrExhibitions, mapping, self.myCollections);
 					ko.mapping.fromJS(data2[0].collectionsOrExhibitions, mapping, self.sharedCollections);
 					self.loading(false);
@@ -245,29 +244,36 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			});
 		};
 
-		self.moreShared = function(isExhibition){
-			self.more(isExhibition, getCollectionsSharedWithMe);
-		}
+		/*self.moreShared = function(isExhibition){
+			self.more(isExhibition, getCollectionsSharedWithMe, false);
+		}*/
 
 		self.moreCollections = function(isExhibition){
-			self.more(isExhibition, app.getUserCollections);
+			if (self.collectionSet == "my")
+				self.more(isExhibition, app.getUserCollections, true);
+			else if (self.collectionSet == "shared")
+				self.more(isExhibition, getCollectionsSharedWithMe, false);
 		}
 
-		self.more = function(isExhibition, funcToExecute) {
+		self.more = function(isExhibition, funcToExecute, my) {
 			if (self.loading === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
 				self.loading(true);
-				var offset = self.myCollections().length;
+				var offset = self.collectionSet == "my"? self.myCollections().length: self.sharedCollections().length;
 				var promise = funcToExecute(isExhibition, offset, count);
 				$.when(promise).done(function(data) {
 					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
-					self.myCollections.push.apply(self.myCollections, newItems());
+					if (my)
+						self.myCollections.push.apply(self.myCollections, newItems());
+					else {
+						self.sharedCollections.push.apply(self.sharedCollections, newItems());
+					}
 					self.loading(false);
-					if(data.collectionsOrExhibitions.length<count-1){
+					if (data.collectionsOrExhibitions.length<count-1){
 						self.moreCollectionData(false);
-					}else{
+					} else {
 					  self.moreCollectionData(true);
 					}
 				}).fail(function(result) {self.loading(false);});
@@ -618,10 +624,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			if(what=="shared"){
 			   $("#mycollections").hide();
 			   $("#sharedtab").show();
+			   self.collectionSet = "shared";
 			}
 			else{
 				$("#mycollections").show();
 				   $("#sharedtab").hide();
+				   self.collectionSet = "my";
 			}
 
 		}
