@@ -2,8 +2,8 @@ define(function () {
 
     var _args = {}; // private
     
-    _args.projectName = 'EUscreenXL';
-    _args.projectId = '561033bfe4b03e1878ccaf73';
+    _args.projectName = 'Europeana Sounds Space';
+    _args.projectId = '56e13d2e75fe2450755e553a';
     _args.featuredExhibition='5614f353569e48389d111281';
     _args.featuredCollection='';
     
