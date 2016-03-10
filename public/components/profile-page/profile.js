@@ -30,10 +30,17 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 		self.hasFacebook = ko.computed(function () {
 			return self.facebookId() ? true : false;
 		});
+		self.profileImage = ko.pureComputed(function () {
+			if (self.avatar.Square() != null) {
+				return self.avatar.Square();
+			} else {
+				return 'images/user.png';
+			}
+		});
 
 		self.validationModel = ko.validatedObservable({
 			firstName: self.firstName,
-			lastName: self.lastName,
+			lastName: self.lastName
 		});
 
 		self.checkLogged = function () {
@@ -66,6 +73,9 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			},
 			error: function (request, status, error) {
 				console.log(request);
+			},
+			complete: function () {
+				WITHApp.tabAction();
 			}
 		});
 
@@ -90,9 +100,9 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 			}
 		});
 
-		// Call the global closePopup function to dispose the component without saving the changes
 		self.closeWindow = function () {
-			app.closePopup();
+			// TODO: Reset changes
+			$('.action').removeClass('active');
 		};
 
 		// Save the changes and dispose the component
@@ -114,12 +124,13 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 					data: json,
 					success: function (data) {
 						app.loadUser(data, true, false);
+						$('.action').removeClass('active');
+						WITHApp.tabAction();
 					},
 					error: function (request, status, error) {
 						console.log(error);
 					}
 				});
-				app.closePopup();
 			}
 		};
 
@@ -144,6 +155,10 @@ define(['knockout', 'text!./profile.html', 'app', 'knockout-validation', 'jquery
 					self.createMedia(url);
 				}
 			});
+		};
+
+		self.loadFromDisk = function () {
+			$('#imageupload').trigger('click');
 		};
 
 		self.createMedia = function (remoteurl) {

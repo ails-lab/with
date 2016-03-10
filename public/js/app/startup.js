@@ -50,10 +50,7 @@ define(['jquery','knockout', './router', './app','knockout-mapping', 'bootstrap'
 		viewModel: { require: 'components/login-register-page/login-register' },
 		template: { require: 'text!components/login-register-page/popup-login.html' }
 	});
-	ko.components.register('edit-profile', {
-		viewModel: { require: 'components/profile-page/profile' },
-		template: { require: 'text!components/profile-page/edit-profile.html' }
-	});
+	ko.components.register('profile', { require: 'components/profile-page/profile' });
 	ko.components.register('edit-collection', {
 		viewModel: { instance: 'components/mycollections/mycollections' },
 		template: { require: 'text!components/mycollections/edit-collection.html' }

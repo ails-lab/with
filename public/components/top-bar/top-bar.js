@@ -4,8 +4,8 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		this.route         = params.route;
 		var self           = this;
 		self.notifications = ko.observableArray();
-		self.templateName = ko.observable('top-bar'); 
-		
+		self.templateName = ko.observable('top-bar');
+
 		ko.computed(function () {
 			var tmp = app.currentUser.notifications.userNotifications().concat(app.currentUser.notifications.groupNotifications());
 			tmp.sort(function(a, b) {
@@ -13,12 +13,12 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 			});
 			self.notifications(tmp.splice(0, 5));
 		});
-		
+
 		if(localStorage.getItem('logged_in')=="true"){
 			self.templateName('dashboard-bar');
-			
+
 		}
-		
+
 		goToPage=function(data,event){
 			 if(data=="#index" || data=="#"){
 			      sessionStorage.removeItem("homemasonryscroll");
@@ -28,10 +28,13 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 			   return false;
 		}
 
-		
-		
-		self.username      = app.currentUser.username;
-		
+
+
+		// self.username      = app.currentUser.username;
+		self.username = ko.pureComputed(function () {
+			return app.currentUser.firstName() + ' ' + app.currentUser.lastName();
+		});
+
 		self.profileImage  = ko.computed(function() { return app.currentUser.avatar.Square() ? app.currentUser.avatar.Square() : 'images/user.png'; });
 		self.organizations = app.currentUser.organizations;
 		self.projects      = app.currentUser.projects;
@@ -41,10 +44,10 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		});
 
 		logout             = function() { app.logout(); };
-		
-		
+
+
 		self.removeFlyouts=function() {
-		
+
 			$( '.action' ).removeClass( 'active' );
 
 		};
