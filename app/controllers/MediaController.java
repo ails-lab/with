@@ -280,14 +280,15 @@ public class MediaController extends Controller {
 			break;
 		}
 
+		InputStream mediaBytes = new ByteArrayInputStream(mediaObject.getMediaBytes());
 		BufferedImage originalImage = ImageIO
-				.read(new ByteArrayInputStream(mediaObject.getMediaBytes()));
+				.read(mediaBytes);
 		int originalWidth = originalImage.getWidth();
 		int originalHeight = originalImage.getHeight();
 		MediaObject thumbnailObject = new MediaObject(mediaObject);
 
 		// first check if we need to scale width
-		if (originalWidth <= newWidth && !crop) {
+		if ((originalWidth <= newWidth) && !crop) {
 			// there is no need for thumbnail
 			thumbnailObject = new MediaObject(mediaObject);
 			thumbnailObject.setMediaVersion(version);
@@ -313,6 +314,9 @@ public class MediaController extends Controller {
 		thumbnailObject.setWidth(newWidth);
 		thumbnailObject.setHeight(newHeight);
 		thumbnailObject.setMediaVersion(version);
+		// closes the media bytes input stream
+		mediaBytes.close();
+		originalImage.flush();
 		return thumbnailObject;
 	}
 
@@ -471,11 +475,11 @@ public class MediaController extends Controller {
 	private static MediaObject makeThumb(MediaObject med, BufferedImage image,
 			int width, boolean crop) throws IOException {
 
-		if (image.getWidth() <= 150 && image.getHeight() <= 150) {
+		if ((image.getWidth() <= 150) && (image.getHeight() <= 150)) {
 			crop = false;
 		}
 		Boolean res = true;
-		if (image.getWidth() <= 150 ^ image.getHeight() <= 150) {
+		if ((image.getWidth() <= 150) ^ (image.getHeight() <= 150)) {
 			res = false;
 		}
 		// TODO: comments left on purpose because this needs a bit of cleaning
