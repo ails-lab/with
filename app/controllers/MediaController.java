@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -37,6 +38,7 @@ import model.EmbeddedMediaObject.MediaVersion;
 import model.EmbeddedMediaObject.Quality;
 import model.EmbeddedMediaObject.WithMediaRights;
 import model.EmbeddedMediaObject.WithMediaType;
+import model.resources.RecordResource;
 import model.MediaObject;
 import net.coobird.thumbnailator.Thumbnails;
 import net.coobird.thumbnailator.geometry.Positions;
@@ -67,6 +69,8 @@ import play.mvc.Http.MultipartFormData.FilePart;
 import play.mvc.Result;
 import sources.core.HttpConnector;
 import sources.core.ParallelAPICall;
+import utils.AccessManager;
+import utils.AccessManager.Action;
 import actors.MediaCheckerActor.MediaCheckMessage;
 import akka.actor.ActorRef;
 import akka.actor.ActorSelection;
@@ -699,5 +703,18 @@ public class MediaController extends Controller {
 			return ok(result);
 		}
 
+	}
+	
+	public static boolean hasAccessToMedia(String mediaUrl, List<ObjectId> effectiveIds, Action action) {
+		List<RecordResource> resources = DB.getRecordResourceDAO().getByMedia(mediaUrl);
+		if (!resources.isEmpty()) {
+			for (RecordResource r: resources) {
+				if (DB.getRecordResourceDAO().hasAccess(effectiveIds, action, r.getDbId()))
+					return true;
+			}
+			return false;
+		}
+		else
+			return true;
 	}
 }
