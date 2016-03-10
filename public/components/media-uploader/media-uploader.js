@@ -18,6 +18,8 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 				params: true
 			}
 		});
+		self.description = ko.observable().extend();
+		self.dataProvider = ko.observable().extend();
 		self.collectionId = ko.observable(params.collectionId);
 
 		self.originalUrl = ko.observable();
@@ -94,37 +96,41 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 		self.uploadImage = function () {
 			if (self.validationModel.isValid()) {
 				var data = {
-					provenance: [{
-						provider: app.currentUser.username()
-					}, {
-						provider: 'UploadedByUser'
-					}],
-					descriptiveData: {
-						label: { "default": [self.title()] },
-						description: { "default": [self.description()] }
-					},
-					media: [{
-						Original: {
-							url: this.originalUrl(),
-							withRights: this.enumRights()
+						provenance: [{provider: self.dataProvider()},
+						             {provider: app.currentUser.username()},
+						             {provider: 'UploadedByUser'}
+						],
+						descriptiveData: {
+							label: {"default":[self.title()]},
+							description: {"default": [self.description()]}
 						},
-						Medium: {
-							url: this.mediumUrl(),
-							withRights: this.enumRights()
-						},
-						Thumbnail: {
-							url: this.thumbnailUrl(),
-							withRights: this.enumRights()
-						},
-						Square: {
-							url: this.squareUrl(),
-							withRights: this.enumRights()
-						},
-						Tiny: {
-							url: this.tinyUrl(),
-							withRights: this.enumRights()
-						}
-					}]
+						media: [{
+							Original: {
+								url: this.originalUrl(),
+								withRights: this.enumRights(),
+								originalRights: {"uri": this.enumRights()}
+							},
+							Medium: {
+								url: this.mediumUrl(),
+								withRights: this.enumRights(),
+								originalRights: {"uri": this.enumRights()}
+							},
+							Thumbnail: {
+								url: this.thumbnailUrl(),
+								withRights: this.enumRights(),
+								originalRights: {"uri": this.enumRights()}
+							},
+							Square: {
+								url: this.squareUrl(),
+								withRights: this.enumRights(),
+								originalRights: {"uri": this.enumRights()}
+							},
+							Tiny: {
+								url: this.tinyUrl(),
+								withRights: this.enumRights(),
+								originalRights: {"uri": this.enumRights()}
+							}
+						}]
 				};
 				$.ajax({
 					url: '/collection/' + self.collectionId() + '/addRecord',
