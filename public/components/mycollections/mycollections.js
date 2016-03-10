@@ -312,6 +312,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		   				else if(item.category == "group")
 		   					userGroups.push(item);
 					});
+		   			alert(JSON.stringify(users));
 					ko.mapping.fromJS(users, self.usersMapping, self.usersToShare);
 					ko.mapping.fromJS(userGroups, self.usersMapping, self.userGroupsToShare);
 					//app.showPopup("share-collection");

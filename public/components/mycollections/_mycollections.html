@@ -147,19 +147,19 @@
 				  <ul class="access-list">
 				  	<!-- ko foreach: usersToShare() -->
 					<li>
-					  <!-- ko if: image -->
+					  <!-- ko if: $data.image -->
 					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
 					  <!--/ko-->
 					  <!-- ko else -->
 					  	<div class="thumbnails"><img src="images/user.png"></div>
 					  <!-- /ko -->
-					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username()}, click: changeRights.bind($data, 'NONE')}" class="trash">
-					  	<i class="fa fa-trash"></i></a>
+					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: $data.username}, click: $parent.changeRights.bind($data, 'NONE')}" class="trash">
+					  <i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" id="u1">
 						<label for="u1"></label>
-						<span class="private" data-bind="click: changeRights.bind($data, 'READ')">view</span>
-						<span class="public" "click: changeRights.bind($data, 'WRITE')">co-edit</span>
+						<span class="private" data-bind="click: $parent.changeRights.bind($data, 'READ')">view</span>
+						<span class="public" "click: $parent.changeRights.bind($data, 'WRITE')">co-edit</span>
 					  </div>
 					</li>
 					<!-- /ko -->
@@ -171,14 +171,19 @@
 				  <ul class="access-list">
 				  	<!-- ko foreach: userGroupsToShare() -->
 				  	<li>
-					  <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
-					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{title: username(), click: changeRights.bind($data, 'NONE')}" class="trash">
+					 <!-- ko if: image -->
+					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
+					  <!--/ko-->
+					  <!-- ko else -->
+					  	<div class="thumbnails"><img src="images/user.png"></div>
+					  <!-- /ko -->
+					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: $data.username}, click: $parent.changeRights.bind($data, 'NONE')}" class="trash">
 					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
 						<input type="checkbox" id="u1">
 						<label for="u1"></label>
-						<span class="private" data-bind="click: changeRights.bind($data, 'READ')">view</span>
-						<span class="public" "click: changeRights.bind($data, 'WRITE')">co-edit</span>
+						<span class="private" data-bind="click: $parent.changeRights.bind($data, 'READ')">view</span>
+						<span class="public" "click: $parent.changeRights.bind($data, 'WRITE')">co-edit</span>
 					  </div>
 					</li>
 					<!-- /ko -->
