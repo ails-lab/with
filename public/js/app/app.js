@@ -879,7 +879,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 	};
 
 	self.checkLogged();
-
+	
 	self.findByLang=function(val, language) {
 		if (language == undefined || language == null)
 			language = "default";
