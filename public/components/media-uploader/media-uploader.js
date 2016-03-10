@@ -117,8 +117,7 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 					}
 				}]
 			};
-			alert(JSON.stringify(data));
-			$.ajax({
+=			$.ajax({
 				url: '/collection/' + self.collectionId() + '/addRecord',
 				method: 'POST',
 				data: JSON.stringify(data),
