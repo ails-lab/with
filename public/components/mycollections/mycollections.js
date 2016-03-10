@@ -437,7 +437,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 				});
 		    }
 		    else
-		    	app.editPublicity(self.index(), true, false);
+		    	self.editPublicity(self.index(), true, false);
 		}
 
 		self.editPublicity = function(collIndex, isPublic, membersDowngrade) {
