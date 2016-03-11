@@ -31,12 +31,20 @@
 									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
 								</div>
 							</div>
-							<!-- listing-->
-							<ul class="list-body grids" data-bind="attr: {id: id}">
-								<li class="sizer"></li>
-							</ul>
-
-							<!-- load more -->
+						</section>
+					
+						
+						
+						<!-- isotope section-->
+              <section class="isotope">
+                <section class="listing">
+                  <div class="grid" data-bind="attr: {id: id}">
+                    <div class="sizer"></div>
+                   
+                   
+                  </div>
+                </section>
+                <!-- load more -->
 							<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
 								Load more
 								<div class="left"></div>
@@ -45,8 +53,7 @@
 								<div class="bot"></div>
 							</a>
 							<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
-
-						</section>
+              </section>
 						<!-- collection api-->
 						<section class="action api">
 							<div class="action-header">
