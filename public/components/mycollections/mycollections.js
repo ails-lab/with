@@ -329,20 +329,17 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			$("#image_"+userId).css("opacity", "1");
 		}
 
-		self.changeRights = function() {
-			var currentUserData = ko.toJS(this);
-			//alert(JSON.stringify(self.userGroupsToShare()[0]));
-			//alert(JSON.stringify(self.usersToShare()[0]));
-			//alert(JSON.stringify(currentUserData));
-			if (currentUserData.accessChecked)
+		self.changeRights = function(currentUserData) {
+			if (currentUserData.accessChecked())
 				self.shareCollection(currentUserData, "WRITE");
 			else
 				self.shareCollection(currentUserData, "READ");
 			return true;
 		}
 		
-		self.removeRights = function() {
-			self.shareCollection(ko.toJS(this), "NONE");
+		self.removeRights = function(userData) {
+			alert(JSON.stringify(userData));
+			self.shareCollection(userData, "NONE");
 		}
 
 		self.addToSharedWithUsers = function(clickedRights, username) {
@@ -406,13 +403,13 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		//userData.username will still have currentAccess to the records [...] via collections [...] (to which userData.username has access).
 		//Do you want to downgrade access rights userData.username for all collections?
 		self.checkIfDowngrade = function(userData, clickedRights) {
-			var currentAccessRights = userData.accessRights;
+			var currentAccessRights = userData.accessRights();
 			var currentAccessOrdinal = accessLevels[currentAccessRights];
 			var newAccessOrdinal = accessLevels[clickedRights];
 			if (currentAccessOrdinal > newAccessOrdinal)
 				//downgrade
 				$.smkConfirm({
-					text: "User " + userData.username + " may still have " + currentAccessRights + 
+					text: "User " + userData.username() + " may still have " + currentAccessRights + 
 					" access to records that you own and are members of that collection " +
 					", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
 					"in all collections they belong to?",
@@ -433,15 +430,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		}
 
 		self.callShareAPI = function(userData, clickedRights, membersDowngrade) {
-			var username = userData.username;
+			var username = userData.username();
 			var collId = self.myCollections()[self.index()].dbId();
 			var index = -1;
 			var isGroup = false;
-			if (userData.category == "user")
+			if (userData.category() == "user")
 			  index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
-			else if (userData.category == "group") {
+			else if (userData.category() == "group") {
 				isGroup = true;
 				index = arrayFirstIndexOf(self.userGroupsToShare(), function(item) {
 					   return item.username() === username;
@@ -453,15 +450,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				"contentType": "application/json",
 				success: function(result) {
 					if (index < 0) {
-						userData.accessRights = clickedRights;
-		   				if (userData.accessRights == "READ")
-		   					userData.accessChecked = ko.observable(false);
+						userData.accessRights() = clickedRights;
+		   				if (userData.accessRights() == "READ")
+		   					userData.accessChecked(false);
 		   				else
-		   					userData.accessChecked = ko.observable(true);
+		   					userData.accessChecked(true);
 						if (!isGroup)
-							self.usersToShare.push(ko.mapping.fromJS(userData));
+							self.usersToShare.push(userData);
 						else
-							self.userGroupsToShare.push(ko.mapping.fromJS(userData));
+							self.userGroupsToShare.push(userData);
 					}
 					else {
 						if (clickedRights == 'NONE') {

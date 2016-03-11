@@ -145,7 +145,7 @@
 				  <div class="title">Users access</div>
 				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername: myUsername, category:1" placeholder="Start typing username or email">
 				  <ul class="access-list">
-				  	<!-- ko foreach: usersToShare() -->
+				  	<!-- ko foreach: usersToShare -->
 					<li>
 					  <!-- ko if: $data.image -->
 					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
@@ -169,7 +169,7 @@
 				  <div class="title">Groups access</div>
 				  <input type="text"  id="usernameOrEmail" data-bind="autocompleteUsername: myUsername, category:2" placeholder="Start typing group name">
 				  <ul class="access-list">
-				  	<!-- ko foreach: userGroupsToShare() -->
+				  	<!-- ko foreach: userGroupsToShare -->
 				  	<li>
 					 <!-- ko if: $data.image -->
 					 	 <div class="thumbnails"><img data-bind="attr: {src: image}"></div>
@@ -180,8 +180,8 @@
 					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
-						<input type="checkbox" id="u1" data-bind="{checked: accessChecked, click: $parent.changeRights}">
-						<label for="u1"></label>
+						<input type="checkbox" id="u2" data-bind="{checked: accessChecked, click: $parent.changeRights}">
+						<label for="u2"></label>
 						<span class="private">view</span>
 						<span class="public">co-edit</span>
 					  </div>
