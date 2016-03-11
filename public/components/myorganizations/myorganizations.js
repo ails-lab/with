@@ -253,10 +253,12 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 			
 			
 		ko.bindingHandlers.autocompleteUsername = {
-				      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-				    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context);
-				      }
-				 };
+			      init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
+			    	  app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context, function(suggestion) {
+							viewModel.addToUserGroup();
+						});
+			      }
+			 };
 			
 		arrayFirstIndexOf = function(array, predicate) {
 		    for (var i = 0, j = array.length; i < j; i++) {
@@ -293,7 +295,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 			// fill userMembers, groupMembers arrays on load
 		//self.getMembersInfo("both");
 			
-		self.addToUserGroup = function(clickedRights) {
+		self.addToUserGroup = function() {
 			var username = $("#userName").val();
 			if(username == "") { username = $("#groupName").val(); }
 			$("#userName").val("");
@@ -358,22 +360,6 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 				}
 			});
 		}
-			
-		self.showRemoveIcon = function(userData) {
-			var userId = userData.userId();
-			$("#removeIcon_"+userId).show();
-			$("#image_"+userId).css("opacity", "0.5");
-		}
-			
-			
-		self.hideRemoveIcon = function(userId) {
-			$("#removeIcon_"+userId).hide();
-			$("#image_"+userId).css("opacity", "1");
-		}
-			
-		self.closeWindow  = function() {
-			app.closePopup();
-		};
 		
 		/* ****************************************************************
 		 * 
