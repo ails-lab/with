@@ -44,7 +44,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		self.showsExhibitions = params.showsExhibitions;
 		//self.collections = [];
 		self.index = ko.observable(0);
-		self.myCollectionSet=ko.observable(true);
+		self.collectionSet=ko.observable("my");
 		var mapping = {
 			create: function (options) {
 		        //customize at the root level: add title and description observables, based on multiliteral
@@ -250,9 +250,9 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		};
 
 		self.moreCollections = function(isExhibition){
-			if (self.myCollectionSet()) 
+			if (self.collectionSet() == "my") 
 				self.more(isExhibition, app.getUserCollections, true);
-			else //shared
+			else if (self.collectionSet() == "shared")
 				self.more(isExhibition, getCollectionsSharedWithMe, false);
 		}
 
@@ -262,7 +262,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
 				self.loading(true);
-				var offset = self.myCollectionSet()? self.myCollections().length: self.sharedCollections().length;
+				var offset = self.collectionSet() == "my"? self.myCollections().length: self.sharedCollections().length;
 				var promise = funcToExecute(isExhibition, offset, count);
 				$.when(promise).done(function(data) {
 					var newItems=ko.mapping.fromJS(data.collectionsOrExhibitions, mapping);
@@ -526,34 +526,27 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 	        var context = ko.contextFor(event.target);
 	        var collIndex = context.$index();
 			self.index(collIndex);
-			if (collection.myAccess() == "OWN") {
-				self.myCollectionSet(true);
+			//if (collection.myAccess() == "OWN") {
+			if (self.collectionSet() == "my") {
+				//self.collectionSet("my");
 				self.titleToEdit(self.myCollections()[collIndex].title());
 		        self.descriptionToEdit(self.myCollections()[collIndex].description());
-		        //self.isPublicToEdit(self.myCollections()[collIndex].administrative.access.isPublic());
 			}
 			else {
-				self.myCollectionSet(false);
+				//self.collectionSet("shared");
 				self.titleToEdit(self.sharedCollections()[collIndex].title());
 		        self.descriptionToEdit(self.sharedCollections()[collIndex].description());
-		        //self.isPublicToEdit(self.sharedCollections()[collIndex].administrative.access.isPublic());
 			}
-			//app.showPopup("edit-collection");
 		}
-
-		self.closePopup = function() {
-			app.closePopup();
-		}
-
 
 		//TODO: currently changes fisrt entry of label.default and description.default
 		//have to support multilinguality (both in presentation of collection, as well as in edit - drop-down list with languages)
 		self.editCollection = function () {
 			var collIndex = self.index();
 			var collId=-1;
-			if (self.myCollectionSet())
+			if (self.collectionSet() == "my")
 				collId = self.myCollections()[collIndex].dbId();
-			else
+			else if (self.collectionSet() == "shared")
 				collId = self.sharedCollections()[collIndex].dbId();
 			if (collId != -1) {
 				$.ajax({
@@ -567,9 +560,9 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 						}
 					}),
 					success: function(result){
-						if (self.myCollectionSet()) 
+						if (self.collectionSet() == "my") 
 							self.updateCollectionData(self.myCollections(), collIndex);
-						else 
+						else if (self.collectionSet() == "shared")
 							self.updateCollectionData(self.sharedCollections(), collIndex);
 						var editItem = ko.utils.arrayFirst(currentUser.editables(), function(item) {
 							return item.dbId===collId;
@@ -653,19 +646,17 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		}
 
 
-		self.changeTab=function(what,data,event){
-			$(event.target).parents("span.withmain").children("span.collectiontab").toggleClass('active');
-			if(what=="shared"){
-			   $("#mycollections").hide();
-			   $("#sharedtab").show();
-			   self.collectionSet = "shared";
+		self.changeTab=function(data, event) {
+			//var context = ko.contextFor(event.target);
+			var clickedElement = (event.currentTarget) ? event.currentTarget : event.srcElement;
+			if ($(clickedElement).text() == "My Collections") {
+				self.collectionSet("my");
+				$("#pickerTitle").text("My Collections");
 			}
-			else{
-				$("#mycollections").show();
-				   $("#sharedtab").hide();
-				   self.collectionSet = "my";
+			else if ($(clickedElement).text() == "Collections shared with me") {
+				self.collectionSet("shared");
+				$("#pickerTitle").text("Collections shared with me");
 			}
-
 		}
 
 		self.checkCollectionSet = function(dbId) {

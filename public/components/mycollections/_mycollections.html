@@ -10,21 +10,23 @@
 		  <section class="collection">
 			<section class="header">
 			  <!-- collection picker-->
-			  <a id="picker" href="#" data-toggle="dropdown" class="picker" data-bind="checked: myCollectionSet"><span class="text">My Collections</span><span class="arrow"></span></a>
+			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
+			  	<span id="pickerTitle" class="text">My Collections</span><span class="arrow"></span>
+			  </a>
 			  <ul aria-labelledby="picker" class="dropdown-menu">
-				<li><a style="cursor:pointer;">My Collections</a></li>
-				<li><a style="cursor:pointer;" >Collections shared with me</a></li>
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Collections</a></li>
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Collections shared with me</a></li>
 			  </ul>
 			  <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New Collection</span></a>
 			</section>
 			<!-- message-->
-			<!--<section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+			<section class="message"><img src="img/ui/ic-inbox.png" class="hero">
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
 				<div class="description">This is <b> My Collections </b>. All collections created by and shared with you will be presented here.</div><a href="#"><span class="cross"></span>
 					<span class="text">Hide welcome message</span></a>
 			  </div>
-			</section>-->
+			</section>
 			<!-- collection main-->
 			<section class="collection-list">
 			  <!-- collection main header-->
@@ -43,13 +45,9 @@
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
-			  	<!-- if myCollectionSet -->
-					<div data-bind="template: { name: 'collectionsTemplate', foreach:  myCollections}"></div>
-				<!-- /ko -->
-				<!-- ko else -->
-				<div data-bind="template: { name: 'collectionsTemplate', foreach:  sharedCollections}"></div>
-				<!-- /ko -->
-			  </ul><a style="cursor:pointer;" class="loadmore" data-bind="{visible: collectionCount()>myCollections().length, event: {click: moreCollections(false)}}">load more</a>
+					<div data-bind="{visible: collectionSet() == "my", template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
+					<div data-bind="{visible: collectionSet() == "shared", template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
+			  </ul><a style="cursor:pointer;" class="loadmore" data-bind="{visible: collectionCount() > myCollections().length, event: {click: moreCollections(false)}}">load more</a>
 			</section>
 			<!-- collection edit-->
 			<section class="action edit">
