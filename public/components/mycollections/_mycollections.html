@@ -1,11 +1,11 @@
 <div role="main">
-		
+
 <div class="container-fluid">
 	<div class="wrapper">
 		<!-- ko if: isLogged() == true  -->
 		<side-bar params="route: route"></side-bar>
 		<!-- /ko -->
-		<main>	
+		<main>
 		  <!-- collection section-->
 		  <section class="collection">
 			<section class="header">
@@ -45,8 +45,8 @@
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
-					<div data-bind="{visible: collectionSet() == "my", template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
-					<div data-bind="{visible: collectionSet() == "shared", template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
+					<div data-bind="{visible: collectionSet() == 'my', template: { name: 'collectionsTemplate', foreach: myCollections()}}"></div>
+					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
 			  </ul><a style="cursor:pointer;" class="loadmore" data-bind="{visible: collectionCount() > myCollections().length, event: {click: moreCollections(false)}}">load more</a>
 			</section>
 			<!-- collection edit-->
@@ -55,9 +55,9 @@
 				<div class="title">Edit Collection</div>
 			  </div>
 			  <div class="action-body">
-				<input type="text" data-bind="{value: titleToEdit, 
+				<input type="text" data-bind="{value: titleToEdit,
 				      attr: {placeholder: titleToEdit}}">
-				<textarea data-bind="{value: descriptionToEdit, 
+				<textarea data-bind="{value: descriptionToEdit,
 					  attr: {placeholder: descriptionToEdit}"></textarea>
 			  </div>
 			  <div class="button-group">
@@ -152,7 +152,7 @@
 			  <div class="button-group">
 			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
 			  </div>
-			  
+
 			   <script type="text/html" id="collectionsTemplate">
 			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
 				  <div class="thumbnails">
@@ -201,7 +201,7 @@
 				  </div>
 				</li>
 			  </script>
-			  
+
 			</section>
 		  </section>
 		</main>

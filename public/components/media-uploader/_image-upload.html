@@ -1,90 +1,34 @@
-<!-- <div class="modal-dialog imageUploadPopup">
-	<div class="modal-content text-left">
-		<div class="modal-header">
-			<button type="button" class="close" data-bind="click: close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-			<h4>Upload Image</h4>
-		</div>
-		<div class="modal-body row">
-			<form id="image-upload">
-				<div class="form-group">
-					<div class="row">
-						<div class="col-sm-2 col-ms-12 col-xs-12 text-center">
-							<div data-bind="if: imageURL" id="uploaded-image">
-								<img class="img-thumbnail" data-bind="attr: { src: imageURL }" />
-							</div>
-							<div data-bind="ifnot: imageURL" id="uploaded-image">
-								<img src="images/no_image.jpg" class="img-thumbnail" />
-							</div>
-
-							<br />
-							<div class="btn btn-default btn-browse">
-								Browse <input type="file" id="imageupload" name="image" />
-							</div>
-						</div>
-					</div>
-
-					<div class="progress" id="progress" style="height: 10px; margin-top: 20px;">
-						<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
-					</div>
-				</div>
-				<div class="form-group" data-bind="validationElement: title">
-					<label for="itemTitle">Title</label>
-					<input type="text" class="form-control" placeholder="Title" id="itemTitle" data-bind="value: title, valueUpdate: 'afterkeypress', hasFocus: true;">
-				</div>
-				<div class="form-group" data-bind="">
-					<label for="itemRights">Item Rights</label>
-					<select class="form-control" id="itemRights" data-bind="options: rights, optionsCaption: 'Please select', value: withRights"></select>
-				</div>
-				<div class="form-group">
-					<label for="itemDescription">Description</label>
-					<textarea rows="4" class="form-control" placeholder="Description..." id="itemDescription" data-bind="value: description"></textarea>
-				</div>
-			</form>
-		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-default" data-bind="click: close">Close</button>
-			<button type="button" class="btn btn-primary" data-bind="click: uploadImage">Save</button>
-		</div>
+	<div class="action-header">
+		<div class="title">Upload image</div>
 	</div>
-</div>
--->
-
-               <div class="action-header">
-                  <div class="title">Upload image</div>
-                </div>
-                <form id="image-upload">
-                <div class="action-body">
-                <div id="uploaded-image" data-bind="validationElement: imageURL">
-                 <label for="imageupload">
-                <!-- ko if: imageURL() -->
-                   <img class="upload-img" data-bind="attr: { src: imageURL }" />
-                 	<!-- /ko -->
-				<!-- ko ifnot: imageURL() -->
-				   <img src="img/ui/upload-placeholder.png" class="upload-img"/>
-				<!-- /ko -->
-
+	<form id="image-upload">
+		<div class="action-body">
+			<div id="uploaded-image">
+				<label for="mediaupload">
+					<img class="upload-img" data-bind="attr: { src: displayImage }" />
 				</label>
-					<input type="file" id="imageupload" name="image" />
-				</div>
 
-				<span class="help-block has-error" data-bind="validationMessage: imageURL"></span>
+				<input type="file" id="mediaupload" name="image" />
+			</div>
 
-				<div class="progress" id="progress">
-						<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
-				</div>
+			<span class="help-block has-error" data-bind="validationMessage: thumbnailUrl"></span>
 
-                <div class="form-group" data-bind="validationElement: title" style="vertical-align: top;">
-                  <input type="text" placeholder="Title" id="itemTitle" data-bind="value: title, valueUpdate: 'afterkeypress', hasFocus: true;">
-                 </div>
-                 <div class="form-group">
-					<select class="form-control" id="itemRights" data-bind="options: rights, optionsCaption: 'Please select rights', value: withRights"></select>
-				</div>
-				<div class="form-group">
-					<textarea rows="4" class="form-control" placeholder="Description..." id="itemDescription" data-bind="value: description"></textarea>
-				</div>
-				<div class="form-group">
-					<textarea rows="4" class="form-control" placeholder="Data Provider" id="itemDataProvider" data-bind="value: dataProvider"></textarea>
-				</div>
-                </div>
-				<div class="button-group"><a class="btn-green-o cancel" data-bind="click: close">Cancel</a><a  class="btn-green" data-bind="click: uploadImage">Save</a></div>
-				</form>
+			<div class="progress" id="progress">
+				<div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;"></div>
+			</div>
+
+			<div class="form-group" data-bind="validationElement: title" style="vertical-align: top;">
+				<input type="text" placeholder="Title" id="itemTitle" data-bind="value: title, valueUpdate: 'afterkeypress', hasFocus: true;">
+			</div>
+			<div class="form-group">
+				<select class="form-control" id="itemRights" data-bind="options: rights, optionsCaption: 'Please select rights', value: withRights"></select>
+			</div>
+			<div class="form-group">
+				<textarea rows="4" placeholder="Description..." id="itemDescription" data-bind="value: description"></textarea>
+			</div>
+			<div class="form-group">
+				<textarea rows="4" placeholder="Data Provider" id="itemDataProvider" data-bind="value: dataProvider"></textarea>
+			</div>
+		</div>
+		<div class="button-group"><a class="btn-green-o cancel" data-bind="click: close">Cancel</a><a  class="btn-green" data-bind="click: uploadImage">Save</a></div>
+	</form>

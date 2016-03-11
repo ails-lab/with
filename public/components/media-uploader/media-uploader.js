@@ -12,19 +12,17 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 			required: true
 		});
 		self.description = ko.observable();
-		self.imageURL = ko.observable().extend({
-			required: {
-				message: "No image was uploaded.",
-				params: true
-			}
-		});
-		self.description = ko.observable().extend();
 		self.dataProvider = ko.observable().extend();
 		self.collectionId = ko.observable(params.collectionId);
 
 		self.originalUrl = ko.observable();
 		self.mediumUrl = ko.observable();
-		self.thumbnailUrl = ko.observable();
+		self.thumbnailUrl = ko.observable().extend({
+			required: {
+				message: "No image was uploaded.",
+				params: true
+			}
+		});
 		self.squareUrl = ko.observable();
 		self.tinyUrl = ko.observable();
 		self.validationModel = ko.validatedObservable({
@@ -55,28 +53,23 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 		self.enumRights = ko.pureComputed(function () {
 			return self.withRights().substring(0, self.withRights().indexOf(' '));
 		});
+		self.displayImage = ko.pureComputed(function () {
+			if (self.mediumUrl()) {
+				return self.mediumUrl();
+			} else {
+				return 'img/ui/upload-placeholder.png';
+			}
+		});
 
-		$('#imageupload').fileupload({
+		$('#mediaupload').fileupload({
 			type: "POST",
 			url: '/media/create',
-			progressall: function (e, data) {
-				var progress = parseInt(data.loaded / data.total * 100, 10);
-				$('#progress .progress-bar').css('width', progress + '%');
-			},
-			done: function (e, data) {
-				if (data.files && data.files[0]) {
-					var reader = new FileReader();
-					reader.onload = function (e) {
-						self.resizePhoto(e.target.result, 200);
-						$('#progress .progress-bar').css('display', 'none');
-					};
-					reader.readAsDataURL(data.files[0]);
-				}
-				self.originalUrl(data.result.original);
-				self.mediumUrl(data.result.medium);
-				self.thumbnailUrl(data.result.thumbnail);
-				self.squareUrl(data.result.square);
-				self.tinyUrl(data.result.tiny);
+			success: function (data, textStatus, jqXHR) {
+				self.originalUrl(data.original);
+				self.mediumUrl(data.medium);
+				self.thumbnailUrl(data.thumbnail);
+				self.squareUrl(data.square);
+				self.tinyUrl(data.tiny);
 			},
 			error: function (e, data) {
 				console.log(e);
@@ -86,25 +79,32 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 		});
 
 		self.close = function () {
-			self.imageURL(null);
 			self.title('');
+			self.description = ko.observable();
+			self.dataProvider = ko.observable().extend();
+
+			self.originalUrl = ko.observable();
+			self.mediumUrl = ko.observable();
+			self.thumbnailUrl = ko.observable();
+			self.squareUrl = ko.observable();
+			self.tinyUrl = ko.observable();
 
 			self.validationModel.errors.showAllMessages(false);
-			$( '.action' ).removeClass( 'active' );
+			$('.action').removeClass('active');
 		};
 
 		self.uploadImage = function () {
 			if (self.validationModel.isValid()) {
 				var data = {
-						provenance: [{provider: self.dataProvider()},
-						             {provider: app.currentUser.username()},
-						             {provider: 'UploadedByUser'}
-						],
-						descriptiveData: {
-							label: {"default":[self.title()]},
-							description: {"default": [self.description()]}
-						},
-						media: [{
+					provenance: [{ provider: self.dataProvider() },
+						{ provider: app.currentUser.username() },
+						{ provider: 'UploadedByUser' }
+					],
+					descriptiveData: {
+						label: { "default": [self.title()] },
+						description: {"default": [self.description()]}
+					},
+					media: [{
 							Original: {
 								url: this.originalUrl(),
 								withRights: this.enumRights(),
@@ -152,34 +152,36 @@ define(['knockout', 'text!./_image-upload.html', 'app', 'knockout-validation', '
 			}
 		};
 
-		self.resizePhoto = function (src, width, height) {
-			var img = new Image();
-			img.onload = function () {
-				var canvas = document.createElement('canvas');
-				var ctx = canvas.getContext("2d");
-				ctx.drawImage(img, 0, 0);
-
-				height = typeof height !== 'undefined' ? height : -1;
-
-				if (height < 0) {
-					if (img.width > img.height) {
-						height = (img.height / img.width) * width;
-					} else {
-						width = (img.width / img.height) * height;
-					}
-				}
-
-				canvas.width = width;
-				canvas.height = height;
-				ctx = canvas.getContext("2d");
-				ctx.drawImage(img, 0, 0, width, height);
-
-				var dataurl = canvas.toDataURL("image/png");
-
-				self.imageURL(dataurl);
-			};
-			img.src = src;
-		};
+		// self.resizePhoto = function (src, width, height) {
+		// 	var img = new Image();
+		// 	img.onload = function () {
+		// 		var canvas = document.createElement('canvas');
+		// 		var ctx = canvas.getContext("2d");
+		// 		ctx.drawImage(img, 0, 0);
+		//
+		// 		height = typeof height !== 'undefined' ? height : -1;
+		//
+		// 		if (height < 0) {
+		// 			if (img.width > img.height) {
+		// 				height = (img.height / img.width) * width;
+		// 			} else {
+		// 				width = (img.width / img.height) * height;
+		// 			}
+		// 		}
+		//
+		// 		canvas.width = width;
+		// 		canvas.height = height;
+		// 		ctx = canvas.getContext("2d");
+		// 		ctx.drawImage(img, 0, 0, width, height);
+		//
+		// 		var dataurl = canvas.toDataURL("image/png");
+		//
+		// 		console.log(dataurl);
+		//
+		// 		self.imageURL(dataurl);
+		// 	};
+		// 	img.src = src;
+		// };
 
 	}
 
