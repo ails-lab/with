@@ -1,5 +1,15 @@
-define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke', 'jquery.fileupload'], function (ko, template, app) {
+define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','imagesloaded', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke', 'jquery.fileupload'], function (bridget,ko, template,Isotope,imagesLoaded, app) {
 
+	$.bridget('isotope', Isotope);
+	
+
+	
+	ko.bindingHandlers.profileisotope = {
+				init: app.initOrUpdate('init'),
+				update: app.initOrUpdate('update')
+			};
+
+	
 	var mapping = {
 		create: function (options) {
 			var self = this;
@@ -73,6 +83,99 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			return self;
 		}
 	};
+	
+	function Collection(data) {
+		var self=this;
+		
+		var mapping = {
+				create: function(options) {
+			    	var self=this;
+			        // use extend instead of map to avoid observables
+			    	
+			    	self=$.extend(self, options.data);
+			    	
+			    	self.title=findByLang(self.descriptiveData.label);
+			    	self.entryCount=self.administrative.entryCount;
+			    	self.thumbnail = ko.computed(function() {
+			          if(self.media && self.media[0] && self.media[0].Thumbnail){
+			        	var data=self.media[0].Thumbnail.url;
+			        	 if(data){
+			 				return data;}
+			 			  else{
+			 				   return "img/content/thumb-empty.png";
+			 			   }
+			        	}
+			        	return "img/content/thumb-empty.png";
+			        });
+
+			        self.type=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        		  return "COLLECTION";
+			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        			return "SPACE";
+			        	    else return "EXHIBITION";
+			        	}else return "";
+			        });
+			        
+			        self.css=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
+			        		  return "item collection";
+			        		else if (self.administrative.collectionType.indexOf("Space")!=-1)
+			        			return "item space";
+			        	    else return "item space";
+			        	}else return "item exhibition";
+			        });
+			        
+			        self.url=ko.computed(function() {
+			        	if(self.administrative){
+			        		if (self.administrative.collectionType.indexOf("Collection")==-1)
+				    		  return 'index.html#exhibitionview/'+ self.dbId;
+			        		else if (self.administrative.collectionType.indexOf("Space")>-1){
+			        			return self.administrative.isShownAt;
+			        		}
+				    		else{
+				    			return 'index.html#collectionview/'+ self.dbId;
+				    		}
+			        	}else return "";
+			        });
+			        self.owner=ko.computed(function(){
+			        	if(self.withCreatorInfo){
+			        		return self.withCreatorInfo.username;
+			        	}
+			        });
+			        
+			        return self;
+			     }
+			  
+		};
+		
+		
+		var recmapping={
+				'dbId': {
+					key: function(data) {
+			            return ko.utils.unwrapObservable(data.dbId);
+			        }
+				 }};
+		self.isLoaded = ko.observable(false);
+		self.records=ko.mapping.fromJS([], recmapping);
+		
+		
+		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
+		
+		self.load = function(data) {
+			self.data=ko.mapping.fromJS(data, mapping);
+			
+		};
+
+		
+		if(data != undefined){ 
+			self.load(data);
+			
+		}
+	}
+
 
 	function OrganizationEditViewModel(params) {
 		// Check if user is logged in. If not, ask for user to login
@@ -85,9 +188,43 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 		var self = this;
 		self.id = ko.observable(params.id);
 		self.route = params.route;
+		self.collections=ko.observableArray();
+		 
 		self.name = params.name;				// Project or Organization (display field)
 		self.namePlural = params.name + 's';	// Projects or Organizations (display field)
-
+		var $container = $(".grid").isotope({
+			itemSelector: '.item',
+			transitionDuration: transDuration,
+			masonry: {
+				columnWidth		: '.sizer',
+				percentPosition	: true
+			
+			}
+		});
+		
+		self.revealItems = function (data) {
+			if(data.length==0){ self.loading(false);}
+			var items=[];
+			for (var i in data) {
+				var result = new Collection(data[i]);
+				items.push(result);
+				 
+			}
+			
+			
+			/*if new items are found then empty collection and realod*/
+			if(items.length>0){
+				console.log("something changed");
+				self.collections.removeAll();
+				//self.collections.removeAll();
+				self.collections.push.apply(self.collections, items);
+				return items;}
+			else {return [];}
+		};
+		
+		
+	
+		
 		// Group Details
 		self.username = ko.observable().extend({
 			required: true,
@@ -112,7 +249,7 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			Thumbnail: ko.observable(),
 			Medium: ko.observable()
 		};
-		self.collections = ko.mapping.fromJS([], mapping);
+		//self.collections = ko.mapping.fromJS([], mapping);
 
 		// Page Fields
 		self.page = {
@@ -383,14 +520,7 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 			});
 		};
 
-		self.filter = function (data, event) {
-			var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
-			$(event.currentTarget).siblings().removeClass("active");
-			$(event.currentTarget).addClass("active");
-			$(settings.mSelector).isotope({ filter: selector });
-
-			return false;
-		};
+		
 
 		self.getProfileCollections = function () {
 			$.ajax({
@@ -399,13 +529,85 @@ define(['knockout', 'text!./organization-edit.html', 'app', 'async!https://maps.
 				dataType: "json",
 				url: "/collection/list",
 				processData: false,
-				data: "offset=0&count=" + self.count() + "&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
+				data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
 			}).success(function (data, textStatus, jqXHR) {
-				console.log(data);
-				ko.mapping.fromJS(data.collectionsOrExhibitions, mapping, self.collections);
-				console.log(self.collections());
+				var items=self.revealItems(data['collectionsOrExhibitions']);
+			
+				if(items.length>0){
+					 var $newitems=getItems(items);
+				     
+					 providerIsotopeImagesReveal( $container,$newitems );
+					
+					}
+				
 			});
 		};
+		
+		
+		function getItem(collection) {
+			
+			
+			
+			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
+			   tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
+                +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
+                +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
+                +'</a></div></div>';
+			return tile;
+			
+		}	
+		
+	
+	
+	
+		
+  function getItems(data) {
+	  var items = '';
+	  for ( i in data) {
+	    items += getItem(data[i]);
+	  }
+	  return $( items );
+	}
+  
+		
+	 
+
+  
+    providerIsotopeImagesReveal = function( $container,$items ) {
+		  var iso = $container.data('isotope');
+		  var itemSelector = iso.options.itemSelector;
+		  var $allitems=$(".item");
+		  $container.isotope( 'remove', $allitems );
+		  $container.isotope('layout');
+		  // append to container
+		  $container.append( $items );
+		// hide by default
+		  $items.hide();
+		  $items.imagesLoaded().progress( function( imgLoad, image ) {
+		    // get item
+		    var $item = $( image.img ).parents( itemSelector );
+		    // un-hide item
+		    $item.show();
+		    iso.appended( $item );
+		   
+		  });
+		  
+		  return this;
+		};
+	
+	  
+		
+	  
+	  self.filter=function(data, event) {
+		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
+					  $(event.currentTarget).siblings().removeClass("active");
+					  $(event.currentTarget).addClass("active");
+					  $( settings.mSelector ).isotope({ filter: selector });
+					  return false;
+				}
+					  
+	 
+		
 	}
 
 	return {

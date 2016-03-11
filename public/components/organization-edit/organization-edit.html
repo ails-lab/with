@@ -42,40 +42,31 @@
 					</div>
 				</section>
 
-				<!-- isotope section-->
-				<section class="isotope">
-					<section class="filter">
-						<div class="wrap">
-							<!-- menu-->
-							<ul class="nav">
-								<li data-filter="*" class="active" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
-								<li data-filter=".collection" data-bind="click: filter"><a href="#" title="ALL">Collections</a></li>
-								<li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibitions</a></li>
-							</ul>
-						</div>
-					</section>
-					<section class="listing">
-						<div class="grid">
-							<div class="sizer"></div>
-							<!-- ko foreach: collections -->
-							<div data-bind="css: css">
-								<div class="wrap">
-									<a data-bind="attr: { href: url }">
-										<div class="thumb">
-											<img data-bind="attr: { src: thumbnail }" />
-											<div class="counter" data-bind="text: count"></div>
-										</div>
-										<div class="info">
-											<div class="type" data-bind="text: type"></div>
-											<h2 class="title" data-bind="text: title"></h2>
-										</div>
-									</a>
-								</div>
-							</div>
-							<!-- /ko -->
-						</div>
-					</section>
-				</section>
+				 <!-- isotope section-->
+        <section class="isotope">
+         <!-- filter-->
+      <section class="filter">
+          <div class="wrap">
+            <!-- menu-->
+            <ul class="nav">
+              <li class="active" data-filter="*" data-bind="click: filter"><a href="#" title="ALL">All</a></li>
+              <li data-filter=".exhibition" data-bind="click: filter"><a href="#" title="EXHIBITION">Exhibition</a></li>
+              <li data-filter=".collection" data-bind="click: filter"><a href="#" title="COLLECTION">Collection</a></li>
+            </ul>
+           
+          </div>
+      </section>
+             <!-- listing-->
+		      <section class="listing">
+		          <!-- grid-->
+		          <div class="grid">
+		              <div class="sizer"></div>
+		             
+		          </div>
+		          
+	     
+        		</section>
+      </section>
 
 				<!-- manage members -->
 				<section class="action members">
