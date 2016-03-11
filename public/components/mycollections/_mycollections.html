@@ -9,10 +9,11 @@
 		  <!-- collection section-->
 		  <section class="collection">
 			<section class="header">
-			  <!-- collection picker--><a id="picker" href="#" data-toggle="dropdown" class="picker"><span class="text">My Collections</span><span class="arrow"></span></a>
+			  <!-- collection picker-->
+			  <a id="picker" href="#" data-toggle="dropdown" class="picker" data-bind="checked: myCollectionSet"><span class="text">My Collections</span><span class="arrow"></span></a>
 			  <ul aria-labelledby="picker" class="dropdown-menu">
-				<li><a href="#">My Collections</a></li>
-				<li><a href="#">Collections shared with me</a></li>
+				<li><a style="cursor:pointer;">My Collections</a></li>
+				<li><a style="cursor:pointer;" >Collections shared with me</a></li>
 			  </ul>
 			  <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New Collection</span></a>
 			</section>
@@ -42,55 +43,13 @@
 			  </div>
 			  <!-- listing-->
 			  <ul class="list-body grids">
-			  	<!-- ko foreach: myCollections -->
-				<li data-bind="css: { private: !administrative.access.isPublic()}">
-				  <div class="thumbnails">
-				  	<!-- ko if: administrative.access.isPublic()-->
-					<div class="category">public</div>
-					<!--/ko-->
-					<!-- ko else -->
-					<div class="category">private</div>
-					<!--/ko-->
-					<!-- ko if: media()[0]-->
-					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap"></div>
-					<!-- /ko -->
-					<!-- ko if: media()[1]-->
-					<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap small"></div>
-					<!-- /ko -->
-					<!-- ko if: media()[2]-->
-					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
-					<!-- /ko -->
-					<!-- ko else -->
-					<div class="wrap small"></div>
-					<!-- /ko -->
-				  </div>
-				  <div class="meta">
-				  	<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}"></a>
-					<div class="description" data-bind="text: description()"></div>
-					<div class="other-info">
-					  <div class="count" data-bind="text: administrative.entryCount()"></div>
-					  <div class="date" data-bind="text: administrative.created()"></div>
-					  <div class="user"data-bind="text: withCreatorInfo.username"></div>
-					</div>
-					<div class="action-group">
-						<!--  ko if: myAccess() ==  "OWN" -->
-						<a href="#" data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
-						<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
-						<!-- /ko -->
-						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<a href="#" data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
-						<!-- /ko -->
-					</div>
-				  </div>
-				</li>
-				<!--/ko-->
-			  </ul><a href="#" class="loadmore">load more</a>
+			  	<!-- if myCollectionSet -->
+					<div data-bind="template: { name: 'collectionsTemplate', foreach:  myCollections}"></div>
+				<!-- /ko -->
+				<!-- ko else -->
+				<div data-bind="template: { name: 'collectionsTemplate', foreach:  sharedCollections}"></div>
+				<!-- /ko -->
+			  </ul><a style="cursor:pointer;" class="loadmore" data-bind="{visible: collectionCount()>myCollections().length, event: {click: moreCollections(false)}}">load more</a>
 			</section>
 			<!-- collection edit-->
 			<section class="action edit">
@@ -195,6 +154,56 @@
 			  <div class="button-group">
 			  	<a href="#" class="btn-green cancel" data-bind="click: closeSideBar">Close</a>
 			  </div>
+			  
+			   <script type="text/html" id="collectionsTemplate">
+			   	<li data-bind="css: { private: !administrative.access.isPublic()}">
+				  <div class="thumbnails">
+				  	<!-- ko if: administrative.access.isPublic()-->
+					<div class="category">public</div>
+					<!--/ko-->
+					<!-- ko else -->
+					<div class="category">private</div>
+					<!--/ko-->
+					<!-- ko if: media()[0]-->
+					<div class="wrap"><img data-bind="attr: {src: media()[0].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap"></div>
+					<!-- /ko -->
+					<!-- ko if: media()[1]-->
+					<div class="wrap small"><img data-bind="attr: {src: media()[1].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap small"></div>
+					<!-- /ko -->
+					<!-- ko if: media()[2]-->
+					<div class="wrap small"><img data-bind="attr: {src: media()[2].thumbnailUrl}"/></div>
+					<!-- /ko -->
+					<!-- ko else -->
+					<div class="wrap small"></div>
+					<!-- /ko -->
+				  </div>
+				  <div class="meta">
+				  	<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}"></a>
+					<div class="description" data-bind="text: description()"></div>
+					<div class="other-info">
+					  <div class="count" data-bind="text: administrative.entryCount()"></div>
+					  <div class="date" data-bind="text: administrative.created()"></div>
+					  <div class="user"data-bind="text: withCreatorInfo.username"></div>
+					</div>
+					<div class="action-group">
+						<!--  ko if: myAccess() ==  "OWN" -->
+						<a href="#" data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
+						<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
+						<!-- /ko -->
+						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
+						<a href="#" data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<!-- /ko -->
+					</div>
+				  </div>
+				</li>
+			  </script>
+			  
 			</section>
 		  </section>
 		</main>
