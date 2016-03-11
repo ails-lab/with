@@ -39,7 +39,7 @@ define(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) {
 			{ url: 'organization/{id}/count/{count}',     params: { page: 'group-page', title: 'Organization', 'type': 'organization' } },
 			{ url: 'organizations', params: { page: 'organizations', title: 'Organizations', 'type': 'Organization' } },
 			{ url: 'projects', params: { page: 'organizations', title: 'Projects', 'type': 'Project' } },
-			{ url: 'project/{id}', params: { page: 'organization-page', title: 'Project', 'type': 'project' } },
+			{ url: 'project/{id}', params: { page: 'group-page', title: 'Project', 'type': 'project' } },
 			{ url: 'notifications', params: { page: 'notifications-page', title: 'Notifications' } }
 		]
 	});

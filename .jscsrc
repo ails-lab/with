@@ -4,5 +4,6 @@
   "requireMultipleVarDecl": false,
   "validateIndentation": "\t",
   "disallowDanglingUnderscores": false,
-  "disallowEmptyBlocks": false
+  "disallowEmptyBlocks": false,
+  "requireDotNotation": false
 }
