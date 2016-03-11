@@ -215,7 +215,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		self.next = ko.observable(-1);
 		self.desc = ko.showMoreLess('');
 		self.showAPICalls = ko.observable(false);
-		self.$container = $(".grids#" + self.id()).isotope({
+		self.$container = $(".grid#" + self.id()).isotope({
 			itemSelector: '.item',
 			transitionDuration: transDuration,
 			masonry: {
@@ -476,48 +476,24 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		};
 
 		function getItem(record) {
-			var tile = '<li class="item ' + record.dbId + '"><div class="wrap"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
-			tile += '<div class="meta"><a href="#" class="header mediaviewer" onclick="recordSelect(\'' + record.dbId + '\',event)">' + record.displayTitle() + '</a><div class="description"></div>';
-			tile += '<div class="action-group"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
+			var tile = '<div class="item ' + record.dbId + '"><div class="wrap"><a href="#"  onclick="recordSelect(\'' + record.dbId + '\',event)"><div class="thumb"><img style="width:100%" src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"/></div>';
+			tile += '<div class="info"><h2 class="title">' + record.displayTitle() + '</h2></div></a>';
+			tile += '<div class="action-group"><div class="wrap"><a href="' + record.view_url + '" target="_new" class="links">' + record.sourceCredits() + '</a>';
 			if (isLogged()) {
+				tile+="<ul>"
 				if (!self.isFavorites() && (self.access() == "WRITE" || self.access() == "OWN")) {
-					tile += '<a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a>';
+					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Remove media" class="fa fa-trash-o"  onclick="removeRecord(\'' + record.dbId + '\',event)"></a></li>';
 				}
 				if (record.isLiked()) {
-					tile += '<a data-toggle="tooltip" data-placement="top" title="Remove from favorites"  onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a>';
+					tile += '<li><a data-toggle="tooltip" data-placement="top" title="Remove from favorites"  onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart" style="color: #ec5a62;"></a></li>';
 				} else {
-					tile += '<a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a>';
+					tile += '<li><a  data-toggle="tooltip" data-placement="top" title="Add to favorites" onclick="likeRecord(\'' + record.dbId + '\',event);" class="fa fa-heart"></a></li>';
 				}
-				tile += '<a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download" onclick="collect(\'' + record.dbId + '\',event);" ></a>';
+				tile += '<li><a data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" onclick="collect(\'' + record.dbId + '\',event);" ></a></li></ul>';
 			}
 
-			tile += "</div></div></li>";
-
-			/*
-			var tile = '<div class="item media ' + record.dbId + '"><div class="wrap">';
-
-			if (isLogged()) {
-				if (record.isLiked()) {
-					tile += '<div class="star active">';
-				} else {
-					tile += '<div class="star">';
-				}
-				if (self.access() == "WRITE" || self.access() == "OWN")
-					tile += ' <span class="collect" title="remove"><i class="fa fa-trash-o fa-inverse" onclick="removeRecord(\'' + record.dbId + '\',event)"></i></span>';
-
-				if (!self.isFavorites() && record.externalId ) { // Don't show the favorites icon when in favorites
-
-						tile += '<span class="fa fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">' + '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>' + '</span>';
-
-				}
-				else{tile += '<span class="fa fa-fw" title="add to favorites" style="visibility:hidden">' + '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>' + '</span>';}
-
-				tile += '<span class="delete" title="collect" onclick="collect(\'' + record.dbId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></div>';
-
-			}
-
-			tile += '<a href="#" data-view="inline"  onclick="recordSelect(\'' + record.dbId + '\',event)">' + '<div class="thumb"><img src="' + record.thumbnail() + '" onError="this.src=\'img/content/thumb-empty.png\'"></div>' + ' <div class="info"><h1 class="title">' + record.displayTitle() + '</h1><span class="owner">' + record.dataProvider + '</span></div></a>' + "<div class='sourceCredits'><a href='" + record.view_url + "' target='_new'>" + record.sourceCredits() + "</a></div></div></div>";
-			*/
+			tile += "</div></div></div></div>";
+			
 			return tile;
 		}
 
@@ -592,13 +568,13 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 		};
 
 		self.isotopeImagesReveal = function ($container, $items) {
-			self.$container = $(".grids#" + self.id());
+			self.$container = $(".grid#" + self.id());
 			var iso = self.$container.data('isotope');
 			var itemSelector = null;
 			if (iso) {
 				itemSelector = iso.options.itemSelector;
 			} else {
-				self.$container = $(".grids#" + self.id()).isotope({
+				self.$container = $(".grid#" + self.id()).isotope({
 					itemSelector: '.item',
 					transitionDuration: transDuration,
 					masonry: {
@@ -623,22 +599,22 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				$item.show();
 				iso.appended($item);
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grids#" + self.id()).height() > scrollpos) {
+				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grids#" + self.id()).height() < scrollpos) {
-					$(window).scrollTop($(".grids#" + self.id()).height());
+				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
+					$(window).scrollTop($(".grid#" + self.id()).height());
 
 				}
 
 			}).always(function () {
 				var scrollpos = sessionStorage.getItem("collection-viewscroll" + self.id());
-				if (scrollpos && $(".grids#" + self.id()).height() > scrollpos) {
+				if (scrollpos && $(".grid#" + self.id()).height() > scrollpos) {
 					$(window).scrollTop(scrollpos);
 					sessionStorage.removeItem("collection-viewscroll" + self.id());
-				} else if (scrollpos && $(".grids#" + self.id()).height() < scrollpos) {
-					$(window).scrollTop($(".grids#" + self.id()).height());
-					if (scrollpos != null && $(".grids#" + self.id()).height() > scrollpos) {
+				} else if (scrollpos && $(".grid#" + self.id()).height() < scrollpos) {
+					$(window).scrollTop($(".grid#" + self.id()).height());
+					if (scrollpos != null && $(".grid#" + self.id()).height() > scrollpos) {
 						sessionStorage.removeItem("collection-viewscroll" + self.id());
 					}
 				}
