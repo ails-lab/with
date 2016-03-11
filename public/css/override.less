@@ -20,32 +20,6 @@ a.redheart {
     cursor: pointer;
 }
 
-.autocomplete-suggestions {
-  border: 1px solid #ccc;
-  -webkit-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
-  -moz-box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
-  box-shadow: 2px 2px 2px 0px rgba(128,128,128,0.75);
-  background: white;
-}
-
-.autocomplete-suggestions > .autocomplete-selected {
-  background-color: #cccccc;
-}
-
-.autocomplete-suggestions-extra {
-  font-size: 12pt;
-}
-.autocomplete-suggestion-extra {
-  background-color: #FAFAFA;
-  cursor: default;
-  padding: 2px 4px 2px 8px;
-}
-
-.autocomplete-suggestion-extra .label {
-  background-color: #ec5a62;
-  margin: 2px 0;
-}
-
 // Loading Icon
 body div[role='main'] .more {
 	bottom: 100px;
@@ -76,7 +50,9 @@ body div[role='main'] .wrapper main section.collection .list-body.grids li.item 
 	width: 25%; padding: 0 15px 0 15px;float:none;margin-left:0;
 }
 
-body div[role='main'] .wrapper section.action .button-group {
+body div[role='main'] .wrapper section.action .button-group,
+.list-control a,
+.action-group a {
 	cursor: pointer;
 }
 
@@ -102,11 +78,8 @@ body div[role="main"] .wrapper main section.project section.hero .map {
 	cursor: pointer;
 }
 
-body div[role='main'] .wrapper .search .searchlabel .label{
-   color:#333333;
-   font-weight:200;
-}
-
-body div[role='main'] .wrapper .search .searchresults {
-    /*padding-top: 25px;*/
+.hiddenfile {
+	width: 0px;
+	height: 0px;
+	overflow: hidden;
 }

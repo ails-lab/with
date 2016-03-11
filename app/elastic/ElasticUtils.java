@@ -246,7 +246,7 @@ public class ElasticUtils {
 				//TODO: why withMediaType and not type, like in EmbeddedMedia? media.type
 				media.put("type", Json.toJson(emo.getType()));
 				media.put("originalRights", Json.toJson(emo.getOriginalRights()));
-				media.put("mimeType", Json.toJson(emo.getMimeType()));
+				media.put("mimeType", Json.toJson(emo.getMimeType().toString()));
 				media.put("url", Json.toJson(emo.getUrl()));
 				media.put("quality", Json.toJson(emo.getQuality()));
 				media.put("width", emo.getWidth());

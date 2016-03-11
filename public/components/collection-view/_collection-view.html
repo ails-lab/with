@@ -1,94 +1,96 @@
-
-      <div class="container-fluid">
-        <!-- wrapper-->
-        <div class="wrapper" id="withcollection" >
-          <!-- sidebar-->
-          <!-- ko if:isLogged()==true  -->
-           <side-bar params="route: route"></side-bar>
-           <!-- /ko -->
-          <!-- main-->
-          <main data-bind="css:{ 'full-page' :localStorage.getItem('logged_in')!='true'}">
-            <!-- collection section-->
-            <section class="collection">
-              <section class="header"><span class="title"><!-- ko text:title() --><!-- /ko --></span><span class="item-count" data-bind="visible: entryCount() > -1 "><!-- ko text:entryCount() --><!-- /ko -->  Items</span>
-                <p class="description" data-bind="text:desc.display"></p>
-		        <span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
-		      </section>
-              <!-- collection main-->
-              <section class="collection-list">
-                <!-- collection main header-->
-                <div class="list-head">
-                  <!-- back-->
-                  <a href="void(0);"  onclick="window.history.go(-1); return false;" title="back" class="back">Return to previous page</a>
-                  <!-- control-->
-                  <div class="list-control">
-                    <!-- upload--><a class="upload" data-bind="visible: isLogged() && (access() == 'WRITE' || access() == 'OWN')"><span class="plus"></span><span class="text">Upload Image</span></a><a data-bind="visible: isLogged() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a><a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a><a data-bind="visible: isLogged() && (access() == 'WRITE' || access() == 'OWN')"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
-                  </div>
-                </div>
-                <!-- listing-->
-                <ul class="list-body grids" data-bind="attr: {id: id}">
-                <li class="sizer"></li>
-                 
-                </ul>
-                
-                <!-- load more -->
-					<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
-						Load more
-						<div class="left"></div>
-						<div class="right"></div>
-						<div class="top"></div>
-						<div class="bot"></div>
-					</a>
-					<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
-                
-                
-              </section>
-              <!-- collection api-->
-              <section class="action api">
-                <div class="action-header">
-                  <div class="title">API Calls</div>
-                </div>
-                <div class="action-body">
-                  <div class="input-style"><span class="get">GET</span>
-                    <input type="text" data-bind="value: getAPIUrlCollection()">
-                  </div>
-                  <div class="input-style"><span class="post">POST</span>
-                    <input type="text" data-bind="value: getAPIUrlRecords()">
-                  </div>
-                </div>
-                <div class="button-group"><a class="btn-green cancel">close</a></div>
-              </section>
-              <!-- collection edit-->
-              <section class="action edit">
-                <div class="action-header">
-                  <div class="title">Edit Collection</div>
-                  <div class="toggle">
-                    <input type="checkbox" id="toggle1" data-bind="checked:isPublicEdit">
-                    <label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
-                  </div>
-                </div>
-                <div class="action-body">
-                  <input type="text" placeholder="Name your collection" data-bind="{value: titleToEdit}">
-                  <textarea placeholder="Describe your collection" data-bind="{value: descriptionToEdit}" ></textarea>
-                </div>
-                <div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green" data-bind="click: editCollection">Save collection</a></div>
-              </section>
-              <!-- collection new-->
-              <section class="action upload">
-                <!-- ko component: {
-				    name: "image-upload",
-				    params: { collectionId: id() }
-				} -->
+		<div class="container-fluid">
+			<!-- wrapper-->
+			<div class="wrapper" id="withcollection">
+				<!-- sidebar-->
+				<!-- ko if:isLogged()==true  -->
+				<side-bar params="route: route"></side-bar>
 				<!-- /ko -->
-              </section>
-              <!-- collection give access-->
-              <section class="action collect">
-              <collection params="route: route"></collection>
-              </section>
-              <!-- item view-->
-               <item-view params="route: route"></item-view>
-              </section>
-          </main>
-        </div>
-      </div>
- 
+				<!-- main-->
+				<main data-bind="css:{ 'full-page' :localStorage.getItem('logged_in')!='true'}">
+					<!-- collection section-->
+					<section class="collection">
+						<section class="header">
+							<span class="title"><!-- ko text:displayTitle() --><!-- /ko --></span>
+							<span class="item-count" data-bind="visible: entryCount() > -1 "><!-- ko text:itemCount() --><!-- /ko --></span>
+							<p class="description" data-bind="text:desc.display"></p>
+							<span><a data-bind="visible: desc.showButton, text: desc.showAll() ? '  show less' : '...show more', click: desc.toggleShowAll" href="#"></a></span>
+						</section>
+						<!-- collection main-->
+						<section class="collection-list">
+							<!-- collection main header-->
+							<div class="list-head">
+								<!-- back-->
+								<a href="void(0);"  onclick="window.history.go(-1); return false;" title="back" class="back" data-bind="visible: !isFavorites()">Return to previous page</a>
+								<!-- control-->
+								<div class="list-control">
+									<!-- upload-->
+									<a class="upload" data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')"><span class="plus"></span><span class="text">Upload Image</span></a>
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')" data-toggle="tooltip" data-placement="top" title="Edit Collection" class="fa fa-pencil editaction"></a>
+									<a data-toggle="tooltip" data-placement="top" title="API Calls" class="fa fa-rss detail-control"></a>
+									<a data-bind="visible: isLogged() && !isFavorites() && (access() == 'WRITE' || access() == 'OWN')"  data-toggle="tooltip" data-placement="top" title="Delete Collection" class="fa fa-trash"></a>
+								</div>
+							</div>
+							<!-- listing-->
+							<ul class="list-body grids" data-bind="attr: {id: id}">
+								<li class="sizer"></li>
+							</ul>
+
+							<!-- load more -->
+							<a href="#" class="loadmore" data-bind="visible: citems().length>0 ,event: {click: loadNext}">
+								Load more
+								<div class="left"></div>
+								<div class="right"></div>
+								<div class="top"></div>
+								<div class="bot"></div>
+							</a>
+							<div class="more" data-bind="visible: loading"> <i class="fa fa-spinner fa-pulse"></i></div>
+
+						</section>
+						<!-- collection api-->
+						<section class="action api">
+							<div class="action-header">
+								<div class="title">API Calls</div>
+							</div>
+							<div class="action-body">
+								<div class="input-style"><span class="get">GET</span>
+									<input type="text" data-bind="value: getAPIUrlCollection()">
+								</div>
+								<div class="input-style"><span class="post">POST</span>
+									<input type="text" data-bind="value: getAPIUrlRecords()">
+								</div>
+							</div>
+							<div class="button-group"><a class="btn-green cancel">close</a></div>
+						</section>
+						<!-- collection edit-->
+						<section class="action edit">
+							<div class="action-header">
+								<div class="title">Edit Collection</div>
+								<div class="toggle">
+									<input type="checkbox" id="toggle1" data-bind="checked:isPublicEdit">
+									<label for="toggle1"></label><span class="private">private</span><span class="public">public</span>
+								</div>
+							</div>
+							<div class="action-body">
+								<input type="text" placeholder="Name your collection" data-bind="{value: titleToEdit}">
+								<textarea placeholder="Describe your collection" data-bind="{value: descriptionToEdit}" ></textarea>
+							</div>
+							<div class="button-group"><a class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green" data-bind="click: editCollection">Save collection</a></div>
+						</section>
+						<!-- collection new-->
+						<section class="action upload">
+							<!-- ko component: {
+								name: "image-upload",
+								params: { collectionId: id() }
+							} -->
+							<!-- /ko -->
+						</section>
+						<!-- collection give access-->
+						<section class="action collect">
+							<collection params="route: route"></collection>
+						</section>
+						<!-- item view-->
+						<item-view params="route: route"></item-view>
+					</section>
+				</main>
+			</div>
+		</div>

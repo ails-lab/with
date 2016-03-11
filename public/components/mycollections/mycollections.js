@@ -20,12 +20,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			window.location = '#login';
 		}
 	};
-	
-	/*ko.bindingHandlers.enterOnUsername = {
-		 init: function(elem, valueAccessor, allBindingsAccessor, viewModel, context) {
-	    	  viewModel.addToSharedWithUsers('READ');
-	      }	
-	}*/
 
 	function getCollectionsSharedWithMe(isExhibition, offset, count) {
 		return $.ajax({
@@ -170,7 +164,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		};
 
 		self.createCollection = function() {
-			alert(self.isPublicToEdit());
 			var jsondata = JSON.stringify({
 				administrative: { access: {
 			        isPublic: self.isPublicToEdit()},
@@ -307,14 +300,17 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		   			var users = [];
 		   			var userGroups = [];
 		   			$.each(result, function(i, item) {
-		   				if (item.category == "user")
+		   				if (item.accessRights == "READ")
+		   					item.accessChecked = ko.observable(false);
+		   				else
+		   					item.accessChecked = ko.observable(true);
+		   				if (item.category == "user") 
 		   					users.push(item);
-		   				else if(item.category == "group")
+		   				else if (item.category == "group")
 		   					userGroups.push(item);
 					});
 					ko.mapping.fromJS(users, self.usersMapping, self.usersToShare);
 					ko.mapping.fromJS(userGroups, self.usersMapping, self.userGroupsToShare);
-					//app.showPopup("share-collection");
 				}
 			});
 		}
@@ -333,8 +329,17 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			$("#image_"+userId).css("opacity", "1");
 		}
 
-		self.changeRights = function(clickedRights) {
-			self.shareCollection(ko.toJS(this), clickedRights);
+		self.changeRights = function(currentUserData) {
+			if (currentUserData.accessChecked())
+				self.shareCollection(currentUserData, "WRITE");
+			else
+				self.shareCollection(currentUserData, "READ");
+			return true;
+		}
+		
+		self.removeRights = function(userData) {
+			alert(JSON.stringify(userData));
+			self.shareCollection(userData, "NONE");
 		}
 
 		self.addToSharedWithUsers = function(clickedRights, username) {
@@ -346,12 +351,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				url         : "/user/findByUserOrGroupNameOrEmail",
 				data: "userOrGroupNameOrEmail="+username+"&collectionId="+collId,
 				success		: function(result) {
-					/*var index = arrayFirstIndexOf(self.usersToShare(), function(item) {
-						   return item.name() === username;
-					});
-					if (index < 0) {*/
 					self.shareCollection(result, clickedRights);
-					//}
 				},
 				error      : function(result) {
 					$.smkAlert({text:'There is no such username or email', type:'danger', time: 10});
@@ -362,20 +362,35 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 
 		self.shareCollection = function(userData, clickedRights) {
 			if (userData.category == "group" && clickedRights === "OWN")
-					app.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
-							" group will acquire these rights. Giving OWN rights to others means that they will have the right to delete" +
-							" your collection, as well as to share it with others.", function() {
+				$.smkConfirm({
+					text: "Giving rights to a user group means that all members of the user" +
+					" group will acquire these rights. Giving OWN rights to others means that they will have the right to delete" +
+					" your collection, as well as to share it with others. Are you sure?",
+					accept: 'Confirm',
+					cancel: 'Cancel'
+				}, function (ee) {
+					if (ee)
 						self.callShareAPI(userData, clickedRights);
-					});
+				});
 			else if (userData.category == "group")
-					app.showInfoPopup("Are you sure?", "Giving rights to a user group means that all members of the user" +
-							" group will acquire these rights.", function() {
+				$.smkConfirm({
+					text: "Giving rights to a user group means that all members of the user" +
+							" group will acquire these rights. Are you sure?",
+					accept: 'Confirm',
+					cancel: 'Cancel'
+				}, function (ee) {
+					if (ee)
 						self.checkIfDowngrade(userData, clickedRights);
-					});
+				});
 			else if (clickedRights === "OWN")
-				app.showInfoPopup("Are you sure?", "Giving OWN rights to others means that they will have the right to delete your collection, " +
-						"as well as to share it with others.", function() {
-					self.callShareAPI(userData, clickedRights);
+				$.smkConfirm({
+					text: "Giving OWN rights to others means that they will have the right to delete your collection, " +
+					"as well as to share it with others. Are you sure?",
+					accept: 'Confirm',
+					cancel: 'Cancel'
+				}, function (ee) {
+					if (ee)
+						self.callShareAPI(userData, clickedRights);
 				});
 			else
 				self.checkIfDowngrade(userData, clickedRights);
@@ -388,16 +403,23 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		//userData.username will still have currentAccess to the records [...] via collections [...] (to which userData.username has access).
 		//Do you want to downgrade access rights userData.username for all collections?
 		self.checkIfDowngrade = function(userData, clickedRights) {
-			var currentAccessRights = userData.accessRights;
+			var currentAccessRights = userData.accessRights();
 			var currentAccessOrdinal = accessLevels[currentAccessRights];
 			var newAccessOrdinal = accessLevels[clickedRights];
 			if (currentAccessOrdinal > newAccessOrdinal)
 				//downgrade
-				app.showInfoPopupTwoOptions("Downgrade records in all collections?",
-						"User " + userData.username + " may still have " + currentAccessRights + " access to records that you own and are members of that collection " +
-						", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
-						"in all collections they belong to?", function(response) {
-					self.callShareAPI(userData, clickedRights, response);
+				$.smkConfirm({
+					text: "User " + userData.username() + " may still have " + currentAccessRights + 
+					" access to records that you own and are members of that collection " +
+					", via other collections s/he has access to. Do you want to downgrade access rights to these records "  +
+					"in all collections they belong to?",
+					accept: 'Yes, downgrade all collections.',
+					cancel: 'No, only in this collection.'
+				}, function (ee) {
+					if (ee)
+						self.callShareAPI(userData, clickedRights, true);
+					else
+						self.callShareAPI(userData, clickedRights, false);
 				});
 			else
 				self.callShareAPI(userData, clickedRights, false);
@@ -408,15 +430,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		}
 
 		self.callShareAPI = function(userData, clickedRights, membersDowngrade) {
-			var username = userData.username;
+			var username = userData.username();
 			var collId = self.myCollections()[self.index()].dbId();
 			var index = -1;
 			var isGroup = false;
-			if (userData.category == "user")
+			if (userData.category() == "user")
 			  index = arrayFirstIndexOf(self.usersToShare(), function(item) {
 				   return item.username() === username;
 			});
-			else if (userData.category == "group") {
+			else if (userData.category() == "group") {
 				isGroup = true;
 				index = arrayFirstIndexOf(self.userGroupsToShare(), function(item) {
 					   return item.username() === username;
@@ -428,11 +450,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				"contentType": "application/json",
 				success: function(result) {
 					if (index < 0) {
-						userData.accessRights = clickedRights;
+						userData.accessRights() = clickedRights;
+		   				if (userData.accessRights() == "READ")
+		   					userData.accessChecked(false);
+		   				else
+		   					userData.accessChecked(true);
 						if (!isGroup)
-							self.usersToShare.push(ko.mapping.fromJS(userData));
+							self.usersToShare.push(userData);
 						else
-							self.userGroupsToShare.push(ko.mapping.fromJS(userData));
+							self.userGroupsToShare.push(userData);
 					}
 					else {
 						if (clickedRights == 'NONE') {
@@ -454,12 +480,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		
 		self.isPublicToggle = function() {
 		    if (!self.isPublicToEdit()) {
-		    	/*app.showInfoPopupTwoOptions("Make records private in all collections?",
-						"Users may still be able to read records that you own and are members of that collection " +
-						", via other collections s/he has access to. Do you want to make these records private "  +
-						"in all collections they belong to?", function(response) {
-		    		self.editPublicity(self.index(), false, response);
-				});*/
 		    	$.smkConfirm({
 					text: "Users may still be able to read records that you own and are members of that collection " +
 					", via other collections s/he has access to. Do you want to make these records private "  +

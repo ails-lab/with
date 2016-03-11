@@ -383,7 +383,7 @@ public class GroupManager extends Controller {
 
 	/**
 	 * Return child groups or all descedant groups according to group type.
-	 * 
+	 *
 	 * @param groupId
 	 * @param groupType
 	 * @param direct
@@ -494,8 +494,8 @@ public class GroupManager extends Controller {
 			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
 					"effectiveUserIds"));
 			User user = DB.getUserDAO().get(userId);
-			g.put("firstName", ((User) user).getFirstName());
-			g.put("lastName", ((User) user).getLastName());
+			g.put("firstName", user.getFirstName());
+			g.put("lastName", user.getLastName());
 			Query<CollectionObject> q = DB.getCollectionObjectDAO()
 					.createQuery();
 			// Criteria criteria1 =
@@ -529,7 +529,6 @@ public class GroupManager extends Controller {
 					"effectiveUserIds"));
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
-				// return ok (userGroupsToJSON(groups));
 				return ok(Json.toJson(groups));
 			}
 			User user = DB.getUserDAO().get(userId);
