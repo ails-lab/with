@@ -116,7 +116,6 @@ public class Serializer {
 				jsonGen.writeString(MediaType.ANY_TYPE.toString());
 			}
 		}
-
 	}
 
 	public static class WithAccessSerializer extends JsonSerializer<Object> {

@@ -227,7 +227,6 @@ public class EmbeddedMediaObject {
 		this.originalRights = originalRights;
 	}
 	
-	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
 	public MediaType getMimeType() {
 		return mimeType;
 	}
