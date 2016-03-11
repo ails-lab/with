@@ -203,7 +203,9 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		});
 		
 		self.revealItems = function (data) {
-			if(data.length==0){ self.loading(false);}
+			if(data.length==0){ //self.loading(false);
+				return([]);
+			}
 			var items=[];
 			for (var i in data) {
 				var result = new Collection(data[i]);
@@ -214,7 +216,6 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			
 			/*if new items are found then empty collection and realod*/
 			if(items.length>0){
-				console.log("something changed");
 				self.collections.removeAll();
 				//self.collections.removeAll();
 				self.collections.push.apply(self.collections, items);

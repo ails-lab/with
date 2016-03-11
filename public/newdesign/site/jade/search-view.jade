@@ -1,6 +1,6 @@
 //- index.jade
 - var title = "WITH - Search"
-- var page= "search"
+- var page  = "search"
 
 doctype html
 html
@@ -11,8 +11,25 @@ html
 	// body
 	body
 
-		// head
-		include ./includes/header.inc.jade
+		header
+			.wrap
+				.container
+					a(href="index.html").logo
+						img(src="img/ui/logo.png")
+
+					nav
+						ul
+							li
+								a(href="index.html" title="home") HOME
+							li
+								a(href="search-view.html" title="home") EXPLORE
+							li
+								a(href="about.html" title="home") ABOUT
+							li
+								a(href="search-view.html" title="home") SEARCH
+					section.login-section
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
 
 		// main
 		div( role="main" ).searchpage
@@ -119,18 +136,17 @@ html
 															h1.title
 																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
-
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 														
 											// item
 											.item.media
@@ -144,17 +160,17 @@ html
 														.info
 															h1.title The earth was small light blue and so touchingly alone.
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 														
 											// item
 											.item.media
@@ -167,18 +183,18 @@ html
 														// info
 														.info
 															h1.title The earth was small light blue and so touchingly alone ur
-														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 														
 														
 											// item
@@ -193,17 +209,17 @@ html
 														.info
 															h1.title The earth was small light blue 
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 
 														
 														
@@ -219,17 +235,17 @@ html
 														.info
 															h1.title The earth was small light blue and so touchingly alone.
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 													
 													
 											// item
@@ -244,17 +260,17 @@ html
 														.info
 															h1.title The earth was small light blue and so touchingly alone.
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 														
 														
 											// item
@@ -270,17 +286,17 @@ html
 															h1.title
 																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 														
 														
 											// item
@@ -297,17 +313,17 @@ html
 															h1.title
 																| The earth was small light blue and so touchingly alone ur home that must be defended like a relic
 														
-														// metadata
-														.action-group
-															.wrap
-																a(href="#").links digitainz.org
-																ul
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-																	li
-																		a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
-																	li
-																		input.selectitem( type="checkbox" )
+													// metadata
+													.action-group
+														.wrap
+															a(href="#").links digitainz.org
+															ul
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+																li
+																	a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+																li
+																	input.selectitem( type="checkbox" )
 														
 														
 
@@ -897,5 +913,6 @@ html
 						.button-group
 							a(href="#").btn-green-o.cancel Cancel
 							a(href="#").btn-green Apply
+
 	// script
 	include ./includes/script.inc.jade

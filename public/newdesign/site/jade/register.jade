@@ -1,6 +1,6 @@
 //- index.jade
-- var title = "WITH - Login"
-- var page  = "Login"
+- var title = "WITH - Register Social"
+- var page  = "Register Social"
 
 doctype html
 html
@@ -36,28 +36,22 @@ html
 			// viewer mode
 			.viewer
 
-				// Login
-				section.login.entrance
+				// Register using social
+				section.entrance.register-social
 					.section-header
-						.text Sign in
+						.text Register
 					.section-body 
 						a(href="#").fb
 							i.fa.fa-facebook-official
-							span.text Sign in with Facebook account
+							span.text Register with Facebook account
 						a(href="#").gplus
 							i.fa.fa-google-plus
-							span.text Sign in with Google account
+							span.text Register with Google account
 						.or
 							span.text or
-						.input-group
-							input(type="text" placeholder="Email or username")
-							input(type="password" placeholder="Password")
-							input(type="checkbox")#login
-							label(for="login") Keep me signed in
 						.button-group
-							a(href="#").btn-green-o Forgot password?
-							a(href="#").btn-green Sign in
-
+							a(href="register-email.html").btn-green.btn-register Register with your email address
+					
 		// footer
 		include ./includes/footer.view.jade
 			

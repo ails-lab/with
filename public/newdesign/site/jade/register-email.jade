@@ -14,21 +14,22 @@ html
 		header
 			.wrap
 				.container
-					a(href="#").logo
+					a(href="index.html").logo
 						img(src="img/ui/logo.png")
 
 					nav
 						ul
 							li
-								a(href="#" title="home") HOME
+								a(href="index.html" title="home") HOME
 							li
-								a(href="#" title="home") EXPLORE
+								a(href="search-view.html" title="home") EXPLORE
 							li
-								a(href="#" title="home") ABOUT
+								a(href="about.html" title="home") ABOUT
 							li
-								a(href="#" title="home") SEARCH
+								a(href="search-view.html" title="home") SEARCH
 					section.login-section
-						a(href="dashboard.html").back GO TO DASHBOARD
+						a( href="login.html" class="login") SIGN IN
+						a( href="register.html" class="register") REGISTER
 		// main
 		div( role="main" )
 
@@ -59,11 +60,8 @@ html
 						.button-group
 							a(href="#").btn-green Register
 
-
-
-					
-			// footer
-			include ./includes/footer.view.jade
+		// footer
+		include ./includes/footer.view.jade
 			
 	// script
 	include ./includes/script.inc.jade

@@ -61,63 +61,94 @@ html
 										a(href="#" data-toggle="tooltip" data-placement="top" title="API Calls").fa.fa-rss.detail-control
 										a(href="#" data-toggle="tooltip" data-placement="top" title="Delete Collection").fa.fa-trash
 
-								// listing
-								ul.list-body.grids
-									li
-										.thumbnails
-											.wrap
-												img(src="img/content/collection-hero.png")
-										.meta
-											a(href="#").header.mediaviewer Collection title orem ipsum dolor sit amet
-											.description
-												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
-											.other-info
-												.count 20 Items
-												.date December 15, 2015
-												.user By Annac
-											.action-group
-												a(href="#").links digitainz.org
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Remove media" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download
+							// isotope section
+							section.isotope
+								
 
-									li
-										.thumbnails
-											.wrap
-												img(src="img/content/collection-hero.png")
-										.meta
-											a(href="#").header.mediaviewer Collection title orem ipsum dolor sit amet
-											.description
-												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
-											.other-info
-												.count 20 Items
-												.date December 15, 2015
-												.user By Annac
-											.action-group
-												a(href="#").links digitainz.org
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Remove media" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download
+								section.listing
 
-									li
-										.thumbnails
-											.wrap
-												img(src="img/content/collection-hero.png")
-										.meta
-											a(href="#").header.mediaviewer Collection title orem ipsum dolor sit amet
-											.description
-												| Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip.
-											.other-info
-												.count 20 Items
-												.date December 15, 2015
-												.user By Annac
-											.action-group
-												a(href="#").links digitainz.org
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Remove media" ).fa.fa-trash-o
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
-												a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download
+									.grid
 
-								a(href="#").loadmore load more
+										.sizer
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
+														
+													.info
+														h2.title Lorem ipsum dolor sit amet conceptus
+												.action-group
+													.wrap
+														a(href="#").links digitainz.org
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-1.png" alt="Lorem ipsum")
+														
+													.info
+														h2.title Lorem ipsum dolor sit amet conceptus
+												.action-group
+													.wrap
+														a(href="#").links digitainz.org
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-3.png" alt="Lorem ipsum")
+														
+													.info
+														h2.title Lorem ipsum dolor sit amet conceptus
+												.action-group
+													.wrap
+														a(href="#").links digitainz.org
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
+
+										.item
+											.wrap
+												a(href="#" title="Lorem ipsum")
+													.thumb
+														img(src="img/content/content-2.png" alt="Lorem ipsum")
+														
+													.info
+														h2.title Lorem ipsum dolor sit amet conceptus
+												.action-group
+													.wrap
+														a(href="#").links digitainz.org
+														ul
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Delete media" ).fa.fa-trash-o
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart
+															li
+																a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
 							
 							// collection api
 							section.action.api
@@ -204,7 +235,7 @@ html
 										// actions
 										.actions
 											a(href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" ).fa.fa-heart.favorite
-											a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collect
+											a(href="#" data-toggle="tooltip" data-placement="top" title="Collect it" ).fa.fa-download.collectbutton
 											a.medialink( href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" )
 												i.fa.fa-external-link
 											a.closemedia( href="#" data-toggle="tooltip" data-placement="bottom" title="Close media viewer" )
@@ -227,10 +258,17 @@ html
 											.metadata
 												.infowrap
 
-													// title
-													h1 Avenue de l'Observatoire , 1932-34
-													.owner
-														a( href="#" title="#" ) National Gallery Athens
+													// top
+													.top
+
+														// title
+														.infotitle
+															h1 Avenue de l'Observatoire , 1932-34
+															.owner
+																a( href="#" title="#" ) National Gallery Athens
+
+														// collect
+														a.infocollect.collectbutton( href="#" title="#" ) COLLECT ITEM
 
 
 													// metadata
@@ -249,32 +287,64 @@ html
 														.tab-pane.active( id="information" )
 															
 															// description
-															ul.meta
-																li
+															.meta
+																.list
 																	.title 
 																		.titlewrap Description
-																	.field
+																	.field.limitchar( data-limit='400' )
 																		| George Brassaï (pseudonym of Gyula Halász) (9 September 1899 — 8 July 1984) was a Hungarian photographer, 
 																		| sculptor, and filmmaker who rose to international fame in France in the 20th century. He was one of the numerous 
-																		| Hungarian artists who flourished in Paris beginning between the World Wars. In the early 21st century, the discovery 
+																		| Hungarian artists who flourished in Paris beginning between the World Wars. 
+																		| In the early 21st century, the discovery 
 																		| of more than 200 letters and hundreds of drawings and other items from the period 1940–1984 has provided scholars with 
 																		| material for understanding his later life and career.
-																li
+																.list
 																	.title 
 																		.titlewrap Provider
 																	.field
 																		| National Gallery - Alexandros Soutzos Museum, Athens.
-																li
+																.list
 																	.title 
 																		.titlewrap Rights
 																	.field
 																		| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-																li
+																.list
 																	.title 
 																		.titlewrap Record Source
 																	.field
 																		a( href="#" title="#" ) 
 																			| EUROPEANA
+
+																.listhide#extrainfo
+																	.list
+																		.title 
+																			.titlewrap Provider
+																		.field
+																			| National Gallery - Alexandros Soutzos Museum, Athens.
+																	.list
+																		.title 
+																			.titlewrap Rights
+																		.field
+																			| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+																	.list
+																		.title 
+																			.titlewrap Record Source
+																		.field
+																			a( href="#" title="#" ) 
+																				| EUROPEANA
+																	.list
+																		.title 
+																			.titlewrap Provider
+																		.field
+																			| National Gallery - Alexandros Soutzos Museum, Athens.
+																	.list
+																		.title 
+																			.titlewrap Rights
+																		.field
+																			| Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+																
+																// more
+																a.listmore( href="#" data-target="extrainfo" ) SHOW MORE INFO
 
 														.tab-pane( id="related" )
 

@@ -72,20 +72,23 @@ WITHApp.ui = function( custom ){
 		// init all action in collection page
 		tabAction();
 
-		// initialize nicescroll plugin
-		//initNicescroll();
-
 		// init media viewer
 		initMediaViewer();
 
 		// init carousel
 		initCarousel();
 
-		//initSearchSetting();
-
+		// search column adjustment
 		initSearchColumnAdjustment();
 
+		// seach view toggle
 		initSearchViewToggle();
+	
+		// init limitcharacter functionality
+		initCharacterLimiterToggle();
+
+		// init show more info
+		initShowMore();
 	};
 
 	// method to toggle search view mode
@@ -141,6 +144,12 @@ WITHApp.ui = function( custom ){
 				$( '#columnlist .row .column' ).css({
 					'width' : newWidth+'%'
 				});
+
+				// hide pointermark
+				$( '#pointermark' ).fadeOut();
+			} else {
+				// hide pointermark
+				$( '#pointermark' ).fadeIn();
 			}
 		}
 
@@ -205,7 +214,7 @@ WITHApp.ui = function( custom ){
 		if ( $( '.action .button-group' ).length !== 0 ) {
 
 			$( '.cancel' ).click( function( e ) {
-
+				e.preventDefault();
 				$( '.action' ).removeClass( 'active' );
 
 			});
@@ -239,6 +248,12 @@ WITHApp.ui = function( custom ){
 			});
 
 			$( '.fa-download' ).click( function( e ) {
+
+				$( '.action' ).removeClass( 'active' );
+				$( '.action.collect' ).addClass( 'active' );
+
+			});
+			$( '.collectbutton' ).click( function( e ) {
 
 				$( '.action' ).removeClass( 'active' );
 				$( '.action.collect' ).addClass( 'active' );
@@ -326,6 +341,17 @@ WITHApp.ui = function( custom ){
 			$( '.action.profile' ).addClass( 'active' );
 
 		});
+
+		// profile
+		$( '.editbox' ).click( function( e ) {
+
+			// prevent
+			e.preventDefault();
+
+			$( '.action' ).removeClass( 'active' );
+			$( '.action.editsection' ).addClass( 'active' );
+
+		});
 	};
 
 	// method to initialize isotope
@@ -401,6 +427,53 @@ WITHApp.ui = function( custom ){
 				$texts.text( tmp );
 			}
 		}
+	};
+
+	// method to limit character with toggle
+	var initCharacterLimiterToggle = function(){
+
+		// log
+		logger( 'info','plugin.js / initCharacterLimiterToggle' );
+
+		// check
+		if( $( '.limitchar' ).length > 0 ) {
+
+			// each
+			$( '.limitchar' ).each( function(){
+
+				// elem
+				var $texts = $( '.limitchar' ),
+					textlength = $texts.text().length;
+					limit = $texts.attr( 'data-limit' ),
+					self = this;
+
+				// check
+				if ( $texts.text().length > limit ) {
+
+					// replace
+					var tmp = $texts.text().substr(0,limit) + '<span class="limitdot">...</span><span class="limithide">' + $texts.text().substr(limit, textlength) + '</span><div><a href="#" class="limittoggle">Show more</a></div>';
+					
+					// set
+					$texts.html( tmp );
+				}
+
+				// add click
+				$( '.limittoggle',this ).on( 'click', function( e ){
+
+					// prevent
+					e.preventDefault();
+
+					// check parent
+					if( $( self ).hasClass( 'show' ) ) {
+						$( self ).removeClass( 'show' );
+						$( this ).html( 'Show more');
+					} else {
+						$( self ).addClass( 'show' );
+						$( this ).html( 'Show less');
+					}
+				});
+			});
+		} 
 	};
 
 	// method to initialize filter stick plugin
@@ -601,5 +674,39 @@ WITHApp.ui = function( custom ){
 				$( '.carouselexhibition' ).slick( 'slickNext' );
 			});
 		}
+	};
+
+	// method to initialize more info on item page
+	var initShowMore = function(){
+
+		// log
+		logger( 'info','plugins.js / initShowMore' );
+
+		// check
+		if( $( '.listmore' ).length > 0 ) {
+
+			// each
+			$( '.listmore' ).each( function(){
+
+				// get target
+				var target = $( this ).attr( 'data-target' );
+
+				// click
+				$( this ).on( 'click', function(){
+
+					// check
+					if( $('#'+target).hasClass( 'show' )) {
+
+						// remove
+						$('#'+target).removeClass( 'show' )
+						$( this ).html( 'SHOW MORE INFO' );
+					} else {
+						// add
+						$('#'+target).addClass( 'show' )
+						$( this ).html( 'SHOW LESS INFO' );
+					}
+				});
+			});
+		}	
 	};
 };
