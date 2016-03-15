@@ -434,6 +434,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									var media=result.media;
 									var provenance=result.provenance;
 									var usage=result.usage;
+									var rights=null;
+									if(media){
+									 if(media[0].Original){
+										 rights=findResOrLit(media[0].Original.originalRights);
+									 }else if(media[0].Thumbnail){
+										 rights=findResOrLit(media[0].Thumbnail.originalRights);
+									 }}
 							        var record = new Record({
 										//recordId: result.recordId || result.id,
 										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -445,7 +452,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										dataProvider: findProvenanceValues(provenance,"dataProvider"),
 										dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 										provider: findProvenanceValues(provenance,"provider"),
-										rights: findResOrLit(descdata.metadataRights),
+										rights: rights,
 										externalId: admindata.externalId,
 										source: findProvenanceValues(provenance,"source"),
 										likes: usage.likes,
@@ -628,6 +635,15 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					var media=result.media;
 					var provenance=result.provenance;
 					var usage=result.usage;
+					var rights=null;
+					if(media){
+						
+						 if(media[0].Original){
+							 rights=findResOrLit(media[0].Original.originalRights);
+						 }else{
+							 rights=findResOrLit(media[0].Thumbnail.originalRights);
+						 }
+					}
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
 						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -639,7 +655,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						dataProvider: findProvenanceValues(provenance,"dataProvider"),
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
-						rights: findResOrLit(descdata.metadataRights),
+						rights: rights,
 						externalId: admindata.externalId,
 						source: findProvenanceValues(provenance,"source"),
 						likes: usage.likes,

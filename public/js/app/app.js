@@ -987,15 +987,16 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 			if(data){
 			if(data[uilang]){
 
-			   for(var i=0;i<data[uilang].length;i++){
-			                	if(selvalue.length>0){selvalue+=",";}
-			                	selvalue=data[uilang][i];
-			     }
-
-			}
+			                	selvalue=data[uilang];
+			   }
 			else if(data.uri){
 				selvalue=data.uri;
-			}}
+			}
+			else if(data["en"]){
+
+            	selvalue=data["en"];
+				}
+			}
 			return selvalue;
 
 		}

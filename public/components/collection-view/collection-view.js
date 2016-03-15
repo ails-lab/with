@@ -123,7 +123,12 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			if (descdata) {
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
-				self.rights = media[0] && media[0].Original && media[0].Original.originalRights ? media[0].Original.originalRights.uri : null;
+				
+				
+				/*self.rights = media[0] && media[0].Original && media[0].Original.originalRights ? media[0].Original.originalRights.uri : null;
+				if(self.rights==null){
+					self.rights=media[0] && media[0].Thumbnail && media[0].Thumbnail.originalRights ? media[0].Thumbnail.originalRights.uri : null;
+				}*/
 				self.creator = findByLang(descdata.dccreator);
 			}
 
@@ -144,6 +149,14 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 
 			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
+			if(self.fullres){
+				self.rights=findResOrLit(media[0].Original.originalRights);
+				
+			}
+			else if (self.thumb){
+				self.rights=findResOrLit(media[0].Thumbnail.originalRights);
+				
+			}
 			self.data(options);
 			self.isLoaded = ko.observable(true);
 			/*to calculate position find how many of these are already in citems

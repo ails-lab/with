@@ -1,4 +1,5 @@
-
+<div role="main">
+		<div class="container-fluid">
 <div class="wrapper">
 <main>
 
@@ -9,7 +10,7 @@
                     <!-- head-->
                     <h3>Media Viewer</h3>
                     <!-- actions-->
-                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorite" class="fa fa-heart favorite" data-bind="visible:loggedUser, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
+                    <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
                     <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collect" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
                     <a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink" data-bind="attr: { href:record().view_url}" target="_blank"><i class="fa fa-external-link"></i></a>
                     <a  data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></div>
@@ -24,10 +25,17 @@
                       <div class="media"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}"/></div>
                       <!-- metadata-->
                       <div class="metadata">
-                        <div class="infowrap">
+                      <div class="infowrap">
+                        <!-- top-->
+                          <div class="top">
+                            <!-- title-->
+                            <div class="infotitle">
                           <!-- title-->
                           <h1><!-- ko text: record().title --><!-- /ko --> </h1>
                           <div class="owner"  data-bind="text:record().dataProvider"></div>
+                           </div>
+                            <!-- collect--><a href="#" title="collect" class="infocollect collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }">COLLECT ITEM</a>
+                          </div>
                           <!-- metadata-->
                           <ul role="tablist" class="nav nav-tabs">
                             <li class="active"><a href="#information" title="" data-toggle="tab">Info</a></li>
@@ -39,33 +47,33 @@
                           <div class="tab-content">
                             <div id="information" class="tab-pane active">
                               <!-- description-->
-                              <ul class="meta">
-                                <li>
+                              <div class="meta">
+                                <div class="list">
                                   <div class="title">
                                     <div class="titlewrap">Description</div>
                                   </div>
                                   <div class="field" data-bind="html:record().description">
                                   </div>
-                                </li>
-                                <li>
+                                </div>
+                                <div class="list">
                                   <div class="title" data-bind="if: record().dataProvider">
                                     <div class="titlewrap">Provider</div>
                                   </div>
                                   <div class="field" data-bind="text:record().dataProvider"></div>
-                                </li>
-                                <li>
+                                </div>
+                                <div class="list">
                                   <div class="title" data-bind="if: record().rights">
                                     <div class="titlewrap">Rights</div>
                                   </div>
                                   <div class="field" data-bind="text:record().rights"></div>
-                                </li>
-                                <li>
+                                </div>
+                                <div class="list">
                                   <div class="title">
                                     <div class="titlewrap">Record Source</div>
                                   </div>
                                   <div class="field" data-bind="text:record().source"></div>
-                                </li>
-                              </ul>
+                                </div>
+                              </div>
                             </div>
                             <div id="related" class="tab-pane">
                               <!-- related media-->
@@ -134,7 +142,7 @@
                       <div class="sharetext" data-bind="text: record().title"></div>
                       		<ul class="social">
                         		<li><a data-bind="attr: {href:record().facebook}" title="share on facebook" onclick="javascript:window.open(this.href,'facebook-share-dialog','width=626,height=436'); return false;"><img src="img/ui/ic-facebook.png" alt="facebook"></a></li>
-                        		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;""><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
+                        		<li><a data-bind="attr: {href:record().twitter}" title="twitter share" onclick="javascript:window.open(this.href,'', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');return false;"><img src="img/ui/ic-twitter.png" alt="facebook"></a></li>
                         		<li data-bind="event: {click: function(){record().pinterest()}}"><a href="#" title="pin it"><img src="img/ui/ic-pinterest.png" alt="facebook"></a></li>
                         		<li><a data-bind="attr: {href:record().mail}" title="email item"><img src="img/ui/ic-mail.png" alt="facebook"></a></li>
                       		</ul>
@@ -144,8 +152,12 @@
                       </div>
                     </div>
                   </div>
-                </div>
+        </div>        
 	</section>	
 
+
+
 </main>
+</div>
+</div>
 </div>

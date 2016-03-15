@@ -5,7 +5,7 @@ define(['knockout', 'text!./top-bar.html', 'app', 'autocomplete', 'knockout-swit
 		var self           = this;
 		self.notifications = ko.observableArray();
 		self.templateName = ko.observable('top-bar');
-
+		
 		ko.computed(function () {
 			var tmp = app.currentUser.notifications.userNotifications().concat(app.currentUser.notifications.groupNotifications());
 			tmp.sort(function(a, b) {
