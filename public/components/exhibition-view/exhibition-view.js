@@ -1,4 +1,4 @@
-define(['knockout', 'text!./exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
+define(['knockout', 'text!./_exhibition-view.html', 'app', 'magnific-popup', 'slick'], function (ko, template, app, magnificPopup, slick) {
 
 	ko.bindingHandlers.backgroundImage = {
 		update: function (element, valueAccessor) {

@@ -641,8 +641,8 @@ WITHApp.ui = function( custom ){
 				'infinite' : false,
 				'dots'   : true,
 				'arrows' : true,
-				'prevArrow' : '<a href="#" class="slick-prev"><img src="img/ui/ic-left-arrow.png"></a>',
-				'nextArrow' : '<a href="#" class="slick-next"><img src="img/ui/ic-right-arrow.png"></a>'
+				'prevArrow' : '<a class="slick-prev"><img src="img/ui/ic-left-arrow.png"></a>',
+				'nextArrow' : '<a class="slick-next"><img src="img/ui/ic-right-arrow.png"></a>'
 			});
 
 			// on btn click
