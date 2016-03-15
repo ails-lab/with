@@ -1,15 +1,12 @@
-define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'bootstrap-select', 'bootstrap-switch', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, bootstrapSelect, bootstrapSwitch, jqueryLazyLoad) {
+define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', 'app', 'jquery.lazyload'], function (ko, template, jqueryUI, autoscroll, app, jqueryLazyLoad) {
 
 	function setUpSwitch(exhibition) {
-		$("input.switch").bootstrapSwitch({
-			onText: 'Public',
-			offText: 'Restricted',
-			size: 'small',
-			onColor: 'success',
-			offColor: 'danger',
-			state: exhibition.administrative.access.isPublic()
-		});
-		$("input.switch").on('switchChange.bootstrapSwitch', function (event, state) {
+		// Set the initial value
+		$('#toggle2').prop('checked', exhibition.administrative.access.isPublic());
+
+		// Add event handler for change event
+		$("#toggle2").change(function () {
+			state = this.checked;
 			$.ajax({
 				url: '/rights/' + exhibition.dbId() + '?isPublic=' + state,
 				method: 'GET',
@@ -74,13 +71,13 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		if (isTitleUpdate) {
 			jsonObject.descriptiveData = {
 				label: {
-					default: [ exhibition.title() ]
+					default: [exhibition.title()]
 				}
 			};
 		} else {
 			jsonObject.descriptiveData = {
 				description: {
-					default: [ exhibition.description() ]
+					default: [exhibition.description()]
 				}
 			};
 		}
@@ -128,10 +125,10 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		$.ajax({
 			url: "/collection/" + exhibitionId + "/moveRecord" + "?recordId=" + recordId + '&oldPosition=' + oldPosition + '&newPosition=' + newPosition,
 			method: 'put',
-			success: function(data) {
+			success: function (data) {
 				// Empty
 			},
-			error: function(result) {
+			error: function (result) {
 				// Empty
 			}
 		});
@@ -145,53 +142,56 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		var self = this;
 		self.route = params.route;
 		self.checkLogged = function () {
-
-			if (isLogged() == false) {
-				window.location = '#login';
-				return;
+			if (localStorage.getItem('logged_in') != "true") {
+				window.location.href = "#login";
 			}
 		};
 
 		self.mapping = {
 			create: function (options) {
-		        //customize at the root level: add title and description observables, based on multiliteral
+				//customize at the root level: add title and description observables, based on multiliteral
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
-		        var record = options.data;
-		        var newRecord =  ko.mapping.fromJS({}, {});
-		        newRecord.dbId = ko.observable(record.dbId);
-		        var contextData= record.contextData;
-				if (contextData !== undefined)
+				var record = options.data;
+				var newRecord =  ko.mapping.fromJS({}, {});
+				newRecord.dbId = ko.observable(record.dbId);
+				var contextData = record.contextData;
+				if (contextData !== undefined) {
 					newRecord.contextData = ko.mapping.fromJS(contextData, {});
-		        newRecord.containsAudio = ko.pureComputed(function() {
-		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
-		        		return false;
-		        	else
-		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
-				});
-		        newRecord.containsVideo = ko.pureComputed(function() {
-		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined)
-		        		return false;
-		        	else
-		        		return (newRecord.contextData()[0].body.videoUrl() !== '');
-		        	return result;
-				});
-				newRecord.containsText = ko.pureComputed(function() {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined)
+				}
+				newRecord.containsAudio = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined) {
 						return false;
-		        	else
-		        		return newRecord.contextData()[0].body.text.default() !== '';
+					} else {
+						return (newRecord.contextData()[0].body.audioUrl() !== '');
+					}
+				});
+				newRecord.containsVideo = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined) {
+						return false;
+					} else {
+						return (newRecord.contextData()[0].body.videoUrl() !== '');
+					}
+					return result;
+				});
+				newRecord.containsText = ko.pureComputed(function () {
+					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.text.default == undefined) {
+						return false;
+					} else {
+						return newRecord.contextData()[0].body.text.default() !== '';
+					}
 				});
 				newRecord.media = ko.mapping.fromJS(record.media, {});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-		        if (dbDescription == undefined || dbDescription == null)
-		        	newRecord.description = ko.observable("");
-		        else
-		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
+				if (dbDescription == undefined || dbDescription == null) {
+					newRecord.description = ko.observable("");
+				} else {
+					newRecord.description = ko.observable(app.findByLang(dbDescription));
+				}
 				newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
-		        return newRecord;
-		    }
-		}
+				return newRecord;
+			}
+		};
 
 		self.checkLogged();
 		self.loading = ko.observable(false);
@@ -222,7 +222,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}));
 
 			//then initialise select
-			$('.selectpicker').selectpicker();
+			// $('.selectpicker').selectpicker();
 		});
 
 		var mappingExhibition = {
@@ -273,7 +273,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				});
 
 
-// TODO: Update Code
+				// TODO: Update Code
 				// self.loadingInitialItemsCount = self.firstEntries.length;
 				// self.firstEntries.map(function (record) { //fix for now till service gets implemented
 				// 	record.additionalText = ko.observable('');
@@ -336,21 +336,8 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 			}
 		};
 
-		self.detailsEnabled = ko.observable(false);
-
-		self.enableDetails = function (data, event) {
-			self.currentItem(data);
-			self.detailsEnabled(true);
-			//fix hover
-			$(event.target).parent().addClass('box-Hover');
-		};
-
-		self.disableDetails = function (data, event) {
-			self.detailsEnabled(false);
-			$(event.target).parent().removeClass('box-Hover');
-		};
-
 		self.itemsLoaded = 0;
+
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
 			if ($(elem).hasClass('boxBasic boxItem')) { //it gets called for all elements rendered with the foreach
@@ -378,7 +365,7 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		self.removeItem = function (elem, index, record) {
 			if (_bIsMoveOperation) {
 				_startIndex = index;	// If removeItem is executed before the showNewItem, save the startIndex for moving the record
-				if (_removeItem) { 	// If removeItem is executed after the showNewItem, remove the item
+				if (_removeItem) {		// If removeItem is executed after the showNewItem, remove the item
 					deleteItemFromExhibition(self.dbId(), record.dbId(), index);
 					_removeItem = false;
 				}
@@ -387,20 +374,20 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 		};
 
 		self.showPopUpVideo = function (data, event) {
-			 var context = ko.contextFor(event.target);
-		    var index = context.$index();
+			var context = ko.contextFor(event.target);
+			var index = context.$index();
 			editItem(data, self.dbId(), index, 'PopUpVideoMode');
 		};
 
 		self.showPopUpText = function (data, event) {
 			var context = ko.contextFor(event.target);
-		    var index = context.$index();
+			var index = context.$index();
 			editItem(data, self.dbId(), index, 'PopUpTextMode');
 		};
 
-	    self.playExhibition = function() {
-	    	window.location.hash = '#exhibitionview/' + self.dbId();
-	    };
+		self.playExhibition = function () {
+			window.location.hash = '#exhibitionview/' + self.dbId();
+		};
 
 		//custom binding
 		var _draggedItem;
@@ -518,9 +505,9 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 								}
 							}], {});
 							newItem.contextData = contextData;
-						}
-						else
+						} else {
 							newItem.contextData()[0].target.position(indexNewItem);
+						}
 						//dont do anything if it is moved to its direct left or right dashed box
 						if (_bIsMoveOperation) {// moved from exhibition itself
 							if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
@@ -545,7 +532,6 @@ define(['knockout', 'text!./exhibition-edit.html', 'jquery.ui', 'autoscroll', 'a
 				dropElement.droppable(dropOptions);
 			}
 		};
-
 
 		ko.bindingHandlers.hscroll = {
 			updating: true,
