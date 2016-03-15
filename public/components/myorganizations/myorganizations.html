@@ -1,5 +1,5 @@
 <div role="main">
-		
+
 <div class="container-fluid">
 	<div class="wrapper">
 		<!-- ko if: isLogged() == true  -->
@@ -32,13 +32,13 @@
 								<div class="description" data-bind="text: about"></div>
 								<div class="other-info">
 									<div class="count" data-bind="text: itemsCount"></div>
-									<div class="date" data-bind="text: created"></div>
+									<div class="date" data-bind="text: date"></div>
 									<div class="user" data-bind="text: creatorName"></div>
 								</div>
 								<div class="action-group">
 									<a href="#" data-toggle="tooltip" data-placement="top" title="Delete organization" class="fa fa-trash-o" data-bind="visible: isCreator, click: $parent.deleteGroup"></a>
 									<a href="#" data-toggle="tooltip" data-placement="top" title="Edit organization space" class="fa fa-pencil" data-bind="visible: isCreator, click: $parent.editGroup"></a>
-									<a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members" 
+									<a href="#" data-toggle="tooltip" data-placement="top" title="Manage members" class="fa fa-user members"
 									data-bind="visible: isAdmin, click: $parent.getMembersInfo.bind($data, 'both')"></a>
 								</div>
 							</div>
@@ -327,8 +327,8 @@
 						<div class="group">
 							<div class="title">Users access</div>
 							<input id="userName" type="text" placeholder="Start typing username" data-bind="autocompleteUsername: myUsername, category:1">
-							
-			
+
+
 							<ul class="access-list" data-bind="foreach: userMembers">
 								<li>
 									<!-- ko if: $data.image -->
@@ -341,8 +341,8 @@
 										<input type="checkbox" id="u1">
 										<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div> -->
-									
-									
+
+
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
 									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div>
@@ -355,10 +355,10 @@
 										<input type="checkbox" id="u1">
 										<label for="u1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div> -->
-									
-									
+
+
 									<!-- /ko -->
-								</li> 
+								</li>
 							</ul>
 						</div>
 						<div class="group">
@@ -391,7 +391,7 @@
 										<label for="g1"></label><span class="private">view</span><span class="public">co-edit</span>
 									</div> -->
 									<!-- /ko -->
-								</li> 	
+								</li>
 							</ul>
 						</div>
 					</div>
