@@ -242,6 +242,7 @@ define(['knockout', 'text!./myorganizations.html', 'app', 'async!https://maps.go
 		self.userMembers  =     ko.mapping.fromJS([], {});
 		self.groupMembers = 	ko.mapping.fromJS([], {});
 		self.image		  =     "";
+		self.colors	 	  = 	['blue', 'green', 'red', 'yellow'];
 		// mapping to state with key is the identifier
 		var usersMapping = {
 				'dbId': {

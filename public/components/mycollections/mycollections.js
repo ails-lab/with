@@ -66,7 +66,19 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 						innerModel.media()[index].thumbnailUrl = withUrl;
 					}
 				});
-
+				innerModel.itemCount = ko.pureComputed(function () {
+					var count = innerModel.administrative.entryCount();
+					return count === 1 ? count + ' Item' : count + ' Items';
+				});
+				innerModel.creatorName = ko.pureComputed(function () {
+					var firstName = innerModel.withCreatorInfo.firstName();
+					var lastName = innerModel.withCreatorInfo.lastName();
+					if (firstName !== undefined && firstName !== null
+							&& lastName !== undefined && lastName !== null)
+						return 'by ' + firstName + ' ' + lastName;
+					else
+						return 'by ' + innerModel.withCreatorInfo.username();
+				});
 				return innerModel;
 			},
 			'dbId': {
@@ -478,9 +490,8 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		   					userData.accessChecked(true);
 						if (!isGroup)
 							self.usersToShare.push(userData);
-						} else {
+						else
 							self.userGroupsToShare.push(userData);
-						}
 					} else {
 						if (clickedRights == 'NONE') {
 							if (!isGroup) {

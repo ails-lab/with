@@ -185,9 +185,9 @@
 				  	<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}"></a>
 					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">
-					  <div class="count" data-bind="text: administrative.entryCount()"></div>
+					  <div class="count" data-bind="text: itemCount()"></div>
 					  <div class="date" data-bind="text: administrative.created()"></div>
-					  <div class="user"data-bind="text: withCreatorInfo.username"></div>
+					  <div class="user"data-bind="text: withCreatorInfo.creatorName"></div>
 					</div>
 					<div class="action-group">
 						<!--  ko if: myAccess() ==  "OWN" -->

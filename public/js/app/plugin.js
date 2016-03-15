@@ -547,7 +547,6 @@ WITHApp.ui = function( custom ){
 
 	// method to toggle collection listing from grid to list
 	var changeList = function() {
-
 		// check
 		if ( $( '.list-control' ).length !== 0 ) {
 
@@ -570,10 +569,10 @@ WITHApp.ui = function( custom ){
 				$( this ).parent().find( '.fa-th' ).toggleClass( 'active' );
 				$( '.list-body' ).toggleClass('grids');
 				$( '.list-body' ).toggleClass('list');
-
 			});
 
 		}
+		alert("3");
 	};
 
 	// method to initialize media viewer
