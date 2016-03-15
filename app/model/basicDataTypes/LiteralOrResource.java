@@ -41,6 +41,11 @@ public class LiteralOrResource extends Literal {
 			addSmartLiteral(label);
 		}
 	}
+	
+	@Override
+	public LiteralOrResource fillDEF() {
+		return (LiteralOrResource)super.fillDEF();
+	}
 
 	public void addLiteral(Language lang, String value) {
 		if (Utils.isValidURL(value)) {
