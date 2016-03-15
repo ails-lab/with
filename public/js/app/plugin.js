@@ -73,7 +73,7 @@ WITHApp.ui = function( custom ){
 		hideMessage();
 
 		// toggle list function
-		//changeList();
+		changeList();
 
 		// init all action in collection page
 		/*this call is moved to every component that require the flyouts*/
@@ -551,7 +551,6 @@ WITHApp.ui = function( custom ){
 		if ( $( '.list-control' ).length !== 0 ) {
 
 			$( '.list-control .fa-th' ).on('click', function(e) {
-
 				e.preventDefault();
 
 				$( this ).toggleClass( 'active' );
@@ -562,7 +561,6 @@ WITHApp.ui = function( custom ){
 			});
 
 			$( '.list-control .fa-bars' ).on('click', function( e ) {
-
 				e.preventDefault();
 
 				$( this ).toggleClass( 'active' );
@@ -572,7 +570,6 @@ WITHApp.ui = function( custom ){
 			});
 
 		}
-		alert("3");
 	};
 
 	// method to initialize media viewer

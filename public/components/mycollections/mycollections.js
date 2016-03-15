@@ -1,6 +1,6 @@
 define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','app'], function (bootstrap, ko, template, KnockoutElse, app) {
 
-	count = 1;
+	count = 6;
 	accessLevels = {
 		READ : 0,
 		WRITE : 1,
@@ -157,10 +157,13 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				});
 			}
 		};
+		
+		WITHApp.changeList();
 
-		self.changeList = function () {
+		/*self.changeList = function () {
+			alert("0");
 			WITHApp.changeList();
-		};
+		};*/
 
 		self.checkLogged = function () {
 			// Check if user is logged in. If not, ask for user to login

@@ -159,18 +159,22 @@ public class MediaController extends Controller {
 
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
-		try {
-			MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
-			thumbnail.setMediaVersion(MediaVersion.Thumbnail);
-			thumbnail.setParentId(media.getDbId());
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			thumbnail.setUrl(
-					"/media/" + thumbnail.getDbId().toString() + "?file=true");
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			return thumbnail;
-		} catch (Exception e) {
-			return null;
+		if (media.getType() != WithMediaType.IMAGE) {
+			try {
+				MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
+				thumbnail.setMediaVersion(MediaVersion.Thumbnail);
+				thumbnail.setParentId(media.getDbId());
+				DB.getMediaObjectDAO().makePermanent(thumbnail);
+				thumbnail.setUrl(
+						"/media/" + thumbnail.getDbId().toString() + "?file=true");
+				DB.getMediaObjectDAO().makePermanent(thumbnail);
+				return thumbnail;
+			} catch (Exception e) {
+				return null;
+			}
 		}
+		else 
+			return null;
 	}
 
 	/**
@@ -255,7 +259,7 @@ public class MediaController extends Controller {
 	}
 
 	private static MediaObject makeThumbNew(MediaObject mediaObject,
-			MediaVersion version) throws IOException {
+		MediaVersion version) throws IOException {
 
 		int newWidth = 0;
 		int newHeight;
@@ -279,7 +283,7 @@ public class MediaController extends Controller {
 		default:
 			break;
 		}
-
+		
 		BufferedImage originalImage = ImageIO
 				.read(new ByteArrayInputStream(mediaObject.getMediaBytes()));
 		int originalWidth = originalImage.getWidth();

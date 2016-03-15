@@ -157,7 +157,7 @@ public class EmbeddedMediaObject {
 	 * .com/git/javadoc/com/google/common/net/MediaType.html
 	 */
 	@JsonSerialize(using = Serializer.MimeTypeSerializer.class)
-	private MediaType mimeType;
+	private MediaType mimeType = MediaType.ANY_IMAGE_TYPE;
 
 	public static enum Quality {
 		UNKNOWN, IMAGE_SMALL, IMAGE_500k, IMAGE_1, IMAGE_4, VIDEO_SD, VIDEO_HD, AUDIO_8k, AUDIO_32k, AUDIO_256k, TEXT_IMAGE, TEXT_TEXT
