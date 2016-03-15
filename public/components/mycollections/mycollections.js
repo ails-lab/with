@@ -471,14 +471,12 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				"contentType": "application/json",
 				success: function (result) {
 					if (index < 0) {
-						userData.accessRights() = clickedRights;
-						if (userData.accessRights() == "READ") {
-							userData.accessChecked(false);
-						} else {
-							userData.accessChecked(true);
-						}
-
-						if (!isGroup) {
+						userData.accessRights(clickedRights);
+		   				if (userData.accessRights() == "READ")
+		   					userData.accessChecked(false);
+		   				else
+		   					userData.accessChecked(true);
+						if (!isGroup)
 							self.usersToShare.push(userData);
 						} else {
 							self.userGroupsToShare.push(userData);
