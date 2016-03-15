@@ -90,12 +90,9 @@
 					 </div>
 					 </div>
 				 <!-- /ko -->
-
 				 </div>
-				 	<div id="more" data-bind="visible: loading, scroll: myCollections(), scrollOptions: {loadFunc: moreCollections, functPar1: showsExhibitions, offset: 0}"> <i class="fa fa-spinner fa-pulse"></i></div>
-
-
-			</div>
+				 	<div id="more1" data-bind="visible: loading, scroll: myCollections(), scrollOptions: {loadFunc: moreCollections, functPar1: showsExhibitions, offset: 0}"> <i class="fa fa-spinner fa-pulse"></i></div>
+				 </div>
 			<div class="col-lg-12" id="sharedtab" style="display:none">
 				 <span class="withmain">
 				<!-- ko if: showsExhibitions -->
@@ -106,7 +103,6 @@
 				 <!-- /ko -->
 				 </span>
 				 <div id="sharedcollections">
-				 <!-- collections listed here -->
 				 <!-- ko foreach: sharedCollections() -->
 					 <div class="profilecoll">
 					 <div class="container-fluid">
@@ -171,8 +167,7 @@
 					 </div>
 				 <!-- /ko -->
 				 </div>
-				 	<div id="more" data-bind="visible: loading ,scroll: sharedCollections(), scrollOptions: { loadFunc: nextSharedCollections, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
-
+				 <!--<div id="more2" data-bind="visible: loading, scroll: sharedCollections(), scrollOptions: {loadFunc: moreShared, functPar1: showsExhibitions, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>-->
 		    </div>
 		</div>
 

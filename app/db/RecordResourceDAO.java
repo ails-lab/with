@@ -171,6 +171,12 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 		// int MAX = 10000;
 		// return getByCollectionBetweenPositions(colId, 0, MAX);
 	}
+	
+	public List<RecordResource> getByMedia(String mediaUrl) {
+		Query<RecordResource> q = this.createQuery().disableValidation().field("media.0.Original.url").equal(mediaUrl);
+		System.out.println(q.toString());
+		return this.find(q.retrievedFields(true, "_id")).asList();
+	}
 
 	public void shift(ObjectId colId, int position,
 			BiConsumer<String, UpdateOperations> update) {

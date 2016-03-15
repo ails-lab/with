@@ -12,6 +12,7 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 			required: true
 		});
 		self.description = ko.observable().extend();
+		self.dataProvider = ko.observable().extend();
 		self.imageURL = ko.observable();
 		self.collectionId = ko.observable(params.collectionId);
 
@@ -80,7 +81,8 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 
 		self.uploadImage = function () {
 			var data = {
-				provenance: [{provider: app.currentUser.username()},
+				provenance: [{provider: self.dataProvider()},
+				             {provider: app.currentUser.username()},
 				             {provider: 'UploadedByUser'}
 				],
 				descriptiveData: {
@@ -90,27 +92,32 @@ define(['knockout', 'text!./image-upload.html', 'app', 'knockout-validation', 'j
 				media: [{
 					Original: {
 						url: this.originalUrl(),
-						withRights: this.enumRights()
+						withRights: this.enumRights(),
+						originalRights: {"uri": this.enumRights()}
 					},
 					Medium: {
 						url: this.mediumUrl(),
-						withRights: this.enumRights()
+						withRights: this.enumRights(),
+						originalRights: {"uri": this.enumRights()}
 					},
 					Thumbnail: {
 						url: this.thumbnailUrl(),
-						withRights: this.enumRights()
+						withRights: this.enumRights(),
+						originalRights: {"uri": this.enumRights()}
 					},
 					Square: {
 						url: this.squareUrl(),
-						withRights: this.enumRights()
+						withRights: this.enumRights(),
+						originalRights: {"uri": this.enumRights()}
 					},
 					Tiny: {
 						url: this.tinyUrl(),
-						withRights: this.enumRights()
+						withRights: this.enumRights(),
+						originalRights: {"uri": this.enumRights()}
 					}
 				}]
 			};
-			$.ajax({
+=			$.ajax({
 				url: '/collection/' + self.collectionId() + '/addRecord',
 				method: 'POST',
 				data: JSON.stringify(data),

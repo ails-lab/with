@@ -370,7 +370,7 @@ public class GroupManager extends Controller {
 		UserGroup group = DB.getUserGroupDAO().getByName(name);
 		return getGroupJson.apply(group);
 	}
-	
+
 	public static ArrayNode groupsAsJSON(List<UserGroup> groups,
 			ObjectId restrictedById, boolean collectionHits) {
 		ArrayNode result = Json.newObject().arrayNode();
@@ -410,7 +410,7 @@ public class GroupManager extends Controller {
 
 	/**
 	 * Return child groups or all descedant groups according to group type.
-	 * 
+	 *
 	 * @param groupId
 	 * @param groupType
 	 * @param direct
@@ -513,7 +513,7 @@ public class GroupManager extends Controller {
 		return userJSON;
 	}
 
-	
+
 	public static ArrayNode userGroupsAsJSON(List<UserGroup> groups) {
 		ArrayNode result = Json.newObject().arrayNode();
 		for (UserGroup group : groups) {
@@ -522,8 +522,8 @@ public class GroupManager extends Controller {
 			ObjectId userId = AccessManager.effectiveUserDbId(session().get(
 					"effectiveUserIds"));
 			User user = DB.getUserDAO().get(userId);
-			g.put("firstName", ((User) user).getFirstName());
-			g.put("lastName", ((User) user).getLastName());
+			g.put("firstName", user.getFirstName());
+			g.put("lastName", user.getLastName());
 
 			//
 			Query<CollectionObject> q = DB.getCollectionObjectDAO()
@@ -552,8 +552,8 @@ public class GroupManager extends Controller {
 		}
 		return result;
 	}
-	
-	
+
+
 	public static Result listUserGroups(String groupType, int offset, int count) {
 		List<UserGroup> groups = new ArrayList<UserGroup>();
 		try {
@@ -562,8 +562,7 @@ public class GroupManager extends Controller {
 					"effectiveUserIds"));
 			if (userId == null) {
 				groups = DB.getUserGroupDAO().findPublic(type, offset, count);
-				//return ok(Json.toJson(groups));
-				return ok(userGroupsAsJSON(groups));
+				return ok(Json.toJson(groups));
 			}
 			User user = DB.getUserDAO().get(userId);
 			Set<ObjectId> userGroupsIds = user.getUserGroupsIds();
@@ -571,7 +570,7 @@ public class GroupManager extends Controller {
 					offset, count);
 			if (groups.size() == count)
 				//return ok(Json.toJson(groups));
-			
+
 				return ok(userGroupsAsJSON(groups));
 
 			int userGroupCount = DB.getUserGroupDAO().getGroupCount(

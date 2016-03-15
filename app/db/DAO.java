@@ -469,7 +469,7 @@ public class DAO<E> extends BasicDAO<E, ObjectId> {
 						else
 							values[i] = fieldValue.get(i).asText();
 					}
-					if (values[0] != null)
+					if ((values.length > 0) && (values[0] != null) )
 						updateOps.disableValidation().set(newFieldName, values);
 				} else {
 					updateOps.disableValidation().set(newFieldName,

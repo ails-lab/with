@@ -260,7 +260,6 @@ public class WithResourceController extends Controller {
 					// that has been created
 					record.getAdministrative().setWithCreator(userId);
 					String mediaUrl;
-					WithMediaRights withRights;
 					for (HashMap<MediaVersion, EmbeddedMediaObject> embeddedMedia : (List<HashMap<MediaVersion, EmbeddedMediaObject>>) record
 							.getMedia()) {
 						for (MediaVersion version : embeddedMedia.keySet()) {
@@ -269,12 +268,16 @@ public class WithResourceController extends Controller {
 							if (media != null) {
 								mediaUrl = media.getUrl();
 								EmbeddedMediaObject existingMedia = null;
-								if (!mediaUrl.isEmpty()
-										&& ((existingMedia = DB
-												.getMediaObjectDAO()
-												.getByUrl(mediaUrl)) != null)) {
-									media = new EmbeddedMediaObject(
-											existingMedia);
+								if (!mediaUrl.isEmpty()) {
+									MediaObject mediaObject = DB.getMediaObjectDAO().getByUrl(mediaUrl);
+									if (mediaObject != null) {
+										//if user has access to at least one recordResource pointing to that media, or if media is an orphan
+										//then the user has write access to the media
+										boolean hasAccessToMedia = MediaController.hasAccessToMedia(mediaUrl, AccessManager.effectiveUserDbIds(session().get(
+												"effectiveUserIds")), Action.EDIT);
+										if (!hasAccessToMedia)
+											media = new EmbeddedMediaObject(existingMedia);
+									}
 								}
 								else {
 									return badRequest("A media url has to be provided.");
