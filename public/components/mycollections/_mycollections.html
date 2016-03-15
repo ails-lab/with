@@ -24,7 +24,7 @@
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
 				<div class="description">This is <b> My Collections </b>. All collections created by and shared with you will be presented here.</div>
-				   <a href="#"><span class="cross"></span>
+				   <a href="#">
 					<span class="cross"></span><span class="text">Hide welcome message</span></a>
 			  </div>
 			</section>
@@ -103,7 +103,7 @@
 			  <div class="action-body">
 				<div class="group">
 				  <div class="title">Users access</div>
-				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername: myUsername, category:1" placeholder="Start typing username or email">
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, category:1" placeholder="Start typing username or email">
 				  <ul class="access-list">
 				  	<!-- ko foreach: usersToShare -->
 					<li>
@@ -116,8 +116,8 @@
 					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  <i class="fa fa-trash"></i></a>
 					  <div class="toggle">
-						<input type="checkbox" id="u1" data-bind="{checked: accessChecked, click: $parent.changeRights}">
-						<label for="u1"></label>
+						<input type="checkbox" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
+						<label data-bind = "{attr: {for: username}}"></label>
 						<span class="private">view</span>
 						<span class="public">co-edit</span>
 					  </div>
@@ -127,7 +127,7 @@
 				</div>
 				<div class="group">
 				  <div class="title">Groups access</div>
-				  <input type="text"  id="usernameOrEmail" data-bind="autocompleteUsername: myUsername, category:2" placeholder="Start typing group name">
+				  <input type="text" id="usernameOrEmail" data-bind="autocompleteUsername1: myUsername, category:2" placeholder="Start typing group name">
 				  <ul class="access-list">
 				  	<!-- ko foreach: userGroupsToShare -->
 				  	<li>
@@ -137,11 +137,11 @@
 					  <!-- ko else -->
 					  	<div class="thumbnails"><img src="images/user.png"></div>
 					  <!-- /ko -->
-					  <a href="#" data-toggle="tooltip" data-placement="top" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
+					  <a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
-						<input type="checkbox" id="u2" data-bind="{checked: accessChecked, click: $parent.changeRights}">
-						<label for="u2"></label>
+						<input type="checkbox" id="u2" data-bind="{id: username, checked: accessChecked, click: $parent.changeRights}">
+						<label data-bind="{attr: {for: username}}"></label>
 						<span class="private">view</span>
 						<span class="public">co-edit</span>
 					  </div>

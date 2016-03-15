@@ -7,7 +7,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		OWN : 2
 	};
 
-	ko.bindingHandlers.autocompleteUsername = {
+	ko.bindingHandlers.autocompleteUsername1 = {
 		init: function (elem, valueAccessor, allBindingsAccessor, viewModel, context) {
 			app.autoCompleteUserName(elem, valueAccessor, allBindingsAccessor, viewModel, context, function (suggestion) {
 				viewModel.addToSharedWithUsers("READ", suggestion);
@@ -344,49 +344,46 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			});
 		};
 
-		self.showRightsIcons = function (userData) {
-			var accessRights = userData.accessRights();
-			var userId = userData.userId();
-			var collId = self.myCollections()[self.index()].dbId();
-			$("#rightsIcons_" + userId).show();
-			$("#image_" + userId).css("opacity", "0.5");
-		};
-
-
-		self.hideRightsIcons = function (userId) {
-			$("#rightsIcons_" + userId).hide();
-			$("#image_" + userId).css("opacity", "1");
-		};
-
-		self.changeRights = function (currentUserData) {
-			if (currentUserData.accessChecked()) {
-				self.shareCollection(currentUserData, "WRITE");
+		self.changeRights = function (userData) {
+			if (userData.accessChecked()) {
+				self.shareCollection(userData, "WRITE");
 			} else {
-				self.shareCollection(currentUserData, "READ");
+				self.shareCollection(userData, "READ");
 			}
-
 			return true;
 		};
 
 		self.removeRights = function (userData) {
 			self.shareCollection(userData, "NONE");
+			return true;
 		};
 
 		self.addToSharedWithUsers = function (clickedRights, username) {
-			var collId = self.myCollections()[self.index()].dbId();
-			//var username = $("#usernameOrEmail").val();
-			$.ajax({
-				method      : "GET",
-				contentType    : "application/json",
-				url         : "/user/findByUserOrGroupNameOrEmail",
-				data: "userOrGroupNameOrEmail=" + username + "&collectionId=" + collId,
-				success		: function (result) {
-					self.shareCollection(result, clickedRights);
-				},
-				error      : function (result) {
-					$.smkAlert({ text: 'There is no such username or email', type: 'danger', time: 10 });
-				}
+			var indexUsers = arrayFirstIndexOf(self.usersToShare(), function (item) {
+				return item.username() === username;
 			});
+			if (indexUsers < 0) {
+				indexUsers = arrayFirstIndexOf(self.userGroupsToShare(), function (item) {
+					return item.username() === username;
+				});
+			}
+			if (indexUsers >= 0) {
+			var collId = self.myCollections()[self.index()].dbId();
+				$.ajax({
+					method      : "GET",
+					contentType    : "application/json",
+					url         : "/user/findByUserOrGroupNameOrEmail",
+					data: "userOrGroupNameOrEmail=" + username + "&collectionId=" + collId,
+					success		: function (result) {
+						result.accessChecked = ko.observable(false);
+						var koResult = ko.mapping.fromJS(result);
+						self.shareCollection(koResult, clickedRights);
+					},
+					error      : function (result) {
+						$.smkAlert({ text: 'There is no such username or email', type: 'danger', time: 10 });
+					}
+				});
+			}
 		};
 
 
