@@ -83,7 +83,7 @@ import db.WithResourceDAO;
  * @author mariaral
  *
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class WithResourceController extends Controller {
 
 	public static final ALogger log = Logger.of(WithResourceController.class);
@@ -177,9 +177,9 @@ public class WithResourceController extends Controller {
 			resourceType = WithResourceType.CulturalObject.toString();
 		try {
 			Class<?> clazz = Class.forName("model.resources." + resourceType);
-			if (position.isDefined())
-				fillInContextTarget(json, collectionDbId.toString(),
-						position.get());
+			// if (position.isDefined())
+			// fillInContextTarget(json, collectionDbId.toString(),
+			// position.get());
 			RecordResource record = (RecordResource) Json.fromJson(json, clazz);
 			MultiLiteral label = record.getDescriptiveData().getLabel();
 			if (label == null || label.get(Language.DEFAULT) == null
@@ -240,13 +240,13 @@ public class WithResourceController extends Controller {
 					// TODO: if record has annotations, update/add
 					// annotations (already filtered so that they refer to
 					// colId)
-					if (record.getContextData() != null
-							&& !record.getContextData().isEmpty()) {
-						ContextData contextData = (ContextData) record
-								.getContextData().get(0);
-						DB.getRecordResourceDAO()
-								.updateContextData(contextData);
-					}
+					// if (record.getContextData() != null
+					// && !record.getContextData().isEmpty()) {
+					// ContextData contextData = (ContextData) record
+					// .getContextData().get(0);
+					// DB.getRecordResourceDAO()
+					// .updateContextData(contextData);
+					// }
 				}
 			} else { // create new record in db
 				ObjectNode errors;
@@ -484,7 +484,7 @@ public class WithResourceController extends Controller {
 							} else {
 								target = new ContextDataTarget();
 								target.setCollectionId(colId);
-								target.setPosition(position);
+								// target.setPosition(position);
 							}
 							if (c.has("body")) {
 								JsonNode bodyNode = c.get("body");
@@ -543,7 +543,7 @@ public class WithResourceController extends Controller {
 	 * @return
 	 */
 	public static Result removeRecordFromCollection(String id, String recordId,
-			Option<Integer> position, boolean all) {
+			Option<Integer> position, boolean all, boolean first) {
 		ObjectNode result = Json.newObject();
 		Locks locks = null;
 		try {
@@ -556,41 +556,15 @@ public class WithResourceController extends Controller {
 			List<Integer> positions = new ArrayList<Integer>();
 			if (!response.toString().equals(ok().toString()))
 				return response;
-			else {
-				if (!position.isDefined()) {
-					List<Integer> pos = DB.getRecordResourceDAO()
-							.getPositionsInCollection(recordDbId,
-									collectionDbId);
-					if (all) {
-						positions.addAll(pos);
-					} else {
-						if (!pos.isEmpty())
-							positions = pos.subList(0, 1);
-					}
-				} else {
-					positions.add(position.get());
-				}
-				for (int p : positions) {
-					DB.getRecordResourceDAO().removeFromCollection(recordDbId,
-							collectionDbId, p);
-					DB.getRecordResourceDAO()
-							.updateRecordRightsUponRemovalFromCollection(
-									recordDbId, collectionDbId);
-					DB.getCollectionObjectDAO().removeCollectionMedia(
-							collectionDbId, p);
-					if (DB.getCollectionObjectDAO().isFavorites(collectionDbId)) {
-						DB.getRecordResourceDAO().decrementLikes(recordDbId);
-					} else
-						DB.getRecordResourceDAO().decField("usage.collected",
-								recordDbId);
-					DB.getCollectionObjectDAO().decEntryCount(collectionDbId);
-					DB.getCollectionObjectDAO().updateField(collectionDbId,
-							"administrative.lastModified", new Date());
-				}
-				result.put("message",
-						"Record succesfully removed from collection");
-				return ok(result);
-			}
+			int pos;
+			if (position.isDefined())
+				pos = position.get();
+			else
+				pos = -1;
+			DB.getRecordResourceDAO().removeFromCollection(recordDbId,
+					collectionDbId, pos, first, all);
+			result.put("message", "Record succesfully removed from collection");
+			return ok(result);
 		} catch (FileNotFoundException e) {
 			result.put("error", "Wrong record id or position in the collection");
 			return badRequest(result);
@@ -617,26 +591,8 @@ public class WithResourceController extends Controller {
 					collectionDbId);
 			if (!response.toString().equals(ok().toString()))
 				return response;
-			else {
-				if (oldPosition > newPosition) {
-					DB.getRecordResourceDAO().shiftRecordsToRight(
-							collectionDbId, oldPosition - 1, newPosition);
-				} else if (newPosition > oldPosition) {
-					DB.getRecordResourceDAO().shiftRecordsToLeft(
-							collectionDbId, oldPosition + 1, newPosition - 1);
-					newPosition--;
-				}
-				DB.getRecordResourceDAO().updatePosition(recordDbId,
-						collectionDbId, oldPosition, newPosition);
-				DB.getCollectionObjectDAO().updateField(collectionDbId,
-						"administrative.lastModified", new Date());
-				DB.getCollectionObjectDAO().removeCollectionMedia(
-						collectionDbId, oldPosition);
-				DB.getCollectionObjectDAO().addCollectionMedia(collectionDbId,
-						recordDbId);
-				result.put("message", "Record succesfully added to collection");
-				return ok(result);
-			}
+			result.put("message", "Record succesfully added to collection");
+			return ok(result);
 		} catch (Exception e) {
 			result.put("error", e.getMessage());
 			return internalServerError(result);
@@ -719,14 +675,14 @@ public class WithResourceController extends Controller {
 				.toString();
 		RecordResource record = DB.getRecordResourceDAO().getByExternalId(
 				externalId);
-		List<CollectionInfo> collected = record.getCollectedIn();
-		for (CollectionInfo c : collected) {
-			if (c.getCollectionId().toString().equals(fav)) {
-				return removeRecordFromCollection(fav, record.getDbId()
-						.toString(), Option.Some(c.getPosition()), false);
-			}
-		}
+		/*
+		 * List<CollectionInfo> collected = record.getCollectedIn(); for
+		 * (CollectionInfo c : collected) { if
+		 * (c.getCollectionId().toString().equals(fav)) { return
+		 * removeRecordFromCollection(fav, record.getDbId() .toString(),
+		 * Option.Some(c.getPosition()), false); } }
+		 */
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
-				Option.None(), false);
+				Option.None(), true, false);
 	}
 }

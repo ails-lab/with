@@ -24,13 +24,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
-import model.basicDataTypes.CollectionInfo;
+import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
@@ -50,8 +51,8 @@ import utils.Tuple;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.BasicDBObject;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
 import elastic.Elastic;
@@ -379,46 +380,99 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
-	public CollectionObject addToCollection(ObjectId collectionId,
-			ObjectId recordId, int position) {
-		UpdateOperations<CollectionObject> colUpdate = DB
-				.getCollectionObjectDAO().createUpdateOperations()
-				.disableValidation();
+	public CollectionObject addToCollection(ObjectId collectionId, ObjectId recordId,
+			int position, boolean last) {
+
 		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
 				.field("_id").equal(collectionId);
-		if (position == -1)
-			colUpdate.add("collectedResources",
-					new ContextData<ContextDataBody>(recordId));
-		else
-			colUpdate.add("collectedResources." + position,
-					new ContextData<ContextDataBody>(recordId));
-		colUpdate.set("administrative.lastModified", new Date());
-		colUpdate.inc("administrative.entryCount");
+		UpdateOperations<CollectionObject> collectionUpdate = DB
+				.getCollectionObjectDAO().createUpdateOperations()
+				.disableValidation();
+		if (last) {
+			collectionUpdate.add("collectedResources",
+					new ContextData(recordId));
+		} else {
+			collectionUpdate.add("collectedResources", "{ $each: ["
+					+ new ContextData(recordId) + "], $position: " + position
+					+ "}", true);
+		}
+		collectionUpdate.inc("administrative.entryCount");
+		collectionUpdate.set("administrative.lastModified", new Date());
 		// true returns the oldVersion (contrary to documentation!!!)
-		return DB.getDs().findAndModify(q, colUpdate, true);
+		return DB.getDs().findAndModify(q, collectionUpdate, true);
 	}
 
-	public List<CollectionObject> getByCollectedResource(ObjectId resourceId,
-			List<String> retrievedFields) {
-		Query<CollectionObject> q = this.createQuery()
-				.field("collectedResources").equal(resourceId);
-		BasicDBObject query = new BasicDBObject();
-		query.put("resourceId", resourceId);
-		BasicDBObject elemMatch = new BasicDBObject();
-		elemMatch.put("$elemMatch", query);
-		q.filter("collectedIn", elemMatch);
-		if (retrievedFields != null)
-			q.retrievedFields(true,
-					retrievedFields.toArray(new String[retrievedFields.size()]));
-		return this.find(q).asList();
+	public void removeFromCollection(ObjectId collectionId, ObjectId recordId,
+			int position, boolean first, boolean all) throws Exception {
+
+		CollectionObject collection = this.getById(collectionId,
+				Arrays.asList("collectedResources"));
+		int i = 0;
+		List<ContextData> newCollectedResources = new ArrayList<ContextData>(
+				collection.getCollectedResources());
+		int resourcesRemoved = 0;
+		if (!first && !all) {
+			ContextData resource = newCollectedResources.remove(position);
+			resourcesRemoved = 1;
+			if (!resource.getTarget().getRecordId().equals(recordId))
+				throw new Exception("Invalid position");
+		} else {
+			for (ContextData data : collection.getCollectedResources()) {
+				if (data.getTarget().getRecordId().equals(recordId)) {
+					if (first) {
+						newCollectedResources.remove(i);
+						resourcesRemoved = 1;
+						break;
+					}
+					if (all) {
+						newCollectedResources.remove(i);
+						resourcesRemoved++;
+					}
+				}
+				i++;
+			}
+		}
+		if (resourcesRemoved == 0)
+			throw new Exception("Record not in collection");
+		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
+				.field("_id").equal(collectionId);
+		UpdateOperations<CollectionObject> collectionUpdate = DB
+				.getCollectionObjectDAO().createUpdateOperations()
+				.disableValidation();
+		collectionUpdate.set("collectedResources", newCollectedResources);
+		collectionUpdate.inc("administrative.entryCount", 0 - resourcesRemoved);
+		collectionUpdate.set("administrative.lastModified", new Date());
+		this.update(q, collectionUpdate);
+		removeCollectionMedia(collectionId, i);
+	}
+	
+	public void moveInCollection(ObjectId collectionId, ObjectId recordId,
+			int oldPosition, int newPosition) {
+		CollectionObject collection = this.getById(collectionId,
+				Arrays.asList("collectedResources"));
+		List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
+		ObjectId collectedRecordId = collectedResources.get(oldPosition).getTarget().getRecordId();
+		if (!collectedRecordId.equals(recordId))
+			return;
+		ContextData<ContextDataBody> collectedRecord = collectedResources.remove(oldPosition);
+		collectedResources.add(newPosition, collectedRecord);
+		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
+				.field("_id").equal(collectionId);
+		UpdateOperations<CollectionObject> collectionUpdate = DB
+				.getCollectionObjectDAO().createUpdateOperations()
+				.disableValidation();
+		collectionUpdate.set("collectedResources", collectedResources);
+		collectionUpdate.set("administrative.lastModified", new Date());
+		this.update(q, collectionUpdate);
+		removeCollectionMedia(collectionId, oldPosition);
+		addCollectionMedia(collectionId, collectedRecordId);
 	}
 
 	// it may happen that e.g. the thumbnail of the 4th instead of the 3d record
 	// of the media appears in the collections's (3) media
 	public void addCollectionMedia(ObjectId collectionId, ObjectId recordId) {
-		CollectionObject collection = DB.getCollectionObjectDAO().getById(
-				collectionId,
-				new ArrayList<String>(Arrays.asList("collectedResources")));
+		CollectionObject collection = this.getById(collectionId,
+				Arrays.asList("collectedResources"));
 		int position = 0;
 		for (ContextData<ContextDataBody> data : collection
 				.getCollectedResources()) {
@@ -462,21 +516,19 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 
 	}
 
-	public void updateContextData(ContextData contextData) {
-		ObjectId colId = contextData.getTarget().getCollectionId();
-		int position = contextData.getTarget().getPosition();
-		Query<RecordResource> q = this.createQuery().field("collectedIn")
-				.hasThisElement(new CollectionInfo(colId, position));
-		UpdateOperations<RecordResource> recordUpdate1 = this
-				.createUpdateOperations();
-		recordUpdate1
-				.removeAll("contextData", new ContextData(colId, position));
-		this.update(q, recordUpdate1);
-		UpdateOperations<RecordResource> recordUpdate2 = this
-				.createUpdateOperations();
-		recordUpdate2.add("contextData", contextData);
-		this.update(q, recordUpdate2);
-	}
+	/*
+	 * public void updateContextData(ContextData contextData) { ObjectId colId =
+	 * contextData.getTarget().getCollectionId(); int position =
+	 * contextData.getTarget().getPosition(); Query<RecordResource> q =
+	 * this.createQuery().field("collectedIn") .hasThisElement(new
+	 * CollectionInfo(colId, position)); UpdateOperations<RecordResource>
+	 * recordUpdate1 = this .createUpdateOperations(); recordUpdate1
+	 * .removeAll("contextData", new ContextData(colId, position));
+	 * this.update(q, recordUpdate1); UpdateOperations<RecordResource>
+	 * recordUpdate2 = this .createUpdateOperations();
+	 * recordUpdate2.add("contextData", contextData); this.update(q,
+	 * recordUpdate2); }
+	 */
 
 	/*
 	 * public void addCollectionMediaAsync(ObjectId collectionId, ObjectId
