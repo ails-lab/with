@@ -43,21 +43,21 @@
                             <div id="information" class="tab-pane active">
                               <!-- description-->
                               <div class="meta">
-                                <div class="list">
+                                <div class="list" data-bind="if: record().description">
                                   <div class="title">
                                     <div class="titlewrap">Description</div>
                                   </div>
                                   <div class="field" data-bind="html:record().description">
                                   </div>
                                 </div>
-                                <div class="list">
-                                  <div class="title" data-bind="if: record().dataProvider">
+                                <div class="list"  data-bind="if: record().dataProvider">
+                                  <div class="title">
                                     <div class="titlewrap">Provider</div>
                                   </div>
                                   <div class="field" data-bind="text:record().dataProvider"></div>
                                 </div>
-                                <div class="list">
-                                  <div class="title" data-bind="if: record().rights">
+                                <div class="list" data-bind="if: record().rights">
+                                  <div class="title">
                                     <div class="titlewrap">Rights</div>
                                   </div>
                                   <div class="field" data-bind="text:record().rights"></div>
