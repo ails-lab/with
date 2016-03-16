@@ -11,7 +11,7 @@
                     <h3>Media Viewer</h3>
                     <!-- actions-->
                     <div class="actions"><a href="#" data-toggle="tooltip" data-placement="top" title="Add to favorites" class="fa fa-heart favorite" data-bind="visible:loggedUser && record().externalId!=null, css: { redheart: record().isLike()==true }, event: { click: function(data,event) { likeRecord(record(),event); } }"></a>
-                    <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collect" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
+                    <a href="#" data-toggle="tooltip" data-placement="top" title="Collect it" class="fa fa-download collectbutton" data-bind="visible:loggedUser, event: { click: function(data,event) { collect(record(),event); } }"></a>
                     <a href="#" data-toggle="tooltip" data-placement="bottom" title="Visit item site" class="medialink" data-bind="attr: { href:record().view_url}" target="_blank"><i class="fa fa-external-link"></i></a>
                     <a  data-toggle="tooltip" data-placement="bottom" title="Close media viewer" class="closemedia" data-bind="visible: window.location.href.indexOf('#item')==-1,click: close"><img src="img/ui/ic-close.png"></a></div>
                   </div>
@@ -61,6 +61,12 @@
                                   </div>
                                   <div class="field" data-bind="text:record().dataProvider"></div>
                                 </div>
+                                <div class="list" data-bind="if: record().creator">
+                                  <div class="title">
+                                    <div class="titlewrap">Creator</div>
+                                  </div>
+                                  <div class="field" data-bind="text:record().creator"></div>
+                                </div>
                                 <div class="list" data-bind="if: record().rights">
                                   <div class="title">
                                     <div class="titlewrap">Rights</div>
@@ -81,7 +87,7 @@
                       		  <!-- ko if: record().related().length > 0 -->
                       
                               <div class="title">
-                                <div class="titlewrap">Other media item by National Gallery Athens</div><a href="#" title="Follow National Gallery Athens" class="follow">FOLLOW</a>
+                                <div class="titlewrap" data-bind="text: 'Other media items by '+record().forrelated()"></div><a href="#" title="Follow National Gallery Athens" class="follow">FOLLOW</a>
                               </div>
                               <ul class="related">
                       			<!-- ko foreach: record().related -->
@@ -92,7 +98,7 @@
                       		<!-- related media-->
                        		<!-- ko if: record().similar().length > 0 -->
                               <div class="title">
-                                <div class="titlewrap">Similar media item</div>
+                                <div class="titlewrap">Similar media items</div>
                               </div>
                             <ul class="related">
                        		<!-- ko foreach: record().similar -->

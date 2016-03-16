@@ -147,6 +147,11 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 				self.collected = usage.collected;
 			}
 
+			
+			
+			if(self.source=="Rijksmuseum" && media){
+				media[0].Thumbnail=media[0].Original;
+			}
 			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			if(self.fullres){
@@ -159,17 +164,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 			}
 			self.data(options);
 			self.isLoaded = ko.observable(true);
-			/*to calculate position find how many of these are already in citems
-			 *
-			 */
-			/*var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
-	            return item.dbId==self.dbId;
-			});
-			var positions=ko.utils.arrayFilter(self.collectedIn, function(item) {
-	            return item.collectionId==ko.dataFor(withcollection).id();
-			});
-			if(positions && positions[foundrec.length])
-			 self.position=positions[foundrec.length].position;*/
+			
 
 		};
 
@@ -179,9 +174,7 @@ define(['bridget', 'knockout', 'text!./_collection-view.html', 'isotope', 'image
 	}
 
 	function CViewModel(params) {
-		//document.body.setAttribute("data-page", "collection");
-		$("div[role='main']").toggleClass("homepage", false);
-
+		
 		var self = this;
 		self.route = params.route;
 		var counter = 1;

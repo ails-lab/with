@@ -128,6 +128,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									 rights=findResOrLit(media[0].Thumbnail.originalRights);
 								 }}
 									
+								 var source=findProvenanceValues(provenance,"source");
+									
+									if(source=="Rijksmuseum" && media){
+										media[0].Thumbnail=media[0].Original;
+									} 
 						        var record = new Record({
 									        thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 											fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -140,7 +145,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 											provider: findProvenanceValues(provenance,"provider"),
 											rights: rights,
 											externalId: admindata.externalId,
-											source: findProvenanceValues(provenance,"source"),
+											source: source,
 											likes: usage.likes,
 											collected: usage.collected,
 											collectedIn:result.collectedIn,
@@ -196,7 +201,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									 }else if(media[0].Thumbnail){
 										 rights=findResOrLit(media[0].Thumbnail.originalRights);
 									 }}
+									 var source=findProvenanceValues(provenance,"source");
 										
+										if(source=="Rijksmuseum" && media){
+											media[0].Thumbnail=media[0].Original;
+										}
 							        var record = new Record({
 							            		thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 												fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -209,7 +218,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 												provider: findProvenanceValues(provenance,"provider"),
 												rights: rights,
 												externalId: admindata.externalId,
-												source: findProvenanceValues(provenance,"source"),
+												source: source,
 												likes: usage.likes,
 												collected: usage.collected,
 												collectedIn:result.collectedIn,
@@ -422,6 +431,11 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 					 }else if(media[0].Thumbnail){
 						 rights=findResOrLit(media[0].Thumbnail.originalRights);
 					 }}
+					 var source=findProvenanceValues(provenance,"source");
+						
+						if(source=="Rijksmuseum" && media){
+							media[0].Thumbnail=media[0].Original;
+						}
 					 var record = new Record({
 						            thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
 								    fullres: media!=null &&  media[0] !=null && media[0].Original!=null  && media[0].Original.url!="null"  ? media[0].Original.url : "",
@@ -434,7 +448,7 @@ define(['knockout', 'text!./_item.html', 'app','smoke'], function (ko, template,
 									provider: findProvenanceValues(provenance,"provider"),
 									rights: rights,
 									externalId: admindata.externalId,
-									source: findProvenanceValues(provenance,"source"),
+									source: source,
 									dbId:result.dbId,
 									likes: usage.likes,
 									collected: usage.collected,
