@@ -126,7 +126,6 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if (descdata) {
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
-				self.rights = findResOrLit(descdata.metadataRights);
 				self.creator = findByLang(descdata.dccreator);
 			}
 
@@ -144,22 +143,23 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				self.likes = usage.likes;
 				self.collected = usage.collected;
 			}
-
+			if(self.source=="Rijksmuseum" && media){
+				media[0].Thumbnail=media[0].Original;
+			}
 			self.thumb = media[0] != null && media[0].Thumbnail != null && media[0].Thumbnail.withUrl != "null" ? media[0].Thumbnail.url : null;
 			self.fullres = media[0] != null && media[0].Original != null && media[0].Original.url != "null" ? media[0].Original.url : null;
 			self.data(options);
+			if(self.fullres){
+				self.rights=findResOrLit(media[0].Original.originalRights);
+				
+			}
+			else if (self.thumb){
+				self.rights=findResOrLit(media[0].Thumbnail.originalRights);
+				
+			}
 			self.isLoaded = ko.observable(false);
-			/*to calculate position find how many of these are already in citems
-			 * 
-			 */
-			var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
-	            return item.dbId==self.dbId;
-			});
-			var positions=ko.utils.arrayFilter(self.collectedIn, function(item) {
-	            return item.collectionId==ko.dataFor(withcollection).id();
-			});
-			if(positions && positions[foundrec.length])
-			 self.position=positions[foundrec.length].position;
+			
+			
 			
 		};
 
@@ -328,38 +328,37 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		});
 
 		self.loadNext = function () {
-			
-			self.moreItems();
-		};
-
-		self.moreItems = function () {
-			if (loading === true) {
-				setTimeout(self.moreItems(), 1000);
-			}
 			if (loading() === false) {
 				loading(true);
-				
-				var offset = self.citems().length;
-				$.ajax({
-					"url": "/collection/" + self.id() + "/list?count=40&start=" + offset,
-					"method": "get",
-					"contentType": "application/json",
-					"success": function (data) {
-						var items=self.revealItems(data.records);
-						
-						if(items.length>0){
-							 var $newitems=getItems(items);
-						     
-							 self.isotopeImagesReveal($newitems );
-							
-							}
-						loading(false);
-					},
-					"error": function (result) {
-						loading(false);
+
+				var promise = self.moreItems();
+				$.when(promise).done(function (data) {
+					var items = self.revealItems(data.records);
+					if (items.length > 0) {
+						var $newitems = getItems(items);
+
+						self.isotopeImagesReveal(self.$container, $newitems);
+
 					}
+					loading(false);
 				});
 			}
+		};
+
+
+		self.moreItems = function () {
+		
+		return $.ajax({
+				type: "GET",
+				contentType: "application/json",
+				dataType: "json",
+				url: "/collection/" + self.id() + "/list",
+				processData: false,
+				data: "count=40&start=" + self.citems().length
+			}).success (function () {
+			});
+			
+			
 		};
 
 		
@@ -425,7 +424,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 		
        function getItems(data) {
      	  var items = '';
-     	  for ( i in data) {
+     	  for ( var i in data) {
      	    items += getItem(data[i]);
      	  }
      	  return $( items );

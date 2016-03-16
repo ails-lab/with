@@ -33,14 +33,14 @@
               </div>
             </section>
             <!-- search filter-->
-            <section class="searchlabel" data-bind="visible: results().length>0">
+            <section class="searchlabel">
                <div class="container-fluid" data-bind="visible: filterselect()==true || results().length>0">
                 <input id="facet_tags" type="text" data-role="tagsinput">
         	  </div>
         	</section>
            
             <!-- results-->
-            <div class="searchresults" data-bind="visible: mixresults().length>0">
+            <div class="searchresults" data-bind="style: { visibility : mixresults().length>0 ? '':'hidden'}">
               <!-- search result grid-->
               <section id="gridlist" class="gridlist" data-bind="css : {active: sourceview()==false}">
                 <section class="listing itemlistview">

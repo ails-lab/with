@@ -92,7 +92,7 @@ WITHApp.ui = function( custom ){
 
 		initSearchColumnAdjustment();
 
-		initSearchViewToggle();
+		//initSearchViewToggle();
 		
 	};
 	
@@ -369,31 +369,40 @@ WITHApp.ui = function( custom ){
 
 		// initialize masonry after window.load
 		// safari seems to have problem when initialize on dom ready
+
+		// initialize masonry after window.load
+		// safari seems to have problem when initialize on dom ready
 		$(document).ready(function(){
-			
+		
 			// check if grid exist
 			if( $( settings.mSelector ).length > 0 ) {
 				
+				// init
+				$( settings.mSelector ).imagesLoaded(function(){	
+					
+				$( settings.mSelector ).isotope({
+
+					// options
+					columnWidth		: settings.mSizer,
+					itemSelector	: settings.mItem,
+					percentPosition	: true
+					/*,
+					  onLayout: function( $elems, instance ) {
+						    // `this` refers to jQuery object of the container element
+						  console.log("onLayout");
+						    console.log( this.height() );
+						    var height = $( settings.mSelector ).height();
+
+							if( height > 0 ) { // or some other number
+								$( settings.mSelector ).height( height );
+							}
+				}*/
 				
-
-					// Isotope messes up in Chrome because it initiates before everything has loaded
-
-					// This ensures everything has loaded before applying
-
-					$(window).load(function() {
-
-						$( settings.mSelector ).isotope({
-
-							// options
-							columnWidth		: settings.mSizer,
-							itemSelector	: settings.mItem,
-							percentPosition	: true
-						})
-
-					});
-
+			});
+				$( settings.mSelector ).isotope("layout");
+				});
 				
-     }
+			}
 		});
 		
 

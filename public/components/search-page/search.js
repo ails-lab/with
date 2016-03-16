@@ -158,8 +158,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 	function SearchModel(params) {
 		var self = this;
-		//document.body.setAttribute("data-page","search");
-		 $("div[role='main']").toggleClass( "searchpage", true );
 		 
 		setTimeout(function(){ WITHApp.init(); WITHApp.tabAction();}, 300);
 		var $container = $(".grid").isotope({
@@ -226,6 +224,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						percentPosition	: true
 					}
 				});
+			   $container.isotope("layout");
 					
 			}
 			$( '.searchbar .view li').removeClass( 'active' );
@@ -519,8 +518,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 							percentPosition	: true
 						}
 					});
-
-				
 			self.page(1);
 			self.next(-1);
 			self.previous(0);

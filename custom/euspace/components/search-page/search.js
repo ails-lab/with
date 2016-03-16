@@ -16,7 +16,6 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
-		   // $container.isotope("layout");
 		    
 		  });
 		  
@@ -309,7 +308,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						
 						if(items.length>0){
 							 var $newitems=getItems(items);
-						     
+						     $container.isotope({
+									itemSelector: '.media',
+									masonry: {
+										columnWidth		: '.sizer',
+										percentPosition	: true
+									}
+								});
 							 $container.isotopeImagesReveal( $newitems );
 
 							}
@@ -432,6 +437,19 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									var media=result.media;
 									var provenance=result.provenance;
 									var usage=result.usage;
+									var rights=null;
+									if(media){
+									 if(media[0].Original){
+										 rights=findResOrLit(media[0].Original.originalRights);
+									 }else if(media[0].Thumbnail){
+										 rights=findResOrLit(media[0].Thumbnail.originalRights);
+									 }}
+									
+									var source=findProvenanceValues(provenance,"source");
+									
+									if(source=="Rijksmuseum" && media){
+										media[0].Thumbnail=media[0].Original;
+									}
 							        var record = new Record({
 										//recordId: result.recordId || result.id,
 										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -443,9 +461,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										dataProvider: findProvenanceValues(provenance,"dataProvider"),
 										dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 										provider: findProvenanceValues(provenance,"provider"),
-										rights: findResOrLit(descdata.metadataRights),
+										rights: rights,
 										externalId: admindata.externalId,
-										source: findProvenanceValues(provenance,"source"),
+										source: source,
 										likes: usage.likes,
 										collected: usage.collected,
 										collectedIn:result.collectedIn,
@@ -626,6 +644,21 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 					var media=result.media;
 					var provenance=result.provenance;
 					var usage=result.usage;
+					var rights=null;
+					if(media){
+						
+						 if(media[0].Original){
+							 rights=findResOrLit(media[0].Original.originalRights);
+						 }else{
+							 rights=findResOrLit(media[0].Thumbnail.originalRights);
+						 }
+					}
+
+					var source=findProvenanceValues(provenance,"source");
+					
+					if(source=="Rijksmuseum" && media){
+						media[0].Thumbnail=media[0].Original;
+					}
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
 						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -637,9 +670,9 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						dataProvider: findProvenanceValues(provenance,"dataProvider"),
 						dataProvider_uri: findProvenanceValues(provenance,"dataProvider_uri"),
 						provider: findProvenanceValues(provenance,"provider"),
-						rights: findResOrLit(descdata.metadataRights),
+						rights: rights,
 						externalId: admindata.externalId,
-						source: findProvenanceValues(provenance,"source"),
+						source: source,
 						likes: usage.likes,
 						collected: usage.collected,
 						collectedIn:result.collectedIn,

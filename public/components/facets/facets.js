@@ -166,10 +166,10 @@ define(['bridget','knockout', 'text!./facets.html','inputtags','liveFilter', 'ba
     $('#facet_tags').on('itemRemoved', function(event) {
     	
     	if(event.item.id.indexOf("source#")>-1){
-    	 if(ko.contextFor(this).$parent.sources().length>=2)	{
-    	  ko.contextFor(this).$parent.sources.remove(event.item.label);
-    	  ko.contextFor(this).$parent.filterselect(true);
-      	  ko.contextFor(this).$parent.filtersearch();}
+    	 if(ko.contextFor(this).$data.sources().length>=2)	{
+    	  ko.contextFor(this).$data.sources.remove(event.item.label);
+    	  ko.contextFor(this).$data.filterselect(true);
+      	  ko.contextFor(this).$data.filtersearch();}
     	 else{
     		 $("#facet_tags").tagsinput('add',{ id: event.item.id, label: event.item.label });
     		 return false;}
