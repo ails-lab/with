@@ -18,8 +18,6 @@ package controllers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +25,16 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.bson.types.ObjectId;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import controllers.parameterTypes.MyPlayList;
+import controllers.parameterTypes.StringTuple;
+import db.DB;
 import model.annotations.ContextData;
-import model.annotations.ExhibitionData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
 import model.basicDataTypes.WithAccess;
@@ -46,9 +52,6 @@ import model.usersAndGroups.Project;
 import model.usersAndGroups.User;
 import model.usersAndGroups.UserGroup;
 import model.usersAndGroups.UserOrGroup;
-
-import org.bson.types.ObjectId;
-
 import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
@@ -58,29 +61,13 @@ import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
-import scala.concurrent.impl.Future;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.core.CommonQuery;
 import sources.core.SourceResponse;
 import utils.AccessManager;
+import utils.AccessManager.Action;
 import utils.Locks;
 import utils.Tuple;
-import utils.AccessManager.Action;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonPointer;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.core.JsonParser.NumberType;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeType;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import controllers.parameterTypes.MyPlayList;
-import controllers.parameterTypes.StringTuple;
-import db.DB;
 
 /**
  * @author mariaral
@@ -115,6 +102,7 @@ public class CollectionObjectController extends WithResourceController {
 		
 		q.page = 1+"";
 		SourceResponse result = src.getAllResults(q);
+		int total = result.totalCount;
     	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 			WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
 					F.Option.None(), resultInfo);
@@ -125,18 +113,18 @@ public class CollectionObjectController extends WithResourceController {
 	        public Integer apply() {
 	        	SourceResponse result;
 	        	System.out.println("more pages?");
-        		int page = 2;
+        		int page = 1;
         		int pageSize = 20;
-	        	do {
-	        		q.page = page+"";
+        		while (page*pageSize < total) {
+	        		page++;
+	    			q.page = page+"";
 	    	    	result = src.getAllResults(q);
 	    	    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
 	    				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
 	    						F.Option.None(), resultInfo);
 	    			};
-	    			page++;
 	    			System.out.println("more pages? "+page+" of "+result.totalCount);
-	    	    } while (page*pageSize < result.totalCount);
+	    	    } 
 	        	System.out.println("Done? "+page);
 	          return 0;
 	        }
