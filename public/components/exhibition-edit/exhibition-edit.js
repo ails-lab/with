@@ -151,19 +151,18 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			create: function (options) {
 				//customize at the root level: add title and description observables, based on multiliteral
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
-				var record = options.data;
-				var newRecord =  ko.mapping.fromJS({}, {});
-				newRecord.dbId = ko.observable(record.dbId);
-				var contextData = record.contextData;
-				if (contextData !== undefined) {
-					newRecord.contextData = ko.mapping.fromJS(contextData, {});
-				}
-				newRecord.containsAudio = ko.pureComputed(function () {
-					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined) {
-						return false;
-					} else {
-						return (newRecord.contextData()[0].body.audioUrl() !== '');
-					}
+		        var record = options.data;
+		        var newRecord =  ko.mapping.fromJS(record, {});
+		        //newRecord.dbId = ko.observable(record.dbId);
+		        /*var contextData= record.contextData;
+				if (contextData !== undefined)
+					newRecord.contextData = ko.mapping.fromJS(contextData, {});*/
+		        newRecord.containsAudio = ko.pureComputed(function() {
+		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
+		        		return false;
+		        	else
+		        		return (newRecord.contextData()[0].body.audioUrl() !== '');
+
 				});
 				newRecord.containsVideo = ko.pureComputed(function () {
 					if (newRecord.contextData == undefined || newRecord.contextData()[0].body.videoUrl == undefined) {
@@ -180,18 +179,19 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						return newRecord.contextData()[0].body.text.default() !== '';
 					}
 				});
-				newRecord.media = ko.mapping.fromJS(record.media, {});
+				//newRecord.media = ko.mapping.fromJS(record.media, {});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-				if (dbDescription == undefined || dbDescription == null) {
-					newRecord.description = ko.observable("");
-				} else {
-					newRecord.description = ko.observable(app.findByLang(dbDescription));
-				}
-				newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
-				return newRecord;
-			}
-		};
+
+		        if (dbDescription === undefined || dbDescription === null || dbDescription.default[0] === undefined || dbDescription.default[0] === "null")
+		        	newRecord.description = ko.observable("");
+		        else
+		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
+				//newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
+				//newRecord.descriptiveData = ko.mapping.fromJS(record.descriptiveData, {});
+		        return newRecord;
+		    }
+		}
 
 		self.checkLogged();
 		self.loading = ko.observable(false);

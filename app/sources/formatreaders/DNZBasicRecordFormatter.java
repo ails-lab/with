@@ -111,7 +111,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			if (Utils.hasInfo(rights))
-			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)).fillDEF());
 			medThumb.setWithRights(withRights);
 			object.addMedia(MediaVersion.Thumbnail, medThumb);
 		}
@@ -119,7 +119,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			EmbeddedMediaObject med = new EmbeddedMediaObject();
 			med.setUrl(uri2);
 			if (Utils.hasInfo(rights))
-			med.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			med.setOriginalRights(new LiteralOrResource(rights.get(0)).fillDEF());
 			med.setWithRights(withRights);
 			med.setType(type);
 			object.addMedia(MediaVersion.Original, med);
@@ -131,7 +131,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 			medThumb.setUrl(uri3);
 			medThumb.setType(type);
 			if (Utils.hasInfo(rights))
-			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)));
+			medThumb.setOriginalRights(new LiteralOrResource(rights.get(0)).fillDEF());
 			medThumb.setWithRights(withRights);
 			object.addMediaView(MediaVersion.Thumbnail, medThumb);
 		}
