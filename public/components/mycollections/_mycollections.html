@@ -9,18 +9,48 @@
 		  <!-- collection section-->
 		  <section class="collection">
 			<section class="header">
-			  <!-- collection picker-->
+			  <!-- ko if: showsExhibitions -->
+			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
+			  	<span id="pickerTitle" class="text">My Exhibitions</span><span class="arrow"></span>
+			  </a>
+			  <!-- /ko -->
+			  <!-- ko else -->
 			  <a id="picker" href="#" data-toggle="dropdown" class="picker" >
 			  	<span id="pickerTitle" class="text">My Collections</span><span class="arrow"></span>
 			  </a>
+			  <!-- /ko -->
+			  <!-- ko if: showsExhibitions -->
+			  	<ul aria-labelledby="picker" class="dropdown-menu">
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Exhibitions</a></li>
+				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Exhibitions shared with me</a></li>
+			  </ul>
+			  <!-- /ko -->
+			  <!-- ko else -->
 			  <ul aria-labelledby="picker" class="dropdown-menu">
 				<li data-bind="click: changeTab"><a style="cursor:pointer;" >My Collections</a></li>
 				<li data-bind="click: changeTab"><a style="cursor:pointer;" >Collections shared with me</a></li>
 			  </ul>
-			  <!-- new collection--><a href="#" class="new"><span class="plus"></span><span class="text">New Collection</span></a>
+			  <!-- /ko -->
+			  <!-- ko if: showsExhibitions -->
+			    <a href="#" class="new"><span class="plus"></span><span class="text">New Exhibition</span></a>
+			  <!-- /ko -->
+			  <!-- ko else -->
+			    <a href="#" class="new"><span class="plus"></span><span class="text">New Collection</span></a>
+			  <!-- /ko -->
 			</section>
 			<!-- message-->
 			<section class="message"><img src="img/ui/ic-inbox.png" class="hero">
+			 <!-- ko if: showsExhibitions -->
+			  <div class="message-body">
+				<div class="header">Welcome to My Exhibitions</div>
+				<div class="description">This is <b> My Exhibitions </b>. All exhibitions created by and shared with you will be presented here.</div>
+				   <a href="#" data-bind="click: hideMessage">
+				   	<span class="cross"></span>
+				   	<span class="text">Hide welcome message</span>
+				   </a>
+			  </div>
+			   <!-- /ko -->
+			  <!-- ko else -->
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
 				<div class="description">This is <b> My Collections </b>. All collections created by and shared with you will be presented here.</div>
@@ -29,6 +59,7 @@
 				   	<span class="text">Hide welcome message</span>
 				   </a>
 			  </div>
+			  <!-- /ko -->
 			</section>
 			<!-- collection main-->
 			<section class="collection-list">
@@ -52,10 +83,14 @@
 					<div data-bind="{visible: collectionSet() == 'shared', template: { name: 'collectionsTemplate', foreach: sharedCollections()}}"></div>
 			  </ul><a style="cursor:pointer;" class="loadmore" data-bind="{visible: collectionCount() > myCollections().length, event: {click: moreCollections(false)}}">load more</a>
 			</section>
-			<!-- collection edit-->
 			<section class="action edit">
 			  <div class="action-header">
-				<div class="title">Edit Collection</div>
+			  	<!-- ko if: showsExhibitions -->
+			    <div class="title">Edit Exhibition</div>
+			    <!-- /ko -->
+			    <!-- ko else -->
+			    <div class="title">Edit Collection</div>
+			    <!-- /ko -->
 			  </div>
 			  <div class="action-body">
 				<input type="text" data-bind="{value: titleToEdit,
@@ -71,7 +106,12 @@
 			<!-- collection new-->
 			<section class="action new">
 			  <div class="action-header">
-				<div class="title">New Collection</div>
+			  	<!-- ko if: showsExhibitions -->
+				<div class="title">New Exhibition</div>
+				<!-- /ko -->
+			    <!-- ko else -->
+			    <div class="title">New Collection</div>
+			    <!-- /ko -->
 				<div class="toggle">
 				  <input type="checkbox" id="toggle2" data-bind="checked: isPublicToEdit">
 				  <label for="toggle2" ></label><span class="private">private</span>
@@ -79,7 +119,12 @@
 				</div>
 			  </div>
 			  <div class="action-body">
-				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
+			  	<!-- ko if: showsExhibitions -->
+				<input type="text" data-bind="{value: titleToEdit}" placeholder="Name your exhibition">
+				<!-- /ko -->
+			    <!-- ko else -->
+			    <input type="text" data-bind="{value: titleToEdit}" placeholder="Name your collection">
+				<!-- /ko -->
 				<!--<a class="add" >
 					<span class="plus" style="cursor:pointer;"></span>
 					<span href="#" class="text">Add description</span>
@@ -88,7 +133,12 @@
 			  </div>
 			  <div class="button-group">
 			  	<a class="btn-green-o cancel" data-bind="click: closeSideBar">Cancel</a>
-			  	<a data-bind="click: createCollection" class="btn-green">Create collection</a>
+			  	<!-- ko if: showsExhibitions -->
+			  	<a data-bind="click: createCollection" class="btn-green">Create exhibition</a>
+			  	<!-- /ko -->
+			    <!-- ko else -->
+			    <a data-bind="click: createCollection" class="btn-green">Create collection</a>
+			    <!-- /ko -->
 			  </div>
 			</section>
 			<!-- collection give access-->
@@ -142,7 +192,7 @@
 					  <a data-toggle="tooltip" data-placement="top" style="cursor:pointer;" data-bind="{attr: {title: username}, click: $parent.removeRights}" class="trash">
 					  	<i class="fa fa-trash"></i></a>
 					  <div class="toggle">
-						<input type="checkbox" id="u2" data-bind="{id: username, checked: accessChecked, click: $parent.changeRights}">
+						<input type="checkbox" id="u2" data-bind="{attr: {id: username}, checked: accessChecked, click: $parent.changeRights}">
 						<label data-bind="{attr: {for: username}}"></label>
 						<span class="private">view</span>
 						<span class="public">co-edit</span>
