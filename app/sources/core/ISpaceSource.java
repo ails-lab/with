@@ -36,6 +36,11 @@ public abstract class ISpaceSource {
 	public String LABEL = "";
 	protected String apiKey="";
 	protected JsonContextRecordFormatReader formatreader;
+	
+	public HttpConnector getHttpConnector() {
+		return ApacheHttpConnector.getApacheHttpConnector();
+	}
+
 
 	public String getSourceName() {
 		return LABEL;

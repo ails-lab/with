@@ -84,7 +84,7 @@ public class DNZBasicRecordFormatter extends CulturalRecordFormatter {
 		object.addToProvenance(
 				new ProvenanceInfo(rec.getStringValue("content_partner[0]")));
 		object.addToProvenance(
-				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/objects/" + id, id));
+				new ProvenanceInfo(Sources.DigitalNZ.toString(), "http://www.digitalnz.org/records/" + id, id));
 		
 		
 		//TODO EmbeddedMediaObject.originalRights <- rights_url

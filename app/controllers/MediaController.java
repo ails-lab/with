@@ -134,7 +134,7 @@ public class MediaController extends Controller {
 				return media;
 			media = new MediaObject();
 			Logger.info("Downloading " + url);
-			File img = HttpConnector.getURLContentAsFile(url);
+			File img = HttpConnector.getWSHttpConnector().getURLContentAsFile(url);
 			byte[] mediaBytes = IOUtils.toByteArray(new FileInputStream(img));
 			media.setUrl(url);
 			media.setMediaBytes(mediaBytes);
@@ -234,7 +234,7 @@ public class MediaController extends Controller {
 			}
 			try {
 				// image = HttpConnector.getContent(formData.get("url")[0]);
-				File x = HttpConnector
+				File x = HttpConnector.getWSHttpConnector()
 						.getURLContentAsFile(jsonn.get("url").asText());
 				result = storeMedia(med, x);
 				MediaCheckMessage mcm = new MediaCheckMessage(med);
@@ -614,7 +614,7 @@ public class MediaController extends Controller {
 		// Logger.info("URL: " + queryURL);
 		JsonNode response = null;
 		try {
-			response = HttpConnector.postURLContent(url, mediaURL, "url");
+			response = HttpConnector.getWSHttpConnector().postURLContent(url, mediaURL, "url");
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

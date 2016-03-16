@@ -55,7 +55,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 			JsonNode response;
 	
 			try {
-				response = HttpConnector.getURLContent(url);
+				response = getHttpConnector().getURLContent(url);
 				for (JsonNode item : response.path("licenses").path("license")) {
 					String id = Utils.readAttr(item, "id", true);
 					String name = Utils.readAttr(item, "name", true);
@@ -91,7 +91,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 
 	protected Function<List<String>, Pair<String>> fwriter(String parameter) {
 		Function<String, String> function = (String s) -> {
-			return Utils.spacesFormatQuery(s, "%20");
+			return s;
 		};
 		return new Function<List<String>, Pair<String>>() {
 			@Override
@@ -144,7 +144,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		builder.addSearchParam("format", "json");
 		builder.addSearchParam("user_id", userID);
 		builder.addSearchParam("extras",
-				"description,%20license,%20date_upload,%20date_taken,%20owner_name,%20icon_server,%20original_format,%20last_update,%20geo,%20tags,%20machine_tags,%20o_dims,%20views,%20media,%20path_alias,%20url_sq,%20url_t,%20url_s,%20url_q,%20url_m,%20url_n,%20url_z,%20url_c,%20url_l,%20url_o");
+				"description, license, date_upload, date_taken, owner_name, icon_server, original_format, last_update, geo,tags, machine_tags, o_dims, views, media, path_alias, url_sq, url_t, url_s, url_q, url_m, url_n, url_z, url_c, url_l, url_o");
 		builder.addQuery("text", q.searchTerm);
 		builder.addSearchParam("page", q.page);
 	
@@ -163,7 +163,7 @@ public abstract class FlickrSpaceSource extends ISpaceSource {
 		// CommonFilterLogic rights = CommonFilterLogic.rightsFilter();
 		if (checkFilters(q)) {
 			try {
-				response = HttpConnector.getURLContent(httpQuery);
+				response = getHttpConnector().getURLContent(httpQuery);
 				res.totalCount = Utils.readIntAttr(response.path("photos"), "total", true);
 				res.count = Utils.readIntAttr(response.path("photos"), "perpage", true);
 				for (JsonNode item : response.path("photos").path("photo")) {

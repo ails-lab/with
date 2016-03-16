@@ -124,6 +124,7 @@ public class CollectionObjectController extends WithResourceController {
 	      new Function0<Integer>() {
 	        public Integer apply() {
 	        	SourceResponse result;
+	        	System.out.println("more pages?");
         		int page = 2;
         		int pageSize = 20;
 	        	do {
@@ -134,7 +135,9 @@ public class CollectionObjectController extends WithResourceController {
 	    						F.Option.None(), resultInfo);
 	    			};
 	    			page++;
+	    			System.out.println("more pages? "+page+" of "+result.totalCount);
 	    	    } while (page*pageSize < result.totalCount);
+	        	System.out.println("Done? "+page);
 	          return 0;
 	        }
 	      }
