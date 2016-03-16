@@ -103,17 +103,19 @@ public class Serializer {
 	}
 
 	public static class MimeTypeSerializer extends JsonSerializer<Object> {
+
 		@Override
 		public void serialize(Object mimeType, JsonGenerator jsonGen,
-				SerializerProvider provider) throws JsonGenerationException,
-				IOException {
+				SerializerProvider provider) throws IOException,
+				JsonProcessingException {
 			try {
+				//System.out.println(mimeType.toString());
 				if (mimeType == null)
-					jsonGen.writeString(MediaType.ANY_TYPE.toString());
+					jsonGen.writeObject(MediaType.ANY_TYPE.toString());
 				else
-					jsonGen.writeString(((MediaType) mimeType).toString());
+					jsonGen.writeObject(((MediaType) mimeType).toString());
 			} catch (Exception e) {
-				jsonGen.writeString(MediaType.ANY_TYPE.toString());
+				jsonGen.writeObject(MediaType.ANY_TYPE.toString());
 			}
 		}
 

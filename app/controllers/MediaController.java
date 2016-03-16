@@ -159,18 +159,20 @@ public class MediaController extends Controller {
 
 	// Make a thumbnail for a specific media object
 	public static MediaObject makeThumbnail(MediaObject media) {
-		try {
-			MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
-			thumbnail.setMediaVersion(MediaVersion.Thumbnail);
-			thumbnail.setParentId(media.getDbId());
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			thumbnail.setUrl(
-					"/media/" + thumbnail.getDbId().toString() + "?file=true");
-			DB.getMediaObjectDAO().makePermanent(thumbnail);
-			return thumbnail;
-		} catch (Exception e) {
-			return null;
-		}
+		if (media.getType() != WithMediaType.IMAGE)
+		 try {
+			 	MediaObject thumbnail = makeThumbNew(media, MediaVersion.Thumbnail);
+			 	thumbnail.setMediaVersion(MediaVersion.Thumbnail);
+			 	thumbnail.setParentId(media.getDbId());
+			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
+			 	thumbnail.setUrl("/media/" + thumbnail.getDbId().toString() + "?file=true");
+			 	DB.getMediaObjectDAO().makePermanent(thumbnail);
+			 	return thumbnail;
+			} catch (Exception e) {
+			    return null;
+		      }
+		else
+			   return null;
 	}
 
 	/**
@@ -708,7 +710,7 @@ public class MediaController extends Controller {
 		}
 
 	}
-	
+
 	public static boolean hasAccessToMedia(String mediaUrl, List<ObjectId> effectiveIds, Action action) {
 		List<RecordResource> resources = DB.getRecordResourceDAO().getByMedia(mediaUrl);
 		if (!resources.isEmpty()) {
