@@ -448,6 +448,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 									 }else if(media[0].Thumbnail){
 										 rights=findResOrLit(media[0].Thumbnail.originalRights);
 									 }}
+									
+									var source=findProvenanceValues(provenance,"source");
+									
+									if(source=="Rijksmuseum" && media){
+										media[0].Thumbnail=media[0].Original;
+									}
+									
 							        var record = new Record({
 										//recordId: result.recordId || result.id,
 										thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -461,7 +468,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 										provider: findProvenanceValues(provenance,"provider"),
 										rights: rights,
 										externalId: admindata.externalId,
-										source: findProvenanceValues(provenance,"source"),
+										source: source,
 										likes: usage.likes,
 										collected: usage.collected,
 										collectedIn:result.collectedIn,
@@ -651,6 +658,12 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 							 rights=findResOrLit(media[0].Thumbnail.originalRights);
 						 }
 					}
+
+					var source=findProvenanceValues(provenance,"source");
+					
+					if(source=="Rijksmuseum" && media){
+						media[0].Thumbnail=media[0].Original;
+					}
 			        var record = new Record({
 						//recordId: result.recordId || result.id,
 						thumb: media!=null &&  media[0] !=null  && media[0].Thumbnail!=null  && media[0].Thumbnail.url!="null" ? media[0].Thumbnail.url:"img/content/thumb-empty.png",
@@ -664,7 +677,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						provider: findProvenanceValues(provenance,"provider"),
 						rights: rights,
 						externalId: admindata.externalId,
-						source: findProvenanceValues(provenance,"source"),
+						source: source,
 						likes: usage.likes,
 						collected: usage.collected,
 						collectedIn:result.collectedIn,
@@ -728,27 +741,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
         
         	
 			 var tile= '<div class="item media" id="'+record.externalId+'"> <div class="wrap">';
-		/*	 if(isLogged()){
-				    if(record.isLike()){
-				    	 tile+='<span class="star active">';
-				    }
-				    else{tile+='<span class="star">';}
-				    if(record.externalId){
-				    tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
-						+'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
-						+'</span>';}
-						tile+='<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
-					}
-			 else{
-				 tile+='<span class="star" style="display:none">'
-				 if(record.externalId){
-					 tile+='<span class="fa-stack fa-fw" onclick="likeRecord(\'' + record.externalId + '\',event);" title="add to favorites">'
-					    +'<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>'
-					    +'</span>';}
-					tile+='<span class="collect" title="collect" onclick="collect(\'' + record.externalId + '\',event)" style="display:none"><i class="fa fa-download fa-stack-1x fa-inverse"></i></span></span>';
-					
-			 }*/
-                     tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
+		     tile+='<a href="#" onclick="recordSelect(\''+record.externalId+'\',event)" class="mediaviewer">'
                       +'<div class="thumb"><img src="'+record.thumb+'" onError="this.src=\'img/content/thumb-empty.png\'"></div>'
                       +' <div class="info"><h1 class="title">'+record.displayTitle()+'</h1></div>';
                      
