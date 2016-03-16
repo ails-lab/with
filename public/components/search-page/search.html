@@ -33,17 +33,17 @@
               </div>
             </section>
             <!-- search filter-->
-            <section class="searchlabel">
+            <section class="searchlabel" data-bind="visible: results().length>0">
                <div class="container-fluid" data-bind="visible: filterselect()==true || results().length>0">
                 <input id="facet_tags" type="text" data-role="tagsinput">
         	  </div>
         	</section>
            
             <!-- results-->
-            <div class="searchresults">
+            <div class="searchresults" data-bind="visible: mixresults().length>0">
               <!-- search result grid-->
               <section id="gridlist" class="gridlist" data-bind="css : {active: sourceview()==false}">
-                <section class="listing">
+                <section class="listing itemlistview">
                   <div class="container">
                     <!-- grid-->
                     <div class="grid">
@@ -52,7 +52,7 @@
                       
                       
                     </div>
-                     <div class="scroll-top-wrapper"  data-bind="event:{click: goToTop}">
+                     <div class="scroll-top-wrapper"  data-bind="visible: mixresults().length>0 && $('.grid').height()>800, event:{click: goToTop}">
 						<span class="scroll-top-inner">
 							<i class="fa fa-2x fa-arrow-circle-up"></i>
 						</span>
@@ -61,9 +61,6 @@
                  <div class="more" data-bind="visible: searching, scroll: mixresults(), scrollOptions: { loadFunc: searchNext, offset: 0 }"> <i class="fa fa-spinner fa-pulse"></i></div>
 		        
                 </section>
-                
-                
-                
               </section>
               <!-- search result-->
                <!-- ko if: sourceview()==true -->
@@ -90,7 +87,7 @@
 				                
 				                  <!-- item-->
 				                  <div class="item"><a href="#" data-bind="event: { click: $parents[1].columnRecordSelect}" data-view="inline" class="mediaviewer">
-				                      <div class="imgwrap"><img onError="this.src='img/content/thumb-media-1.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
+				                      <div class="imgwrap"><img onError="this.src='img/content/thumb-empty.png'" data-bind="attr: { src:thumb }" class="thumb"></div><span class="text" data-bind="text: title"></span></a></div>
 				                  <!-- item-->
 				                  
 				                 </div>
@@ -100,9 +97,7 @@
 				            <!-- /ko -->
 				            <!-- /ko -->
 				          </div>
-                  
-                  
-                  
+                      <!-- scroll pointer--><img id="pointermark" src="img/ui/ic-right.png" data-toggle="tooltip" data-placement="top" title="Scroll to the right to see more results" class="pointer">
                 </div>
               </section>
               <!-- /ko -->

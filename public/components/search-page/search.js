@@ -16,7 +16,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
-		   // $container.isotope("layout");
+		   
 		    
 		  });
 		  
@@ -311,6 +311,13 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 						
 						if(items.length>0){
 							 var $newitems=getItems(items);
+							 $container.isotope({
+									itemSelector: '.media',
+									masonry: {
+										columnWidth		: '.sizer',
+										percentPosition	: true
+									}
+								});
 						     
 							 $container.isotopeImagesReveal( $newitems );
 
@@ -429,7 +436,7 @@ define(['bridget', 'knockout', 'text!./search.html', 'isotope', 'imagesloaded', 
 
 							 if(result !=null ){
 								 //&& result.title[0]!=null && result.title[0].value!="[Untitled]" && result.thumb!=null && result.thumb[0]!=null  && result.thumb[0]!="null" && result.thumb[0]!=""){
-								 var admindata=result.administrative;
+								    var admindata=result.administrative;
 									var descdata=result.descriptiveData;
 									var media=result.media;
 									var provenance=result.provenance;
