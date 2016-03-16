@@ -24,19 +24,21 @@
 			  <div class="message-body">
 				<div class="header">Welcome to My Collections</div>
 				<div class="description">This is <b> My Collections </b>. All collections created by and shared with you will be presented here.</div>
-				   <a href="#">
-					<span class="cross"></span><span class="text">Hide welcome message</span></a>
+				   <a href="#" data-bind="click: hideMessage">
+				   	<span class="cross"></span>
+				   	<span class="text">Hide welcome message</span>
+				   </a>
 			  </div>
 			</section>
 			<!-- collection main-->
 			<section class="collection-list">
 			  <!-- collection main header-->
 			  <div class="list-head">
-				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Title</span><span class="arrow"></span></a>
+				<div class="sort"><span>Sort by</span><a id="sorting" href="#" data-toggle="dropdown"><span class="text">Date</span><span class="arrow"></span></a>
 				  <!-- dropdown-->
 				  <ul aria-labelledby="sorting" class="dropdown-menu">
-					<li><a href="#">Title</a></li>
-					<li><a href="#">Date</a></li>
+				  	<li><a href="#" data-bind="click: sortByDate">Date</a></li>
+					<li><a href="#" data-bind="click: sortByTitle">Title</a></li>
 				  </ul>
 				</div>
 				<div class="list-control">
@@ -192,11 +194,11 @@
 					</div>
 					<div class="action-group">
 						<!--  ko if: myAccess() ==  "OWN" -->
-						<a href="#" data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
-						<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
+						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
+						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
 						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<a href="#" data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
 						<!-- /ko -->
 					</div>
 				  </div>

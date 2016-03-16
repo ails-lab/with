@@ -31,12 +31,8 @@ import notifications.Notification;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
-import org.mongodb.morphia.mapping.Mapper;
 
 import play.Logger;
-
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
 import com.mongodb.gridfs.GridFS;

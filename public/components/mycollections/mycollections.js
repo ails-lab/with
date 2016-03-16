@@ -175,7 +175,11 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 		};
 
 		self.checkLogged();
-
+		
+		self.hideMessage = function () {
+			$("section.message").toggle();
+		};
+		
 		self.deleteMyCollection = function (collection) {
 			var collectionId = collection.dbId();
 			var collectionTitle = collection.title();
@@ -367,8 +371,8 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 					return item.username() === username;
 				});
 			}
-			if (indexUsers >= 0) {
-			var collId = self.myCollections()[self.index()].dbId();
+			if (indexUsers < 0) {
+				var collId = self.myCollections()[self.index()].dbId();
 				$.ajax({
 					method      : "GET",
 					contentType    : "application/json",
@@ -703,6 +707,30 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				return {index: -1, set: "none"};
 			}
 		};
+		
+		self.sortByTitle = function () {
+			$("#sorting .text").text("Title");
+			if (self.collectionSet() == "my")
+				self.myCollections.sort(function (left, right) {
+					return left.title() < right.title() ? -1 : 1;
+				});
+			if (self.collectionSet() == "shared")
+				self.sharedCollections.sort(function (left, right) {
+					return left.title() < right.title() ? -1 : 1;
+				});
+		}
+		
+		self.sortByDate = function () {
+			$("#sorting .text").text("Date");
+			if (self.collectionSet() == "my") 
+				self.myCollections.sort(function (left, right) {
+					return right.administrative.created() < left.administrative.lastModified() ? -1: 1;
+				});
+			if (self.collectionSet() == "shared") 
+				self.sharedCollections.sort(function (left, right) {
+					return right.administrative.created() < left.administrative.lastModified() ? -1: 1;
+				});
+		}
 
 		arrayFirstIndexOf = function (array, predicate) {
 			for (var i = 0, j = array.length; i < j; i++) {
