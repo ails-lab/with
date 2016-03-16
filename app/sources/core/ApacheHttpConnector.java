@@ -29,10 +29,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import play.Logger;
-import play.libs.F.Function;
-import play.libs.F.Promise;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 
 public class ApacheHttpConnector extends HttpConnector {
 	
@@ -56,7 +52,7 @@ public class ApacheHttpConnector extends HttpConnector {
 			HttpGet method = new HttpGet(url1);
 			HttpResponse response = client.execute(method);
 			BufferedReader rd = new BufferedReader(
-	                new InputStreamReader(response.getEntity().getContent()));
+	                new InputStreamReader(response.getEntity().getContent(),"UTF-8"));
 			ObjectMapper mapper = new ObjectMapper();
 			return (T)mapper.readValue(rd,JsonNode.class);
 		} catch (Exception e) {
