@@ -111,11 +111,11 @@ public class Serializer {
 			try {
 				//System.out.println(mimeType.toString());
 				if (mimeType == null)
-					jsonGen.writeObject(MediaType.ANY_TYPE.toString());
+					jsonGen.writeString(MediaType.ANY_TYPE.toString());
 				else
-					jsonGen.writeObject(((MediaType) mimeType).toString());
+					jsonGen.writeString(((MediaType) mimeType).toString());
 			} catch (Exception e) {
-				jsonGen.writeObject(MediaType.ANY_TYPE.toString());
+				jsonGen.writeString(MediaType.ANY_TYPE.toString());
 			}
 		}
 
