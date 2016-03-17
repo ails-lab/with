@@ -22,25 +22,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
-
-import sources.core.Utils;
-import play.Logger;
-import play.libs.F.Function;
-import play.libs.F.Promise;
-import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.ning.http.client.FluentCaseInsensitiveStringsMap;
 import com.ning.http.multipart.FilePart;
 import com.ning.http.multipart.MultipartRequestEntity;
 import com.ning.http.multipart.Part;
+
+import play.Logger;
+import play.libs.F.Function;
+import play.libs.F.Promise;
+import play.libs.ws.WS;
+import play.libs.ws.WSResponse;
 
 
 public class HttpConnector {
@@ -55,7 +52,7 @@ public class HttpConnector {
 		return wsHttpConnector;
 	}
 
-	private  final int TIMEOUT_CONNECTION = 40000;
+	final int TIMEOUT_CONNECTION = 60000;
 	
 	
 	public <T> T getContent(String url) throws Exception {

@@ -82,7 +82,6 @@ public class CollectionObjectController extends WithResourceController {
 	
 	public static Promise<Result> importSearch(){
 		JsonNode json = request().body().asJson();
-		System.out.println(json.toString());
 		if (json == null) {
 			return Promise.pure((Result)badRequest("Expecting Json query"));
 		} else {
@@ -122,7 +121,6 @@ public class CollectionObjectController extends WithResourceController {
 				Promise<Integer> promiseOfInt = Promise.promise(new Function0<Integer>() {
 					public Integer apply() {
 						SourceResponse result;
-						System.out.println("more pages?");
 						int page = 1;
 						int pageSize = 20;
 						while (page * pageSize < total) {
@@ -133,17 +131,11 @@ public class CollectionObjectController extends WithResourceController {
 								WithResourceController.internalAddRecordToCollection(cid,
 										(RecordResource) item, F.Option.None(), resultInfo);
 							}
-							;
-							System.out.println("more pages? " + page + " of " + result.totalCount);
 						}
 						return 0;
 					}
 				});
 				
-				
-				
-				
-//				return myResults.map(function);
 				return Promise.pure(ok("ok"));
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -187,7 +179,6 @@ public class CollectionObjectController extends WithResourceController {
 	      new Function0<Integer>() {
 	        public Integer apply() {
 	        	SourceResponse result;
-	        	System.out.println("more pages?");
         		int page = 1;
         		int pageSize = 20;
         		while (page*pageSize < total) {
@@ -198,9 +189,7 @@ public class CollectionObjectController extends WithResourceController {
 	    				WithResourceController.internalAddRecordToCollection(collection.getDbId().toString(), (RecordResource)item, 
 	    						F.Option.None(), resultInfo);
 	    			};
-	    			System.out.println("more pages? "+page+" of "+result.totalCount);
 	    	    } 
-	        	System.out.println("Done? "+page);
 	          return 0;
 	        }
 	      }
