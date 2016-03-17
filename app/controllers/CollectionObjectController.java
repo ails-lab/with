@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
+import elastic.Elastic;
 import model.annotations.ContextData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -56,14 +57,18 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.F;
+import play.libs.F.Function;
 import play.libs.F.Function0;
 import play.libs.F.Option;
 import play.libs.F.Promise;
 import play.libs.Json;
 import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
+import sources.EuropeanaSpaceSource;
 import sources.core.CommonQuery;
+import sources.core.SearchResponse;
 import sources.core.SourceResponse;
+import sources.core.Utils;
 import utils.AccessManager;
 import utils.AccessManager.Action;
 import utils.Locks;
@@ -77,6 +82,76 @@ public class CollectionObjectController extends WithResourceController {
 
 	public static final ALogger log = Logger.of(CollectionObjectController.class);
 
+	
+	public static Promise<Result> importSearch(){
+		JsonNode json = request().body().asJson();
+		System.out.println(json.toString());
+		if (json == null) {
+			return Promise.pure((Result)badRequest("Expecting Json query"));
+		} else {
+			// Parse the query.
+			try {
+				ObjectNode resultInfo = Json.newObject();
+				ObjectId creatorDbId = new ObjectId(session().get("user"));
+				final CommonQuery q = Utils.parseJson(json.get("query"));
+				final String cname = json.get("collectionName").toString();
+				String ccid = null;
+				if (!isCollectionCreated(creatorDbId, cname)){
+					CollectionObject collection = new CollectionObject();
+					collection.getDescriptiveData().setLabel(new MultiLiteral(cname).fillDEF());
+					boolean success = internalAddCollection(collection, CollectionType.SimpleCollection, creatorDbId, resultInfo);
+					if (!success)
+						return Promise.pure((Result)badRequest("Expecting Json query"));
+					ccid  = collection.getDbId().toString();
+				} else {
+//					DB.getCollectionObjectDAO().getColl
+				}
+
+				final String cid = ccid;
+				
+				q.page = "1";
+				q.pageSize = "20";
+				EuropeanaSpaceSource src = new EuropeanaSpaceSource();
+				SourceResponse result = src.getResults(q);
+				int total = result.totalCount;
+		    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+					WithResourceController.internalAddRecordToCollection(cid, (RecordResource)item, 
+							F.Option.None(), resultInfo);
+				}
+
+				Promise<Integer> promiseOfInt = Promise.promise(new Function0<Integer>() {
+					public Integer apply() {
+						SourceResponse result;
+						System.out.println("more pages?");
+						int page = 1;
+						int pageSize = 20;
+						while (page * pageSize < total) {
+							page++;
+							q.page = page + "";
+							result = src.getResults(q);
+							for (WithResource<?, ?> item : result.items.getCulturalCHO()) {
+								WithResourceController.internalAddRecordToCollection(cid,
+										(RecordResource) item, F.Option.None(), resultInfo);
+							}
+							;
+							System.out.println("more pages? " + page + " of " + result.totalCount);
+						}
+						return 0;
+					}
+				});
+				
+				
+				
+				
+//				return myResults.map(function);
+				return Promise.pure(ok("ok"));
+			} catch (Exception e) {
+				e.printStackTrace();
+				return Promise.pure((Result)badRequest(e.getMessage()));
+			}
+		}
+	}
+	
 	/**
 	 * creates a new collection corresponding to a collection in Europeana and
 	 * collects all its items.
@@ -180,6 +255,10 @@ public class CollectionObjectController extends WithResourceController {
 			error.put("error", e.getMessage());
 			return internalServerError(error);
 		}
+	}
+	
+	private static boolean isCollectionCreated(ObjectId creatorDbId, String name){
+		return DB.getCollectionObjectDAO().existsForOwnerAndLabel(creatorDbId, null,Arrays.asList(name));
 	}
 
 	private static boolean internalAddCollection(CollectionObject collection, CollectionType colType,
