@@ -16,14 +16,19 @@
 
 package db;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
+
+import org.bson.types.ObjectId;
+import org.elasticsearch.common.lang3.ArrayUtils;
+import org.mongodb.morphia.query.Criteria;
+import org.mongodb.morphia.query.CriteriaContainer;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import com.mongodb.BasicDBObject;
 
 import model.DescriptiveData;
 import model.EmbeddedMediaObject;
@@ -36,27 +41,8 @@ import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
 import model.resources.WithResource;
 import model.usersAndGroups.User;
-
-import org.bson.types.ObjectId;
-import org.elasticsearch.common.lang3.ArrayUtils;
-import org.mongodb.morphia.query.Criteria;
-import org.mongodb.morphia.query.CriteriaContainer;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
-
-import play.libs.Json;
-import sources.core.ParallelAPICall;
 import utils.AccessManager.Action;
 import utils.Tuple;
-
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-
-import elastic.Elastic;
-import elastic.ElasticUpdater;
 
 /*
  * The class consists of methods that can be both query
@@ -133,7 +119,7 @@ public class WithResourceDAO<T extends WithResource> extends DAO<T> {
 
 	public List<T> getByLabel(Language lang, String title) {
 		Query<T> q = this.createQuery().disableValidation()
-				.field("descriptiveData.label." + lang.toString()).equal(title);// .contains(title);
+				.field("descriptiveData.label." + lang.getDefaultCode()).equal(title);// .contains(title);
 		return this.find(q).asList();
 	}
 
