@@ -5,26 +5,26 @@
 		</div>
 		<div class="section-body">
 			<div class="input-group">
-				<div data-bind="validationElement: email">
+				<div class="left" data-bind="validationElement: email">
 					<input type="text" class="has-error has-feedback" placeholder="Email" id="useremail" data-bind="value: email, valueUpdate: 'afterkeypress', hasFocus: true;">
 				</div>
-				<div data-bind="validationElement: username">
+				<div class="right" data-bind="validationElement: username">
 					<input type="text" placeholder="Username" id="username" data-bind="value: username, valueUpdate: 'afterkeypress'">
 				</div>
 			</div>
 			<div class="input-group" data-bind="visible: usingEmail">
-				<div data-bind="validationElement: password">
+				<div class="left" data-bind="validationElement: password">
 					<input type="password" placeholder="Password" id="userpassword" data-bind="value: password, valueUpdate: 'afterkeypress'">
 				</div>
-				<div data-bind="validationElement: password2">
+				<div class="right" data-bind="validationElement: password2">
 					<input type="password" placeholder="Repeat Password" id="userpassword2" data-bind="value: password2, valueUpdate: 'afterkeypress'">
 				</div>
 			</div>
 			<div class="input-group">
-				<div data-bind="validationElement: firstName">
+				<div class="left" data-bind="validationElement: firstName">
 					<input type="text" placeholder="First name" id="firstName" data-bind="value: firstName, valueUpdate: 'afterkeypress'">
 				</div>
-				<div data-bind="validationElement: lastName">
+				<div class="right" data-bind="validationElement: lastName">
 					<input type="text" placeholder="Last name" id="lastName" data-bind="value: lastName, valueUpdate: 'afterkeypress'">
 				</div>
 			</div>

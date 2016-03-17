@@ -15,8 +15,8 @@ define(['knockout', 'text!./login-register.html',  'facebook', 'app', 'knockout-
 	}
 
 	ko.validation.init({
-		errorElementClass: 'has-error',
-		errorMessageClass: 'help-block',
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
 		decorateInputElement: true
 	});
 
