@@ -59,7 +59,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 				return "img/content/thumb-empty.png";
 			}
 		});
-		
+
 		self.fullresolution = ko.pureComputed(function () {
 
 			if (self.fullres) {
@@ -121,7 +121,11 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			if (descdata) {
 				self.title = findByLang(descdata.label);
 				self.description = findByLang(descdata.description);
-				self.rights = media[0] != null && media[0].Original != null && media[0].Original.originalRights != "null" ? media[0].Original.originalRights.uri : null;
+				if (typeof media[0].Original.originalRights !== 'undefined') {
+					self.rights = media[0] != null && media[0].Original != null && media[0].Original.originalRights != "null" ? media[0].Original.originalRights.uri : null;
+				} else {
+					self.rights = null;
+				}
 				self.creator = findByLang(descdata.dccreator);
 			}
 
@@ -145,7 +149,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			self.data(options);
 			self.isLoaded = ko.observable(false);
 			/*to calculate position find how many of these are already in citems
-			 * 
+			 *
 			 */
 			/*var foundrec=ko.utils.arrayFilter(ko.dataFor(withcollection).citems(), function(item) {
 	            return item.dbId==self.dbId;
@@ -155,7 +159,7 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 			});
 			if(positions && positions[foundrec.length])
 			 self.position=positions[foundrec.length].position;*/
-			
+
 		};
 
 		if (data !== undefined) self.load(data);
@@ -476,9 +480,9 @@ define(['bridget', 'knockout', 'text!./collection-view.html', 'isotope', 'images
 					tile += ' <span class="collect" title="remove"><i class="fa fa-trash-o fa-inverse" onclick="removeRecord(\'' + record.dbId + '\',event)"></i></span>';
 
 				if (!self.isFavorites() && record.externalId ) { // Don't show the favorites icon when in favorites
-					
+
 						tile += '<span class="fa fa-fw" onclick="likeRecord(\'' + record.dbId + '\',event);" title="add to favorites">' + '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>' + '</span>';
-					
+
 				}
 				else{tile += '<span class="fa fa-fw" title="add to favorites" style="visibility:hidden">' + '<i class="fa fa-heart fa-stack-1x"></i><i class="fa fa-heart-o fa-stack-1x fa-inverse"></i>' + '</span>';}
 
