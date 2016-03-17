@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import controllers.parameterTypes.MyPlayList;
 import controllers.parameterTypes.StringTuple;
 import db.DB;
-import elastic.Elastic;
 import model.annotations.ContextData;
 import model.basicDataTypes.Language;
 import model.basicDataTypes.MultiLiteral;
@@ -57,7 +56,6 @@ import play.Logger;
 import play.Logger.ALogger;
 import play.data.validation.Validation;
 import play.libs.F;
-import play.libs.F.Function;
 import play.libs.F.Function0;
 import play.libs.F.Option;
 import play.libs.F.Promise;
@@ -66,7 +64,6 @@ import play.mvc.Result;
 import sources.EuropeanaCollectionSpaceSource;
 import sources.EuropeanaSpaceSource;
 import sources.core.CommonQuery;
-import sources.core.SearchResponse;
 import sources.core.SourceResponse;
 import sources.core.Utils;
 import utils.AccessManager;
@@ -105,6 +102,8 @@ public class CollectionObjectController extends WithResourceController {
 					ccid  = collection.getDbId().toString();
 				} else {
 //					DB.getCollectionObjectDAO().getColl
+					 List<CollectionObject> col = DB.getCollectionObjectDAO().getByLabel(Language.DEFAULT, cname);
+					 ccid = col.get(0).getDbId().toString();
 				}
 
 				final String cid = ccid;
@@ -112,6 +111,7 @@ public class CollectionObjectController extends WithResourceController {
 				q.page = "1";
 				q.pageSize = "20";
 				EuropeanaSpaceSource src = new EuropeanaSpaceSource();
+				src.setUsingCursor(true);
 				SourceResponse result = src.getResults(q);
 				int total = result.totalCount;
 		    	for (WithResource<?, ?> item : result.items.getCulturalCHO()) {

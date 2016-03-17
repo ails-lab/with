@@ -26,6 +26,7 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
+import scala.tools.jline_embedded.internal.Log;
 import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
@@ -62,8 +63,12 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		model.setMetadataRights(new LiteralOrResource("http://creativecommons.org/publicdomain/zero/1.0/"));
 		model.setRdfType("http://www.europeana.eu/schemas/edm/ProvidedCHO");
 
+		try {
 		fillObjectFrom(text);
-
+		} catch (Exception e){
+			e.printStackTrace();
+			Log.error(e.getMessage());
+		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
 		String resourceId = provenance.get(index).getResourceId();
