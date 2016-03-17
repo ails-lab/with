@@ -230,14 +230,14 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			window.location = '#exhibition-edit';
 		};
 
-		self.loadCollectionOrExhibition = function (collection) {
+		/*self.loadCollectionOrExhibition = function (collection) {
 			if (self.showsExhibitions) {
 				window.location = '#exhibition-edit/' + collection.dbId();
 			} else {
 				window.location = 'index.html#collectionview/' + collection.dbId();
 			}
 		};
-
+		*/
 		self.showDelCollPopup = function (collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
@@ -762,7 +762,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				$("#myModal").removeClass("modal-info");
 			});
 		};
-
+		
 	    self.playExhibition = function(dbId) {
 	    	window.location.hash = '#exhibitionview/' + dbId;
 	    };*/

@@ -89,12 +89,7 @@
 			</section>
 			<section class="action edit">
 			  <div class="action-header">
-			  	<!-- ko if: showsExhibitions -->
-			    <div class="title">Edit Exhibition</div>
-			    <!-- /ko -->
-			    <!-- ko else -->
 			    <div class="title">Edit Collection</div>
-			    <!-- /ko -->
 			  </div>
 			  <div class="action-body">
 				<input type="text" data-bind="{value: titleToEdit,
@@ -239,7 +234,12 @@
 					<!-- /ko -->
 				  </div>
 				  <div class="meta">
-				  	<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}"></a>
+				  	<!-- ko if: $parent.showsExhibitions -->
+				  	<a title="View exhibition" data-bind="{text: title(), attr: {href: 'index.html#exhibitionview/'+dbId()}}" class="header"></a>
+				  	<!-- /ko -->
+					<!-- ko else -->
+					<a class="header" data-bind="{text: title(), attr: {href: 'index.html#collectionview/'+dbId()}}"></a>
+					<!-- /ko -->
 					<div class="description" data-bind="text: description()"></div>
 					<div class="other-info">
 					  <div class="count" data-bind="text: itemCount()"></div>
@@ -248,11 +248,22 @@
 					</div>
 					<div class="action-group">
 						<!--  ko if: myAccess() ==  "OWN" -->
-						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
+						<!-- ko if: $parent.showsExhibitions -->
+						<a data-toggle="tooltip" data-bind="click: $parent.showDelCollPopup" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a>
+						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share exhibition" class="fa fa-paper-plane-o"></a>
+						<!-- /ko -->
+						<!-- ko else -->
+						<a data-toggle="tooltip" data-bind="click: $parent.showDelCollPopup" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
 						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
 						<!-- /ko -->
+						<!-- /ko -->
 						<!--  ko if: (myAccess() ==  "OWN" || myAccess() == "WRITE")-->
-						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<!-- ko if: $parent.showsExhibitions -->
+						<a data-toggle="tooltip" data-bind="attr: {href: 'index.html#exhibition-edit/'+dbId()}" data-placement="top" title="Edit collection" class="fa fa-pencil editaction"></a>
+						<!-- /ko -->
+						<!-- ko else -->
+						<a data-toggle="tooltip" data-bind="click: $parent.prepareForEditCollection" data-placement="top" title="Edit exhibition" class="fa fa-pencil editaction"></a>
+						<!-- /ko -->
 						<!-- /ko -->
 					</div>
 				  </div>
