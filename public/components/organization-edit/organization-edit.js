@@ -1,15 +1,19 @@
 define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','imagesloaded', 'app', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke', 'jquery.fileupload'], function (bridget,ko, template,Isotope,imagesLoaded, app) {
 
 	$.bridget('isotope', Isotope);
-	
 
-	
+	ko.validation.init({
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
+		decorateInputElement: true
+	});
+
 	ko.bindingHandlers.profileisotope = {
 				init: app.initOrUpdate('init'),
 				update: app.initOrUpdate('update')
 			};
 
-	
+
 	var mapping = {
 		create: function (options) {
 			var self = this;
@@ -83,17 +87,17 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			return self;
 		}
 	};
-	
+
 	function Collection(data) {
 		var self=this;
-		
+
 		var mapping = {
 				create: function(options) {
 			    	var self=this;
 			        // use extend instead of map to avoid observables
-			    	
+
 			    	self=$.extend(self, options.data);
-			    	
+
 			    	self.title=findByLang(self.descriptiveData.label);
 			    	self.entryCount=self.administrative.entryCount;
 			    	self.thumbnail = ko.computed(function() {
@@ -117,7 +121,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			        	    else return "EXHIBITION";
 			        	}else return "";
 			        });
-			        
+
 			        self.css=ko.computed(function() {
 			        	if(self.administrative){
 			        		if (self.administrative.collectionType.indexOf("Collection")!=-1)
@@ -127,7 +131,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			        	    else return "item space";
 			        	}else return "item exhibition";
 			        });
-			        
+
 			        self.url=ko.computed(function() {
 			        	if(self.administrative){
 			        		if (self.administrative.collectionType.indexOf("Collection")==-1)
@@ -145,13 +149,13 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			        		return self.withCreatorInfo.username;
 			        	}
 			        });
-			        
+
 			        return self;
 			     }
-			  
+
 		};
-		
-		
+
+
 		var recmapping={
 				'dbId': {
 					key: function(data) {
@@ -160,19 +164,19 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				 }};
 		self.isLoaded = ko.observable(false);
 		self.records=ko.mapping.fromJS([], recmapping);
-		
-		
+
+
 		self.data = ko.mapping.fromJS({"dbID":"","administrative":"","descriptiveData":""}, mapping);
-		
+
 		self.load = function(data) {
 			self.data=ko.mapping.fromJS(data, mapping);
-			
+
 		};
 
-		
-		if(data != undefined){ 
+
+		if(data != undefined){
 			self.load(data);
-			
+
 		}
 	}
 
@@ -189,7 +193,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		self.id = ko.observable(params.id);
 		self.route = params.route;
 		self.collections=ko.observableArray();
-		 
+
 		self.name = params.name;				// Project or Organization (display field)
 		self.namePlural = params.name + 's';	// Projects or Organizations (display field)
 		var $container = $(".grid").isotope({
@@ -198,10 +202,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			masonry: {
 				columnWidth		: '.sizer',
 				percentPosition	: true
-			
+
 			}
 		});
-		
+
 		self.revealItems = function (data) {
 			if(data.length==0){ //self.loading(false);
 				return([]);
@@ -210,10 +214,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			for (var i in data) {
 				var result = new Collection(data[i]);
 				items.push(result);
-				 
+
 			}
-			
-			
+
+
 			/*if new items are found then empty collection and realod*/
 			if(items.length>0){
 				self.collections.removeAll();
@@ -222,10 +226,10 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				return items;}
 			else {return [];}
 		};
-		
-		
-	
-		
+
+
+
+
 		// Group Details
 		self.username = ko.observable().extend({
 			required: true,
@@ -521,7 +525,7 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 			});
 		};
 
-		
+
 
 		self.getProfileCollections = function () {
 			$.ajax({
@@ -533,35 +537,35 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 				data: "offset=0&count=500&directlyAccessedByUserOrGroup=" + JSON.stringify([{group: self.username(), rights: "WRITE"}])
 			}).success(function (data, textStatus, jqXHR) {
 				var items=self.revealItems(data['collectionsOrExhibitions']);
-			
+
 				if(items.length>0){
 					 var $newitems=getItems(items);
-				     
+
 					 providerIsotopeImagesReveal( $container,$newitems );
-					
+
 					}
-				
+
 			});
 		};
-		
-		
+
+
 		function getItem(collection) {
-			
-			
-			
+
+
+
 			  var tile= '<div class="'+collection.data.css()+'"> <div class="wrap">';
 			   tile+='<a href="#" onclick="loadUrl(\''+collection.data.url()+'\',event)">'
                 +'<div class="thumb"><img src="'+collection.data.thumbnail()+'"><div class="counter">'+collection.data.entryCount+' ITEMS</div></div>'
                 +' <div class="info"><div class="type">'+collection.data.type()+'</div><h2 class="title">'+collection.data.title+'</h2></div>'
                 +'</a></div></div>';
 			return tile;
-			
-		}	
-		
-	
-	
-	
-		
+
+		}
+
+
+
+
+
   function getItems(data) {
 	  var items = '';
 	  for ( i in data) {
@@ -569,11 +573,11 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 	  }
 	  return $( items );
 	}
-  
-		
-	 
 
-  
+
+
+
+
     providerIsotopeImagesReveal = function( $container,$items ) {
 		  var iso = $container.data('isotope');
 		  var itemSelector = iso.options.itemSelector;
@@ -590,15 +594,15 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 		    // un-hide item
 		    $item.show();
 		    iso.appended( $item );
-		   
+
 		  });
-		  
+
 		  return this;
 		};
-	
-	  
-		
-	  
+
+
+
+
 	  self.filter=function(data, event) {
 		  			  var selector = event.currentTarget.attributes.getNamedItem("data-filter").value;
 					  $(event.currentTarget).siblings().removeClass("active");
@@ -606,9 +610,9 @@ define(['bridget','knockout', 'text!./organization-edit.html', 'isotope','images
 					  $( settings.mSelector ).isotope({ filter: selector });
 					  return false;
 				}
-					  
-	 
-		
+
+
+
 	}
 
 	return {

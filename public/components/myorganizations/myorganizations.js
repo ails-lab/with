@@ -1,8 +1,8 @@
 define(['knockout', 'text!./myorganizations.html', 'app', 'moment', 'async!https://maps.google.com/maps/api/js?v=3&sensor=false', 'knockout-validation', 'smoke'], function (ko, template, app, moment) {
 
 	ko.validation.init({
-		errorElementClass: 'has-error',
-		errorMessageClass: 'help-block',
+		errorElementClass: 'error',
+		errorMessageClass: 'errormsg',
 		decorateInputElement: true
 	});
 

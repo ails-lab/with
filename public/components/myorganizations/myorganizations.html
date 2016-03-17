@@ -338,7 +338,7 @@
 								<li>
 									<!-- ko if: $data.image -->
 									<div class="thumbnails"><img data-bind="attr: {src: image, id: 'image_' + userId()}"></div>
-									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'), 
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
 									attr: { title: username }"  class="trash">
 										<i class="fa fa-trash"></i>
 									</a>
@@ -351,8 +351,8 @@
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
 									<div class="thumbnails"><img src="img/content/img-profile.jpg"></div>
-									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'), 
-									attr: { title: username }" 
+									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'user'),
+									attr: { title: username }"
 									 class="trash">
 										<i class="fa fa-trash"></i>
 									</a>
@@ -371,11 +371,11 @@
 							<input id="groupName" type="text" placeholder="Start typing group name" data-bind="autocompleteUsername: myUsername, category:2">
 							<ul class="access-list" data-bind="foreach: groupMembers">
 <!-- 								 <li data-bind="attr: { class: $parent.colors[$index]%4  }"> -->
-									<li class="blue">	
+									<li class="blue">
  									<!-- ko if: $data.image -->
 										<span class="text"  data-bind="text: username().substring(0,2).toUpperCase()"></span>
 										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
-										attr: { title: username }" 
+										attr: { title: username }"
 										 class="trash">
 											<i class="fa fa-trash"></i>
 										</a>
@@ -386,8 +386,8 @@
 									<!-- /ko -->
 									<!-- ko ifnot: $data.image -->
 										<span class="text" data-bind="text: username().substring(0,2).toUpperCase()"></span>
-										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'), 
-										attr: { title: username }" 
+										<a href="#" data-toggle="tooltip" data-placement="top" data-bind="click: $parent.excecuteRemove.bind($data, userId(), 'group'),
+										attr: { title: username }"
 										 class="trash">
 											<i class="fa fa-trash"></i>
 										</a>
