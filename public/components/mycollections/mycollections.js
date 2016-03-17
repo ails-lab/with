@@ -42,7 +42,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		self.showsExhibitions = params.showsExhibitions;
 		//self.collections = [];
 		self.index = ko.observable(0);
-		self.collectionSet = "none";
+		self.collectionSet = "my";
 		var mapping = {
 			create: function (options) {
 		        //customize at the root level: add title and description observables, based on multiliteral
