@@ -238,7 +238,7 @@ define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','a
 		}
 
 		self.more = function(isExhibition, funcToExecute, my) {
-			if (self.loading === true) {
+			if (self.loading() === true) {
 				setTimeout(self.moreCollections(isExhibition), 300);
 			}
 			if (self.loading() === false && self.moreCollectionData()===true) {
