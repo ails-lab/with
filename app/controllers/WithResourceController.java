@@ -543,7 +543,7 @@ public class WithResourceController extends Controller {
 	 * @return
 	 */
 	public static Result removeRecordFromCollection(String id, String recordId,
-			Option<Integer> position, boolean all, boolean first) {
+			Option<Integer> position, boolean all) {
 		ObjectNode result = Json.newObject();
 		Locks locks = null;
 		try {
@@ -553,14 +553,18 @@ public class WithResourceController extends Controller {
 			Result response = errorIfNoAccessToCollection(Action.EDIT,
 					collectionDbId);
 			ObjectId recordDbId = new ObjectId(recordId);
-			List<Integer> positions = new ArrayList<Integer>();
 			if (!response.toString().equals(ok().toString()))
 				return response;
 			int pos;
-			if (position.isDefined())
+			boolean first = false;
+			if (position.isDefined()) {
 				pos = position.get();
-			else
+			}
+			else {
 				pos = -1;
+				if (!all)
+					first = true;
+			}
 			DB.getRecordResourceDAO().removeFromCollection(recordDbId,
 					collectionDbId, pos, first, all);
 			result.put("message", "Record succesfully removed from collection");
@@ -683,6 +687,6 @@ public class WithResourceController extends Controller {
 		 * Option.Some(c.getPosition()), false); } }
 		 */
 		return removeRecordFromCollection(fav, record.getDbId().toString(),
-				Option.None(), true, false);
+				Option.None(), true);
 	}
 }

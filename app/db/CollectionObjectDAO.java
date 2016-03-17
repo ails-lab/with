@@ -24,14 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 
 import model.EmbeddedMediaObject;
 import model.EmbeddedMediaObject.MediaVersion;
 import model.MediaObject;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
-import model.annotations.ContextData.ContextDataType;
 import model.basicDataTypes.WithAccess.Access;
 import model.resources.CollectionObject;
 import model.resources.CollectionObject.CollectionAdmin.CollectionType;
@@ -52,7 +50,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
 
 import controllers.MediaController;
 import elastic.Elastic;
@@ -380,8 +377,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		return this.find(q).asList();
 	}
 
-	public CollectionObject addToCollection(ObjectId collectionId, ObjectId recordId,
-			int position, boolean last) {
+	public CollectionObject addToCollection(ObjectId collectionId,
+			ObjectId recordId, int position, boolean last) {
 
 		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
 				.field("_id").equal(collectionId);
@@ -390,7 +387,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				.disableValidation();
 		if (last) {
 			collectionUpdate.add("collectedResources",
-					new ContextData(recordId));
+					new ContextData(recordId), true);
 		} else {
 			collectionUpdate.add("collectedResources", "{ $each: ["
 					+ new ContextData(recordId) + "], $position: " + position
@@ -411,6 +408,7 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		List<ContextData> newCollectedResources = new ArrayList<ContextData>(
 				collection.getCollectedResources());
 		int resourcesRemoved = 0;
+		ArrayList<Integer> positions = new ArrayList<Integer>();
 		if (!first && !all) {
 			ContextData resource = newCollectedResources.remove(position);
 			resourcesRemoved = 1;
@@ -425,7 +423,8 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 						break;
 					}
 					if (all) {
-						newCollectedResources.remove(i);
+						newCollectedResources.remove(i - resourcesRemoved);
+						positions.add(i);
 						resourcesRemoved++;
 					}
 				}
@@ -443,18 +442,28 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		collectionUpdate.inc("administrative.entryCount", 0 - resourcesRemoved);
 		collectionUpdate.set("administrative.lastModified", new Date());
 		this.update(q, collectionUpdate);
-		removeCollectionMedia(collectionId, i);
+		if (!all) {
+			removeCollectionMedia(collectionId, i);
+		} else {
+			do {
+				removeCollectionMedia(collectionId,
+						positions.get(--resourcesRemoved));
+			} while (resourcesRemoved > 0);
+		}
 	}
-	
+
 	public void moveInCollection(ObjectId collectionId, ObjectId recordId,
 			int oldPosition, int newPosition) {
 		CollectionObject collection = this.getById(collectionId,
 				Arrays.asList("collectedResources"));
-		List<ContextData<ContextDataBody>> collectedResources = collection.getCollectedResources();
-		ObjectId collectedRecordId = collectedResources.get(oldPosition).getTarget().getRecordId();
+		List<ContextData<ContextDataBody>> collectedResources = collection
+				.getCollectedResources();
+		ObjectId collectedRecordId = collectedResources.get(oldPosition)
+				.getTarget().getRecordId();
 		if (!collectedRecordId.equals(recordId))
 			return;
-		ContextData<ContextDataBody> collectedRecord = collectedResources.remove(oldPosition);
+		ContextData<ContextDataBody> collectedRecord = collectedResources
+				.remove(oldPosition);
 		collectedResources.add(newPosition, collectedRecord);
 		Query<CollectionObject> q = DB.getCollectionObjectDAO().createQuery()
 				.field("_id").equal(collectionId);
@@ -465,29 +474,25 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 		collectionUpdate.set("administrative.lastModified", new Date());
 		this.update(q, collectionUpdate);
 		removeCollectionMedia(collectionId, oldPosition);
-		addCollectionMedia(collectionId, collectedRecordId);
+		addCollectionMedia(collectionId, collectedRecordId, newPosition);
 	}
 
 	// it may happen that e.g. the thumbnail of the 4th instead of the 3d record
 	// of the media appears in the collections's (3) media
-	public void addCollectionMedia(ObjectId collectionId, ObjectId recordId) {
+	public void addCollectionMedia(ObjectId collectionId, ObjectId recordId, int position) {
 		CollectionObject collection = this.getById(collectionId,
-				Arrays.asList("collectedResources"));
-		int position = 0;
-		for (ContextData<ContextDataBody> data : collection
-				.getCollectedResources()) {
-			if (data.getTarget().getRecordId().equals(recordId)
-					|| position++ == 5)
-				break;
-		}
+				Arrays.asList("media"));
 		if (position > 4)
 			return;
-		RecordResource record = DB.getRecordResourceDAO().getById(recordId,
-				new ArrayList<String>(Arrays.asList("media")));
+		List<HashMap<MediaVersion, EmbeddedMediaObject>> recordMedia = DB
+				.getRecordResourceDAO()
+				.getById(recordId,
+						new ArrayList<String>(Arrays.asList("media")))
+				.getMedia();
 		EmbeddedMediaObject thumbnail;
-		if (record.getMedia() != null) {
-			HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record
-					.getMedia().get(0);
+		if (recordMedia != null) {
+			HashMap<MediaVersion, EmbeddedMediaObject> media = recordMedia
+					.get(0);
 			if (media.containsKey(MediaVersion.Original)
 					&& !media.containsKey(MediaVersion.Thumbnail)) {
 				String originalUrl = media.get(MediaVersion.Original).getUrl();
@@ -499,18 +504,21 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 				thumbnail = media.get(MediaVersion.Thumbnail);
 			}
 			if (thumbnail != null) {
-				UpdateOperations<CollectionObject> colUpdate = DB
+				List<HashMap<MediaVersion, EmbeddedMediaObject>> collectionMedia = collection
+						.getMedia();
+				collectionMedia.add(position,
+						new HashMap<MediaVersion, EmbeddedMediaObject>() {
+							{
+								put(MediaVersion.Thumbnail, thumbnail);
+							}
+						});
+				UpdateOperations<CollectionObject> collectionUpdate = DB
 						.getCollectionObjectDAO().createUpdateOperations()
 						.disableValidation();
 				Query<CollectionObject> cq = DB.getCollectionObjectDAO()
 						.createQuery().field("_id").equal(collectionId);
-				HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
-					{
-						put(MediaVersion.Thumbnail, thumbnail);
-					}
-				};
-				colUpdate.set("media." + position, colMedia);
-				this.update(cq, colUpdate);
+				collectionUpdate.set("media" , collectionMedia.size() < 5 ? collectionMedia : collectionMedia.subList(0, 5));
+				this.update(cq, collectionUpdate);
 			}
 		}
 
@@ -539,41 +547,42 @@ public class CollectionObjectDAO extends WithResourceDAO<CollectionObject> {
 	 * }; ParallelAPICall.createPromise(methodQuery, collectionId, recordId); }
 	 */
 
-	public void removeCollectionMedia(ObjectId colId, int position) {
-		if (position < 5) {
-			// new Media should be based on records' positions before shifting.
-			List<HashMap<MediaVersion, EmbeddedMediaObject>> newMedia = new ArrayList<HashMap<MediaVersion, EmbeddedMediaObject>>();
-			for (int i = 0; i < 5; i++) {
-				RecordResource record = DB.getRecordResourceDAO()
-						.getByCollectionAndPosition(colId, i);
-				if (record != null) {
-					HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record
-							.getMedia().get(0);
-					EmbeddedMediaObject thumbnail = media
-							.get(MediaVersion.Thumbnail);
-					HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
-						{
-							put(MediaVersion.Thumbnail, thumbnail);
-						}
-					};
-					newMedia.add(colMedia);
+	public void removeCollectionMedia(ObjectId collectionId, int position) {
+		if (position > 4)
+			return;
+		List<HashMap<MediaVersion, EmbeddedMediaObject>> collectionMedia = this
+				.getById(collectionId, Arrays.asList("media")).getMedia();
+		collectionMedia.remove(position);
+		for (int i = collectionMedia.size(); i < 5; i++) {
+			RecordResource record = DB.getRecordResourceDAO()
+					.getByCollectionAndPosition(collectionId, i);
+			if (record == null)
+				break;
+			HashMap<MediaVersion, EmbeddedMediaObject> media = (HashMap<MediaVersion, EmbeddedMediaObject>) record
+					.getMedia().get(0);
+			EmbeddedMediaObject thumbnail = media.get(MediaVersion.Thumbnail);
+			HashMap<MediaVersion, EmbeddedMediaObject> colMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
+				{
+					put(MediaVersion.Thumbnail, thumbnail);
 				}
-			}
-			if (newMedia.isEmpty()) {
-				HashMap<MediaVersion, EmbeddedMediaObject> emptyMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
-					{
-						put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
-					}
-				};
-				newMedia.add(emptyMedia);
-			}
-			UpdateOperations<CollectionObject> colUpdate = DB
-					.getCollectionObjectDAO().createUpdateOperations()
-					.disableValidation();
-			Query<CollectionObject> cq = DB.getCollectionObjectDAO()
-					.createQuery().field("_id").equal(colId);
-			colUpdate.set("media", newMedia);
-			this.update(cq, colUpdate);
+			};
+			collectionMedia.add(colMedia);
 		}
+		if (collectionMedia.isEmpty()) {
+			HashMap<MediaVersion, EmbeddedMediaObject> emptyMedia = new HashMap<MediaVersion, EmbeddedMediaObject>() {
+				{
+					put(MediaVersion.Thumbnail, new EmbeddedMediaObject());
+				}
+			};
+			collectionMedia.add(emptyMedia);
+		}
+		UpdateOperations<CollectionObject> colUpdate = DB
+				.getCollectionObjectDAO().createUpdateOperations()
+				.disableValidation();
+		Query<CollectionObject> cq = DB.getCollectionObjectDAO().createQuery()
+				.field("_id").equal(collectionId);
+		colUpdate.set("media", collectionMedia);
+		this.update(cq, colUpdate);
+
 	}
 }

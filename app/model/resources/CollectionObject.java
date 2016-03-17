@@ -16,6 +16,7 @@
 
 package model.resources;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ public class CollectionObject extends WithResource<CollectionObject.CollectionDe
 		this.descriptiveData = new CollectionDescriptiveData();
 		this.resourceType = WithResourceType.valueOf(this.getClass()
 				.getSimpleName());
+		this.collectedResources = new ArrayList<ContextData<ContextDataBody>>();
 	}
 
 	@Embedded

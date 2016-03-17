@@ -341,7 +341,8 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	protected U administrative;
 
 	@Embedded
-	private Set<ObjectId> collectedIn;
+	@JsonSerialize(using = Serializer.ObjectIdArraySerializer.class)
+	private List<ObjectId> collectedIn;
 
 	@Embedded
 	private Usage usage;
@@ -379,7 +380,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public WithResource() {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new HashSet<ObjectId>();
+		this.collectedIn = new ArrayList<ObjectId>();
 		this.contextData = new ArrayList<ContextData>();
 		this.media = new ArrayList<>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
@@ -390,7 +391,7 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 	public WithResource(Class<?> clazz) {
 		this.usage = new Usage();
 		this.provenance = new ArrayList<ProvenanceInfo>();
-		this.collectedIn = new HashSet<ObjectId>();
+		this.collectedIn = new ArrayList<ObjectId>();
 		this.media = new ArrayList<>();
 		this.contextData = new ArrayList<ContextData>();
 		HashMap<MediaVersion, EmbeddedMediaObject> embedded = new HashMap<MediaVersion, EmbeddedMediaObject>();
@@ -410,17 +411,17 @@ public class WithResource<T extends DescriptiveData, U extends WithResource.With
 		this.administrative = administrative;
 	}
 
-	public Set<ObjectId> getCollectedIn() {
+	public List<ObjectId> getCollectedIn() {
 		return collectedIn;
 	}
 
-	public void setCollectedIn(Set<ObjectId> collectedIn) {
+	public void setCollectedIn(List<ObjectId> collectedIn) {
 		this.collectedIn = collectedIn;
 	}
 
 	public void addPositionToCollectedIn(ObjectId colId) {
 		if (collectedIn == null)
-			collectedIn = new HashSet<ObjectId>();
+			collectedIn = new ArrayList<ObjectId>();
 		collectedIn.add(colId);
 
 	}

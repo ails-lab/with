@@ -16,37 +16,14 @@
 
 package db;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.bson.types.ObjectId;
-import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateResults;
-
-import play.libs.Json;
-import scala.util.control.Exception;
-import sources.core.ParallelAPICall;
-import utils.AccessManager;
-import utils.AccessManager.Action;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.mongodb.BasicDBObject;
-
-import elastic.ElasticEraser;
 import model.annotations.ContextData;
 import model.annotations.ContextData.ContextDataBody;
-import model.annotations.ContextData.ContextDataTarget;
-import model.annotations.ExhibitionData;
-import model.basicDataTypes.CollectionInfo;
-import model.basicDataTypes.Language;
 import model.basicDataTypes.WithAccess;
 import model.basicDataTypes.WithAccess.Access;
 import model.basicDataTypes.WithAccess.AccessEntry;
@@ -55,6 +32,16 @@ import model.resources.RecordResource;
 
 import org.apache.commons.beanutils.BeanToPropertyValueTransformer;
 import org.apache.commons.collections.CollectionUtils;
+import org.bson.types.ObjectId;
+import org.mongodb.morphia.query.Query;
+import org.mongodb.morphia.query.UpdateOperations;
+
+import sources.core.ParallelAPICall;
+import utils.AccessManager.Action;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import elastic.ElasticEraser;
 
 /*
  * This class is the aggregator of methods
@@ -112,6 +99,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public List<RecordResource> getByCollectionBetweenPositions(
 			List<ContextData<ContextDataBody>> collectedResources,
 			int lowerBound, int upperBound, Query<RecordResource> q) {
+		if (collectedResources == null)
+			return new ArrayList<RecordResource>();
 		if (lowerBound >= collectedResources.size())
 			return new ArrayList<RecordResource>();
 		if (upperBound > collectedResources.size())
@@ -172,11 +161,16 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	public List<RecordResource> getByCollection(
 			List<ContextData<ContextDataBody>> collectedResources,
 			Query<RecordResource> q) {
-		List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils.collect(
-				collectedResources, new BeanToPropertyValueTransformer(
-						"target.recordId"));
-		q.field("_id").in(recordIds);
-		return this.find(q).asList();
+		try {
+			List<ObjectId> recordIds = (List<ObjectId>) CollectionUtils
+					.collect(collectedResources,
+							new BeanToPropertyValueTransformer(
+									"target.recordId"));
+			q.field("_id").in(recordIds);
+			return this.find(q).asList();
+		} catch (Exception e) {
+			return new ArrayList<RecordResource>();
+		}
 	}
 
 	public void updateRecordUsageCollectedAndRights(ObjectId collectionId,
@@ -208,7 +202,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId);
-		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId);
+		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
+				position);
 	}
 
 	public void appendToCollection(ObjectId recordId, ObjectId collectionId,
@@ -220,7 +215,8 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 			newAccess = mergeParentCollectionRights(recordId, collectionId,
 					collection.getAdministrative().getAccess());
 		updateRecordUsageCollectedAndRights(collectionId, newAccess, recordId);
-		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId);
+		DB.getCollectionObjectDAO().addCollectionMedia(collectionId, recordId,
+				collection.getCollectedResources().size());
 	}
 
 	// TODO Refactor
@@ -360,16 +356,14 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 	}
 
 	public void removeFromCollection(ObjectId recordId, ObjectId collectionId,
-			int position, boolean first, boolean all)
-			throws FileNotFoundException {
-
+			int position, boolean first, boolean all) throws Exception {
 		DB.getCollectionObjectDAO().removeFromCollection(collectionId,
 				recordId, position, first, all);
 		UpdateOperations<RecordResource> recordUpdate = this
 				.createUpdateOperations();
 		Query<RecordResource> q = this.createQuery().field("_id")
 				.equal(recordId);
-		recordUpdate.removeAll("collectedIn", collectionId);
+		recordUpdate.removeAll("collectedIn", Arrays.asList(collectionId));
 		if (DB.getCollectionObjectDAO().isFavorites(collectionId))
 			recordUpdate.dec("usage.likes");
 		else
@@ -380,25 +374,22 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 
 	public RecordResource getByCollectionAndPosition(ObjectId collectionId,
 			int position) {
-		CollectionObject collectedResources = DB.getCollectionObjectDAO()
-				.getById(collectionId, Arrays.asList("collectedResources"));
-		ObjectId recordId = collectedResources.getCollectedResources()
-				.get(position).getTarget().getRecordId();
+		List<ContextData<ContextDataBody>> collectedResources = DB
+				.getCollectionObjectDAO()
+				.getById(collectionId, Arrays.asList("collectedResources"))
+				.getCollectedResources();
+		if (collectedResources.size() <= position)
+			return null;
+		ObjectId recordId = collectedResources.get(position).getTarget()
+				.getRecordId();
 		return this.get(recordId);
 	}
 
-	public boolean existsInCollectionAndPosition(ObjectId colId,
-			Integer position) {
-		Query<RecordResource> q = this.createQuery().field("collectedIn")
-				.hasThisElement(new CollectionInfo(colId, position));
-		return this.find(q.limit(1)).asList().size() == 0 ? false : true;
-	}
-
 	public boolean existsSameExternaIdInCollection(String externalId,
-			ObjectId colId) {
+			ObjectId collectionId) {
 		Query<RecordResource> q = this.createQuery().disableValidation()
-				.field("collectedIn").hasThisElement(colId);
-		q.field("administrativeData.externalId").equal(externalId);
+				.field("collectedIn").equal(collectionId);
+		q.field("administrative.externalId").equal(externalId);
 		return this.find(q.limit(1)).asList().size() == 0 ? false : true;
 	}
 
@@ -418,7 +409,7 @@ public class RecordResourceDAO extends WithResourceDAO<RecordResource> {
 				retrievedFields);
 		for (RecordResource record : memberRecords) {
 			ObjectId recordId = record.getDbId();
-			Set<ObjectId> collectedIn = record.getCollectedIn();
+			List<ObjectId> collectedIn = record.getCollectedIn();
 			if (collectedIn.size() > 1) {
 				UpdateOperations<RecordResource> updateOps = this
 						.createUpdateOperations();

@@ -66,13 +66,23 @@ public class Serializer {
 	public static class ObjectIdArraySerializer extends JsonSerializer<Object> {
 		@Override
 		public void serialize(Object objectIds, JsonGenerator jsonGen,
-				SerializerProvider provider) throws IOException,
-				JsonProcessingException {
-			HashSet<String> ids = new HashSet<String>();
-			for (ObjectId e : ((Set<ObjectId>) objectIds)) {
-				ids.add(e.toString());
+				SerializerProvider provider) {
+			try {
+				HashSet<String> ids = new HashSet<String>();
+				for (ObjectId id : ((Set<ObjectId>) objectIds)) {
+					ids.add(id.toString());
+				}
+				jsonGen.writeObject(Json.toJson(ids));
+			} catch (Exception e) {
+				List<String> ids = new ArrayList<String>();
+				for (ObjectId id : ((List<ObjectId>) objectIds)) {
+					ids.add(id.toString());
+				}
+				try {
+				jsonGen.writeObject(Json.toJson(ids));
+				} catch (Exception e1) {
+				}
 			}
-			jsonGen.writeObject(Json.toJson(ids));
 		}
 
 	}

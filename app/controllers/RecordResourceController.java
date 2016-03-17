@@ -182,7 +182,7 @@ public class RecordResourceController extends WithResourceController {
 								+ contextDataType);
 						ContextData newContextData = (ContextData) Json.fromJson(json, clazz);
 						ObjectId colId = newContextData.getTarget().getCollectionId();
-						int position = newContextData.getTarget().getPosition();
+						//int position = newContextData.getTarget().getPosition();
 						if (colId != null && DB.getCollectionObjectDAO().existsEntity(colId)) {
 						//filterContextData(record);
 							Result response = errorIfNoAccessToCollection(Action.EDIT,
@@ -190,7 +190,7 @@ public class RecordResourceController extends WithResourceController {
 							if (!response.toString().equals(ok().toString()))
 								return response;
 							else {
-								DB.getRecordResourceDAO().updateContextData(newContextData);
+								//DB.getRecordResourceDAO().updateContextData(newContextData);
 								return ok("Edited context data.");
 							}
 						}
