@@ -46,16 +46,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		});
 	}
 
-	function createExhibition() {
-		return $.ajax({
-			type: "POST",
-			url: "/collection?collectionType=Exhibition",
-			success: function () {
-				// Empty
-			}
-		});
-	}
-
 	function getExhibition(id) {
 		return $.ajax({
 			type: "GET",
@@ -177,11 +167,25 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
-
 		        if (dbDescription === undefined || dbDescription === null || dbDescription.default[0] === undefined || dbDescription.default[0] === "null")
 		        	newRecord.description = ko.observable("");
 		        else
 		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
+		        $.each(newRecord.media(), function (index, value) {
+					//withUrl = value.Thumbnail.withUrl(); still not fully working
+					withUrl = value.Thumbnail.url();
+					if (withUrl != "empty") {
+						if (withUrl == "")
+							newRecord.media()[index].thumbnailUrl = "img/content/thumb-empty.png";
+						else {
+							if (withUrl.indexOf("/media") == 0) {
+								newRecord.media()[index].thumbnailUrl = window.location.origin + withUrl;
+							} else {
+								newRecord.media()[index].thumbnailUrl = withUrl;
+							}
+						}
+					}
+				});
 		        return newRecord;
 		    }
 		}
@@ -191,14 +195,11 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.title = ko.observable('');
 		self.description = ko.observable('');
 		self.dbId = ko.observable();
-		self.creationMode = !params.hasOwnProperty('id');
 		self.loadingExhibitionItems = false;
 		self.loadingInitialItemsCount = 0;
 		var _removeItem = false;
 		var _startIndex = -1;
-		if (!self.creationMode) {
-			self.dbId(params.id);
-		}
+		self.dbId(params.id);
 		self.userSavedItemsArray = ko.mapping.fromJS([], {});  //holds the selected collections items
 		self.collectionItemsArray = ko.mapping.fromJS([], {}); //holds the exhibitions items
 
@@ -232,59 +233,48 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			'copy': ["media"]
 		};
 
-		if (self.creationMode) {
+		self.loadingExhibitionItems = true;
+		var promise = getExhibition(self.dbId());
+		$.when(promise).done(function (data) {
 			$('.outer').css("visibility", "visible");
-			var promiseCreateExhibtion = createExhibition();
-			$.when(promiseCreateExhibtion).done(function (data) {
-				ko.mapping.fromJS(data, mappingExhibition, self);
-				setUpSwitch(self);
-				self.title('');
-				self.description('');
+			ko.mapping.fromJS(data, mappingExhibition, self);
+			self.title(app.findByLang(data.descriptiveData.label));
+			self.description(app.findByLang(data.descriptiveData.description));
+			setUpSwitch(self);
+
+			$.ajax({
+				url: "/collection/" + self.dbId() + "/list?count=5&start=0",
+				method: "get",
+				success: function (data) {
+					self.firstEntries = data.records;
+					self.loadingInitialItemsCount = data.entryCount;
+					ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
+					self.loadingExhibitionItems = true;
+				},
+				error: function (result) {
+					// Empty
+				}
 			});
-		} else {
-			self.loadingExhibitionItems = true;
-			var promise = getExhibition(self.dbId());
-			$.when(promise).done(function (data) {
-				$('.outer').css("visibility", "visible");
-				ko.mapping.fromJS(data, mappingExhibition, self);
-				self.title(app.findByLang(data.descriptiveData.label));
-				self.description(app.findByLang(data.descriptiveData.description));
-				setUpSwitch(self);
-
-				$.ajax({
-					url: "/collection/" + self.dbId() + "/list?count=5&start=0",
-					method: "get",
-					success: function (data) {
-						self.firstEntries = data.records;
-						self.loadingInitialItemsCount = data.entryCount;
-						ko.mapping.fromJS(self.firstEntries, self.mapping, self.collectionItemsArray);
-						self.loadingExhibitionItems = true;
-					},
-					error: function (result) {
-						// Empty
-					}
-				});
 
 
-				// TODO: Update Code
-				// self.loadingInitialItemsCount = self.firstEntries.length;
-				// self.firstEntries.map(function (record) { //fix for now till service gets implemented
-				// 	record.additionalText = ko.observable('');
-				// 	record.videoUrl = ko.observable('');
-				// 	record.containsVideo = ko.observable(false);
-				// 	record.containsText = ko.observable(false);
-				// 	var exhibitionItemInfo = record.exhibitionRecord;
-				// 	if (exhibitionItemInfo !== undefined) {
-				// 		record.additionalText(exhibitionItemInfo.annotation);
-				// 		record.videoUrl(exhibitionItemInfo.videoUrl);
-				// 		record.containsVideo(!isEmpty(record.videoUrl()));
-				// 		record.containsText(!isEmpty(record.additionalText()));
-				// 	}
-				// });
-				// self.collectionItemsArray(self.firstEntries);
-				// self.loadingExhibitionItems = true;
-			});
-		}
+			// TODO: Update Code
+			// self.loadingInitialItemsCount = self.firstEntries.length;
+			// self.firstEntries.map(function (record) { //fix for now till service gets implemented
+			// 	record.additionalText = ko.observable('');
+			// 	record.videoUrl = ko.observable('');
+			// 	record.containsVideo = ko.observable(false);
+			// 	record.containsText = ko.observable(false);
+			// 	var exhibitionItemInfo = record.exhibitionRecord;
+			// 	if (exhibitionItemInfo !== undefined) {
+			// 		record.additionalText(exhibitionItemInfo.annotation);
+			// 		record.videoUrl(exhibitionItemInfo.videoUrl);
+			// 		record.containsVideo(!isEmpty(record.videoUrl()));
+			// 		record.containsText(!isEmpty(record.additionalText()));
+			// 	}
+			// });
+			// self.collectionItemsArray(self.firstEntries);
+			// self.loadingExhibitionItems = true;
+		});
 
 		self.selectedCollection = ko.observable();
 		self.currentItemSet = ko.observable(false);
@@ -334,7 +324,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.showNewItem = function (elem, index, record) {
 			$(elem).hide().fadeIn(500);
 			if ($(elem).hasClass('boxBasic boxItem')) { //it gets called for all elements rendered with the foreach
-				if (!self.creationMode && self.itemsLoaded < self.loadingInitialItemsCount) {
+				if (self.itemsLoaded < self.loadingInitialItemsCount) {
 					self.itemsLoaded++;
 					$(elem).find('#loadingIcon').fadeOut();
 					return;
@@ -381,22 +371,79 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		self.playExhibition = function () {
 			window.location.hash = '#exhibitionview/' + self.dbId();
 		};
-
+		
 		//custom binding
 		var _draggedItem;
 		var _bIsMoveOperation = false;
+		
+		self.dymmy = function() {
+			alert("kk");
+		}
+		
+		self.dragStart = function (move) {
+			console.log("1");
+			_draggedItem = this;
+			_bIsMoveOperation = move;
+			return true;
+		}
+		
+		self.drop = function (index) {
+			alert("1");
+			var indexNewItem = index;
+			var newItem = ko.mapping.fromJS({}, {});
+			newItem = _draggedItem;
+			var indexDraggedItem = self.collectionItemsArray.indexOf(_draggedItem);
+			_startIndex = indexDraggedItem;
+			if (_draggedItem.contextData == undefined) {
+				contextData = ko.mapping.fromJS([{
+					"contextDataType": "ExhibitionData",
+					"target": {
+						"collectionId": self.dbId(),
+						"position": indexNewItem
+					},
+					"body" : {
+						"audioUrl": "",
+						"text": {"default": ""},
+						"videoUrl": ""
+					}
+				}], {});
+				newItem.contextData = contextData;
+			} else {
+				newItem.contextData()[0].target.position(indexNewItem);
+			}
+			//dont do anything if it is moved to its direct left or right dashed box
+			if (_bIsMoveOperation) {// moved from exhibition itself
+				if (indexDraggedItem == indexNewItem || (indexDraggedItem + 1) == indexNewItem) {
+					_draggedItem = undefined;
+					return;
+				}
+			}
+			dropElement.animate({
+				width: "60px"
+			}, 200);
+			dropElement.find('#droppable-Children').css({
+				display: "none"
+			});
+			if (_bIsMoveOperation) {
+				_removeItem = false;
+				self.collectionItemsArray.splice(indexDraggedItem, 1);
+			}
+			self.collectionItemsArray.splice(indexNewItem, 0, newItem);
+			_draggedItem = undefined;
+		}
+		
 		ko.bindingHandlers.drag = {
 			init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
 				var dragElement = $(element);
 				var dragOptions = {
 					start: function (event, ui) {
-						$('#outer-bottom').css({
+						/*$('#outer-bottom').css({
 							"overflow": 'visible'
 						});
-						$('.bottom-box').removeClass("box-Hover");
+						$('.bottom-box').removeClass("box-Hover");*/
 						_draggedItem = ko.utils.unwrapObservable(valueAccessor().item);
 						_bIsMoveOperation = ko.utils.unwrapObservable(valueAccessor().move);
-						ui.helper.css({
+						/*ui.helper.css({
 							"z-index": 500
 						});
 						if (_bIsMoveOperation) {
@@ -412,21 +459,21 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 									opacity: 0.8
 								});
 							}
-						}
+						}*/
 					},
 					stop: function (event, ui) {
-						$("#outer-bottom").css({
+						/*$("#outer-bottom").css({
 							overflow: "scroll"
 						});
 						$("#outer-bottom").css({
 							"overflow-y": "hidden"
-						});
+						});*/
 						//un comment below statement
 						//$('.outer').autoscroll('destroy');
 						_draggedItem = undefined;
 					}
 				};
-				if (dragElement.hasClass('boxBasic boxItem')) { //if it is move operation
+				/*if (dragElement.hasClass('boxBasic boxItem')) { //if it is move operation
 					dragOptions.appendTo = $('.left');
 					dragOptions.helper = function () {
 
@@ -449,16 +496,17 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 					dragOptions.helper = 'clone';
 					dragOptions.cursor = 'pointer';
 					dragOptions.revert = 'invalid';
-				}
+				}*/
 				dragElement.draggable(dragOptions).disableSelection();
 			}
 		};
 
 		ko.bindingHandlers.drop = {
 			init: function (element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+				alert("drop");
 				var dropElement = $(element);
 				var dropOptions = {
-					hoverClass: "drop-hover",
+					/*hoverClass: "drop-hover",
 					tolerance: "intersect",
 					over: function (event, ui) {
 						if (!_bIsMoveOperation) {
@@ -477,7 +525,7 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						dropElement.animate({
 							width: "60px"
 						}, 200);
-					},
+					},*/
 					drop: function (event, ui) {
 						var indexNewItem = ko.utils.unwrapObservable(valueAccessor().index);
 						var newItem = ko.mapping.fromJS({}, {});

@@ -147,10 +147,16 @@ public class CollectionObjectController extends WithResourceController {
 	 *            {SimpleCollection, Exhibition }
 	 * @return the newly created collection
 	 */
-	public static Result createCollectionObject(String collectionType) {
+	public static Result createCollectionObject() {
 		ObjectNode error = Json.newObject();
 		JsonNode json = request().body().asJson();
-		CollectionType colType = CollectionType.valueOf(collectionType);
+		CollectionType colType = null;
+		JsonNode adm = json.get("administrative");
+		if (adm != null) {
+			JsonNode ct = adm.get("collectionType");
+			if (ct != null)
+				colType = CollectionType.valueOf(ct.asText());
+		}
 		try {
 			if ((colType == null) && (json == null)) {
 				error.put("error", "Invalid JSON");
@@ -161,19 +167,10 @@ public class CollectionObjectController extends WithResourceController {
 				return forbidden(error);
 			}
 			ObjectId creatorDbId = new ObjectId(session().get("user"));
-			CollectionObject collection = (colType.equals(CollectionType.Exhibition)) ? new CollectionObject()
-					: Json.fromJson(json, CollectionObject.class);
+			CollectionObject collection = Json.fromJson(json, CollectionObject.class);
 			boolean success = internalAddCollection(collection, colType, creatorDbId, error);
 			if (!success)
 				return badRequest(error);
-			/*
-			 * index collection BiFunction<ObjectId, Map<String, Object>,
-			 * IndexResponse> indexCollection = (ObjectId colId, Map<String,
-			 * Object> doc) -> { return
-			 * ElasticIndexer.index(Elastic.typeCollection, colId, doc); };
-			 * ParallelAPICall.createPromise(indexCollection,
-			 * collection.getDbId(), collection.transformCO());
-			 */
 			return ok(Json.toJson(collectionWithMyAccessData(collection,
 					AccessManager.effectiveUserIds(session().get("effectiveUserIds")))));
 		} catch (Exception e) {
@@ -184,22 +181,18 @@ public class CollectionObjectController extends WithResourceController {
 
 	private static boolean internalAddCollection(CollectionObject collection, CollectionType colType,
 			ObjectId creatorDbId, ObjectNode error) {
-		if (colType.equals(CollectionType.Exhibition)) {
-			collection.getDescriptiveData().setLabel(createExhibitionDummyTitle());
-		} else {
-			if (collection.getDescriptiveData().getLabel() == null) {
-				error.put("error", "Missing collection title");
-				return false;
-			}
-			if (collection.getDescriptiveData().getLabel().isEmpty()) {
-				error.put("error", "Missing collection title");
-				return false;
-			}
-			if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(creatorDbId, null,
-					collection.getDescriptiveData().getLabel().get(Language.DEFAULT))) {
-				error.put("error", "Not unique collection title");
-				return false;
-			}
+		if (collection.getDescriptiveData().getLabel() == null) {
+			error.put("error", "Missing collection title");
+			return false;
+		}
+		if (collection.getDescriptiveData().getLabel().isEmpty()) {
+			error.put("error", "Missing collection title");
+			return false;
+		}
+		if (DB.getCollectionObjectDAO().existsForOwnerAndLabel(creatorDbId, null,
+				collection.getDescriptiveData().getLabel().get(Language.DEFAULT))) {
+			error.put("error", "Not unique collection title");
+			return false;
 		}
 		Set<ConstraintViolation<CollectionObject>> violations = Validation.getValidator().validate(collection);
 		if (!violations.isEmpty()) {

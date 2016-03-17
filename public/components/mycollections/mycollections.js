@@ -1,4 +1,4 @@
-define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','app'], function (bootstrap, ko, template, KnockoutElse, app) {
+define(['bootstrap', 'knockout', 'text!./mycollections.html', 'knockout-else','app'], function (bootstrap, ko, template, KnockoutElse, app) {
 
 	count = 6;
 	accessLevels = {
@@ -114,6 +114,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 
 		self.myUsername = ko.observable(app.currentUser.username());
 		self.collectionCount = ko.observable(app.currentUser.collectionCount());
+		self.exhibitionCount = ko.observable(app.currentUser.exhibitionCount());
 		self.moreCollectionData = ko.observable(true);
 		self.moreSharedCollectionData = ko.observable(true);
 		self.sharedCollections = ko.mapping.fromJS([], mapping);
@@ -192,13 +193,13 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			self.showDelCollPopup(collectionTitle, collectionId);
 		};
 
-		self.createCollection = function () {
+		self.createCollection = function (collectionType) {
 			var jsondata = JSON.stringify({
 				administrative: {
 					access: {
 						isPublic: self.isPublicToEdit()
 					},
-					collectionType: "SimpleCollection"
+					collectionType: collectionType
 				},
 				descriptiveData : {
 					label : {
@@ -209,7 +210,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 					}
 				}
 			});
-
 			$.ajax({
 				"url": "/collection",
 				"method": "post",
@@ -217,8 +217,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				"data": jsondata,
 				"success": function (data) {
 					self.reloadCollection(data);
-					app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
-					self.collectionCount(self.collectionCount() + 1);
+					if (collectionType == 'SimpleCollection') {
+						app.currentUser.collectionCount(app.currentUser.collectionCount() + 1);
+						self.collectionCount(self.collectionCount() + 1);
+			    	}
+			        if (collectionType == 'Exhibition') {
+						app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() + 1);
+						self.exhibitionCount(self.exhibitionCount() + 1);
+						window.location = '#exhibition-edit/'+data.dbId;
+			        }
 					self.closeSideBar();
 				},
 				"error": function (result) {
@@ -228,22 +235,7 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			});
 		};
 
-		self.nextSharedCollections = function () {
-			self.moreShared(false);
-		};
-
-		self.createExhibition = function () {
-			window.location = '#exhibition-edit';
-		};
-
-		/*self.loadCollectionOrExhibition = function (collection) {
-			if (self.showsExhibitions) {
-				window.location = '#exhibition-edit/' + collection.dbId();
-			} else {
-				window.location = 'index.html#collectionview/' + collection.dbId();
-			}
-		};
-		*/
+	
 		self.showDelCollPopup = function (collectionTitle, collectionId) {
 			var myself = this;
 			myself.id = collectionId;
@@ -273,10 +265,15 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 					var theitem = ko.utils.arrayFirst(currentUser.editables(), function (item) {
 						return item.dbId === collectionId;
 					});
-
 					currentUser.editables.remove(theitem);
-					app.currentUser.collectionCount(app.currentUser.collectionCount() - 1);
-					self.collectionCount(self.collectionCount() + 1);
+					if (self.showsExhibitions) {
+						app.currentUser.exhibitionCount(app.currentUser.exhibitionCount() - 1);
+						self.exhibitionCount(self.exhibitionCount() + 1);
+					}
+					else {
+						app.currentUser.collectionCount(app.currentUser.collectionCount() - 1);
+						self.collectionCount(self.collectionCount() + 1);
+					}
 				}
 			});
 		};
@@ -570,7 +567,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 			var context = ko.contextFor(event.target);
 			var collIndex = context.$index();
 			self.index(collIndex);
-			//if (collection.myAccess() == "OWN") {
 			if (self.collectionSet() == "my") {
 				//self.collectionSet("my");
 				self.titleToEdit(self.myCollections()[collIndex].title());
@@ -682,8 +678,6 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				ko.mapping.fromJS(data, newCollection);
 				self.sharedCollections.unshift(newCollection);
 			}
-			//currentUser.editables.unshift({title: newCollection.title, dbId:newCollection.dbId});
-
 		};
 
 		self.changeTab = function (data, event) {

@@ -162,6 +162,7 @@ define("app", ['knockout', 'facebook', 'imagesloaded', 'moment', './js/app/plugi
 					if ($(window).scrollTop() >= $(document).height() - $(window).height() - 300) {
 						if (self.updating) {
 							if (functPar1 !== undefined && functPar1 !== null)
+
 								loadFunc(functPar1);
 							else
 								loadFunc();

@@ -33,7 +33,11 @@
 								</div>
 								<!-- add-->
 								<!-- ko template: { foreach: collectionItemsArray, beforeRemove: removeItem, afterAdd: showNewItem } -->
-								<div class="add droppable">
+								<div class="add droppable" 
+								data-bind="{event: {dragover: function(event){event.preventDefault();},
+                          dragenter: function(event){event.target.addClass('dragover'); event.preventDefault();},
+                          dragleave: function(event){event.target.removeClass('dragover'); event.preventDefault();}}, 
+                          drop: $parent.drop.bind($data, $index)}">
 									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png" /></a></span>
 								</div>
 								<!-- box-->
@@ -63,7 +67,8 @@
 								</div>
 								<!-- /ko -->
 								<div class="add droppable">
-									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here"><img src="img/ui/ic-add.png" /></a></span>
+									<span><a href="#" data-toggle="tooltip" data-placement="top" title="Drag an item here">
+										<img src="img/ui/ic-add.png" /></a></span>
 								</div>
 							</div>
 						</div>
@@ -76,28 +81,30 @@
 							<select  id="CollectionSelect" class="form-control collectionlist" data-bind="options: myCollections, optionsText: 'title', value: selectedCollection"></select>
 							<!-- /ko -->
 
-							<div class="collectionsearch">
+							<!--<div class="collectionsearch">
 								<input type="text" placeholder="Search"><img src="img/ui/ic-mag.png" class="icon">
-							</div>
+							</div>-->
 							<div class="notification">Select items from your collections and drag them to your exhibition</div>
 						</div>
 						<!-- listing-->
 						<div class="assetlisting">
 							<ul data-bind="foreach: userSavedItemsArray">
 								<li>
-									<a href="#" data-toggle="tooltip" data-placement="top" data-bind="drag: { item: $data, move: false }, attr: { title: title }">
+									<a href="#" data-toggle="tooltip" data-placement="top" draggable="true"
+									data-bind="{event:{ dragstart: $parent.dragStart.bind($data, false), 
+										dragend: function(event){console.log("2");document.getElementsByClassName('dragover')[0].removeClass('dragover')}},
+										attr: { title: title }}}">
 										<div class="hue">
-											<img class="draggable" data-bind="attr: { src: media()[0].Thumbnail.url }" />
+											<img data-bind="attr: { src: media()[0].thumbnailUrl }" />
 											<div class="color"></div>
 										</div>
 									</a>
 								</li>
 							</ul>
-							<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"/>
+							<div data-bind="hscroll: userSavedItemsArray(), scrollOptions: { loadFunc: loadNextCollection, offset: 20 }"></div>
 						</div>
 					</div>
 				</section>
-				<!-- collection new-->
 				<section class="action upload">
 					<div class="action-header">
 						<div class="title">Upload background image</div>
@@ -105,7 +112,6 @@
 					<div class="action-body"><img src="img/ui/upload-placeholder.png" class="upload-img"><span style="width:40%;" class="progress"></span></div>
 					<div class="button-group"><a href="#" class="btn-green-o cancel">Cancel</a><a href="#" class="btn-green">Save</a></div>
 				</section>
-				<!-- collection new-->
 				<section class="action editsection">
 					<div class="action-header">
 						<div class="title">Edit section</div>
