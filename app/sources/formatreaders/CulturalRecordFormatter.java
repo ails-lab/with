@@ -26,7 +26,6 @@ import model.basicDataTypes.ProvenanceInfo;
 import model.resources.CulturalObject;
 import model.resources.CulturalObject.CulturalObjectData;
 import play.Logger;
-import scala.tools.jline_embedded.internal.Log;
 import sources.FilterValuesMap;
 import sources.core.JsonContextRecordFormatReader;
 import sources.core.Utils;
@@ -67,7 +66,7 @@ public abstract class CulturalRecordFormatter extends JsonContextRecordFormatRea
 		fillObjectFrom(text);
 		} catch (Exception e){
 			e.printStackTrace();
-			Log.error(e.getMessage());
+			Logger.error(e.getMessage());
 		}
 		List<ProvenanceInfo> provenance = object.getProvenance();
 		int index = provenance.size() - 1;
