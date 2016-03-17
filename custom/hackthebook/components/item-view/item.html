@@ -1,3 +1,4 @@
+
  <div class="itemview">
         <!-- menu bar-->
         <nav class="menubar media">
@@ -25,12 +26,16 @@
           <div class="container">
             <div class="wrap">
               <!-- media itself-->
-              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()},event: {error: function(){changeSource($data)}}" ></div>
+              <div class="mediathumb"><img data-bind="attr: {src: record().fullres()}" onError="this.src='img/content/thumb-empty.png'" ></div>
               <!-- media information-->
               <div class="mediainfo">
                 <div class="infowrap">
                   <!-- title-->
-                  <h1><!-- ko text: record().title --><!-- /ko --> </h1>
+                  <h1><!-- ko text: record().title --><!-- /ko --> 
+                   <!-- ADDED BY ALESSIO PICCIOLI -->
+                    <span about="http://data.europeana.eu/item/2021603/teylers_col28_dat7931_TEY0010002277" class="pnd-resource" onclick="angular.element(document).trigger('Pundit.showBootstrap')"></span>
+                   <!-- ADDED BY ALESSIO PICCIOLI -->
+                   </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
                   <!-- metadata-->
                   <ul role="tablist" class="nav nav-tabs">

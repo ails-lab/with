@@ -227,7 +227,7 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 					return self.thumb;
 				}
 			   else{
-				   return "images/no_image.jpg";
+				   return "img/content/thumb-empty.png";
 			   }
 			});
 		self.sourceCredits = ko.pureComputed(function() {
