@@ -405,6 +405,12 @@ define(['knockout', 'text!./item.html', 'app','smoke'], function (ko, template, 
 			self.loadItem();
 		}
 		
+		
+		self.annotate=function(){
+			
+			window.open('http://euspndwidget.netseven.it/index.php?id='+self.record().externalId, self.record().externalId, 'top=10, left=10, width=900, height=600, status=no, menubar=no, toolbar=no scrollbars=no');
+		}
+		
 		function adjustHeight() {
 
 			// vars 

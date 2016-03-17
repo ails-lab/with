@@ -141,8 +141,8 @@
                 <div class="shortcut">
                   <!-- ul-->
                   <ul>
-                    <li>
-                      <a onclick="window.open('http://euspndwidget.netseven.it/index.php?id=2021603/teylers_col28_dat7931_TEY0010002277', '2021603/teylers_col28_dat7931_TEY0010002277', 'top=10, left=10, width=900, height=600, status=no, menubar=no, toolbar=no scrollbars=no');" target="_blank"  class="btn btn-alt">
+                    <li data-bind="visible: record().source=='Europeana'">
+                      <a data-bind="click: annotate" target="_blank"  class="btn btn-alt">
                         ANNOTATE
                       </a>
                     </li>
