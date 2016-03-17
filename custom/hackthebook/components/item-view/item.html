@@ -32,8 +32,10 @@
                 <div class="infowrap">
                   <!-- title-->
                   <h1><!-- ko text: record().title --><!-- /ko --> 
-                   <!-- ADDED BY ALESSIO PICCIOLI -->
-                    <span about="http://data.europeana.eu/item/2021603/teylers_col28_dat7931_TEY0010002277" class="pnd-resource" onclick="angular.element(document).trigger('Pundit.showBootstrap')"></span>
+                    <!-- ADDED BY ALESSIO PICCIOLI -->
+                    <!-- ko if:record().source=='Europeana' -->
+                    <span data-bind="attr: { 'about': 'http://data.europeana.eu/item' + record().externalId}"  class="pnd-resource" onclick="angular.element(document).trigger('Pundit.showBootstrap')"></span>
+                   <!-- /ko -->
                    <!-- ADDED BY ALESSIO PICCIOLI -->
                    </h1>
                   <div class="owner" data-bind="text:record().dataProvider"></div>
