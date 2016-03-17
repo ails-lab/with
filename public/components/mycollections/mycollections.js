@@ -60,10 +60,16 @@ define(['bootstrap', 'knockout', 'text!./_mycollections.html', 'knockout-else','
 				$.each(innerModel.media(), function (index, value) {
 					//withUrl = value.Thumbnail.withUrl(); still not fully working
 					withUrl = value.Thumbnail.url();
-					if (withUrl.indexOf("/media") == 0) {
-						innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
-					} else {
-						innerModel.media()[index].thumbnailUrl = withUrl;
+					if (withUrl != "empty") {
+						if (withUrl == "")
+							innerModel.media()[index].thumbnailUrl = "img/content/thumb-empty.png";
+						else {
+							if (withUrl.indexOf("/media") == 0) {
+								innerModel.media()[index].thumbnailUrl = window.location.origin + withUrl;
+							} else {
+								innerModel.media()[index].thumbnailUrl = withUrl;
+							}
+						}
 					}
 				});
 				innerModel.itemCount = ko.pureComputed(function () {

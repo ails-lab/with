@@ -153,10 +153,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 				//TODO: support multilinguality, have to be observable arrays of type [{lang: default, values: []}, ...]
 		        var record = options.data;
 		        var newRecord =  ko.mapping.fromJS(record, {});
-		        //newRecord.dbId = ko.observable(record.dbId);
-		        /*var contextData= record.contextData;
-				if (contextData !== undefined)
-					newRecord.contextData = ko.mapping.fromJS(contextData, {});*/
 		        newRecord.containsAudio = ko.pureComputed(function() {
 		        	if (newRecord.contextData == undefined || newRecord.contextData()[0].body.audioUrl == undefined)
 		        		return false;
@@ -179,7 +175,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 						return newRecord.contextData()[0].body.text.default() !== '';
 					}
 				});
-				//newRecord.media = ko.mapping.fromJS(record.media, {});
 				newRecord.title = ko.mapping.fromJS(app.findByLang(record.descriptiveData.label), {});
 				var dbDescription = record.descriptiveData.description;
 
@@ -187,8 +182,6 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 		        	newRecord.description = ko.observable("");
 		        else
 		        	newRecord.description = ko.observable(app.findByLang(dbDescription));
-				//newRecord.provenance = ko.mapping.fromJS(record.provenance, {});
-				//newRecord.descriptiveData = ko.mapping.fromJS(record.descriptiveData, {});
 		        return newRecord;
 		    }
 		}
@@ -317,10 +310,10 @@ define(['knockout', 'text!./_exhibition-edit.html', 'jquery.ui', 'autoscroll', '
 			}
 		});
 
-		showViewModel = function () {
+		/*showViewModel = function () {
 			console.log(ko.toJSON(self));
 			console.log(self.myCollections());
-		};
+		};*/
 
 		self.textfieldsLostFocus = function (isTitleUpdate) {
 			updateExhibition(self, isTitleUpdate);

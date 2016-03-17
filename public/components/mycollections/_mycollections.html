@@ -249,11 +249,11 @@
 					<div class="action-group">
 						<!--  ko if: myAccess() ==  "OWN" -->
 						<!-- ko if: $parent.showsExhibitions -->
-						<a data-toggle="tooltip" data-bind="click: $parent.showDelCollPopup" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a>
+						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete exhibition" class="fa fa-trash-o"></a>
 						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share exhibition" class="fa fa-paper-plane-o"></a>
 						<!-- /ko -->
 						<!-- ko else -->
-						<a data-toggle="tooltip" data-bind="click: $parent.showDelCollPopup" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
+						<a data-toggle="tooltip" data-bind="click: $parent.deleteMyCollection" data-placement="top" title="Delete collection" class="fa fa-trash-o"></a>
 						<a data-toggle="tooltip" data-placement="top" data-bind="click: $parent.openShareCollection" title="Share collection" class="fa fa-paper-plane-o"></a>
 						<!-- /ko -->
 						<!-- /ko -->

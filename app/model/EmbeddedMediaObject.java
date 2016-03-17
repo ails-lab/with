@@ -140,7 +140,7 @@ public class EmbeddedMediaObject {
 	private WithMediaRights withRights;
 
 	// the media object URL
-	private String url="";
+	private String url= "empty";
 
 	private MediaVersion mediaVersion;
 
